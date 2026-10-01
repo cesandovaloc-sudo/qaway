@@ -1,0 +1,33 @@
+🗺️ Q-Inventy — Mapa de módulos ( /hub/inventario )
+
+Qué es. Q-Inventy (Inventi Pro) es la aplicación de logística e inventario multimarca del ecosistema Qaway Hub. Su finalidad es administrar el ciclo completo de la operación comercial de una empresa: catálogo de productos, existencias, precios, ventas, compras, promociones y finanzas operativas, todo bajo un modelo multiempresa ( tenant_id ).
+
+Relación con el panel principal. La app vive dentro del Qaway Hub, el panel principal del ecosistema. Desde el Hub la empresa realiza su onboarding — registra su marca y datos fiscales, configura usuarios y roles, y gestiona su suscripción — y esa configuración queda disponible como contexto común para todas las apps que la empresa tenga contratadas, incluida esta. Así, la identidad de la marca, el tenant activo y los permisos se resuelven una sola vez y se heredan en cada módulo de Q-Inventy.
+
+Arquitectura de acceso (3 capas en el router):
+1.  RequireAuth  → sesión obligatoria
+2.  RequirePlanFeature  → gate comercial por feature ( products ,  inventory ,  movements ,  price_lists ,  packages ,  quotations ,  promotions ,  customers ,  assisted_capture )
+3.  RequirePermission  → permisos granulares ( can_create_products ,  can_view_sales ,  can_create_sales ,  can_access_fiscal_settings ,  can_access_settings )
+
+
+Esto es posible que se mdoifique en un momento, estamos reestruercutrrando, pero lo anterior si afínalo 
+Módulos por sección del Sidebar:
+
+┌─────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Sección         │ Módulos                                                                                      │
+├─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Logística       │ Productos, Categorías, Movimientos, Sedes                                                    │
+│ Comercial       │ Clientes, Precios (+ Listas, Precios-Diseño), Paquetes, Kits, Cotizaciones                   │
+│ Ventas          │ Ventas, Punto de Venta, Registro de Ventas, Pedidos Web, Pedidos                             │
+│ Compras         │ Compras, Proveedores, Órdenes de Compra, Compras-Diseño                                      │
+│ Promociones     │ Campañas/Liquidaciones, Catálogos, Liquidaciones (panel)                                     │
+│ Finanzas        │ Caja Chica, Gastos, Contabilidad (solo admin)                                                │
+│ Reportes        │ Reportes                                                                                     │
+│ Config          │ Configuración, Enlaces compartidos (solo admin)                                              │
+│ Público/Cliente │ Catálogo público (remates/:slug), Carrito → Checkout → Compras, Acceso Guest (acceso/:token) │
+│ Transversal     │ Dashboard (Resumen), Captura IA                                                              │
+└─────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Servicios que sostienen las interconexiones:  productService + supabaseProductAdapter ,  productDetailService ,  productPriceService ,  priceListService ,  pricingRulesService ,  bundleService ,  catalogService ,  liquidationService ,  saleService ,  quotationService ,  purchaseService ,  customerService ,  dashboardService ,  fiscalService ,  qawaService  (tienda cliente: orders/payments/products),  aiSuggestionService ,  sunatLookupAdapter .
+
+Documentación existente en  Permisos y Funcioanmiento/ : Productos ✅, Compras ✅, Ventas/Pedidos/Logística ✅, Documento Comercial, Auditoría Super Admin. El formato del doc de Productos está muy bien: propósito → responsabilidades → rutas → operaciones de datos → permisos → modelo de datos → interconexiones → reglas de integridad → implementado/pendientes → criterio de cierre → encaje comercial Qaway.

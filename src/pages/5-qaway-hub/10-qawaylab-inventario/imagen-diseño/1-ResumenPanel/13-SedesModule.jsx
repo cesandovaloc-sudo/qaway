@@ -12,7 +12,12 @@ import {
  * Requiere: React y lucide-react.
  * Diseñado para integrarse dentro del layout general de la aplicación.
  */
-const INITIAL_SEDES = [
+/**
+ * Fuente de datos compartida del módulo Sedes.
+ * Exportada para que el tablero superior (13-SedesModuleLiteral.jsx) lea exactamente
+ * la misma fuente, sin duplicar constantes ni inventar mock data.
+ */
+export const INITIAL_SEDES = [
   {
     id: 1, nombre: "Sede Lima", subtitulo: "Oficina principal", codigo: "SED-001",
     ciudad: "Lima", direccion: "Av. José Pardo 123, Miraflores, Lima",
@@ -48,7 +53,7 @@ const INITIAL_SEDES = [
   }
 ];
 
-const INITIAL_ALMACENES = [
+export const INITIAL_ALMACENES = [
   { id: 1, nombre: "Almacén Principal", descripcion: "Inventario general", codigo: "ALM-001", sede: "Sede Lima", tipo: "Principal", ubicaciones: 25, productos: 1250, estado: "Activo", direccion: "Av. José Pardo 123, Miraflores, Lima", responsable: "Carlos Sandoval", telefono: "+51 123 5678", capacidad: "2,000 productos", fechaCreacion: "15/01/2026", actualizacion: "25/09/2026 10:30", valor: "S/ 48,920" },
   { id: 2, nombre: "Almacén Tienda", descripcion: "Venta directa", codigo: "ALM-002", sede: "Sede Lima", tipo: "Tienda", ubicaciones: 10, productos: 320, estado: "Activo", direccion: "Av. José Pardo 123, Miraflores, Lima", responsable: "Carlos Sandoval", telefono: "+51 123 5678", capacidad: "500 productos", fechaCreacion: "20/01/2026", actualizacion: "25/09/2026 10:30", valor: "S/ 12,400" },
   { id: 3, nombre: "Almacén Secundario", descripcion: "Stock de respaldo", codigo: "ALM-003", sede: "Sede Cusco", tipo: "Secundario", ubicaciones: 18, productos: 680, estado: "Activo", direccion: "Av. El Sol 456, Cusco, Cusco", responsable: "María Quispe", telefono: "+51 984 111 222", capacidad: "1,000 productos", fechaCreacion: "20/02/2026", actualizacion: "24/09/2026 15:20", valor: "S/ 22,700" },

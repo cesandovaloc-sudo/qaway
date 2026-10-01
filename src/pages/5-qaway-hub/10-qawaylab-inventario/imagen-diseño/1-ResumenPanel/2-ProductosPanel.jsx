@@ -282,9 +282,9 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   flex: 1,
                   padding: "10px 14px",
                   borderRadius: 10,
-                  border: !form.hasStock ? "1.5px solid #ff4b0b" : "1px solid #e2e8f0",
-                  background: !form.hasStock ? "#fff2eb" : "#fff",
-                  color: !form.hasStock ? "#ff4b0b" : "#475569",
+                  border: !form.hasStock ? "1.5px solid #52525b" : "1px solid #e2e8f0",
+                  background: !form.hasStock ? "#f4f4f5" : "#fff",
+                  color: !form.hasStock ? "#0f172a" : "#475569",
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: "pointer",
@@ -699,6 +699,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                     <input
                       type="checkbox"
                       className="pxp-check"
+                      style={{ accentColor: "#52525b", width: 18, height: 18, margin: 0, padding: 0, flexShrink: 0, alignSelf: "center", cursor: "pointer" }}
                       checked={form.inPos}
                       onChange={e => setForm(prev => ({ ...prev, inPos: e.target.checked }))}
                     />

@@ -14,6 +14,8 @@ import {
   Search,
   X,
   ChevronDown,
+  ChevronUp,
+  Briefcase,
   ArrowLeft,
   Trash2,
   Edit,
@@ -110,7 +112,7 @@ const css = `
 .pxp-bulk-menu-item:hover{background:#f1f5f9;color:#0f172a}
 .pxp-bulk-menu-item.danger{color:#dc2626}
 .pxp-bulk-menu-item.danger:hover{background:#fef2f2;color:#b91c1c}
-.pxp-empty{padding:45px;text-align:center;color:var(--muted)}.pxp-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(2px);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;color-scheme:light!important}.pxp-modal{background:#fff;border-radius:16px;width:min(640px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(12,27,53,0.22);z-index:9999;color-scheme:light!important}.pxp-modal input[type="number"]::-webkit-inner-spin-button,.pxp-modal input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none!important;margin:0!important}.pxp-modal input[type="number"]{-moz-appearance:textfield!important;appearance:textfield!important}.pxp-modal-head{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}.pxp-modal-head h2{margin:0;font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-.4px}.pxp-modal-head .close{font-size:22px;color:#64748b;background:none;border:0;cursor:pointer;line-height:1}.pxp-modal-body{padding:22px 24px}.pxp-form-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center;margin-bottom:15px}.pxp-form-label{font-size:13px;font-weight:650;color:#334155;line-height:1.3}.pxp-form-label span.req{color:#ef4444;margin-left:2px}.pxp-form-input{width:100%;border:1px solid transparent;background:#f4f4f6;border-radius:12px;padding:11px 14px;font:inherit;font-size:13.5px;color:#0f172a;outline:none;transition:all .18s ease;color-scheme:light!important}select.pxp-form-input,select.pxp-compound-sel,select.pxp-select,select{color-scheme:light!important;color:#0f172a!important;background-color:#f4f4f6}select.pxp-form-input option,select.pxp-compound-sel option,select.pxp-select option,select option,option{background-color:#ffffff!important;color:#0f172a!important;color-scheme:light!important}.pxp-form-input:focus{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound{display:flex;border-radius:12px;background:#f4f4f6;overflow:hidden;border:1px solid transparent}.pxp-compound:focus-within{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound-sel{border:0;background:transparent;padding:0 12px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;border-right:1px solid #e4e4e7;color-scheme:light!important}.pxp-compound-input{border:0;background:transparent;padding:11px 14px;flex:1;min-width:0;font:inherit;font-size:13.5px;color:#0f172a;outline:none}.pxp-compound-tag{display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11.5px;font-weight:650;color:#166534;white-space:nowrap}.pxp-modal-foot{padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-bottom-left-radius:16px;border-bottom-right-radius:16px}.pxp-field{display:grid;gap:6px;margin-bottom:13px}.pxp-field label{font-size:12px;color:#53627d;font-weight:600}.pxp-field input,.pxp-field select,.pxp-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;outline-color:#9ab9ff;background:white;color-scheme:light!important}.pxp-field textarea{min-height:90px;resize:vertical}.pxp-map-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.pxp-preview-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-preview-table th,.pxp-preview-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.pxp-preview-scroll{overflow:auto}.pxp-detail{position:fixed;z-index:9999;right:0;top:0;bottom:0;width:min(760px,95vw);background:#fff;box-shadow:-20px 0 60px rgba(15,23,42,0.16);overflow-y:auto;animation:pxpSlideIn .25s cubic-bezier(.16,1,.3,1)}.pxp-detail-head{padding:24px 28px 18px;border-bottom:1px solid var(--line)}.pxp-detail-close{position:absolute;right:18px;top:18px;z-index:10;width:34px;height:34px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);color:#475569;display:grid;place-items:center;font-size:20px;cursor:pointer;transition:all .2s ease}.pxp-detail-close:hover{background:#fee2e2;color:#ef4444;border-color:#fca5a5}.pxp-detail-product{display:flex;gap:18px;align-items:center;padding-right:48px}.pxp-detail-art{width:68px;height:68px;border-radius:12px;background:#f8fafc;display:grid;place-items:center;flex-shrink:0;border:1px solid #e2e8f0}.pxp-detail-title{font-size:21px;font-weight:800;letter-spacing:-.4px;margin:0 0 6px;color:#0f172a}.pxp-detail-tabs{display:flex;gap:2px;overflow-x:auto;padding:0 24px;border-bottom:1px solid var(--line);background:#fafafa}.pxp-detail-tabs button{padding:12px 14px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64748b;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:color .15s ease}.pxp-detail-tabs button:hover{color:#0f172a}.pxp-detail-tabs button.active{color:#ff4b0b;border-color:#ff4b0b;font-weight:700}.pxp-detail-content{padding:22px 28px}.pxp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.pxp-detail-box{border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.02)}.pxp-detail-box h3{margin:0 0 12px;font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}.pxp-detail-box.full{grid-column:1/-1}.pxp-kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f8fafc;font-size:13px}.pxp-kv:last-child{border-bottom:0}.pxp-kv span{color:#64748b;font-weight:500}.pxp-kv b{text-align:right;font-weight:650;color:#0f172a}.pxp-detail-table{width:100%;border-collapse:collapse;font-size:13px}.pxp-detail-table th{background:#f8fafc;color:#475569;font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:12.5px}.pxp-detail-table td{text-align:left;padding:10px 10px;border-bottom:1px solid #f1f5f9;color:#334155}.pxp-detail-table tr:last-child td{border-bottom:0}.pxp-toast{position:fixed;bottom:20px;right:20px;z-index:100;background:#14213c;color:#fff;padding:12px 18px;border-radius:9px;box-shadow:0 8px 25px #0e1e3b33}.pxp-mobile-menu{display:none}
+.pxp-empty{padding:45px;text-align:center;color:var(--muted)}.pxp-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.45);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;color-scheme:light!important}.pxp-modal{background:#fff;border-radius:16px;width:min(640px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(12,27,53,0.22);z-index:9999;color-scheme:light!important}.pxp-modal input[type="number"]::-webkit-inner-spin-button,.pxp-modal input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none!important;margin:0!important}.pxp-modal input[type="number"]{-moz-appearance:textfield!important;appearance:textfield!important}.pxp-modal-head{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}.pxp-modal-head h2{margin:0;font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-.4px}.pxp-modal-head .close{font-size:22px;color:#64748b;background:none;border:0;cursor:pointer;line-height:1}.pxp-modal-body{padding:22px 24px}.pxp-form-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center;margin-bottom:15px}.pxp-form-label{font-size:13px;font-weight:650;color:#334155;line-height:1.3}.pxp-form-label span.req{color:#ef4444;margin-left:2px}.pxp-form-input{width:100%;border:1px solid transparent;background:#f4f4f6;border-radius:12px;padding:11px 14px;font:inherit;font-size:13.5px;color:#0f172a;outline:none;transition:all .18s ease;color-scheme:light!important}select.pxp-form-input,select.pxp-compound-sel,select.pxp-select,select{color-scheme:light!important;color:#0f172a!important;background-color:#f4f4f6}select.pxp-form-input option,select.pxp-compound-sel option,select.pxp-select option,select option,option{background-color:#ffffff!important;color:#0f172a!important;color-scheme:light!important}.pxp-form-input:focus{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound{display:flex;border-radius:12px;background:#f4f4f6;overflow:hidden;border:1px solid transparent}.pxp-compound:focus-within{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound-sel{border:0;background:transparent;padding:0 12px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;border-right:1px solid #e4e4e7;color-scheme:light!important}.pxp-compound-input{border:0;background:transparent;padding:11px 14px;flex:1;min-width:0;font:inherit;font-size:13.5px;color:#0f172a;outline:none}.pxp-compound-tag{display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11.5px;font-weight:650;color:#166534;white-space:nowrap}.pxp-modal-foot{padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-bottom-left-radius:16px;border-bottom-right-radius:16px}.pxp-field{display:grid;gap:6px;margin-bottom:13px}.pxp-field label{font-size:12px;color:#53627d;font-weight:600}.pxp-field input,.pxp-field select,.pxp-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;outline-color:#9ab9ff;background:white;color-scheme:light!important}.pxp-field textarea{min-height:90px;resize:vertical}.pxp-map-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.pxp-preview-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-preview-table th,.pxp-preview-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.pxp-preview-scroll{overflow:auto}.pxp-detail{position:fixed;z-index:9999;right:0;top:0;bottom:0;width:min(760px,95vw);background:#fff;box-shadow:-20px 0 60px rgba(15,23,42,0.16);overflow-y:auto;animation:pxpSlideIn .25s cubic-bezier(.16,1,.3,1)}.pxp-detail-head{padding:24px 28px 18px;border-bottom:1px solid var(--line)}.pxp-detail-close{position:absolute;right:18px;top:18px;z-index:10;width:34px;height:34px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);color:#475569;display:grid;place-items:center;font-size:20px;cursor:pointer;transition:all .2s ease}.pxp-detail-close:hover{background:#fee2e2;color:#ef4444;border-color:#fca5a5}.pxp-detail-product{display:flex;gap:18px;align-items:center;padding-right:48px}.pxp-detail-art{width:68px;height:68px;border-radius:12px;background:#f8fafc;display:grid;place-items:center;flex-shrink:0;border:1px solid #e2e8f0}.pxp-detail-title{font-size:21px;font-weight:800;letter-spacing:-.4px;margin:0 0 6px;color:#0f172a}.pxp-detail-tabs{display:flex;gap:2px;overflow-x:auto;padding:0 24px;border-bottom:1px solid var(--line);background:#fafafa}.pxp-detail-tabs button{padding:12px 14px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64748b;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:color .15s ease}.pxp-detail-tabs button:hover{color:#0f172a}.pxp-detail-tabs button.active{color:#ff4b0b;border-color:#ff4b0b;font-weight:700}.pxp-detail-content{padding:22px 28px}.pxp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.pxp-detail-box{border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.02)}.pxp-detail-box h3{margin:0 0 12px;font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}.pxp-detail-box.full{grid-column:1/-1}.pxp-kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f8fafc;font-size:13px}.pxp-kv:last-child{border-bottom:0}.pxp-kv span{color:#64748b;font-weight:500}.pxp-kv b{text-align:right;font-weight:650;color:#0f172a}.pxp-detail-table{width:100%;border-collapse:collapse;font-size:13px}.pxp-detail-table th{background:#f8fafc;color:#475569;font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:12.5px}.pxp-detail-table td{text-align:left;padding:10px 10px;border-bottom:1px solid #f1f5f9;color:#334155}.pxp-detail-table tr:last-child td{border-bottom:0}.pxp-toast{position:fixed;bottom:20px;right:20px;z-index:100;background:#14213c;color:#fff;padding:12px 18px;border-radius:9px;box-shadow:0 8px 25px #0e1e3b33}.pxp-mobile-menu{display:none}
 @media(max-width:1500px){.pxp-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
 @media(max-width:1150px){.pxp-sidebar{width:190px}.pxp-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.pxp-metric-value{font-size:22px}.pxp-import-columns{grid-template-columns:1fr}}
 @media(max-width:800px){.pxp-sidebar{display:none}.pxp-content{padding:16px 12px}.pxp-topbar{padding:0 12px}.pxp-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.pxp-heading h1{font-size:24px}.pxp-heading-actions{width:100%;margin-left:0}.pxp-heading-actions .pxp-btn{flex:1;justify-content:center}.pxp-detail-grid{grid-template-columns:1fr}.pxp-detail-box.full{grid-column:auto}.pxp-detail-product{align-items:flex-start}.pxp-detail-art{width:75px;height:75px;font-size:35px}.pxp-detail-title{font-size:20px}.pxp-stepper{grid-template-columns:repeat(2,1fr)}.pxp-modal-body{padding:16px}.pxp-modal-head,.pxp-modal-foot{padding:16px}.pxp-select{max-width:calc(50% - 6px);flex:1}.pxp-view-toggle{margin-left:0}}
@@ -203,24 +205,24 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
         <form onSubmit={handleSubmit}>
           <div className="pxp-modal-head">
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div className="pxp-heading-icon" style={{ background: "#fff2eb", borderColor: "#fed7aa", color: "#ff4b0b" }}>
+              <div className="pxp-heading-icon">
                 <Boxes size={20} strokeWidth={1.8} />
               </div>
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.3px", lineHeight: 1.25 }}>
                   {editing ? "Editar producto" : "Nuevo producto / servicio"}
                 </h2>
-                <p style={{ fontSize: 12.5, color: "#64748b", margin: "2px 0 0" }}>
+                <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0", lineHeight: 1.5 }}>
                   {editing ? `Modificando: ${editing.name}` : "Registra un nuevo ítem en el inventario de Qaway Lab"}
                 </p>
               </div>
             </div>
-            <button type="button" className="pxp-icon-btn close" onClick={onClose} title="Cerrar">×</button>
+            <button type="button" className="pxp-icon-btn close" onClick={onClose} title="Cerrar"><X size={18} /></button>
           </div>
 
           <div className="pxp-modal-body" style={{ maxHeight: "75vh", overflowY: "auto", padding: "20px 24px" }}>
             {/* Pill selectors: Con inventario vs Servicio */}
-            <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+            <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>
               <button
                 type="button"
                 className={`pxp-pill-btn ${form.hasStock ? "active" : ""}`}
@@ -229,9 +231,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   flex: 1,
                   padding: "10px 14px",
                   borderRadius: 10,
-                  border: form.hasStock ? "1.5px solid #ff4b0b" : "1px solid #e2e8f0",
-                  background: form.hasStock ? "#fff2eb" : "#fff",
-                  color: form.hasStock ? "#ff4b0b" : "#475569",
+                  border: form.hasStock ? "1.5px solid #52525b" : "1px solid #e2e8f0",
+                  background: form.hasStock ? "#f4f4f5" : "#fff",
+                  color: form.hasStock ? "#0f172a" : "#475569",
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: "pointer",
@@ -242,7 +244,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   transition: "all .15s ease"
                 }}
               >
-                <span>✓</span> Con inventario / stock
+                <Package size={15} /> Con inventario / stock
               </button>
               <button
                 type="button"
@@ -252,9 +254,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   flex: 1,
                   padding: "10px 14px",
                   borderRadius: 10,
-                  border: !form.hasStock ? "1.5px solid #ff4b0b" : "1px solid #e2e8f0",
-                  background: !form.hasStock ? "#fff2eb" : "#fff",
-                  color: !form.hasStock ? "#ff4b0b" : "#475569",
+                  border: !form.hasStock ? "1.5px solid #52525b" : "1px solid #e2e8f0",
+                  background: !form.hasStock ? "#f4f4f5" : "#fff",
+                  color: !form.hasStock ? "#0f172a" : "#475569",
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: "pointer",
@@ -265,7 +267,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   transition: "all .15s ease"
                 }}
               >
-                <span>🏷️</span> Servicio / Intangible
+                <Briefcase size={15} /> Servicio / Intangible
               </button>
             </div>
 
@@ -425,7 +427,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               {/* Categoría y Sede */}
               <div className="pxp-form-row">
                 <div className="pxp-form-label">Categoría y Sede</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <select
                     className="pxp-form-input"
                     value={form.category}
@@ -454,7 +456,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               {form.hasStock && (
                 <div className="pxp-form-row">
                   <div className="pxp-form-label">Stock y Alerta Mínima</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
                       <input
                         type="number"
@@ -499,7 +501,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     padding: 0
                   }}
                 >
-                  <span>{showAdvanced ? "Ocultar opciones avanzadas ⌃" : "Opciones avanzadas ⌄"}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{showAdvanced ? <>Ocultar opciones avanzadas <ChevronUp size={15} /></> : <>Opciones avanzadas <ChevronDown size={15} />}</span>
                 </button>
               </div>
 
@@ -509,15 +511,15 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   background: "#f8fafc",
                   border: "1px solid #e2e8f0",
                   borderRadius: 12,
-                  padding: 16,
+                  padding: 20,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 12
+                  gap: 16
                 }}>
                   {/* Costo de compra y Margen */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Costo de compra ({form.currency === "USD" ? "$" : "S/"})
                       </label>
                       <input
@@ -539,7 +541,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Margen de ganancia (%)
                       </label>
                       <input
@@ -553,9 +555,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   </div>
 
                   {/* Precios escalonados: Mayorista y Mínimo */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Precio Mayorista (S/)
                       </label>
                       <input
@@ -569,7 +571,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Precio Mínimo de venta (S/)
                       </label>
                       <input
@@ -585,9 +587,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   </div>
 
                   {/* Escala de condición Qaway (1-10) y Marca */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Condición / Calidad (Escala 1-10)
                       </label>
                       <select
@@ -601,7 +603,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Marca o Laboratorio
                       </label>
                       <input
@@ -614,9 +616,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   </div>
 
                   {/* Código de barras y Código SUNAT */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Código de barras (EAN-13)
                       </label>
                       <input
@@ -627,7 +629,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Código SUNAT (Catálogo 25)
                       </label>
                       <input
@@ -640,9 +642,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   </div>
 
                   {/* Peso y Dimensiones */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Peso (kg / gr)
                       </label>
                       <input
@@ -653,7 +655,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Dimensiones (L × A × Alto cm)
                       </label>
                       <input
@@ -674,6 +676,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     <input
                       type="checkbox"
                       className="pxp-check"
+                      style={{ accentColor: "#52525b", width: 18, height: 18, margin: 0, padding: 0, flexShrink: 0, alignSelf: "center", cursor: "pointer" }}
                       checked={form.inPos}
                       onChange={e => setForm({ ...form, inPos: e.target.checked })}
                     />
@@ -681,7 +684,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
 
                   {/* Descripción */}
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                    <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                       Descripción detallada
                     </label>
                     <textarea
@@ -1281,7 +1284,7 @@ export default function ProductosPanel() {
               <div>Creado: <b style={{ color: "#1e293b" }}>18 set. 2026</b></div>
             </div>
 
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: "flex", gap: 12 }}>
               <button className="pxp-btn primary" onClick={() => openEdit(fullProduct)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <Edit size={15} /> Editar
               </button>
@@ -1364,7 +1367,7 @@ export default function ProductosPanel() {
                   </p>
                 </div>
               </div>
-              <div className="pxp-heading-actions" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <div className="pxp-heading-actions" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                 <button className="pxp-btn" onClick={resetImport} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
                   <FileSpreadsheet size={15} /> Importar
                 </button>
@@ -1826,7 +1829,7 @@ export default function ProductosPanel() {
                   </div>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
                 <button
                   className="pxp-btn small"
                   style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}
