@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import "./inventario-controls.css";
 import PxpPopup from "./PxpPopup";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";

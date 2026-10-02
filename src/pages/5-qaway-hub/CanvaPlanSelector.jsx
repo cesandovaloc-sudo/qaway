@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { loadMercadoPago } from "@mercadopago/sdk-js";
 import {
   Check,
   ChevronDown,
@@ -272,6 +273,7 @@ export default function CanvaPlanSelector({
   const [paymentMethod, setPaymentMethod] = useState(null); // inicia colapsado (null | "card" | "yape")
   const [yapeStep, setYapeStep] = useState("input"); // "input" | "approval"
   const [yapeSeconds, setYapeSeconds] = useState(294); // 04:54
+  const [paymentError, setPaymentError] = useState("");
 
   const [cardForm, setCardForm] = useState({
     name: "",
@@ -320,6 +322,25 @@ export default function CanvaPlanSelector({
   }
 
   const selectedPlanObj = PLAN_CONFIGS.find((p) => p.id === currentPlan) || PLAN_CONFIGS[1];
+
+  async function createCardToken() {
+    const publicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
+    if (!publicKey) throw new Error("Mercado Pago no está configurado para este entorno.");
+    const MercadoPago = await loadMercadoPago();
+    if (!MercadoPago) throw new Error("No se pudo cargar el formulario seguro de Mercado Pago.");
+    const mp = new MercadoPago(publicKey);
+    if (!mp?.createCardToken) throw new Error("No se pudo cargar el formulario seguro de Mercado Pago.");
+    const [month, year] = String(cardForm.expiry).split("/");
+    const token = await mp.createCardToken({
+      cardNumber: cardForm.number.replace(/\s/g, ""),
+      cardExpirationMonth: month,
+      cardExpirationYear: year?.length === 2 ? `20${year}` : year,
+      securityCode: cardForm.cvc,
+      cardholderName: cardForm.name,
+    });
+    if (!token?.id) throw new Error("Mercado Pago no pudo tokenizar la tarjeta.");
+    return token.id;
+  }
 
   // En Qaway Lab el Pago Único prepago es exclusivamente mensual
   const activeOneTimePrice = selectedPlanObj.priceMonthly;
@@ -1223,23 +1244,33 @@ export default function CanvaPlanSelector({
                   className="canva-sub2-btn-submit"
                   disabled={loading || !paymentMethod}
                   style={!paymentMethod ? { opacity: 0.6, cursor: "not-allowed", boxShadow: "none" } : {}}
-                  onClick={() => {
+                  onClick={async () => {
                     if (!paymentMethod) return;
-                    if (paymentMethod === "yape" && yapeStep === "input") {
-                      setYapeStep("approval");
+                    if (billingType !== "recurring") {
+                      setPaymentError("El pago único estará disponible en una próxima fase.");
+                      return;
+                    }
+                    if (paymentMethod === "yape") {
+                      setPaymentError("Yape estará disponible en una próxima fase.");
                       return;
                     }
                     if (onContinue) {
-                      onContinue({
+                      try {
+                        setPaymentError("");
+                        const cardTokenId = paymentMethod === "card" ? await createCardToken() : undefined;
+                        await onContinue({
                         ...selectedPlanObj,
                         billingType,
                         frequency: billingType === "recurring" ? frequency : undefined,
                         oneTimeDuration: billingType === "one_time" ? oneTimeDuration : undefined,
                         price: billingType === "recurring" ? currentPrice : activeOneTimePrice,
                         paymentMethod,
-                        cardForm: paymentMethod === "card" ? cardForm : undefined,
-                        yapeForm: paymentMethod === "yape" ? yapeForm : undefined,
-                      });
+                         cardTokenId,
+                         yapeForm: undefined,
+                       });
+                      } catch (error) {
+                        setPaymentError(error?.message || "No se pudo iniciar el pago.");
+                      }
                     }
                   }}
                 >
@@ -1253,6 +1284,7 @@ export default function CanvaPlanSelector({
                     "He aprobado en mi app Yape"
                   )}
                 </button>
+                {paymentError ? <p className="canva-sub2-legal" role="alert">{paymentError}</p> : null}
 
                 <p className="canva-sub2-legal">
                   Al continuar, aceptas las <a href="#terminos" onClick={(e) => e.preventDefault()}>Condiciones de uso de Qaway Lab</a> y confirmas que leíste nuestra <a href="#privacidad" onClick={(e) => e.preventDefault()}>Política de privacidad</a>.

@@ -29,9 +29,9 @@ Deno.serve(async (req) => {
   const { data: { user: caller } } = await callerClient.auth.getUser()
   if (!caller) return json({ error: 'No autorizado' }, 401)
 
-  const { tenant_id, items } = await req.json().catch(() => ({}))
-  if (!tenant_id || !Array.isArray(items) || items.length === 0) {
-    return json({ error: 'Faltan tenant_id e items' }, 400)
+  const { tenant_id, items, card_token_id } = await req.json().catch(() => ({}))
+  if (!tenant_id || !Array.isArray(items) || items.length === 0 || typeof card_token_id !== 'string' || !card_token_id.trim()) {
+    return json({ error: 'Faltan tenant_id, items o card_token_id' }, 400)
   }
 
   // El llamante debe pertenecer al tenant (o ser plataforma). Precio NUNCA del cliente.
@@ -130,6 +130,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       reason: `Qaway Hub — ${lines.length} app(s) — ${tenant_id.slice(0, 8)}`,
       payer_email: caller.email,
+      card_token_id: card_token_id.trim(),
       back_url: `${base}/onboarding?done=1`,
       external_reference: tenant_id,
       auto_recurring: {
@@ -137,11 +138,12 @@ Deno.serve(async (req) => {
         frequency_type: 'months',
         transaction_amount: total,
         currency_id: currency,
+        free_trial: { frequency: 30, frequency_type: 'days' },
       },
     }),
   })
   const mp = await mpRes.json().catch(() => ({}))
-  if (!mpRes.ok || !mp.id || !mp.init_point) {
+  if (!mpRes.ok || !mp.id) {
     return json({ error: 'Mercado Pago rechazó la suscripción' }, 502)
   }
 
@@ -183,5 +185,5 @@ Deno.serve(async (req) => {
     }, { onConflict: 'subscription_id,addon_slug' })
   }
 
-  return json({ init_point: mp.init_point, preapproval_id: String(mp.id), total, currency })
+  return json({ init_point: mp.init_point || null, preapproval_id: String(mp.id), status: mp.status || 'pending', total, currency })
 })

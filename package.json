@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@mercadopago/sdk-js": "^0.0.3",
+    "@mercadopago/sdk-js": "^0.0.3",
     "@supabase/supabase-js": "^2.110.0",
     "@tiptap/extension-bubble-menu": "^3.30.5",
     "@tiptap/extension-color": "^3.30.5",

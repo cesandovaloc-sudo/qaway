@@ -163,6 +163,9 @@ export default function HubOnboardingPage() {
   const [step, setStep] = useState(() => validPaso || 1);
   const [selected, setSelected] = useState(["inventario", "crm", "agenda"]);
   const [chosenPlan, setChosenPlan] = useState("intermedio");
+  const [pendingCardTokenId, setPendingCardTokenId] = useState(null);
+  const pendingCardTokenRef = useRef(null);
+  const pendingPlanRef = useRef(chosenPlan);
   // Cableado SaaS (solo comportamiento; diseño intacto).
   const [session, setSession] = useState(null);
   const [tenant, setTenant] = useState(null);
@@ -470,7 +473,9 @@ export default function HubOnboardingPage() {
         setTenant({ ...tenant, name: form.name, features: { ...(tenant.features || {}), rubro: finalRubro, onboarding_completed: false } });
       }
       if (goNext) {
-        await saveApps(false, chosenPlan);
+        const cardTokenId = pendingCardTokenRef.current || pendingCardTokenId;
+        if (!cardTokenId) throw new Error("Completa primero la autorización de pago.");
+        await startSubscription(newTenantId, cardTokenId, pendingPlanRef.current || chosenPlan);
         next();
       }
     } catch (e) {
@@ -480,11 +485,26 @@ export default function HubOnboardingPage() {
     }
   }
 
-  async function saveApps(goNext, planToApply) {
+  async function startSubscription(tenantId, cardTokenId, plan) {
+    const selectedSlugs = [...new Set([...selected, "inventario"].map((raw) => raw === "inventory" ? "inventario" : raw))];
+    const { data, error } = await supabase.functions.invoke("mp-subscription-init", {
+      body: {
+        tenant_id: tenantId,
+        card_token_id: cardTokenId,
+        items: selectedSlugs.map((app_slug) => ({ app_slug, plan })),
+      },
+    });
+    if (error || data?.error) throw new Error(data?.error || await leerErrorEdge(error));
+    if (!data?.preapproval_id) throw new Error("Mercado Pago no devolvió la suscripción.");
+    await saveApps(false, plan, { status: data.status === "authorized" ? "trialing" : "pending", mpPreapprovalId: data.preapproval_id }, tenantId);
+  }
+
+  async function saveApps(goNext, planToApply, payment = null, tenantIdOverride = null) {
     setNote("");
     setSaving(true);
     try {
-      if (!tenant) throw new Error("Primero registra tu empresa.");
+      const activeTenantId = tenantIdOverride || tenant?.id;
+      if (!activeTenantId) throw new Error("Primero registra tu empresa.");
       const activePlan = planToApply || chosenPlan || "intermedio";
       const alias = { inventory: "inventario" };
       let selectedSlugs = selected.map((raw) => alias[raw] || raw);
@@ -506,7 +526,7 @@ export default function HubOnboardingPage() {
         await supabase
           .from("tenant_app_subscriptions")
           .delete()
-          .eq("tenant_id", tenant.id)
+           .eq("tenant_id", activeTenantId)
           .not("app_id", "in", `(${selectedAppIds.join(",")})`);
       }
 
@@ -528,10 +548,10 @@ export default function HubOnboardingPage() {
 
         return supabase.from("tenant_app_subscriptions").upsert(
           {
-            tenant_id: tenant.id,
+             tenant_id: activeTenantId,
             app_id: app.id,
             plan: activePlan,
-            status: "trial",
+             status: payment?.status || "trialing",
             trial_started_at: now.toISOString(),
             trial_ends_at: in30Days.toISOString(),
             current_period_start: now.toISOString(),
@@ -541,7 +561,8 @@ export default function HubOnboardingPage() {
             price_currency: precio?.currency || "PEN",
             trial_days_granted: 30,
             trial_requires_card: true,
-            trial_source: "onboarding_canva_30d",
+             trial_source: "onboarding_canva_30d",
+             mp_preapproval_id: payment?.mpPreapprovalId || null,
           },
           { onConflict: "tenant_id,app_id" },
         );
@@ -549,18 +570,20 @@ export default function HubOnboardingPage() {
 
       await Promise.all(upsertPromises);
 
-      // Activar tenant para que disfrute de los 30 días de prueba
+       if (payment?.status === "pending") throw new Error("Mercado Pago aún no autorizó la tarjeta.");
+
+       // Activar tenant solo después de que Mercado Pago confirme la suscripción.
       await supabase.from("tenants").update({
         status: "active",
         features: {
-          ...(tenant.features || {}),
+           ...(tenant?.features || {}),
           trial_plan: activePlan,
           trial_started_at: now.toISOString(),
           trial_ends_at: in30Days.toISOString(),
           catalog_promo_active: true,
           catalog_promo_until: in90Days.toISOString(),
         },
-      }).eq("id", tenant.id);
+       }).eq("id", activeTenantId);
 
       setTenant((prev) => (prev ? {
         ...prev,
@@ -690,10 +713,17 @@ export default function HubOnboardingPage() {
             <CanvaPlanSelector
               selectedPlan={chosenPlan}
               onSelectPlan={(pId) => setChosenPlan(pId)}
-              onContinue={(planObj) => {
-                if (planObj?.id) setChosenPlan(planObj.id);
-                next();
-              }}
+               onContinue={async (planObj) => {
+                 if (planObj?.id) {
+                   pendingPlanRef.current = planObj.id;
+                   setChosenPlan(planObj.id);
+                 }
+                 if (planObj?.cardTokenId) {
+                   pendingCardTokenRef.current = planObj.cardTokenId;
+                   setPendingCardTokenId(planObj.cardTokenId);
+                 }
+                 next();
+               }}
               loading={saving}
             />
             <Notice error={noteIsError}>{note}</Notice>
