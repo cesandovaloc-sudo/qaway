@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
-import { Bone, Coffee, Cpu, Diamond, Droplets, Grid2X2, Heart, MoreHorizontal, Package, PawPrint, Pill, Shirt, Star, Stethoscope, Utensils, Wrench } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, Bone, Coffee, Cpu, Diamond, Droplets, Filter, Grid2X2, Heart, ListFilter, MoreHorizontal, Package, PawPrint, Pill, Search, Shirt, SlidersHorizontal, Star, Stethoscope, Utensils, Wrench } from "lucide-react";
 
 /**
  * CategoriasPanel.jsx
@@ -96,7 +96,15 @@ function handleEscape(event) {
     let rows=categories.filter(c=>(!q || `${c.name} ${c.description} ${c.parent}`.toLowerCase().includes(q)) &&
       (statusFilter==="Todas" || c.status===statusFilter) &&
       (hasProducts==="Todos" || (hasProducts==="Con productos" && c.products>0) || (hasProducts==="Sin productos" && c.products===0)));
-    rows=[...rows].sort((a,b)=> sort==="name-desc" ? b.name.localeCompare(a.name,"es") : sort==="products-desc" ? b.products-a.products : sort==="products-asc" ? a.products-b.products : a.name.localeCompare(b.name,"es"));
+     const [sortColumnName, sortDirection] = sort.split("-");
+     rows=[...rows].sort((a,b)=> {
+       const aValue = a[sortColumnName] ?? "";
+       const bValue = b[sortColumnName] ?? "";
+       const comparison = typeof aValue === "number" && typeof bValue === "number"
+         ? aValue - bValue
+         : String(aValue).localeCompare(String(bValue), "es", { numeric: true });
+       return sortDirection === "desc" ? -comparison : comparison;
+     });
     return rows;
   },[categories,query,statusFilter,sort,hasProducts]);
   const pages=Math.max(1,Math.ceil(filtered.length/pageSize));
@@ -107,6 +115,12 @@ function handleEscape(event) {
     if (category.lowStock > 0) return "Stock bajo";
     return "Disponible";
   };
+  const sortColumn = column => {
+    const nextDirection = sort === `${column}-asc` ? "desc" : "asc";
+    setSort(`${column}-${nextDirection}`);
+  };
+  const sortIcon = column => sort.startsWith(`${column}-`) ? (sort.endsWith("asc") ? <ArrowUp size={13} /> : <ArrowDown size={13} />) : <ArrowDownUp size={13} />;
+  const sortableHeader = (label, column) => <th><button type="button" className="cat-sort-header" onClick={() => sortColumn(column)}>{label}{sortIcon(column)}</button></th>;
   const resetForm = () => setForm({name:"",description:"",icon:"utensils",color:"#1684F8",status:"Activa",parent:""});
   const openCreate = () => { setEditing(null); resetForm(); setModal(true); setMenuId(null); };
   const openEdit = c => { setEditing(c); setForm({name:c.name,description:c.description,icon:c.icon,color:c.color,status:c.status,parent:c.parent||""}); setModal(true); setMenuId(null); };
@@ -208,15 +222,45 @@ function handleEscape(event) {
          border-radius: 8px;
          background: #f9fbfd;
        }
-       .cat-select {
+        .cat-select {
          height: 38px;
          border: 1px solid #e2e8f0;
          border-radius: 8px;
          background: #fff;
          color: #334155;
          font-size: 13px;
-         font-weight: 500;
-       }
+          font-weight: 500;
+        }
+        .cat-select-with-icon {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          height: 38px;
+          padding: 0 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          background: #fff;
+          color: #475569;
+        }
+        .cat-select-with-icon .cat-select {
+          height: 36px;
+          padding: 0 24px 0 0;
+          border: 0;
+          outline: 0;
+        }
+        .cat-sort-header {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          font-weight: inherit;
+          cursor: pointer;
+        }
+        .cat-sort-header:hover { color: var(--blue); }
        .cat-table-card {
          background: #fff;
          border: 1px solid #e5ebf4;
@@ -342,17 +386,17 @@ function handleEscape(event) {
              <div className="cat-metric"><div className="cat-metric-icon purple"><Utensils size={16} /></div><div><div className="cat-metric-label">Total de productos</div><div className="cat-metric-value">{fmt(totalProducts)}</div><div className="cat-metric-note"><span className="cat-up">↑ 12%</span>　vs. mes anterior</div></div></div>
           </div>
           <div className="cat-toolbar">
-            <div className="cat-search"><Icon>⌕</Icon><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Buscar categoría..."/></div>
-            <select className="cat-select" value={statusFilter} onChange={e=>{setStatusFilter(e.target.value);setPage(1)}}><option value="Todas">▣　Estado: Todas</option><option>Activa</option><option>Inactiva</option></select>
-            <select className="cat-select" value={sort} onChange={e=>setSort(e.target.value)}><option value="name-asc">▤　Ordenar por: Nombre (A–Z)</option><option value="name-desc">Ordenar por: Nombre (Z–A)</option><option value="products-desc">Ordenar por: Más productos</option><option value="products-asc">Ordenar por: Menos productos</option></select>
-            <div className="cat-toolbar-spacer"/>
-             <button className="cat-btn" onClick={()=>setMoreFilters(v=>!v)}>⚑　Más filtros {moreFilters?"⌃":" "}</button>
-             <button className={`cat-btn ${showCategoryData ? "primary" : ""}`} onClick={()=>setShowCategoryData(v=>!v)}>▤　Datos de categoría</button>
+             <div className="cat-search"><Search size={15} /><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Buscar categoría..."/></div>
+             <div className="cat-select-with-icon"><ListFilter size={15} /><select className="cat-select" value={statusFilter} onChange={e=>{setStatusFilter(e.target.value);setPage(1)}}><option value="Todas">Estado: Todas</option><option>Activa</option><option>Inactiva</option></select></div>
+             <div className="cat-select-with-icon"><ArrowDownUp size={15} /><select className="cat-select" value={sort} onChange={e=>setSort(e.target.value)}><option value="name-asc">Ordenar por: Nombre (A–Z)</option><option value="name-desc">Ordenar por: Nombre (Z–A)</option><option value="products-desc">Ordenar por: Más productos</option><option value="products-asc">Ordenar por: Menos productos</option></select></div>
+             <div className="cat-toolbar-spacer"/>
+              <button className="cat-btn" onClick={()=>setMoreFilters(v=>!v)}><Filter size={15} /> Más filtros {moreFilters?<ArrowUp size={14} />:<ArrowDown size={14} />}</button>
+             <button className={`cat-btn ${showCategoryData ? "primary" : ""}`} onClick={()=>setShowCategoryData(v=>!v)}><SlidersHorizontal size={15} /> Datos de categoría</button>
              {moreFilters&&<select className="cat-select" value={hasProducts} onChange={e=>{setHasProducts(e.target.value);setPage(1)}}><option>Todos</option><option>Con productos</option><option>Sin productos</option></select>}
           </div>
           <div className="cat-table-card">
             <div className="cat-table-scroll"><table className="cat-table">
-               <thead><tr><th><input type="checkbox" aria-label="Seleccionar todos" checked={rows.length>0&&rows.every(c=>selectedIds.includes(c.id))} onChange={e=>toggleAll(e.target.checked)}/></th><th>Categoría　↕</th><th>Descripción　↕</th><th>Productos　↕</th>{showCategoryData&&<><th>Categoría padre</th><th>Con stock</th><th>Stock bajo</th><th>Sin stock</th><th>Disponibilidad</th></>}<th>Estado　↕</th><th>Fecha de creación　↕</th><th>Última actualización　↕</th><th style={{textAlign:"right"}}>Acciones</th></tr></thead>
+               <thead><tr><th><input type="checkbox" aria-label="Seleccionar todos" checked={rows.length>0&&rows.every(c=>selectedIds.includes(c.id))} onChange={e=>toggleAll(e.target.checked)}/></th>{sortableHeader("Categoría", "name")}<th>Descripción</th>{sortableHeader("Productos", "products")}{showCategoryData&&<><th>Categoría padre</th>{sortableHeader("Con stock", "stock")}{sortableHeader("Stock bajo", "lowStock")}{sortableHeader("Sin stock", "noStock")}<th>Disponibilidad</th></>}<th>Estado</th>{sortableHeader("Fecha de creación", "created")}{sortableHeader("Última actualización", "updated")}<th style={{textAlign:"right"}}>Acciones</th></tr></thead>
               <tbody>{rows.map(c=><tr key={c.id} className={selectedIds.includes(c.id)?"selected":""}>
                 <td><input type="checkbox" checked={selectedIds.includes(c.id)} onChange={()=>toggleOne(c.id)} aria-label={`Seleccionar ${c.name}`}/></td>
                  <td><div className="cat-category-cell"><div className="cat-icon-box" style={iconBg(c.color)}><CategoryIcon name={c.icon} /></div><button style={{border:0,background:"transparent",padding:0,color:"inherit",font:"inherit",cursor:"pointer"}} onClick={()=>{setDetail(c);setDetailTab("Resumen")}}>{c.name}</button></div></td>
