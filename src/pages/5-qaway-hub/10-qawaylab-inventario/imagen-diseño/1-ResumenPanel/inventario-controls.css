@@ -1,3 +1,11 @@
+/* =======================================================
+   inventario-controls.css
+   Tokens maestros PXP - basados en 2-ProductosPanel.jsx
+   Los !important en primary/dark son necesarios para
+   vencer los bloques <style>{css}</style> internos de
+   cada *Literal.jsx sin modificar el JSX.
+======================================================= */
+
 .pxp-heading-actions {
   display: flex;
   align-items: center;
@@ -30,29 +38,31 @@
   background: #f9fbff;
 }
 
+/* !important necesario: vence el <style>{css}</style> inline de cada módulo */
 .pxp-btn.primary {
-  border-color: #ff4b0b;
-  background: #ff4b0b;
-  color: #fff;
+  background: #ff4b0b !important;
+  border-color: #ff4b0b !important;
+  color: #fff !important;
   font-weight: 650;
   box-shadow: 0 2px 8px rgba(255, 75, 11, .25);
 }
 
 .pxp-btn.primary:hover {
-  border-color: #ea3e00;
-  background: #ea3e00;
+  background: #ea3e00 !important;
+  border-color: #ea3e00 !important;
+  color: #fff !important;
 }
 
 .pxp-btn.dark {
-  border-color: #1e293b;
-  background: #1e293b;
-  color: #fff;
+  background: #1e293b !important;
+  border-color: #1e293b !important;
+  color: #fff !important;
   font-weight: 600;
 }
 
 .pxp-btn.dark:hover {
-  border-color: #0f172a;
-  background: #0f172a;
+  background: #0f172a !important;
+  border-color: #0f172a !important;
 }
 
 .pxp-btn.small {
@@ -145,11 +155,9 @@
   .pxp-toolbar {
     align-items: stretch;
   }
-
   .pxp-toolbar .pxp-search {
     flex-basis: 100%;
   }
-
   .pxp-heading-actions .pxp-btn,
   .pxp-toolbar .pxp-btn,
   .pxp-toolbar .pxp-select {
@@ -161,11 +169,9 @@
   .pxp-heading-actions {
     width: 100%;
   }
-
   .pxp-heading-actions .pxp-btn {
     flex: 1 1 auto;
   }
-
   .pxp-toolbar .pxp-select {
     min-width: 0;
     flex: 1 1 calc(50% - 5px);
