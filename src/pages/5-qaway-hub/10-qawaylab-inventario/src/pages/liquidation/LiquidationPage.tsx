@@ -136,7 +136,7 @@ export default function LiquidationPage() {
                         onClick={() => setPage(pagination.page - 1)}
                         disabled={pagination.page === 1}
                         className="pxp-btn"
-                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                        style={{ fontSize: '12px' }}
                       >
                         Anterior
                       </button>
@@ -147,7 +147,7 @@ export default function LiquidationPage() {
                         onClick={() => setPage(pagination.page + 1)}
                         disabled={pagination.page === pagination.total_pages}
                         className="pxp-btn"
-                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                        style={{ fontSize: '12px' }}
                       >
                         Siguiente
                       </button>
