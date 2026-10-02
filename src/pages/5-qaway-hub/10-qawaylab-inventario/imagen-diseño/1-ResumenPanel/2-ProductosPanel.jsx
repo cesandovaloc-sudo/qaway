@@ -1404,7 +1404,7 @@ export default function ProductosPanel() {
                   }}
                   title="Crear nuevo producto"
                 >
-                  <Plus size={15} /> Nuevo producto <ChevronDown size={13} />
+                  <Plus size={15} /> Nuevo producto
                 </button>
               </div>
             </div>

@@ -1396,7 +1396,7 @@ export default function ProductosPanel() {
                   }}
                   title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para crear productos" : "Crear nuevo producto"}
                 >
-                  <Plus size={15} /> Nuevo producto <ChevronDown size={13} />
+                  <Plus size={15} /> Nuevo producto
                 </button>
               </div>
             </div>

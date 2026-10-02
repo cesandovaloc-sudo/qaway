@@ -478,7 +478,7 @@ export default function SedesPanel() {
                   }}
                   title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para crear sedes" : "Crear nueva sede"}
                 >
-                  <Plus size={15} /> Nueva sede <ChevronDown size={13} />
+                  <Plus size={15} /> Nueva sede
                 </button>
               </div>
             </div>

@@ -1553,7 +1553,7 @@ export default function MovimientosPanelLiteral() {
                   }}
                   title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para registrar movimientos" : "Registrar nuevo movimiento"}
                 >
-                  <Plus size={15} /> Nuevo movimiento <ChevronDown size={13} />
+                  <Plus size={15} /> Nuevo movimiento
                 </button>
               </div>
             </div>
