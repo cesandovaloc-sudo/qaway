@@ -197,7 +197,29 @@ export default function LoginPage() {
     supabase.auth.getSession()
       .then(async ({ data }) => {
         if (!alive) return
-        if (data.session) {
+        if (data?.session) {
+          // Verificar si el usuario realmente existe en la BD antes de redirigir a ciegas
+          try {
+            const { data: userCheck } = await supabase
+              .from('users')
+              .select('id')
+              .eq('id', data.session.user.id)
+              .maybeSingle()
+
+            if (!userCheck) {
+              // Usuario eliminado de Supabase: cerrar sesión huérfana y mostrar formulario
+              await supabase.auth.signOut()
+              sessionStorage.removeItem('qaway_auth_token')
+              sessionStorage.removeItem('qaway_auth_email')
+              sessionStorage.removeItem('qaway_auth_role')
+              localStorage.removeItem('qaway_auth_token')
+              localStorage.removeItem('qaway_auth_email')
+              localStorage.removeItem('qaway_auth_role')
+              if (alive) setChecking(false)
+              return
+            }
+          } catch (_) {}
+
           const target = await resolvePostLoginTarget(supabase, data.session.user.id)
           if (alive) navigate(target, { replace: true })
           return

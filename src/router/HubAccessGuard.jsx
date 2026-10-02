@@ -35,6 +35,19 @@ export default function HubAccessGuard({ children }) {
         .maybeSingle()
 
       if (userError || !user) {
+        // La sesión local apunta a un usuario que ya no existe en la base de datos (eliminado o revocado).
+        // Limpiamos la sesión huérfana para evitar bucles de rebote infinitos con /login.
+        try {
+          await supabase.auth.signOut()
+        } catch (_) {}
+        try {
+          sessionStorage.removeItem('qaway_auth_token')
+          sessionStorage.removeItem('qaway_auth_email')
+          sessionStorage.removeItem('qaway_auth_role')
+          localStorage.removeItem('qaway_auth_token')
+          localStorage.removeItem('qaway_auth_email')
+          localStorage.removeItem('qaway_auth_role')
+        } catch (_) {}
         resolve('/login')
         return
       }

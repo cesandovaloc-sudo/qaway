@@ -902,7 +902,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 relative flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2.5 relative flex-wrap sm:flex-nowrap shrink-0 ml-auto">
           {/* Cápsula de telemetría estilo CRM */}
           <span className="inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-[8px] bg-white border border-[#e5ebf4] text-[13px] font-semibold text-[#34415b] flex-shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -915,7 +915,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           <button
             type="button"
             onClick={() => setIsMetricModalOpen(true)}
-            className="inline-flex items-center gap-1.5 h-[38px] bg-[#ff4b0b] hover:bg-[#ea3e00] border border-[#ff4b0b] hover:border-[#ea3e00] text-white text-[13.5px] font-semibold px-3.5 rounded-[8px] transition-all shadow-[0_2px_8px_rgba(255,75,11,0.25)] cursor-pointer flex-shrink-0"
+            className="inline-flex items-center gap-1.5 h-[38px] bg-[#ff4b0b] hover:bg-[#e03f06] border border-[#ff4b0b] hover:border-[#e03f06] text-white text-[13.5px] font-semibold px-3.5 rounded-[8px] transition-all shadow-[0_2px_8px_rgba(255,75,11,0.25)] cursor-pointer flex-shrink-0"
             title="Crear métrica personalizada (Super Administrador)"
           >
             <HubIcon icon={Plus} size={15} className="w-4 h-4" />

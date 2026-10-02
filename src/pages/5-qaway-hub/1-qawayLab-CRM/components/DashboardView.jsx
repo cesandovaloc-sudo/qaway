@@ -593,9 +593,9 @@ export default function DashboardView() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 relative flex-wrap shrink-0 ml-auto md:ml-0">
+          <div className="flex items-center gap-2.5 relative flex-wrap sm:flex-nowrap shrink-0 ml-auto">
             {/* Cápsula de telemetría */}
-            <span className="inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-xl bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700 shadow-2xs">
+             <span className="inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-[8px] bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>{activeCount} {activeCount === 1 ? 'activa' : 'activas'}</span>
               <span className="text-zinc-300">·</span>
@@ -604,9 +604,9 @@ export default function DashboardView() {
 
             {/* Botón Nueva Métrica (Solo Administrador / Management) */}
             {currentRole === 'management' && (
-              <button
-                onClick={() => setIsMetricBuilderOpen(true)}
-                className="h-[38px] px-3.5 rounded-xl bg-[#ff4b0b] hover:bg-[#ea3e00] text-white text-xs font-semibold shadow-[0_2px_10px_rgba(255,75,11,0.25)] flex items-center gap-1.5 transition-all active:scale-[0.98]"
+               <button
+                 onClick={() => setIsMetricBuilderOpen(true)}
+                 className="h-[38px] px-3.5 rounded-[8px] bg-[#ff4b0b] hover:bg-[#e03f06] border border-[#ff4b0b] hover:border-[#e03f06] text-white text-xs font-semibold shadow-[0_2px_8px_rgba(255,75,11,0.25)] flex items-center gap-1.5 transition-all active:scale-[0.98]"
               >
                 <Plus size={15} />
                 <span>Nueva Métrica</span>
@@ -615,9 +615,9 @@ export default function DashboardView() {
 
             {/* Selector de Rango de Tiempo Interactivo */}
             <div className="relative" ref={timeMenuRef}>
-              <button 
-                onClick={() => setShowTimeMenu(!showTimeMenu)}
-                className="h-[38px] px-3.5 rounded-xl bg-white border border-zinc-200/80 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-all shadow-2xs flex items-center gap-2"
+               <button
+                 onClick={() => setShowTimeMenu(!showTimeMenu)}
+                 className="h-[38px] px-3.5 rounded-[8px] bg-white border border-zinc-200/80 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-all shadow-2xs flex items-center gap-2"
               >
                 <Calendar size={15} className="text-zinc-500" />
                 <span>{TIME_LABELS[timeRange] || 'Tiempo Real'}</span>
