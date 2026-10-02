@@ -269,7 +269,7 @@ export default function CanvaPlanSelector({
   const [oneTimeDuration, setOneTimeDuration] = useState("1_month");
 
   // Estados de Checkout (subStep === 3)
-  const [paymentMethod, setPaymentMethod] = useState("card"); // "card" | "yape"
+  const [paymentMethod, setPaymentMethod] = useState(null); // inicia colapsado (null | "card" | "yape")
   const [yapeStep, setYapeStep] = useState("input"); // "input" | "approval"
   const [yapeSeconds, setYapeSeconds] = useState(294); // 04:54
 
@@ -830,7 +830,7 @@ export default function CanvaPlanSelector({
                 <div className={`canva-pay-card ${paymentMethod === "card" ? "open" : ""}`}>
                   <div
                     className="canva-pay-header"
-                    onClick={() => setPaymentMethod("card")}
+                    onClick={() => setPaymentMethod((prev) => (prev === "card" ? null : "card"))}
                     role="button"
                     tabIndex={0}
                   >
@@ -955,7 +955,7 @@ export default function CanvaPlanSelector({
                 <div className={`canva-pay-card ${paymentMethod === "yape" ? "open" : ""}`}>
                   <div
                     className="canva-pay-header"
-                    onClick={() => setPaymentMethod("yape")}
+                    onClick={() => setPaymentMethod((prev) => (prev === "yape" ? null : "yape"))}
                     role="button"
                     tabIndex={0}
                   >
@@ -1221,8 +1221,10 @@ export default function CanvaPlanSelector({
                 <button
                   type="button"
                   className="canva-sub2-btn-submit"
-                  disabled={loading}
+                  disabled={loading || !paymentMethod}
+                  style={!paymentMethod ? { opacity: 0.6, cursor: "not-allowed", boxShadow: "none" } : {}}
                   onClick={() => {
+                    if (!paymentMethod) return;
                     if (paymentMethod === "yape" && yapeStep === "input") {
                       setYapeStep("approval");
                       return;
@@ -1241,7 +1243,9 @@ export default function CanvaPlanSelector({
                     }
                   }}
                 >
-                  {paymentMethod === "card" ? (
+                  {!paymentMethod ? (
+                    "Selecciona una opción de pago"
+                  ) : paymentMethod === "card" ? (
                     billingType === "recurring" ? "Obtén tu prueba gratis" : "Pagar y activar ahora"
                   ) : yapeStep === "input" ? (
                     "Continuar a aprobación Yape"
