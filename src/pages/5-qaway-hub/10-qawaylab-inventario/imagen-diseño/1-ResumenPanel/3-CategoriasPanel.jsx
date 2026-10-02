@@ -61,6 +61,7 @@ export default function CategoriasPanel() {
   const [detailTab, setDetailTab] = useState("Resumen");
   const [moreFilters, setMoreFilters] = useState(false);
   const [hasProducts, setHasProducts] = useState("Todos");
+  const [showCategoryData, setShowCategoryData] = useState(false);
   const [form, setForm] = useState({ name:"", description:"", icon:"utensils", color:"#1684F8", status:"Activa", parent:"" });
   const [toast, setToast] = useState("");
   const actionsMenuRef = useRef(null);
@@ -100,6 +101,12 @@ function handleEscape(event) {
   },[categories,query,statusFilter,sort,hasProducts]);
   const pages=Math.max(1,Math.ceil(filtered.length/pageSize));
   const rows=filtered.slice((page-1)*pageSize,page*pageSize);
+  const categoryAvailability = category => {
+    if (category.products === 0) return "Sin productos";
+    if (category.noStock === category.products) return "Agotada";
+    if (category.lowStock > 0) return "Stock bajo";
+    return "Disponible";
+  };
   const resetForm = () => setForm({name:"",description:"",icon:"utensils",color:"#1684F8",status:"Activa",parent:""});
   const openCreate = () => { setEditing(null); resetForm(); setModal(true); setMenuId(null); };
   const openEdit = c => { setEditing(c); setForm({name:c.name,description:c.description,icon:c.icon,color:c.color,status:c.status,parent:c.parent||""}); setModal(true); setMenuId(null); };
@@ -339,16 +346,17 @@ function handleEscape(event) {
             <select className="cat-select" value={statusFilter} onChange={e=>{setStatusFilter(e.target.value);setPage(1)}}><option value="Todas">▣　Estado: Todas</option><option>Activa</option><option>Inactiva</option></select>
             <select className="cat-select" value={sort} onChange={e=>setSort(e.target.value)}><option value="name-asc">▤　Ordenar por: Nombre (A–Z)</option><option value="name-desc">Ordenar por: Nombre (Z–A)</option><option value="products-desc">Ordenar por: Más productos</option><option value="products-asc">Ordenar por: Menos productos</option></select>
             <div className="cat-toolbar-spacer"/>
-            <button className="cat-btn" onClick={()=>setMoreFilters(v=>!v)}>⚑　Más filtros {moreFilters?"⌃":" "}</button>
-            {moreFilters&&<select className="cat-select" value={hasProducts} onChange={e=>{setHasProducts(e.target.value);setPage(1)}}><option>Todos</option><option>Con productos</option><option>Sin productos</option></select>}
+             <button className="cat-btn" onClick={()=>setMoreFilters(v=>!v)}>⚑　Más filtros {moreFilters?"⌃":" "}</button>
+             <button className={`cat-btn ${showCategoryData ? "primary" : ""}`} onClick={()=>setShowCategoryData(v=>!v)}>▤　Datos de categoría</button>
+             {moreFilters&&<select className="cat-select" value={hasProducts} onChange={e=>{setHasProducts(e.target.value);setPage(1)}}><option>Todos</option><option>Con productos</option><option>Sin productos</option></select>}
           </div>
           <div className="cat-table-card">
             <div className="cat-table-scroll"><table className="cat-table">
-              <thead><tr><th><input type="checkbox" aria-label="Seleccionar todos" checked={rows.length>0&&rows.every(c=>selectedIds.includes(c.id))} onChange={e=>toggleAll(e.target.checked)}/></th><th>Categoría　↕</th><th>Descripción　↕</th><th>Productos　↕</th><th>Estado　↕</th><th>Fecha de creación　↕</th><th>Última actualización　↕</th><th style={{textAlign:"right"}}>Acciones</th></tr></thead>
+               <thead><tr><th><input type="checkbox" aria-label="Seleccionar todos" checked={rows.length>0&&rows.every(c=>selectedIds.includes(c.id))} onChange={e=>toggleAll(e.target.checked)}/></th><th>Categoría　↕</th><th>Descripción　↕</th><th>Productos　↕</th>{showCategoryData&&<><th>Categoría padre</th><th>Con stock</th><th>Stock bajo</th><th>Sin stock</th><th>Disponibilidad</th></>}<th>Estado　↕</th><th>Fecha de creación　↕</th><th>Última actualización　↕</th><th style={{textAlign:"right"}}>Acciones</th></tr></thead>
               <tbody>{rows.map(c=><tr key={c.id} className={selectedIds.includes(c.id)?"selected":""}>
                 <td><input type="checkbox" checked={selectedIds.includes(c.id)} onChange={()=>toggleOne(c.id)} aria-label={`Seleccionar ${c.name}`}/></td>
                  <td><div className="cat-category-cell"><div className="cat-icon-box" style={iconBg(c.color)}><CategoryIcon name={c.icon} /></div><button style={{border:0,background:"transparent",padding:0,color:"inherit",font:"inherit",cursor:"pointer"}} onClick={()=>{setDetail(c);setDetailTab("Resumen")}}>{c.name}</button></div></td>
-                <td title={c.description}>{c.description.length>47?c.description.slice(0,47)+"…":c.description}</td><td>{fmt(c.products)}</td><td><span className={`cat-status ${c.status==="Inactiva"?"inactive":c.products===0?"empty":""}`}>{c.products===0&&c.status==="Activa"?"Sin productos":c.status}</span></td><td>{c.created}</td><td>{c.updated}</td>
+                 <td title={c.description}>{c.description.length>47?c.description.slice(0,47)+"…":c.description}</td><td>{fmt(c.products)}</td>{showCategoryData&&<><td>{c.parent||"Sin categoría padre"}</td><td>{fmt(c.stock)}</td><td>{fmt(c.lowStock)}</td><td>{fmt(c.noStock)}</td><td><span className={`cat-status ${categoryAvailability(c)==="Stock bajo"?"empty":categoryAvailability(c)==="Agotada"?"inactive":""}`}>{categoryAvailability(c)}</span></td></>}<td><span className={`cat-status ${c.status==="Inactiva"?"inactive":c.products===0?"empty":""}`}>{c.products===0&&c.status==="Activa"?"Sin productos":c.status}</span></td><td>{c.created}</td><td>{c.updated}</td>
                 <td><div className="cat-actions" ref={menuId === c.id ? actionsMenuRef : null}><button className="cat-icon-btn" title="Editar" onClick={()=>openEdit(c)}>✎</button><div className="cat-action-wrap"><button className="cat-icon-btn" title="Más acciones" onClick={()=>setMenuId(menuId===c.id?null:c.id)}>•••</button>{menuId===c.id&&<div className="cat-dropdown"><button onClick={()=>{setDetail(c);setDetailTab("Resumen");setMenuId(null)}}>◉　Ver detalle</button><button onClick={()=>openEdit(c)}>✎　Editar categoría</button><button onClick={()=>{setForm({name:c.name,description:c.description,icon:c.icon,color:c.color,status:c.status,parent:c.parent||""});setEditing(null);setModal(true);setMenuId(null);showToast("Edita el nombre para duplicar")}}>▣　Duplicar</button><button className="danger" onClick={()=>removeCategory(c)}>♜　Eliminar</button></div>}</div></div></td>
               </tr>)}</tbody>
             </table></div>
