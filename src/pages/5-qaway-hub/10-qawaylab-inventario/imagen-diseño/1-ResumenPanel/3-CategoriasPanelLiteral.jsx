@@ -37,6 +37,10 @@ import {
   Box,
   Upload,
   Copy,
+  ArrowDown,
+  ArrowDownUp,
+  ArrowUp,
+  ListFilter,
 } from "lucide-react";
 
 import { productService } from "../../src/services/productService";
@@ -746,6 +750,7 @@ export default function ProductosPanel() {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [locationFilter, setLocationFilter] = useState("Todos");
+  const [sort, setSort] = useState("name-asc");
   const [showExtraFilters, setShowExtraFilters] = useState(false);
   const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState([
@@ -1037,7 +1042,8 @@ export default function ProductosPanel() {
 
   const categories = useMemo(() => ["Todas", ...new Set(products.map(p => p.category))], [products]);
 
-  const filtered = useMemo(() => products.filter(p => {
+   const filtered = useMemo(() => {
+     const result = products.filter(p => {
     const q = query.toLowerCase().trim();
     const matchesQ = !q || [p.name, p.sku, p.category, p.barcode, p.brand].some(v => String(v || "").toLowerCase().includes(q));
     const matchesCat = category === "Todas" || p.category === category;
@@ -1047,13 +1053,36 @@ export default function ProductosPanel() {
     const matchesMinPrice = !minPrice || p.price >= Number(minPrice);
     const matchesMaxPrice = !maxPrice || p.price <= Number(maxPrice);
     const matchesLoc = locationFilter === "Todos" || p.location === locationFilter;
-    return matchesQ && matchesCat && matchesStock && matchesComm && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesLoc;
-  }), [products, query, category, stockFilter, commercialStatus, brandFilter, minPrice, maxPrice, locationFilter]);
+     const matchesStatus = status === "Todos" || p.status === status;
+     return matchesQ && matchesCat && matchesStock && matchesComm && matchesStatus && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesLoc;
+     });
+      const [column, direction] = sort.split("-");
+      const valueFor = (product, key) => key === "name" ? product.name : product[key];
+      return result.sort((a, b) => {
+        const aValue = valueFor(a, column) ?? "";
+        const bValue = valueFor(b, column) ?? "";
+       const comparison = typeof aValue === "number" && typeof bValue === "number"
+         ? aValue - bValue
+         : String(aValue).localeCompare(String(bValue), "es", { numeric: true });
+       return direction === "desc" ? -comparison : comparison;
+     });
+   }, [products, query, category, status, stockFilter, commercialStatus, brandFilter, minPrice, maxPrice, locationFilter, sort]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
   const totalStock = products.reduce((s, p) => s + p.stock, 0);
   const inventoryValue = products.reduce((s, p) => s + p.stock * p.price, 0);
+  const sortColumn = column => setSort(current => `${column}-${current === `${column}-asc` ? "desc" : "asc"}`);
+  const sortIcon = column => sort.startsWith(`${column}-`)
+    ? (sort.endsWith("asc") ? <ArrowUp size={13} /> : <ArrowDown size={13} />)
+    : <ArrowDownUp size={13} />;
+  const sortableHeader = (label, column) => (
+    <th>
+      <button type="button" className="pxp-sort-header" onClick={() => sortColumn(column)}>
+        {label}{sortIcon(column)}
+      </button>
+    </th>
+  );
   const showToast = msg => { setToast(msg); window.setTimeout(() => setToast(""), 2800); };
   
   const openNew = () => {
@@ -1232,7 +1261,8 @@ export default function ProductosPanel() {
   if (fullProduct) {
     return (
       <div className="pxp-root" style={{ background: "#fff", minHeight: "100vh", padding: "28px 36px" }}>
-        <style>{css}</style>
+       <style>{css}</style>
+       <style>{`.pxp-sort-header{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;cursor:pointer;text-transform:inherit;letter-spacing:inherit}.pxp-sort-header:hover{color:#ff4b0b}`}</style>
         <button
           onClick={() => setFullProduct(null)}
           style={{
@@ -1482,6 +1512,22 @@ export default function ProductosPanel() {
                     ))}
                   </div>
                 )}
+              </div>
+
+              <div className="pxp-select-wrap">
+                <div className="pxp-select" style={{ display: "inline-flex", alignItems: "center", gap: 8, paddingRight: 10 }}>
+                  <ListFilter size={14} />
+                  <select
+                    value={status}
+                    onChange={e => { setStatus(e.target.value); setPage(1); }}
+                    style={{ border: 0, outline: 0, background: "transparent", color: "inherit", font: "inherit", cursor: "pointer" }}
+                  >
+                    <option value="Todos">Estado: Todos</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="Stock bajo">Stock bajo</option>
+                    <option value="Sin stock">Sin stock</option>
+                  </select>
+                </div>
               </div>
               
               {/* Botón Más filtros con Icono Lucide */}
@@ -1763,11 +1809,11 @@ export default function ProductosPanel() {
               {view === "list" ? <div className="pxp-table-scroll"><table className="pxp-table">
                 <thead><tr>
                   <th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(p => selected.includes(p.id))} onChange={e => selectAll(e.target.checked)} /></th>
-                  {visibleColumns.includes("product") && <th>Categoría ↕</th>}
-                  {visibleColumns.includes("sku") && <th>SKU ↕</th>}
+                  {visibleColumns.includes("product") && <th><button type="button" className="pxp-sort-header" onClick={() => sortColumn("name")}>Producto {sortIcon("name")}</button></th>}
+                  {visibleColumns.includes("sku") && <th><button type="button" className="pxp-sort-header" onClick={() => sortColumn("sku")}>SKU {sortIcon("sku")}</button></th>}
                   {visibleColumns.includes("barcode") && <th>Cód. Barras</th>}
                   {visibleColumns.includes("category") && <th>Categoría</th>}
-                  {visibleColumns.includes("stock") && <th>Stock ↕</th>}
+                  {visibleColumns.includes("stock") && <th><button type="button" className="pxp-sort-header" onClick={() => sortColumn("stock")}>Stock {sortIcon("stock")}</button></th>}
                   {visibleColumns.includes("price") && <th>Precio base</th>}
                   {visibleColumns.includes("wholesale") && <th>Precio mayorista</th>}
                   {visibleColumns.includes("status") && <th>Estado</th>}
