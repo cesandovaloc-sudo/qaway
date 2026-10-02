@@ -82,7 +82,7 @@ export function QuotationCard({ quotation, onEdit, onDelete, onView, onStatusCha
         <div className="flex items-center gap-2 mb-4">
           <button
             onClick={() => onStatusChange(quotation, 'sent')}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+            className="flex h-[38px] flex-1 items-center justify-center gap-1 px-3 py-0 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
           >
             <Send className="w-4 h-4" />
             Enviar
@@ -94,14 +94,14 @@ export function QuotationCard({ quotation, onEdit, onDelete, onView, onStatusCha
         <div className="flex items-center gap-2 mb-4">
           <button
             onClick={() => onStatusChange(quotation, 'accepted')}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+            className="flex h-[38px] flex-1 items-center justify-center gap-1 px-3 py-0 text-sm text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
           >
             <Check className="w-4 h-4" />
             Aceptar
           </button>
           <button
             onClick={() => onStatusChange(quotation, 'rejected')}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+            className="flex h-[38px] flex-1 items-center justify-center gap-1 px-3 py-0 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
           >
             <X className="w-4 h-4" />
             Rechazar
@@ -114,7 +114,7 @@ export function QuotationCard({ quotation, onEdit, onDelete, onView, onStatusCha
         {onView && (
           <button
             onClick={() => onView(quotation)}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+            className="flex h-[38px] flex-1 items-center justify-center gap-1 px-3 py-0 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <Eye className="w-4 h-4" />
             Ver
@@ -124,7 +124,7 @@ export function QuotationCard({ quotation, onEdit, onDelete, onView, onStatusCha
           <button
             onClick={() => onExportPDF(quotation)}
             disabled={exportingPDF}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50"
+            className="flex h-[38px] flex-1 items-center justify-center gap-1 px-3 py-0 text-sm text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50"
             title="Exportar a PDF"
           >
             <Download className="w-4 h-4" />
@@ -134,7 +134,7 @@ export function QuotationCard({ quotation, onEdit, onDelete, onView, onStatusCha
         {onEdit && (
           <button
             onClick={() => onEdit(quotation)}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+            className="flex h-[38px] flex-1 items-center justify-center gap-1 px-3 py-0 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
           >
             <Edit2 className="w-4 h-4" />
             Editar
@@ -143,7 +143,7 @@ export function QuotationCard({ quotation, onEdit, onDelete, onView, onStatusCha
         {onDelete && (
           <button
             onClick={() => onDelete(quotation)}
-            className="flex items-center justify-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="flex h-[38px] w-[38px] items-center justify-center p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
             <Trash2 className="w-4 h-4" />
           </button>

@@ -272,7 +272,7 @@ export function QuotationPDF({ quotation, onGenerated }: QuotationPDFProps) {
       <button
         onClick={generatePDF}
         disabled={generating}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex h-[38px] items-center gap-2 px-3 py-0 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         title="Exportar a PDF"
       >
         {generating ? (

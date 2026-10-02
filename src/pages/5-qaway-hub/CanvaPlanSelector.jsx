@@ -339,7 +339,7 @@ export default function CanvaPlanSelector({
       cardholderName: cardForm.name,
     });
     if (!token?.id) throw new Error("Mercado Pago no pudo tokenizar la tarjeta.");
-    return token.id;
+    return { id: token.id, paymentMethodId: token.payment_method_id || null };
   }
 
   // En Qaway Lab el Pago Único prepago es exclusivamente mensual
@@ -1246,18 +1246,14 @@ export default function CanvaPlanSelector({
                   style={!paymentMethod ? { opacity: 0.6, cursor: "not-allowed", boxShadow: "none" } : {}}
                   onClick={async () => {
                     if (!paymentMethod) return;
-                    if (billingType !== "recurring") {
-                      setPaymentError("El pago único estará disponible en una próxima fase.");
-                      return;
-                    }
                     if (paymentMethod === "yape") {
-                      setPaymentError("Yape estará disponible en una próxima fase.");
+                      setPaymentError("Yape estará disponible próximamente.");
                       return;
                     }
                     if (onContinue) {
                       try {
                         setPaymentError("");
-                        const cardTokenId = paymentMethod === "card" ? await createCardToken() : undefined;
+                        const cardToken = paymentMethod === "card" ? await createCardToken() : null;
                         await onContinue({
                         ...selectedPlanObj,
                         billingType,
@@ -1265,7 +1261,8 @@ export default function CanvaPlanSelector({
                         oneTimeDuration: billingType === "one_time" ? oneTimeDuration : undefined,
                         price: billingType === "recurring" ? currentPrice : activeOneTimePrice,
                         paymentMethod,
-                         cardTokenId,
+                          cardTokenId: cardToken?.id,
+                          cardPaymentMethodId: cardToken?.paymentMethodId,
                          yapeForm: undefined,
                        });
                       } catch (error) {

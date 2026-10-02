@@ -166,6 +166,10 @@ export default function HubOnboardingPage() {
   const [pendingCardTokenId, setPendingCardTokenId] = useState(null);
   const pendingCardTokenRef = useRef(null);
   const pendingPlanRef = useRef(chosenPlan);
+  const pendingBillingTypeRef = useRef("recurring");
+  const pendingPaymentMethodRef = useRef(null);
+  const pendingCardPaymentMethodRef = useRef(null);
+  const planObjAmountRef = useRef(null);
   // Cableado SaaS (solo comportamiento; diseño intacto).
   const [session, setSession] = useState(null);
   const [tenant, setTenant] = useState(null);
@@ -475,8 +479,17 @@ export default function HubOnboardingPage() {
       if (goNext) {
         const cardTokenId = pendingCardTokenRef.current || pendingCardTokenId;
         if (!cardTokenId) throw new Error("Completa primero la autorización de pago.");
-        await startSubscription(newTenantId, cardTokenId, pendingPlanRef.current || chosenPlan);
-        next();
+         const activePlan = pendingPlanRef.current || chosenPlan;
+         if (pendingBillingTypeRef.current === "one_time" && pendingPaymentMethodRef.current === "card") {
+           await startOneTimePayment(newTenantId, cardTokenId, activePlan, planObjAmountRef.current, pendingCardPaymentMethodRef.current);
+         } else {
+           await startSubscription(newTenantId, cardTokenId, activePlan);
+         }
+                  pendingBillingTypeRef.current = planObj?.billingType || "recurring";
+                  pendingPaymentMethodRef.current = planObj?.paymentMethod || null;
+                  pendingCardPaymentMethodRef.current = planObj?.cardPaymentMethodId || null;
+                  planObjAmountRef.current = planObj?.price || null;
+                  next();
       }
     } catch (e) {
       setNote("No se pudo guardar: " + e.message);
@@ -497,6 +510,17 @@ export default function HubOnboardingPage() {
     if (error || data?.error) throw new Error(data?.error || await leerErrorEdge(error));
     if (!data?.preapproval_id) throw new Error("Mercado Pago no devolvió la suscripción.");
     await saveApps(false, plan, { status: data.status === "authorized" ? "trialing" : "pending", mpPreapprovalId: data.preapproval_id }, tenantId);
+  }
+
+  async function startOneTimePayment(tenantId, cardTokenId, plan, amount, paymentMethodId) {
+    const selectedSlugs = [...new Set([...selected, "inventario"].map((raw) => raw === "inventory" ? "inventario" : raw))];
+    const { data, error } = await supabase.functions.invoke("mp-onetime-payment", {
+      body: { tenant_id: tenantId, plan_id: plan, amount, card_token_id: cardTokenId, card_payment_method_id: paymentMethodId, app_slugs: selectedSlugs },
+    });
+    if (error || data?.error) throw new Error(data?.error || await leerErrorEdge(error));
+    if (!data?.payment_id) throw new Error("Mercado Pago no devolvió el pago.");
+    if (data.status !== "approved") throw new Error("El pago está pendiente de confirmación.");
+    await saveApps(false, plan, { status: "active", billingType: "one_time", autoRenew: false, mpPaymentId: data.payment_id }, tenantId);
   }
 
   async function saveApps(goNext, planToApply, payment = null, tenantIdOverride = null) {
@@ -552,6 +576,9 @@ export default function HubOnboardingPage() {
             app_id: app.id,
             plan: activePlan,
              status: payment?.status || "trialing",
+             billing_type: payment?.billingType || "recurring",
+             auto_renew: payment?.autoRenew ?? true,
+             mp_payment_id: payment?.mpPaymentId || null,
             trial_started_at: now.toISOString(),
             trial_ends_at: in30Days.toISOString(),
             current_period_start: now.toISOString(),
@@ -570,7 +597,7 @@ export default function HubOnboardingPage() {
 
       await Promise.all(upsertPromises);
 
-       if (payment?.status === "pending") throw new Error("Mercado Pago aún no autorizó la tarjeta.");
+        if (payment?.status === "pending") throw new Error("Mercado Pago aún no autorizó la tarjeta.");
 
        // Activar tenant solo después de que Mercado Pago confirme la suscripción.
       await supabase.from("tenants").update({
@@ -714,7 +741,7 @@ export default function HubOnboardingPage() {
               selectedPlan={chosenPlan}
               onSelectPlan={(pId) => setChosenPlan(pId)}
                onContinue={async (planObj) => {
-                 if (planObj?.id) {
+                  if (planObj?.id) {
                    pendingPlanRef.current = planObj.id;
                    setChosenPlan(planObj.id);
                  }

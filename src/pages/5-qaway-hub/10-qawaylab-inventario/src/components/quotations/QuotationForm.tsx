@@ -382,14 +382,14 @@ export function QuotationForm({ quotation, onSave, onClose }: QuotationFormProps
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+              className="flex h-[38px] flex-1 items-center justify-center px-4 py-0 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
             >
               Cancelar
             </button>
             <button
               onClick={handleSubmit}
               disabled={saving || items.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
+              className="flex h-[38px] flex-1 items-center justify-center gap-2 px-4 py-0 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
