@@ -2188,7 +2188,7 @@ function HubPanelContent({ canvasOnly = false }) {
       // Admin de marca = rol 'admin' con tenant (dueño o co-admin) o plataforma.
       const isTenantAdmin = isPlatformAdmin || (me.role === 'admin' && Boolean(me.tenant_id))
       if (!isPlatformAdmin && !me.tenant_id) {
-        navigate('/onboarding/tu-empresa', { replace: true })
+        navigate('/onboarding', { replace: true })
         return
       }
       let tenantName = null
@@ -2197,8 +2197,10 @@ function HubPanelContent({ canvasOnly = false }) {
         tenantName = tenant?.name || null
         const isLocallyDone = localStorage.getItem(`qaway.onboarding_completed.${me.tenant_id}`) === 'true'
         const isDone = tenant?.features?.onboarding_completed === true || isLocallyDone
-        if (!isPlatformAdmin && tenant?.features?.onboarding_completed === false && !isDone) {
-          navigate('/onboarding/tu-hub', { replace: true })
+        const needsOnboarding = tenant?.status === 'draft'
+          || (tenant?.features?.onboarding_completed !== true && !isDone)
+        if (!isPlatformAdmin && needsOnboarding) {
+          navigate('/onboarding', { replace: true })
           return
         }
       }

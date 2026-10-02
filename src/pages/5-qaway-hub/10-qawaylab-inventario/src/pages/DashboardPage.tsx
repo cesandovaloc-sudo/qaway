@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import {
   Package,
@@ -24,6 +24,20 @@ import { RecentActivity } from '@/components/dashboard/RecentActivity'
 import { TopProducts } from '@/components/dashboard/TopProducts'
 import { SalesChartsSection } from '@/components/dashboard/SalesCharts'
 import { CollapsibleSection } from '@/components/dashboard/CollapsibleSection'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
 const css = `
 .pxp-root{--blue:#ff4b0b;--ink:#17233b;--muted:#71809e;--line:#e5ebf4;--soft:#f5f8fc;--green:#059669;--red:#e11d48;--amber:#d97706;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7f9fc;min-height:100vh;font-size:14px}
@@ -99,6 +113,28 @@ export default function DashboardPage() {
   const [dateRange, setDateRange] = useState("Este mes")
   const modalRef = useDismissOnEscapeOrOutside(isOperationOpen, () => setIsOperationOpen(false))
 
+  const [rendimientoPeriod, setRendimientoPeriod] = useState('Mensual')
+  const [showRendimientoMenu, setShowRendimientoMenu] = useState(false)
+  const rendimientoMenuRef = useRef<HTMLDivElement>(null)
+  const [canalTimeframe, setCanalTimeframe] = useState('Este mes')
+  const [showCanalMenu, setShowCanalMenu] = useState(false)
+  const canalMenuRef = useRef<HTMLDivElement>(null)
+  const [etapaTimeframe, setEtapaTimeframe] = useState('Este mes')
+  const [showEtapaMenu, setShowEtapaMenu] = useState(false)
+  const etapaMenuRef = useRef<HTMLDivElement>(null)
+  const [revenueTimeRange, setRevenueTimeRange] = useState('12m')
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (rendimientoMenuRef.current && !rendimientoMenuRef.current.contains(target)) setShowRendimientoMenu(false)
+      if (canalMenuRef.current && !canalMenuRef.current.contains(target)) setShowCanalMenu(false)
+      if (etapaMenuRef.current && !etapaMenuRef.current.contains(target)) setShowEtapaMenu(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const {
     stats,
     recentActivity,
@@ -118,6 +154,53 @@ export default function DashboardPage() {
       currency: 'PEN',
       minimumFractionDigits: 0,
     }).format(value)
+  }
+
+  const COLORS = ['#ff4b0b', '#d1d5db', '#9ca3af', '#6b7280', '#4b5563']
+  const salesMonth = stats?.salesMonth ?? 0
+  const totalCustomers = stats?.totalCustomers ?? 0
+  const rendimientoData = [
+    { name: 'Dic', ingresos: 200, ganadas: 150 },
+    { name: 'Ene', ingresos: 350, ganadas: 250 },
+    { name: 'Feb', ingresos: 600, ganadas: 400 },
+    { name: 'Mar', ingresos: 500, ganadas: 300 },
+    { name: 'Abr', ingresos: 900, ganadas: 700 },
+    { name: 'May', ingresos: salesMonth / 1000, ganadas: totalCustomers * 100 },
+  ]
+  const channelData = [
+    { name: 'Referidos', ganado: 420000, curso: 180000 },
+    { name: 'Inbound / Web', ganado: 312000, curso: 100000 },
+    { name: 'Email Marketing', ganado: 198000, curso: 50000 },
+    { name: 'Ads (Dinámico)', ganado: salesMonth, curso: stats?.pendingPayments ?? 0 },
+  ]
+  const pieData = [
+    { name: 'Nuevo Lead', value: stats?.totalProducts ?? 0 },
+    { name: 'Calificación', value: stats?.totalCustomers ?? 0 },
+    { name: 'Propuesta', value: stats?.pendingQuotations ?? 0 },
+    { name: 'Negociación', value: stats?.activeCampaigns ?? 0 },
+    { name: 'Cierre', value: stats?.salesToday ?? 0 },
+  ].filter(item => item.value > 0)
+  const pieTotal = pieData.reduce((sum, item) => sum + item.value, 0)
+  const revenueMonths = revenueTimeRange === '30d' ? 4 : revenueTimeRange === '90d' ? 3 : 12
+  const revenueBars = (salesData.length > 0 ? salesData.slice(-revenueMonths) : rendimientoData.slice(-revenueMonths)).map((item, index) => {
+    const value = 'ingresos' in item ? item.ingresos : ('ventas' in item ? item.ingresos : 0)
+    const values = salesData.length > 0 ? salesData.slice(-revenueMonths).map(sale => sale.ingresos) : rendimientoData.slice(-revenueMonths).map(data => data.ingresos)
+    const maxValue = Math.max(...values, 1)
+    return {
+      month: 'month' in item ? item.month : item.name,
+      value,
+      height: `${Math.max(Math.round((value / maxValue) * 100), 6)}%`,
+      label: formatCurrency(value),
+    }
+  })
+
+  const formatActivityTime = (timestamp: string) => {
+    const diffMinutes = Math.floor((Date.now() - new Date(timestamp).getTime()) / 60000)
+    if (diffMinutes < 1) return 'Ahora'
+    if (diffMinutes < 60) return `${diffMinutes}m`
+    const diffHours = Math.floor(diffMinutes / 60)
+    if (diffHours < 24) return `${diffHours}h`
+    return `${Math.floor(diffHours / 24)}d`
   }
 
   // Loading state
@@ -317,6 +400,160 @@ export default function DashboardPage() {
               >
                 ⚡ Acciones rápidas
               </button>
+            </div>
+
+            {/* GRAFICOS CENTRALES */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
+                <div className="flex justify-between items-center mb-5 relative">
+                  <h4 className="text-base font-bold text-zinc-900 tracking-tight">Rendimiento comercial</h4>
+                  <div className="relative" ref={rendimientoMenuRef}>
+                    <button
+                      onClick={() => { setShowRendimientoMenu(!showRendimientoMenu); setShowCanalMenu(false); setShowEtapaMenu(false) }}
+                      className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"
+                    >
+                      <span>{rendimientoPeriod}</span><ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                    </button>
+                    {showRendimientoMenu && (
+                      <div className="absolute right-0 mt-1.5 w-36 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                        {['Diario', 'Semanal', 'Mensual', 'Trimestral'].map(period => (
+                          <button key={period} onClick={() => { setRendimientoPeriod(period); setShowRendimientoMenu(false) }} className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${rendimientoPeriod === period ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'}`}>{period}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
+                  <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-[#ff4b0b]" /> Ingresos (k)</div>
+                  <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-zinc-900" /> Cierres</div>
+                </div>
+                <div className="h-56 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={rendimientoData} margin={{ top: 5, right: 0, left: -15, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f4" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} />
+                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(value) => `$${value}`} />
+                      <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
+                      <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.08)' }} />
+                      <Line yAxisId="left" type="monotone" dataKey="ingresos" stroke="#ff4b0b" strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 6, strokeWidth: 0, fill: '#ff4b0b' }} />
+                      <Line yAxisId="right" type="monotone" dataKey="ganadas" stroke="#18181b" strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 6, strokeWidth: 0, fill: '#18181b' }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
+                <div className="flex justify-between items-center mb-5 relative">
+                  <h4 className="text-base font-bold text-zinc-900 tracking-tight">Ingresos por canal</h4>
+                  <div className="relative" ref={canalMenuRef}>
+                    <button onClick={() => { setShowCanalMenu(!showCanalMenu); setShowRendimientoMenu(false); setShowEtapaMenu(false) }} className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]">
+                      <span>{canalTimeframe}</span><ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                    </button>
+                    {showCanalMenu && <div className="absolute right-0 mt-1.5 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                      {['Este mes', 'Últimos 30 días', 'Este trimestre', 'Año actual'].map(timeframe => <button key={timeframe} onClick={() => { setCanalTimeframe(timeframe); setShowCanalMenu(false) }} className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${canalTimeframe === timeframe ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'}`}>{timeframe}</button>)}
+                    </div>}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-[#ff4b0b]" /> Ganado</div>
+                  <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-zinc-200" /> En curso</div>
+                </div>
+                <div className="h-56 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={channelData} layout="vertical" margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
+                      <XAxis type="number" hide /><YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#52525b', fontWeight: 500 }} width={95} />
+                      <Tooltip cursor={{ fill: '#f4f4f5' }} contentStyle={{ borderRadius: '10px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.08)' }} />
+                      <Bar dataKey="ganado" stackId="a" fill="#ff4b0b" barSize={16} radius={[0, 0, 0, 0]} /><Bar dataKey="curso" stackId="a" fill="#e4e4e7" barSize={16} radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
+                <div className="flex justify-between items-center mb-5 relative">
+                  <h4 className="text-base font-bold text-zinc-900 tracking-tight">Oportunidades por etapa</h4>
+                  <div className="relative" ref={etapaMenuRef}>
+                    <button onClick={() => { setShowEtapaMenu(!showEtapaMenu); setShowRendimientoMenu(false); setShowCanalMenu(false) }} className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"><span>{etapaTimeframe}</span><ChevronDown className="w-3.5 h-3.5 text-zinc-500" /></button>
+                    {showEtapaMenu && <div className="absolute right-0 mt-1.5 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                      {['Este mes', 'Últimos 30 días', 'Este trimestre', 'Todo el histórico'].map(timeframe => <button key={timeframe} onClick={() => { setEtapaTimeframe(timeframe); setShowEtapaMenu(false) }} className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${etapaTimeframe === timeframe ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'}`}>{timeframe}</button>)}
+                    </div>}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between h-56">
+                  <div className="relative w-1/2 h-full flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={2} dataKey="value" stroke="none" cornerRadius={4}>{pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}</Pie></PieChart></ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"><span className="text-xs font-semibold text-zinc-400">Total</span><span className="text-3xl font-extrabold tracking-tight text-zinc-900">{pieTotal}</span></div>
+                  </div>
+                  <div className="w-1/2 pl-4 flex flex-col gap-3 justify-center">{pieData.map((item, index) => <div key={item.name} className="flex items-center justify-between text-xs"><div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} /><span className="font-semibold text-zinc-700 truncate max-w-[85px]">{item.name}</span></div><span className="text-zinc-600 font-semibold">{pieTotal ? ((item.value / pieTotal) * 100).toFixed(1) : '0.0'}%</span></div>)}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fila copiada del Panel: crecimiento de ingresos + actividad reciente */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              <div className="lg:col-span-2 bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <div>
+                      <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos y ventas</h3>
+                      <p className="text-xs text-zinc-500 mt-0.5">Pagos de pasarelas y pedidos comerciales consolidado por mes</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
+                      {[{ id: '30d', label: '30 d' }, { id: '90d', label: '90 d' }, { id: '12m', label: '12 m' }, { id: 'all', label: 'Todo' }].map((range) => (
+                        <button key={range.id} type="button" onClick={() => setRevenueTimeRange(range.id)} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${revenueTimeRange === range.id ? 'bg-white text-zinc-950 shadow-2xs font-bold' : 'text-zinc-500 hover:text-zinc-900'}`}>
+                          {range.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {salesData.length > 0 ? (
+                    <div className="h-56 flex items-end justify-between gap-2 pt-6 px-2">
+                      {revenueBars.map((bar, index) => (
+                        <div key={`${bar.month}-${index}`} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                          <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-mono px-2 py-0.5 rounded-md whitespace-nowrap z-10 shadow-sm pointer-events-none">{bar.label}</div>
+                          <div className="w-full bg-gradient-to-t from-[#ff4b0b] to-[#ff7a45] rounded-t-lg transition-all duration-300 ease-out group-hover:brightness-110" style={{ height: bar.height }} />
+                          <span className="text-[11px] font-medium text-zinc-400 mt-2">{bar.month}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="h-56 flex items-center justify-center rounded-xl bg-zinc-50/70 border border-dashed border-zinc-200">
+                      <p className="text-xs text-zinc-400 font-medium">Sin cobros ni ventas registradas en este período.</p>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
+                  <span>Volumen consolidado: {formatCurrency(stats?.revenueMonth ?? 0)}</span>
+                  <span className="text-zinc-500 font-semibold">MRR estimado: {formatCurrency(stats?.revenueMonth ?? 0)}</span>
+                </div>
+              </div>
+
+              <div className="lg:col-span-1 bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <h3 className="text-sm font-bold text-zinc-950">Actividad reciente</h3>
+                    </div>
+                    <button type="button" className="text-[11px] font-bold text-zinc-500 hover:text-zinc-950 transition-colors flex items-center gap-0.5 cursor-pointer">Ver todo <span aria-hidden="true">→</span></button>
+                  </div>
+                  <div className="space-y-3">
+                    {recentActivity.slice(0, 6).map((activity) => {
+                      const ActivityIcon = activity.type === 'product' ? Package : activity.type === 'quotation' ? FileText : activity.type === 'campaign' ? Zap : RefreshCw
+                      return (
+                        <div key={activity.id} className="flex items-start gap-3 text-xs p-2 rounded-xl hover:bg-zinc-50 transition-colors">
+                          <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-orange-50 text-orange-500"><ActivityIcon size={13} className="w-3.5 h-3.5" /></span>
+                          <div className="flex-1 min-w-0"><p className="font-bold text-zinc-900 truncate">{activity.title}</p><p className="text-zinc-500 text-[11px] truncate mt-0.5">{activity.description}</p></div>
+                          <span className="text-[10px] font-medium text-zinc-400 whitespace-nowrap bg-zinc-100 px-2 py-0.5 rounded-full">{formatActivityTime(activity.timestamp)}</span>
+                        </div>
+                      )
+                    })}
+                    {recentActivity.length === 0 && <p className="text-xs text-zinc-400 py-6 text-center">Sin actividad registrada todavía.</p>}
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium"><span>En vivo</span><span className="text-emerald-600 font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Sincronizado</span></div>
+              </div>
             </div>
 
             {/* ═══════════════════════════════════════════════════════════════ */}

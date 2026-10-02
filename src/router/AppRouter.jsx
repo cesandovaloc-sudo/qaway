@@ -5,6 +5,7 @@ import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-do
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import AuthLinkHandler from '@/router/AuthLinkHandler'
+import HubAccessGuard from './HubAccessGuard'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
 import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
 import AuthShell from '@/pages/auth/AuthShell'
@@ -138,7 +139,7 @@ function ProtectedRoute({ children }) {
   if (!authed) {
     return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />
   }
-  return children
+  return <HubAccessGuard>{children}</HubAccessGuard>
 }
 
 function renderRoute(routeKey, element) {
@@ -349,51 +350,51 @@ export default function AppRouter() {
         />
         <Route
           path="/hub/marketing"
-          element={<MarketingStudioPage />}
+          element={renderRoute('hub', <HubAccessGuard><MarketingStudioPage /></HubAccessGuard>)}
         />
         <Route
           path="hub/marketing"
-          element={<MarketingStudioPage />}
+          element={renderRoute('hub', <HubAccessGuard><MarketingStudioPage /></HubAccessGuard>)}
         />
         <Route
           path="hub/agenda/*"
-          element={<AgendaAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><AgendaAppPage /></HubAccessGuard>)}
         />
         <Route
           path="hub/agenda"
-          element={<AgendaAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><AgendaAppPage /></HubAccessGuard>)}
         />
         <Route
           path="/hub/inventario/*"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="/hub/inventario"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="hub/inventario/*"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="hub/inventario"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="/inventario/*"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="/inventario"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="inventario/*"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="inventario"
-          element={<InventarioAppPage />}
+          element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
         <Route
           path="hub/gestor-proyectos-v2"
@@ -457,16 +458,16 @@ export default function AppRouter() {
         {/* CRM: standalone FUERA del Layout → sin navbar de marca */}
         <Route
           path="/hub/crm"
-          element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
+          element={renderRoute('hub', <HubAccessGuard><CRMPage /></HubAccessGuard>)}
         />
         <Route
           path="hub/crm"
-          element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
+          element={renderRoute('hub', <HubAccessGuard><CRMPage /></HubAccessGuard>)}
         />
         {/* Hub Panel portada (carcasa CRM, sin navbar/footer públicos) */}
           <Route
             path="hub/panel/*"
-            element={renderRoute('hub', <ProtectedRoute><HubPanelPage /></ProtectedRoute>)}
+            element={renderRoute('hub', <HubAccessGuard><HubPanelPage /></HubAccessGuard>)}
           />
         <Route element={<Layout />}>
           <Route index element={<RootIndexRoute />} />

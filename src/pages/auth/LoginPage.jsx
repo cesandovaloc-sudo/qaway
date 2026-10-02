@@ -39,12 +39,12 @@ export default function LoginPage() {
     try {
       const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
       if (me && !me.is_platform_admin) {
-        if (!me.tenant_id) return '/onboarding/tu-empresa'
-        // Si tiene empresa pero su onboarding está explícitamente incompleto, retomar en tu-hub
+        if (!me.tenant_id) return '/onboarding'
+        // El wizard determina el paso correcto según el estado persistido.
         const { data: t } = await supabase.from('tenants').select('status, features').eq('id', me.tenant_id).maybeSingle()
         const isLocallyDone = localStorage.getItem(`qaway.onboarding_completed.${me.tenant_id}`) === 'true'
         const isDone = t?.features?.onboarding_completed === true || isLocallyDone
-        if (t && t.features?.onboarding_completed === false && !isDone) return '/onboarding/tu-hub'
+        if (t && (t.status === 'draft' || (!isDone && t.features?.onboarding_completed !== true))) return '/onboarding'
       }
     } catch (_) { /* error de lectura: cae al destino normal */ }
     return '/hub/panel'
