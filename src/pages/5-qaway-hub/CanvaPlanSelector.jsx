@@ -266,7 +266,7 @@ export default function CanvaPlanSelector({
   const [showAllBenefits, setShowAllBenefits] = useState(false);
   const [billingType, setBillingType] = useState("recurring");
   const [frequency, setFrequency] = useState("monthly");
-  const [oneTimeDuration, setOneTimeDuration] = useState("1_week");
+  const [oneTimeDuration, setOneTimeDuration] = useState("1_month");
 
   // Estados de Checkout (subStep === 3)
   const [paymentMethod, setPaymentMethod] = useState("card"); // "card" | "yape"
@@ -321,13 +321,8 @@ export default function CanvaPlanSelector({
 
   const selectedPlanObj = PLAN_CONFIGS.find((p) => p.id === currentPlan) || PLAN_CONFIGS[1];
 
-  // Precios para Pago Único prepago (Imagen 5 de Canva)
-  const oneTimePriceMap = {
-    "1_week": 10.99,
-    "1_month": selectedPlanObj.priceMonthly,
-    "1_day": 3.99,
-  };
-  const activeOneTimePrice = oneTimePriceMap[oneTimeDuration] || 10.99;
+  // En Qaway Lab el Pago Único prepago es exclusivamente mensual
+  const activeOneTimePrice = selectedPlanObj.priceMonthly;
 
   // Cálculo dinámico para la frecuencia anual (ahorro de 2 meses)
   const annualTotal = selectedPlanObj.priceMonthly === 30 ? 240 : (selectedPlanObj.priceMonthly === 50 ? 400 : 560);
@@ -583,11 +578,11 @@ export default function CanvaPlanSelector({
                 <div className="canva-sub2-bullets">
                   <div className="canva-sub2-bullet">
                     <Check size={18} className="canva-check-green" strokeWidth={2.8} />
-                    <span>Sin suscripción. Sin renovación automática.</span>
+                    <span><strong>Sin renovación automática:</strong> Pagas únicamente por el mes que decidas utilizar el sistema.</span>
                   </div>
                   <div className="canva-sub2-bullet">
                     <Check size={18} className="canva-check-green" strokeWidth={2.8} />
-                    <span>Paga por adelantado. Conserva tus accesos y datos después de que venza.</span>
+                    <span><strong>Tus datos nunca se pierden:</strong> Al vencer los 30 días, tu catálogo y registros se conservan seguros para cuando decidas reactivar.</span>
                   </div>
                 </div>
               )}
@@ -639,62 +634,25 @@ export default function CanvaPlanSelector({
                   </div>
                 </div>
               ) : (
-                /* Opciones de Pago Único (Imagen 5 de Canva) */
+                /* Opción de Pago Único exclusiva por mes (Imagen 5 de Canva adaptada) */
                 <div className="canva-freq-cards-list" role="radiogroup" aria-label="Duración de pago único">
-                  {/* 1 Semana */}
                   <div
-                    className={`canva-freq-card ${oneTimeDuration === "1_week" ? "selected" : ""}`}
-                    onClick={() => setOneTimeDuration("1_week")}
+                    className="canva-freq-card selected"
                     role="radio"
-                    aria-checked={oneTimeDuration === "1_week"}
+                    aria-checked={true}
                     tabIndex={0}
                   >
                     <div className="canva-freq-radio">
-                      <div className={`canva-freq-circle ${oneTimeDuration === "1_week" ? "active" : ""}`}>
-                        {oneTimeDuration === "1_week" && <div className="canva-freq-dot" />}
+                      <div className="canva-freq-circle active">
+                        <div className="canva-freq-dot" />
                       </div>
                     </div>
                     <div className="canva-freq-details">
-                      <span className="canva-freq-name">1 semana</span>
-                      <span className="canva-freq-cost">S/10.99</span>
-                    </div>
-                  </div>
-
-                  {/* 1 Mes */}
-                  <div
-                    className={`canva-freq-card ${oneTimeDuration === "1_month" ? "selected" : ""}`}
-                    onClick={() => setOneTimeDuration("1_month")}
-                    role="radio"
-                    aria-checked={oneTimeDuration === "1_month"}
-                    tabIndex={0}
-                  >
-                    <div className="canva-freq-radio">
-                      <div className={`canva-freq-circle ${oneTimeDuration === "1_month" ? "active" : ""}`}>
-                        {oneTimeDuration === "1_month" && <div className="canva-freq-dot" />}
+                      <div className="canva-freq-header-line">
+                        <span className="canva-freq-name">1 mes de acceso prepago</span>
+                        <span className="canva-offer-tag bg-blue-600">PAGO ÚNICO</span>
                       </div>
-                    </div>
-                    <div className="canva-freq-details">
-                      <span className="canva-freq-name">1 mes</span>
-                      <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly}</span>
-                    </div>
-                  </div>
-
-                  {/* 1 Día */}
-                  <div
-                    className={`canva-freq-card ${oneTimeDuration === "1_day" ? "selected" : ""}`}
-                    onClick={() => setOneTimeDuration("1_day")}
-                    role="radio"
-                    aria-checked={oneTimeDuration === "1_day"}
-                    tabIndex={0}
-                  >
-                    <div className="canva-freq-radio">
-                      <div className={`canva-freq-circle ${oneTimeDuration === "1_day" ? "active" : ""}`}>
-                        {oneTimeDuration === "1_day" && <div className="canva-freq-dot" />}
-                      </div>
-                    </div>
-                    <div className="canva-freq-details">
-                      <span className="canva-freq-name">1 día</span>
-                      <span className="canva-freq-cost">S/3.99</span>
+                      <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly} · Sin suscripción recurrente</span>
                     </div>
                   </div>
                 </div>
@@ -753,15 +711,34 @@ export default function CanvaPlanSelector({
               ) : (
                 /* Card 1: Información del plan para Pago Único (Imagen 5 de Canva) */
                 <div className="canva-card-plan-info">
-                  <h3 className="canva-plan-info-title">Información del plan</h3>
+                  <div className="canva-plan-info-header">
+                    <h3 className="canva-plan-info-title">Información del plan</h3>
+                    <span className="canva-pill-prepago">Prepago</span>
+                  </div>
+
                   <div className="canva-plan-info-body">
                     <div className="canva-plan-avatar">
                       <Crown size={22} className="text-purple-600" />
                     </div>
                     <div className="canva-plan-info-text">
-                      <strong className="canva-plan-info-name">Qaway Hub ({selectedPlanObj.name})</strong>
-                      <span className="canva-plan-info-sub">Facturación prepaga</span>
-                      <span className="canva-plan-info-users">1 persona en el equipo</span>
+                      <strong className="canva-plan-info-name">Qaway Hub · {selectedPlanObj.name}</strong>
+                      <span className="canva-plan-info-sub">Acceso total por 30 días</span>
+                      <span className="canva-plan-info-users">1 usuario administrador incluido</span>
+                    </div>
+                  </div>
+
+                  <div className="canva-plan-prepago-perks">
+                    <div className="canva-prepago-perk-item">
+                      <Check size={14} className="text-emerald-600 shrink-0" strokeWidth={2.6} />
+                      <span>Acceso completo a inventario y ventas por 30 días</span>
+                    </div>
+                    <div className="canva-prepago-perk-item">
+                      <Check size={14} className="text-emerald-600 shrink-0" strokeWidth={2.6} />
+                      <span>Sin cobros automáticos posteriores a tu tarjeta o Yape</span>
+                    </div>
+                    <div className="canva-prepago-perk-item">
+                      <Check size={14} className="text-emerald-600 shrink-0" strokeWidth={2.6} />
+                      <span>Catálogo y registros guardados intactos tras vencer el mes</span>
                     </div>
                   </div>
                 </div>
@@ -792,9 +769,7 @@ export default function CanvaPlanSelector({
                   </div>
                 ) : (
                   <div className="canva-summary-line-next">
-                    <span className="canva-next-date">
-                      Duración: {oneTimeDuration === "1_week" ? "1 semana" : (oneTimeDuration === "1_day" ? "1 día" : "1 mes")}
-                    </span>
+                    <span className="canva-next-date">Periodo: 30 días desde la activación</span>
                     <span className="canva-next-price">Sin renovación</span>
                   </div>
                 )}
@@ -1179,15 +1154,34 @@ export default function CanvaPlanSelector({
               ) : (
                 /* Card 1: Información del plan para Pago Único (Imagen 5 de Canva) */
                 <div className="canva-card-plan-info">
-                  <h3 className="canva-plan-info-title">Información del plan</h3>
+                  <div className="canva-plan-info-header">
+                    <h3 className="canva-plan-info-title">Información del plan</h3>
+                    <span className="canva-pill-prepago">Prepago</span>
+                  </div>
+
                   <div className="canva-plan-info-body">
                     <div className="canva-plan-avatar">
                       <Crown size={22} className="text-purple-600" />
                     </div>
                     <div className="canva-plan-info-text">
-                      <strong className="canva-plan-info-name">Qaway Hub ({selectedPlanObj.name})</strong>
-                      <span className="canva-plan-info-sub">Facturación prepaga</span>
-                      <span className="canva-plan-info-users">1 persona en el equipo</span>
+                      <strong className="canva-plan-info-name">Qaway Hub · {selectedPlanObj.name}</strong>
+                      <span className="canva-plan-info-sub">Acceso total por 30 días</span>
+                      <span className="canva-plan-info-users">1 usuario administrador incluido</span>
+                    </div>
+                  </div>
+
+                  <div className="canva-plan-prepago-perks">
+                    <div className="canva-prepago-perk-item">
+                      <Check size={14} className="text-emerald-600 shrink-0" strokeWidth={2.6} />
+                      <span>Acceso completo a inventario y ventas por 30 días</span>
+                    </div>
+                    <div className="canva-prepago-perk-item">
+                      <Check size={14} className="text-emerald-600 shrink-0" strokeWidth={2.6} />
+                      <span>Sin cobros automáticos posteriores a tu tarjeta o Yape</span>
+                    </div>
+                    <div className="canva-prepago-perk-item">
+                      <Check size={14} className="text-emerald-600 shrink-0" strokeWidth={2.6} />
+                      <span>Catálogo y registros guardados intactos tras vencer el mes</span>
                     </div>
                   </div>
                 </div>
@@ -1218,9 +1212,7 @@ export default function CanvaPlanSelector({
                   </div>
                 ) : (
                   <div className="canva-summary-line-next">
-                    <span className="canva-next-date">
-                      Duración: {oneTimeDuration === "1_week" ? "1 semana" : (oneTimeDuration === "1_day" ? "1 día" : "1 mes")}
-                    </span>
+                    <span className="canva-next-date">Periodo: 30 días desde la activación</span>
                     <span className="canva-next-price">Sin renovación</span>
                   </div>
                 )}
@@ -2016,6 +2008,10 @@ export default function CanvaPlanSelector({
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
         }
 
+        .canva-card-timeline {
+          min-height: 236px;
+        }
+
         .canva-tl-step {
           display: flex;
           gap: 14px;
@@ -2177,6 +2173,8 @@ export default function CanvaPlanSelector({
         .canva-sub2-legal a {
           color: #475569;
           text-decoration: underline;
+        }
+
         /* Tarjeta de Información del Plan Prepago (Imagen 5 de Canva) */
         .canva-card-plan-info {
           background: #ffffff;
@@ -2184,24 +2182,36 @@ export default function CanvaPlanSelector({
           border-radius: 16px;
           padding: 22px 24px;
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+          min-height: 236px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .canva-plan-info-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
         }
 
         .canva-plan-info-title {
-          font-size: 15px;
+          font-size: 14.5px;
           font-weight: 700;
           color: #0f172a;
-          margin: 0 0 16px 0;
+          margin: 0;
         }
 
         .canva-plan-info-body {
           display: flex;
           align-items: center;
           gap: 14px;
+          margin-bottom: 12px;
         }
 
         .canva-plan-avatar {
-          width: 48px;
-          height: 48px;
+          width: 44px;
+          height: 44px;
           border-radius: 12px;
           background: #f5f3ff;
           border: 1px solid #ddd6fe;
@@ -2217,13 +2227,13 @@ export default function CanvaPlanSelector({
         }
 
         .canva-plan-info-name {
-          font-size: 15px;
+          font-size: 14.5px;
           font-weight: 700;
           color: #0f172a;
         }
 
         .canva-plan-info-sub {
-          font-size: 13px;
+          font-size: 12.5px;
           color: #64748b;
         }
 
@@ -2232,9 +2242,31 @@ export default function CanvaPlanSelector({
           color: #94a3b8;
         }
 
+        .canva-plan-prepago-perks {
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+          padding-top: 12px;
+          border-top: 1px solid #f1f5f9;
+        }
+
+        .canva-prepago-perk-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12.5px;
+          color: #334155;
+          line-height: 1.4;
+        }
+
         .canva-pill-prepago {
           background: #eff6ff;
           color: #2563eb;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 2px 8px;
+          border-radius: 999px;
+          border: 1px solid #bfdbfe;
         }
 
         /* Pantalla 3: Métodos de Pago (Imágenes 1, 2, 3 y 4 de Canva) */
