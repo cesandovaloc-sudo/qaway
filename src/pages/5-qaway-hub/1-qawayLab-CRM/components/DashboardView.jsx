@@ -280,7 +280,7 @@ export default function DashboardView() {
     const hasAnyFilter = channelFilter !== 'all' || !isAllCampaignsSelected || selectedAdSetId !== 'all' || selectedAdId !== 'all'
 
     return (
-      <div className="sticky top-0 z-20 flex items-center gap-2.5 mb-[14px] bg-white/96 dark:bg-[#18181b]/96 backdrop-blur-md border border-[#e4e4e7] dark:border-[#27272a] px-3 py-2 rounded-[11px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex-wrap">
+      <div className="sticky top-0 z-20 flex items-center gap-2 mb-6 bg-white/95 backdrop-blur-md border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.03)] flex-wrap">
         <div className="flex items-center gap-2 relative shrink-0">
           
           {/* 1. CANAL DE ORIGEN */}
@@ -292,13 +292,13 @@ export default function DashboardView() {
                 setShowAdSetMenu(false)
                 setShowAdMenu(false)
               }}
-              className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-[13px] border transition-all active:scale-[0.98] ${
+              className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 channelFilter !== 'all' 
-                  ? 'bg-zinc-100 dark:bg-[#27272a] hover:bg-zinc-200/70 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-white font-bold shadow-2xs' 
-                  : 'bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#27272a] border-[#e2e8f0] dark:border-[#27272a] text-[#334155] dark:text-[#cbd5e1] font-medium'
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs' 
+                  : 'bg-white hover:bg-zinc-50 border-zinc-200/80 text-zinc-600 font-medium'
               }`}
             >
-              <Globe className="w-4 h-4 opacity-70" />
+              <Globe className="w-3.5 h-3.5 opacity-70" />
               <span>
                 {channelFilter === 'all' ? 'Canal: Todos' : (CHANNEL_LABELS[channelFilter] || channelFilter)}
               </span>
@@ -306,7 +306,7 @@ export default function DashboardView() {
             </button>
 
             {showChannelMenu && (
-              <div className="absolute left-0 top-[calc(100%+6px)] w-52 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 p-1.5 text-xs animate-in fade-in duration-150">
+              <div className="absolute left-0 top-[calc(100%+6px)] w-52 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-1.5 text-xs animate-in fade-in duration-150">
                 <p className="px-2.5 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Canal de Origen</p>
                 {Object.entries(CHANNEL_LABELS).map(([key, label]) => (
                   <button
@@ -316,7 +316,7 @@ export default function DashboardView() {
                       setShowChannelMenu(false)
                     }}
                     className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
-                      channelFilter === key ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#27272a]'
+                      channelFilter === key ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
                     }`}
                   >
                     <span>{label}</span>
@@ -327,7 +327,7 @@ export default function DashboardView() {
             )}
           </div>
 
-          <span className="text-zinc-300 dark:text-zinc-600 font-light">/</span>
+          <span className="text-zinc-300 font-light">/</span>
 
           {/* 2. CAMPAÑAS (MULTISELECT) */}
           <div className="relative" ref={campaignMenuRef}>
@@ -338,10 +338,10 @@ export default function DashboardView() {
                 setShowAdSetMenu(false)
                 setShowAdMenu(false)
               }}
-              className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-[13px] border transition-all active:scale-[0.98] ${
+              className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 !isAllCampaignsSelected
-                  ? 'bg-zinc-100 dark:bg-[#27272a] hover:bg-zinc-200/70 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-white font-bold shadow-2xs'
-                  : 'bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#27272a] border-[#e2e8f0] dark:border-[#27272a] text-[#334155] dark:text-[#cbd5e1] font-medium'
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                  : 'bg-white hover:bg-zinc-50 border-zinc-200/80 text-zinc-600 font-medium'
               }`}
             >
               <span className={`w-2 h-2 rounded-full shrink-0 ${isAllCampaignsSelected ? 'bg-emerald-500' : 'bg-[#ff4b0b]'}`} />
@@ -421,7 +421,7 @@ export default function DashboardView() {
           {/* 3. CONJUNTO DE ANUNCIOS (ADSETS) - Progresivo */}
           {availableAdSets.length > 0 && (
             <>
-              <span className="text-zinc-300 dark:text-zinc-600 font-light">/</span>
+              <span className="text-zinc-300 font-light">/</span>
               <div className="relative" ref={adSetMenuRef}>
                 <button
                   onClick={() => {
@@ -430,10 +430,10 @@ export default function DashboardView() {
                     setShowCampaignMenu(false)
                     setShowAdMenu(false)
                   }}
-                  className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-[13px] border transition-all active:scale-[0.98] ${
+                  className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                     selectedAdSetId !== 'all'
-                      ? 'bg-zinc-100 dark:bg-[#27272a] hover:bg-zinc-200/70 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-white font-bold shadow-2xs'
-                      : 'bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#27272a] border-[#e2e8f0] dark:border-[#27272a] text-[#334155] dark:text-[#cbd5e1] font-medium'
+                      ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                      : 'bg-white hover:bg-zinc-50 border-zinc-200/80 text-zinc-600 font-medium'
                   }`}
                 >
                   <Layers className="w-4 h-4 opacity-70" />
@@ -446,7 +446,7 @@ export default function DashboardView() {
                 </button>
 
                 {showAdSetMenu && (
-                  <div className="absolute left-0 top-[calc(100%+6px)] w-64 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 p-2 text-xs animate-in fade-in duration-150">
+                  <div className="absolute left-0 top-[calc(100%+6px)] w-64 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-2 text-xs animate-in fade-in duration-150">
                     <p className="px-2.5 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Conjunto de Anuncios</p>
                     <button
                       onClick={() => {
@@ -455,7 +455,7 @@ export default function DashboardView() {
                         setShowAdSetMenu(false)
                       }}
                       className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
-                        selectedAdSetId === 'all' ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#27272a]'
+                        selectedAdSetId === 'all' ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
                       }`}
                     >
                       <span>Todos los conjuntos</span>
@@ -470,7 +470,7 @@ export default function DashboardView() {
                           setShowAdSetMenu(false)
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
-                          selectedAdSetId === as.id ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#27272a]'
+                          selectedAdSetId === as.id ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
                         }`}
                       >
                         <span className="truncate pr-2">{as.name}</span>
@@ -486,7 +486,7 @@ export default function DashboardView() {
           {/* 4. ANUNCIOS / CREATIVOS - Progresivo */}
           {selectedAdSetId !== 'all' && availableAds.length > 0 && (
             <>
-              <span className="text-zinc-300 dark:text-zinc-600 font-light">/</span>
+              <span className="text-zinc-300 font-light">/</span>
               <div className="relative" ref={adMenuRef}>
                 <button
                   onClick={() => {
@@ -495,10 +495,10 @@ export default function DashboardView() {
                     setShowCampaignMenu(false)
                     setShowAdSetMenu(false)
                   }}
-                  className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-[13px] border transition-all active:scale-[0.98] ${
+                  className={`h-[38px] flex items-center gap-2 px-3.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                     selectedAdId !== 'all'
-                      ? 'bg-zinc-100 dark:bg-[#27272a] hover:bg-zinc-200/70 border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-white font-bold shadow-2xs'
-                      : 'bg-white dark:bg-[#18181b] hover:bg-zinc-50 dark:hover:bg-[#27272a] border-[#e2e8f0] dark:border-[#27272a] text-[#334155] dark:text-[#cbd5e1] font-medium'
+                      ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                      : 'bg-white hover:bg-zinc-50 border-zinc-200/80 text-zinc-600 font-medium'
                   }`}
                 >
                   <Video className="w-4 h-4 opacity-70" />
@@ -511,7 +511,7 @@ export default function DashboardView() {
                 </button>
 
                 {showAdMenu && (
-                  <div className="absolute left-0 top-[calc(100%+6px)] w-64 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 p-2 text-xs animate-in fade-in duration-150">
+                  <div className="absolute left-0 top-[calc(100%+6px)] w-64 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-2 text-xs animate-in fade-in duration-150">
                     <p className="px-2.5 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Creativo / Anuncio</p>
                     <button
                       onClick={() => {
@@ -519,7 +519,7 @@ export default function DashboardView() {
                         setShowAdMenu(false)
                       }}
                       className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
-                        selectedAdId === 'all' ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#27272a]'
+                        selectedAdId === 'all' ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
                       }`}
                     >
                       <span>Todos los anuncios</span>
@@ -533,7 +533,7 @@ export default function DashboardView() {
                           setShowAdMenu(false)
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
-                          selectedAdId === ad.id ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#27272a]'
+                          selectedAdId === ad.id ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
                         }`}
                       >
                         <span className="truncate pr-2">{ad.name}</span>
@@ -555,7 +555,7 @@ export default function DashboardView() {
                 setSelectedAdSetId('all')
                 setSelectedAdId('all')
               }}
-              className="h-[38px] flex items-center gap-1.5 px-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-[#27272a] dark:hover:bg-[#3f3f46] text-zinc-600 dark:text-zinc-300 rounded-lg text-xs font-semibold transition-colors ml-auto"
+              className="h-[38px] flex items-center gap-1.5 px-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-lg text-xs font-semibold transition-colors ml-auto"
               title="Restablecer todos los filtros"
             >
               <span>Restablecer</span>
@@ -577,17 +577,17 @@ export default function DashboardView() {
     return (
       <div className="bg-transparent text-zinc-900 w-full min-w-0">
         
-        {/* ENCABEZADO: Título, Telemetría y Botones Auxiliares (Alineado 1:1 a Inventario) */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-[22px] gap-3.5 flex-wrap">
+        {/* ENCABEZADO: Título con Icono, Telemetría y Botones Auxiliares */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 flex-wrap">
           <div className="flex items-center gap-3.5">
-            <div className="w-[38px] h-[38px] rounded-[10px] bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7] dark:border-[#3f3f46] text-[#18181b] dark:text-[#f4f4f5] flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-[38px] h-[38px] rounded-[10px] bg-zinc-100 border border-zinc-200/80 text-zinc-800 flex items-center justify-center shrink-0 shadow-2xs">
               <BarChart3 size={20} strokeWidth={1.8} />
             </div>
             <div>
-              <h1 className="text-[26px] md:text-[28px] font-extrabold tracking-[-0.8px] text-[#111b2d] dark:text-[#f8fafc] leading-[1.15] m-0">
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-900 leading-tight m-0">
                 Resumen de Rendimiento
               </h1>
-              <p className="text-[13px] text-[#71809e] dark:text-[#94a3b8] mt-0.5 leading-normal">
+              <p className="text-[13px] md:text-[14px] text-zinc-500 font-medium mt-1 leading-normal">
                 Analiza las métricas clave y el estado general de tu ecosistema comercial.
               </p>
             </div>
@@ -595,10 +595,10 @@ export default function DashboardView() {
 
           <div className="flex items-center gap-2.5 relative flex-wrap shrink-0 ml-auto md:ml-0">
             {/* Cápsula de telemetría */}
-            <span className="inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-lg bg-white dark:bg-[#18181b] border border-[#e5ebf4] dark:border-[#27272a] text-[12px] font-semibold text-[#52525b] dark:text-[#a1a1aa] shadow-2xs">
+            <span className="inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-xl bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>{activeCount} {activeCount === 1 ? 'activa' : 'activas'}</span>
-              <span className="text-zinc-300 dark:text-zinc-600">·</span>
+              <span className="text-zinc-300">·</span>
               <span>{filteredLeads.length} {filteredLeads.length === 1 ? 'lead filtrado' : 'leads filtrados'}</span>
             </span>
 
@@ -606,7 +606,7 @@ export default function DashboardView() {
             {currentRole === 'management' && (
               <button
                 onClick={() => setIsMetricBuilderOpen(true)}
-                className="h-[38px] px-3.5 rounded-lg bg-[#ff4b0b] hover:bg-[#ea3e00] text-white text-[13.5px] font-[650] shadow-[0_2px_8px_rgba(255,75,11,0.25)] flex items-center gap-1.5 transition-all active:scale-[0.98]"
+                className="h-[38px] px-3.5 rounded-xl bg-[#ff4b0b] hover:bg-[#ea3e00] text-white text-xs font-semibold shadow-[0_2px_10px_rgba(255,75,11,0.25)] flex items-center gap-1.5 transition-all active:scale-[0.98]"
               >
                 <Plus size={15} />
                 <span>Nueva Métrica</span>
@@ -617,15 +617,15 @@ export default function DashboardView() {
             <div className="relative" ref={timeMenuRef}>
               <button 
                 onClick={() => setShowTimeMenu(!showTimeMenu)}
-                className="h-[38px] px-3.5 rounded-lg bg-white dark:bg-[#18181b] border border-[#e5ebf4] dark:border-[#27272a] text-[13px] font-semibold text-[#34415b] dark:text-[#cbd5e1] hover:bg-[#f9fbff] dark:hover:bg-[#27272a] transition-all shadow-2xs flex items-center gap-2"
+                className="h-[38px] px-3.5 rounded-xl bg-white border border-zinc-200/80 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-all shadow-2xs flex items-center gap-2"
               >
-                <Calendar size={15} className="text-[#71809e]" />
+                <Calendar size={15} className="text-zinc-500" />
                 <span>{TIME_LABELS[timeRange] || 'Tiempo Real'}</span>
-                <ChevronDown size={14} className="text-[#71809e]" />
+                <ChevronDown size={14} className="text-zinc-400" />
               </button>
 
               {showTimeMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-xl shadow-xl z-50 py-1.5 text-xs overflow-hidden">
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-zinc-200 rounded-2xl shadow-xl z-50 py-1.5 text-xs overflow-hidden">
                   {Object.entries(TIME_LABELS).map(([key, label]) => (
                     <button
                       key={key}
@@ -634,11 +634,11 @@ export default function DashboardView() {
                         setShowTimeMenu(false)
                       }}
                       className={`w-full text-left px-4 py-2 font-medium transition-colors flex items-center justify-between ${
-                        timeRange === key ? 'bg-zinc-50 dark:bg-[#27272a] text-zinc-900 dark:text-white font-bold' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-[#27272a]'
+                        timeRange === key ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
                       }`}
                     >
                       <span>{label}</span>
-                      {timeRange === key && <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b]" />}
+                      {timeRange === key && <span className="w-1.5 h-1.5 rounded-full bg-zinc-900" />}
                     </button>
                   ))}
                 </div>
@@ -647,102 +647,91 @@ export default function DashboardView() {
           </div>
         </div>
 
-        {/* ── GRID DE KPIS OFICIAL (5 COLUMNAS, TARJETAS PXP CON SPARKLINE) ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-[14px]">
+        {/* ── KPIs SUPERIORES DINÁMICOS (FONDO BLANCO PURO) ────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           {/* Leads Totales */}
-          <div className="bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-xl p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <span className="text-xs font-semibold text-[#52525b] dark:text-[#a1a1aa] truncate">Leads totales</span>
-              <div className="w-7 h-7 rounded-lg bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7]/60 dark:border-[#3f3f46] flex items-center justify-center shrink-0 text-[#52525b] dark:text-[#a1a1aa]">
+              <span className="text-xs font-semibold text-zinc-600 truncate">Leads totales</span>
+              <div className="w-7 h-7 rounded-lg bg-orange-50 border border-orange-100/60 flex items-center justify-center shrink-0 text-[#ff4b0b]">
                 <Users size={16} strokeWidth={1.75} />
               </div>
             </div>
-            <div className="text-[26px] font-extrabold tracking-[-0.6px] text-[#0f172a] dark:text-white leading-[1.15] mt-0.5 whitespace-nowrap">
-              {totalLeads}
-            </div>
-            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-              <polyline fill="none" stroke="#ff4b0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,10 40,18 60,5 80,12 100,2" />
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">{totalLeads}</h3>
+            <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse"></span> Data en vivo
+            </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,10 40,18 60,5 80,12 100,2" />
             </svg>
-            <div className="text-[11px] font-medium text-[#71717a] dark:text-[#a1a1aa] mt-1.5 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" />
-              <span>Data en vivo</span>
-            </div>
           </div>
 
           {/* Ingresos generados */}
-          <div className="bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-xl p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <span className="text-xs font-semibold text-[#52525b] dark:text-[#a1a1aa] truncate">Ingresos generados</span>
-              <div className="w-7 h-7 rounded-lg bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7]/60 dark:border-[#3f3f46] flex items-center justify-center shrink-0 text-[#52525b] dark:text-[#a1a1aa]">
+              <span className="text-xs font-semibold text-zinc-600 truncate">Ingresos generados</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100/60 flex items-center justify-center shrink-0 text-emerald-600">
                 <DollarSign size={16} strokeWidth={1.75} />
               </div>
             </div>
-            <div className="text-[26px] font-extrabold tracking-[-0.6px] text-[#0f172a] dark:text-white leading-[1.15] mt-0.5 whitespace-nowrap">
-              S/ {(totalRevenue).toLocaleString('es-PE')}
-            </div>
-            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-              <polyline fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,10 100,2" />
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">S/ {(totalRevenue).toLocaleString('es-PE')}</h3>
+            <p className="text-xs font-semibold text-emerald-600 mt-1.5 flex items-center gap-1">
+              Gasto total: S/ {(totalSpend).toLocaleString('es-PE')}
+            </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,10 100,2" />
             </svg>
-            <div className="text-[11px] font-medium text-[#71717a] dark:text-[#a1a1aa] mt-1.5 flex items-center gap-1.5">
-              <span className="text-[#059669] font-semibold">Gasto total: S/ {(totalSpend).toLocaleString('es-PE')}</span>
-            </div>
           </div>
 
           {/* Tasa Conversión */}
-          <div className="bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-xl p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <span className="text-xs font-semibold text-[#52525b] dark:text-[#a1a1aa] truncate">Tasa conversión</span>
-              <div className="w-7 h-7 rounded-lg bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7]/60 dark:border-[#3f3f46] flex items-center justify-center shrink-0 text-[#52525b] dark:text-[#a1a1aa]">
+              <span className="text-xs font-semibold text-zinc-600 truncate">Tasa conversión</span>
+              <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100/60 flex items-center justify-center shrink-0 text-blue-600">
                 <Target size={16} strokeWidth={1.75} />
               </div>
             </div>
-            <div className="text-[26px] font-extrabold tracking-[-0.6px] text-[#0f172a] dark:text-white leading-[1.15] mt-0.5 whitespace-nowrap">
-              {conversionRate}%
-            </div>
-            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-              <polyline fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,12 20,15 40,8 60,10 80,4 100,2" />
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">{conversionRate}%</h3>
+            <p className="text-xs font-semibold text-zinc-500 mt-1.5 flex items-center gap-1">
+              De lead a cierre
+            </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,12 20,15 40,8 60,10 80,4 100,2" />
             </svg>
-            <div className="text-[11px] font-medium text-[#71717a] dark:text-[#a1a1aa] mt-1.5 flex items-center gap-1.5">
-              <span className="text-[#0284c7] font-semibold">De lead a cierre</span>
-            </div>
           </div>
 
           {/* Ticket Promedio */}
-          <div className="bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-xl p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <span className="text-xs font-semibold text-[#52525b] dark:text-[#a1a1aa] truncate">Ticket promedio</span>
-              <div className="w-7 h-7 rounded-lg bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7]/60 dark:border-[#3f3f46] flex items-center justify-center shrink-0 text-[#52525b] dark:text-[#a1a1aa]">
+              <span className="text-xs font-semibold text-zinc-600 truncate">Ticket promedio</span>
+              <div className="w-7 h-7 rounded-lg bg-purple-50 border border-purple-100/60 flex items-center justify-center shrink-0 text-purple-600">
                 <FileText size={16} strokeWidth={1.75} />
               </div>
             </div>
-            <div className="text-[26px] font-extrabold tracking-[-0.6px] text-[#0f172a] dark:text-white leading-[1.15] mt-0.5 whitespace-nowrap">
-              S/ {(ticketPromedio).toLocaleString('es-PE')}
-            </div>
-            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-              <polyline fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,12 40,14 60,9 80,10 100,4" />
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">S/ {(ticketPromedio).toLocaleString('es-PE')}</h3>
+            <p className="text-xs font-semibold text-zinc-500 mt-1.5 flex items-center gap-1">
+              Por venta exitosa
+            </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,12 40,14 60,9 80,10 100,4" />
             </svg>
-            <div className="text-[11px] font-medium text-[#71717a] dark:text-[#a1a1aa] mt-1.5 flex items-center gap-1.5">
-              <span className="text-[#7c3aed] font-semibold">Por venta exitosa</span>
-            </div>
           </div>
 
           {/* Valor Pipeline */}
-          <div className="bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-xl p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between gap-2 mb-1">
-              <span className="text-xs font-semibold text-[#52525b] dark:text-[#a1a1aa] truncate">Valor en pipeline</span>
-              <div className="w-7 h-7 rounded-lg bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7]/60 dark:border-[#3f3f46] flex items-center justify-center shrink-0 text-[#52525b] dark:text-[#a1a1aa]">
+              <span className="text-xs font-semibold text-zinc-600 truncate">Valor en pipeline</span>
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100/60 flex items-center justify-center shrink-0 text-indigo-600">
                 <Activity size={16} strokeWidth={1.75} />
               </div>
             </div>
-            <div className="text-[26px] font-extrabold tracking-[-0.6px] text-[#0f172a] dark:text-white leading-[1.15] mt-0.5 whitespace-nowrap">
-              S/ {(valorPipeline).toLocaleString('es-PE')}
-            </div>
-            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-              <polyline fill="none" stroke="#ff4b0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,20 20,15 40,10 60,12 80,4 100,2" />
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">S/ {(valorPipeline).toLocaleString('es-PE')}</h3>
+            <p className="text-xs font-semibold text-zinc-500 mt-1.5 flex items-center gap-1">
+              Oportunidades activas
+            </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,20 20,15 40,10 60,12 80,4 100,2" />
             </svg>
-            <div className="text-[11px] font-medium text-[#71717a] dark:text-[#a1a1aa] mt-1.5 flex items-center gap-1.5">
-              <span className="text-[#ff4b0b] font-semibold">Oportunidades activas</span>
-            </div>
           </div>
 
           {/* MÉTRICAS PERSONALIZADAS (Creadas por el Administrador) */}
@@ -760,33 +749,33 @@ export default function DashboardView() {
             }
 
             return (
-              <div key={cm.id} className="bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-xl p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default relative group flex flex-col justify-between min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-xs font-semibold text-[#52525b] dark:text-[#a1a1aa] truncate">{cm.name}</span>
-                  <div className="flex items-center gap-1">
-                    {currentRole === 'management' && (
-                      <button 
-                        onClick={() => removeCustomMetric(cm.id)}
-                        className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-all p-1"
-                        title="Eliminar métrica"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    <div className="w-7 h-7 rounded-lg bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7]/60 dark:border-[#3f3f46] flex items-center justify-center shrink-0 text-[#52525b] dark:text-[#a1a1aa]">
-                      <Activity size={16} strokeWidth={1.75} />
+              <div key={cm.id} className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default relative group flex flex-col justify-between min-w-0">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-zinc-100 text-zinc-700">
+                      <Activity className="w-4 h-4" />
                     </div>
+                    <span className="text-xs font-semibold text-zinc-600 truncate max-w-[120px]">{cm.name}</span>
                   </div>
+                  {currentRole === 'management' && (
+                    <button 
+                      onClick={() => removeCustomMetric(cm.id)}
+                      className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-all p-1"
+                      title="Eliminar métrica"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
-                <div className="text-[26px] font-extrabold tracking-[-0.6px] text-[#0f172a] dark:text-white leading-[1.15] mt-0.5 whitespace-nowrap">
+                <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">
                   {typeof val === 'number' ? val.toLocaleString('es-PE') : val}
-                </div>
-                <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-                  <polyline fill="none" stroke="#71717a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points="0,15 25,8 50,14 75,6 100,2" />
-                </svg>
-                <div className="text-[11px] font-medium text-[#71717a] dark:text-[#a1a1aa] mt-1.5 flex items-center gap-1.5">
+                </h3>
+                <p className="text-xs font-semibold text-zinc-400 mt-1.5 flex items-center gap-1.5">
                   Personalizada por Admin
-                </div>
+                </p>
+                <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <polyline fill="none" stroke="#71717a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 25,8 50,14 75,6 100,2" />
+                </svg>
               </div>
             )
           })}
