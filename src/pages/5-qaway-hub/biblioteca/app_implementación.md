@@ -97,3 +97,11 @@
 ## IteraciÃ³n 19 â€” BIB-016 Jev mapeado (2026-09-20)
 - TypeSafe Jev (System One, 15-sep-2026): decisiones tipadas 70-500ms, $0.042/M, vÃ­a OpenRouter/Vercel. Uso futuro: ruteo de tus 38 skills, guardrails, rerank.
 - Solo mapeado (`por-verificar`, prioridad media), sin implementar. Seed total 16, validado. Sin commit, sin push.
+
+## Iteración 20 — Orca con opciones completas + OpenCode V1 & V2 (2026-10-03)
+- BIB-004 Orca actualizada: soporte para opciones Studio NPX, modo servidor headless, worktree git y cliente móvil.
+- BIB-017 OpenCode V1 y BIB-018 OpenCode V2 incorporadas al seed v6 (total 18).
+- Ficha técnica (modal) enriquecida con comandos_opciones interactivos paso a paso (cierre forzado, instalación forzada V2, verificación de versión y servidor web en http://localhost:8080).
+- Menú móvil: secciones con subítems (Blog) colapsadas por defecto con toggle acordeón.
+- Auth Guards: purga limpia y local de sesiones huérfanas de Supabase preservando clientes logueados válidos.
+

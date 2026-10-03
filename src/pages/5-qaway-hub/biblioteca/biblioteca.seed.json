@@ -1,6 +1,6 @@
 {
-  "version": "seed-v5",
-  "total": 16,
+  "version": "seed-v6",
+  "total": 18,
   "vocabulario": {
     "tipo": ["skill", "app", "repo", "infra", "os", "lib"],
     "instalacion_metodo": ["1-comando", "clone", "iso", "lib", "app", "vps"],
@@ -98,27 +98,53 @@
       "id": "BIB-004",
       "slug": "orca",
       "nombre": "Orca",
-      "nombre_simple": "Estudio visual para manejar IAs",
+      "nombre_simple": "Estudio visual y remoto para manejar IAs",
       "tipo": "app",
       "categoria": "Entorno de Desarrollo",
       "subcategoria": "IDE / GUI Studio",
-      "instalacion": { "metodo": "app", "formato": "Desktop + móvil", "comando_ejemplo": "npx orca-studio@latest" },
-      "stack": { "lenguaje": "TypeScript / Electron", "rendimiento": "GUI + servidor remoto", "entorno": "Desktop / móvil" },
-      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Usa tus suscripciones de IA" },
+      "instalacion": { 
+        "metodo": "app", 
+        "formato": "Desktop + móvil + Server", 
+        "comando_ejemplo": "npx orca-studio@latest" 
+      },
+      "comandos_opciones": [
+        {
+          "label": "1. Lanzamiento directo Studio (NPX)",
+          "comando": "npx orca-studio@latest",
+          "desc": "Abre la suite gráfica interactiva sin requerir instalación global previa."
+        },
+        {
+          "label": "2. Modo Servidor Headless / Remoto",
+          "comando": "orca serve --port 3000 --host 0.0.0.0",
+          "desc": "Levanta el core para conexiones remotas, control vía navegador o sesiones SSH."
+        },
+        {
+          "label": "3. Espacio aislado con Git Worktree",
+          "comando": "orca workspace --branch feature/agente-ia",
+          "desc": "Aísla el entorno de desarrollo del agente en un worktree independiente sin tocar tu rama actual."
+        },
+        {
+          "label": "4. Vincular con Cliente Móvil",
+          "comando": "orca connect --tunnel",
+          "desc": "Genera un túnel seguro y código QR para monitorear y aprobar acciones desde el celular."
+        }
+      ],
+      "stack": { "lenguaje": "TypeScript / Electron", "rendimiento": "GUI + servidor remoto", "entorno": "Desktop / móvil / Web" },
+      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Usa tus suscripciones de IA (BYOK)" },
       "costo": "freemium",
-      "plataforma": ["desktop", "movil", "cloud"],
+      "plataforma": ["desktop", "movil", "cloud", "web"],
       "nivel": "dev",
       "popularidad": { "estrellas": "~63,000", "nota": "Alta en GitHub" },
       "integraciones": ["git", "ssh", "worktree", "web-ui", "movil"],
-      "nichos": ["Desarrolladores visuales", "Frontend Devs"],
-      "funcionalidad_corta": "Estudio gráfico para operar y monitorear agentes de código en tiempo real",
-      "caso_uso": "Gestionar tareas y ejecución remota de agentes con interfaz gráfica tipo VS Code.",
+      "nichos": ["Desarrolladores visuales", "Frontend Devs", "Orquestadores de Agentes"],
+      "funcionalidad_corta": "Estudio gráfico para operar, monitorear y autorizar agentes de código en tiempo real",
+      "caso_uso": "Gestionar tareas, diffs de código y ejecución remota de agentes con interfaz visual intuitiva.",
       "url_repo": "https://github.com/orca-ai/orca-studio",
       "licencia": "open",
       "estado": "verificado",
-      "prioridad_qaway": "media",
-      "tags": ["ide", "agentes", "gui", "remoto", "open-source"],
-      "alias_busqueda": ["ide", "gui", "agentes visual", "remoto", "movil", "orca"],
+      "prioridad_qaway": "alta",
+      "tags": ["ide", "agentes", "gui", "remoto", "worktree", "movil", "open-source"],
+      "alias_busqueda": ["ide", "gui", "agentes visual", "remoto", "movil", "orca", "studio"],
       "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
@@ -443,6 +469,107 @@
       "prioridad_qaway": "media",
       "tags": ["jev", "decisiones", "typesafe", "skills", "guardrails", "agentes"],
       "alias_busqueda": ["jev", "decisiones", "typesafe", "system one", "ruteo skills", "micro-decisiones"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+    },
+    {
+      "id": "BIB-017",
+      "slug": "opencode-v1",
+      "nombre": "OpenCode V1",
+      "nombre_simple": "Agente de código clásico para terminal",
+      "tipo": "app",
+      "categoria": "Entorno de Desarrollo",
+      "subcategoria": "Agente CLI de Código",
+      "instalacion": { 
+        "metodo": "1-comando", 
+        "formato": "CLI Global (NPM)", 
+        "comando_ejemplo": "npm install -g opencode && opencode" 
+      },
+      "comandos_opciones": [
+        {
+          "label": "1. Instalación Global V1",
+          "comando": "npm install -g opencode",
+          "desc": "Instala el paquete global clásico de OpenCode vía npm."
+        },
+        {
+          "label": "2. Iniciar agente en terminal interactiva",
+          "comando": "opencode",
+          "desc": "Lanza el TUI conversacional en la raíz de tu proyecto para editar y crear código."
+        },
+        {
+          "label": "3. Iniciar versión Web Legacy",
+          "comando": "opencode --web",
+          "desc": "Modo interfaz web experimental de la primera versión."
+        }
+      ],
+      "stack": { "lenguaje": "TypeScript / Node.js", "rendimiento": "TUI en terminal / Ejecución local", "entorno": "Terminal Windows/macOS/Linux" },
+      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Open Source (BYOK OpenAI/Claude/Ollama)" },
+      "costo": "gratis",
+      "plataforma": ["local"],
+      "nivel": "dev",
+      "popularidad": { "estrellas": "~25,000", "nota": "Proyecto CLI de código abierto" },
+      "integraciones": ["cli", "git"],
+      "nichos": ["Desarrolladores", "Programadores CLI", "Devs Backend"],
+      "funcionalidad_corta": "Agente autónomo de terminal para refactorizar y escribir código",
+      "caso_uso": "Escribir código, depurar errores y ejecutar tareas de desarrollo directo en consola.",
+      "url_repo": "https://github.com/opencode-ai/opencode",
+      "licencia": "open",
+      "estado": "verificado",
+      "prioridad_qaway": "alta",
+      "tags": ["opencode", "cli", "agente", "terminal", "open-source", "v1"],
+      "alias_busqueda": ["opencode", "opencode 1", "opencode v1", "agente terminal", "cli", "codigo"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+    },
+    {
+      "id": "BIB-018",
+      "slug": "opencode-v2",
+      "nombre": "OpenCode V2",
+      "nombre_simple": "Agente de código autónomo + Servidor Web",
+      "tipo": "app",
+      "categoria": "Entorno de Desarrollo",
+      "subcategoria": "Agente CLI + Servidor Web",
+      "instalacion": { 
+        "metodo": "1-comando", 
+        "formato": "CLI Global (@opencode/cli) + Web", 
+        "comando_ejemplo": "opencode serve" 
+      },
+      "comandos_opciones": [
+        {
+          "label": "1. Cerrar procesos bloqueados (PowerShell)",
+          "comando": "Stop-Process -Name \"opencode\" -Force",
+          "desc": "Antes de actualizar, este comando fuerza el cierre de cualquier ejecutable colgado en segundo plano. Usa el código con precaución."
+        },
+        {
+          "label": "2. Instalar forzando sobrescritura (Nueva V2)",
+          "comando": "npm install -g @opencode/cli --force",
+          "desc": "Ignora los errores de archivos duplicados (EEXIST) y machaca la versión antigua con la nueva V2. Usa el código con precaución."
+        },
+        {
+          "label": "3. Verificar versión instalada globalmente",
+          "comando": "opencode --version",
+          "desc": "Confirmas que el sistema reconoce la nueva versión de manera global. Usa el código con precaución."
+        },
+        {
+          "label": "4. Iniciar la versión Web (localhost:8080)",
+          "comando": "opencode serve",
+          "desc": "Para levantar el servidor en segundo plano e ingresar desde tu navegador, ejecutas: opencode serve (sin la palabra --web). Abre http://localhost:8080."
+        }
+      ],
+      "stack": { "lenguaje": "TypeScript / Rust Core", "rendimiento": "Servidor local Web + Socket tiempo real", "entorno": "Web (http://localhost:8080)" },
+      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Open Source V2 (BYOK / Local)" },
+      "costo": "gratis",
+      "plataforma": ["local", "web"],
+      "nivel": "dev",
+      "popularidad": { "estrellas": "~35,000", "nota": "Nueva generación V2 con interfaz web" },
+      "integraciones": ["cli", "web-ui", "git"],
+      "nichos": ["Desarrolladores", "Equipos ágiles", "Creadores de Software"],
+      "funcionalidad_corta": "Entorno autónomo de programación con servidor web en localhost:8080 y CLI renovado",
+      "caso_uso": "Programar proyectos complejos desde el navegador web local o terminal con soporte multi-sesión.",
+      "url_repo": "https://github.com/opencode-ai/opencode",
+      "licencia": "open",
+      "estado": "verificado",
+      "prioridad_qaway": "alta",
+      "tags": ["opencode", "opencode-v2", "web", "serve", "localhost-8080", "agente", "open-source"],
+      "alias_busqueda": ["opencode 2", "opencode v2", "opencode serve", "localhost 8080", "agente web", "cli v2"],
       "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     }
   ]

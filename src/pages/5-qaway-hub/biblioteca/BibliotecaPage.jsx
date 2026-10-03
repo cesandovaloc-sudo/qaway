@@ -119,6 +119,7 @@ export default function BibliotecaPage() {
         ...(it.tags || []),
         ...(it.integraciones || []),
         ...(it.alias_busqueda || []),
+        ...(it.comandos_opciones?.map((c) => `${c.label} ${c.comando} ${c.desc}`) || []),
         it.curso_repo?.modulo,
         it.curso_repo?.leccion,
       ].filter(Boolean).join(' ').toLowerCase()
@@ -522,9 +523,9 @@ export default function BibliotecaPage() {
             <div className="my-4 rounded-2xl border p-4 shadow-inner" style={{ background: '#0E0E11', borderColor: '#D8FF3E', color: '#F2EFE6' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider" style={{ color: '#D8FF3E' }}>
-                  <Terminal size={15} /> Comando de Instalación / Ejecución:
+                  <Terminal size={15} /> {selected.comandos_opciones?.length ? 'Guía de Comandos y Opciones de Ejecución:' : 'Comando de Instalación / Ejecución:'}
                 </span>
-                {selected.instalacion?.comando_ejemplo && (
+                {selected.instalacion?.comando_ejemplo && !selected.comandos_opciones?.length && (
                   <button
                     onClick={() => copyToClipboard(selected.instalacion.comando_ejemplo, 'modal')}
                     className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 font-mono text-xs font-bold transition cursor-pointer"
@@ -543,9 +544,64 @@ export default function BibliotecaPage() {
                 )}
               </div>
 
-              <div className="overflow-x-auto rounded-xl bg-black/80 p-3 font-mono text-xs text-[#D8FF3E] border border-zinc-800">
-                <code>{selected.instalacion?.comando_ejemplo || 'Consultar repositorio oficial para el método de instalación.'}</code>
-              </div>
+              {selected.comandos_opciones?.length ? (
+                <div className="space-y-3 mt-3">
+                  {selected.comandos_opciones.map((opt, idx) => {
+                    const stepId = `modal-step-${selected.id}-${idx}`
+                    return (
+                      <div key={idx} className="rounded-xl border border-zinc-800/80 bg-zinc-950/70 p-3">
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="font-mono text-xs font-bold text-zinc-200">
+                            {opt.label}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(opt.comando, stepId)}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[11px] font-semibold transition cursor-pointer shrink-0"
+                            style={{ background: copiedCommand === stepId ? '#10B981' : '#D8FF3E', color: '#0E0E11' }}
+                            title="Copiar este comando"
+                          >
+                            {copiedCommand === stepId ? (
+                              <>
+                                <Check size={12} /> ¡Copiado!
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={12} /> Copiar
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        {opt.desc && (
+                          <p className="font-sans text-[11px] text-zinc-400 mb-2 leading-relaxed">
+                            {opt.desc}
+                          </p>
+                        )}
+                        <div className="overflow-x-auto rounded-lg bg-black/90 p-2.5 font-mono text-xs text-[#D8FF3E] border border-zinc-900">
+                          <code>{opt.comando}</code>
+                        </div>
+                        {(opt.comando?.includes('localhost:8080') || opt.desc?.includes('localhost:8080')) && (
+                          <div className="mt-2 flex items-center justify-between pt-1 border-t border-zinc-900 text-[11px]">
+                            <span className="text-zinc-500 font-mono">Acceso Web local:</span>
+                            <a
+                              href="http://localhost:8080"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 font-mono font-bold text-[#D8FF3E] hover:underline"
+                            >
+                              http://localhost:8080 <ExternalLink size={11} />
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl bg-black/80 p-3 font-mono text-xs text-[#D8FF3E] border border-zinc-800">
+                  <code>{selected.instalacion?.comando_ejemplo || 'Consultar repositorio oficial para el método de instalación.'}</code>
+                </div>
+              )}
             </div>
 
             {/* Botón Destacado de Repositorio u Oficial Web */}

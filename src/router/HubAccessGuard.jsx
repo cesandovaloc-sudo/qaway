@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
+import { logoutUser } from '@/config/auth'
 import { RouteLoading } from './RouteSuspense'
 
 export default function HubAccessGuard({ children }) {
@@ -10,7 +11,12 @@ export default function HubAccessGuard({ children }) {
   useEffect(() => {
     let alive = true
 
+    const timeoutId = setTimeout(() => {
+      if (alive) resolve('/login')
+    }, 3500)
+
     const resolve = (next) => {
+      clearTimeout(timeoutId)
       if (alive) setState({ checking: false, redirect: next })
     }
 
@@ -36,17 +42,18 @@ export default function HubAccessGuard({ children }) {
 
       if (userError || !user) {
         // La sesión local apunta a un usuario que ya no existe en la base de datos (eliminado o revocado).
-        // Limpiamos la sesión huérfana para evitar bucles de rebote infinitos con /login.
+        // Limpiamos la sesión huérfana localmente para evitar bucles de rebote infinitos con /login.
         try {
-          await supabase.auth.signOut()
+          await supabase.auth.signOut({ scope: 'local' })
         } catch (_) {}
         try {
-          sessionStorage.removeItem('qaway_auth_token')
-          sessionStorage.removeItem('qaway_auth_email')
-          sessionStorage.removeItem('qaway_auth_role')
-          localStorage.removeItem('qaway_auth_token')
-          localStorage.removeItem('qaway_auth_email')
-          localStorage.removeItem('qaway_auth_role')
+          logoutUser()
+          Object.keys(localStorage).forEach((k) => {
+            if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k)
+          })
+          Object.keys(sessionStorage).forEach((k) => {
+            if (k.startsWith('sb-') && k.endsWith('-auth-token')) sessionStorage.removeItem(k)
+          })
         } catch (_) {}
         resolve('/login')
         return

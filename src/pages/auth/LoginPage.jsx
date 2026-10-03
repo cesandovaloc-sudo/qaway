@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { getSupabaseClient, APP_BASE_URL } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
-import { isSuperAdmin } from '@/config/auth'
+import { isSuperAdmin, logoutUser } from '@/config/auth'
 import QawayCleanLoader from '@/components/ui/QawayCleanLoader'
 
 export default function LoginPage() {
@@ -207,14 +207,15 @@ export default function LoginPage() {
               .maybeSingle()
 
             if (!userCheck) {
-              // Usuario eliminado de Supabase: cerrar sesión huérfana y mostrar formulario
-              await supabase.auth.signOut()
-              sessionStorage.removeItem('qaway_auth_token')
-              sessionStorage.removeItem('qaway_auth_email')
-              sessionStorage.removeItem('qaway_auth_role')
-              localStorage.removeItem('qaway_auth_token')
-              localStorage.removeItem('qaway_auth_email')
-              localStorage.removeItem('qaway_auth_role')
+              // Usuario eliminado de Supabase: cerrar sesión huérfana localmente y mostrar formulario
+              try { await supabase.auth.signOut({ scope: 'local' }) } catch (_) {}
+              logoutUser()
+              Object.keys(localStorage).forEach((k) => {
+                if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k)
+              })
+              Object.keys(sessionStorage).forEach((k) => {
+                if (k.startsWith('sb-') && k.endsWith('-auth-token')) sessionStorage.removeItem(k)
+              })
               if (alive) setChecking(false)
               return
             }

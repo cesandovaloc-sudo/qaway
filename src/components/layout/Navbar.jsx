@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu } from 'lucide-react'
+import { Menu, ChevronDown } from 'lucide-react'
 import { WHATSAPP_LINK, navItems } from '@/data/navigation'
 import { getAuthUser } from '@/config/auth'
 import { getNavbarLinks } from '@/config/siteVisibility'
@@ -136,6 +136,7 @@ export default function Navbar({ variant: explicitVariant }) {
   })
 
   const [menuOpen, setMenuOpen] = useState(false)
+  const [expandedMobileKey, setExpandedMobileKey] = useState(null)
   const [headerVisible, setHeaderVisible] = useState(!isProjectDock)
   const [scrolled, setScrolled] = useState(false)
   const menuContainerRef = useRef(null)
@@ -337,44 +338,64 @@ export default function Navbar({ variant: explicitVariant }) {
                 className={`relative z-30 border-b ${styles.mobileBg} px-6 py-5 lg:hidden`}
               >
               <div className="flex flex-col">
-                {navLinks.map((link) => (
-                  <div key={link.key} className="border-b border-[#20201f]/10 last:border-b-0">
-                    <Link
-                      to={link.path}
-                      onClick={() => {
-                        if (!link.items || link.items.length === 0) setMenuOpen(false)
-                      }}
-                      className={`block py-3 text-xs font-bold uppercase tracking-[0.14em] ${styles.mobileLink}`}
-                    >
-                      {link.label}
-                    </Link>
-                    {link.items && link.items.length > 0 && (
-                      <div className="flex flex-col pl-4 pb-2">
-                        {link.items.map(subItem => (
-                          subItem.external ? (
-                            <a
-                              key={subItem.label}
-                              href={subItem.path}
-                              onClick={() => setMenuOpen(false)}
-                              className={`block py-2 text-[10px] font-bold uppercase tracking-wider opacity-60 hover:opacity-100 ${styles.mobileLink}`}
-                            >
-                              {subItem.label}
-                            </a>
-                          ) : (
-                            <Link
-                              key={subItem.label}
-                              to={subItem.path}
-                              onClick={() => setMenuOpen(false)}
-                              className={`block py-2 text-[10px] font-bold uppercase tracking-wider ${isActive(subItem.path) ? styles.linkActive : `opacity-60 hover:opacity-100 ${styles.mobileLink}`}`}
-                            >
-                              {subItem.label}
-                            </Link>
-                          )
-                        ))}
+                {navLinks.map((link) => {
+                  const hasItems = link.items && link.items.length > 0
+                  const isExpanded = expandedMobileKey === link.key
+                  return (
+                    <div key={link.key} className="border-b border-[#20201f]/10 last:border-b-0">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          to={link.path}
+                          onClick={() => {
+                            if (!hasItems) setMenuOpen(false)
+                          }}
+                          className={`block py-3 text-xs font-bold uppercase tracking-[0.14em] flex-1 ${styles.mobileLink}`}
+                        >
+                          {link.label}
+                        </Link>
+                        {hasItems && (
+                          <button
+                            type="button"
+                            aria-label={isExpanded ? `Colapsar submenú de ${link.label}` : `Expandir submenú de ${link.label}`}
+                            aria-expanded={isExpanded}
+                            onClick={() => setExpandedMobileKey(isExpanded ? null : link.key)}
+                            className="p-3 -mr-2 text-zinc-400 hover:text-zinc-900 transition-colors"
+                          >
+                            <ChevronDown
+                              size={15}
+                              className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                            />
+                          </button>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+                      {hasItems && isExpanded && (
+                        <div className="flex flex-col pl-4 pb-2">
+                          {link.items.map(subItem => (
+                            subItem.external ? (
+                              <a
+                                key={subItem.label}
+                                href={subItem.path}
+                                onClick={() => setMenuOpen(false)}
+                                className={`block py-2 text-[10px] font-bold uppercase tracking-wider opacity-60 hover:opacity-100 ${styles.mobileLink}`}
+                              >
+                                {subItem.label}
+                              </a>
+                            ) : (
+                              <Link
+                                key={subItem.label}
+                                to={subItem.path}
+                                onClick={() => setMenuOpen(false)}
+                                className={`block py-2 text-[10px] font-bold uppercase tracking-wider ${isActive(subItem.path) ? styles.linkActive : `opacity-60 hover:opacity-100 ${styles.mobileLink}`}`}
+                              >
+                                {subItem.label}
+                              </Link>
+                            )
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
                 <a
                   href={WHATSAPP_LINK}
                   target="_blank"
