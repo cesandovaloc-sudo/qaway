@@ -27,9 +27,9 @@ export default function AuthLinkHandler() {
     }
 
     // Si la confirmación de email llega a la raíz '/' con access_token / type=signup,
-    // redirigir inmediatamente a /onboarding sin mostrar la landing page de Inicio.
+    // redirigir inmediatamente a /onboarding/tu-plan sin mostrar la landing page de Inicio.
     if (location.pathname === '/' && (hash.includes('access_token') || hash.includes('type=signup') || hash.includes('type=recovery'))) {
-      navigate(`/onboarding${hash}`, { replace: true })
+      navigate(`/onboarding/tu-plan${hash}`, { replace: true })
     }
   }, [navigate, location])
 

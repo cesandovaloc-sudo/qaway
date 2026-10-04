@@ -69,7 +69,7 @@ export default function HubAccessGuard({ children }) {
       }
 
       if (!user.tenant_id) {
-        resolve('/onboarding')
+        resolve('/onboarding/tu-plan')
         return
       }
 
@@ -80,7 +80,7 @@ export default function HubAccessGuard({ children }) {
         .maybeSingle()
 
       if (tenantError || !tenant) {
-        resolve('/onboarding')
+        resolve('/onboarding/tu-plan')
         return
       }
 
@@ -88,7 +88,7 @@ export default function HubAccessGuard({ children }) {
       const onboardingCompleted = tenant.features?.onboarding_completed === true || locallyCompleted
       const needsOnboarding = tenant.status === 'draft' || !onboardingCompleted
 
-      resolve(needsOnboarding ? '/onboarding' : null)
+      resolve(needsOnboarding ? '/onboarding/tu-plan' : null)
     }
 
     checkAccess().catch(() => resolve('/login'))

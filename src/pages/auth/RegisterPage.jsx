@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const rawRedirect = searchParams.get('redirect')
   const redirectTarget = (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//'))
     ? rawRedirect
-    : '/onboarding'
+    : '/onboarding/tu-plan'
 
   async function handleRegister(e) {
     e.preventDefault()
@@ -51,19 +51,19 @@ export default function RegisterPage() {
         password,
         options: {
           data: { full_name: composedName, last_name: lastName.trim() },
-          emailRedirectTo: `${APP_BASE_URL}/onboarding`,
+          emailRedirectTo: `${APP_BASE_URL}/onboarding/tu-plan`,
         },
       })
       if (error) throw error
       if (data.session) {
         // Ruta canónica (aprobado 2026-09-23): ?redirect= explícito gana SOLO si el
-        // usuario ya tiene marca (invitado). Cuenta nueva sin marca → /onboarding.
+        // usuario ya tiene marca (invitado). Cuenta nueva sin marca → /onboarding/tu-plan.
         let target = rawRedirect || null
         try {
           const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', data.user.id).maybeSingle()
-          if (!target) target = (me && me.tenant_id !== null) ? '/hub/panel' : '/onboarding'
+          if (!target) target = (me && me.tenant_id !== null) ? '/hub/panel' : '/onboarding/tu-plan'
         } catch (_) {
-          target = target || '/onboarding'
+          target = target || '/onboarding/tu-plan'
         }
         navigate(target, { replace: true })
         return

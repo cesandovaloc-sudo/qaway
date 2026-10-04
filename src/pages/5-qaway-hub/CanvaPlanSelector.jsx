@@ -261,8 +261,18 @@ export default function CanvaPlanSelector({
   loading = false,
   isModal = false,
   onClose,
+  subStep: controlledSubStep,
+  onSubStepChange,
 }) {
-  const [subStep, setSubStep] = useState(1);
+  const [internalSubStep, setInternalSubStep] = useState(1);
+  const subStep = controlledSubStep !== undefined ? controlledSubStep : internalSubStep;
+  const setSubStep = (val) => {
+    if (onSubStepChange) {
+      onSubStepChange(val);
+    } else {
+      setInternalSubStep(val);
+    }
+  };
   const [currentPlan, setCurrentPlan] = useState(selectedPlan);
   const [showAllBenefits, setShowAllBenefits] = useState(false);
   const [billingType, setBillingType] = useState("recurring");

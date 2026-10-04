@@ -20,8 +20,9 @@ import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 import { PAISES } from "@/config/paises";
 import CanvaPlanSelector from "./CanvaPlanSelector";
 
-const steps = ["Elige tu plan", "Tu cuenta", "Tu empresa", "Tu equipo", "Listo"];
-const SLUGS = ["tu-plan", "tu-cuenta", "tu-empresa", "tu-equipo", "listo"];
+const steps = ["Elige tu plan", "Tu empresa", "Tu equipo", "Listo"];
+const FLOW_SLUGS = ["tu-plan", "frecuencia", "pago", "tu-empresa", "tu-equipo", "listo"];
+const ALL_SLUGS = ["tu-plan", "frecuencia", "pago", "tu-cuenta", "tu-empresa", "tu-equipo", "listo"];
 
 const apps = [
   ["crm", "CRM Comercial", "Clientes, oportunidades y seguimiento comercial."],
@@ -158,9 +159,11 @@ function splitPhone(phone) {
 export default function HubOnboardingPage() {
   const navigate = useNavigate();
   const { paso } = useParams();
-  const slugIdx = paso ? SLUGS.indexOf(String(paso).toLowerCase()) : -1;
-  const validPaso = slugIdx >= 0 ? slugIdx + 1 : null;
-  const [step, setStep] = useState(() => validPaso || 1);
+  const currentSlug = paso ? String(paso).toLowerCase() : "tu-plan";
+  const isPlanStep = !paso || currentSlug === "tu-plan" || currentSlug === "frecuencia" || currentSlug === "pago";
+  const planSubStep = currentSlug === "pago" ? 3 : (currentSlug === "frecuencia" ? 2 : 1);
+  const step = isPlanStep ? 1 : (currentSlug === "tu-cuenta" ? 2 : (currentSlug === "tu-empresa" ? 3 : (currentSlug === "tu-equipo" ? 4 : 5)));
+
   const [selected, setSelected] = useState(["inventario", "crm", "agenda"]);
   const [chosenPlan, setChosenPlan] = useState("intermedio");
   const [pendingCardTokenId, setPendingCardTokenId] = useState(null);
@@ -192,16 +195,39 @@ export default function HubOnboardingPage() {
 
   const next = () => {
     setNote("");
-    navigate(`/onboarding/${SLUGS[Math.min(5, step + 1) - 1]}`);
+    if (currentSlug === "tu-cuenta") {
+      navigate("/onboarding/tu-empresa");
+      return;
+    }
+    const idx = FLOW_SLUGS.indexOf(currentSlug);
+    if (idx >= 0 && idx < FLOW_SLUGS.length - 1) {
+      navigate(`/onboarding/${FLOW_SLUGS[idx + 1]}`);
+    } else {
+      navigate("/hub/panel");
+    }
   };
+
   const back = () => {
     setNote("");
-    navigate(`/onboarding/${SLUGS[Math.max(1, step - 1) - 1]}`);
+    if (currentSlug === "tu-cuenta") {
+      navigate("/onboarding/pago");
+      return;
+    }
+    const idx = FLOW_SLUGS.indexOf(currentSlug);
+    if (idx > 0) {
+      navigate(`/onboarding/${FLOW_SLUGS[idx - 1]}`);
+    }
+  };
+
+  const handleSubStepChange = (sub) => {
+    if (sub === 1) navigate("/onboarding/tu-plan");
+    else if (sub === 2) navigate("/onboarding/frecuencia");
+    else if (sub === 3) navigate("/onboarding/pago");
   };
 
   useEffect(() => {
     setNote("");
-  }, [step]);
+  }, [currentSlug]);
 
   const noteIsError = !note.startsWith("✓") && !note.startsWith("Logo");
   const setF = (k) => (e) => {
@@ -278,24 +304,26 @@ export default function HubOnboardingPage() {
             // Si la empresa ya está activa y no está en el paso final de confirmación,
             // derivar directamente al panel de administración (la empresa ya no está en borrador):
             if (t.status === "active") {
-              if (validPaso === 5) {
-                setStep(5);
+              if (currentSlug === "listo") {
+                // permanecer en pantalla listo
               } else {
                 navigate("/hub/panel", { replace: true });
                 return;
               }
-            } else if (!validPaso) {
+            } else if (!paso) {
               const { data: currentSubs } = await supabase.from("tenant_app_subscriptions").select("app_id").eq("tenant_id", t.id);
               if (currentSubs && currentSubs.length > 0) {
-                setStep(4);
+                navigate("/onboarding/tu-equipo", { replace: true });
               } else {
-                setStep(3);
+                navigate("/onboarding/tu-empresa", { replace: true });
               }
             }
           }
         } else {
-          // No tiene empresa aún: ir directo al Paso 2 (Tu empresa)
-          if (!validPaso) setStep(2);
+          // No tiene empresa aún: ir directo al Paso 1 (tu-plan)
+          if (!paso) {
+            navigate("/onboarding/tu-plan", { replace: true });
+          }
         }
         const { data: catalog } = await supabase.from("app_catalog").select("slug");
         if (catalog) setAppsDb(catalog.map((a) => a.slug));
@@ -307,11 +335,12 @@ export default function HubOnboardingPage() {
     })();
   }, []);
 
-  // El paso vive en la URL (/onboarding/:paso): atrás/adelante del navegador
-  // y enlaces directos funcionan de verdad al cambiar el parámetro.
+  // Si se ingresa a /onboarding plano sin slug, redirigir a /onboarding/tu-plan
   useEffect(() => {
-    if (validPaso) setStep(validPaso);
-  }, [paso]);
+    if (!paso) {
+      navigate("/onboarding/tu-plan", { replace: true });
+    }
+  }, [paso, navigate]);
 
   function conTimeout(promise, ms) {
     return new Promise((resolve, reject) => {
@@ -714,7 +743,7 @@ export default function HubOnboardingPage() {
 
   return (
     <div className="onboarding">
-      <main className={step === 1 ? "step-3-main" : ""}>
+      <main className={isPlanStep ? "step-3-main" : ""}>
 
         {loading && (
           <section className="card wide onboarding-skeleton">
@@ -735,29 +764,43 @@ export default function HubOnboardingPage() {
           </section>
         )}
 
-        {!loading && step === 1 && (
+        {!loading && isPlanStep && (
           <section className="card wider canva-onboarding-card">
             <CanvaPlanSelector
               selectedPlan={chosenPlan}
               onSelectPlan={(pId) => setChosenPlan(pId)}
-               onContinue={async (planObj) => {
-                  if (planObj?.id) {
-                   pendingPlanRef.current = planObj.id;
-                   setChosenPlan(planObj.id);
-                 }
-                 if (planObj?.cardTokenId) {
-                   pendingCardTokenRef.current = planObj.cardTokenId;
-                   setPendingCardTokenId(planObj.cardTokenId);
-                 }
-                 next();
-               }}
+              subStep={planSubStep}
+              onSubStepChange={handleSubStepChange}
+              onContinue={async (planObj) => {
+                if (planObj?.id) {
+                  pendingPlanRef.current = planObj.id;
+                  setChosenPlan(planObj.id);
+                }
+                if (planObj?.cardTokenId) {
+                  pendingCardTokenRef.current = planObj.cardTokenId;
+                  setPendingCardTokenId(planObj.cardTokenId);
+                }
+                if (planObj?.billingType) {
+                  pendingBillingTypeRef.current = planObj.billingType;
+                }
+                if (planObj?.paymentMethod) {
+                  pendingPaymentMethodRef.current = planObj.paymentMethod;
+                }
+                if (planObj?.cardPaymentMethodId) {
+                  pendingCardPaymentMethodRef.current = planObj.cardPaymentMethodId;
+                }
+                if (planObj?.price) {
+                  planObjAmountRef.current = planObj.price;
+                }
+                navigate("/onboarding/tu-empresa");
+              }}
               loading={saving}
             />
             <Notice error={noteIsError}>{note}</Notice>
           </section>
         )}
 
-        {step === 2 && (
+        {!loading && currentSlug === "tu-cuenta" && (
           <section className="card">
             <small className="eyebrow">{session ? "TU CUENTA" : "EMPECEMOS"}</small>
             <h1>{session ? "Tu cuenta" : "Crea tu cuenta."}</h1>
@@ -786,7 +829,7 @@ export default function HubOnboardingPage() {
           </section>
         )}
 
-        {step === 3 && (
+        {!loading && currentSlug === "tu-empresa" && (
           <section className="card wide">
             <small className="eyebrow">TU EMPRESA</small>
             <h1>Ahora cuéntanos sobre tu marca.</h1>
@@ -874,7 +917,7 @@ export default function HubOnboardingPage() {
           </section>
         )}
 
-        {step === 4 && (
+        {!loading && currentSlug === "tu-equipo" && (
           <section className="card">
             <small className="eyebrow">TU EQUIPO</small>
             <h1>¿Trabajarás con otras personas?</h1>
@@ -930,7 +973,7 @@ export default function HubOnboardingPage() {
           </section>
         )}
 
-        {step === 5 && (
+        {!loading && currentSlug === "listo" && (
           <section className="card done">
             <div className="success">
               <Check size={32} strokeWidth={2.5} />
