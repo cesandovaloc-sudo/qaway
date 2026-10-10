@@ -1,8 +1,34 @@
 import { useState, useEffect } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home, Building2, MapPin, X } from 'lucide-react'
+import {
+  Search,
+  Bell,
+  LogOut,
+  User,
+  Menu,
+  Shield,
+  ChevronDown,
+  Users,
+  Settings,
+  Sun,
+  Moon,
+  Contrast,
+  Layers,
+  Home,
+  Building2,
+  X,
+  Crown,
+  Check,
+  Sparkles,
+  UserCheck,
+} from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useTenant } from '@/context/TenantContext'
+import {
+  useProjectPerspective,
+  PROJECT_PERSONAS,
+  type ProjectPerspectiveRole,
+} from '../../context/ProjectPerspectiveContext'
 // @ts-ignore
 import { AppSwitcherDropdown } from '../../../../5-gestor-de-proyectos/components/AppSwitcherDropdown'
 
@@ -13,38 +39,6 @@ const roleLabels: Record<string, string> = {
   guest: 'Invitado',
 }
 
-const sedesList = [
-  { id: 'sed-01', name: 'Sede Principal', code: 'SED-01' },
-  { id: 'sed-02', name: 'Sede Surco', code: 'SED-SUR' },
-  { id: 'sed-03', name: 'Sede Miraflores', code: 'SED-MIR' },
-  { id: 'sed-04', name: 'Sede Online', code: 'SED-ONL' },
-]
-
-const warehousesBySede: Record<string, Array<{ id: string; name: string; code: string }>> = {
-  'sed-01': [
-    { id: 'alm-01', name: 'Almacén Central', code: 'ALM-01' },
-    { id: 'alm-02', name: 'Almacén Secundario', code: 'ALM-02' },
-  ],
-  'sed-02': [
-    { id: 'alm-sur-01', name: 'Depósito Surco', code: 'ALM-SUR' },
-    { id: 'alm-sur-02', name: 'Almacén Tienda', code: 'ALM-TND' },
-  ],
-  'sed-03': [
-    { id: 'alm-mir-01', name: 'Almacén Exhibición', code: 'ALM-EXH' },
-    { id: 'alm-mir-02', name: 'Depósito Rápido', code: 'ALM-RAP' },
-  ],
-  'sed-04': [
-    { id: 'alm-onl-01', name: 'Almacén E-Commerce', code: 'ALM-ONL' },
-  ],
-}
-
-const warehousesList = [
-  { id: '1', name: 'Almacén Principal', code: 'ALM-01' },
-  { id: '2', name: 'Tienda Surco', code: 'ALM-SUR' },
-  { id: '3', name: 'Almacén Secundario', code: 'ALM-02' },
-  { id: '4', name: 'Tienda Online', code: 'ALM-ONL' },
-]
-
 export default function Header({
   collapsed,
   onToggleSidebar,
@@ -54,31 +48,17 @@ export default function Header({
 }) {
   const { session, profile, signOut, loading } = useAuth()
   const { scopedTenant, setScopedTenant, isPlatformAdmin, tenantOptions, loadingTenants, activeTenant } = useTenant()
+  const { perspective, currentPersona, setPerspective } = useProjectPerspective()
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isTenantOpen, setIsTenantOpen] = useState(false)
-  const [isSedeOpen, setIsSedeOpen] = useState(false)
-  const [isWarehouseOpen, setIsWarehouseOpen] = useState(false)
+  const [isPerspectiveOpen, setIsPerspectiveOpen] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
-  const [selectedSede, setSelectedSede] = useState<{ id: string; name: string; code: string } | null>(null)
-  const [selectedWarehouse, setSelectedWarehouse] = useState<{ id: string; name: string; code: string } | null>(null)
-
-  // Reseteo en cascada cuando cambia la empresa seleccionada
-  useEffect(() => {
-    setSelectedSede(null)
-    setSelectedWarehouse(null)
-  }, [scopedTenant?.id])
-
-  // Reseteo en cascada cuando cambia la sede seleccionada
-  useEffect(() => {
-    setSelectedWarehouse(null)
-  }, [selectedSede?.id])
 
   // Cierre unificado de todos los desplegables del Header
   const closeAllDropdowns = () => {
     setIsTenantOpen(false)
-    setIsSedeOpen(false)
-    setIsWarehouseOpen(false)
+    setIsPerspectiveOpen(false)
     setIsProfileOpen(false)
     setIsWaffleOpen(false)
   }
@@ -88,8 +68,7 @@ export default function Header({
     setIsWaffleOpen((prev) => {
       if (!prev) {
         setIsTenantOpen(false)
-        setIsSedeOpen(false)
-        setIsWarehouseOpen(false)
+        setIsPerspectiveOpen(false)
         setIsProfileOpen(false)
       }
       return !prev
@@ -99,8 +78,7 @@ export default function Header({
   const toggleTenant = () => {
     setIsTenantOpen((prev) => {
       if (!prev) {
-        setIsSedeOpen(false)
-        setIsWarehouseOpen(false)
+        setIsPerspectiveOpen(false)
         setIsProfileOpen(false)
         setIsWaffleOpen(false)
       }
@@ -108,23 +86,10 @@ export default function Header({
     })
   }
 
-  const toggleSede = () => {
-    setIsSedeOpen((prev) => {
+  const togglePerspective = () => {
+    setIsPerspectiveOpen((prev) => {
       if (!prev) {
         setIsTenantOpen(false)
-        setIsWarehouseOpen(false)
-        setIsProfileOpen(false)
-        setIsWaffleOpen(false)
-      }
-      return !prev
-    })
-  }
-
-  const toggleWarehouse = () => {
-    setIsWarehouseOpen((prev) => {
-      if (!prev) {
-        setIsTenantOpen(false)
-        setIsSedeOpen(false)
         setIsProfileOpen(false)
         setIsWaffleOpen(false)
       }
@@ -133,6 +98,15 @@ export default function Header({
   }
 
   const toggleProfile = () => {
+    setIsProfileOpen((prev) => {
+      if (!prev) {
+        setIsTenantOpen(false)
+        setIsPerspectiveOpen(false)
+        setIsWaffleOpen(false)
+      }
+      return !prev
+    })
+  }
     setIsProfileOpen((prev) => {
       if (!prev) {
         setIsTenantOpen(false)
@@ -342,17 +316,17 @@ export default function Header({
                     <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
                       <div className="flex items-center gap-2">
                         <Building2 size={16} className="text-[#ff4b0b]" />
-                        <p className="text-xs font-extrabold text-[var(--hub-text)]">Empresa de trabajo</p>
+                        <p className="text-xs font-extrabold text-[var(--hub-text)]">Organización / Empresa</p>
                       </div>
                       <p className="text-[10px] text-[var(--hub-dim)] mt-1">
-                        Selecciona la empresa sobre la que registrarás y gestionarás productos.
+                        Selecciona la organización, entidad o empresa sobre la que gestionarás proyectos y carteras.
                       </p>
                     </div>
                     <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
                       {loadingTenants ? (
-                        <div className="p-3 text-xs text-[var(--hub-dim)] text-center">Cargando empresas...</div>
+                        <div className="p-3 text-xs text-[var(--hub-dim)] text-center">Cargando organizaciones...</div>
                       ) : tenantOptions.length === 0 ? (
-                        <div className="p-3 text-xs text-[var(--hub-dim)] text-center">No se encontraron empresas</div>
+                        <div className="p-3 text-xs text-[var(--hub-dim)] text-center">No se encontraron organizaciones</div>
                       ) : (
                         tenantOptions.map((t) => (
                           <button
@@ -392,7 +366,7 @@ export default function Header({
                         }`}
                       >
                         <X size={14} className="w-3.5 h-3.5" />
-                        Desactivar selección (Sin empresa)
+                        Desactivar selección (Todas las entidades)
                       </button>
                     </div>
                   </div>
@@ -402,7 +376,7 @@ export default function Header({
           ) : activeTenant ? (
             <div
               className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-text)] text-sm font-bold"
-              title={`Empresa asignada: ${activeTenant.name}`}
+              title={`Organización asignada: ${activeTenant.name}`}
             >
               <Building2 size={15} className="text-[#ff4b0b]" />
               <span className="max-w-36 truncate">{activeTenant.name}</span>
@@ -410,129 +384,132 @@ export default function Header({
           ) : null}
         </div>
 
-        {/* Selector de Sede: solo visible si hay una Empresa/Marca activa */}
-        {activeTenant && (
-          <div className="relative">
-            <button
-              type="button"
-              onClick={toggleSede}
-              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
-              title="Seleccionar sede"
-            >
-              <MapPin size={15} className="text-[#ff4b0b]" />
-              <span className="max-w-36 truncate">{selectedSede ? selectedSede.name : 'Todas las sedes'}</span>
-              <ChevronDown size={14} className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${isSedeOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
-            </button>
-            {isSedeOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsSedeOpen(false)} aria-label="Cerrar selector" />
-                <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
-                  <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-[#ff4b0b]" />
-                      <p className="text-xs font-extrabold text-[var(--hub-text)]">Cambiar de sede</p>
-                    </div>
-                    <p className="text-[10px] text-[var(--hub-dim)] mt-0.5">Filtra las operaciones por sucursal o sede física.</p>
-                  </div>
-                  <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
-                    {sedesList.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedSede(s)
-                          setIsSedeOpen(false)
-                        }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
-                          selectedSede?.id === s.id
-                            ? 'bg-brand/15 text-brand font-bold'
-                            : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)] font-semibold'
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedSede?.id === s.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
-                        <span className="truncate">{s.name}</span>
-                        <span className="ml-auto text-[10px] font-semibold text-[var(--hub-dim)] shrink-0">{s.code}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="p-2 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedSede(null); setIsSedeOpen(false); }}
-                      disabled={!selectedSede}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${selectedSede ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
-                    >
-                      <MapPin size={14} className="w-3.5 h-3.5" />
-                      Todas las sedes (Vista general)
-                    </button>
-                  </div>
-                </div>
-              </>
+        {/* Conmutador de Perspectiva / Rol Operativo (Super Admin <-> Coordinador <-> Gestor) */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={togglePerspective}
+            className="flex items-center gap-2 h-10 px-3 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all shadow-xs"
+            title={`Perspectiva: ${currentPersona.title} (${currentPersona.scope})`}
+          >
+            {perspective === 'super_admin' ? (
+              <Crown size={15} className="text-[#ff4b0b] shrink-0" />
+            ) : perspective === 'coordinador' ? (
+              <Shield size={15} className="text-blue-500 shrink-0" />
+            ) : (
+              <UserCheck size={15} className="text-emerald-500 shrink-0" />
             )}
-          </div>
-        )}
+            <span
+              className="px-1.5 py-0.5 text-[10px] uppercase font-black rounded-md tracking-wider shrink-0"
+              style={{
+                color: currentPersona.accentColor,
+                backgroundColor: `${currentPersona.accentColor}18`,
+              }}
+            >
+              {currentPersona.tag}
+            </span>
+            <span className="hidden xl:inline max-w-44 truncate">{currentPersona.title}</span>
+            <span className="xl:hidden max-w-28 truncate">{currentPersona.name}</span>
+            <ChevronDown
+              size={14}
+              className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${
+                isPerspectiveOpen ? 'rotate-180 text-[var(--hub-text)]' : ''
+              }`}
+            />
+          </button>
 
-        {/* Selector de Almacén: solo visible si hay una Sede seleccionada */}
-        {activeTenant && selectedSede && (
-          <div className="relative">
-            <button
-              type="button"
-              onClick={toggleWarehouse}
-              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
-              title="Seleccionar almacén de la sede"
-            >
-              <Warehouse size={15} className="text-[#ff4b0b]" />
-              <span className="max-w-36 truncate">{selectedWarehouse ? selectedWarehouse.name : 'Todos los almacenes'}</span>
-              <ChevronDown size={14} className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${isWarehouseOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
-            </button>
-            {isWarehouseOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsWarehouseOpen(false)} aria-label="Cerrar selector" />
-                <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
-                  <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
-                    <div className="flex items-center gap-2">
-                      <Warehouse size={16} className="text-[#ff4b0b]" />
-                      <p className="text-xs font-extrabold text-[var(--hub-text)]">Almacén en {selectedSede.name}</p>
-                    </div>
-                    <p className="text-[10px] text-[var(--hub-dim)] mt-0.5">Filtra el stock de esta sede por depósito o almacén.</p>
+          {isPerspectiveOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsPerspectiveOpen(false)}
+                aria-label="Cerrar conmutador de perspectiva"
+              />
+              <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-88 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
+                <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={16} className="text-[#ff4b0b]" />
+                    <p className="text-xs font-extrabold text-[var(--hub-text)]">
+                      Conmutador de Rol / Perspectiva
+                    </p>
                   </div>
-                  <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
-                    {(warehousesBySede[selectedSede.id] || warehousesList).map((w) => (
+                  <p className="text-[11px] text-[var(--hub-dim)] mt-1 leading-snug">
+                    Opera la suite desde la visión del Fundador (SaaS global), Coordinador (supervisión nacional) o Gestor Territorial (ejecución de campo).
+                  </p>
+                </div>
+
+                <div className="p-2 space-y-1.5">
+                  {(Object.keys(PROJECT_PERSONAS) as ProjectPerspectiveRole[]).map((roleKey) => {
+                    const p = PROJECT_PERSONAS[roleKey]
+                    const isSelected = perspective === roleKey
+                    return (
                       <button
-                        key={w.id}
+                        key={roleKey}
                         type="button"
                         onClick={() => {
-                          setSelectedWarehouse(w)
-                          setIsWarehouseOpen(false)
+                          setPerspective(roleKey)
+                          setIsPerspectiveOpen(false)
                         }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
-                          selectedWarehouse?.id === w.id
-                            ? 'bg-brand/15 text-brand font-bold'
-                            : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)] font-semibold'
+                        className={`w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-brand/10 border-brand/40 text-[var(--hub-text)] shadow-xs'
+                            : 'border-transparent hover:bg-[var(--hub-hover)] text-[var(--hub-text-soft)] hover:text-[var(--hub-text)]'
                         }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedWarehouse?.id === w.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
-                        <span className="truncate">{w.name}</span>
-                        <span className="ml-auto text-[10px] font-semibold text-[var(--hub-dim)] shrink-0">{w.code}</span>
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-black text-xs mt-0.5"
+                          style={{
+                            color: p.accentColor,
+                            backgroundColor: `${p.accentColor}20`,
+                          }}
+                        >
+                          {roleKey === 'super_admin' ? (
+                            <Crown size={16} />
+                          ) : roleKey === 'coordinador' ? (
+                            <Shield size={16} />
+                          ) : (
+                            <UserCheck size={16} />
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-[var(--hub-text)] truncate">
+                              {p.title}
+                            </span>
+                            <span
+                              className="px-1.5 py-0.2 text-[9px] uppercase font-black rounded tracking-wider shrink-0"
+                              style={{
+                                color: p.accentColor,
+                                backgroundColor: `${p.accentColor}18`,
+                              }}
+                            >
+                              {p.tag}
+                            </span>
+                            {isSelected && (
+                              <Check size={14} className="ml-auto text-emerald-500 shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-[10px] text-[var(--hub-dim)] font-medium mt-0.5 truncate">
+                            📍 {p.scope}
+                          </p>
+                          <p className="text-[10.5px] text-[var(--hub-faint)] mt-1 line-clamp-2 leading-relaxed">
+                            {p.description}
+                          </p>
+                        </div>
                       </button>
-                    ))}
-                  </div>
-                  <div className="p-2 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedWarehouse(null); setIsWarehouseOpen(false); }}
-                      disabled={!selectedWarehouse}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${selectedWarehouse ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
-                    >
-                      <Warehouse size={14} className="w-3.5 h-3.5" />
-                      Todos los almacenes de la sede
-                    </button>
-                  </div>
+                    )
+                  })}
                 </div>
-              </>
-            )}
-          </div>
-        )}
+
+                <div className="p-3 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]/60 text-[10px] text-[var(--hub-dim)] flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span>Sincronización reactiva activa en tableros y bandejas de trabajo.</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Lado derecho: buscador con Ctrl K + campana + perfil Supabase */}
@@ -541,7 +518,7 @@ export default function Header({
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--hub-dim)]" />
           <input
             type="text"
-            placeholder="Buscar productos, SKU, categorías..."
+            placeholder="Buscar proyectos, tareas, hitos o miembros..."
             className="w-full bg-[var(--hub-chip)] border border-[var(--hub-border)] rounded-xl pl-10 pr-16 h-10 text-sm text-[var(--hub-text)] placeholder:text-[var(--hub-faint)] focus:outline-none focus:border-brand/50 focus:bg-[var(--hub-hover)] transition-colors"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
@@ -621,22 +598,22 @@ export default function Header({
                 {/* Menú de navegación (Regla 1-ResumenPanel.js:147-155 + HubPanelPage.jsx:2940-2945) */}
                 <div className="p-2 space-y-0.5">
                   <button
-                    onClick={() => { setIsProfileOpen(false); navigate('/hub/inventario/config') }}
+                    onClick={() => { setIsProfileOpen(false); navigate('/hub/proyectos/config') }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] rounded-lg transition-colors font-semibold cursor-pointer"
                   >
                     <User size={14} className="text-[var(--hub-dim)] shrink-0" /> Mi cuenta
                   </button>
                   <button
-                    onClick={() => { setIsProfileOpen(false); navigate('/hub/inventario/organizacion/usuarios') }}
+                    onClick={() => { setIsProfileOpen(false); navigate('/hub/proyectos/config') }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] rounded-lg transition-colors font-semibold cursor-pointer"
                   >
                     <Users size={14} className="text-[var(--hub-dim)] shrink-0" /> Usuarios y permisos
                   </button>
                   <button
-                    onClick={() => { setIsProfileOpen(false); navigate('/hub/inventario/config') }}
+                    onClick={() => { setIsProfileOpen(false); navigate('/hub/proyectos/config') }}
                     className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] rounded-lg transition-colors font-semibold cursor-pointer"
                   >
-                    <Settings size={14} className="text-[var(--hub-dim)] shrink-0" /> Configuración de la empresa
+                    <Settings size={14} className="text-[var(--hub-dim)] shrink-0" /> Configuración de la organización
                   </button>
                   <button
                     onClick={() => window.alert('Sección Seguridad disponible próximamente.')}

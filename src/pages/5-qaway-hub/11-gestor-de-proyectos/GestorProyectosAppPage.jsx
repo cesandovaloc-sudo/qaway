@@ -1,6 +1,7 @@
 import { Component, Suspense } from 'react'
 import { AuthProvider } from './src/context/AuthContext'
 import { TenantProvider } from './src/context/TenantContext'
+import { ProjectPerspectiveProvider } from './src/context/ProjectPerspectiveContext'
 import AppRouter from './src/app/router/AppRouter'
 import './src/index.css'
 
@@ -46,15 +47,17 @@ export default function GestorProyectosAppPage() {
     <div className="qaway-gestor-proyectos-root hub-shell" style={{ minHeight: '100vh' }}>
       <AuthProvider>
         <TenantProvider>
-          <ErrorBoundary>
-            <Suspense fallback={
-              <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-                <span style={{ fontSize: '14px', color: '#71717a' }}>Cargando Gestor de Proyectos...</span>
-              </div>
-            }>
-              <AppRouter />
-            </Suspense>
-          </ErrorBoundary>
+          <ProjectPerspectiveProvider>
+            <ErrorBoundary>
+              <Suspense fallback={
+                <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
+                  <span style={{ fontSize: '14px', color: '#71717a' }}>Cargando Gestor de Proyectos...</span>
+                </div>
+              }>
+                <AppRouter />
+              </Suspense>
+            </ErrorBoundary>
+          </ProjectPerspectiveProvider>
         </TenantProvider>
       </AuthProvider>
     </div>

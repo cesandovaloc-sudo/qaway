@@ -20,9 +20,14 @@ import {
   Users,
   X,
   Zap,
+  Crown,
+  Shield,
+  UserCheck,
+  Sparkles,
 } from 'lucide-react'
 import { useProjectWorkItems } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
+import { useProjectPerspective } from '../../../context/ProjectPerspectiveContext'
 import {
   FOLLOW_UP_META,
   KANBAN_STATE_ORDER,
@@ -55,9 +60,21 @@ const emptyDrafts: Record<WorkItemState, string> = {
 
 export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
   const workItems = useProjectWorkItems(projectId)
+  const { perspective, isGestor, isCoordinador, isSuperAdmin, currentPersona } = useProjectPerspective()
   const [drafts, setDrafts] = useState<Record<WorkItemState, string>>(emptyDrafts)
-  const [memberFilter, setMemberFilter] = useState<string | null>(null)
+  const [memberFilter, setMemberFilter] = useState<string | null>(() => {
+    return perspective === 'gestor' ? 'Carlos Sandoval' : null
+  })
   const [ugelQuery, setUgelQuery] = useState('')
+
+  // Sincronizar filtro territorial con la perspectiva activa conmutada en el Header
+  useEffect(() => {
+    if (perspective === 'gestor') {
+      setMemberFilter('Carlos Sandoval')
+    } else {
+      setMemberFilter(null)
+    }
+  }, [perspective])
   const [responseFilter, setResponseFilter] = useState<
     'todos' | 'esperando_respuesta' | 'respondido' | 'sin_notificar'
   >('todos')
@@ -190,6 +207,81 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
 
   return (
     <>
+      {/* Banner Reactivo de Perspectiva Institucional / Operativa */}
+      <div
+        className={`mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 shadow-xs transition-colors ${
+          isGestor
+            ? 'border-emerald-200 bg-emerald-50/70 text-emerald-950'
+            : isCoordinador
+            ? 'border-blue-200 bg-blue-50/70 text-blue-950'
+            : 'border-zinc-200 bg-gradient-to-r from-zinc-50 to-orange-50/40 text-zinc-900'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg font-black text-xs text-white shadow-xs"
+            style={{ backgroundColor: currentPersona.accentColor }}
+          >
+            {isSuperAdmin ? <Crown size={16} /> : isCoordinador ? <Shield size={16} /> : <UserCheck size={16} />}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black tracking-tight">{currentPersona.title}</span>
+              <span
+                className="rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider"
+                style={{
+                  color: currentPersona.accentColor,
+                  backgroundColor: `${currentPersona.accentColor}18`,
+                }}
+              >
+                {currentPersona.tag}
+              </span>
+            </div>
+            <p className="text-[11px] opacity-80 font-medium">
+              📍 <span className="font-semibold">{currentPersona.scope}</span> · {currentPersona.description}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 ml-auto">
+          {isGestor && memberFilter !== 'Carlos Sandoval' && (
+            <button
+              type="button"
+              onClick={() => setMemberFilter('Carlos Sandoval')}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
+            >
+              <UserCheck size={13} />
+              Filtrar mi bandeja territorial
+            </button>
+          )}
+
+          {isCoordinador && memberFilter !== null && (
+            <button
+              type="button"
+              onClick={() => setMemberFilter(null)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
+            >
+              <Shield size={13} />
+              Ver supervisión nacional (Todo el equipo)
+            </button>
+          )}
+
+          {isGestor && memberFilter === 'Carlos Sandoval' && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-100/80 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              Bandeja territorial filtrada a tus tareas
+            </span>
+          )}
+
+          {isCoordinador && memberFilter === null && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-100/80 px-2.5 py-1 text-[11px] font-bold text-blue-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
+              Torre PMO: Vista de las 26 regiones
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Barra de Filtros Ergonómica (Solución a la saturación horizontal) */}
       <div className="mb-3 space-y-2 rounded-xl border border-zinc-200 bg-white p-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="flex flex-wrap items-center gap-2">
