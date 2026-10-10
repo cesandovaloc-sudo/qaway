@@ -1,0 +1,14 @@
+# doc/ — bitácora de trabajo del agente sobre Gestor de Proyectos.
+# Todo lo de esta carpeta queda fuera del repositorio: el avance se registra
+# aquí y no se commitea. El repo solo versiona el código acoplado.
+
+*.md
+*.txt
+*.tmp
+*.bak
+*.log
+adjuntos/
+capturas/
+salidas/
+scratch/
+node_modules/

@@ -98,3 +98,28 @@
 - [x] **Task 9.7:** Integrar pestaña de Sprints en `src/pages/projects/ProjectWorkspacePage.tsx`:
   - Pestaña `sprints` con icono `Flame`, badge de tareas del sprint y navegación con `?tab=sprints`.
 - [x] **Task 9.8:** Auditoría y verificación de compilación 0 errores TS.
+
+---
+
+## 🏛️ Fase 10: Monitoreo Territorial Híbrido (MINEDU Dotación 2027, Hito ↔ Tareas, WhatsApp & Semáforos)
+- [x] **Task 10.1:** Extender `src/types/project.types.ts`:
+  - En `WorkItem`: campos `milestoneId?: string`, `followUpDate?: string`, `scopeTag?: string` (UGEL/Ámbito).
+  - En `WorkItemAssignee`: campos `phone?: string`, `email?: string`.
+  - Tipo `FollowUpStatus` + `FOLLOW_UP_META`; utilidades en `src/utils/followUp.ts` (semáforo, `wa.me`, `mailto:`).
+- [x] **Task 10.2:** Crear proyecto semilla MINEDU en `src/data/mock-projects-data.ts` según `minedu_dotacion_2027_hitos.md`:
+  - Proyecto `proj-minedu-2027` (Dotación 2027 - DIGERE).
+  - Los 10 hitos normativos oficiales del Oficio Múltiple 00032-2026.
+  - Tareas operativas hijas asignadas a gestores con UGELs reales (Huancavelica, Maynas, Cusco, Condorcanqui, Lima).
+- [x] **Task 10.3:** Enriquecer `src/pages/projects/workspace/MilestonesTab.tsx`:
+  - Acordeón expandible en cada hito rector para visualizar y gestionar sus tareas hijas vinculadas.
+  - Acceso directo a botón WhatsApp en cada tarea vinculada del hito.
+- [x] **Task 10.4:** Enriquecer `src/components/projects/SlideOverTaskSheet.tsx`:
+  - Selector desplegable para vincular la tarea a cualquier Hito Rector del proyecto.
+  - Selector de Fecha de Seguimiento (`followUpDate`) e input de Ámbito / UGEL (`scopeTag`).
+  - Botón verde de **WhatsApp** con enlace `wa.me` y mensaje institucional preformateado.
+  - Botón de **Correo** institucional con `mailto:`.
+- [x] **Task 10.5:** Enriquecer `src/pages/projects/workspace/KanbanBoardTab.tsx`:
+  - Semáforo de alerta preventiva de seguimiento (🔴 Vencido, 🟡 Vence ≤ 72h, 🟢 En plazo).
+  - Chip identificador de UGEL / Ámbito en las tarjetas.
+  - Buscador / filtro por UGEL.
+- [x] **Task 10.6:** Verificación de compilación `npm run typecheck`, actualización de `tasks.md` y prueba HTTP 200.

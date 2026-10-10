@@ -1,14 +1,16 @@
 import { useMemo, useState } from 'react'
-import { Ban, ChevronLeft, ChevronRight, Clock, Flag, Link2, Plus, User } from 'lucide-react'
+import { Ban, ChevronLeft, ChevronRight, Clock, Flag, Link2, MapPin, Plus, Search, User } from 'lucide-react'
 import { useProjectWorkItems } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import {
+  FOLLOW_UP_META,
   KANBAN_STATE_ORDER,
   KANBAN_WIP_LIMITS,
   WORK_ITEM_PRIORITY_META,
   WORK_ITEM_STATE_META,
   type WorkItemState,
 } from '@/types/project.types'
+import { formatFollowUpDate, getFollowUpStatus } from '@/utils/followUp'
 
 // ─────────────────────────────────────────────────────────────────────────
 // KanbanBoardTab.tsx — b) Tablero Kanban interactivo (Task 4.2)
@@ -33,6 +35,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
   const workItems = useProjectWorkItems(projectId)
   const [drafts, setDrafts] = useState<Record<WorkItemState, string>>(emptyDrafts)
   const [memberFilter, setMemberFilter] = useState<string | null>(null)
+  const [ugelQuery, setUgelQuery] = useState('')
 
   const members = useMemo(() => {
     const map = new Map<string, number>()
@@ -43,9 +46,19 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
     return [...map.entries()].sort((a, b) => b[1] - a[1])
   }, [workItems])
 
-  const visibleItems = memberFilter
-    ? workItems.filter((item) => (item.assignee.name.trim() || 'Sin asignar') === memberFilter)
-    : workItems
+  const visibleItems = useMemo(() => {
+    const term = ugelQuery.trim().toLowerCase()
+    return workItems.filter((item) => {
+      const matchesMember = !memberFilter || (item.assignee.name.trim() || 'Sin asignar') === memberFilter
+      const matchesUgel =
+        !term ||
+        (item.scopeTag ?? '').toLowerCase().includes(term) ||
+        item.title.toLowerCase().includes(term) ||
+        item.id.toLowerCase().includes(term) ||
+        item.assignee.name.toLowerCase().includes(term)
+      return matchesMember && matchesUgel
+    })
+  }, [workItems, memberFilter, ugelQuery])
 
   const move = (taskId: string, direction: -1 | 1) => {
     const current = workItems.find((item) => item.id === taskId)
@@ -75,8 +88,18 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
 
   return (
     <>
-      {/* Filtro rápido por integrante (Fase 9) */}
+      {/* Filtro rápido por integrante + buscador UGEL (Fase 9/10) */}
       <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="relative min-w-[200px] flex-1">
+          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <input
+            value={ugelQuery}
+            onChange={(event) => setUgelQuery(event.target.value)}
+            placeholder="Buscar por UGEL, tarea o gestor…"
+            aria-label="Buscar por UGEL"
+            className="h-9 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-xs text-zinc-800 outline-none transition-all placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/15"
+          />
+        </div>
         <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Equipo</span>
         <button
           type="button"
@@ -153,6 +176,8 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
               {cards.map((card) => {
                 const priorityMeta = WORK_ITEM_PRIORITY_META[card.priority]
                 const index = KANBAN_STATE_ORDER.indexOf(card.state)
+                const followStatus = getFollowUpStatus(card.followUpDate, card.state)
+                const followMeta = FOLLOW_UP_META[followStatus]
                 return (
                   <article
                     key={card.id}
@@ -228,6 +253,30 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                         </span>
                       )}
                     </div>
+
+                    {/* Semáforo de seguimiento + UGEL (Fase 10) */}
+                    {(card.followUpDate || card.scopeTag) && (
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        {card.scopeTag && (
+                          <span className="inline-flex max-w-full items-center gap-1 truncate rounded-md bg-sky-50 px-1.5 py-0.5 text-[10px] font-extrabold text-sky-700">
+                            <MapPin size={10} className="shrink-0" />
+                            <span className="truncate">{card.scopeTag}</span>
+                          </span>
+                        )}
+                        {card.followUpDate && (
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-extrabold ${followMeta.badgeClass}`}
+                            title={`Seguimiento: ${formatFollowUpDate(card.followUpDate)} · ${followMeta.label}`}
+                          >
+                            <span
+                              className="h-1.5 w-1.5 rounded-full"
+                              style={{ backgroundColor: followMeta.color }}
+                            />
+                            {formatFollowUpDate(card.followUpDate)}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <div className="mt-2 flex items-center justify-between border-t border-zinc-100 pt-2">
                       <button

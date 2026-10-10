@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, Ban, Calendar, Check, Link2, ListChecks, Save, Trash2, User, X } from 'lucide-react'
+import { AlertTriangle, Ban, Calendar, CalendarClock, Check, Link2, ListChecks, Mail, MapPin, MessageCircle, Save, Trash2, User, X } from 'lucide-react'
 import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { useProjectsDataset } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import {
+  FOLLOW_UP_META,
   KANBAN_STATE_ORDER,
   TSHIRT_POINTS,
   WORK_ITEM_PRIORITY_META,
@@ -12,6 +13,13 @@ import {
   type WorkItemPriority,
   type WorkItemState,
 } from '@/types/project.types'
+import {
+  buildFollowUpMessage,
+  buildMailtoUrl,
+  buildWhatsAppUrl,
+  formatFollowUpDate,
+  getFollowUpStatus,
+} from '@/utils/followUp'
 
 // ─────────────────────────────────────────────────────────────────────────
 // SlideOverTaskSheet.tsx — Ver y editar tareas al hacer clic (Task 4.3)
@@ -42,8 +50,13 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
   const [criteriaText, setCriteriaText] = useState('')
   const [state, setState] = useState<WorkItemState>('backlog')
   const [priority, setPriority] = useState<WorkItemPriority>('MEDIA')
+  const [milestoneId, setMilestoneId] = useState('')
+  const [followUpDate, setFollowUpDate] = useState('')
+  const [scopeTag, setScopeTag] = useState('')
   const [assigneeName, setAssigneeName] = useState('')
   const [assigneeRole, setAssigneeRole] = useState('')
+  const [assigneePhone, setAssigneePhone] = useState('')
+  const [assigneeEmail, setAssigneeEmail] = useState('')
   const [storyPoints, setStoryPoints] = useState('')
   const [tShirtSize, setTShirtSize] = useState<TShirtSize | ''>('')
   const [durationDays, setDurationDays] = useState('')
@@ -61,8 +74,13 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
     setCriteriaText((task.acceptanceCriteria ?? []).join('\n'))
     setState(task.state)
     setPriority(task.priority)
+    setMilestoneId(task.milestoneId ?? '')
+    setFollowUpDate(task.followUpDate ?? '')
+    setScopeTag(task.scopeTag ?? '')
     setAssigneeName(task.assignee.name)
     setAssigneeRole(task.assignee.role)
+    setAssigneePhone(task.assignee.phone ?? '')
+    setAssigneeEmail(task.assignee.email ?? '')
     setStoryPoints(task.storyPoints !== undefined ? String(task.storyPoints) : '')
     setTShirtSize(task.tShirtSize ?? '')
     setDurationDays(task.durationDays !== undefined ? String(task.durationDays) : '')
@@ -77,6 +95,27 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
   if (!task) return null
 
   const priorityMeta = WORK_ITEM_PRIORITY_META[priority]
+  const projectMilestones = dataset.milestones
+    .filter((milestone) => milestone.projectId === task.projectId)
+    .sort((a, b) => a.phaseNumber - b.phaseNumber)
+  const scopeOptions = [
+    ...new Set(
+      dataset.workItems
+        .filter((item) => item.projectId === task.projectId && item.scopeTag)
+        .map((item) => item.scopeTag as string),
+    ),
+  ]
+  const followMeta = FOLLOW_UP_META[getFollowUpStatus(followUpDate, state)]
+  const draftContact = {
+    gestor: assigneeName.trim() || task.assignee.name,
+    ugel: scopeTag.trim() || 'ámbito por definir',
+    titulo: title.trim() || task.title,
+    fecha: formatFollowUpDate(followUpDate),
+    bloqueada: isBlocked,
+    motivoBloqueo: blockerReason.trim() || undefined,
+  }
+  const waUrl = buildWhatsAppUrl(assigneePhone, buildFollowUpMessage(draftContact))
+  const mailUrl = buildMailtoUrl(assigneeEmail, draftContact)
   const criteria = criteriaText
     .split('\n')
     .map((line) => line.trim().replace(/^[-•\d.)\s]+/, ''))
@@ -87,8 +126,13 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
     criteria.join('\n') !== (task.acceptanceCriteria ?? []).join('\n') ||
     state !== task.state ||
     priority !== task.priority ||
+    milestoneId !== (task.milestoneId ?? '') ||
+    followUpDate !== (task.followUpDate ?? '') ||
+    scopeTag.trim() !== (task.scopeTag ?? '') ||
     assigneeName.trim() !== task.assignee.name ||
     assigneeRole.trim() !== task.assignee.role ||
+    assigneePhone.trim() !== (task.assignee.phone ?? '') ||
+    assigneeEmail.trim() !== (task.assignee.email ?? '') ||
     storyPoints !== (task.storyPoints !== undefined ? String(task.storyPoints) : '') ||
     tShirtSize !== (task.tShirtSize ?? '') ||
     durationDays !== (task.durationDays !== undefined ? String(task.durationDays) : '') ||
@@ -108,7 +152,15 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
       acceptanceCriteria: criteria.length > 0 ? criteria : undefined,
       state,
       priority,
-      assignee: { name: assigneeName.trim(), role: assigneeRole.trim() || task.assignee.role },
+      milestoneId: milestoneId || undefined,
+      followUpDate: followUpDate || undefined,
+      scopeTag: scopeTag.trim() || undefined,
+      assignee: {
+        name: assigneeName.trim(),
+        role: assigneeRole.trim() || task.assignee.role,
+        phone: assigneePhone.trim() || undefined,
+        email: assigneeEmail.trim() || undefined,
+      },
       storyPoints: points,
       tShirtSize: tShirtSize || undefined,
       durationDays: duration,
@@ -206,6 +258,102 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
             {isCritical && <span className="ml-auto uppercase tracking-wide">· Ruta crítica</span>}
           </div>
 
+          {/* Vinculación territorial MINEDU (Fase 10) */}
+          <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-50/50 p-3">
+            <p className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-sky-800">
+              <MapPin size={12} /> Vinculación territorial
+            </p>
+            <div>
+              <label className={labelClass} htmlFor="gp-task-milestone">Hito rector asociado</label>
+              <select
+                id="gp-task-milestone"
+                value={milestoneId}
+                onChange={(event) => setMilestoneId(event.target.value)}
+                className={inputClass}
+              >
+                <option value="">Sin hito asociado</option>
+                {projectMilestones.map((milestone) => (
+                  <option key={milestone.id} value={milestone.id}>
+                    Fase {milestone.phaseNumber} · {milestone.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass} htmlFor="gp-task-followup">
+                  <span className="inline-flex items-center gap-1">
+                    <CalendarClock size={12} /> Fecha de seguimiento
+                  </span>
+                </label>
+                <input
+                  id="gp-task-followup"
+                  type="date"
+                  value={followUpDate}
+                  onChange={(event) => setFollowUpDate(event.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="gp-task-scope">UGEL / Ámbito</label>
+                <input
+                  id="gp-task-scope"
+                  value={scopeTag}
+                  onChange={(event) => setScopeTag(event.target.value)}
+                  placeholder="UGEL Huancavelica"
+                  list="gp-scope-options"
+                  className={inputClass}
+                />
+                <datalist id="gp-scope-options">
+                  {scopeOptions.map((option) => (
+                    <option key={option} value={option} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide ${followMeta.badgeClass}`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: followMeta.color }} />
+                {followMeta.label}
+                {followUpDate ? ` · ${formatFollowUpDate(followUpDate)}` : ''}
+              </span>
+              {waUrl ? (
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#25d366] px-3 text-xs font-extrabold text-white shadow-sm transition-transform hover:scale-[1.02] sm:flex-none sm:px-4"
+                >
+                  <MessageCircle size={14} /> WhatsApp
+                </a>
+              ) : (
+                <span
+                  title="Registra el teléfono del gestor para activar WhatsApp"
+                  className="inline-flex h-9 flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-zinc-100 px-3 text-xs font-bold text-zinc-400 sm:flex-none sm:px-4"
+                >
+                  <MessageCircle size={14} /> WhatsApp
+                </span>
+              )}
+              {mailUrl ? (
+                <a
+                  href={mailUrl}
+                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-zinc-900 px-3 text-xs font-extrabold text-white transition-colors hover:bg-brand sm:flex-none sm:px-4"
+                >
+                  <Mail size={14} /> Correo
+                </a>
+              ) : (
+                <span
+                  title="Registra el correo del gestor para activar el contacto"
+                  className="inline-flex h-9 flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-zinc-100 px-3 text-xs font-bold text-zinc-400 sm:flex-none sm:px-4"
+                >
+                  <Mail size={14} /> Correo
+                </span>
+              )}
+            </div>
+          </div>
+
           <div>
             <label className={labelClass} htmlFor="gp-task-desc">Descripción</label>
             <textarea
@@ -284,6 +432,28 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                 value={assigneeRole}
                 onChange={(event) => setAssigneeRole(event.target.value)}
                 placeholder="Rol"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass} htmlFor="gp-task-phone">Teléfono / WhatsApp</label>
+              <input
+                id="gp-task-phone"
+                value={assigneePhone}
+                onChange={(event) => setAssigneePhone(event.target.value)}
+                placeholder="+51987654321"
+                inputMode="tel"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass} htmlFor="gp-task-email">Correo institucional</label>
+              <input
+                id="gp-task-email"
+                value={assigneeEmail}
+                onChange={(event) => setAssigneeEmail(event.target.value)}
+                placeholder="gestor@minedu.gob.pe"
+                inputMode="email"
                 className={inputClass}
               />
             </div>

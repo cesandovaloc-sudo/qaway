@@ -231,7 +231,9 @@ export default function ProjectWorkspacePage() {
       {activeTab === 'gantt' && (
         <GanttTab projectId={project.id} onOpenTask={setSelectedTaskId} />
       )}
-      {activeTab === 'hitos' && <MilestonesTab projectId={project.id} />}
+      {activeTab === 'hitos' && (
+        <MilestonesTab projectId={project.id} onOpenTask={setSelectedTaskId} />
+      )}
       {activeTab === 'docs' && <DocsTab projectId={project.id} />}
 
       <SlideOverTaskSheet

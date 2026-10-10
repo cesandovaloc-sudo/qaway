@@ -69,12 +69,15 @@ export interface WorkItemAssignee {
   name: string
   avatar?: string
   role: string
+  phone?: string // WhatsApp del gestor territorial (Fase 10)
+  email?: string // Correo institucional (Fase 10)
 }
 
 export interface WorkItem {
   id: string // ej: "TSK-101"
   projectId: string
   sprintId?: string
+  milestoneId?: string // Hito Rector vinculado (Fase 10)
   epicTitle?: string // Épica / agrupador funcional (Fase 9)
   title: string
   description?: string
@@ -88,6 +91,8 @@ export interface WorkItem {
   startDate?: string
   endDate?: string
   completedAt?: string // ISO DateTime de cierre — motor del burndown (Fase 9)
+  followUpDate?: string // ISO Date de seguimiento preventivo (Fase 10)
+  scopeTag?: string // UGEL / Ámbito territorial (Fase 10)
   predecessors?: string[] // IDs de tareas previas obligatorias (FS)
   isCriticalPath?: boolean // Indicador de ruta crítica CPM
   isBlocked?: boolean // Bloqueo activo / impedimento (Fase 9)
@@ -452,4 +457,33 @@ export const COST_STATUS_META: Record<CostStatus, { label: string; color: string
   bajo_costo: { label: 'Bajo costo', color: '#059669' },
   en_presupuesto: { label: 'En presupuesto', color: '#2563eb' },
   sobrecosto: { label: 'Sobrecosto', color: '#e11d48' },
+}
+
+/** Semáforo preventivo de fecha de seguimiento (Fase 10). */
+export type FollowUpStatus = 'vencido' | 'alerta' | 'a_tiempo' | 'sin_fecha'
+
+export const FOLLOW_UP_META: Record<
+  FollowUpStatus,
+  { label: string; color: string; badgeClass: string }
+> = {
+  vencido: {
+    label: 'Vencido',
+    color: '#e11d48',
+    badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+  },
+  alerta: {
+    label: 'Vence ≤ 72h',
+    color: '#d97706',
+    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
+  a_tiempo: {
+    label: 'En plazo',
+    color: '#059669',
+    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  },
+  sin_fecha: {
+    label: 'Sin fecha',
+    color: '#71717a',
+    badgeClass: 'bg-zinc-100 text-zinc-500 border-zinc-200',
+  },
 }
