@@ -25,9 +25,9 @@ export default function AppLayout() {
     if (raw === 'oscuro') return 'oscuro'
     return 'contraste'
   })
-  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio'>(() => {
+  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio' | 'personalizado'>(() => {
     const raw = localStorage.getItem('qaway.colorPalette')
-    if (raw === 'carbon' || raw === 'estudio') return raw
+    if (raw === 'carbon' || raw === 'estudio' || raw === 'personalizado') return raw
     return 'terracota'
   })
 

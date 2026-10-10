@@ -112,13 +112,13 @@
   --status-blocked-border: #d4d4d8;
 }
 
-/* 3. Qaway Estudio (Cobrizo Cálido Calibrado No Tóxico) */
+/* 3. Rojo MINEDU Perú (institucional #c8102e) */
 .hub-shell[data-palette='estudio'],
 [data-palette='estudio'] {
-  --hub-brand: #ea580c;
-  --hub-brand-hover: #c2410c;
-  --hub-brand-soft: #fff7ed;
-  --hub-brand-glow: rgba(234, 88, 12, 0.15);
+  --hub-brand: #c8102e;
+  --hub-brand-hover: #a50d26;
+  --hub-brand-soft: #fdeef1;
+  --hub-brand-glow: rgba(200, 16, 46, 0.16);
 
   --status-ok: #4a6741;
   --status-ok-bg: #f5f8f3;

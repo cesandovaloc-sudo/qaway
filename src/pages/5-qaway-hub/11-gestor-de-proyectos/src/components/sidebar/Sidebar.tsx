@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   FolderKanban,
@@ -154,6 +154,29 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     },
   ]
 
+  const location = useLocation()
+
+  // URL actual completa (ruta + query). NavLink solo compara el pathname, por eso
+  // todos los items que comparten /proyectos/proj-minedu-2027 se encendían a la
+  // vez al cambiar de ?tab=. La coincidencia aquí es exacta e incluye el query.
+  const currentUrl = `${location.pathname}${location.search}`
+
+  // Primer href (orden de documento, hijos incluidos) con coincidencia exacta.
+  // Desempata URLs idénticas: Mi Bandeja / Alertas Críticas / Gestores &
+  // Territorio comparten ?tab=kanban → gana el primero (Mi Bandeja).
+  let activeHref: string | null = null
+  for (const sec of sections) {
+    for (const item of sec.items) {
+      const candidates = [item.to, ...(item.children ?? []).map((child) => child.to)]
+      for (const to of candidates) {
+        if (activeHref === null && getHref(to) === currentUrl) {
+          activeHref = getHref(to)
+        }
+      }
+    }
+  }
+  const isHrefActive = (to: string) => activeHref !== null && getHref(to) === activeHref
+
   return (
     <aside
       className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-all duration-300 ${
@@ -221,13 +244,13 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                     <NavLink
                       to={getHref(item.to)}
                       end={item.end}
-                      className={({ isActive }) =>
+                      className={() =>
                         `flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                           hasChildren && isProjectsExpanded && !collapsed
                             ? 'border-l-2 border-[var(--hub-brand)] bg-[var(--hub-chip)] text-[var(--hub-text)]'
                             : ''
                         } ${
-                          isActive
+                          isHrefActive(item.to)
                             ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
                             : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
                         } ${collapsed ? 'justify-center' : ''}`
@@ -281,9 +304,9 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                         <NavLink
                           key={child.to}
                           to={getHref(child.to)}
-                          className={({ isActive }) =>
+                          className={() =>
                             `flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs transition-colors truncate ${
-                              isActive
+                              isHrefActive(child.to)
                                 ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold'
                                 : 'text-[var(--hub-dim)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
                             }`

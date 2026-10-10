@@ -36,6 +36,40 @@ const roleLabels: Record<string, string> = {
   guest: 'Invitado',
 }
 
+// ── Utilidades de color para el swatch personalizado (sin tocar el sistema) ──
+function clampChannel(n: number) {
+  return Math.max(0, Math.min(255, Math.round(n)))
+}
+function hexToRgb(hex: string): [number, number, number] {
+  const clean = hex.replace('#', '')
+  return [
+    parseInt(clean.slice(0, 2), 16),
+    parseInt(clean.slice(2, 4), 16),
+    parseInt(clean.slice(4, 6), 16),
+  ]
+}
+function rgbToHex(r: number, g: number, b: number) {
+  const toHex = (n: number) => clampChannel(n).toString(16).padStart(2, '0')
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+// amount < 0 oscurece (hover), > 0 aclara
+function shadeHex(hex: string, amount: number): string {
+  const [r, g, b] = hexToRgb(hex)
+  if (amount < 0) {
+    return rgbToHex(r * (1 + amount), g * (1 + amount), b * (1 + amount))
+  }
+  return rgbToHex(r + (255 - r) * amount, g + (255 - g) * amount, b + (255 - b) * amount)
+}
+// Mezcla con blanco para el fondo suave (soft)
+function mixWithWhite(hex: string, weight: number): string {
+  const [r, g, b] = hexToRgb(hex)
+  return rgbToHex(r + (255 - r) * weight, g + (255 - g) * weight, b + (255 - b) * weight)
+}
+function hexToRgba(hex: string, alpha: number): string {
+  const [r, g, b] = hexToRgb(hex)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 export default function Header({
   collapsed,
   onToggleSidebar,
@@ -136,18 +170,46 @@ export default function Header({
     window.dispatchEvent(new CustomEvent('qaway-theme-change', { detail: themeMode }))
   }, [themeMode])
 
-  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio'>(() => {
+  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio' | 'personalizado'>(() => {
     const raw = localStorage.getItem('qaway.colorPalette')
-    if (raw === 'carbon' || raw === 'estudio') return raw
+    if (raw === 'carbon' || raw === 'estudio' || raw === 'personalizado') return raw
     return 'terracota'
+  })
+
+  // Color de marca libre elegido por el usuario (4to swatch). Persiste en
+  // localStorage y se aplica como variable inline para prevalecer sobre el CSS.
+  const [customBrand, setCustomBrand] = useState<string>(() => {
+    try {
+      const raw = localStorage.getItem('qaway.customBrand')
+      return raw && /^#[0-9a-fA-F]{6}$/.test(raw) ? raw : '#c8102e'
+    } catch {
+      return '#c8102e'
+    }
   })
 
   // Sincronización de la paleta anti-tóxica con el DOM y almacenamiento local
   useEffect(() => {
     localStorage.setItem('qaway.colorPalette', colorPalette)
     document.documentElement.setAttribute('data-palette', colorPalette)
+    const root = document.documentElement
+    if (colorPalette === 'personalizado' && /^#[0-9a-fA-F]{6}$/.test(customBrand)) {
+      try {
+        localStorage.setItem('qaway.customBrand', customBrand)
+      } catch {
+        // Ignorar storage errors
+      }
+      root.style.setProperty('--hub-brand', customBrand)
+      root.style.setProperty('--hub-brand-hover', shadeHex(customBrand, -0.16))
+      root.style.setProperty('--hub-brand-soft', mixWithWhite(customBrand, 0.94))
+      root.style.setProperty('--hub-brand-glow', hexToRgba(customBrand, 0.16))
+    } else {
+      root.style.removeProperty('--hub-brand')
+      root.style.removeProperty('--hub-brand-hover')
+      root.style.removeProperty('--hub-brand-soft')
+      root.style.removeProperty('--hub-brand-glow')
+    }
     window.dispatchEvent(new CustomEvent('qaway-palette-change', { detail: colorPalette }))
-  }, [colorPalette])
+  }, [colorPalette, customBrand])
 
   // Caché local para eliminar al 100% el parpadeo/flash en recargas
   const [cachedProfile] = useState<{ displayName: string; avatarUrl: string | null; roleLabel: string; initials: string } | null>(() => {
@@ -628,13 +690,39 @@ export default function Header({
                       />
                       <button
                         onClick={() => setColorPalette('estudio')}
-                        title="Qaway Estudio (Cobrizo armónico calibrado)"
-                        aria-label="Paleta qaway estudio"
+                        title="Rojo MINEDU Perú (institucional)"
+                        aria-label="Paleta rojo minedu peru"
                         className={`relative w-4 h-4 rounded-full transition-transform cursor-pointer flex items-center justify-center ${
-                          colorPalette === 'estudio' ? 'ring-2 ring-offset-1 ring-[#ea580c] scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
+                          colorPalette === 'estudio' ? 'ring-2 ring-offset-1 ring-[#c8102e] scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
                         }`}
-                        style={{ backgroundColor: '#ea580c' }}
+                        style={{ backgroundColor: '#c8102e' }}
                       />
+                      <label
+                        title="Color personalizado (elige tu marca)"
+                        aria-label="Color de marca personalizado"
+                        className={`relative w-4 h-4 rounded-full transition-transform cursor-pointer flex items-center justify-center overflow-hidden ${
+                          colorPalette === 'personalizado' ? 'scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
+                        }`}
+                        style={{
+                          backgroundColor: customBrand,
+                          boxShadow:
+                            colorPalette === 'personalizado'
+                              ? `0 0 0 2px var(--hub-surface, #ffffff), 0 0 0 4px ${customBrand}`
+                              : undefined,
+                        }}
+                      >
+                        <span className="sr-only">Elegir color de marca personalizado</span>
+                        <input
+                          type="color"
+                          value={/^#[0-9a-fA-F]{6}$/.test(customBrand) ? customBrand : '#c8102e'}
+                          onChange={(e) => {
+                            setCustomBrand(e.target.value)
+                            setColorPalette('personalizado')
+                          }}
+                          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                          aria-label="Selector de color de marca personalizado"
+                        />
+                      </label>
                     </div>
                   </div>
 
