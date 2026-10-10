@@ -62,10 +62,24 @@
 - **Ruta Crítica (CPM):** Tareas en la ruta crítica destacadas en color rojo/naranja advertencia con badge `CRÍTICA`.
 - **Líneas de Dependencia:** Flechas conectivas de relación Fin-Comienzo (FS).
 
-### B. Tablero Kanban Fluido (Scrum / Trello / Linear)
-- **Barra de Filtro Rápido:** Avatares redondos del equipo para filtrar tareas por integrante con un solo clic.
+### B. Tablero Kanban Fluido (Scrum / Trello / Linear + Supervisión Territorial)
+- **Barra de Filtros Ergonómica (Solución al Desorden Horizontal):**
+  - **Selector Desplegable `Filtrar Gestor [Todos (N) ▾]`:** Menú compacto con buscador en tiempo real, conteo de tareas pendientes por gestor y badges numéricos de urgencia. Evita saturar el encabezado horizontal con botones infinitos.
+  - **Avatares de Alerta Preventiva (Acceso Inmediato):** Junto al selector desplegable, se muestran únicamente los avatares circulares de gestores con alertas críticas (tareas vencidas o con plazo ≤ 72h), dotados de un pulso sutil de advertencia (`ring-2 ring-rose-500/50 animate-pulse`).
+  - **Filtro de Jornada para el Coordinador:** Segmentación rápida con un clic para auditar el día:
+    - `[Todos]` | `[Esperando Respuesta]` | `[Respondidos Hoy]` | `[Sin Notificar]`.
 - **Columnas con Límites WIP:** Header de cada columna con contador de trabajo en proceso (ej. `3 / 4 WIP`). Si el número excede el límite, la cabecera activa un badge ámbar/rojo de alerta de cuello de botella.
-- **Tarjetas:** Código de ticket, título, prioridad con badge (`URGENTE`, `ALTA`, `MEDIA`), puntos de historia y avatar del asignado.
+- **Tarjetas Enriquecidas de Monitoreo:**
+  - **Diferenciación Visual de Origen de Tarea:**
+    - `[OM 032 · Hito X.X]`: Subproceso formal del Oficio Múltiple (estilo institucional índigo con icono `FileText` y borde distintivo).
+    - `[Acción Táctica]`: Tarea operativa de campo creada para destrabar gestiones (estilo ámbar/púrpura con icono `Zap`).
+  - **Chip Territorial:** Etiqueta clara de ámbito/jurisdicción (`[UGEL Huancavelica]`, `[UGEL Oxapampa]`, etc.).
+  - **Trazabilidad de Comunicación (Triple-Check Auditable):**
+    - Chips compactos con estado de contacto: `[✓ WA]` (WhatsApp enviado con tooltip de fecha/hora), `[✓ Mail]` (correo institucional remitido), `[✓ App]` (notificación interna).
+  - **Feedback y Alerta de Respuesta del Gestor:**
+    - Badge con pulso visual `[RESPONDIDO]` en verde esmeralda cuando el gestor territorial remitió su descargo/avance, permitiendo al coordinador identificarlo inmediatamente sin abrir la tarjeta.
+  - **Asignación Co-Responsable (Multi-Gestor):**
+    - Renderizado de avatares superpuestos (`-space-x-2`) para directrices generales asignadas a múltiples gestores a la vez.
 - **Acción Rápida:** Botón inline `+ Añadir Tarea` al pie de cada columna.
 
 ### C. Motor de Sprints & Burndown Chart (Scrum Pro)
@@ -87,6 +101,16 @@
 - **Navegador Lateral de Documentos:** Lista jerárquica con iconos/emojis categorizados por tipo (Requerimientos, Minutas, Guías).
 - **Lienzo de Lectura/Edición:** Tipografía enriquecida, bloques de código, listas de verificación y marcas de tiempo de edición.
 
+### F. Slide-Over Lateral: Trazabilidad y Descargo Territorial
+- **Bloque de Auditoría de Envíos:** Botones de acción directa con sellado de tiempo:
+  - Botón verde `WhatsApp`: Abre mensaje preformateado y registra automáticamente la marca `whatsappSentAt`.
+  - Botón azul `Correo`: Abre cliente de correo institucional y sella `emailSentAt`.
+- **Bloque de Respuesta / Descargo de Campo:**
+  - Selector de estado: `Sin Notificar` $\rightarrow$ `Esperando Respuesta` $\rightarrow$ `Respondido`.
+  - Área de texto para registro de minuta de descargo, compromisos o acta de visita del gestor.
+  - Marca temporal automática de respuesta (`respondedAt`) y usuario firmante.
+- **Selector de Co-Responsables:** Permite agregar o remover gestores adicionales para asignaciones transversales.
+
 ---
 
 ## 4. Adaptabilidad Móvil (Mobile-First Real)
@@ -95,3 +119,4 @@
   - El Sidebar se pliega automáticamente como cajón lateral con overlay oscuro.
   - La tabla de proyectos conmuta a tarjetas compactas apiladas verticalmente.
   - El cronograma Gantt y el tablero Kanban habilitan scroll horizontal suave con indicadores de desplazamiento para evitar quiebres de layout.
+  - El dropdown de gestores se adapta a pantalla completa como bottom sheet con buscador táctil ergonómico.

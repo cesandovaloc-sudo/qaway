@@ -1,5 +1,26 @@
-import { useMemo, useState } from 'react'
-import { Ban, ChevronLeft, ChevronRight, Clock, Flag, Link2, MapPin, Plus, Search, User } from 'lucide-react'
+import { useMemo, useState, useRef, useEffect } from 'react'
+import {
+  AlertTriangle,
+  Ban,
+  Bell,
+  CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  FileText,
+  Flag,
+  Link2,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Plus,
+  Search,
+  User,
+  Users,
+  X,
+  Zap,
+} from 'lucide-react'
 import { useProjectWorkItems } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import {
@@ -13,9 +34,10 @@ import {
 import { formatFollowUpDate, getFollowUpStatus } from '@/utils/followUp'
 
 // ─────────────────────────────────────────────────────────────────────────
-// KanbanBoardTab.tsx — b) Tablero Kanban interactivo (Task 4.2)
-// Columnas fluidas con tarjetas interactivas (prioridad, story points,
-// asignado), cambio de estado inline y alta rápida por columna.
+// KanbanBoardTab.tsx — b) Tablero Kanban interactivo (Task 4.2 & Fase 11)
+// Supervisión territorial ergonómica: filtro dropdown sin saturación horizontal,
+// avatares de alerta crítica con pulso, triple-check de contacto, feedback y
+// tareas normativas vs. acciones emergentes de campo.
 // ─────────────────────────────────────────────────────────────────────────
 
 interface KanbanBoardTabProps {
@@ -36,29 +58,109 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
   const [drafts, setDrafts] = useState<Record<WorkItemState, string>>(emptyDrafts)
   const [memberFilter, setMemberFilter] = useState<string | null>(null)
   const [ugelQuery, setUgelQuery] = useState('')
+  const [responseFilter, setResponseFilter] = useState<
+    'todos' | 'esperando_respuesta' | 'respondido' | 'sin_notificar'
+  >('todos')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [memberSearch, setMemberSearch] = useState('')
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const members = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const item of workItems) {
-      const name = item.assignee.name.trim() || 'Sin asignar'
-      map.set(name, (map.get(name) ?? 0) + 1)
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
     }
-    return [...map.entries()].sort((a, b) => b[1] - a[1])
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isDropdownOpen])
+
+  const memberStats = useMemo(() => {
+    interface Stat {
+      name: string
+      count: number
+      urgentCount: number
+      hasUrgent: boolean
+    }
+    const map = new Map<string, Stat>()
+
+    for (const item of workItems) {
+      const names = [item.assignee.name.trim() || 'Sin asignar']
+      if (item.multiAssignees) {
+        for (const co of item.multiAssignees) {
+          if (co.name.trim() && !names.includes(co.name.trim())) {
+            names.push(co.name.trim())
+          }
+        }
+      }
+
+      const followStatus = getFollowUpStatus(item.followUpDate, item.state)
+      const isUrgent =
+        item.priority === 'URGENTE' || followStatus === 'vencido' || Boolean(item.isBlocked)
+
+      for (const name of names) {
+        const existing = map.get(name) || { name, count: 0, urgentCount: 0, hasUrgent: false }
+        existing.count += 1
+        if (isUrgent) {
+          existing.urgentCount += 1
+          existing.hasUrgent = true
+        }
+        map.set(name, existing)
+      }
+    }
+
+    return [...map.values()].sort((a, b) => b.urgentCount - a.urgentCount || b.count - a.count)
+  }, [workItems])
+
+  const urgentMembers = useMemo(() => {
+    return memberStats.filter((m) => m.hasUrgent && m.name !== 'Sin asignar')
+  }, [memberStats])
+
+  const filteredMembersList = useMemo(() => {
+    const q = memberSearch.trim().toLowerCase()
+    if (!q) return memberStats
+    return memberStats.filter((m) => m.name.toLowerCase().includes(q))
+  }, [memberStats, memberSearch])
+
+  const responseCounts = useMemo(() => {
+    let esperando = 0
+    let respondido = 0
+    let sinNotificar = 0
+    for (const item of workItems) {
+      const st = item.gestorFeedback?.responseStatus || 'sin_notificar'
+      if (st === 'esperando_respuesta') esperando++
+      else if (st === 'respondido') respondido++
+      else sinNotificar++
+    }
+    return { esperando, respondido, sinNotificar }
   }, [workItems])
 
   const visibleItems = useMemo(() => {
     const term = ugelQuery.trim().toLowerCase()
     return workItems.filter((item) => {
-      const matchesMember = !memberFilter || (item.assignee.name.trim() || 'Sin asignar') === memberFilter
-      const matchesUgel =
+      const matchesMember =
+        !memberFilter ||
+        (item.assignee.name.trim() || 'Sin asignar') === memberFilter ||
+        Boolean(item.multiAssignees?.some((co) => co.name.trim() === memberFilter))
+
+      const matchesSearch =
         !term ||
         (item.scopeTag ?? '').toLowerCase().includes(term) ||
         item.title.toLowerCase().includes(term) ||
         item.id.toLowerCase().includes(term) ||
-        item.assignee.name.toLowerCase().includes(term)
-      return matchesMember && matchesUgel
+        item.assignee.name.toLowerCase().includes(term) ||
+        Boolean(item.multiAssignees?.some((co) => co.name.toLowerCase().includes(term))) ||
+        (item.milestoneRef ?? '').toLowerCase().includes(term)
+
+      const responseStatus = item.gestorFeedback?.responseStatus || 'sin_notificar'
+      const matchesResponse =
+        responseFilter === 'todos' || responseStatus === responseFilter
+
+      return matchesMember && matchesSearch && matchesResponse
     })
-  }, [workItems, memberFilter, ugelQuery])
+  }, [workItems, memberFilter, ugelQuery, responseFilter])
 
   const move = (taskId: string, direction: -1 | 1) => {
     const current = workItems.find((item) => item.id === taskId)
@@ -66,7 +168,6 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
     const index = KANBAN_STATE_ORDER.indexOf(current.state)
     const next = KANBAN_STATE_ORDER[index + direction]
     if (!next) return
-    // Sellado de cierre: alimenta el burndown en tiempo real (Fase 9).
     projectsService.updateWorkItem(taskId, {
       state: next,
       completedAt: next === 'done' ? new Date().toISOString() : undefined,
@@ -82,60 +183,212 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
       state,
       priority: 'MEDIA',
       assignee: { name: 'Sin asignar', role: 'Equipo' },
+      originType: 'accion_emergente',
     })
     setDrafts((prev) => ({ ...prev, [state]: '' }))
   }
 
   return (
     <>
-      {/* Filtro rápido por integrante + buscador UGEL (Fase 9/10) */}
-      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-        <div className="relative min-w-[200px] flex-1">
-          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-          <input
-            value={ugelQuery}
-            onChange={(event) => setUgelQuery(event.target.value)}
-            placeholder="Buscar por UGEL, tarea o gestor…"
-            aria-label="Buscar por UGEL"
-            className="h-9 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-xs text-zinc-800 outline-none transition-all placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/15"
-          />
-        </div>
-        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Equipo</span>
-        <button
-          type="button"
-          onClick={() => setMemberFilter(null)}
-          className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
-            memberFilter === null
-              ? 'bg-zinc-900 text-white'
-              : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-          }`}
-        >
-          Todos ({workItems.length})
-        </button>
-        {members.map(([name, count]) => {
-          const active = memberFilter === name
-          return (
+      {/* Barra de Filtros Ergonómica (Solución a la saturación horizontal) */}
+      <div className="mb-3 space-y-2 rounded-xl border border-zinc-200 bg-white p-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Buscador reactivo */}
+          <div className="relative min-w-[200px] flex-1">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              value={ugelQuery}
+              onChange={(event) => setUgelQuery(event.target.value)}
+              placeholder="Buscar por UGEL, tarea, código o gestor…"
+              aria-label="Buscar tareas"
+              className="h-9 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-7 text-xs text-zinc-800 outline-none transition-all placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/15"
+            />
+            {ugelQuery && (
+              <button
+                type="button"
+                onClick={() => setUgelQuery('')}
+                aria-label="Limpiar búsqueda"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+
+          {/* Selector Desplegable de Gestores (Elimina botones infinitos) */}
+          <div className="relative" ref={dropdownRef}>
             <button
-              key={name}
               type="button"
-              onClick={() => setMemberFilter(active ? null : name)}
-              title={`${name} · ${count} tareas`}
-              className={`inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-2.5 text-xs font-bold transition-colors ${
-                active ? 'bg-brand text-white' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+              className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-bold transition-colors ${
+                memberFilter
+                  ? 'border-brand bg-brand/5 text-brand ring-2 ring-brand/15'
+                  : 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100'
               }`}
             >
-              <span
-                className={`grid h-6 w-6 place-items-center rounded-full text-[10px] font-extrabold ${
-                  active ? 'bg-white/25 text-white' : 'bg-zinc-900 text-white'
-                }`}
-              >
-                {name.trim().charAt(0).toUpperCase()}
+              <Users size={14} className={memberFilter ? 'text-brand' : 'text-zinc-500'} />
+              <span>
+                {memberFilter ? `Gestor: ${memberFilter}` : `Filtrar Gestor [Todos (${workItems.length})]`}
               </span>
-              <span className="max-w-[120px] truncate">{name}</span>
-              <span className="font-mono opacity-70">{count}</span>
+              <ChevronDown size={13} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
-          )
-        })}
+
+            {/* Menú flotante del selector */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 top-full z-50 mt-1.5 w-72 rounded-xl border border-zinc-200 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-in fade-in-50 zoom-in-95">
+                <div className="relative mb-2">
+                  <Search size={12} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    placeholder="Buscar gestor..."
+                    className="h-7 w-full rounded-md border border-zinc-200 bg-zinc-50 pl-7 pr-2 text-xs outline-none focus:border-brand focus:bg-white"
+                  />
+                </div>
+
+                <div className="max-h-56 space-y-1 overflow-y-auto pr-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMemberFilter(null)
+                      setIsDropdownOpen(false)
+                    }}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                      memberFilter === null ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-zinc-100'
+                    }`}
+                  >
+                    <span>Todos los gestores</span>
+                    <span className="font-mono text-[11px] opacity-70">{workItems.length}</span>
+                  </button>
+
+                  {filteredMembersList.map((stat) => {
+                    const isSelected = memberFilter === stat.name
+                    return (
+                      <button
+                        key={stat.name}
+                        type="button"
+                        onClick={() => {
+                          setMemberFilter(isSelected ? null : stat.name)
+                          setIsDropdownOpen(false)
+                        }}
+                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
+                          isSelected ? 'bg-brand text-white font-bold' : 'text-zinc-700 hover:bg-zinc-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span
+                            className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[9px] font-extrabold ${
+                              isSelected ? 'bg-white/20 text-white' : 'bg-zinc-200 text-zinc-800'
+                            }`}
+                          >
+                            {stat.name.charAt(0).toUpperCase()}
+                          </span>
+                          <span className="truncate">{stat.name}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          {stat.urgentCount > 0 && (
+                            <span
+                              className={`rounded px-1 text-[9px] font-extrabold ${
+                                isSelected ? 'bg-white text-rose-600' : 'bg-rose-100 text-rose-700'
+                              }`}
+                            >
+                              {stat.urgentCount} urg
+                            </span>
+                          )}
+                          <span className="font-mono text-[11px] opacity-70">{stat.count}</span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Avatares de Alerta Preventiva (Acceso inmediato con pulso) */}
+          {urgentMembers.length > 0 && (
+            <div className="flex items-center gap-1.5 border-l border-zinc-200 pl-2">
+              <span className="hidden sm:inline text-[10px] font-extrabold uppercase tracking-wide text-rose-500">
+                Urgencias:
+              </span>
+              <div className="flex items-center gap-1">
+                {urgentMembers.map((m) => {
+                  const isActive = memberFilter === m.name
+                  return (
+                    <button
+                      key={m.name}
+                      type="button"
+                      onClick={() => setMemberFilter(isActive ? null : m.name)}
+                      title={`${m.name}: ${m.urgentCount} tarea(s) críticas o vencidas`}
+                      className={`relative grid h-7 w-7 place-items-center rounded-full text-[10px] font-black transition-transform hover:scale-110 ${
+                        isActive
+                          ? 'bg-rose-600 text-white ring-2 ring-rose-600 ring-offset-1'
+                          : 'bg-rose-50 text-rose-700 ring-2 ring-rose-500/60 animate-pulse hover:animate-none'
+                      }`}
+                    >
+                      {m.name.charAt(0).toUpperCase()}
+                      <span className="absolute -top-1 -right-1 grid h-3.5 w-3.5 place-items-center rounded-full bg-rose-600 text-[8px] font-black text-white">
+                        {m.urgentCount}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Auditoría de Jornada del Coordinador (Segmentación rápida) */}
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-zinc-100 pt-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mr-1">
+            Auditoría de hoy:
+          </span>
+          <button
+            type="button"
+            onClick={() => setResponseFilter('todos')}
+            className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors ${
+              responseFilter === 'todos'
+                ? 'bg-zinc-900 text-white'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+            }`}
+          >
+            Todas ({workItems.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setResponseFilter('esperando_respuesta')}
+            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors ${
+              responseFilter === 'esperando_respuesta'
+                ? 'bg-amber-500 text-white'
+                : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60'
+            }`}
+          >
+            <Clock size={11} /> Esperando Respuesta ({responseCounts.esperando})
+          </button>
+          <button
+            type="button"
+            onClick={() => setResponseFilter('respondido')}
+            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors ${
+              responseFilter === 'respondido'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60'
+            }`}
+          >
+            <CheckCircle2 size={11} /> Respondidos ({responseCounts.respondido})
+          </button>
+          <button
+            type="button"
+            onClick={() => setResponseFilter('sin_notificar')}
+            className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors ${
+              responseFilter === 'sin_notificar'
+                ? 'bg-zinc-600 text-white'
+                : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+            }`}
+          >
+            Sin Notificar ({responseCounts.sinNotificar})
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-5">
@@ -189,7 +442,26 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                           : 'border-zinc-200'
                     }`}
                   >
+                    {/* Badge de Origen de Tarea: Oficial OM 032 vs Acción Táctica */}
                     <div className="flex flex-wrap items-center gap-1.5">
+                      {card.originType === 'oficial_oficio' ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-indigo-50/90 px-1.5 py-0.5 text-[9px] font-extrabold text-indigo-700"
+                          title="Subproceso formal normativo del Oficio Múltiple"
+                        >
+                          <FileText size={10} className="shrink-0 text-indigo-600" />
+                          {card.milestoneRef || 'Oficial OM 032'}
+                        </span>
+                      ) : card.originType === 'accion_emergente' ? (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-900"
+                          title="Acción táctica del equipo de gestores en campo (Excel, traslados, contingencia)"
+                        >
+                          <Zap size={10} className="shrink-0 text-amber-600" />
+                          Acción Táctica
+                        </span>
+                      ) : null}
+
                       {card.isBlocked && (
                         <span className="inline-flex items-center gap-1 rounded border border-rose-300 bg-rose-50 px-1.5 py-px text-[9px] font-extrabold tracking-wide text-rose-700">
                           <Ban size={10} /> BLOQUEADA
@@ -232,13 +504,31 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                       </p>
                     )}
 
+                    {/* Fila del Asignado y Co-Responsables */}
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500">
-                      <span className="inline-flex items-center gap-1 font-semibold">
-                        <span className="grid h-5 w-5 place-items-center rounded-full bg-zinc-900 text-[9px] font-extrabold text-white">
-                          {card.assignee.name.trim().charAt(0).toUpperCase() || <User size={10} />}
+                      <div className="inline-flex items-center gap-1.5 font-semibold">
+                        <div className="flex -space-x-1.5 overflow-hidden">
+                          <span
+                            className="grid h-5 w-5 place-items-center rounded-full bg-zinc-900 text-[9px] font-extrabold text-white ring-1 ring-white"
+                            title={`${card.assignee.name} (${card.assignee.role})`}
+                          >
+                            {card.assignee.name.trim().charAt(0).toUpperCase() || <User size={10} />}
+                          </span>
+                          {card.multiAssignees?.map((co) => (
+                            <span
+                              key={co.name}
+                              className="grid h-5 w-5 place-items-center rounded-full bg-brand text-[9px] font-extrabold text-white ring-1 ring-white"
+                              title={`Co-responsable: ${co.name} (${co.role})`}
+                            >
+                              {co.name.trim().charAt(0).toUpperCase()}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="max-w-[130px] truncate text-zinc-700 font-bold">
+                          {card.assignee.name}
+                          {card.multiAssignees && card.multiAssignees.length > 0 && ` +${card.multiAssignees.length}`}
                         </span>
-                        {card.assignee.name}
-                      </span>
+                      </div>
                       {card.storyPoints !== undefined && (
                         <span className="font-mono font-bold">{card.storyPoints} pts</span>
                       )}
@@ -254,7 +544,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                       )}
                     </div>
 
-                    {/* Semáforo de seguimiento + UGEL (Fase 10) */}
+                    {/* Semáforo de seguimiento + UGEL */}
                     {(card.followUpDate || card.scopeTag) && (
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
                         {card.scopeTag && (
@@ -275,6 +565,52 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                             {formatFollowUpDate(card.followUpDate)}
                           </span>
                         )}
+                      </div>
+                    )}
+
+                    {/* Trazabilidad (Triple-Check) & Feedback del Gestor */}
+                    {(card.notificationAudit || card.gestorFeedback) && (
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-zinc-100 pt-1.5">
+                        {card.notificationAudit?.whatsappSentAt && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700 border border-emerald-200/80"
+                            title={`WhatsApp enviado: ${new Date(card.notificationAudit.whatsappSentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                          >
+                            <MessageSquare size={9} /> ✓ WA
+                          </span>
+                        )}
+                        {card.notificationAudit?.emailSentAt && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded bg-sky-50 px-1.5 py-0.5 text-[9px] font-extrabold text-sky-700 border border-sky-200/80"
+                            title={`Correo enviado: ${new Date(card.notificationAudit.emailSentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                          >
+                            <Mail size={9} /> ✓ Mail
+                          </span>
+                        )}
+                        {card.notificationAudit?.appNotifiedAt && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded bg-purple-50 px-1.5 py-0.5 text-[9px] font-extrabold text-purple-700 border border-purple-200/80"
+                            title="Notificado en App"
+                          >
+                            <Bell size={9} /> ✓ App
+                          </span>
+                        )}
+
+                        {card.gestorFeedback?.responseStatus === 'respondido' ? (
+                          <span
+                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-extrabold text-emerald-800 shadow-sm ring-1 ring-emerald-500/30 animate-pulse"
+                            title={card.gestorFeedback.lastResponseNote ? `Respondido: "${card.gestorFeedback.lastResponseNote}"` : 'El gestor reportó cumplimiento'}
+                          >
+                            <CheckCircle2 size={10} className="text-emerald-600 shrink-0" /> RESPONDIDO
+                          </span>
+                        ) : card.gestorFeedback?.responseStatus === 'esperando_respuesta' ? (
+                          <span
+                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50/70 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800"
+                            title="Esperando respuesta del gestor territorial"
+                          >
+                            <Clock size={9} className="shrink-0" /> Esperando respuesta
+                          </span>
+                        ) : null}
                       </div>
                     )}
 

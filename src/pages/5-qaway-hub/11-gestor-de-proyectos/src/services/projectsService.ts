@@ -3,9 +3,11 @@ import type {
   BurndownSnapshot,
   CostStatus,
   EarnedValueMetrics,
+  GestorFeedback,
   MethodologyDistribution,
   Milestone,
   NewProjectInput,
+  NotificationAudit,
   PortfolioKpis,
   Project,
   ProjectDoc,
@@ -15,6 +17,7 @@ import type {
   Sprint,
   TeamMemberWorkload,
   WorkItem,
+  WorkItemAssignee,
   WorkloadRisk,
 } from '@/types/project.types'
 import {
@@ -37,7 +40,7 @@ import { mockProjectsDataset } from '@/data/mock-projects-data'
 // - Aislamiento: no toca Supabase ni el auth del Hub.
 // ─────────────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'qaway_projects_v2'
+const STORAGE_KEY = 'qaway_projects_v3'
 
 type Listener = () => void
 
@@ -72,8 +75,10 @@ function readStorage(): ProjectsDataset | null {
   try {
     let raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) {
-      // Intentar migrar desde v1 si existía previamente
-      raw = window.localStorage.getItem('qaway_projects_v1')
+      // Intentar migrar desde v2 o v1 si existía previamente
+      raw =
+        window.localStorage.getItem('qaway_projects_v2') ||
+        window.localStorage.getItem('qaway_projects_v1')
     }
     if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
@@ -121,6 +126,27 @@ function loadInitialState(): ProjectsDataset {
       milestones.push(...clone(seedMilestones))
       const seedDocs = mockProjectsDataset.docs.filter((d) => d.projectId === seedProject.id)
       docs.push(...clone(seedDocs))
+    }
+  }
+
+  // Asegurar enriquecimiento de tareas semilla territoriales Fase 11
+  for (const seedItem of mockProjectsDataset.workItems) {
+    if (seedItem.projectId === 'proj-minedu-2027') {
+      const existingIdx = workItems.findIndex((w) => w.id === seedItem.id)
+      if (existingIdx === -1) {
+        hasMissing = true
+        workItems.push(clone(seedItem))
+      } else if (!workItems[existingIdx].originType) {
+        hasMissing = true
+        workItems[existingIdx] = {
+          ...workItems[existingIdx],
+          originType: seedItem.originType,
+          milestoneRef: seedItem.milestoneRef,
+          notificationAudit: seedItem.notificationAudit,
+          gestorFeedback: seedItem.gestorFeedback,
+          multiAssignees: seedItem.multiAssignees,
+        }
+      }
     }
   }
 
@@ -299,6 +325,71 @@ export const projectsService = {
     setState({
       ...state,
       workItems: state.workItems.filter((item) => item.id !== workItemId),
+    })
+  },
+
+  // ── Métodos Fase 11: Trazabilidad y Feedback de Campo ──
+  recordNotificationSent(
+    workItemId: string,
+    channel: 'whatsapp' | 'email' | 'app',
+    sentBy?: string,
+  ): void {
+    const item = state.workItems.find((w) => w.id === workItemId)
+    if (!item) return
+    const now = new Date().toISOString()
+    const currentAudit = item.notificationAudit ?? {}
+    const updatedAudit: NotificationAudit = {
+      ...currentAudit,
+      ...(channel === 'whatsapp'
+        ? { whatsappSentAt: now, whatsappSentBy: sentBy || 'Coordinador General' }
+        : {}),
+      ...(channel === 'email'
+        ? { emailSentAt: now, emailSentBy: sentBy || 'Coordinador General' }
+        : {}),
+      ...(channel === 'app'
+        ? { appNotifiedAt: now }
+        : {}),
+    }
+    const currentFeedback = item.gestorFeedback ?? { responseStatus: 'sin_notificar' }
+    const nextResponseStatus =
+      currentFeedback.responseStatus === 'respondido' ? 'respondido' : 'esperando_respuesta'
+
+    this.updateWorkItem(workItemId, {
+      notificationAudit: updatedAudit,
+      gestorFeedback: {
+        ...currentFeedback,
+        responseStatus: nextResponseStatus,
+      },
+    })
+  },
+
+  updateGestorFeedback(
+    workItemId: string,
+    feedback: Partial<GestorFeedback>,
+  ): void {
+    const item = state.workItems.find((w) => w.id === workItemId)
+    if (!item) return
+    const current = item.gestorFeedback ?? { responseStatus: 'sin_notificar' }
+    this.updateWorkItem(workItemId, {
+      gestorFeedback: {
+        ...current,
+        ...feedback,
+        respondedAt:
+          feedback.responseStatus === 'respondido'
+            ? feedback.respondedAt || new Date().toISOString()
+            : feedback.respondedAt,
+      },
+    })
+  },
+
+  updateTaskAssignees(
+    workItemId: string,
+    primaryAssignee: WorkItemAssignee,
+    multiAssignees?: WorkItemAssignee[],
+  ): void {
+    this.updateWorkItem(workItemId, {
+      assignee: primaryAssignee,
+      multiAssignees,
     })
   },
 

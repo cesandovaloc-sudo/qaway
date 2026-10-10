@@ -123,3 +123,36 @@
   - Chip identificador de UGEL / Ámbito en las tarjetas.
   - Buscador / filtro por UGEL.
 - [x] **Task 10.6:** Verificación de compilación `npm run typecheck`, actualización de `tasks.md` y prueba HTTP 200.
+
+---
+
+## 🛰️ Fase 11: Ergonomía de Coordinación Territorial, Trazabilidad & Feedback de Campo
+- [x] **Task 11.1:** Extender modelo de datos en `src/types/project.types.ts`:
+  - Definir tipos `TaskOriginType = 'oficial_oficio' | 'accion_emergente'`, `TaskResponseStatus = 'sin_notificar' | 'esperando_respuesta' | 'respondido'`.
+  - Interfaces `NotificationAudit` (`whatsappSentAt`, `whatsappSentBy`, `emailSentAt`, `emailSentBy`, `appNotifiedAt`) y `GestorFeedback` (`responseStatus`, `lastResponseNote`, `respondedAt`, `respondedBy`).
+  - En `WorkItem`: incorporar `originType?: TaskOriginType`, `milestoneRef?: string`, `notificationAudit?: NotificationAudit`, `gestorFeedback?: GestorFeedback`, `multiAssignees?: WorkItemAssignee[]`.
+- [x] **Task 11.2:** Enriquecer proyecto semilla MINEDU en `src/data/mock-projects-data.ts`:
+  - Marcar tareas normativas del OM 032 como `originType: 'oficial_oficio'` con referencia al hito correspondiente.
+  - Añadir tareas con `originType: 'accion_emergente'` (ej. "Consolidación de cuadro Excel de contingencia local", "Visita de inspección extraordinaria").
+  - Poblar trazabilidad de comunicaciones (`whatsappSentAt`, `emailSentAt`) y respuestas simuladas (`respondido` con minuta de campo y fecha).
+  - Incluir tareas co-responsables con múltiples gestores (`multiAssignees`).
+- [x] **Task 11.3:** Extender store y servicio en `src/services/projectsService.ts` y hooks en `src/hooks/useProjects.ts`:
+  - Método `recordNotificationSent(taskId, channel, user)` para registrar timestamp reactivo en `localStorage`.
+  - Método `updateGestorFeedback(taskId, feedback)` para marcar estado de respuesta y nota de descargo.
+  - Método `updateTaskAssignees(taskId, assignees)` para soporte de co-responsables.
+- [x] **Task 11.4:** Rediseñar la barra superior de filtros en `src/pages/projects/workspace/KanbanBoardTab.tsx`:
+  - Eliminar la barra horizontal de botones de nombres que saturaba visualmente la pantalla.
+  - Implementar dropdown selector `Filtrar Gestor [Todos (N) ▾]` con buscador en tiempo real y contador de tareas.
+  - Mostrar a un costado únicamente avatares circulares de gestores con alertas críticas (vencidas o ≤ 72h) con pulso de advertencia (`animate-pulse`).
+  - Agregar botones de filtro de fin de jornada para el coordinador: `Todos` | `Esperando Respuesta` | `Respondidos Hoy` | `Sin Notificar`.
+- [x] **Task 11.5:** Rediseñar tarjetas de Kanban (`WorkItemCard`):
+  - Badge de origen: `[OM 032 · Hito X]` (estilo formal índigo con icono `FileText`) vs `[Acción Táctica]` (estilo ámbar con icono `Zap`).
+  - Triple-check de notificación: chips compactos `[✓ WA]`, `[✓ Mail]`, `[✓ App]` con fecha/hora visible.
+  - Badge de feedback: `[RESPONDIDO]` en verde esmeralda con pulso visual sutil para identificación inmediata al vuelo.
+  - Renderizado de avatares apilados (`-space-x-2`) para directrices asignadas a múltiples gestores a la vez.
+- [x] **Task 11.6:** Enriquecer `src/components/projects/SlideOverTaskSheet.tsx`:
+  - Selector de origen de tarea (`Oficial OM 032` vs `Acción Táctica`).
+  - Selector multi-asignado de co-responsables territoriales.
+  - Sellado automático de marca de tiempo al hacer clic en WhatsApp o Correo.
+  - Sección interactiva "Descargo / Reporte de Campo del Gestor" para registrar minutas, compromisos y conmutar a `Respondido`.
+- [x] **Task 11.7:** Verificación de compilación TypeScript (`npm run typecheck` 0 errores) y confirmación HTTP 200 en Dev Server.

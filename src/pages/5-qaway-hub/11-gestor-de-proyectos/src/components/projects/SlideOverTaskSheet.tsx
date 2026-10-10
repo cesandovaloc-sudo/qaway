@@ -1,5 +1,24 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, Ban, Calendar, CalendarClock, Check, Link2, ListChecks, Mail, MapPin, MessageCircle, Save, Trash2, User, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  Ban,
+  Calendar,
+  CalendarClock,
+  Check,
+  CheckCircle2,
+  FileText,
+  Link2,
+  ListChecks,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Save,
+  Trash2,
+  User,
+  Users,
+  X,
+  Zap,
+} from 'lucide-react'
 import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { useProjectsDataset } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
@@ -9,7 +28,10 @@ import {
   TSHIRT_POINTS,
   WORK_ITEM_PRIORITY_META,
   WORK_ITEM_STATE_META,
+  type TaskOriginType,
+  type TaskResponseStatus,
   type TShirtSize,
+  type WorkItemAssignee,
   type WorkItemPriority,
   type WorkItemState,
 } from '@/types/project.types'
@@ -50,6 +72,13 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
   const [criteriaText, setCriteriaText] = useState('')
   const [state, setState] = useState<WorkItemState>('backlog')
   const [priority, setPriority] = useState<WorkItemPriority>('MEDIA')
+  const [originType, setOriginType] = useState<TaskOriginType>('accion_emergente')
+  const [milestoneRef, setMilestoneRef] = useState('')
+  const [responseStatus, setResponseStatus] = useState<TaskResponseStatus>('sin_notificar')
+  const [lastResponseNote, setLastResponseNote] = useState('')
+  const [coAssigneeName, setCoAssigneeName] = useState('')
+  const [coAssigneeRole, setCoAssigneeRole] = useState('')
+  const [multiAssignees, setMultiAssignees] = useState<WorkItemAssignee[]>([])
   const [milestoneId, setMilestoneId] = useState('')
   const [followUpDate, setFollowUpDate] = useState('')
   const [scopeTag, setScopeTag] = useState('')
@@ -74,6 +103,13 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
     setCriteriaText((task.acceptanceCriteria ?? []).join('\n'))
     setState(task.state)
     setPriority(task.priority)
+    setOriginType(task.originType ?? (task.milestoneId ? 'oficial_oficio' : 'accion_emergente'))
+    setMilestoneRef(task.milestoneRef ?? '')
+    setResponseStatus(task.gestorFeedback?.responseStatus ?? 'sin_notificar')
+    setLastResponseNote(task.gestorFeedback?.lastResponseNote ?? '')
+    setMultiAssignees(task.multiAssignees ?? [])
+    setCoAssigneeName('')
+    setCoAssigneeRole('')
     setMilestoneId(task.milestoneId ?? '')
     setFollowUpDate(task.followUpDate ?? '')
     setScopeTag(task.scopeTag ?? '')
@@ -126,6 +162,11 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
     criteria.join('\n') !== (task.acceptanceCriteria ?? []).join('\n') ||
     state !== task.state ||
     priority !== task.priority ||
+    originType !== (task.originType ?? (task.milestoneId ? 'oficial_oficio' : 'accion_emergente')) ||
+    milestoneRef.trim() !== (task.milestoneRef ?? '') ||
+    responseStatus !== (task.gestorFeedback?.responseStatus ?? 'sin_notificar') ||
+    lastResponseNote.trim() !== (task.gestorFeedback?.lastResponseNote ?? '') ||
+    JSON.stringify(multiAssignees) !== JSON.stringify(task.multiAssignees ?? []) ||
     milestoneId !== (task.milestoneId ?? '') ||
     followUpDate !== (task.followUpDate ?? '') ||
     scopeTag.trim() !== (task.scopeTag ?? '') ||
@@ -152,6 +193,18 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
       acceptanceCriteria: criteria.length > 0 ? criteria : undefined,
       state,
       priority,
+      originType,
+      milestoneRef: milestoneRef.trim() || undefined,
+      multiAssignees: multiAssignees.length > 0 ? multiAssignees : undefined,
+      gestorFeedback: {
+        responseStatus,
+        lastResponseNote: lastResponseNote.trim() || undefined,
+        respondedAt:
+          responseStatus === 'respondido'
+            ? task.gestorFeedback?.respondedAt || new Date().toISOString()
+            : undefined,
+        respondedBy: responseStatus === 'respondido' ? assigneeName.trim() : undefined,
+      },
       milestoneId: milestoneId || undefined,
       followUpDate: followUpDate || undefined,
       scopeTag: scopeTag.trim() || undefined,
@@ -258,11 +311,62 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
             {isCritical && <span className="ml-auto uppercase tracking-wide">· Ruta crítica</span>}
           </div>
 
-          {/* Vinculación territorial MINEDU (Fase 10) */}
-          <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-50/50 p-3">
-            <p className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-sky-800">
-              <MapPin size={12} /> Vinculación territorial
-            </p>
+          {/* Vinculación territorial MINEDU & Coordinación de Campo (Fase 10/11) */}
+          <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-50/50 p-3.5">
+            <div className="flex items-center justify-between">
+              <p className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-sky-800">
+                <MapPin size={12} /> Coordinación Territorial & Hitos
+              </p>
+              {originType === 'oficial_oficio' ? (
+                <span className="inline-flex items-center gap-1 rounded bg-indigo-100 px-1.5 py-0.5 text-[9px] font-extrabold text-indigo-700">
+                  <FileText size={10} /> Oficial OM 032
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-800">
+                  <Zap size={10} /> Acción Táctica
+                </span>
+              )}
+            </div>
+
+            {/* Clasificación de origen */}
+            <div>
+              <span className={labelClass}>Tipo de tarea</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOriginType('oficial_oficio')}
+                  className={`flex-1 rounded-lg border py-1.5 px-2.5 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${
+                    originType === 'oficial_oficio'
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-500/15'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100'
+                  }`}
+                >
+                  <FileText size={13} className={originType === 'oficial_oficio' ? 'text-indigo-600' : 'text-zinc-400'} />
+                  Oficial OM 032
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOriginType('accion_emergente')}
+                  className={`flex-1 rounded-lg border py-1.5 px-2.5 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${
+                    originType === 'accion_emergente'
+                      ? 'border-amber-600 bg-amber-50 text-amber-800 ring-2 ring-amber-500/15'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100'
+                  }`}
+                >
+                  <Zap size={13} className={originType === 'accion_emergente' ? 'text-amber-600' : 'text-zinc-400'} />
+                  Acción Táctica
+                </button>
+              </div>
+              {originType === 'oficial_oficio' && (
+                <input
+                  value={milestoneRef}
+                  onChange={(e) => setMilestoneRef(e.target.value)}
+                  placeholder="Referencia: ej. OM 032 · Hito 3"
+                  className={`${inputClass} mt-2 text-xs`}
+                />
+              )}
+            </div>
+
             <div>
               <label className={labelClass} htmlFor="gp-task-milestone">Hito rector asociado</label>
               <select
@@ -324,6 +428,7 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                   href={waUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => projectsService.recordNotificationSent(task.id, 'whatsapp')}
                   className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#25d366] px-3 text-xs font-extrabold text-white shadow-sm transition-transform hover:scale-[1.02] sm:flex-none sm:px-4"
                 >
                   <MessageCircle size={14} /> WhatsApp
@@ -339,6 +444,7 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
               {mailUrl ? (
                 <a
                   href={mailUrl}
+                  onClick={() => projectsService.recordNotificationSent(task.id, 'email')}
                   className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg bg-zinc-900 px-3 text-xs font-extrabold text-white transition-colors hover:bg-brand sm:flex-none sm:px-4"
                 >
                   <Mail size={14} /> Correo
@@ -351,6 +457,86 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                   <Mail size={14} /> Correo
                 </span>
               )}
+            </div>
+
+            {/* Evidencia de contacto registrada */}
+            {(task.notificationAudit?.whatsappSentAt || task.notificationAudit?.emailSentAt) && (
+              <div className="rounded-lg border border-sky-200 bg-white p-2.5 text-[10px] text-zinc-600 space-y-1">
+                <span className="font-extrabold uppercase tracking-wide text-zinc-400 block">
+                  Evidencia de Contacto Registrada
+                </span>
+                {task.notificationAudit.whatsappSentAt && (
+                  <p className="flex items-center gap-1.5 text-emerald-700 font-bold">
+                    <MessageCircle size={11} className="text-[#25d366]" />
+                    WhatsApp: {new Date(task.notificationAudit.whatsappSentAt).toLocaleString()} ({task.notificationAudit.whatsappSentBy || 'Coordinador'})
+                  </p>
+                )}
+                {task.notificationAudit.emailSentAt && (
+                  <p className="flex items-center gap-1.5 text-sky-700 font-bold">
+                    <Mail size={11} className="text-sky-600" />
+                    Correo: {new Date(task.notificationAudit.emailSentAt).toLocaleString()} ({task.notificationAudit.emailSentBy || 'Coordinador'})
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Reporte & Descargo de campo del gestor */}
+            <div className="rounded-lg border border-zinc-200 bg-white p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className={responseStatus === 'respondido' ? 'text-emerald-600' : 'text-zinc-400'} />
+                  Reporte & Descargo del Gestor
+                </span>
+                {task.gestorFeedback?.respondedAt && (
+                  <span className="font-mono text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                    Respondido {new Date(task.gestorFeedback.respondedAt).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex gap-1.5">
+                {(['sin_notificar', 'esperando_respuesta', 'respondido'] as TaskResponseStatus[]).map((status) => {
+                  const active = responseStatus === status
+                  const labels: Record<TaskResponseStatus, string> = {
+                    sin_notificar: 'Sin notificar',
+                    esperando_respuesta: 'Esperando respuesta',
+                    respondido: '✓ Respondido',
+                  }
+                  const activeClasses: Record<TaskResponseStatus, string> = {
+                    sin_notificar: 'bg-zinc-800 text-white border-zinc-800',
+                    esperando_respuesta: 'bg-amber-500 text-white border-amber-500',
+                    respondido: 'bg-emerald-600 text-white border-emerald-600',
+                  }
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => setResponseStatus(status)}
+                      className={`flex-1 rounded-md border py-1 text-[10px] font-extrabold transition-colors ${
+                        active
+                          ? activeClasses[status]
+                          : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100'
+                      }`}
+                    >
+                      {labels[status]}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500 mb-1 block" htmlFor="gp-task-response-note">
+                  Minuta de descargo / acuerdos en campo
+                </label>
+                <textarea
+                  id="gp-task-response-note"
+                  rows={2}
+                  value={lastResponseNote}
+                  onChange={(e) => setLastResponseNote(e.target.value)}
+                  placeholder="ej. Acta de recepción suscrita con el director de UGEL, padrón validado sin observaciones..."
+                  className={`${inputClass} h-auto resize-none py-2 text-xs`}
+                />
+              </div>
             </div>
           </div>
 
@@ -456,6 +642,69 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                 inputMode="email"
                 className={inputClass}
               />
+            </div>
+          </div>
+
+          {/* Co-Responsables Territoriales */}
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 space-y-2">
+            <span className="text-xs font-bold text-zinc-800 flex items-center gap-1.5">
+              <Users size={13} className="text-brand" />
+              Co-Responsables Territoriales ({multiAssignees.length})
+            </span>
+
+            {multiAssignees.length > 0 && (
+              <div className="space-y-1.5">
+                {multiAssignees.map((co, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs"
+                  >
+                    <div>
+                      <p className="font-bold text-zinc-800">{co.name}</p>
+                      <p className="text-[10px] text-zinc-400">{co.role}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setMultiAssignees((prev) => prev.filter((_, i) => i !== idx))}
+                      className="rounded p-1 text-zinc-400 hover:bg-rose-50 hover:text-rose-600"
+                      title="Remover co-responsable"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
+              <input
+                value={coAssigneeName}
+                onChange={(e) => setCoAssigneeName(e.target.value)}
+                placeholder="Nombre de co-gestor..."
+                className="h-8 flex-1 rounded-md border border-zinc-200 bg-white px-2.5 text-xs outline-none focus:border-brand"
+              />
+              <input
+                value={coAssigneeRole}
+                onChange={(e) => setCoAssigneeRole(e.target.value)}
+                placeholder="Rol..."
+                className="h-8 w-28 rounded-md border border-zinc-200 bg-white px-2.5 text-xs outline-none focus:border-brand"
+              />
+              <button
+                type="button"
+                disabled={!coAssigneeName.trim()}
+                onClick={() => {
+                  if (!coAssigneeName.trim()) return
+                  setMultiAssignees((prev) => [
+                    ...prev,
+                    { name: coAssigneeName.trim(), role: coAssigneeRole.trim() || 'Co-Gestor' },
+                  ])
+                  setCoAssigneeName('')
+                  setCoAssigneeRole('')
+                }}
+                className="h-8 rounded-md bg-zinc-900 px-3 text-xs font-bold text-white hover:bg-brand disabled:opacity-40"
+              >
+                + Añadir
+              </button>
             </div>
           </div>
 

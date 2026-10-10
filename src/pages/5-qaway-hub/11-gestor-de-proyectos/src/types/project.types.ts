@@ -73,11 +73,32 @@ export interface WorkItemAssignee {
   email?: string // Correo institucional (Fase 10)
 }
 
+// ── Fase 11: Trazabilidad & Coordinación Territorial ──
+export type TaskOriginType = 'oficial_oficio' | 'accion_emergente'
+export type TaskResponseStatus = 'sin_notificar' | 'esperando_respuesta' | 'respondido'
+
+export interface NotificationAudit {
+  whatsappSentAt?: string
+  whatsappSentBy?: string
+  emailSentAt?: string
+  emailSentBy?: string
+  appNotifiedAt?: string
+}
+
+export interface GestorFeedback {
+  responseStatus: TaskResponseStatus
+  lastResponseNote?: string
+  respondedAt?: string
+  respondedBy?: string
+}
+
 export interface WorkItem {
   id: string // ej: "TSK-101"
   projectId: string
   sprintId?: string
   milestoneId?: string // Hito Rector vinculado (Fase 10)
+  milestoneRef?: string // Referencia normativa oficial ej: "OM 032 · Hito 1.2" (Fase 11)
+  originType?: TaskOriginType // 'oficial_oficio' vs 'accion_emergente' (Fase 11)
   epicTitle?: string // Épica / agrupador funcional (Fase 9)
   title: string
   description?: string
@@ -85,6 +106,9 @@ export interface WorkItem {
   state: WorkItemState
   priority: WorkItemPriority
   assignee: WorkItemAssignee
+  multiAssignees?: WorkItemAssignee[] // Co-responsables territoriales (Fase 11)
+  notificationAudit?: NotificationAudit // Trazabilidad de contacto auditable (Fase 11)
+  gestorFeedback?: GestorFeedback // Feedback y descargo de campo del gestor (Fase 11)
   storyPoints?: number // Para Scrum
   tShirtSize?: TShirtSize // Estimación ágil por tallas (Fase 9)
   durationDays?: number // Para Gantt P6
