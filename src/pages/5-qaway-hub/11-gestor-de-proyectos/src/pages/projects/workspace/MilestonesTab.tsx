@@ -74,7 +74,7 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
         <div className="ml-auto flex min-w-[200px] items-center gap-2.5">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-100">
             <div
-              className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+              className="h-full rounded-full bg-[var(--hub-brand)] transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -137,7 +137,7 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
                       <Clock size={12} /> {formatDate(milestone.targetDate)}
                     </span>
                     {milestone.signOffRequired && (
-                      <span className="rounded-md bg-amber-50 px-2 py-0.5 font-bold uppercase tracking-wide text-amber-700">
+                      <span className="rounded-md border border-[#f5d8c8] bg-[#fdf3ed] px-2 py-0.5 font-bold uppercase tracking-wide text-[#b85a2f]">
                         Requiere firma
                       </span>
                     )}

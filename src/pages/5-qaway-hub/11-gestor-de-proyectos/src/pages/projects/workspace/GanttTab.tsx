@@ -163,10 +163,10 @@ export function GanttTab({ projectId, onOpenTask }: GanttTabProps) {
             <span className="h-2.5 w-8 rounded-full bg-brand" /> Normal
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-8 rounded-full bg-rose-500" /> Ruta crítica ({criticalCount})
+            <span className="h-2.5 w-8 rounded-full bg-[#b83328]" /> Ruta crítica ({criticalCount})
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-8 rounded-full bg-emerald-500" /> Completada
+            <span className="h-2.5 w-8 rounded-full bg-[#404040]" /> Completada
           </span>
         </div>
       </div>
@@ -227,13 +227,13 @@ export function GanttTab({ projectId, onOpenTask }: GanttTabProps) {
                         className="block w-full text-left"
                       >
                         <p className="flex items-center gap-1.5 truncate text-[13px] font-bold text-zinc-800 hover:text-brand">
-                          {row.isCritical && <Flag size={12} className="shrink-0 text-rose-500" />}
+                          {row.isCritical && <Flag size={12} className="shrink-0 text-[#b83328]" />}
                           <span className="truncate">{row.title}</span>
                         </p>
                         <p className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-zinc-400">
                           {row.id} · {days}d
                           {row.predecessors.length > 0 && (
-                            <span className="inline-flex items-center gap-0.5 text-violet-600">
+                            <span className="inline-flex items-center gap-0.5 text-[#8b829e]">
                               <Link2 size={10} /> {row.predecessors.join(', ')}
                             </span>
                           )}
@@ -251,13 +251,13 @@ export function GanttTab({ projectId, onOpenTask }: GanttTabProps) {
                           left: `${left}%`,
                           width: `${Math.min(100 - left, width)}%`,
                           backgroundColor: row.isDone
-                            ? '#10b981'
+                            ? '#404040'
                             : row.isCritical
-                              ? '#f43f5e'
-                              : '#ff4b0b',
+                              ? '#b83328'
+                              : 'var(--hub-brand, #d9532f)',
                           boxShadow: row.isCritical
-                            ? '0 0 0 3px rgba(244,63,94,0.18)'
-                            : '0 2px 6px rgba(255,75,11,0.25)',
+                            ? '0 0 0 3px rgba(184,51,40,0.18)'
+                            : '0 2px 6px var(--hub-brand-glow, rgba(217,83,47,0.22))',
                         }}
                       />
                     </div>

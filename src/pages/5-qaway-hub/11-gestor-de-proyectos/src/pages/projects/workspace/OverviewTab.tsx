@@ -163,7 +163,7 @@ export function OverviewTab({ projectId, onOpenTask, onGoDocs }: OverviewTabProp
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${Math.min(100, budgetPct)}%`,
-                backgroundColor: budgetPct >= 85 ? '#e11d48' : '#0284c7',
+                backgroundColor: budgetPct >= 85 ? '#b83328' : 'var(--hub-brand, #d9532f)',
               }}
             />
           </div>
@@ -196,7 +196,7 @@ export function OverviewTab({ projectId, onOpenTask, onGoDocs }: OverviewTabProp
                     <div className="mt-2 flex items-center gap-2">
                       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
                         <div
-                          className="h-full rounded-full bg-violet-500"
+                          className="h-full rounded-full bg-zinc-800"
                           style={{ width: `${Math.min(100, pct)}%` }}
                         />
                       </div>
@@ -216,8 +216,8 @@ export function OverviewTab({ projectId, onOpenTask, onGoDocs }: OverviewTabProp
       <div className="space-y-4">
         <div className={panelClass}>
           <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-zinc-900">
-            <AlertTriangle size={15} className="text-rose-500" /> Tareas en riesgo
-            <span className="ml-auto rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-600">
+            <AlertTriangle size={15} className="text-[#b83328]" /> Tareas en riesgo
+            <span className="ml-auto rounded-full bg-[#fcedea] px-2 py-0.5 text-[11px] font-bold text-[#9a2820]">
               {riskTasks.length}
             </span>
           </h3>
@@ -230,7 +230,7 @@ export function OverviewTab({ projectId, onOpenTask, onGoDocs }: OverviewTabProp
                   <button
                     type="button"
                     onClick={() => onOpenTask(item.id)}
-                    className="w-full rounded-xl border border-zinc-100 p-2.5 text-left transition-colors hover:border-brand/40 hover:bg-orange-50/40"
+                    className="w-full rounded-xl border border-zinc-100 p-2.5 text-left transition-colors hover:border-brand/40 hover:bg-[#fdf0ec]"
                   >
                     <p className="flex items-center gap-2 text-[13px] font-bold text-zinc-800">
                       <span
@@ -263,7 +263,7 @@ export function OverviewTab({ projectId, onOpenTask, onGoDocs }: OverviewTabProp
           </h3>
           <p className="mb-3 text-[11px] text-zinc-400">Puntos activos vs. capacidad (10 pts)</p>
           {overloaded.length > 0 && (
-            <p className="mb-3 flex items-start gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-bold leading-snug text-rose-700">
+            <p className="mb-3 flex items-start gap-1.5 rounded-xl border border-[#f5cfca] bg-[#fcedea] px-3 py-2 text-[11px] font-bold leading-snug text-[#9a2820]">
               <AlertTriangle size={13} className="mt-0.5 shrink-0" />
               Riesgo de burnout: {overloaded.map((member) => member.memberName).join(', ')}. Redistribuye
               tareas o desbloquea impedimentos.
@@ -320,7 +320,7 @@ export function OverviewTab({ projectId, onOpenTask, onGoDocs }: OverviewTabProp
             <ul className="space-y-2.5">
               {upcomingMilestones.map((milestone) => (
                 <li key={milestone.id} className="flex items-start gap-2.5 text-sm">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-violet-50 text-[11px] font-extrabold text-violet-700">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[#f4f2f7] text-[11px] font-extrabold text-[#6d6480]">
                     {milestone.phaseNumber}
                   </span>
                   <div className="min-w-0">

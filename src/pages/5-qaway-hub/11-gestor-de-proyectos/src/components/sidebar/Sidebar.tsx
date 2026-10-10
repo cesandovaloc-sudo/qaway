@@ -165,7 +165,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         <div
           className="w-[30px] h-[30px] flex-shrink-0 relative"
           style={{
-            background: 'linear-gradient(135deg, #ff6b35, #ff4b0b)',
+            background: 'linear-gradient(135deg, var(--hub-brand-hover, #c44523), var(--hub-brand, #d9532f))',
             clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
           }}
         >
@@ -186,8 +186,8 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               <span
                 className="text-[11px] font-semibold rounded-[6px] px-[7px] py-[3px] leading-none"
                 style={{
-                  backgroundColor: '#fff2eb',
-                  color: '#ff4b0b',
+                  backgroundColor: 'var(--hub-brand-soft, #fbf0ec)',
+                  color: 'var(--hub-brand, #d9532f)',
                 }}
               >
                 Pro
@@ -224,7 +224,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                       className={({ isActive }) =>
                         `flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                           hasChildren && isProjectsExpanded && !collapsed
-                            ? 'border-l-2 border-[#ff4b0b] bg-[var(--hub-chip)] text-[var(--hub-text)]'
+                            ? 'border-l-2 border-[var(--hub-brand)] bg-[var(--hub-chip)] text-[var(--hub-text)]'
                             : ''
                         } ${
                           isActive

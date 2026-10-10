@@ -373,8 +373,8 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
             onClick={() => setResponseFilter('esperando_respuesta')}
             className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors ${
               responseFilter === 'esperando_respuesta'
-                ? 'bg-amber-500 text-white'
-                : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60'
+                ? 'bg-[#cf7143] text-white'
+                : 'bg-[#fdf3ed] text-[#b85a2f] hover:bg-[#fae7dc] border border-[#f5d8c8]'
             }`}
           >
             <Clock size={11} /> Esperando Respuesta ({responseCounts.esperando})
@@ -384,8 +384,8 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
             onClick={() => setResponseFilter('respondido')}
             className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors ${
               responseFilter === 'respondido'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60'
+                ? 'bg-[#404040] text-white'
+                : 'bg-[#f4f4f5] text-[#27272a] hover:bg-[#e4e4e7] border border-[#e4e4e7]'
             }`}
           >
             <CheckCircle2 size={11} /> Respondidos ({responseCounts.respondido})
@@ -395,7 +395,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
             onClick={() => setResponseFilter('sin_notificar')}
             className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors ${
               responseFilter === 'sin_notificar'
-                ? 'bg-zinc-600 text-white'
+                ? 'bg-zinc-700 text-white'
                 : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
             }`}
           >
@@ -415,7 +415,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
           <section
             key={state}
             className={`flex min-h-[280px] flex-col rounded-2xl border bg-zinc-50/70 p-2.5 transition-colors ${
-              bottleneck ? 'border-rose-300 ring-1 ring-rose-200' : 'border-zinc-200'
+              bottleneck ? 'border-[#f5cfca] ring-1 ring-[#f5cfca]' : 'border-zinc-200'
             }`}
           >
             <header className="flex items-center gap-2 px-1.5 pb-2">
@@ -425,7 +425,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
               </h3>
               <span
                 className={`ml-auto rounded-full px-2 py-0.5 font-mono text-[11px] font-bold shadow-sm ${
-                  bottleneck ? 'bg-rose-500 text-white' : 'bg-white text-zinc-500'
+                  bottleneck ? 'bg-[#b83328] text-white' : 'bg-white text-zinc-500'
                 }`}
                 title={wipLimit >= 99 ? `${columnTotal} tarjetas` : `WIP ${columnTotal}/${wipLimit}`}
               >
@@ -433,7 +433,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
               </span>
             </header>
             {bottleneck && (
-              <p className="mb-2 flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-rose-700">
+              <p className="mb-2 flex items-center gap-1.5 rounded-lg border border-[#f5cfca] bg-[#fcedea] px-2.5 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-[#9a2820]">
                 <Ban size={12} /> Cuello de botella
               </p>
             )}
@@ -467,16 +467,16 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                         </span>
                       ) : card.originType === 'accion_emergente' ? (
                         <span
-                          className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-900"
+                          className="inline-flex items-center gap-1 rounded-md border border-[#f5d8c8] bg-[#fdf3ed] px-1.5 py-0.5 text-[9px] font-extrabold text-[#b85a2f]"
                           title="Acción táctica del equipo de gestores en campo (Excel, traslados, contingencia)"
                         >
-                          <Zap size={10} className="shrink-0 text-amber-600" />
+                          <Zap size={10} className="shrink-0 text-[#cf7143]" />
                           Acción Táctica
                         </span>
                       ) : null}
 
                       {card.isBlocked && (
-                        <span className="inline-flex items-center gap-1 rounded border border-rose-300 bg-rose-50 px-1.5 py-px text-[9px] font-extrabold tracking-wide text-rose-700">
+                        <span className="inline-flex items-center gap-1 rounded border border-[#f5cfca] bg-[#fcedea] px-1.5 py-px text-[9px] font-extrabold tracking-wide text-[#9a2820]">
                           <Ban size={10} /> BLOQUEADA
                         </span>
                       )}
@@ -497,7 +497,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                         </span>
                       )}
                       {card.isCriticalPath && (
-                        <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-extrabold uppercase text-rose-600">
+                        <span className="ml-auto inline-flex items-center gap-1 text-[9px] font-extrabold uppercase text-[#b83328]">
                           <Flag size={10} /> Crítica
                         </span>
                       )}
@@ -511,7 +511,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                       {card.title}
                     </button>
                     {card.isBlocked && card.blockerReason && (
-                      <p className="mt-1.5 flex items-start gap-1 rounded-lg bg-rose-50 px-2 py-1 text-[10px] font-semibold leading-snug text-rose-700">
+                      <p className="mt-1.5 flex items-start gap-1 rounded-lg bg-[#fcedea] px-2 py-1 text-[10px] font-semibold leading-snug text-[#9a2820]">
                         <Ban size={10} className="mt-0.5 shrink-0" />
                         <span className="line-clamp-2">{card.blockerReason}</span>
                       </p>
@@ -611,17 +611,17 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
 
                         {card.gestorFeedback?.responseStatus === 'respondido' ? (
                           <span
-                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-extrabold text-emerald-800 shadow-sm ring-1 ring-emerald-500/30 animate-pulse"
+                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-[#e4e4e7] bg-[#f4f4f5] px-1.5 py-0.5 text-[10px] font-extrabold text-[#27272a] shadow-sm"
                             title={card.gestorFeedback.lastResponseNote ? `Respondido: "${card.gestorFeedback.lastResponseNote}"` : 'El gestor reportó cumplimiento'}
                           >
-                            <CheckCircle2 size={10} className="text-emerald-600 shrink-0" /> RESPONDIDO
+                            <CheckCircle2 size={10} className="text-[#404040] shrink-0" /> RESPONDIDO
                           </span>
                         ) : card.gestorFeedback?.responseStatus === 'esperando_respuesta' ? (
                           <span
-                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50/70 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800"
+                            className="ml-auto inline-flex items-center gap-1 rounded-md border border-[#f5d8c8] bg-[#fdf3ed] px-1.5 py-0.5 text-[9px] font-semibold text-[#b85a2f]"
                             title="Esperando respuesta del gestor territorial"
                           >
-                            <Clock size={9} className="shrink-0" /> Esperando respuesta
+                            <Clock size={9} className="text-[#cf7143] shrink-0" /> Esperando respuesta
                           </span>
                         ) : null}
                       </div>

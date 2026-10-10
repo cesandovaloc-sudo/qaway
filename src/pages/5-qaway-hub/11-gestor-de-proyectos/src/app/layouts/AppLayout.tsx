@@ -25,6 +25,11 @@ export default function AppLayout() {
     if (raw === 'oscuro') return 'oscuro'
     return 'contraste'
   })
+  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio'>(() => {
+    const raw = localStorage.getItem('qaway.colorPalette')
+    if (raw === 'carbon' || raw === 'estudio') return raw
+    return 'terracota'
+  })
 
   useEffect(() => {
     const handleThemeChange = (e: any) => {
@@ -32,13 +37,23 @@ export default function AppLayout() {
         setThemeMode(e.detail)
       }
     }
+    const handlePaletteChange = (e: any) => {
+      if (e.detail) {
+        setColorPalette(e.detail)
+      }
+    }
     window.addEventListener('qaway-theme-change', handleThemeChange)
-    return () => window.removeEventListener('qaway-theme-change', handleThemeChange)
+    window.addEventListener('qaway-palette-change', handlePaletteChange)
+    return () => {
+      window.removeEventListener('qaway-theme-change', handleThemeChange)
+      window.removeEventListener('qaway-palette-change', handlePaletteChange)
+    }
   }, [])
 
   return (
     <div
       data-mode={themeMode}
+      data-palette={colorPalette}
       className="hub-shell h-dvh bg-[var(--hub-bg)] text-[var(--hub-text)] overflow-hidden transition-colors duration-200"
     >
       <Sidebar collapsed={collapsed} />

@@ -136,6 +136,19 @@ export default function Header({
     window.dispatchEvent(new CustomEvent('qaway-theme-change', { detail: themeMode }))
   }, [themeMode])
 
+  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio'>(() => {
+    const raw = localStorage.getItem('qaway.colorPalette')
+    if (raw === 'carbon' || raw === 'estudio') return raw
+    return 'terracota'
+  })
+
+  // Sincronización de la paleta anti-tóxica con el DOM y almacenamiento local
+  useEffect(() => {
+    localStorage.setItem('qaway.colorPalette', colorPalette)
+    document.documentElement.setAttribute('data-palette', colorPalette)
+    window.dispatchEvent(new CustomEvent('qaway-palette-change', { detail: colorPalette }))
+  }, [colorPalette])
+
   // Caché local para eliminar al 100% el parpadeo/flash en recargas
   const [cachedProfile] = useState<{ displayName: string; avatarUrl: string | null; roleLabel: string; initials: string } | null>(() => {
     try {
@@ -244,7 +257,7 @@ export default function Header({
               {[...Array(9)].map((_, i) => (
                 <span
                   key={i}
-                  className="w-[3px] h-[3px] rounded-full bg-[var(--hub-text-soft)] group-hover:bg-[#ff4b0b] transition-colors"
+                  className="w-[3px] h-[3px] rounded-full bg-[var(--hub-text-soft)] group-hover:bg-[var(--hub-brand)] transition-colors"
                 />
               ))}
             </div>
@@ -267,7 +280,7 @@ export default function Header({
             className="group flex items-center gap-2 h-10 px-3 rounded-xl border border-transparent hover:bg-[var(--hub-hover)] text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
             title="Volver al Panel del Hub (/hub/panel)"
           >
-            <Home className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
+            <Home className="w-5 h-5 shrink-0 group-hover:text-[var(--hub-brand)] transition-colors" />
             <span className="text-sm font-bold text-[var(--hub-text)] max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">
               Inicio
             </span>
@@ -298,7 +311,7 @@ export default function Header({
                   <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-80 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
                     <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
                       <div className="flex items-center gap-2">
-                        <Building2 size={16} className="text-[#ff4b0b]" />
+                        <Building2 size={16} className="text-[var(--hub-brand)]" />
                         <p className="text-xs font-extrabold text-[var(--hub-text)]">Organización / Empresa</p>
                       </div>
                       <p className="text-[10px] text-[var(--hub-dim)] mt-1">
@@ -321,11 +334,11 @@ export default function Header({
                             }}
                             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
                               scopedTenant?.id === t.id
-                                ? 'bg-[#ff4b0b]/15 text-[#ff4b0b] font-bold'
+                                ? 'bg-[var(--hub-brand)]/15 text-[var(--hub-brand)] font-bold'
                                 : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)] font-semibold'
                             }`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${scopedTenant?.id === t.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${scopedTenant?.id === t.id ? 'bg-[var(--hub-brand)]' : 'bg-white/20'}`} />
                             <span className="truncate">{t.name}</span>
                             {t.client_code && (
                               <span className="ml-auto text-[10px] font-semibold text-[var(--hub-dim)] shrink-0">{t.client_code}</span>
@@ -361,7 +374,7 @@ export default function Header({
               className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-text)] text-sm font-bold"
               title={`Organización asignada: ${activeTenant.name}`}
             >
-              <Building2 size={15} className="text-[#ff4b0b]" />
+              <Building2 size={15} className="text-[var(--hub-brand)]" />
               <span className="max-w-36 truncate">{activeTenant.name}</span>
             </div>
           ) : null}
@@ -425,7 +438,7 @@ export default function Header({
                           </p>
                         </div>
                         {isSelected && (
-                          <Check size={13} className="text-[#ff4b0b] shrink-0" />
+                          <Check size={13} className="text-[var(--hub-brand)] shrink-0" />
                         )}
                       </button>
                     )
@@ -586,6 +599,42 @@ export default function Header({
                       >
                         <Moon size={14} />
                       </button>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-[var(--hub-border-soft)] my-1.5" />
+
+                  {/* Selector de Paleta Anti-tóxica (Variación de Colores) */}
+                  <div className="flex items-center justify-between px-3 py-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">Paleta</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setColorPalette('terracota')}
+                        title="Terracota Editorial (Referencia cálida sin tóxicos)"
+                        aria-label="Paleta terracota editorial"
+                        className={`relative w-4 h-4 rounded-full transition-transform cursor-pointer flex items-center justify-center ${
+                          colorPalette === 'terracota' ? 'ring-2 ring-offset-1 ring-[#d9532f] scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
+                        }`}
+                        style={{ backgroundColor: '#d9532f' }}
+                      />
+                      <button
+                        onClick={() => setColorPalette('carbon')}
+                        title="Carbón Escandinavo (Monocromo nórdico)"
+                        aria-label="Paleta carbón escandinavo"
+                        className={`relative w-4 h-4 rounded-full transition-transform cursor-pointer flex items-center justify-center ${
+                          colorPalette === 'carbon' ? 'ring-2 ring-offset-1 ring-[#18181b] scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
+                        }`}
+                        style={{ backgroundColor: '#18181b' }}
+                      />
+                      <button
+                        onClick={() => setColorPalette('estudio')}
+                        title="Qaway Estudio (Cobrizo armónico calibrado)"
+                        aria-label="Paleta qaway estudio"
+                        className={`relative w-4 h-4 rounded-full transition-transform cursor-pointer flex items-center justify-center ${
+                          colorPalette === 'estudio' ? 'ring-2 ring-offset-1 ring-[#ea580c] scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
+                        }`}
+                        style={{ backgroundColor: '#ea580c' }}
+                      />
                     </div>
                   </div>
 

@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Colors: Qaway Design System ── */
-  --color-brand: #ff4b0b;
-  --color-brand-light: #ff7a45;
-  --color-brand-bright: #ff9b73;
-  /* Fila 11 plan v3: hover único de marca, decidido y ejecutado en el Hub (#e03f06) */
-  --color-brand-hover: #e03f06;
+  /* ── Colors: Qaway Design System (Paleta Editorial Anti-tóxica) ── */
+  --color-brand: var(--hub-brand, #d9532f);
+  --color-brand-light: #e06644;
+  --color-brand-bright: #eb7f60;
+  /* Hover armónico sin saturación fluorescente */
+  --color-brand-hover: var(--hub-brand-hover, #c44523);
 
   --color-ink: #111111;
   --color-ink-2: #18181b;
@@ -44,12 +44,93 @@
   --shadow-elevated: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* ── Base ── */
+/* ── Base & Paletas Anti-Tóxicas ── */
 :root {
   color-scheme: light;
   font-family: var(--font-body);
   background: var(--color-surface);
   color: var(--color-ink);
+
+  /* Paleta Predeterminada: Terracota Editorial (Referencia) */
+  --hub-brand: #d9532f;
+  --hub-brand-hover: #c44523;
+  --hub-brand-soft: #fbf0ec;
+  --hub-brand-glow: rgba(217, 83, 47, 0.16);
+
+  --status-ok: #404040;
+  --status-ok-bg: #f4f4f5;
+  --status-ok-border: #e4e4e7;
+
+  --status-risk: #cf7143;
+  --status-risk-bg: #fdf3ed;
+  --status-risk-border: #f5d8c8;
+
+  --status-blocked: #b83328;
+  --status-blocked-bg: #fcedea;
+  --status-blocked-border: #f5cfca;
+}
+
+/* 1. Terracota Editorial (Referencia cálida) */
+.hub-shell[data-palette='terracota'],
+[data-palette='terracota'] {
+  --hub-brand: #d9532f;
+  --hub-brand-hover: #c44523;
+  --hub-brand-soft: #fbf0ec;
+  --hub-brand-glow: rgba(217, 83, 47, 0.16);
+
+  --status-ok: #404040;
+  --status-ok-bg: #f4f4f5;
+  --status-ok-border: #e4e4e7;
+
+  --status-risk: #cf7143;
+  --status-risk-bg: #fdf3ed;
+  --status-risk-border: #f5d8c8;
+
+  --status-blocked: #b83328;
+  --status-blocked-bg: #fcedea;
+  --status-blocked-border: #f5cfca;
+}
+
+/* 2. Carbón Escandinavo (Minimalismo Monocromático) */
+.hub-shell[data-palette='carbon'],
+[data-palette='carbon'] {
+  --hub-brand: #18181b;
+  --hub-brand-hover: #09090b;
+  --hub-brand-soft: #f4f4f5;
+  --hub-brand-glow: rgba(24, 24, 27, 0.12);
+
+  --status-ok: #27272a;
+  --status-ok-bg: #f4f4f5;
+  --status-ok-border: #e4e4e7;
+
+  --status-risk: #71717a;
+  --status-risk-bg: #f4f4f5;
+  --status-risk-border: #d4d4d8;
+
+  --status-blocked: #09090b;
+  --status-blocked-bg: #e4e4e7;
+  --status-blocked-border: #d4d4d8;
+}
+
+/* 3. Qaway Estudio (Cobrizo Cálido Calibrado No Tóxico) */
+.hub-shell[data-palette='estudio'],
+[data-palette='estudio'] {
+  --hub-brand: #ea580c;
+  --hub-brand-hover: #c2410c;
+  --hub-brand-soft: #fff7ed;
+  --hub-brand-glow: rgba(234, 88, 12, 0.15);
+
+  --status-ok: #4a6741;
+  --status-ok-bg: #f5f8f3;
+  --status-ok-border: #e0eadc;
+
+  --status-risk: #c2410c;
+  --status-risk-bg: #fff7ed;
+  --status-risk-border: #fed7aa;
+
+  --status-blocked: #9f1239;
+  --status-blocked-bg: #fff1f2;
+  --status-blocked-border: #fecdd3;
 }
 
 
@@ -232,14 +313,14 @@ body {
 /* MASTER PXP DESIGN SYSTEM (Basado en 2-ProductosPanel.jsx)        */
 /* ═══════════════════════════════════════════════════════════════ */
 .pxp-root {
-  --blue: #ff4b0b;
+  --blue: var(--hub-brand, #d9532f);
   --ink: #17233b;
   --muted: #71809e;
   --line: #e5ebf4;
   --soft: #f5f8fc;
-  --green: #059669;
-  --red: #e11d48;
-  --amber: #d97706;
+  --green: var(--status-ok, #404040);
+  --red: var(--status-blocked, #b83328);
+  --amber: var(--status-risk, #cf7143);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--ink);
   background: #f7f9fc;
@@ -257,8 +338,8 @@ body {
 .pxp-heading-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; flex-shrink: 0; }
 .pxp-btn { border: 1px solid var(--line); background: #fff; color: #34415b; border-radius: 8px; padding: 10px 14px; display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; height: 38px; transition: all .15s ease; }
 .pxp-btn:hover { border-color: #b8c9e6; background: #f9fbff; }
-.pxp-btn.primary { background: #ff4b0b; border-color: #ff4b0b; color: #fff; font-weight: 650; box-shadow: 0 2px 8px rgba(255,75,11,0.25); }
-.pxp-btn.primary:hover { background: #ea3e00; border-color: #ea3e00; color: #fff; }
+.pxp-btn.primary { background: var(--hub-brand, #d9532f); border-color: var(--hub-brand, #d9532f); color: #fff; font-weight: 650; box-shadow: 0 2px 8px var(--hub-brand-glow, rgba(217,83,47,0.22)); }
+.pxp-btn.primary:hover { background: var(--hub-brand-hover, #c44523); border-color: var(--hub-brand-hover, #c44523); color: #fff; }
 .pxp-btn.dark { background: #1e293b; border-color: #1e293b; color: #fff; }
 .pxp-btn.small { padding: 7px 10px; font-size: 12px; height: 32px; }
 .pxp-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }

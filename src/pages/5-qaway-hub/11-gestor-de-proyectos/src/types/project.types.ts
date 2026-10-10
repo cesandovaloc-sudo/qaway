@@ -288,26 +288,26 @@ export const PROJECT_METHODOLOGY_META: Record<ProjectMethodology, DisplayMeta> =
   scrum: {
     label: 'Ágil / Scrum',
     short: 'SCRUM',
-    color: '#2563eb',
-    badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
+    color: '#cf7143',
+    badgeClass: 'bg-[#fdf3ed] text-[#b85a2f] border-[#f5d8c8]',
   },
   pmbok_p6: {
     label: 'PMBOK / Primavera P6',
     short: 'P6',
-    color: '#7c3aed',
-    badgeClass: 'bg-violet-50 text-violet-700 border-violet-200',
+    color: '#8b829e',
+    badgeClass: 'bg-[#f4f2f7] text-[#6d6480] border-[#dedae6]',
   },
   kanban: {
     label: 'Kanban Continuo',
     short: 'KANBAN',
-    color: '#059669',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    color: '#404040',
+    badgeClass: 'bg-[#f4f4f5] text-[#27272a] border-[#e4e4e7]',
   },
   hibrido: {
     label: 'Híbrido',
     short: 'HÍBRIDO',
-    color: '#d97706',
-    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    color: '#a3998e',
+    badgeClass: 'bg-[#f7f5f2] text-[#786e64] border-[#e8e4de]',
   },
 }
 
@@ -315,20 +315,20 @@ export const PROJECT_HEALTH_META: Record<ProjectHealth, DisplayMeta> = {
   optimo: {
     label: 'Óptimo',
     short: 'ÓPTIMO',
-    color: '#059669',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    color: '#404040',
+    badgeClass: 'bg-[#f4f4f5] text-[#27272a] border-[#e4e4e7]',
   },
   atencion: {
     label: 'En atención',
     short: 'ATENCIÓN',
-    color: '#d97706',
-    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    color: '#cf7143',
+    badgeClass: 'bg-[#fdf3ed] text-[#b85a2f] border-[#f5d8c8]',
   },
   critico: {
     label: 'Crítico',
     short: 'CRÍTICO',
-    color: '#e11d48',
-    badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+    color: '#b83328',
+    badgeClass: 'bg-[#fcedea] text-[#9a2820] border-[#f5cfca]',
   },
 }
 
@@ -336,14 +336,14 @@ export const PROJECT_STATUS_META: Record<ProjectStatus, DisplayMeta> = {
   planificacion: {
     label: 'Planificación',
     short: 'PLAN',
-    color: '#2563eb',
-    badgeClass: 'bg-blue-50 text-blue-700 border-blue-200',
+    color: '#52525b',
+    badgeClass: 'bg-zinc-100 text-zinc-700 border-zinc-200',
   },
   en_curso: {
     label: 'En curso',
     short: 'CURSO',
-    color: '#ff4b0b',
-    badgeClass: 'bg-orange-50 text-orange-700 border-orange-200',
+    color: '#d9532f',
+    badgeClass: 'bg-[#fdf0ec] text-[#b83d1c] border-[#f7d6cc]',
   },
   pausado: {
     label: 'Pausado',
@@ -354,8 +354,8 @@ export const PROJECT_STATUS_META: Record<ProjectStatus, DisplayMeta> = {
   completado: {
     label: 'Completado',
     short: 'DONE',
-    color: '#059669',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    color: '#404040',
+    badgeClass: 'bg-[#f4f4f5] text-[#27272a] border-[#e4e4e7]',
   },
 }
 
@@ -371,9 +371,9 @@ export const WORK_ITEM_PRIORITY_META: Record<
   WorkItemPriority,
   { color: string; badgeClass: string }
 > = {
-  URGENTE: { color: '#e11d48', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' },
-  ALTA: { color: '#ea580c', badgeClass: 'bg-orange-50 text-orange-700 border-orange-200' },
-  MEDIA: { color: '#2563eb', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+  URGENTE: { color: '#b83328', badgeClass: 'bg-[#fcedea] text-[#9a2820] border-[#f5cfca]' },
+  ALTA: { color: '#cf7143', badgeClass: 'bg-[#fdf3ed] text-[#b85a2f] border-[#f5d8c8]' },
+  MEDIA: { color: '#52525b', badgeClass: 'bg-[#f4f4f5] text-[#3f3f46] border-[#e4e4e7]' },
   BAJA: { color: '#71717a', badgeClass: 'bg-zinc-100 text-zinc-600 border-zinc-200' },
 }
 
@@ -382,10 +382,10 @@ export const WORK_ITEM_STATE_META: Record<
   { label: string; accent: string }
 > = {
   backlog: { label: 'Backlog', accent: '#a1a1aa' },
-  todo: { label: 'Por Hacer', accent: '#2563eb' },
-  in_progress: { label: 'En Desarrollo', accent: '#ff4b0b' },
-  review: { label: 'En Revisión', accent: '#7c3aed' },
-  done: { label: 'Completado', accent: '#059669' },
+  todo: { label: 'Por Hacer', accent: '#52525b' },
+  in_progress: { label: 'En Desarrollo', accent: '#d9532f' },
+  review: { label: 'En Revisión', accent: '#8b829e' },
+  done: { label: 'Completado', accent: '#404040' },
 }
 
 /** Orden canónico de columnas Kanban (Fase 4). */
@@ -407,14 +407,14 @@ export const MILESTONE_STATUS_META: Record<MilestoneStatus, DisplayMeta> = {
   en_revision: {
     label: 'En revisión',
     short: 'REV',
-    color: '#d97706',
-    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    color: '#cf7143',
+    badgeClass: 'bg-[#fdf3ed] text-[#b85a2f] border-[#f5d8c8]',
   },
   aprobado: {
     label: 'Aprobado',
     short: 'OK',
-    color: '#059669',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    color: '#404040',
+    badgeClass: 'bg-[#f4f4f5] text-[#27272a] border-[#e4e4e7]',
   },
 }
 
@@ -456,31 +456,31 @@ export const WORKLOAD_RISK_META: Record<
 > = {
   saludable: {
     label: 'Saludable',
-    color: '#059669',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    color: '#404040',
+    badgeClass: 'bg-[#f4f4f5] text-[#27272a] border-[#e4e4e7]',
   },
   alerta: {
     label: 'En alerta',
-    color: '#d97706',
-    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    color: '#cf7143',
+    badgeClass: 'bg-[#fdf3ed] text-[#b85a2f] border-[#f5d8c8]',
   },
   sobrecarga: {
     label: 'Sobrecarga',
-    color: '#e11d48',
-    badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+    color: '#b83328',
+    badgeClass: 'bg-[#fcedea] text-[#9a2820] border-[#f5cfca]',
   },
 }
 
 export const SCHEDULE_STATUS_META: Record<ScheduleStatus, { label: string; color: string }> = {
-  adelantado: { label: 'Adelantado', color: '#059669' },
-  en_tiempo: { label: 'En tiempo', color: '#2563eb' },
-  atrasado: { label: 'Atrasado', color: '#e11d48' },
+  adelantado: { label: 'Adelantado', color: '#404040' },
+  en_tiempo: { label: 'En tiempo', color: '#52525b' },
+  atrasado: { label: 'Atrasado', color: '#b83328' },
 }
 
 export const COST_STATUS_META: Record<CostStatus, { label: string; color: string }> = {
-  bajo_costo: { label: 'Bajo costo', color: '#059669' },
-  en_presupuesto: { label: 'En presupuesto', color: '#2563eb' },
-  sobrecosto: { label: 'Sobrecosto', color: '#e11d48' },
+  bajo_costo: { label: 'Bajo costo', color: '#404040' },
+  en_presupuesto: { label: 'En presupuesto', color: '#52525b' },
+  sobrecosto: { label: 'Sobrecosto', color: '#b83328' },
 }
 
 /** Semáforo preventivo de fecha de seguimiento (Fase 10). */
@@ -492,18 +492,18 @@ export const FOLLOW_UP_META: Record<
 > = {
   vencido: {
     label: 'Vencido',
-    color: '#e11d48',
-    badgeClass: 'bg-rose-50 text-rose-700 border-rose-200',
+    color: '#b83328',
+    badgeClass: 'bg-[#fcedea] text-[#9a2820] border-[#f5cfca]',
   },
   alerta: {
     label: 'Vence ≤ 72h',
-    color: '#d97706',
-    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    color: '#cf7143',
+    badgeClass: 'bg-[#fdf3ed] text-[#b85a2f] border-[#f5d8c8]',
   },
   a_tiempo: {
     label: 'En plazo',
-    color: '#059669',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    color: '#404040',
+    badgeClass: 'bg-[#f4f4f5] text-[#27272a] border-[#e4e4e7]',
   },
   sin_fecha: {
     label: 'Sin fecha',
