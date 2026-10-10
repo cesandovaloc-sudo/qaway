@@ -37,7 +37,7 @@ import { mockProjectsDataset } from '@/data/mock-projects-data'
 // - Aislamiento: no toca Supabase ni el auth del Hub.
 // ─────────────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'qaway_projects_v1'
+const STORAGE_KEY = 'qaway_projects_v2'
 
 type Listener = () => void
 
@@ -70,7 +70,11 @@ function nextSequentialId(prefix: string, existing: string[]): string {
 function readStorage(): ProjectsDataset | null {
   if (typeof window === 'undefined') return null
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
+    let raw = window.localStorage.getItem(STORAGE_KEY)
+    if (!raw) {
+      // Intentar migrar desde v1 si existía previamente
+      raw = window.localStorage.getItem('qaway_projects_v1')
+    }
     if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
     return isDataset(parsed) ? parsed : null
@@ -90,10 +94,49 @@ function writeStorage(dataset: ProjectsDataset): void {
 
 function loadInitialState(): ProjectsDataset {
   const persisted = readStorage()
-  if (persisted) return persisted
-  const seeded = clone(mockProjectsDataset)
-  writeStorage(seeded)
-  return seeded
+  if (!persisted) {
+    const seeded = clone(mockProjectsDataset)
+    writeStorage(seeded)
+    return seeded
+  }
+
+  // Auto-fusión resiliente: asegurar que los proyectos semilla maestros
+  // (incluyendo proj-minedu-2027) estén presentes sin borrar los creados por el usuario
+  let hasMissing = false
+  const projects = [...persisted.projects]
+  const workItems = [...persisted.workItems]
+  const sprints = [...persisted.sprints]
+  const milestones = [...persisted.milestones]
+  const docs = [...persisted.docs]
+
+  for (const seedProject of mockProjectsDataset.projects) {
+    if (!projects.some((p) => p.id === seedProject.id)) {
+      hasMissing = true
+      projects.unshift(clone(seedProject)) // Poner al inicio para máxima visibilidad
+      const seedItems = mockProjectsDataset.workItems.filter((w) => w.projectId === seedProject.id)
+      workItems.push(...clone(seedItems))
+      const seedSprints = mockProjectsDataset.sprints.filter((s) => s.projectId === seedProject.id)
+      sprints.push(...clone(seedSprints))
+      const seedMilestones = mockProjectsDataset.milestones.filter((m) => m.projectId === seedProject.id)
+      milestones.push(...clone(seedMilestones))
+      const seedDocs = mockProjectsDataset.docs.filter((d) => d.projectId === seedProject.id)
+      docs.push(...clone(seedDocs))
+    }
+  }
+
+  if (hasMissing) {
+    const merged: ProjectsDataset = {
+      projects,
+      workItems,
+      sprints,
+      milestones,
+      docs,
+    }
+    writeStorage(merged)
+    return merged
+  }
+
+  return persisted
 }
 
 // ── Utilidades Fase 9 (Suite Metodológica Pro) ──

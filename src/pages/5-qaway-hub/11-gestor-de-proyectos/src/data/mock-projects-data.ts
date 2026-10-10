@@ -15,6 +15,24 @@ export const mockProjectsDataset: ProjectsDataset = {
   // ── Proyectos ──
   projects: [
     {
+      id: 'proj-minedu-2027',
+      code: 'PRJ-MINEDU-DOT27',
+      name: 'Monitoreo Nacional de Distribución de Materiales Educativos — Dotación 2027',
+      client: 'MINEDU - DIGERE / Direcciones Regionales (DRE) y UGEL',
+      description:
+        'Monitoreo territorial híbrido de la Dotación 2027: 10 hitos rectores contractuales (Oficio Múltiple 00032-2026) + gestión ágil de tareas con gestores territoriales y contacto en 1 clic.',
+      category: 'operaciones',
+      methodology: 'hibrido',
+      status: 'en_curso',
+      health: 'atencion',
+      budget: { currency: 'PEN', allocated: 480000, spent: 175000 },
+      startDate: '2026-09-01',
+      targetDate: '2027-04-30',
+      progress: 34,
+      manager: 'Coordinador General DIGERE',
+      membersCount: 12,
+    },
+    {
       id: 'proj-001',
       code: 'PRJ-ALPHA',
       name: 'Plataforma Core Cloud',
@@ -105,24 +123,6 @@ export const mockProjectsDataset: ProjectsDataset = {
       activeSprint: 'sprint-004',
       manager: 'Karla Mendoza',
       membersCount: 9,
-    },
-    {
-      id: 'proj-minedu-2027',
-      code: 'PRJ-MINEDU-DOT27',
-      name: 'Monitoreo Nacional de Distribución de Materiales Educativos — Dotación 2027',
-      client: 'MINEDU - DIGERE / Direcciones Regionales (DRE) y UGEL',
-      description:
-        'Monitoreo territorial híbrido de la Dotación 2027: 10 hitos rectores contractuales (Oficio Múltiple 00032-2026) + gestión ágil de tareas con gestores territoriales y contacto en 1 clic.',
-      category: 'operaciones',
-      methodology: 'hibrido',
-      status: 'en_curso',
-      health: 'atencion',
-      budget: { currency: 'PEN', allocated: 480000, spent: 175000 },
-      startDate: '2026-09-01',
-      targetDate: '2027-04-30',
-      progress: 34,
-      manager: 'Coordinador General DIGERE',
-      membersCount: 12,
     },
   ],
 
