@@ -11,7 +11,7 @@ export default defineConfig({
     // El submódulo 10-qawaylab-inventario es un proyecto standalone con su propio
     // vitest.config, node_modules y paquete file: @qawaylab/pago: se valida con su
     // propio `npm test`. El runner raíz NO debe absorber sus tests.
-    exclude: ['src/pages/5-qaway-hub/10-qawaylab-inventario/**', 'node_modules', 'dist'],
+    exclude: ['src/pages/5-qaway-hub/10-qawaylab-inventario/**', 'src/pages/5-qaway-hub/11-gestor-de-proyectos/**', 'node_modules', 'dist'],
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
   },
@@ -27,6 +27,10 @@ export default defineConfig({
           }
           if (importer && importer.replace(/\\/g, '/').includes('10-qawaylab-inventario')) {
             const target = path.resolve(__dirname, 'src/pages/5-qaway-hub/10-qawaylab-inventario/src', source)
+            return this.resolve(target, importer, { skipSelf: true, ...options })
+          }
+          if (importer && importer.replace(/\\/g, '/').includes('11-gestor-de-proyectos')) {
+            const target = path.resolve(__dirname, 'src/pages/5-qaway-hub/11-gestor-de-proyectos/src', source)
             return this.resolve(target, importer, { skipSelf: true, ...options })
           }
           const mainTarget = path.resolve(__dirname, 'src', source)

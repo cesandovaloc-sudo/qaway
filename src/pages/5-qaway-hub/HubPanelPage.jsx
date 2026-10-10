@@ -17,7 +17,7 @@ import {
 import { logoutUser } from '@/config/auth'
 import { supabase } from '@/config/supabase'
 import { useAppAccess } from './hooks/useAppAccess'
-import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
+import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/AppSwitcherDropdown'
 import EmpresasModule from './HubSuperEmpresasModule'
 import UsersModule from './HubSuperUsersModule'
 import AplicacionesModule from './HubsuperAplicacionesModule'

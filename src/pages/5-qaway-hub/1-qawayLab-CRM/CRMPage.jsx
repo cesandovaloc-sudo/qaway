@@ -12,7 +12,7 @@ import ClientesView from './components/ClientesView'
 import AutomatizacionesView from './components/AutomatizacionesView'
 import TareasView from './components/TareasView'
 import ConfiguracionView from './components/ConfiguracionView'
-import { AppSwitcherDropdown } from '../5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
+import { AppSwitcherDropdown } from '../5-gestor-de-proyectos/components/AppSwitcherDropdown'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { logoutUser } from '@/config/auth'
 

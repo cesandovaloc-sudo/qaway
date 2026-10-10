@@ -43,7 +43,6 @@ const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEd
 const CRMPage = lazy(() => import('@/pages/5-qaway-hub/1-qawayLab-CRM/CRMPage'))
 const WabaCrmConsolePage = lazy(() => import('@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'))
 const GestorProyectosHubPage = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosHubPage'))
-const GestorProyectosV2Page = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosV2Page'))
 const ProjectTimelineViewerPage = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'))
 const AnalyticsStudioPage = lazy(() => import('@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'))
 const OptimizadorWebpHubPage = lazy(() => import('@/pages/5-qaway-hub/optimizador-webp/OptimizadorWebpHubPage'))
@@ -56,6 +55,7 @@ const TutorialOnboardingPage = lazy(() => import('@/pages/5-qaway-hub/0-Estructu
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 // PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
+const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
 // Tienda de cliente: las páginas viven en inventario y se sirven aquí, dentro
 // del Layout, para que lleven el navbar oficial de Qaway Lab.
 const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/TiendaClientePage'))
@@ -396,9 +396,30 @@ export default function AppRouter() {
           path="inventario"
           element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
+        {/* Gestor de Proyectos Suite (11-gestor-de-proyectos): standalone con shell oficial Hub */}
         <Route
-          path="hub/gestor-proyectos-v2"
-          element={renderRoute('hub', <ProtectedRoute><GestorProyectosV2Page /></ProtectedRoute>)}
+          path="/hub/proyectos/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="/hub/proyectos"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/proyectos/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/proyectos"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="/hub/gestor-proyectos-app/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/gestor-proyectos-app/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
         />
         {/* Biblioteca: standalone FUERA del Layout → sin navbar, solo logo interno */}
         <Route

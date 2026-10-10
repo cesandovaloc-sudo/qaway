@@ -1,0 +1,181 @@
+import { genId } from './orders.js'
+
+// Helper para persistencia local de pagos
+function saveLocalPayment(payment) {
+  try {
+    const payments = JSON.parse(localStorage.getItem('qaway_payments') || '[]')
+    payments.unshift(payment)
+    localStorage.setItem('qaway_payments', JSON.stringify(payments.slice(0, 50)))
+  } catch (e) {
+    console.warn('[PaymentsService] Error guardando pago local:', e)
+  }
+}
+
+export function createPaymentsService(supabase, options = {}) {
+  const {
+    onPaymentCompleted = null,
+  } = options
+
+  return {
+    async createPayment({
+      userId,
+      orderId = null,
+      productId = null,
+      productTitle = null,
+      amount,
+      currency = 'PEN',
+      provider = 'manual',
+      proofUrl = null,
+      notes = null,
+      tenantId = null,
+    }) {
+      const paymentData = {
+        user_id: userId,
+        ...(tenantId ? { tenant_id: tenantId } : {}),
+        order_id: orderId,
+        amount,
+        currency,
+        status: 'pending',
+        provider,
+        notes,
+      }
+      if (productId) paymentData.product_id = productId
+      if (productTitle) paymentData.product_title = productTitle
+      if (proofUrl) paymentData.proof_url = proofUrl
+
+      // Invitado: id client-side y sin .select() (misma razón que en orders).
+      // El error de persistencia se propaga: un pago local no confirmado no
+      // debe presentarse como pago registrado correctamente.
+      if (!userId) {
+        const payload = { id: genId(), created_at: new Date().toISOString(), ...paymentData }
+        const { error } = await supabase.from('payments').insert(payload)
+        if (error) throw error
+        saveLocalPayment(payload)
+        return payload
+      }
+
+      const { data: payment, error } = await supabase
+        .from('payments')
+        .insert(paymentData)
+        .select()
+        .single()
+
+      if (error) throw error
+      saveLocalPayment(payment)
+      return payment
+    },
+
+    async updatePaymentStatus(paymentId, status, { providerId = null, notes = null } = {}) {
+      const updates = { status }
+      if (providerId) updates.provider_id = providerId
+      if (notes) updates.notes = notes
+
+      try {
+        const { data: payment, error } = await supabase
+          .from('payments')
+          .update(updates)
+          .eq('id', paymentId)
+          .select()
+          .single()
+
+        if (error) throw error
+
+        if (status === 'completed' && payment.order_id) {
+          const { error: orderError } = await supabase
+              .from('orders')
+              .update({
+                status: 'paid',
+                paid_at: new Date().toISOString(),
+              })
+              .eq('id', payment.order_id)
+          if (orderError) throw orderError
+        }
+
+        if (status === 'completed' && onPaymentCompleted) {
+          await onPaymentCompleted(payment)
+        }
+
+        return payment
+      } catch (err) {
+        throw err
+      }
+    },
+
+    async getUserPayments(userId) {
+      try {
+        const { data, error } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        return data || []
+      } catch (err) {
+        console.warn('[PaymentsService] Supabase getUserPayments fallback:', err)
+        // C-7: el fallback debe respetar el mismo filtro user_id que el query remoto
+        // (antes devolvía pagos de otros usuarios cacheados en el mismo origen)
+        const local = JSON.parse(localStorage.getItem('qaway_payments') || '[]')
+        return local.filter((p) => !userId || p.user_id === userId)
+      }
+    },
+
+    async getPendingPayments() {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('provider', 'manual')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data
+    },
+
+    async getAllPayments({ status, provider, limit = 50 } = {}) {
+      let query = supabase
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (status) query = query.eq('status', status)
+      if (provider) query = query.eq('provider', provider)
+
+      const { data, error } = await query
+      if (error) throw error
+      return data
+    },
+
+    async simulateCulqiWebhook(paymentId) {
+      return this.updatePaymentStatus(paymentId, 'completed', {
+        providerId: `culqi_sim_${Date.now()}`,
+      })
+    },
+
+    async createMercadoPagoPreference({ items, externalReference, successUrl, failureUrl, pendingUrl }) {
+      // Retorna objeto con preferencia estructurada para Mercado Pago SDK / Checkout Pro
+      return {
+        items: items.map(item => ({
+          title: item.title || item.product_title || item.name,
+          unit_price: Number(item.price || item.unit_price || 0),
+          quantity: Number(item.quantity || 1),
+          currency_id: 'PEN',
+        })),
+        external_reference: externalReference,
+        back_urls: {
+          success: successUrl || window.location.origin + '/purchases',
+          failure: failureUrl || window.location.origin + '/checkout',
+          pending: pendingUrl || window.location.origin + '/purchases',
+        },
+        auto_return: 'approved',
+      }
+    },
+
+    async simulateMercadoPagoWebhook(paymentId) {
+      return this.updatePaymentStatus(paymentId, 'completed', {
+        providerId: `mp_sim_${Date.now()}`,
+      })
+    },
+  }
+}

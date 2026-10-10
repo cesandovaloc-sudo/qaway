@@ -1,0 +1,697 @@
+import { useEffect, useState, useMemo } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
+import {
+  Globe,
+  Search,
+  RefreshCw,
+  Eye,
+  CheckCircle2,
+  Clock,
+  Truck,
+  XCircle,
+  ExternalLink,
+  Package,
+  DollarSign,
+  User,
+  MapPin,
+  Calendar,
+  X,
+  CreditCard,
+  MessageCircle,
+  AlertCircle,
+} from 'lucide-react'
+import { supabase } from '@/config/supabase'
+
+export interface WebOrderItem {
+  id?: string
+  product_id: string
+  product_title: string
+  quantity: number
+  unit_price: number
+  subtotal: number
+}
+
+export interface WebOrder {
+  id: string
+  created_at: string
+  customer_name?: string
+  customer_email?: string
+  customer_phone?: string
+  shipping_address?: string
+  payment_method?: string
+  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
+  total: number
+  notes?: string
+  items: WebOrderItem[]
+}
+
+// C-6: el array DEMO_WEB_ORDERS fue eliminado (run-2). Renderizar fixtures con
+// "Ingresos Confirmados" S/ 2,179 ocultaba el estado real del negocio; el panel
+// ahora muestra un banner de error cuando la carga falla y "0 órdenes" cuando
+// genuinamente no hay pedidos.
+
+// Estados reales de orders (CHECK DB) → estados de UI. 'refunded' se muestra
+// como 'cancelled' en la bandeja; la granularidad fina vive fuera del panel.
+const REMOTE_STATUS_TO_UI: Record<string, WebOrder['status']> = {
+  pending: 'pending',
+  paid: 'paid',
+  cancelled: 'cancelled',
+  refunded: 'cancelled',
+}
+
+const statusBadges: Record<
+  WebOrder['status'],
+  { label: string; icon: typeof Clock; color: string; bg: string; border: string }
+> = {
+  pending: {
+    label: 'Pendiente',
+    icon: Clock,
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+  },
+  paid: {
+    label: 'Pagado',
+    icon: CheckCircle2,
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20',
+  },
+  shipped: {
+    label: 'En camino',
+    icon: Truck,
+    color: 'text-blue-400',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/20',
+  },
+  delivered: {
+    label: 'Entregado',
+    icon: CheckCircle2,
+    color: 'text-purple-400',
+    bg: 'bg-purple-500/10',
+    border: 'border-purple-500/20',
+  },
+  cancelled: {
+    label: 'Cancelado',
+    icon: XCircle,
+    color: 'text-rose-400',
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/20',
+  },
+}
+
+export default function WebOrdersPage() {
+  const [orders, setOrders] = useState<WebOrder[]>([])
+  // C-6: error de carga visible para el operador (antes el fallback DEMO lo ocultaba)
+  const [dataError, setDataError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [selectedOrder, setSelectedOrder] = useState<WebOrder | null>(null)
+  const modalRef = useDismissOnEscapeOrOutside(!!selectedOrder, () => setSelectedOrder(null))
+
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+      minimumFractionDigits: 2,
+    }).format(val || 0)
+  }
+
+  const loadOrders = async () => {
+    setLoading(true)
+    try {
+      let combined: WebOrder[] = []
+
+      // 1. Cargar desde Supabase
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, items:order_items(*)')
+          .order('created_at', { ascending: false })
+          .limit(50)
+
+        if (error) {
+          // C-6: el error de carga debe ser visible para el operador
+          setDataError(`No se pudieron cargar pedidos desde la base de datos: ${error.message}`)
+        }
+        if (!error && data && data.length > 0) {
+          combined = data.map((o) => ({
+            id: o.id || `ORD-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+            created_at: o.created_at || new Date().toISOString(),
+            customer_name: o.customer_name || (o.user_id ? `Usuario ${o.user_id.slice(0, 8)}` : 'Cliente Web'),
+            customer_email: o.customer_email || o.shipping_address?.email,
+            customer_phone: o.customer_phone || o.shipping_address?.phone,
+            shipping_address:
+              typeof o.shipping_address === 'string'
+                ? o.shipping_address
+                : o.shipping_address?.address || 'Lima, Perú',
+            payment_method: o.payment_method || 'Web Checkout',
+            status: REMOTE_STATUS_TO_UI[o.status] || 'pending',
+            total: Number(o.total) || 0,
+            notes: o.notes,
+            items: (o.items || []).map((it: any) => ({
+              id: it.id,
+              product_id: it.product_id,
+              product_title: it.product_title || 'Producto Web',
+              quantity: it.quantity || 1,
+              unit_price: Number(it.unit_price) || 0,
+              subtotal: Number(it.subtotal || it.unit_price * (it.quantity || 1)) || 0,
+            })),
+          }))
+        }
+      } catch (err) {
+        console.error('[WebOrdersPage] Supabase error:', err)
+        // C-6: antes este catch tragaba el error y caía a DEMO
+        setDataError(`No se pudieron cargar pedidos web: ${err instanceof Error ? err.message : 'error desconocido'}`)
+      }
+
+      // 2. Failsafe localStorage (qaway_orders)
+      try {
+        const localOrders = JSON.parse(localStorage.getItem('qaway_orders') || '[]')
+        if (Array.isArray(localOrders) && localOrders.length > 0) {
+          const mappedLocal: WebOrder[] = localOrders.map((lo) => ({
+            id: lo.id || `QW-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
+            created_at: lo.created_at || new Date().toISOString(),
+            customer_name: lo.customer_name || 'Cliente Web',
+            customer_email: lo.customer_email || '',
+            customer_phone: lo.customer_phone || '',
+            shipping_address:
+              typeof lo.shipping_address === 'string'
+                ? lo.shipping_address
+                : lo.shipping_address?.address || 'Entrega Digital',
+            payment_method: lo.payment_method || 'Yape / Carrito Web',
+            status: lo.status || 'pending',
+            total: Number(lo.total) || 0,
+            notes: lo.notes,
+            items: (lo.items || []).map((it: any) => ({
+              product_id: it.product_id,
+              product_title: it.product_title || 'Producto Digital',
+              quantity: it.quantity || 1,
+              unit_price: Number(it.unit_price) || 0,
+              subtotal: Number(it.subtotal || it.unit_price * (it.quantity || 1)) || 0,
+            })),
+          }))
+
+          // Unir evitando duplicados por ID
+          const existingIds = new Set(combined.map((o) => o.id))
+          mappedLocal.forEach((lo) => {
+            if (!existingIds.has(lo.id)) {
+              combined.push(lo)
+            }
+          })
+        }
+      } catch (e) {
+        console.warn('[WebOrdersPage] Local orders parse error:', e)
+      }
+
+      // C-6: sin fallback a fixtures. Si no hay pedidos, se muestra 0 con el
+      // banner (si hubo error) o vacío genuino.
+      setOrders(combined)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadOrders()
+  }, [])
+
+  const updateOrderStatus = async (orderId: string, newStatus: WebOrder['status']) => {
+    // Actualizar estado local
+    setOrders((prev) =>
+      prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord))
+    )
+    if (selectedOrder && selectedOrder.id === orderId) {
+      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
+    }
+
+    // Actualizar en localStorage
+    try {
+      const local = JSON.parse(localStorage.getItem('qaway_orders') || '[]')
+      const updated = local.map((o: any) => (o.id === orderId ? { ...o, status: newStatus } : o))
+      localStorage.setItem('qaway_orders', JSON.stringify(updated))
+    } catch (e) {
+      console.warn('[WebOrdersPage] update local error:', e)
+    }
+
+    // Actualizar en Supabase. El CHECK de orders.status solo acepta
+    // ('pending','paid','cancelled','refunded') — los estados de UI
+    // shipped/delivered se mapean a 'paid' (pedido cobrado y avanzado);
+    // la granularidad de UI vive solo en el cliente.
+    const REMOTE_STATUS_MAP: Record<WebOrder['status'], string> = {
+      pending: 'pending',
+      paid: 'paid',
+      shipped: 'paid',
+      delivered: 'paid',
+      cancelled: 'cancelled',
+    }
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: REMOTE_STATUS_MAP[newStatus] })
+        .eq('id', orderId)
+      if (error) {
+        console.error('[WebOrdersPage] update status error:', error.message)
+        setDataError(`No se pudo actualizar el estado del pedido ${orderId}: ${error.message}`)
+      }
+    } catch (e) {
+      console.error('[WebOrdersPage] update status falló:', e)
+      setDataError(`No se pudo actualizar el estado del pedido ${orderId}`)
+    }
+  }
+
+  // Filtrado y estadísticas
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const matchesSearch =
+        o.id.toLowerCase().includes(search.toLowerCase()) ||
+        (o.customer_name && o.customer_name.toLowerCase().includes(search.toLowerCase())) ||
+        (o.customer_email && o.customer_email.toLowerCase().includes(search.toLowerCase())) ||
+        o.items.some((it) => it.product_title.toLowerCase().includes(search.toLowerCase()))
+
+      const matchesStatus = filterStatus === 'all' || o.status === filterStatus
+      return matchesSearch && matchesStatus
+    })
+  }, [orders, search, filterStatus])
+
+  const stats = useMemo(() => {
+    const totalCount = orders.length
+    const pendingCount = orders.filter((o) => o.status === 'pending').length
+    const paidCount = orders.filter((o) => o.status === 'paid' || o.status === 'delivered').length
+    const totalRevenue = orders
+      .filter((o) => o.status === 'paid' || o.status === 'delivered')
+      .reduce((sum, o) => sum + (o.total || 0), 0)
+
+    return { totalCount, pendingCount, paidCount, totalRevenue }
+  }, [orders])
+
+  return (
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Cabecera Principal oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <Globe size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                      Pedidos Web
+                    </h1>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>
+                      {orders.length} órdenes
+                    </span>
+                  </div>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Bandeja unificada de pedidos generados en el carrito web y tienda online.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pxp-heading-actions">
+                <button
+                  onClick={loadOrders}
+                  disabled={loading}
+                  className="pxp-btn"
+                  title="Actualizar bandeja de pedidos"
+                >
+                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                  <span>Actualizar</span>
+                </button>
+                <a
+                  href="/landings/desarrollo-web-qaway"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pxp-btn primary"
+                  title="Ver tienda online pública"
+                >
+                  <span>Ver Catálogo Web</span>
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+            </div>
+
+            {/* Tarjetas de Métricas oficiales pxp */}
+            <section className="pxp-metrics" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Total Pedidos Web</span>
+                  <div className="pxp-metric-icon"><Package size={16} /></div>
+                </div>
+                <div className="pxp-metric-value">{stats.totalCount}</div>
+                <div className="pxp-metric-note">Registrados en tienda online</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Por Confirmar</span>
+                  <div className="pxp-metric-icon" style={{ color: '#d97706', background: '#fffbeb' }}><Clock size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#d97706' }}>{stats.pendingCount}</div>
+                <div className="pxp-metric-note" style={{ color: '#b45309' }}>Requieren validar voucher/pago</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Confirmados</span>
+                  <div className="pxp-metric-icon" style={{ color: '#059669', background: '#ecfdf5' }}><CheckCircle2 size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#059669' }}>{stats.paidCount}</div>
+                <div className="pxp-metric-note" style={{ color: '#047857' }}>Pagados o despachados</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Ingresos Confirmados</span>
+                  <div className="pxp-metric-icon" style={{ color: '#ff4b0b', background: '#fff2eb' }}><DollarSign size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#ff4b0b' }}>{formatCurrency(stats.totalRevenue)}</div>
+                <div className="pxp-metric-note" style={{ color: '#ea3e00' }}>Total recaudado web</div>
+              </div>
+            </section>
+
+            {/* Toolbar oficial pxp */}
+            <div className="pxp-toolbar">
+              <div className="pxp-search">
+                <Search size={15} style={{ color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Buscar por código, cliente o producto..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '12px', color: 'var(--muted)', marginRight: 4 }}>Filtrar:</span>
+                {[
+                  { id: 'all', label: 'Todos' },
+                  { id: 'pending', label: 'Pendientes' },
+                  { id: 'paid', label: 'Pagados' },
+                  { id: 'shipped', label: 'En camino' },
+                  { id: 'delivered', label: 'Entregados' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setFilterStatus(tab.id)}
+                    className={`pxp-btn small ${filterStatus === tab.id ? 'primary' : ''}`}
+                    style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+      {/* C-6: banner de error de datos — nunca ocultar fallos de carga con datos ficticios */}
+      {dataError && (
+        <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-xl p-4" role="alert">
+          <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-red-300">Error de carga de pedidos</p>
+            <p className="text-xs text-red-300/80 mt-0.5">{dataError}</p>
+            <button
+              type="button"
+              onClick={() => { setDataError(null); loadOrders() }}
+              className="text-xs text-red-200 underline mt-1 hover:text-red-100"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tabla de Pedidos Web */}
+      <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-zinc-50 border-b border-zinc-200 text-xs font-mono uppercase tracking-wider text-muted ">
+              <tr>
+                <th className="py-3.5 px-4">Pedido / Fecha</th>
+                <th className="py-3.5 px-4">Cliente</th>
+                <th className="py-3.5 px-4">Productos</th>
+                <th className="py-3.5 px-4">Total</th>
+                <th className="py-3.5 px-4">Método</th>
+                <th className="py-3.5 px-4">Estado</th>
+                <th className="py-3.5 px-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100 text-muted">
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-muted ">
+                    <Globe size={32} className="mx-auto mb-2 opacity-40 text-blue-400" />
+                    <p className="text-sm font-medium">No se encontraron pedidos con estos filtros.</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => {
+                  const badge = statusBadges[order.status] || statusBadges.pending
+                  const StatusIcon = badge.icon
+                  const formattedDate = new Date(order.created_at).toLocaleDateString('es-PE', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+
+                  return (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-white/[0.02] transition-colors cursor-pointer group"
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      {/* ID y Fecha */}
+                      <td className="py-4 px-4">
+                        <div className="font-mono text-sm font-semibold text-ink group-hover:text-brand transition-colors">
+                          {order.id}
+                        </div>
+                        <div className="text-xs text-muted flex items-center gap-1 mt-0.5">
+                          <Calendar size={12} />
+                          <span>{formattedDate}</span>
+                        </div>
+                      </td>
+
+                      {/* Cliente */}
+                      <td className="py-4 px-4">
+                        <div className="font-medium text-ink">{order.customer_name}</div>
+                        {order.customer_phone && (
+                          <div className="text-xs text-muted mt-0.5">
+                            {order.customer_phone}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Productos */}
+                      <td className="py-4 px-4 max-w-xs">
+                        <div className="text-sm text-ink font-medium truncate">
+                          {order.items[0]?.product_title || 'Pedido Web'}
+                        </div>
+                        {order.items.length > 1 && (
+                          <div className="text-xs text-brand mt-0.5">
+                            +{order.items.length - 1} producto(s) adicional(es)
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Total */}
+                      <td className="py-4 px-4">
+                        <span className="font-semibold text-ink">
+                          {formatCurrency(order.total)}
+                        </span>
+                      </td>
+
+                      {/* Método de Pago */}
+                      <td className="py-4 px-4">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+                          <CreditCard size={13} className="text-muted " />
+                          <span>{order.payment_method}</span>
+                        </span>
+                      </td>
+
+                      {/* Estado */}
+                      <td className="py-4 px-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.bg} ${badge.color} ${badge.border}`}
+                        >
+                          <StatusIcon size={12} />
+                          <span>{badge.label}</span>
+                        </span>
+                      </td>
+
+                      {/* Acciones */}
+                      <td
+                        className="py-4 px-4 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedOrder(order)}
+                            className="p-1.5 text-muted hover:text-ink hover:bg-zinc-100 rounded-lg transition-colors"
+                            title="Ver detalles"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          {order.customer_phone && (
+                            <a
+                              href={`https://wa.me/${order.customer_phone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(
+                                order.customer_name || ''
+                              )},%20te%20contactamos%20de%20Qaway%20sobre%20tu%20pedido%20${order.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                              title="Chat WhatsApp"
+                            >
+                              <MessageCircle size={16} />
+                            </a>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal Detalle de Pedido */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div ref={modalRef} className="relative w-full max-w-lg bg-surface border border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5">
+            {/* Cabecera Modal */}
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-brand">
+                  Detalle de Pedido Web
+                </span>
+                <h3 className="text-xl font-bold text-ink mt-1">{selectedOrder.id}</h3>
+                <p className="text-xs text-muted ">
+                  Emitido el {new Date(selectedOrder.created_at).toLocaleString('es-PE')}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="p-1.5 text-muted hover:text-ink hover:bg-zinc-100 rounded-lg transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Datos del Cliente */}
+            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 space-y-2">
+              <div className="flex items-center gap-2 text-ink font-medium text-sm">
+                <User size={15} className="text-brand" />
+                <span>{selectedOrder.customer_name || 'Cliente sin nombre'}</span>
+              </div>
+              {selectedOrder.customer_email && (
+                <p className="text-xs text-muted pl-6">
+                  {selectedOrder.customer_email}
+                </p>
+              )}
+              {selectedOrder.customer_phone && (
+                <p className="text-xs text-muted pl-6">
+                  Tel: {selectedOrder.customer_phone}
+                </p>
+              )}
+              {selectedOrder.shipping_address && (
+                <div className="flex items-start gap-2 text-xs text-muted pl-6 pt-1">
+                  <MapPin size={13} className="text-muted shrink-0 mt-0.5" />
+                  <span>{selectedOrder.shipping_address}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Desglose de Productos */}
+            <div>
+              <h4 className="text-xs font-mono uppercase tracking-wider text-muted mb-2">
+                Productos Comprados
+              </h4>
+              <div className="divide-y divide-zinc-100 border border-zinc-100 rounded-xl overflow-hidden bg-white/30">
+                {selectedOrder.items.map((item, idx) => (
+                  <div key={idx} className="p-3 flex items-center justify-between text-sm">
+                    <div>
+                      <div className="font-medium text-ink">{item.product_title}</div>
+                      <div className="text-xs text-muted ">
+                        {item.quantity} x {formatCurrency(item.unit_price)}
+                      </div>
+                    </div>
+                    <div className="font-semibold text-ink">
+                      {formatCurrency(item.subtotal)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="flex items-center justify-between p-3.5 bg-brand/10 border border-brand/20 rounded-xl">
+              <span className="font-semibold text-ink">Total a Pagar</span>
+              <span className="text-xl font-bold text-brand">
+                {formatCurrency(selectedOrder.total)}
+              </span>
+            </div>
+
+            {/* Notas */}
+            {selectedOrder.notes && (
+              <div className="p-3 bg-zinc-50 border border-zinc-100 rounded-xl">
+                <span className="text-xs font-mono uppercase tracking-wider text-muted block mb-1">
+                  Notas del pedido:
+                </span>
+                <p className="text-xs text-muted italic">{selectedOrder.notes}</p>
+              </div>
+            )}
+
+            {/* Estado y Acciones Rápidas */}
+            <div className="space-y-2 pt-2 border-t border-zinc-200">
+              <span className="text-xs text-muted block">Cambiar estado del pedido:</span>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => updateOrderStatus(selectedOrder.id, 'paid')}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                    selectedOrder.status === 'paid'
+                      ? 'bg-emerald-500 text-white border-emerald-400'
+                      : 'bg-zinc-50 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
+                  }`}
+                >
+                  ✓ Pagado
+                </button>
+                <button
+                  onClick={() => updateOrderStatus(selectedOrder.id, 'delivered')}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                    selectedOrder.status === 'delivered'
+                      ? 'bg-purple-500 text-white border-purple-400'
+                      : 'bg-zinc-50 text-purple-400 border-purple-500/20 hover:bg-purple-500/10'
+                  }`}
+                >
+                  ✓ Entregado
+                </button>
+                <button
+                  onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                    selectedOrder.status === 'cancelled'
+                      ? 'bg-rose-500 text-white border-rose-400'
+                      : 'bg-zinc-50 text-rose-400 border-rose-500/20 hover:bg-rose-500/10'
+                  }`}
+                >
+                  ✕ Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+          </div>
+        </main>
+      </div>
+    </div>
+
+  )
+}
+
+

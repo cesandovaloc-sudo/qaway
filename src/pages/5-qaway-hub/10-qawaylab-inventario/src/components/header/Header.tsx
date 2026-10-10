@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useTenant } from '@/context/TenantContext'
 // @ts-ignore
-import { AppSwitcherDropdown } from '../../../../5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
+import { AppSwitcherDropdown } from '../../../../5-gestor-de-proyectos/components/AppSwitcherDropdown'
 
 const roleLabels: Record<string, string> = {
   admin: 'Super Administrador',
