@@ -20,10 +20,6 @@ import {
   Users,
   X,
   Zap,
-  Crown,
-  Shield,
-  UserCheck,
-  Sparkles,
 } from 'lucide-react'
 import { useProjectWorkItems } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
@@ -207,81 +203,6 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
 
   return (
     <>
-      {/* Banner Reactivo de Perspectiva Institucional / Operativa */}
-      <div
-        className={`mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 shadow-xs transition-colors ${
-          isGestor
-            ? 'border-emerald-200 bg-emerald-50/70 text-emerald-950'
-            : isCoordinador
-            ? 'border-blue-200 bg-blue-50/70 text-blue-950'
-            : 'border-zinc-200 bg-gradient-to-r from-zinc-50 to-orange-50/40 text-zinc-900'
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg font-black text-xs text-white shadow-xs"
-            style={{ backgroundColor: currentPersona.accentColor }}
-          >
-            {isSuperAdmin ? <Crown size={16} /> : isCoordinador ? <Shield size={16} /> : <UserCheck size={16} />}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black tracking-tight">{currentPersona.title}</span>
-              <span
-                className="rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider"
-                style={{
-                  color: currentPersona.accentColor,
-                  backgroundColor: `${currentPersona.accentColor}18`,
-                }}
-              >
-                {currentPersona.tag}
-              </span>
-            </div>
-            <p className="text-[11px] opacity-80 font-medium">
-              📍 <span className="font-semibold">{currentPersona.scope}</span> · {currentPersona.description}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 ml-auto">
-          {isGestor && memberFilter !== 'Carlos Sandoval' && (
-            <button
-              type="button"
-              onClick={() => setMemberFilter('Carlos Sandoval')}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
-            >
-              <UserCheck size={13} />
-              Filtrar mi bandeja territorial
-            </button>
-          )}
-
-          {isCoordinador && memberFilter !== null && (
-            <button
-              type="button"
-              onClick={() => setMemberFilter(null)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
-            >
-              <Shield size={13} />
-              Ver supervisión nacional (Todo el equipo)
-            </button>
-          )}
-
-          {isGestor && memberFilter === 'Carlos Sandoval' && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-100/80 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-              Bandeja territorial filtrada a tus tareas
-            </span>
-          )}
-
-          {isCoordinador && memberFilter === null && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-300 bg-blue-100/80 px-2.5 py-1 text-[11px] font-bold text-blue-800">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
-              Torre PMO: Vista de las 26 regiones
-            </span>
-          )}
-        </div>
-      </div>
-
       {/* Barra de Filtros Ergonómica (Solución a la saturación horizontal) */}
       <div className="mb-3 space-y-2 rounded-xl border border-zinc-200 bg-white p-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="flex flex-wrap items-center gap-2">
@@ -381,11 +302,11 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                         <div className="flex items-center gap-1.5">
                           {stat.urgentCount > 0 && (
                             <span
-                              className={`rounded px-1 text-[9px] font-extrabold ${
-                                isSelected ? 'bg-white text-rose-600' : 'bg-rose-100 text-rose-700'
+                              className={`rounded px-1.5 py-0.2 text-[9px] font-semibold ${
+                                isSelected ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-600'
                               }`}
                             >
-                              {stat.urgentCount} urg
+                              {stat.urgentCount} prio
                             </span>
                           )}
                           <span className="font-mono text-[11px] opacity-70">{stat.count}</span>
@@ -398,11 +319,11 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
             )}
           </div>
 
-          {/* Avatares de Alerta Preventiva (Acceso inmediato con pulso) */}
+          {/* Miembros prioritarios (Acceso directo sobrio) */}
           {urgentMembers.length > 0 && (
-            <div className="flex items-center gap-1.5 border-l border-zinc-200 pl-2">
-              <span className="hidden sm:inline text-[10px] font-extrabold uppercase tracking-wide text-rose-500">
-                Urgencias:
+            <div className="flex items-center gap-1.5 border-l border-zinc-200 pl-2.5">
+              <span className="hidden sm:inline text-[11px] font-medium text-zinc-400">
+                Prioritarios:
               </span>
               <div className="flex items-center gap-1">
                 {urgentMembers.map((m) => {
@@ -412,15 +333,15 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                       key={m.name}
                       type="button"
                       onClick={() => setMemberFilter(isActive ? null : m.name)}
-                      title={`${m.name}: ${m.urgentCount} tarea(s) críticas o vencidas`}
-                      className={`relative grid h-7 w-7 place-items-center rounded-full text-[10px] font-black transition-transform hover:scale-110 ${
+                      title={`${m.name}: ${m.urgentCount} tarea(s) prioritarias`}
+                      className={`relative grid h-6 w-6 place-items-center rounded-full text-[10px] font-semibold transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-rose-600 text-white ring-2 ring-rose-600 ring-offset-1'
-                          : 'bg-rose-50 text-rose-700 ring-2 ring-rose-500/60 animate-pulse hover:animate-none'
+                          ? 'bg-zinc-900 text-white ring-1 ring-zinc-900 ring-offset-1'
+                          : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200'
                       }`}
                     >
                       {m.name.charAt(0).toUpperCase()}
-                      <span className="absolute -top-1 -right-1 grid h-3.5 w-3.5 place-items-center rounded-full bg-rose-600 text-[8px] font-black text-white">
+                      <span className="absolute -top-1 -right-1 grid h-3.5 w-3.5 place-items-center rounded-full bg-zinc-700 text-[8px] font-bold text-white">
                         {m.urgentCount}
                       </span>
                     </button>

@@ -16,10 +16,7 @@ import {
   Home,
   Building2,
   X,
-  Crown,
   Check,
-  Sparkles,
-  UserCheck,
 } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
@@ -102,16 +99,6 @@ export default function Header({
       if (!prev) {
         setIsTenantOpen(false)
         setIsPerspectiveOpen(false)
-        setIsWaffleOpen(false)
-      }
-      return !prev
-    })
-  }
-    setIsProfileOpen((prev) => {
-      if (!prev) {
-        setIsTenantOpen(false)
-        setIsSedeOpen(false)
-        setIsWarehouseOpen(false)
         setIsWaffleOpen(false)
       }
       return !prev
@@ -294,19 +281,15 @@ export default function Header({
               <button
                 type="button"
                 onClick={toggleTenant}
-                className={`hidden md:flex items-center gap-2 h-10 px-3.5 rounded-xl border text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all ${
-                  scopedTenant
-                    ? 'border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)]'
-                    : 'border-amber-500/25 bg-amber-500/5 text-amber-200/90 hover:bg-amber-500/10'
-                }`}
-                title="Seleccionar empresa de trabajo"
+                className="hidden md:flex items-center gap-2 h-9 px-2.5 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-xs font-medium focus:outline-none focus:ring-1 focus:ring-zinc-400/40 cursor-pointer transition-colors"
+                title="Seleccionar organización o empresa"
               >
-                <Building2 size={15} className={scopedTenant ? 'text-[#ff4b0b]' : 'text-amber-400/80'} />
-                <span className={`w-2 h-2 rounded-full ${scopedTenant ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400/80'}`} />
+                <Building2 size={14} className="text-zinc-400" />
+                <span className={`w-1.5 h-1.5 rounded-full ${scopedTenant ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
                 <span className="max-w-36 truncate">
-                  {scopedTenant ? scopedTenant.name : 'Sin empresa'}
+                  {scopedTenant ? scopedTenant.name : 'Todas las entidades'}
                 </span>
-                <ChevronDown size={14} className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${isTenantOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
+                <ChevronDown size={12} className={`text-[var(--hub-dim)] transition-transform duration-150 ${isTenantOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
               </button>
 
               {isTenantOpen && (
@@ -384,35 +367,20 @@ export default function Header({
           ) : null}
         </div>
 
-        {/* Conmutador de Perspectiva / Rol Operativo (Super Admin <-> Coordinador <-> Gestor) */}
+        {/* Conmutador de Perspectiva / Rol (Minimalista estilo Linear / Raycast) */}
         <div className="relative">
           <button
             type="button"
             onClick={togglePerspective}
-            className="flex items-center gap-2 h-10 px-3 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all shadow-xs"
-            title={`Perspectiva: ${currentPersona.title} (${currentPersona.scope})`}
+            className="flex items-center gap-2 h-9 px-2.5 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-xs font-medium focus:outline-none focus:ring-1 focus:ring-zinc-400/40 cursor-pointer transition-colors"
+            title={`Perspectiva: ${currentPersona.title}`}
           >
-            {perspective === 'super_admin' ? (
-              <Crown size={15} className="text-[#ff4b0b] shrink-0" />
-            ) : perspective === 'coordinador' ? (
-              <Shield size={15} className="text-blue-500 shrink-0" />
-            ) : (
-              <UserCheck size={15} className="text-emerald-500 shrink-0" />
-            )}
-            <span
-              className="px-1.5 py-0.5 text-[10px] uppercase font-black rounded-md tracking-wider shrink-0"
-              style={{
-                color: currentPersona.accentColor,
-                backgroundColor: `${currentPersona.accentColor}18`,
-              }}
-            >
-              {currentPersona.tag}
-            </span>
-            <span className="hidden xl:inline max-w-44 truncate">{currentPersona.title}</span>
-            <span className="xl:hidden max-w-28 truncate">{currentPersona.name}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
+            <span className="text-zinc-400 font-normal">Rol:</span>
+            <span className="font-semibold max-w-32 truncate">{currentPersona.tag}</span>
             <ChevronDown
-              size={14}
-              className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${
+              size={12}
+              className={`text-[var(--hub-dim)] transition-transform duration-150 ${
                 isPerspectiveOpen ? 'rotate-180 text-[var(--hub-text)]' : ''
               }`}
             />
@@ -423,22 +391,16 @@ export default function Header({
               <div
                 className="fixed inset-0 z-40"
                 onClick={() => setIsPerspectiveOpen(false)}
-                aria-label="Cerrar conmutador de perspectiva"
+                aria-label="Cerrar selector de perspectiva"
               />
-              <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-88 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
-                <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={16} className="text-[#ff4b0b]" />
-                    <p className="text-xs font-extrabold text-[var(--hub-text)]">
-                      Conmutador de Rol / Perspectiva
-                    </p>
-                  </div>
-                  <p className="text-[11px] text-[var(--hub-dim)] mt-1 leading-snug">
-                    Opera la suite desde la visión del Fundador (SaaS global), Coordinador (supervisión nacional) o Gestor Territorial (ejecución de campo).
+              <div className="hub-chrome absolute left-0 top-[calc(100%+6px)] w-72 rounded-xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-lg z-[100] overflow-hidden text-left text-[var(--hub-text)] animate-in fade-in-50 zoom-in-95">
+                <div className="px-3 py-2 border-b border-[var(--hub-border-soft)]">
+                  <p className="text-[10px] font-semibold text-[var(--hub-dim)] uppercase tracking-wider">
+                    Perspectiva de Trabajo
                   </p>
                 </div>
 
-                <div className="p-2 space-y-1.5">
+                <div className="p-1.5 space-y-0.5">
                   {(Object.keys(PROJECT_PERSONAS) as ProjectPerspectiveRole[]).map((roleKey) => {
                     const p = PROJECT_PERSONAS[roleKey]
                     const isSelected = perspective === roleKey
@@ -450,61 +412,24 @@ export default function Header({
                           setPerspective(roleKey)
                           setIsPerspectiveOpen(false)
                         }}
-                        className={`w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all cursor-pointer border ${
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
                           isSelected
-                            ? 'bg-brand/10 border-brand/40 text-[var(--hub-text)] shadow-xs'
-                            : 'border-transparent hover:bg-[var(--hub-hover)] text-[var(--hub-text-soft)] hover:text-[var(--hub-text)]'
+                            ? 'bg-[var(--hub-hover)] font-semibold text-[var(--hub-text)]'
+                            : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-chip)] hover:text-[var(--hub-text)]'
                         }`}
                       >
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-black text-xs mt-0.5"
-                          style={{
-                            color: p.accentColor,
-                            backgroundColor: `${p.accentColor}20`,
-                          }}
-                        >
-                          {roleKey === 'super_admin' ? (
-                            <Crown size={16} />
-                          ) : roleKey === 'coordinador' ? (
-                            <Shield size={16} />
-                          ) : (
-                            <UserCheck size={16} />
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-[var(--hub-text)] truncate">
-                              {p.title}
-                            </span>
-                            <span
-                              className="px-1.5 py-0.2 text-[9px] uppercase font-black rounded tracking-wider shrink-0"
-                              style={{
-                                color: p.accentColor,
-                                backgroundColor: `${p.accentColor}18`,
-                              }}
-                            >
-                              {p.tag}
-                            </span>
-                            {isSelected && (
-                              <Check size={14} className="ml-auto text-emerald-500 shrink-0" />
-                            )}
-                          </div>
-                          <p className="text-[10px] text-[var(--hub-dim)] font-medium mt-0.5 truncate">
-                            📍 {p.scope}
-                          </p>
-                          <p className="text-[10.5px] text-[var(--hub-faint)] mt-1 line-clamp-2 leading-relaxed">
-                            {p.description}
+                        <div className="min-w-0 pr-2">
+                          <p className="font-medium text-[var(--hub-text)] truncate">{p.title}</p>
+                          <p className="text-[10.5px] text-[var(--hub-dim)] truncate mt-0.5">
+                            {p.scope}
                           </p>
                         </div>
+                        {isSelected && (
+                          <Check size={13} className="text-[#ff4b0b] shrink-0" />
+                        )}
                       </button>
                     )
                   })}
-                </div>
-
-                <div className="p-3 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]/60 text-[10px] text-[var(--hub-dim)] flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <span>Sincronización reactiva activa en tableros y bandejas de trabajo.</span>
                 </div>
               </div>
             </>
