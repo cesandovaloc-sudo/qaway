@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown, Filter, FolderKanban, Plus, Search } from 'lucide-react'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
-import { useProjects } from '@/hooks/useProjects'
+import { useTenantFilteredProjects } from '@/hooks/useProjects'
 import {
   PROJECT_HEALTH_META,
   PROJECT_METHODOLOGY_META,
@@ -38,7 +38,7 @@ function formatDate(value: string) {
 }
 
 export default function ProjectsListPage() {
-  const projects = useProjects()
+  const projects = useTenantFilteredProjects()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [methodology, setMethodology] = useState<MethodologyFilter>('todas')

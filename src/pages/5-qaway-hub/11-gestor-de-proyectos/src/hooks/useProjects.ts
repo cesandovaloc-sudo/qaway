@@ -1,5 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react'
 import { projectsService } from '@/services/projectsService'
+import { useTenant } from '@/context/TenantContext'
 import type {
   BudgetByProject,
   BurndownSnapshot,
@@ -33,6 +34,27 @@ export function useProjectsDataset(): ProjectsDataset {
 
 export function useProjects(): Project[] {
   return useProjectsDataset().projects
+}
+
+// ── Alcance por entidad (Fase 17): filtra proyectos por cliente ──
+
+function normalizeClient(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+/** Proyectos de la entidad elegida en el Header; todos si no hay selección. */
+export function useTenantFilteredProjects(): Project[] {
+  const projects = useProjects()
+  const { scopedTenant } = useTenant()
+  return useMemo(() => {
+    const match = scopedTenant?.projectClientMatch?.trim()
+    if (!match) return projects
+    const needle = normalizeClient(match)
+    return projects.filter((project) => normalizeClient(project.client).includes(needle))
+  }, [projects, scopedTenant])
 }
 
 export function useProject(projectId: string | undefined): Project | undefined {

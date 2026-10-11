@@ -11,17 +11,15 @@ import {
 } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
-import {
-  useBudgetByProject,
-  useMethodologyDistribution,
-  usePortfolioKpis,
-  useProjects,
-} from '@/hooks/useProjects'
+import { useProjectsDataset, useTenantFilteredProjects } from '@/hooks/useProjects'
+import { useHubBrand } from '@/hooks/useHubBrand'
 import { projectsService } from '@/services/projectsService'
 import {
+  HEALTH_SCORE,
   PROJECT_HEALTH_META,
   PROJECT_METHODOLOGY_META,
   type ProjectHealth,
+  type ProjectMethodology,
 } from '@/types/project.types'
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -83,12 +81,87 @@ function MetricCard({
 }
 
 export default function DashboardPage() {
-  const projects = useProjects()
+  // Alcance por entidad (Fase 17): todos los agregados derivan de los proyectos
+  // filtrados por cliente; sin selección, equivale a la cartera completa.
+  const projects = useTenantFilteredProjects()
+  const dataset = useProjectsDataset()
+  const hubBrand = useHubBrand()
   const navigate = useNavigate()
-  const kpis = usePortfolioKpis()
-  const methodologyDistribution = useMethodologyDistribution()
-  const budgetByProject = useBudgetByProject()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+
+  const projectIds = useMemo(() => new Set(projects.map((p) => p.id)), [projects])
+
+  const kpis = useMemo(() => {
+    const scopedSprints = dataset.sprints.filter((s) => projectIds.has(s.projectId))
+    const scopedItems = dataset.workItems.filter((i) => projectIds.has(i.projectId))
+    const totalProjects = projects.length
+    const activeProjects = projects.filter((p) => p.status === 'en_curso').length
+    const completedProjects = projects.filter((p) => p.status === 'completado').length
+    const atRiskProjects = projects.filter((p) => p.health !== 'optimo').length
+    const healthSum = projects.reduce((sum, p) => sum + HEALTH_SCORE[p.health], 0)
+    const avgHealthScore = totalProjects > 0 ? Math.round(healthSum / totalProjects) : 0
+    const budgetAllocated = projects.reduce((sum, p) => sum + p.budget.allocated, 0)
+    const budgetSpent = projects.reduce((sum, p) => sum + p.budget.spent, 0)
+    const budgetExecutionPct =
+      budgetAllocated > 0 ? Math.round((budgetSpent / budgetAllocated) * 100) : 0
+    const closed = scopedSprints.filter((s) => s.status === 'cerrado')
+    const pool = closed.length ? closed : scopedSprints.filter((s) => s.status === 'activo')
+    const sprintVelocity =
+      pool.length > 0
+        ? Math.round((pool.reduce((sum, s) => sum + s.completedPoints, 0) / pool.length) * 10) / 10
+        : 0
+    const doneTasks = scopedItems.filter((i) => i.state === 'done').length
+    const tasksAtRisk = scopedItems.filter(
+      (i) =>
+        i.state !== 'done' &&
+        (i.priority === 'URGENTE' || i.priority === 'ALTA' || Boolean(i.isCriticalPath)),
+    ).length
+    const progressSum = projects.reduce((sum, p) => sum + p.progress, 0)
+    const globalProgress = totalProjects > 0 ? Math.round(progressSum / totalProjects) : 0
+    return {
+      totalProjects,
+      activeProjects,
+      completedProjects,
+      atRiskProjects,
+      avgHealthScore,
+      budgetAllocated,
+      budgetSpent,
+      budgetExecutionPct,
+      sprintVelocity,
+      tasksAtRisk,
+      totalTasks: scopedItems.length,
+      doneTasks,
+      globalProgress,
+    }
+  }, [projects, dataset, projectIds])
+
+  const methodologyDistribution = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const project of projects) {
+      counts.set(project.methodology, (counts.get(project.methodology) ?? 0) + 1)
+    }
+    return (Object.keys(PROJECT_METHODOLOGY_META) as ProjectMethodology[]).map(
+      (methodology) => ({
+        methodology,
+        label: PROJECT_METHODOLOGY_META[methodology].short,
+        count: counts.get(methodology) ?? 0,
+        color: PROJECT_METHODOLOGY_META[methodology].color,
+      }),
+    )
+  }, [projects])
+
+  const budgetByProject = useMemo(
+    () =>
+      projects.map((project) => ({
+        projectId: project.id,
+        code: project.code,
+        name: project.name,
+        allocated: project.budget.allocated,
+        spent: project.budget.spent,
+        currency: project.budget.currency,
+      })),
+    [projects],
+  )
 
   const methodologyData = useMemo(
     () => methodologyDistribution.filter((item) => item.count > 0),
@@ -171,7 +244,7 @@ export default function DashboardPage() {
           label="Proyectos activos"
           value={String(kpis.activeProjects)}
           note={`de ${kpis.totalProjects} proyectos en cartera`}
-          accent="#ff4b0b"
+          accent="var(--hub-brand)"
         />
         <MetricCard
           icon={<Gauge size={15} />}
@@ -225,7 +298,10 @@ export default function DashboardPage() {
                       stroke="none"
                     >
                       {methodologyData.map((item) => (
-                        <Cell key={item.methodology} fill={item.color} />
+                        <Cell
+                          key={item.methodology}
+                          fill={item.methodology === 'scrum' ? hubBrand : item.color}
+                        />
                       ))}
                     </Pie>
                     <Tooltip
@@ -248,7 +324,13 @@ export default function DashboardPage() {
                 {methodologyDistribution.map((item) => (
                   <li key={item.methodology} className="flex items-center justify-between text-xs">
                     <span className="flex items-center gap-2 font-semibold text-[var(--hub-text-soft)]">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{
+                          backgroundColor:
+                            item.methodology === 'scrum' ? hubBrand : item.color,
+                        }}
+                      />
                       {PROJECT_METHODOLOGY_META[item.methodology].short}
                     </span>
                     <span className="font-bold text-[var(--hub-dim)]">{item.count}</span>
@@ -289,7 +371,7 @@ export default function DashboardPage() {
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.max(2, width)}%`,
-                        backgroundColor: overrun ? '#e11d48' : '#ff4b0b',
+                        backgroundColor: overrun ? '#e11d48' : 'var(--hub-brand)',
                       }}
                     />
                   </div>

@@ -97,10 +97,10 @@ export function QuickActions({ hideHeader = false }: QuickActionsProps = {}) {
               transition-all duration-200 ease-out
               ${action.primary
                 ? `
-                  bg-[#ff4b0b] 
+                  bg-[var(--hub-brand)] 
                   text-white 
                   shadow-[0_2px_8px_rgba(255,75,11,0.25)]
-                  hover:bg-[#ea3e00]
+                  hover:bg-[var(--hub-brand-hover)]
                   hover:-translate-y-0.5
                 `
                 : `

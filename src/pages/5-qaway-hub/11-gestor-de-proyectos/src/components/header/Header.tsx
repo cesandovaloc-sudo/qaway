@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Search,
   Bell,
@@ -292,6 +292,26 @@ export default function Header({
       // Ignorar errores de logout
     }
     navigate('/login', { replace: true })
+  }
+
+  const customInputRef = useRef<HTMLInputElement>(null)
+
+  // Swatch personalizado en dos tiempos (Fase 17): si no está activo, el clic
+  // solo activa 'personalizado' con el color guardado (sin abrir el picker
+  // nativo); si ya está activo, el clic abre el selector para cambiarlo.
+  const handleCustomSwatchClick = () => {
+    if (colorPalette !== 'personalizado') {
+      setColorPalette('personalizado')
+      return
+    }
+    const el = customInputRef.current
+    if (!el) return
+    const withPicker = el as HTMLInputElement & { showPicker?: () => void }
+    if (typeof withPicker.showPicker === 'function') {
+      withPicker.showPicker()
+    } else {
+      el.click()
+    }
   }
 
   return (
@@ -697,7 +717,9 @@ export default function Header({
                         }`}
                         style={{ backgroundColor: '#c8102e' }}
                       />
-                      <label
+                      <button
+                        type="button"
+                        onClick={handleCustomSwatchClick}
                         title="Color personalizado (elige tu marca)"
                         aria-label="Color de marca personalizado"
                         className={`relative w-4 h-4 rounded-full transition-transform cursor-pointer flex items-center justify-center overflow-hidden ${
@@ -712,17 +734,20 @@ export default function Header({
                         }}
                       >
                         <span className="sr-only">Elegir color de marca personalizado</span>
-                        <input
-                          type="color"
-                          value={/^#[0-9a-fA-F]{6}$/.test(customBrand) ? customBrand : '#c8102e'}
-                          onChange={(e) => {
-                            setCustomBrand(e.target.value)
-                            setColorPalette('personalizado')
-                          }}
-                          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                          aria-label="Selector de color de marca personalizado"
-                        />
-                      </label>
+                      </button>
+                      <input
+                        ref={customInputRef}
+                        type="color"
+                        value={/^#[0-9a-fA-F]{6}$/.test(customBrand) ? customBrand : '#c8102e'}
+                        onChange={(e) => {
+                          setCustomBrand(e.target.value)
+                          setColorPalette('personalizado')
+                        }}
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        className="sr-only pointer-events-none"
+                        aria-label="Selector de color de marca personalizado"
+                      />
                     </div>
                   </div>
 

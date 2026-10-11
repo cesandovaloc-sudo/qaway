@@ -104,7 +104,7 @@ export function QuickAccessCards() {
           to="/landings/desarrollo-web-qaway"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 h-[34px] px-3 text-[13px] font-semibold text-[#34415b] hover:text-white bg-white hover:bg-[#ff4b0b] border border-[#e5ebf4] hover:border-[#ff4b0b] rounded-[8px] transition-all self-start sm:self-auto shadow-2xs"
+          className="inline-flex items-center gap-1.5 h-[34px] px-3 text-[13px] font-semibold text-[#34415b] hover:text-white bg-white hover:bg-[var(--hub-brand)] border border-[#e5ebf4] hover:border-[var(--hub-brand)] rounded-[8px] transition-all self-start sm:self-auto shadow-2xs"
         >
            <span>Ver mi tienda online</span>
           <ExternalLink size={13} />
@@ -125,7 +125,7 @@ export function QuickAccessCards() {
                 {/* Cabecera de la tarjeta: Icono y Badge */}
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div
-                    className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0 group-hover:text-[#ff4b0b] transition-colors"
+                    className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0 group-hover:text-[var(--hub-brand)] transition-colors"
                   >
                     <Icon size={15} strokeWidth={2} />
                   </div>
@@ -137,7 +137,7 @@ export function QuickAccessCards() {
                 </div>
 
                 {/* Título y descripción ergonómica */}
-                <h3 className="text-[14.5px] font-bold text-[#0f172a] group-hover:text-[#ff4b0b] transition-colors duration-200 line-clamp-1">
+                <h3 className="text-[14.5px] font-bold text-[#0f172a] group-hover:text-[var(--hub-brand)] transition-colors duration-200 line-clamp-1">
                   {item.title}
                 </h3>
                 <p className="text-[12px] text-[#71809e] mt-1 leading-relaxed line-clamp-2">
@@ -146,7 +146,7 @@ export function QuickAccessCards() {
               </div>
 
               {/* Pie con llamada a la acción */}
-              <div className="mt-3 pt-2.5 border-t border-[#f1f5f9] flex items-center justify-between text-[11px] font-semibold text-[#71717a] group-hover:text-[#ff4b0b] transition-colors">
+              <div className="mt-3 pt-2.5 border-t border-[#f1f5f9] flex items-center justify-between text-[11px] font-semibold text-[#71717a] group-hover:text-[var(--hub-brand)] transition-colors">
                 <span>Ingresar ahora</span>
                 <ArrowRight
                   size={13}

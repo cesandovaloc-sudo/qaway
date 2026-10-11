@@ -615,7 +615,8 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                         )
                       }
                       aria-label={`Marcar: ${sub.title}`}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#ff4b0b]"
+                      style={{ accentColor: 'var(--hub-brand)' }}
+                      className="mt-0.5 h-4 w-4 shrink-0"
                     />
                     <span className="min-w-0 flex-1">
                       <span

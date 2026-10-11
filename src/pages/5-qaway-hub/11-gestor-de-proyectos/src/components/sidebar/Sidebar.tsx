@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   FolderKanban,
@@ -191,21 +191,28 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     >
       {/* Logo Gestor Pro (Tamaño canónico de App Inventario: 30x30 y 20px) */}
       <div className="flex items-center gap-3 px-4 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
-        <div
-          className="w-[30px] h-[30px] flex-shrink-0 relative"
-          style={{
-            background: 'linear-gradient(135deg, var(--hub-brand-hover, #c44523), var(--hub-brand, #d9532f))',
-            clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
-          }}
+        <Link
+          to={getHref('/')}
+          aria-label="Ir al inicio (Dashboard de Cartera)"
+          title="Ir al inicio (Dashboard de Cartera)"
+          className="shrink-0 rounded-md outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-brand/40"
         >
           <div
-            className="absolute inset-[8px]"
+            className="w-[30px] h-[30px] flex-shrink-0 relative"
             style={{
-              background: 'var(--hub-bg)',
+              background: 'linear-gradient(135deg, var(--hub-brand-hover, #c44523), var(--hub-brand, #d9532f))',
               clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
             }}
-          />
-        </div>
+          >
+            <div
+              className="absolute inset-[8px]"
+              style={{
+                background: 'var(--hub-bg)',
+                clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+              }}
+            />
+          </div>
+        </Link>
         {!collapsed && (
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1.5 leading-none">

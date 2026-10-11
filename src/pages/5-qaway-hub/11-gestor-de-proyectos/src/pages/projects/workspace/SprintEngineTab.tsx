@@ -13,6 +13,7 @@ import {
   useSprintBurndown,
 } from '@/hooks/useProjects'
 import { useProjectsDataset } from '@/hooks/useProjects'
+import { useHubBrand } from '@/hooks/useHubBrand'
 import { projectsService } from '@/services/projectsService'
 import {
   TSHIRT_POINTS,
@@ -69,6 +70,7 @@ function formatDate(value: string) {
 
 export function SprintEngineTab({ projectId, onOpenTask }: SprintEngineTabProps) {
   const project = useProject(projectId)
+  const hubBrand = useHubBrand()
   const workItems = useProjectWorkItems(projectId)
   const dataset = useProjectsDataset()
 
@@ -312,7 +314,7 @@ export function SprintEngineTab({ projectId, onOpenTask }: SprintEngineTabProps)
               )}
               <path d={idealPath} fill="none" stroke="#a1a1aa" strokeWidth={2} strokeDasharray="7 5" strokeLinecap="round" />
               {actualPath && (
-                <path d={actualPath} fill="none" stroke="#ff4b0b" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                <path d={actualPath} fill="none" stroke={hubBrand} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
               )}
               {actualDots.map((d) => (
                 <circle
@@ -320,7 +322,7 @@ export function SprintEngineTab({ projectId, onOpenTask }: SprintEngineTabProps)
                   cx={xOf(d.i)}
                   cy={yOf(d.actual as number)}
                   r={hoverIndex === d.i ? 6 : 4}
-                  fill="#ff4b0b"
+                  fill={hubBrand}
                   stroke="#fff"
                   strokeWidth={2}
                 />
@@ -331,7 +333,7 @@ export function SprintEngineTab({ projectId, onOpenTask }: SprintEngineTabProps)
                   x2={xOf(hoverIndex)}
                   y1={PAD.t}
                   y2={CHART_H - PAD.b}
-                  stroke="#ff4b0b"
+                  stroke={hubBrand}
                   strokeOpacity={0.35}
                   strokeWidth={1.5}
                 />

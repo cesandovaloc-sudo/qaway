@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
-import { supabase } from '@/config/supabase'
 import { useAuth } from './AuthContext'
 
 export interface ScopedTenant {
@@ -9,6 +8,25 @@ export interface ScopedTenant {
   legal_name?: string | null
   branding?: Record<string, unknown> | null
   content?: Record<string, unknown> | null
+  /** Subcadena (normalizada, sin tildes) para filtrar proyectos por cliente. */
+  projectClientMatch?: string
+}
+
+// ── Organizaciones reales de proyectos (Fase 17): cero marcas de tienda ──
+// Reemplaza la consulta a `tenants` de Supabase. El filtrado por cliente se
+// resuelve en `useTenantFilteredProjects` (hooks/useProjects).
+export const PROJECT_ORGANIZATIONS: ScopedTenant[] = [
+  { id: 'org-qaway', name: 'Qaway Lab (Corporativo)', client_code: 'QAW', projectClientMatch: 'qaway lab' },
+  { id: 'org-minedu', name: 'MINEDU - DIGERE', client_code: 'DIGERE', projectClientMatch: 'minedu' },
+  { id: 'org-mml', name: 'Municipalidad Metropolitana', client_code: 'MML', projectClientMatch: 'municipalidad metropolitana' },
+  { id: 'org-andina', name: 'Corporación Andina', client_code: 'CAD', projectClientMatch: 'corporacion andina' },
+  { id: 'org-pacifico', name: 'Distribuidora Pacífico', client_code: 'DPI', projectClientMatch: 'distribuidora pacifico' },
+  { id: 'org-aurea', name: 'Aurea Skincare', client_code: 'AUR', projectClientMatch: 'aurea skincare' },
+]
+
+function findStaticOrg(id: string | null | undefined): ScopedTenant | null {
+  if (!id) return null
+  return PROJECT_ORGANIZATIONS.find((org) => org.id === id) ?? null
 }
 
 interface TenantContextValue {
@@ -27,7 +45,7 @@ const TenantContext = createContext<TenantContextValue | undefined>(undefined)
 const SCOPED_TENANT_STORAGE_KEY = 'qaway.scopedTenant'
 
 export function TenantProvider({ children }: { children: ReactNode }) {
-  const { session, profile, loading: authLoading } = useAuth()
+  const { profile } = useAuth()
 
   // Determinar si el usuario conectado es Super Administrador de plataforma
   const isPlatformAdmin = Boolean(
@@ -35,95 +53,29 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     (profile?.role === 'admin' && !profile?.tenant_id)
   )
 
-  // Cargar scopedTenant desde sessionStorage al iniciar
+  // Cargar scopedTenant desde sessionStorage al iniciar (solo IDs estáticos;
+  // valores antiguos de tienda se descartan → cero marcas ajenas).
   const [scopedTenant, setScopedTenantState] = useState<ScopedTenant | null>(() => {
     try {
       const raw = sessionStorage.getItem(SCOPED_TENANT_STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw)
-        if (parsed && typeof parsed.id === 'string') return parsed
+        if (parsed && typeof parsed.id === 'string') {
+          const known = findStaticOrg(parsed.id)
+          if (known) return known
+        }
       }
     } catch {}
     return null
   })
 
-  const [tenantOptions, setTenantOptions] = useState<ScopedTenant[]>([])
-  const [loadingTenants, setLoadingTenants] = useState(false)
-  const [currentTenant, setCurrentTenant] = useState<ScopedTenant | null>(null)
+  // Lista estática de organizaciones: sin consultas remotas, sin loading.
+  const [tenantOptions] = useState<ScopedTenant[]>(PROJECT_ORGANIZATIONS)
+  const [loadingTenants] = useState(false)
 
-  // Cargar lista de tenants activos si es Super Administrador
-  useEffect(() => {
-    let alive = true
-    if (!isPlatformAdmin || !session) {
-      setTenantOptions([])
-      return
-    }
-
-    setLoadingTenants(true)
-    supabase
-      .from('tenants')
-      .select('id, name, client_code, legal_name, branding, content, status')
-      .eq('status', 'active')
-      .order('name')
-      .then(({ data, error }) => {
-        if (!alive) return
-        if (error) {
-          console.error('[TenantContext] Error loading tenants:', error)
-          setTenantOptions([])
-        } else {
-          setTenantOptions((data || []).map((t) => ({
-            id: t.id,
-            name: t.name,
-            client_code: t.client_code,
-            legal_name: t.legal_name,
-            branding: t.branding,
-            content: t.content,
-          })))
-        }
-      })
-      .catch(() => {
-        if (alive) setTenantOptions([])
-      })
-      .finally(() => {
-        if (alive) setLoadingTenants(false)
-      })
-
-    return () => {
-      alive = false
-    }
-  }, [isPlatformAdmin, session])
-
-  // Q Panel es la fuente de identidad compartida de la empresa. Inventario
-  // consume sus datos, pero no los administra desde su configuración fiscal.
+  // Resolución local del tenant corriente (sin Supabase).
   const selectedTenantId = isPlatformAdmin ? scopedTenant?.id : profile?.tenant_id
-  useEffect(() => {
-    let alive = true
-    if (!selectedTenantId || !session) {
-      setCurrentTenant(null)
-      return
-    }
-
-    supabase
-      .from('tenants')
-      .select('id, name, client_code, legal_name, branding, content, status')
-      .eq('id', selectedTenantId)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (!alive) return
-        if (error || !data) {
-          setCurrentTenant(null)
-          return
-        }
-        setCurrentTenant(data)
-      })
-      .catch(() => {
-        if (alive) setCurrentTenant(null)
-      })
-
-    return () => {
-      alive = false
-    }
-  }, [selectedTenantId, session])
+  const currentTenant = findStaticOrg(selectedTenantId)
 
   // Modificar scopedTenant y sincronizarlo con sessionStorage y eventos
   const setScopedTenant = useCallback((tenant: ScopedTenant | null) => {
