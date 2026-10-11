@@ -87,14 +87,14 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           end: true,
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=kanban',
+          to: '/proyectos/proj-minedu-2027?tab=kanban&view=bandeja',
           label: isGestor ? 'Mi Bandeja' : 'Bandeja de Tareas',
           icon: <Inbox size={18} />,
           badge: myTaskCount,
           badgeVariant: 'neutral',
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=kanban',
+          to: '/proyectos/proj-minedu-2027?tab=kanban&view=criticas',
           label: 'Alertas Críticas',
           icon: <AlertCircle size={18} />,
           badge: urgentCount,
@@ -162,8 +162,8 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const currentUrl = `${location.pathname}${location.search}`
 
   // Primer href (orden de documento, hijos incluidos) con coincidencia exacta.
-  // Desempata URLs idénticas: Mi Bandeja / Alertas Críticas / Gestores &
-  // Territorio comparten ?tab=kanban → gana el primero (Mi Bandeja).
+  // Las URLs se diferencian por ?view= (bandeja / criticas / sin view): solo un
+  // item coincide con currentUrl a la vez. First-wins queda como resguardo.
   let activeHref: string | null = null
   for (const sec of sections) {
     for (const item of sec.items) {

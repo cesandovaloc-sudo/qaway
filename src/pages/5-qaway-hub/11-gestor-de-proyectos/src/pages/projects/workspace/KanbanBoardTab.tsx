@@ -23,6 +23,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { useProjectKanbanSettings, useProjectWorkItems } from '@/hooks/useProjects'
+import { useSearchParams } from 'react-router-dom'
 import { projectsService } from '@/services/projectsService'
 import { useProjectPerspective } from '../../../context/ProjectPerspectiveContext'
 import {
@@ -31,6 +32,7 @@ import {
   WORK_ITEM_PRIORITY_META,
   WORK_ITEM_STATE_META,
   type ColumnPolicy,
+  type WorkItem,
   type WorkItemState,
 } from '@/types/project.types'
 import { formatFollowUpDate, getFollowUpStatus } from '@/utils/followUp'
@@ -196,8 +198,16 @@ function ColumnPolicyPopover({
   )
 }
 
-export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
-  const workItems = useProjectWorkItems(projectId)
+/** Tarea crítica accionable: urgente, vencida o bloqueada (y no cerrada). */
+function isCriticalTask(item: WorkItem): boolean {
+  if (item.state === 'done') return false
+  const followStatus = getFollowUpStatus(item.followUpDate, item.state)
+  return (
+    item.priority === 'URGENTE' || followStatus === 'vencido' || Boolean(item.isBlocked)
+  )
+}
+
+export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {  const workItems = useProjectWorkItems(projectId)
   const { perspective, isGestor, isCoordinador, isSuperAdmin, currentPersona } = useProjectPerspective()
   const settings = useProjectKanbanSettings(projectId)
   const canEditSettings = !isGestor && (isCoordinador || isSuperAdmin)
@@ -219,6 +229,26 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
   const [responseFilter, setResponseFilter] = useState<
     'todos' | 'esperando_respuesta' | 'respondido' | 'sin_notificar'
   >('todos')
+
+  // Vistas profundas vía ?view= (Fase 1 Navegación Lateral): criticas preselecciona
+  // urgentes/bloqueadas; bandeja preselecciona la bandeja personal; sin view se
+  // muestra la vista territorial completa. Compatible con URLs antiguas (sin view).
+  const [searchParams] = useSearchParams()
+  const viewParam = searchParams.get('view')
+  const [criticalOnly, setCriticalOnly] = useState(false)
+
+  useEffect(() => {
+    if (viewParam === 'criticas') {
+      setCriticalOnly(true)
+      setResponseFilter('todos')
+    } else if (viewParam === 'bandeja') {
+      setCriticalOnly(false)
+      setMemberFilter(perspective === 'gestor' ? 'Carlos Sandoval' : null)
+      setResponseFilter('todos')
+    } else {
+      setCriticalOnly(false)
+    }
+  }, [viewParam, perspective])
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -305,6 +335,8 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
     return { esperando, respondido, sinNotificar }
   }, [workItems])
 
+  const criticalTasks = useMemo(() => workItems.filter(isCriticalTask), [workItems])
+
   const visibleItems = useMemo(() => {
     const term = ugelQuery.trim().toLowerCase()
     return workItems.filter((item) => {
@@ -326,9 +358,11 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
       const matchesResponse =
         responseFilter === 'todos' || responseStatus === responseFilter
 
-      return matchesMember && matchesSearch && matchesResponse
+      const matchesCritical = !criticalOnly || isCriticalTask(item)
+
+      return matchesMember && matchesSearch && matchesResponse && matchesCritical
     })
-  }, [workItems, memberFilter, ugelQuery, responseFilter])
+  }, [workItems, memberFilter, ugelQuery, responseFilter, criticalOnly])
 
   const move = (taskId: string, direction: -1 | 1) => {
     const current = workItems.find((item) => item.id === taskId)
@@ -531,6 +565,16 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
           >
             Todas ({workItems.length})
           </button>
+          {criticalOnly && (
+            <button
+              type="button"
+              onClick={() => setCriticalOnly(false)}
+              title="Quitar filtro de vista Críticas"
+              className="inline-flex items-center gap-1 rounded-lg bg-[#b83328] px-2.5 py-1 text-[11px] font-bold text-white transition-colors hover:bg-[#9a2820]"
+            >
+              <X size={11} /> Vista: Críticas ({criticalTasks.length})
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setResponseFilter('esperando_respuesta')}
