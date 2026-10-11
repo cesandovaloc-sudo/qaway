@@ -12,6 +12,7 @@ import {
   Mail,
   MapPin,
   MessageCircle,
+  Plus,
   Save,
   Trash2,
   User,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react'
 import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { useProjectsDataset } from '@/hooks/useProjects'
+import { useProjectPerspective } from '../../context/ProjectPerspectiveContext'
 import { projectsService } from '@/services/projectsService'
 import {
   FOLLOW_UP_META,
@@ -66,6 +68,8 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
   const dataset = useProjectsDataset()
   const task = taskId ? dataset.workItems.find((item) => item.id === taskId) : undefined
   const panelRef = useDismissOnEscapeOrOutside(taskId !== null, onClose)
+  const { currentPersona, isCoordinador, isSuperAdmin } = useProjectPerspective()
+  const canManageChecklist = isCoordinador || isSuperAdmin
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -95,6 +99,7 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
   const [isBlocked, setIsBlocked] = useState(false)
   const [blockerReason, setBlockerReason] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [checkDraft, setCheckDraft] = useState('')
 
   useEffect(() => {
     if (!task) return
@@ -126,11 +131,14 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
     setIsBlocked(Boolean(task.isBlocked))
     setBlockerReason(task.blockerReason ?? '')
     setConfirmDelete(false)
+    setCheckDraft('')
   }, [task])
 
   if (!task) return null
 
   const priorityMeta = WORK_ITEM_PRIORITY_META[priority]
+  const checklist = task.checklist ?? []
+  const checksDone = checklist.filter((sub) => sub.completed).length
   const projectMilestones = dataset.milestones
     .filter((milestone) => milestone.projectId === task.projectId)
     .sort((a, b) => a.phaseNumber - b.phaseNumber)
@@ -566,6 +574,113 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
               placeholder={'Un criterio por línea…\nEj: Login con Google y GitHub'}
               className={`${inputClass} h-auto resize-none py-2.5 font-mono text-[13px]`}
             />
+          </div>
+
+          {/* Subetapas operativas verificables (Fase 4 A37) */}
+          <div>
+            <span className={labelClass}>
+              <span className="inline-flex items-center gap-1">
+                <ListChecks size={12} /> Subetapas operativas ({checksDone}/{checklist.length})
+              </span>
+            </span>
+            {checklist.length > 0 && (
+              <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                <div
+                  className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                  style={{
+                    width: `${checklist.length > 0 ? Math.round((checksDone / checklist.length) * 100) : 0}%`,
+                  }}
+                />
+              </div>
+            )}
+            {checklist.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-3 text-center text-[11px] text-zinc-400">
+                Sin subetapas. La coordinación puede añadir pasos verificables.
+              </p>
+            ) : (
+              <ul className="space-y-1.5">
+                {checklist.map((sub) => (
+                  <li
+                    key={sub.id}
+                    className="flex items-start gap-2 rounded-lg border border-zinc-200 px-2.5 py-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={sub.completed}
+                      onChange={() =>
+                        projectsService.toggleTaskChecklistItem(
+                          task.id,
+                          sub.id,
+                          currentPersona.name,
+                        )
+                      }
+                      aria-label={`Marcar: ${sub.title}`}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#ff4b0b]"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className={`block text-[13px] font-medium leading-snug ${
+                          sub.completed ? 'text-zinc-400 line-through' : 'text-zinc-800'
+                        }`}
+                      >
+                        {sub.title}
+                      </span>
+                      {sub.completed && (sub.completedBy || sub.completedAt) && (
+                        <span className="mt-0.5 block text-[11px] text-zinc-400">
+                          ✓ {sub.completedBy ?? 'Equipo'}
+                          {sub.completedAt ? ` · ${formatFollowUpDate(sub.completedAt)}` : ''}
+                        </span>
+                      )}
+                    </span>
+                    {canManageChecklist && (
+                      <button
+                        type="button"
+                        onClick={() => projectsService.deleteTaskChecklistItem(task.id, sub.id)}
+                        aria-label={`Eliminar: ${sub.title}`}
+                        title="Eliminar subetapa"
+                        className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-zinc-300 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {canManageChecklist ? (
+              <div className="mt-2 flex items-center gap-1.5">
+                <input
+                  value={checkDraft}
+                  onChange={(event) => setCheckDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' && checkDraft.trim()) {
+                      projectsService.addTaskChecklistItem(task.id, checkDraft)
+                      setCheckDraft('')
+                    }
+                  }}
+                  placeholder="+ Añadir subetapa verificable"
+                  aria-label="Añadir subetapa"
+                  className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-800 outline-none placeholder:text-zinc-400 focus:border-brand"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!checkDraft.trim()) return
+                    projectsService.addTaskChecklistItem(task.id, checkDraft)
+                    setCheckDraft('')
+                  }}
+                  disabled={!checkDraft.trim()}
+                  aria-label="Crear subetapa"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-zinc-900 text-white transition-colors hover:bg-brand disabled:opacity-40"
+                >
+                  <Plus size={15} />
+                </button>
+              </div>
+            ) : (
+              <p className="mt-2 text-[11px] text-zinc-400">
+                Marca los pasos al completarlos. Solo coordinación añade subetapas.
+              </p>
+            )}
           </div>
 
           <div>

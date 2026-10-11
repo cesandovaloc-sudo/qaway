@@ -376,6 +376,67 @@ export const projectsService = {
     })
   },
 
+  // ── Subetapas operativas / Checklist (Fase 4 A37) ──
+  // Solo mutan `checklist`: NO alteran project.progress, EVM ni burndown,
+  // que se calculan desde avance, presupuesto, storyPoints y completedAt.
+
+  addTaskChecklistItem(workItemId: string, title: string): void {
+    const clean = title.trim()
+    if (!clean) return
+    setState({
+      ...state,
+      workItems: state.workItems.map((item) =>
+        item.id === workItemId
+          ? {
+              ...item,
+              checklist: [
+                ...(item.checklist ?? []),
+                {
+                  id: `CHK-${Date.now().toString(36).toUpperCase()}`,
+                  title: clean,
+                  completed: false,
+                },
+              ],
+            }
+          : item,
+      ),
+    })
+  },
+
+  toggleTaskChecklistItem(workItemId: string, checklistItemId: string, actor?: string): void {
+    const now = new Date().toISOString()
+    setState({
+      ...state,
+      workItems: state.workItems.map((item) => {
+        if (item.id !== workItemId || !item.checklist) return item
+        return {
+          ...item,
+          checklist: item.checklist.map((sub) => {
+            if (sub.id !== checklistItemId) return sub
+            const completed = !sub.completed
+            return {
+              ...sub,
+              completed,
+              completedAt: completed ? now : undefined,
+              completedBy: completed ? actor?.trim() || 'Equipo de campo' : undefined,
+            }
+          }),
+        }
+      }),
+    })
+  },
+
+  deleteTaskChecklistItem(workItemId: string, checklistItemId: string): void {
+    setState({
+      ...state,
+      workItems: state.workItems.map((item) =>
+        item.id === workItemId && item.checklist
+          ? { ...item, checklist: item.checklist.filter((sub) => sub.id !== checklistItemId) }
+          : item,
+      ),
+    })
+  },
+
   // ── Métodos Fase 11: Trazabilidad y Feedback de Campo ──
   recordNotificationSent(
     workItemId: string,

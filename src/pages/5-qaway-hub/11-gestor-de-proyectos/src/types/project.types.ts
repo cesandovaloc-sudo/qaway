@@ -84,6 +84,15 @@ export type TaskNature =
   | 'control_complementario'
   | 'contingencia_operativa'
 
+/** Subetapa operativa verificable dentro de una tarjeta (Fase 4 A37). */
+export interface TaskChecklistItem {
+  id: string
+  title: string
+  completed: boolean
+  completedAt?: string // ISO DateTime del marcado
+  completedBy?: string // Responsable que la verificó
+}
+
 export interface NotificationAudit {
   whatsappSentAt?: string
   whatsappSentBy?: string
@@ -109,6 +118,7 @@ export interface WorkItem {
   taskNature?: TaskNature // Obligación normativa vs control/contingencia (Fase 2 A35)
   threatensMilestone?: boolean // Su retraso amenaza al hito aunque sea complementaria (Fase 2 A35)
   threatNote?: string // Motivo de la amenaza preventiva al hito (Fase 2 A35)
+  checklist?: TaskChecklistItem[] // Subetapas operativas verificables (Fase 4 A37)
   epicTitle?: string // Épica / agrupador funcional (Fase 9)
   title: string
   description?: string

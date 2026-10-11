@@ -12,6 +12,7 @@ import {
   Flag,
   Info,
   Link2,
+  ListChecks,
   Mail,
   MapPin,
   MessageSquare,
@@ -802,6 +803,14 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                       {card.predecessors && card.predecessors.length > 0 && (
                         <span className="inline-flex items-center gap-1">
                           <Link2 size={11} /> {card.predecessors.length} FS
+                        </span>
+                      )}
+                      {card.checklist && card.checklist.length > 0 && (
+                        <span
+                          className="inline-flex items-center gap-1 font-mono font-bold"
+                          title={`${card.checklist.filter((sub) => sub.completed).length}/${card.checklist.length} subetapas verificadas`}
+                        >
+                          <ListChecks size={11} /> {card.checklist.filter((sub) => sub.completed).length}/{card.checklist.length}
                         </span>
                       )}
                     </div>

@@ -583,6 +583,23 @@ export const mockProjectsDataset: ProjectsDataset = {
       storyPoints: 3,
       followUpDate: '2026-09-20',
       scopeTag: 'UGEL Huancavelica',
+      checklist: [
+        {
+          id: 'CHK-M01-1',
+          title: 'Recolectar fichas de miembros en UGEL',
+          completed: true,
+          completedAt: '2026-09-18T15:00:00.000Z',
+          completedBy: 'Carlos Mendoza',
+        },
+        {
+          id: 'CHK-M01-2',
+          title: 'Validar DNI contra RENIEC',
+          completed: true,
+          completedAt: '2026-09-18T16:00:00.000Z',
+          completedBy: 'Carlos Mendoza',
+        },
+        { id: 'CHK-M01-3', title: 'Visado del director de UGEL', completed: false },
+      ],
       notificationAudit: {
         whatsappSentAt: '2026-09-17T10:30:00.000Z',
         whatsappSentBy: 'Coordinador General',
@@ -618,6 +635,17 @@ export const mockProjectsDataset: ProjectsDataset = {
       storyPoints: 5,
       followUpDate: '2026-09-22',
       scopeTag: 'UGEL Maynas',
+      checklist: [
+        {
+          id: 'CHK-M02-1',
+          title: 'Confirmar estado del paro fluvial',
+          completed: true,
+          completedAt: '2026-09-21T10:00:00.000Z',
+          completedBy: 'Lucía Ramos',
+        },
+        { id: 'CHK-M02-2', title: 'Contactar director de UGEL por radio', completed: false },
+        { id: 'CHK-M02-3', title: 'Elevar informe de contingencia a DIGERE', completed: false },
+      ],
       isBlocked: true,
       blockerReason: 'Paro fluvial dificulta comunicación con director de UGEL.',
       notificationAudit: {
@@ -649,6 +677,22 @@ export const mockProjectsDataset: ProjectsDataset = {
       completedAt: '2026-09-12T18:00:00.000Z',
       followUpDate: '2026-09-12',
       scopeTag: 'UGEL 03 Lima Metropolitana',
+      checklist: [
+        {
+          id: 'CHK-M03-1',
+          title: 'Descargar padrón MC SIGA',
+          completed: true,
+          completedAt: '2026-09-11T15:00:00.000Z',
+          completedBy: 'Roberto Farfán',
+        },
+        {
+          id: 'CHK-M03-2',
+          title: 'Cruzar 82 códigos modulares',
+          completed: true,
+          completedAt: '2026-09-12T17:00:00.000Z',
+          completedBy: 'Roberto Farfán',
+        },
+      ],
       notificationAudit: {
         whatsappSentAt: '2026-09-11T14:00:00.000Z',
         emailSentAt: '2026-09-11T14:05:00.000Z',
@@ -680,6 +724,10 @@ export const mockProjectsDataset: ProjectsDataset = {
       storyPoints: 3,
       followUpDate: '2026-10-15',
       scopeTag: 'UGEL Cusco',
+      checklist: [
+        { id: 'CHK-M04-1', title: 'Convocar estadísticos de UGEL', completed: false },
+        { id: 'CHK-M04-2', title: 'Preparar sala virtual y materiales', completed: false },
+      ],
       gestorFeedback: {
         responseStatus: 'sin_notificar',
       },
@@ -704,6 +752,10 @@ export const mockProjectsDataset: ProjectsDataset = {
       storyPoints: 5,
       followUpDate: '2026-11-20',
       scopeTag: 'UGEL Condorcanqui',
+      checklist: [
+        { id: 'CHK-M05-1', title: 'Revisar rutas fluviales propuestas', completed: false },
+        { id: 'CHK-M05-2', title: 'Validar costos contra histórico', completed: false },
+      ],
       notificationAudit: {
         whatsappSentAt: '2026-11-18T11:00:00.000Z',
         whatsappSentBy: 'Coordinador General',
