@@ -197,3 +197,14 @@
 - [x] **Task 16.4:** Sección interactiva en `SlideOverTaskSheet.tsx` para configurar y marcar verificaciones con sellado de fecha y responsable.
 - [x] **Task 16.5:** Micro-indicador compacto `ListChecks` (`X/Y`) en tarjetas de `KanbanBoardTab.tsx`.
 
+---
+
+## 🎨 Fase 17: Corrección de Logo Inicio, Organizaciones Reales y Respeto de Paleta Dinámica (A41)
+- [x] **Task 17.1:** En `Sidebar.tsx`, convertir el isotipo hexagonal del gestor en un enlace navegable interactivo (`Link to="/"`) que redirija a Inicio / Dashboard de Cartera al hacer clic.
+- [x] **Task 17.2:** En `TenantContext.tsx` y `Header.tsx`, eliminar consultas a `tenants` de Supabase (marcas ajenas de retail/tienda como CoraVet, Vallet Inmobiliaria, Mesa Electa). Reemplazar por organizaciones reales de proyectos (`Qaway Lab (Corporativo)`, `MINEDU - DIGERE`, `Municipalidad Metropolitana`, `Corporación Andina`, `Distribuidora Pacífico`, `Aurea Skincare`).
+- [x] **Task 17.3:** En `useProjects.ts`, conectar el contexto de tenant para filtrar reactivamente los proyectos según la entidad seleccionada en el Header.
+- [x] **Task 17.4:** Erradicar colores naranjas fijos (`#ff4b0b`, `#cf7143`, `#d9532f`) en gráficos, barras y KPIs (`DashboardPage.tsx`, `SprintEngineTab.tsx`, `QuickAccessCards.tsx`, `QuickActions.tsx`, `StatCard.tsx`, `SlideOverTaskSheet.tsx`, `ProjectsListPage.tsx`).
+- [x] **Task 17.5:** Implementar hook `useHubBrand.ts` con suscripción al evento global `qaway-palette-change` para resolver el valor hexadecimal de `--hub-brand` de forma reactiva en SVGs y Recharts.
+- [x] **Task 17.6:** En `Header.tsx`, calibrar el comportamiento UX del 4to swatch de color personalizado (1er clic activa inmediatamente la paleta personalizada con el color guardado sin abrir el picker nativo; solo un 2do clic cuando ya está activo abre el selector de color del sistema operativo).
+
+
