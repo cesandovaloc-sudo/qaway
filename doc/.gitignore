@@ -1,0 +1,4 @@
+# Ignorar archivos temporales y locales de iteración
+*.tmp
+*.log
+
