@@ -125,7 +125,8 @@ export default function LoginPage() {
 
               {resetSent ? (
                 <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-lg p-4 leading-relaxed text-center font-medium">
-                  ✓ Correo enviado con éxito. Revisa tu bandeja de entrada.
+                  <CheckCircle2 size={14} className="mr-1 inline-block align-[-2px]" />
+                  Correo enviado con éxito. Revisa tu bandeja de entrada.
                 </div>
               ) : (
                 <form onSubmit={handleResetSubmit} className="space-y-4" noValidate>

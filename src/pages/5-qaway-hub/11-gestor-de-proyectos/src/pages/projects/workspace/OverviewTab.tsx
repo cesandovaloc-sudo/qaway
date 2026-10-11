@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useProject, useProjectWorkItems, useProjectsDataset, useTeamWorkload } from '@/hooks/useProjects'
+import { resolveDocIcon } from '@/components/projects/docIcons'
 import {
   PROJECT_CATEGORY_META,
   PROJECT_HEALTH_META,
@@ -357,7 +358,10 @@ export function OverviewTab({ projectId, onOpenTask, onGoDocs }: OverviewTabProp
                     onClick={onGoDocs}
                     className="flex w-full items-center gap-2.5 rounded-xl border border-zinc-100 p-2.5 text-left transition-colors hover:border-brand/40"
                   >
-                    <span className="text-lg leading-none">{doc.icon}</span>
+                    {(() => {
+                      const DocIcon = resolveDocIcon(doc.icon)
+                      return <DocIcon size={18} className="shrink-0 text-zinc-500" />
+                    })()}
                     <span className="min-w-0">
                       <span className="block truncate text-[13px] font-bold text-zinc-800">
                         {doc.title}

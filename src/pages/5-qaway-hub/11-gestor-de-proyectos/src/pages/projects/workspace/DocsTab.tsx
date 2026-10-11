@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { BookOpen, Clock, Eye, FileText, Pencil, Plus, Save } from 'lucide-react'
+import { resolveDocIcon } from '@/components/projects/docIcons'
 import { useProjectsDataset } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import {
@@ -50,6 +51,7 @@ export function DocsTab({ projectId }: DocsTabProps) {
   const [content, setContent] = useState('')
 
   const selected = docs.find((doc) => doc.id === selectedId) ?? docs[0] ?? null
+  const SelectedIcon = resolveDocIcon(selected?.icon)
 
   useEffect(() => {
     if (!selected) {
@@ -86,7 +88,7 @@ export function DocsTab({ projectId }: DocsTabProps) {
     const doc = projectsService.createDoc({
       projectId,
       title: 'Nuevo documento',
-      icon: '📄',
+      icon: 'FileText',
       category: 'general',
       author: 'Equipo de proyecto',
       content: '# Nuevo documento\n\nEscribe aquí el contenido…',
@@ -135,6 +137,7 @@ export function DocsTab({ projectId }: DocsTabProps) {
           <ul className="max-h-[420px] space-y-1 overflow-y-auto">
             {docs.map((doc) => {
               const active = selected?.id === doc.id
+              const DocIcon = resolveDocIcon(doc.icon)
               return (
                 <li key={doc.id}>
                   <button
@@ -144,7 +147,10 @@ export function DocsTab({ projectId }: DocsTabProps) {
                       active ? 'bg-zinc-900 text-white' : 'hover:bg-zinc-50'
                     }`}
                   >
-                    <span className="text-lg leading-none">{doc.icon}</span>
+                    <DocIcon
+                      size={18}
+                      className={`shrink-0 ${active ? 'text-white' : 'text-zinc-500'}`}
+                    />
                     <span className="min-w-0">
                       <span
                         className={`block truncate text-[13px] font-bold ${active ? 'text-white' : 'text-zinc-800'}`}
@@ -180,7 +186,7 @@ export function DocsTab({ projectId }: DocsTabProps) {
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-2 border-b border-zinc-100 pb-4">
-              <span className="text-3xl leading-none">{selected.icon}</span>
+              <SelectedIcon size={28} className="shrink-0 text-zinc-700" />
               <div className="min-w-0 flex-1">
                 {editing ? (
                   <input

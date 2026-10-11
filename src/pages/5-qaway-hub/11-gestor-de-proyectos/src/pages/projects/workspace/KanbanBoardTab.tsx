@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useEffect } from 'react'
 import {
   Ban,
   Bell,
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
@@ -846,7 +847,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                             className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700 border border-emerald-200/80"
                             title={`WhatsApp enviado: ${new Date(card.notificationAudit.whatsappSentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
                           >
-                            <MessageSquare size={9} /> ✓ WA
+                            <MessageSquare size={9} /> <Check size={9} /> WA
                           </span>
                         )}
                         {card.notificationAudit?.emailSentAt && (
@@ -854,7 +855,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                             className="inline-flex items-center gap-1 rounded bg-sky-50 px-1.5 py-0.5 text-[9px] font-extrabold text-sky-700 border border-sky-200/80"
                             title={`Correo enviado: ${new Date(card.notificationAudit.emailSentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
                           >
-                            <Mail size={9} /> ✓ Mail
+                            <Mail size={9} /> <Check size={9} /> Mail
                           </span>
                         )}
                         {card.notificationAudit?.appNotifiedAt && (
@@ -862,7 +863,7 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                             className="inline-flex items-center gap-1 rounded bg-purple-50 px-1.5 py-0.5 text-[9px] font-extrabold text-purple-700 border border-purple-200/80"
                             title="Notificado en App"
                           >
-                            <Bell size={9} /> ✓ App
+                            <Bell size={9} /> <Check size={9} /> App
                           </span>
                         )}
 

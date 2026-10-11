@@ -508,7 +508,7 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                   const labels: Record<TaskResponseStatus, string> = {
                     sin_notificar: 'Sin notificar',
                     esperando_respuesta: 'Esperando respuesta',
-                    respondido: '✓ Respondido',
+                    respondido: 'Respondido',
                   }
                   const activeClasses: Record<TaskResponseStatus, string> = {
                     sin_notificar: 'bg-zinc-800 text-white border-zinc-800',
@@ -526,7 +526,10 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                           : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100'
                       }`}
                     >
-                      {labels[status]}
+                      <span className="inline-flex items-center justify-center gap-1">
+                        {status === 'respondido' && <Check size={10} />}
+                        {labels[status]}
+                      </span>
                     </button>
                   )
                 })}
@@ -627,8 +630,9 @@ export function SlideOverTaskSheet({ taskId, onClose, onOpenTask }: SlideOverTas
                         {sub.title}
                       </span>
                       {sub.completed && (sub.completedBy || sub.completedAt) && (
-                        <span className="mt-0.5 block text-[11px] text-zinc-400">
-                          ✓ {sub.completedBy ?? 'Equipo'}
+                        <span className="mt-0.5 flex items-center gap-1 text-[11px] text-zinc-400">
+                          <Check size={11} className="shrink-0" />
+                          {sub.completedBy ?? 'Equipo'}
                           {sub.completedAt ? ` · ${formatFollowUpDate(sub.completedAt)}` : ''}
                         </span>
                       )}

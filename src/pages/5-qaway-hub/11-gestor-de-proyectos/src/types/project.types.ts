@@ -183,12 +183,23 @@ export interface ProjectDoc {
   id: string
   projectId: string
   title: string
-  icon: string // Emoji o Lucide icon
+  icon: ProjectDocIcon // Nombre de icono Lucide (Fase 18, sin emojis)
   category: ProjectDocCategory
   lastEdited: string
   author: string
   content: string // Markdown enriquecido
 }
+
+// ── Iconos Lucide permitidos para documentos (Fase 18) ──
+export type ProjectDocIcon =
+  | 'FileText'
+  | 'BookOpen'
+  | 'Compass'
+  | 'CheckCircle2'
+  | 'Palette'
+  | 'FolderArchive'
+  | 'Truck'
+  | 'Landmark'
 
 // ── Agregado persistido en el store reactivo ──
 export interface ProjectsDataset {
