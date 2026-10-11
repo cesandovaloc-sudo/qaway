@@ -50,10 +50,14 @@ export function useTenantFilteredProjects(): Project[] {
   const projects = useProjects()
   const { scopedTenant } = useTenant()
   return useMemo(() => {
-    const match = scopedTenant?.projectClientMatch?.trim()
-    if (!match) return projects
-    const needle = normalizeClient(match)
-    return projects.filter((project) => normalizeClient(project.client).includes(needle))
+    if (!scopedTenant) return projects
+    // Mapeo limpio por orgId (Fase 24); fallback por cliente para datos legacy.
+    const legacyMatch = scopedTenant.projectClientMatch?.trim()
+    const needle = legacyMatch ? normalizeClient(legacyMatch) : ''
+    return projects.filter((project) => {
+      if (project.orgId) return project.orgId === scopedTenant.id
+      return needle !== '' && normalizeClient(project.client).includes(needle)
+    })
   }, [projects, scopedTenant])
 }
 

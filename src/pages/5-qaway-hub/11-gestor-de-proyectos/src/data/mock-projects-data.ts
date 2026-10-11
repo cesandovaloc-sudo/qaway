@@ -31,6 +31,7 @@ export const mockProjectsDataset: ProjectsDataset = {
       progress: 34,
       manager: 'Coordinador General DIGERE',
       membersCount: 12,
+      orgId: 'org-minedu',
       // Ajustes Kanban territoriales MINEDU (Fase 1 STATIK)
       kanbanSettings: {
         wipLimits: {
@@ -81,6 +82,7 @@ export const mockProjectsDataset: ProjectsDataset = {
       progress: 22,
       manager: 'Coordinador General DIGERE',
       membersCount: 8,
+      orgId: 'org-minedu',
     },
     {
       id: 'proj-001',
@@ -100,6 +102,7 @@ export const mockProjectsDataset: ProjectsDataset = {
       activeSprint: 'sprint-003',
       manager: 'Andrea Salazar',
       membersCount: 8,
+      orgId: 'org-qaway',
     },
     {
       id: 'proj-002',
@@ -118,6 +121,7 @@ export const mockProjectsDataset: ProjectsDataset = {
       progress: 48,
       manager: 'Ing. Marco Quispe',
       membersCount: 12,
+      orgId: 'org-mml',
     },
     {
       id: 'proj-003',
@@ -136,6 +140,7 @@ export const mockProjectsDataset: ProjectsDataset = {
       progress: 71,
       manager: 'Lucía Fernández',
       membersCount: 5,
+      orgId: 'org-aurea',
     },
     {
       id: 'proj-004',
@@ -154,6 +159,7 @@ export const mockProjectsDataset: ProjectsDataset = {
       progress: 12,
       manager: 'Diego Ramírez',
       membersCount: 6,
+      orgId: 'org-andina',
     },
     {
       id: 'proj-005',
@@ -173,6 +179,7 @@ export const mockProjectsDataset: ProjectsDataset = {
       activeSprint: 'sprint-004',
       manager: 'Karla Mendoza',
       membersCount: 9,
+      orgId: 'org-pacifico',
     },
   ],
 

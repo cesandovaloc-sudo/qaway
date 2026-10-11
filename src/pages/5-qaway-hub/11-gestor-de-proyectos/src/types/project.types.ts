@@ -51,6 +51,7 @@ export interface Project {
   manager: string
   membersCount: number
   kanbanSettings?: ProjectKanbanSettings // Límites WIP y políticas por proyecto (Fase 1 STATIK)
+  orgId?: string // Organización propietaria (Fase 24): 'org-qaway' | 'org-minedu' | ...
 }
 
 // ── B. Tarea / Work Item ──

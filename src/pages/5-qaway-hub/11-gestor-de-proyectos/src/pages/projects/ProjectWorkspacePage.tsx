@@ -52,6 +52,18 @@ function formatDate(value: string) {
   return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+// Resuelve rutas del módulo bajo cualquier prefijo del Hub (Fase 24).
+function getHref(to: string): string {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
+  const basePrefix =
+    ['/hub/proyectos', '/hub/gestor-proyectos-app', '/hub/inventario', '/inventario'].find(
+      (prefix) => pathname.startsWith(prefix),
+    ) ?? ''
+  if (!basePrefix) return to
+  if (to === '/') return basePrefix
+  return `${basePrefix}${to.startsWith('/') ? to : `/${to}`}`
+}
+
 export default function ProjectWorkspacePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -90,7 +102,7 @@ export default function ProjectWorkspacePage() {
       <div className="mx-auto max-w-[1800px]">
         <button
           type="button"
-          onClick={() => navigate('..')}
+          onClick={() => navigate(getHref('/proyectos'))}
           className="mb-4 inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50"
         >
           <ArrowLeft size={15} /> Volver a proyectos
@@ -134,7 +146,7 @@ export default function ProjectWorkspacePage() {
         <div className="flex flex-wrap items-start gap-4">
           <button
             type="button"
-            onClick={() => navigate('..')}
+            onClick={() => navigate(getHref('/proyectos'))}
             aria-label="Volver al directorio"
             className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-zinc-200 text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
           >

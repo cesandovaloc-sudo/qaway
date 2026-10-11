@@ -13,7 +13,7 @@ import {
   BookOpen,
   ChevronDown,
 } from 'lucide-react'
-import { useProjectsDataset } from '@/hooks/useProjects'
+import { useProjectsDataset, useTenantFilteredProjects } from '@/hooks/useProjects'
 import { useProjectPerspective } from '../../context/ProjectPerspectiveContext'
 
 interface NavChild {
@@ -95,6 +95,28 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const activeProjectId = projectIdMatch ? projectIdMatch[1] : null
   const planningProjectId = activeProjectId ?? 'proj-minedu-2027'
 
+  // Hijos de CARTERA desde la entidad activa (Fase 24): proyectos de la
+  // organización elegida o los principales de la cartera (no completados,
+  // hasta 5). Nunca fijos arbitrarios.
+  const scopedProjects = useTenantFilteredProjects()
+  const projectChildren: NavChild[] = useMemo(
+    () =>
+      scopedProjects
+        .filter((project) => project.status !== 'completado')
+        .slice(0, 5)
+        .map((project) => ({
+          to: `/proyectos/${project.id}`,
+          label: project.name,
+          statusColor:
+            project.health === 'optimo'
+              ? 'bg-emerald-500'
+              : project.health === 'atencion'
+                ? 'bg-amber-500'
+                : 'bg-rose-500',
+        })),
+    [scopedProjects],
+  )
+
   const sections: NavSection[] = [
     {
       title: 'OPERACIÓN',
@@ -131,18 +153,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           badge: projects.length,
           badgeVariant: 'neutral',
           end: true,
-          children: [
-            {
-              to: '/proyectos/proj-minedu-2027',
-              label: 'Dotación MINEDU 2027',
-              statusColor: 'bg-emerald-500',
-            },
-            {
-              to: '/proyectos/proj-minedu-om050',
-              label: 'Redistribución OM 050',
-              statusColor: 'bg-amber-500',
-            },
-          ],
+          children: projectChildren,
         },
       ],
     },
