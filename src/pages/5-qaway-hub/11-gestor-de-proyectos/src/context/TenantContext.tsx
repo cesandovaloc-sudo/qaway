@@ -45,12 +45,14 @@ const TenantContext = createContext<TenantContextValue | undefined>(undefined)
 const SCOPED_TENANT_STORAGE_KEY = 'qaway.scopedTenant'
 
 export function TenantProvider({ children }: { children: ReactNode }) {
-  const { profile } = useAuth()
+  const { profile } = useAuth() ?? { profile: null }
 
   // Determinar si el usuario conectado es Super Administrador de plataforma
+  // (HOTFIX-01: profile puede ser null fuera de sesión; jamás debe reventar).
+  const safeProfile = profile ?? null
   const isPlatformAdmin = Boolean(
-    profile?.is_platform_admin === true ||
-    (profile?.role === 'admin' && !profile?.tenant_id)
+    safeProfile?.is_platform_admin === true ||
+    (safeProfile?.role === 'admin' && !safeProfile?.tenant_id)
   )
 
   // Cargar scopedTenant desde sessionStorage al iniciar (solo IDs estáticos;
@@ -74,7 +76,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   const [loadingTenants] = useState(false)
 
   // Resolución local del tenant corriente (sin Supabase).
-  const selectedTenantId = isPlatformAdmin ? scopedTenant?.id : profile?.tenant_id
+  const selectedTenantId = isPlatformAdmin ? scopedTenant?.id : safeProfile?.tenant_id
   const currentTenant = findStaticOrg(selectedTenantId)
 
   // Modificar scopedTenant y sincronizarlo con sessionStorage y eventos
@@ -127,8 +129,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   let activeTenant: ScopedTenant | null = null
   if (isPlatformAdmin) {
     activeTenant = scopedTenant ? (currentTenant || scopedTenant) : null
-  } else if (profile?.tenant_id) {
-    activeTenant = currentTenant || { id: profile.tenant_id, name: 'Mi Empresa' }
+  } else if (safeProfile?.tenant_id) {
+    activeTenant = currentTenant || { id: safeProfile.tenant_id, name: 'Mi Empresa' }
   }
 
   const activeTenantId = activeTenant?.id || null

@@ -275,6 +275,7 @@ export const projectsService = {
       progress: 0,
       manager: input.manager.trim(),
       membersCount: Math.max(1, Math.round(input.membersCount)),
+      ...(input.orgId ? { orgId: input.orgId } : {}),
     }
 
     setState({ ...state, projects: [project, ...state.projects] })

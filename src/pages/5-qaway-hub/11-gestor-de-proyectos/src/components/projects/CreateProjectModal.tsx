@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { FolderKanban, Plus, X } from 'lucide-react'
 import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { projectsService } from '@/services/projectsService'
+import { PROJECT_ORGANIZATIONS } from '@/context/TenantContext'
+import { useTenant } from '@/context/TenantContext'
 import {
   PROJECT_CATEGORY_META,
   PROJECT_METHODOLOGY_META,
@@ -29,6 +31,7 @@ interface FormState {
   targetDate: string
   manager: string
   membersCount: string
+  orgId: string
 }
 
 type FormErrors = Partial<Record<keyof FormState, string>>
@@ -46,6 +49,7 @@ const INITIAL_FORM: FormState = {
   targetDate: '',
   manager: '',
   membersCount: '4',
+  orgId: 'org-minedu',
 }
 
 const inputClass =
@@ -88,17 +92,20 @@ function validate(form: FormState): FormErrors {
 }
 
 export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps) {
-  const [form, setForm] = useState<FormState>(INITIAL_FORM)
+  const { scopedTenant, activeTenant } = useTenant()
+  const defaultOrgId = scopedTenant?.id ?? activeTenant?.id ?? 'org-minedu'
+  const [form, setForm] = useState<FormState>({ ...INITIAL_FORM, orgId: defaultOrgId })
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitting, setSubmitting] = useState(false)
   const cardRef = useDismissOnEscapeOrOutside(isOpen, onClose)
 
   useEffect(() => {
     if (isOpen) {
-      setForm(INITIAL_FORM)
+      setForm({ ...INITIAL_FORM, orgId: defaultOrgId })
       setErrors({})
       setSubmitting(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   if (!isOpen) return null
@@ -128,6 +135,7 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
       targetDate: form.targetDate,
       manager: form.manager,
       membersCount: Number(form.membersCount),
+      orgId: form.orgId,
     }
     projectsService.createProject(payload)
     setSubmitting(false)
@@ -248,6 +256,22 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
               {(Object.keys(PROJECT_METHODOLOGY_META) as ProjectMethodology[]).map((methodology) => (
                 <option key={methodology} value={methodology}>
                   {PROJECT_METHODOLOGY_META[methodology].label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass} htmlFor="gp-org">Organización *</label>
+            <select
+              id="gp-org"
+              value={form.orgId}
+              onChange={(event) => update('orgId', event.target.value)}
+              className={inputClass}
+            >
+              {PROJECT_ORGANIZATIONS.map((org) => (
+                <option key={org.id} value={org.id}>
+                  {org.name}
                 </option>
               ))}
             </select>

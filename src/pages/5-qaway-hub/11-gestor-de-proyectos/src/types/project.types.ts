@@ -268,7 +268,171 @@ export interface NewProjectInput {
   targetDate: string
   manager: string
   membersCount: number
+  orgId?: string // Organización propietaria (GOVERNANCE-01): 'org-qaway' | 'org-minedu' | ...
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// G. Gobernanza de Roles y Cargos Dinámicos (GOVERNANCE-01)
+// Matriz Oficial de Permisos de Gestión de Proyectos + definición de cargos.
+// Fuente: doc/pautas_ejecucion_gobernanza_administrador.md §3 Tarea B.
+// ─────────────────────────────────────────────────────────────────────────
+
+/** Matriz Oficial de Permisos de Gestión de Proyectos (19 facultades). */
+export interface ProjectModulePermissions {
+  // 1. Cartera y Proyectos
+  can_create_projects: boolean
+  can_edit_projects: boolean
+  can_archive_projects: boolean
+  can_configure_budget: boolean
+  can_change_methodology: boolean
+
+  // 2. Gobernanza y Cargos
+  can_manage_roles: boolean
+  can_assign_users: boolean
+  can_delegate_permissions: boolean
+
+  // 3. Cobertura y Territorio
+  can_assign_regions: boolean
+  can_reassign_territories: boolean
+  can_audit_territorial_map: boolean
+
+  // 4. Planificación y Cronograma
+  can_approve_milestones: boolean
+  can_edit_gantt_dependencies: boolean
+  can_configure_wip_limits: boolean
+
+  // 5. Operación en Campo
+  can_create_field_tasks: boolean
+  can_upload_evidences_pecosa: boolean
+  can_validate_checklists: boolean
+  can_escalate_blockers: boolean
+}
+
+/** Definición de cargo dinámico de la organización (creable por el Admin). */
+export interface OrganizationRoleDefinition {
+  id: string
+  name: string
+  description: string
+  organizationId: string
+  isSystem: boolean // true para super_admin y admin fijos
+  permissions: ProjectModulePermissions
+  createdAt: string
+}
+
+/** Permisos denegados por defecto (cero facultades). */
+export const EMPTY_PROJECT_PERMISSIONS: ProjectModulePermissions = {
+  can_create_projects: false,
+  can_edit_projects: false,
+  can_archive_projects: false,
+  can_configure_budget: false,
+  can_change_methodology: false,
+  can_manage_roles: false,
+  can_assign_users: false,
+  can_delegate_permissions: false,
+  can_assign_regions: false,
+  can_reassign_territories: false,
+  can_audit_territorial_map: false,
+  can_approve_milestones: false,
+  can_edit_gantt_dependencies: false,
+  can_configure_wip_limits: false,
+  can_create_field_tasks: false,
+  can_upload_evidences_pecosa: false,
+  can_validate_checklists: false,
+  can_escalate_blockers: false,
+}
+
+/** Permisos totales del Administrador de Organización (19/19). */
+export const ADMIN_PROJECT_PERMISSIONS: ProjectModulePermissions = {
+  can_create_projects: true,
+  can_edit_projects: true,
+  can_archive_projects: true,
+  can_configure_budget: true,
+  can_change_methodology: true,
+  can_manage_roles: true,
+  can_assign_users: true,
+  can_delegate_permissions: true,
+  can_assign_regions: true,
+  can_reassign_territories: true,
+  can_audit_territorial_map: true,
+  can_approve_milestones: true,
+  can_edit_gantt_dependencies: true,
+  can_configure_wip_limits: true,
+  can_create_field_tasks: true,
+  can_upload_evidences_pecosa: true,
+  can_validate_checklists: true,
+  can_escalate_blockers: true,
+}
+
+export type PermissionModuleKey =
+  | 'cartera'
+  | 'gobernanza'
+  | 'territorio'
+  | 'planificacion'
+  | 'campo'
+
+export interface PermissionModuleMeta {
+  key: PermissionModuleKey
+  title: string
+  impact: string
+  permissions: { key: keyof ProjectModulePermissions; label: string; impact: string }[]
+}
+
+/** 5 bloques funcionales con check general + repercusiones desplegables. */
+export const PROJECT_PERMISSION_MODULES: PermissionModuleMeta[] = [
+  {
+    key: 'cartera',
+    title: 'Gestión de Cartera y Proyectos',
+    impact: 'Impacto: crea, edita y archiva proyectos; toca presupuesto y metodología de toda la cartera.',
+    permissions: [
+      { key: 'can_create_projects', label: 'Crear proyectos', impact: 'Da de alta proyectos institucionales con responsables y fechas.' },
+      { key: 'can_edit_projects', label: 'Editar proyectos', impact: 'Modifica nombre, alcance, cliente y estado de proyectos activos.' },
+      { key: 'can_archive_projects', label: 'Archivar proyectos', impact: 'Cierra y archiva proyectos; desaparecen de la cartera activa y del sidebar.' },
+      { key: 'can_configure_budget', label: 'Configurar presupuesto', impact: 'Ajusta montos asignados/ejecutados; alimenta EVM y KPIs de cartera.' },
+      { key: 'can_change_methodology', label: 'Cambiar metodología', impact: 'Alterna Scrum / PMBOK-P6 / Kanban / Híbrido por proyecto.' },
+    ],
+  },
+  {
+    key: 'gobernanza',
+    title: 'Gobernanza de Cargos y Equipo',
+    impact: 'Impacto: gobierna quién puede crear cargos, asignar usuarios y delegar facultades.',
+    permissions: [
+      { key: 'can_manage_roles', label: 'Gestionar cargos', impact: 'Crea y configura cargos dinámicos con su matriz de facultades.' },
+      { key: 'can_assign_users', label: 'Asignar usuarios', impact: 'Vincula personas a cargos y proyectos de la organización.' },
+      { key: 'can_delegate_permissions', label: 'Delegar permisos', impact: 'Permite que un cargo delegue facultades a subordinados.' },
+    ],
+  },
+  {
+    key: 'territorio',
+    title: 'Ámbito Territorial y Cobertura',
+    impact: 'Impacto operativo y territorial: define regiones, UGELs y mapa de cobertura.',
+    permissions: [
+      { key: 'can_assign_regions', label: 'Asignar regiones', impact: 'Asigna regiones y UGELs a gestores territoriales.' },
+      { key: 'can_reassign_territories', label: 'Reasignar territorios', impact: 'Mueve cobertura entre gestores; reasigna tareas de campo abiertas.' },
+      { key: 'can_audit_territorial_map', label: 'Auditar mapa territorial', impact: 'Acceso de auditoría al mapa nacional y semáforos preventivos.' },
+    ],
+  },
+  {
+    key: 'planificacion',
+    title: 'Planificación, Hitos y Cronograma',
+    impact: 'Impacto: aprueba hitos contractuales y gobierna Gantt, dependencias y WIP.',
+    permissions: [
+      { key: 'can_approve_milestones', label: 'Aprobar hitos', impact: 'Firma hitos PMBOK; desbloquea fases y entregables.' },
+      { key: 'can_edit_gantt_dependencies', label: 'Editar dependencias Gantt', impact: 'Reordena ruta crítica y dependencias FS del cronograma.' },
+      { key: 'can_configure_wip_limits', label: 'Configurar límites WIP', impact: 'Define políticas de columna y límites del tablero Kanban.' },
+    ],
+  },
+  {
+    key: 'campo',
+    title: 'Operación en Campo y Evidencias',
+    impact: 'Impacto: ejecuta tareas territoriales, evidencias PECOSA y escalamientos.',
+    permissions: [
+      { key: 'can_create_field_tasks', label: 'Crear tareas de campo', impact: 'Genera tarjetas territoriales con responsables y seguimiento.' },
+      { key: 'can_upload_evidences_pecosa', label: 'Subir evidencias PECOSA', impact: 'Adjunta evidencias y actas de verificación en campo.' },
+      { key: 'can_validate_checklists', label: 'Validar checklists', impact: 'Verifica subetapas operativas y criterios de aceptación.' },
+      { key: 'can_escalate_blockers', label: 'Escalar bloqueos', impact: 'Eleva impedimentos al Coordinador y a Alertas Críticas.' },
+    ],
+  },
+]
 
 // ── KPIs de Cartera (Task 3.1 — Dashboard) ──
 export interface PortfolioKpis {

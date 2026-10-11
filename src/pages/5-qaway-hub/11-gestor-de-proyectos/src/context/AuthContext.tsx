@@ -170,8 +170,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
+const authFallback: AuthContextValue = {
+  session: null,
+  profile: null,
+  loading: false,
+  signIn: async () => {},
+  signInWithOAuth: async () => {},
+  resetPassword: async () => {},
+  signOut: async () => {},
+}
+
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth debe usarse dentro de <AuthProvider>')
+  if (!ctx) return authFallback
   return ctx
 }

@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import {
   Building2,
-  FileStack,
-  Percent,
-  Ruler,
+  Users,
   Save,
   Loader2,
   AlertCircle,
@@ -11,37 +9,26 @@ import {
   Trash2,
   Check,
   Link2,
+  ChevronDown,
+  X,
+  ShieldCheck,
 } from 'lucide-react'
 import { fiscalService } from '@/services/fiscalService'
+import { governanceService } from '@/services/governanceService'
 import { useTenant } from '@/context/TenantContext'
-import type { BusinessSettings, Tax, SunatUnit, InvoiceSeries, TaxType } from '@/types'
+import type { BusinessSettings } from '@/types'
+import type { OrganizationRoleDefinition, ProjectModulePermissions } from '@/types/project.types'
+import { EMPTY_PROJECT_PERMISSIONS, PROJECT_PERMISSION_MODULES } from '@/types/project.types'
 
-type Tab = 'negocio' | 'series' | 'impuestos' | 'unidades'
+type Tab = 'negocio' | 'usuarios'
 
 const tabs: { key: Tab; label: string; icon: typeof Building2 }[] = [
   { key: 'negocio', label: 'Negocio', icon: Building2 },
-  { key: 'series', label: 'Series', icon: FileStack },
-  { key: 'impuestos', label: 'Impuestos', icon: Percent },
-  { key: 'unidades', label: 'Unidades', icon: Ruler },
+  { key: 'usuarios', label: 'Usuarios & Cargos', icon: Users },
 ]
-
-const taxTypeOptions: { value: TaxType; label: string }[] = [
-  { value: 'igv', label: 'IGV' },
-  { value: 'isc', label: 'ISC' },
-  { value: 'exonerado', label: 'Exonerado' },
-  { value: 'inafecto', label: 'Inafecto' },
-  { value: 'gratuito', label: 'Gratuito' },
-]
-
-const tipoDocLabels: Record<string, string> = {
-  '01': 'Factura',
-  '03': 'Boleta',
-  '07': 'Nota crédito',
-  '08': 'Nota débito',
-}
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState<Tab>('negocio')
+  const [tab, setTab] = useState<Tab>('usuarios')
   const [error, setError] = useState<string | null>(null)
 
   return (
@@ -49,7 +36,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Configuración</h1>
         <p className="text-sm text-muted mt-1">
-          Configuración fiscal y general de la aplicación.
+          Gobernanza de la organización: usuarios, cargos dinámicos y datos del negocio.
         </p>
       </div>
 
@@ -79,16 +66,14 @@ export default function SettingsPage() {
       </div>
 
       {tab === 'negocio' && <BusinessTab onError={setError} />}
-      {tab === 'series' && <SeriesTab onError={setError} />}
-      {tab === 'impuestos' && <TaxesTab onError={setError} />}
-      {tab === 'unidades' && <UnitsTab onError={setError} />}
+      {tab === 'usuarios' && <UsersRolesTab />}
     </div>
   )
 }
 
 // ── Negocio ──
 function BusinessTab({ onError }: { onError: (e: string | null) => void }) {
-  const { activeTenantId, activeTenant } = useTenant()
+  const { activeTenantId } = useTenant()
   const [settings, setSettings] = useState<BusinessSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -294,480 +279,416 @@ function BusinessTab({ onError }: { onError: (e: string | null) => void }) {
   )
 }
 
-// ── Series ──
-function SeriesTab({ onError }: { onError: (e: string | null) => void }) {
-  const { activeTenantId } = useTenant()
-  const [series, setSeries] = useState<InvoiceSeries[]>([])
-  const [loading, setLoading] = useState(true)
-  const [newSerie, setNewSerie] = useState({ tipo_doc: '01' as const, serie: '', descripcion: '' })
+// ── Usuarios & Cargos (GOVERNANCE-01) ──
+function UsersRolesTab() {
+  const dataset = useSyncExternalStore(
+    governanceService.subscribe,
+    governanceService.getSnapshot,
+    governanceService.getServerSnapshot,
+  )
+  const { scopedTenant } = useTenant()
+  const inEntity = Boolean(scopedTenant)
+  const [userOpen, setUserOpen] = useState(false)
+  const [roleOpen, setRoleOpen] = useState(false)
 
-  const load = () => {
-    if (!activeTenantId) {
-      setSeries([])
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    fiscalService
-      .getSeries(activeTenantId)
-      .then(setSeries)
-      .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar series'))
-      .finally(() => setLoading(false))
-  }
+  // En una organización activa (MINEDU, etc.), los cargos son institucionales.
+  // El Super Administrador global del SaaS no pertenece a la entidad.
+  const visibleRoles = useMemo(() => {
+    return inEntity ? dataset.roles.filter((r) => r.id !== 'role-super-admin') : dataset.roles
+  }, [inEntity, dataset.roles])
 
-  useEffect(load, [activeTenantId, onError])
-
-  const handleAdd = async () => {
-    if (!newSerie.serie.trim()) return
-    try {
-      if (!activeTenantId) return
-      await fiscalService.createSeries(activeTenantId, { ...newSerie, active: true })
-      setNewSerie({ tipo_doc: '01', serie: '', descripcion: '' })
-      load()
-    } catch (err) {
-      onError(err instanceof Error ? err.message : 'Error al crear serie')
-    }
-  }
-
-  const handleToggle = async (s: InvoiceSeries) => {
-    if (!activeTenantId) return
-    await fiscalService.updateSeries(activeTenantId, s.id, { active: !s.active })
-    load()
-  }
-
-  const handleDelete = async (s: InvoiceSeries) => {
-    if (window.confirm(`¿Eliminar la serie ${s.serie}?`)) {
-      if (!activeTenantId) return
-      await fiscalService.deleteSeries(activeTenantId, s.id)
-      load()
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>
-    )
-  }
-
-  const inputCls =
-    'px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+  const roleName = useMemo(() => {
+    const map = new Map(dataset.roles.map((r) => [r.id, r.name]))
+    return (id: string) => map.get(id) ?? '—'
+  }, [dataset.roles])
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-2 bg-white rounded-xl border border-surface-muted p-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
-          <select
-            value={newSerie.tipo_doc}
-            onChange={e => setNewSerie(prev => ({ ...prev, tipo_doc: e.target.value as '01' }))}
-            className={inputCls}
+    <div className="space-y-6">
+      {/* Sección 1: Usuarios */}
+      <section className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-zinc-100">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-zinc-100 text-zinc-900">
+              <Users size={16} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900">Usuarios de la organización</h2>
+              <p className="text-[13px] text-zinc-500">{dataset.users.length} usuarios · Avatar, cargo y estado</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUserOpen(true)}
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-bold text-white transition-colors hover:bg-brand-hover"
           >
-            {(Object.keys(tipoDocLabels) as Array<'01' | '03' | '07' | '08'>).map(td => (
-              <option key={td} value={td}>{tipoDocLabels[td]} ({td})</option>
-            ))}
-          </select>
+            <Plus size={16} /> Nuevo Usuario
+          </button>
         </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Serie</label>
-          <input
-            value={newSerie.serie}
-            onChange={e => setNewSerie(prev => ({ ...prev, serie: e.target.value.toUpperCase() }))}
-            placeholder="B001"
-            className={`${inputCls} w-28`}
-          />
-        </div>
-        <div className="flex-1">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Descripción</label>
-          <input
-            value={newSerie.descripcion}
-            onChange={e => setNewSerie(prev => ({ ...prev, descripcion: e.target.value }))}
-            placeholder="Boleta principal"
-            className={`${inputCls} w-full`}
-          />
-        </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Agregar
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl border border-surface-muted overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Serie</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Tipo</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Descripción</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-500">Correlativo</th>
-              <th className="text-center px-4 py-3 font-medium text-gray-500">Activa</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {series.map(s => (
-              <tr key={s.id}>
-                <td className="px-4 py-3 font-mono text-gray-900">{s.serie}</td>
-                <td className="px-4 py-3 text-gray-600">{tipoDocLabels[s.tipo_doc]}</td>
-                <td className="px-4 py-3 text-gray-600">{s.descripcion || '—'}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-900">{s.correlativo_actual}</td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => handleToggle(s)}
-                    className={`w-9 h-5 rounded-full transition-colors relative ${
-                      s.active ? 'bg-green-500' : 'bg-gray-300'
-                    }`}
-                  >
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-left">
+            <thead>
+              <tr className="border-b border-zinc-100 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                <th className="px-5 py-3">Usuario</th>
+                <th className="px-5 py-3">Correo</th>
+                <th className="px-5 py-3">Cargo asignado</th>
+                <th className="px-5 py-3">Estado</th>
+                <th className="px-5 py-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-50">
+              {dataset.users.map((u) => (
+                <tr key={u.id} className="transition-colors hover:bg-zinc-50/70">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-zinc-100 text-xs font-bold text-zinc-700">
+                        {initialsOf(u.name)}
+                      </span>
+                      <span className="text-sm font-medium text-zinc-900">{u.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5 text-sm font-medium text-zinc-500">{u.email}</td>
+                  <td className="px-5 py-3.5">
+                    <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-xs font-semibold text-zinc-700">
+                      {roleName(u.roleId)}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5">
                     <span
-                      className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${
-                        s.active ? 'left-4' : 'left-0.5'
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-semibold ${
+                        u.status === 'activo'
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                          : 'border-zinc-200 bg-zinc-100 text-zinc-500'
                       }`}
-                    />
-                  </button>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => handleDelete(s)}
-                    className="p-1.5 text-muted hover:text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {series.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted">
-                  No hay series configuradas
-                </td>
-              </tr>
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${u.status === 'activo' ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
+                      {u.status === 'activo' ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right">
+                    <button
+                      type="button"
+                      onClick={() => governanceService.toggleUserStatus(u.id)}
+                      className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+                    >
+                      {u.status === 'activo' ? 'Desactivar' : 'Activar'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {dataset.users.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm font-medium text-zinc-500">
+                    Sin usuarios registrados.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Sección 2: Cargos */}
+      <section className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-zinc-100">
+          <div className="flex items-center gap-2.5">
+            <span className="grid h-9 w-9 place-items-center rounded-lg bg-zinc-100 text-zinc-900">
+              <ShieldCheck size={16} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900">Cargos dinámicos y facultades</h2>
+              <p className="text-[13px] text-zinc-500">Matriz de 5 módulos con checks generales y repercusiones desplegables</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setRoleOpen(true)}
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-bold text-zinc-800 transition-colors hover:bg-zinc-50"
+          >
+            <Plus size={16} /> Nuevo Cargo
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-2">
+          {visibleRoles.map((role) => (
+            <RoleCard key={role.id} role={role} />
+          ))}
+        </div>
+      </section>
+
+      {userOpen && <NewUserModal roles={visibleRoles} onClose={() => setUserOpen(false)} />}
+      {roleOpen && <NewRoleModal onClose={() => setRoleOpen(false)} />}
+    </div>
+  )
+}
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
+}
+
+function countPermissions(p: ProjectModulePermissions): number {
+  return (Object.values(p) as boolean[]).filter(Boolean).length
+}
+
+function RoleCard({ role }: { role: OrganizationRoleDefinition }) {
+  const [open, setOpen] = useState(false)
+  const active = countPermissions(role.permissions)
+  return (
+    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-zinc-900">{role.name}</p>
+          <p className="mt-0.5 text-[13px] text-zinc-500">{role.description || '—'}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {role.isSystem && (
+              <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-600">
+                Sistema
+              </span>
             )}
-          </tbody>
-        </table>
+            <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-xs font-semibold text-zinc-700">
+              {active}/19 facultades
+            </span>
+          </div>
+        </div>
+        {!role.isSystem && (
+          <button
+            type="button"
+            onClick={() => governanceService.deleteRole(role.id)}
+            title={`Eliminar ${role.name}`}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="mt-3 inline-flex h-9 w-full items-center justify-between rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+      >
+        <span>Ver repercusiones por módulo</span>
+        <ChevronDown size={16} className={`text-zinc-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="mt-2 space-y-2 rounded-lg bg-zinc-50 p-3">
+          {PROJECT_PERMISSION_MODULES.map((mod) => {
+            const granted = mod.permissions.filter((p) => role.permissions[p.key])
+            if (granted.length === 0) return null
+            return (
+              <div key={mod.key}>
+                <p className="text-xs font-semibold text-zinc-900">{mod.title} · {granted.length}/{mod.permissions.length}</p>
+                <ul className="mt-1 space-y-0.5">
+                  {granted.map((p) => (
+                    <li key={p.key} className="text-[13px] text-zinc-500">· {p.label} — {p.impact}</li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
+          {active === 0 && <p className="text-[13px] text-zinc-500">Sin facultades asignadas.</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function NewUserModal({ roles, onClose }: { roles: OrganizationRoleDefinition[]; onClose: () => void }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [roleId, setRoleId] = useState(roles[0]?.id ?? '')
+  const [error, setError] = useState<string | null>(null)
+
+  const inputCls =
+    'w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/15'
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) {
+      setError('Ingresa el nombre del usuario.')
+      return
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setError('Ingresa un correo válido.')
+      return
+    }
+    if (!roleId) {
+      setError('Selecciona un cargo.')
+      return
+    }
+    governanceService.createUser({ name, email, roleId })
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-zinc-950/50 p-4 backdrop-blur-[2px]">
+      <div role="dialog" aria-modal="true" aria-label="Nuevo usuario" className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
+        <div className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4">
+          <div>
+            <h2 className="text-sm font-bold text-zinc-900">Nuevo Usuario</h2>
+            <p className="text-[13px] text-zinc-500">Registra nombre, correo y cargo existente.</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="grid h-9 w-9 place-items-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
+            <X size={18} />
+          </button>
+        </div>
+        <form onSubmit={submit} className="space-y-3 px-5 py-4">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-zinc-600">Nombre *</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre completo" className={inputCls} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-zinc-600">Correo *</label>
+            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="usuario@organizacion.pe" className={inputCls} />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-zinc-600">Cargo *</label>
+            <select value={roleId} onChange={(e) => setRoleId(e.target.value)} className={inputCls}>
+              {roles.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
+            </select>
+          </div>
+          {error && <p className="text-[11px] font-medium text-rose-600">{error}</p>}
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <button type="button" onClick={onClose} className="h-10 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50">
+              Cancelar
+            </button>
+            <button type="submit" className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-bold text-white transition-colors hover:bg-brand-hover">
+              <Plus size={16} /> Crear usuario
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
 }
 
-// ── Impuestos ──
-function TaxesTab({ onError }: { onError: (e: string | null) => void }) {
+function NewRoleModal({ onClose }: { onClose: () => void }) {
   const { activeTenantId } = useTenant()
-  const [taxes, setTaxes] = useState<Tax[]>([])
-  const [loading, setLoading] = useState(true)
-  const [newTax, setNewTax] = useState({ codigo: '10', descripcion: '', tasa: '', tipo: 'igv' as TaxType })
-
-  const load = () => {
-    if (!activeTenantId) {
-      setTaxes([])
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    fiscalService
-      .getTaxes(activeTenantId)
-      .then(setTaxes)
-      .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar impuestos'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(load, [activeTenantId, onError])
-
-  const handleAdd = async () => {
-    if (!newTax.codigo.trim() || !newTax.descripcion.trim()) return
-    try {
-      if (!activeTenantId) return
-      await fiscalService.createTax(activeTenantId, {
-        codigo: newTax.codigo.trim(),
-        descripcion: newTax.descripcion.trim(),
-        tasa: newTax.tasa === '' ? null : Number(newTax.tasa),
-        tipo: newTax.tipo,
-        active: true,
-      })
-      setNewTax({ codigo: '10', descripcion: '', tasa: '', tipo: 'igv' })
-      load()
-    } catch (err) {
-      onError(err instanceof Error ? err.message : 'Error al crear impuesto')
-    }
-  }
-
-  const handleToggle = async (t: Tax) => {
-    if (!activeTenantId) return
-    await fiscalService.updateTax(activeTenantId, t.id, { active: !t.active })
-    load()
-  }
-
-  const handleDelete = async (t: Tax) => {
-    if (window.confirm(`¿Eliminar el impuesto ${t.codigo} - ${t.descripcion}?`)) {
-      if (!activeTenantId) return
-      await fiscalService.deleteTax(activeTenantId, t.id)
-      load()
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>
-    )
-  }
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [perms, setPerms] = useState<ProjectModulePermissions>({ ...EMPTY_PROJECT_PERMISSIONS })
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({ cartera: true })
+  const [error, setError] = useState<string | null>(null)
 
   const inputCls =
-    'px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+    'w-full h-10 px-3 rounded-lg border border-zinc-200 bg-white text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/15'
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-2 bg-white rounded-xl border border-surface-muted p-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Código</label>
-          <input
-            value={newTax.codigo}
-            onChange={e => setNewTax(prev => ({ ...prev, codigo: e.target.value }))}
-            className={`${inputCls} w-20`}
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
-          <select
-            value={newTax.tipo}
-            onChange={e => setNewTax(prev => ({ ...prev, tipo: e.target.value as TaxType }))}
-            className={inputCls}
-          >
-            {taxTypeOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex-1">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Descripción</label>
-          <input
-            value={newTax.descripcion}
-            onChange={e => setNewTax(prev => ({ ...prev, descripcion: e.target.value }))}
-            placeholder="IGV"
-            className={`${inputCls} w-full`}
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Tasa %</label>
-          <input
-            type="number"
-            value={newTax.tasa}
-            onChange={e => setNewTax(prev => ({ ...prev, tasa: e.target.value }))}
-            className={`${inputCls} w-20`}
-          />
-        </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Agregar
-        </button>
-      </div>
+  const toggleModule = (moduleKey: string, checked: boolean) => {
+    const mod = PROJECT_PERMISSION_MODULES.find((m) => m.key === moduleKey)
+    if (!mod) return
+    setPerms((prev) => {
+      const next = { ...prev }
+      for (const p of mod.permissions) next[p.key] = checked
+      return next
+    })
+  }
 
-      <div className="bg-white rounded-xl border border-surface-muted overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Código</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Descripción</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Tipo</th>
-              <th className="text-right px-4 py-3 font-medium text-gray-500">Tasa</th>
-              <th className="text-center px-4 py-3 font-medium text-gray-500">Activo</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {taxes.map(t => (
-              <tr key={t.id}>
-                <td className="px-4 py-3 font-mono text-gray-900">{t.codigo}</td>
-                <td className="px-4 py-3 text-gray-900">{t.descripcion}</td>
-                <td className="px-4 py-3 text-gray-600">{taxTypeOptions.find(o => o.value === t.tipo)?.label}</td>
-                <td className="px-4 py-3 text-right text-gray-900">{t.tasa === null ? '—' : `${t.tasa}%`}</td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => handleToggle(t)}
-                    className={`w-9 h-5 rounded-full transition-colors relative ${
-                      t.active ? 'bg-green-500' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${
-                        t.active ? 'left-4' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => handleDelete(t)}
-                    className="p-1.5 text-muted hover:text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {taxes.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted">
-                  No hay impuestos configurados
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
+  const toggleOne = (key: keyof ProjectModulePermissions, checked: boolean) => {
+    setPerms((prev) => ({ ...prev, [key]: checked }))
+  }
 
-// ── Unidades SUNAT ──
-function UnitsTab({ onError }: { onError: (e: string | null) => void }) {
-  const { activeTenantId } = useTenant()
-  const [units, setUnits] = useState<SunatUnit[]>([])
-  const [loading, setLoading] = useState(true)
-  const [newUnit, setNewUnit] = useState({ codigo: '', descripcion: '' })
-
-  const load = () => {
-    if (!activeTenantId) {
-      setUnits([])
-      setLoading(false)
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) {
+      setError('Define el nombre del cargo (ej. Coordinador Macroregional).')
       return
     }
-    setLoading(true)
-    fiscalService
-      .getUnits(activeTenantId)
-      .then(setUnits)
-      .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar unidades'))
-      .finally(() => setLoading(false))
+    governanceService.createRole({
+      name,
+      description: description.trim() || 'Cargo dinámico de la organización.',
+      organizationId: activeTenantId ?? 'org-global',
+      permissions: perms,
+    })
+    onClose()
   }
-
-  useEffect(load, [activeTenantId, onError])
-
-  const handleAdd = async () => {
-    if (!newUnit.codigo.trim() || !newUnit.descripcion.trim()) return
-    try {
-      if (!activeTenantId) return
-      await fiscalService.createUnit(activeTenantId, {
-        codigo: newUnit.codigo.trim().toUpperCase(),
-        descripcion: newUnit.descripcion.trim(),
-        active: true,
-      })
-      setNewUnit({ codigo: '', descripcion: '' })
-      load()
-    } catch (err) {
-      onError(err instanceof Error ? err.message : 'Error al crear unidad')
-    }
-  }
-
-  const handleToggle = async (u: SunatUnit) => {
-    if (!activeTenantId) return
-    await fiscalService.updateUnit(activeTenantId, u.id, { active: !u.active })
-    load()
-  }
-
-  const handleDelete = async (u: SunatUnit) => {
-    if (window.confirm(`¿Eliminar la unidad ${u.codigo}?`)) {
-      if (!activeTenantId) return
-      await fiscalService.deleteUnit(activeTenantId, u.id)
-      load()
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>
-    )
-  }
-
-  const inputCls =
-    'px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-2 bg-white rounded-xl border border-surface-muted p-4">
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Código</label>
-          <input
-            value={newUnit.codigo}
-            onChange={e => setNewUnit(prev => ({ ...prev, codigo: e.target.value }))}
-            placeholder="NIU"
-            className={`${inputCls} w-24`}
-          />
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-zinc-950/50 p-4 backdrop-blur-[2px]">
+      <div role="dialog" aria-modal="true" aria-label="Nuevo cargo" className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
+        <div className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4">
+          <div>
+            <h2 className="text-sm font-bold text-zinc-900">Nuevo Cargo</h2>
+            <p className="text-[13px] text-zinc-500">Define el nombre y asigna facultades por módulo.</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="grid h-9 w-9 place-items-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
+            <X size={18} />
+          </button>
         </div>
-        <div className="flex-1">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Descripción</label>
-          <input
-            value={newUnit.descripcion}
-            onChange={e => setNewUnit(prev => ({ ...prev, descripcion: e.target.value }))}
-            placeholder="Unidad"
-            className={`${inputCls} w-full`}
-          />
-        </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Agregar
-        </button>
-      </div>
+        <form onSubmit={submit} className="space-y-4 px-5 py-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-zinc-600">Nombre del cargo *</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Coordinador Macroregional" className={inputCls} />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-zinc-600">Descripción</label>
+              <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Alcance del cargo…" className={inputCls} />
+            </div>
+          </div>
 
-      <div className="bg-white rounded-xl border border-surface-muted overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Código</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-500">Descripción</th>
-              <th className="text-center px-4 py-3 font-medium text-gray-500">Activa</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {units.map(u => (
-              <tr key={u.id}>
-                <td className="px-4 py-3 font-mono text-gray-900">{u.codigo}</td>
-                <td className="px-4 py-3 text-gray-600">{u.descripcion}</td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => handleToggle(u)}
-                    className={`w-9 h-5 rounded-full transition-colors relative ${
-                      u.active ? 'bg-green-500' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${
-                        u.active ? 'left-4' : 'left-0.5'
-                      }`}
+          <div className="space-y-2">
+            {PROJECT_PERMISSION_MODULES.map((mod) => {
+              const all = mod.permissions.every((p) => perms[p.key])
+              const some = !all && mod.permissions.some((p) => perms[p.key])
+              const isOpen = expanded[mod.key] ?? false
+              return (
+                <div key={mod.key} className="rounded-xl border border-zinc-200">
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={all}
+                      ref={(el) => {
+                        if (el) el.indeterminate = some
+                      }}
+                      onChange={(e) => toggleModule(mod.key, e.target.checked)}
+                      aria-label={`Todas las facultades de ${mod.title}`}
+                      className="h-4 w-4 accent-zinc-900"
                     />
-                  </button>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => handleDelete(u)}
-                    className="p-1.5 text-muted hover:text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {units.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-muted">
-                  No hay unidades configuradas
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                    <button
+                      type="button"
+                      onClick={() => setExpanded((prev) => ({ ...prev, [mod.key]: !isOpen }))}
+                      className="flex flex-1 items-center justify-between gap-2 text-left"
+                    >
+                      <span className="text-sm font-medium text-zinc-900">{mod.title}</span>
+                      <ChevronDown size={16} className={`shrink-0 text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                  {isOpen && (
+                    <div className="space-y-2 border-t border-zinc-100 bg-zinc-50/60 px-4 py-3">
+                      <p className="text-[13px] text-zinc-500">{mod.impact}</p>
+                      {mod.permissions.map((p) => (
+                        <label key={p.key} className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2">
+                          <input
+                            type="checkbox"
+                            checked={perms[p.key]}
+                            onChange={(e) => toggleOne(p.key, e.target.checked)}
+                            className="mt-0.5 h-4 w-4 accent-zinc-900"
+                          />
+                          <span>
+                            <span className="block text-sm font-medium text-zinc-900">{p.label}</span>
+                            <span className="block text-[13px] text-zinc-500">{p.impact}</span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {error && <p className="text-[11px] font-medium text-rose-600">{error}</p>}
+          <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4">
+            <button type="button" onClick={onClose} className="h-10 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-50">
+              Cancelar
+            </button>
+            <button type="submit" className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-bold text-white transition-colors hover:bg-brand-hover">
+              <Plus size={16} /> Guardar cargo
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )

@@ -1,9 +1,24 @@
 // ── User Roles ──
+import type {
+  OrganizationRoleDefinition,
+  ProjectModulePermissions,
+} from './project.types'
+import {
+  ADMIN_PROJECT_PERMISSIONS,
+  EMPTY_PROJECT_PERMISSIONS,
+} from './project.types'
+
+export type { OrganizationRoleDefinition, ProjectModulePermissions }
+
 export type UserRole = 'admin' | 'editor' | 'viewer' | 'guest'
 
 // ── Granular Permissions ──
-export interface UserPermissions {
-  // Inventario
+// Matriz oficial de gestión de proyectos (GOVERNANCE-01) + permisos legacy
+// de tienda/inventario conservados como deprecated para no romper gates de
+// ruta existentes (RequirePermission / AppRouter). Los nuevos cargos usan
+// ProjectModulePermissions; UserPermissions los hereda para compatibilidad.
+export interface UserPermissions extends ProjectModulePermissions {
+  // Inventario (legacy, deprecated)
   can_view_products: boolean
   can_create_products: boolean
   can_edit_products: boolean
@@ -57,6 +72,7 @@ export interface UserPermissions {
 // ── Default Permission Presets ──
 export const rolePermissions: Record<UserRole, UserPermissions> = {
   admin: {
+    ...ADMIN_PROJECT_PERMISSIONS,
     can_view_products: true,
     can_create_products: true,
     can_edit_products: true,
@@ -91,6 +107,24 @@ export const rolePermissions: Record<UserRole, UserPermissions> = {
     can_view_only_assigned: false,
   },
   editor: {
+    can_create_projects: true,
+    can_edit_projects: true,
+    can_archive_projects: false,
+    can_configure_budget: false,
+    can_change_methodology: false,
+    can_manage_roles: false,
+    can_assign_users: true,
+    can_delegate_permissions: false,
+    can_assign_regions: true,
+    can_reassign_territories: false,
+    can_audit_territorial_map: false,
+    can_approve_milestones: false,
+    can_edit_gantt_dependencies: true,
+    can_configure_wip_limits: false,
+    can_create_field_tasks: true,
+    can_upload_evidences_pecosa: true,
+    can_validate_checklists: true,
+    can_escalate_blockers: true,
     can_view_products: true,
     can_create_products: true,
     can_edit_products: true,
@@ -125,6 +159,9 @@ export const rolePermissions: Record<UserRole, UserPermissions> = {
     can_view_only_assigned: false,
   },
   viewer: {
+    ...EMPTY_PROJECT_PERMISSIONS,
+    can_create_field_tasks: false,
+    can_validate_checklists: false,
     can_view_products: true,
     can_create_products: false,
     can_edit_products: false,
@@ -159,6 +196,7 @@ export const rolePermissions: Record<UserRole, UserPermissions> = {
     can_view_only_assigned: false,
   },
   guest: {
+    ...EMPTY_PROJECT_PERMISSIONS,
     can_view_products: true,
     can_create_products: false,
     can_edit_products: false,

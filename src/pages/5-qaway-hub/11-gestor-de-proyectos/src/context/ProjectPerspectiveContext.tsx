@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
-export type ProjectPerspectiveRole = 'super_admin' | 'coordinador' | 'gestor'
+export type ProjectPerspectiveRole = 'super_admin' | 'admin' | 'coordinador' | 'gestor'
 
 export interface ProjectPersona {
   role: ProjectPerspectiveRole
@@ -34,6 +34,16 @@ export const PROJECT_PERSONAS: Record<ProjectPerspectiveRole, ProjectPersona> = 
     tag: 'Coordinador PMO',
     accentColor: '#3b82f6',
   },
+  admin: {
+    role: 'admin',
+    name: 'Director / Administrador',
+    title: 'Administrador de Organización',
+    scope: 'Organización Activa (MINEDU, Qaway, etc.)',
+    avatar: 'AD',
+    description: 'Máxima autoridad de la entidad. Gobierna la organización, crea cargos, asigna facultades a coordinadores y aprueba proyectos.',
+    tag: 'Administrador Org',
+    accentColor: '#8b5cf6',
+  },
   gestor: {
     role: 'gestor',
     name: 'Carlos Sandoval',
@@ -51,6 +61,7 @@ interface ProjectPerspectiveContextValue {
   currentPersona: ProjectPersona
   setPerspective: (role: ProjectPerspectiveRole) => void
   isSuperAdmin: boolean
+  isAdmin: boolean
   isCoordinador: boolean
   isGestor: boolean
 }
@@ -63,7 +74,7 @@ export function ProjectPerspectiveProvider({ children }: { children: ReactNode }
   const [perspective, setPerspectiveState] = useState<ProjectPerspectiveRole>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved === 'coordinador' || saved === 'gestor') return saved
+      if (saved === 'coordinador' || saved === 'gestor' || saved === 'admin') return saved
       return 'super_admin'
     } catch {
       return 'super_admin'
@@ -98,6 +109,7 @@ export function ProjectPerspectiveProvider({ children }: { children: ReactNode }
     currentPersona,
     setPerspective,
     isSuperAdmin: perspective === 'super_admin',
+    isAdmin: perspective === 'admin',
     isCoordinador: perspective === 'coordinador',
     isGestor: perspective === 'gestor',
   }
@@ -118,6 +130,7 @@ export function useProjectPerspective(): ProjectPerspectiveContextValue {
       currentPersona: PROJECT_PERSONAS.super_admin,
       setPerspective: () => {},
       isSuperAdmin: true,
+      isAdmin: false,
       isCoordinador: false,
       isGestor: false,
     }

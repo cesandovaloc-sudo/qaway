@@ -30,7 +30,11 @@ import {
 import { AppSwitcherDropdown } from '../../../../5-gestor-de-proyectos/components/AppSwitcherDropdown'
 
 const roleLabels: Record<string, string> = {
+  super_admin: 'Super Administrador',
   admin: 'Super Administrador',
+  org_admin: 'Administrador de Organización',
+  coordinador: 'Coordinador PMO',
+  gestor: 'Gestor Territorial',
   editor: 'Administrador de empresa',
   viewer: 'Miembro del equipo',
   guest: 'Invitado',
@@ -215,16 +219,27 @@ export default function Header({
   const [cachedProfile] = useState<{ displayName: string; avatarUrl: string | null; roleLabel: string; initials: string } | null>(() => {
     try {
       const raw = localStorage.getItem('qaway.hubProfile')
-      return raw ? JSON.parse(raw) : null
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      // Si en la caché del navegador quedó el antiguo "S Admin" o identificador de email genérico,
+      // se normaliza de inmediato a Carlos Sandoval / Super Administrador
+      if (
+        !parsed.displayName ||
+        /^(s[\._-]admin|super[\s._-]?admin|admin)$/i.test(parsed.displayName) ||
+        parsed.displayName === 'S Admin' ||
+        parsed.displayName === 's.admin'
+      ) {
+        parsed.displayName = 'Carlos Sandoval'
+        parsed.initials = 'CS'
+        parsed.roleLabel = 'Super Administrador'
+      }
+      return parsed
     } catch {
       return null
     }
   })
 
-  // Regla oficial HubPanelPage.jsx:177-180:
-  // "Carlos Enrique Sandoval Ocaña" → "Carlos S." · "Juanito Alimaña" → "Juanito A."
-  // Si el nombre proviene de un correo administrativo (sin full_name en BD), se humaniza:
-  // s.admin@qawaylab.com → "S Admin" (no siglas truncadas "S A.")
+  // Regla oficial de formato corto para nombres largos
   const shortName = (str: string) => {
     if (!str || !str.trim()) return 'Usuario'
     let clean = str.trim()
@@ -241,13 +256,44 @@ export default function Header({
     return `${firstName} ${lastNameInit}.`
   }
 
+  // Identidad oficial:
+  // 1. Si es la cuenta principal/fundador (s.admin, super_admin, o sin nombre asignado),
+  //    es siempre 'Carlos Sandoval' / 'Super Administrador'.
+  // 2. Si es otro usuario registrado (ej. 'Juan Saavedra', 'Rosita Chanca'),
+  //    se muestra su nombre real completo y cargo respectivo.
+  const resolveFullName = (fullName: string | null | undefined): string => {
+    const metaName =
+      (session?.user?.user_metadata as { full_name?: unknown } | undefined)?.full_name
+    const raw =
+      (typeof fullName === 'string' && fullName.trim()) ||
+      (typeof metaName === 'string' && metaName.trim()) ||
+      session?.user?.email?.split('@')[0] ||
+      ''
+
+    const isGenericAdmin =
+      !raw ||
+      /^(s[\._-]admin|super[\s._-]?admin|admin(istrador)?)$/i.test(raw) ||
+      raw.toLowerCase().includes('s.admin') ||
+      Boolean(session?.user?.email?.toLowerCase().includes('s.admin'))
+
+    if (isGenericAdmin) {
+      return 'Carlos Sandoval'
+    }
+
+    if (raw.includes('@')) {
+      return shortName(raw)
+    }
+
+    return raw.trim()
+  }
+
   // Guardar en caché cuando el perfil de Supabase esté resuelto
   useEffect(() => {
     if (profile) {
-      const full = profile.full_name || ''
-      const name = shortName(full)
-      const role = roleLabels[profile.role] || profile.role || 'Miembro del equipo'
-      const inits = (full || '?').split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()
+      const full = resolveFullName(profile.full_name)
+      const name = full
+      const role = roleLabels[profile.role] || profile.role || 'Super Administrador'
+      const inits = full.split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()
       try {
         localStorage.setItem(
           'qaway.hubProfile',
@@ -255,33 +301,33 @@ export default function Header({
             displayName: name,
             avatarUrl: profile.avatar_url || null,
             roleLabel: role,
-            initials: inits,
+            initials: inits || 'CS',
           })
         )
       } catch {
         // Ignorar storage errors
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile])
 
-  // Anti-flash: solo se marca como resuelto si ya tenemos perfil real o perfil en caché.
-  // Jamás hace fallback al email split antes de que termine de cargar.
-  const hasRealData = Boolean(profile || cachedProfile)
+  // Anti-flash: Se resuelve la identidad al terminar la carga
+  const hasRealData = Boolean(profile || cachedProfile || session)
   const identityResolved = !loading && hasRealData
 
   const activeData = profile
     ? {
-        displayName: shortName(profile.full_name || ''),
+        displayName: resolveFullName(profile.full_name),
         avatarUrl: profile.avatar_url || session?.user?.user_metadata?.avatar_url || null,
-        roleLabel: roleLabels[profile.role] || profile.role || 'Miembro del equipo',
-        initials: (profile.full_name || '?').split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase(),
+        roleLabel: roleLabels[profile.role] || profile.role || 'Super Administrador',
+        initials: resolveFullName(profile.full_name).split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() || 'CS',
       }
     : cachedProfile || null
 
-  const displayName = activeData?.displayName || (loading ? '' : 'Usuario')
+  const displayName = activeData?.displayName || (loading ? '' : 'Carlos Sandoval')
   const avatarUrl = activeData?.avatarUrl || null
-  const roleLabel = activeData?.roleLabel || (loading ? '' : 'Miembro del equipo')
-  const initials = activeData?.initials || '?'
+  const roleLabel = activeData?.roleLabel || (loading ? '' : 'Super Administrador')
+  const initials = activeData?.initials || 'CS'
   const email = session?.user?.email ?? ''
 
   const handleLogout = async () => {
@@ -313,6 +359,28 @@ export default function Header({
       el.click()
     }
   }
+
+  // Gobernanza de perspectivas por entidad: dentro de una organización no
+  // existe el Super Administrador global (solo Admin Org, coordinadores y
+  // gestores). Con scopedTenant activo se oculta 'super_admin' y se migra
+  // automáticamente a 'admin'. En "Todas las entidades" sí está disponible.
+  const inEntity = Boolean(scopedTenant)
+  const availableRoles = (Object.keys(PROJECT_PERSONAS) as ProjectPerspectiveRole[])
+    .filter((roleKey) => (inEntity ? roleKey !== 'super_admin' : true))
+    .sort((a, b) => {
+      if (inEntity) {
+        const order: Record<string, number> = { admin: 1, coordinador: 2, gestor: 3 }
+        return (order[a] || 9) - (order[b] || 9)
+      }
+      const order: Record<string, number> = { super_admin: 1, admin: 2, coordinador: 3, gestor: 4 }
+      return (order[a] || 9) - (order[b] || 9)
+    })
+  const displayedPersona =
+    inEntity && perspective === 'super_admin' ? PROJECT_PERSONAS.admin : currentPersona
+
+  useEffect(() => {
+    if (inEntity && perspective === 'super_admin') setPerspective('admin')
+  }, [inEntity, perspective, setPerspective])
 
   return (
     <header className="hub-chrome h-[72px] shrink-0 bg-[var(--hub-bg)] border-b border-[var(--hub-border)] flex items-center justify-between px-5 lg:px-6 relative z-50 text-[var(--hub-text)]">
@@ -468,11 +536,11 @@ export default function Header({
             type="button"
             onClick={togglePerspective}
             className="flex items-center gap-2 h-9 px-2.5 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-xs font-medium focus:outline-none focus:ring-1 focus:ring-zinc-400/40 cursor-pointer transition-colors"
-            title={`Perspectiva: ${currentPersona.title}`}
+            title={`Perspectiva: ${displayedPersona.title}`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
             <span className="text-zinc-400 font-normal">Rol:</span>
-            <span className="font-semibold max-w-32 truncate">{currentPersona.tag}</span>
+            <span className="font-semibold max-w-32 truncate">{displayedPersona.tag}</span>
             <ChevronDown
               size={12}
               className={`text-[var(--hub-dim)] transition-transform duration-150 ${
@@ -488,7 +556,7 @@ export default function Header({
                 onClick={() => setIsPerspectiveOpen(false)}
                 aria-label="Cerrar selector de perspectiva"
               />
-              <div className="hub-chrome absolute left-0 top-[calc(100%+6px)] w-72 rounded-xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-lg z-[100] overflow-hidden text-left text-[var(--hub-text)] animate-in fade-in-50 zoom-in-95">
+              <div className="hub-chrome absolute left-0 top-[calc(100%+6px)] w-72 max-h-80 overflow-y-auto rounded-xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-lg z-[100] overflow-hidden text-left text-[var(--hub-text)] animate-in fade-in-50 zoom-in-95">
                 <div className="px-3 py-2 border-b border-[var(--hub-border-soft)]">
                   <p className="text-[10px] font-semibold text-[var(--hub-dim)] uppercase tracking-wider">
                     Perspectiva de Trabajo
@@ -496,7 +564,7 @@ export default function Header({
                 </div>
 
                 <div className="p-1.5 space-y-0.5">
-                  {(Object.keys(PROJECT_PERSONAS) as ProjectPerspectiveRole[]).map((roleKey) => {
+                  {availableRoles.map((roleKey) => {
                     const p = PROJECT_PERSONAS[roleKey]
                     const isSelected = perspective === roleKey
                     return (
