@@ -302,7 +302,8 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
               type="date"
               value={form.startDate}
               onChange={(event) => update('startDate', event.target.value)}
-              className={inputClass}
+              onClick={(e) => { try { e.currentTarget.showPicker() } catch {} }}
+              className={`${inputClass} cursor-pointer`}
             />
             {errors.startDate && (
               <p className="mt-1 text-[11px] font-medium text-rose-600">{errors.startDate}</p>
@@ -317,7 +318,8 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
               min={form.startDate || undefined}
               value={form.targetDate}
               onChange={(event) => update('targetDate', event.target.value)}
-              className={inputClass}
+              onClick={(e) => { try { e.currentTarget.showPicker() } catch {} }}
+              className={`${inputClass} cursor-pointer`}
             />
             {errors.targetDate && (
               <p className="mt-1 text-[11px] font-medium text-rose-600">{errors.targetDate}</p>
