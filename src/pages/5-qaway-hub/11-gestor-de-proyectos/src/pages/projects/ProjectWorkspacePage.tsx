@@ -29,7 +29,7 @@ import { DocsTab } from './workspace/DocsTab'
 // ─────────────────────────────────────────────────────────────────────────
 // ProjectWorkspacePage.tsx — Espacio de Trabajo del Proyecto (Fase 4, 5, 6, 9 y 3 A36)
 // Ruta /proyectos/:id con header de proyecto y pestañas completas:
-// Resumen · Kanban · Sprints · Calendario · Cronograma Gantt P6 · Hitos PMBOK · Wiki.
+// Resumen · Kanban · Sprints · Calendario · Diagrama Gantt · Hitos PMBOK · Wiki.
 // ─────────────────────────────────────────────────────────────────────────
 
 type WorkspaceTab = 'resumen' | 'kanban' | 'sprints' | 'calendar' | 'gantt' | 'hitos' | 'docs'
@@ -119,7 +119,7 @@ export default function ProjectWorkspacePage() {
     badge: number | null
   }> = [
     { key: 'resumen', label: 'Resumen', icon: <LayoutDashboard size={16} />, badge: null },
-    { key: 'gantt', label: 'Cronograma P6', icon: <GanttChart size={16} />, badge: null },
+    { key: 'gantt', label: 'Diagrama Gantt', icon: <GanttChart size={16} />, badge: null },
     { key: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} />, badge: null },
     { key: 'hitos', label: 'Hitos', icon: <Milestone size={16} />, badge: pendingMilestones || null },
     { key: 'kanban', label: 'Kanban', icon: <KanbanSquare size={16} />, badge: workItems.length },

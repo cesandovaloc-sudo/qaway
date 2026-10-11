@@ -95,7 +95,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           badgeVariant: 'neutral',
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=kanban&view=criticas',
+          to: '/proyectos?view=criticas',
           label: 'Alertas Críticas',
           icon: <AlertCircle size={18} />,
           badge: urgentCount,
@@ -133,7 +133,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       items: [
         {
           to: '/proyectos/proj-minedu-2027?tab=gantt',
-          label: 'Cronograma Maestro',
+          label: 'Diagrama Gantt',
           icon: <GanttChart size={18} />,
         },
         {

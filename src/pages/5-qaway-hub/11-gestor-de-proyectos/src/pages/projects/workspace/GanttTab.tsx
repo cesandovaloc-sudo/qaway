@@ -7,7 +7,7 @@ import {
 } from '@/types/project.types'
 
 // ─────────────────────────────────────────────────────────────────────────
-// GanttTab.tsx — c) Cronograma Gantt Primavera P6 (Task 5.1)
+// GanttTab.tsx — c) Diagrama Gantt Primavera P6 (Task 5.1)
 // Escala de tiempo en semanas, barras proporcionales a durationDays/fechas,
 // resaltado de Ruta Crítica CPM e indicadores de dependencias FS.
 // ─────────────────────────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ export function GanttTab({ projectId, onOpenTask }: GanttTabProps) {
       <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4">
         <div>
           <h3 className="flex items-center gap-2 text-sm font-bold text-zinc-900">
-            <Calendar size={15} className="text-zinc-400" /> Cronograma Primavera P6
+            <Calendar size={15} className="text-zinc-400" /> Diagrama Gantt
           </h3>
           <p className="text-xs text-zinc-500">
             Barras proporcionales a duración · dependencias Fin-Comienzo (FS)

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ChevronDown, Filter, FolderKanban, Plus, Search } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { AlertTriangle, ChevronDown, Filter, FolderKanban, Plus, Search, X } from 'lucide-react'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { useTenantFilteredProjects } from '@/hooks/useProjects'
 import {
@@ -40,14 +40,20 @@ function formatDate(value: string) {
 export default function ProjectsListPage() {
   const projects = useTenantFilteredProjects()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [methodology, setMethodology] = useState<MethodologyFilter>('todas')
   const [status, setStatus] = useState<StatusFilter>('todos')
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
+  // Vista de alertas críticas vía ?view=criticas (Fase 22): solo proyectos en
+  // riesgo (salud distinta de óptima). Sin view, directorio completo.
+  const riskOnly = searchParams.get('view') === 'criticas'
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
     return projects.filter((project) => {
+      const matchesRisk = !riskOnly || project.health !== 'optimo'
       const matchesMethodology = methodology === 'todas' || project.methodology === methodology
       const matchesStatus = status === 'todos' || project.status === status
       const matchesSearch =
@@ -56,9 +62,9 @@ export default function ProjectsListPage() {
         project.name.toLowerCase().includes(term) ||
         project.client.toLowerCase().includes(term) ||
         project.manager.toLowerCase().includes(term)
-      return matchesMethodology && matchesStatus && matchesSearch
+      return matchesRisk && matchesMethodology && matchesStatus && matchesSearch
     })
-  }, [projects, search, methodology, status])
+  }, [projects, search, methodology, status, riskOnly])
 
   return (
     <div className="mx-auto max-w-[1800px]">
@@ -87,6 +93,25 @@ export default function ProjectsListPage() {
           Nuevo proyecto
         </button>
       </div>
+
+      {/* Banner de vista: proyectos en riesgo (Fase 22) */}
+      {riskOnly && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+          <span className="inline-flex items-center gap-2 text-sm font-bold text-rose-700">
+            <AlertTriangle size={15} /> Vista: Proyectos en riesgo
+          </span>
+          <span className="text-xs font-semibold text-rose-600">
+            {filtered.length} de {projects.length} proyectos
+          </span>
+          <button
+            type="button"
+            onClick={() => setSearchParams({})}
+            className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-100"
+          >
+            <X size={13} /> Ver todos
+          </button>
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="sticky top-0 z-20 mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-zinc-200 bg-white/95 p-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur">
