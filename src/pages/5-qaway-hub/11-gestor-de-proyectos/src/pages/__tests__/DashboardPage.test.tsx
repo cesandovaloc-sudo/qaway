@@ -1,219 +1,157 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import DashboardPage from '@/pages/DashboardPage'
-import { useDashboard } from '@/hooks/useDashboard'
+import { render, screen, fireEvent, within, cleanup } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import DashboardPage from '@/pages/DashboardPage'
+import { AuthProvider } from '@/context/AuthContext'
+import { TenantProvider } from '@/context/TenantContext'
+import type { Milestone, Project, WorkItem } from '@/types/project.types'
 
-vi.mock('@/hooks/useDashboard', () => ({
-  useDashboard: vi.fn(),
+vi.mock('@/hooks/useProjects', () => ({
+  useTenantFilteredProjects: vi.fn(),
+  useProjectsDataset: vi.fn(),
 }))
 
-function makeDashboard(overrides: Record<string, unknown> = {}) {
-  return {
-    stats: {
-      totalProducts: 25,
-      totalStock: 320,
-      inventoryValue: 48500,
-      lowStockCount: 3,
-      outOfStockCount: 1,
-      activeProducts: 22,
-      productsInOffer: 2,
-      productsInLiquidation: 1,
-      totalCustomers: 8,
-      pendingQuotations: 2,
-      activeCampaigns: 1,
-      salesToday: 4,
-      salesWeek: 18,
-      salesMonth: 64,
-      revenueToday: 420,
-      revenueWeek: 2100,
-      revenueMonth: 48320,
-      pendingPayments: 3,
-      pendingPaymentsAmount: 1250,
-      purchasesMonth: 9,
-      purchasesMonthAmount: 21450,
-    },
-    recentActivity: [
-      {
-        id: 'a1',
-        icon: 'package',
-        type: 'product',
-        title: 'Producto agregado',
-        description: 'Zapatillas Running Pro',
-        timestamp: new Date().toISOString(),
-      },
-    ],
-    topProducts: [
-      { id: 'p1', name: 'Zapatillas Running Pro', sku: 'ZAP-001', price: 249.9, stock: 12, image_url: null },
-    ],
-    lowStockProducts: [
-      { id: 'p2', name: 'Medias Deportivas', sku: 'MED-002', price: 29.9, stock: 3, image_url: null },
-    ],
-    salesData: [{ month: 'Ene', ventas: 10, cotizaciones: 4, ingresos: 1500 }],
-    categoryData: [{ name: 'Calzado', value: 5, color: '#f97316' }],
-    trendData: [{ day: 'Lun', productos: 25, stock: 320, valor: 1000 }],
-    loading: false,
-    error: null,
-    refresh: vi.fn(),
-    ...overrides,
-  }
-}
+import { useTenantFilteredProjects, useProjectsDataset } from '@/hooks/useProjects'
+
+const YEAR = new Date().getFullYear()
+
+const projects: Project[] = [
+  {
+    id: 'proj-a',
+    code: 'PRJ-A',
+    name: 'MINEDU Dotación 2027',
+    client: 'MINEDU - DIGERE',
+    description: 'Dotación nacional',
+    category: 'operaciones',
+    methodology: 'hibrido',
+    status: 'en_curso',
+    health: 'atencion',
+    budget: { currency: 'PEN', allocated: 620000, spent: 420000 },
+    startDate: `${YEAR}-01-15`,
+    targetDate: `${YEAR}-12-20`,
+    progress: 58,
+    manager: 'Coordinador General',
+    membersCount: 6,
+    orgId: 'org-minedu',
+  },
+  {
+    id: 'proj-b',
+    code: 'PRJ-B',
+    name: 'Plataforma Qaway Lab',
+    client: 'Qaway Lab',
+    description: 'SaaS interno',
+    category: 'software',
+    methodology: 'scrum',
+    status: 'en_curso',
+    health: 'optimo',
+    budget: { currency: 'PEN', allocated: 200000, spent: 90000 },
+    startDate: `${YEAR}-03-01`,
+    targetDate: `${YEAR}-09-30`,
+    progress: 72,
+    manager: 'Andrea Salazar',
+    membersCount: 4,
+    orgId: 'org-qaway',
+  },
+]
+
+const milestones: Milestone[] = [
+  { id: 'm1', projectId: 'proj-a', phaseNumber: 1, name: 'Aprobación del plan de trabajo', targetDate: `${YEAR}-06-10`, status: 'aprobado', deliverableSummary: '', signOffRequired: true },
+  { id: 'm2', projectId: 'proj-a', phaseNumber: 2, name: 'Validación UGEL', targetDate: `${YEAR}-10-20`, status: 'pendiente', deliverableSummary: '', signOffRequired: true },
+  { id: 'm3', projectId: 'proj-b', phaseNumber: 1, name: 'Release interno', targetDate: `${YEAR}-11-05`, status: 'pendiente', deliverableSummary: '', signOffRequired: false },
+]
+
+const workItems: WorkItem[] = [
+  {
+    id: 'TSK-1',
+    projectId: 'proj-a',
+    title: 'Verificar PECOSA en campo',
+    state: 'in_progress',
+    priority: 'ALTA',
+    assignee: { name: 'María Gómez', role: 'Gestora' },
+  },
+  {
+    id: 'TSK-2',
+    projectId: 'proj-b',
+    title: 'Deploy a producción',
+    state: 'done',
+    priority: 'MEDIA',
+    assignee: { name: 'Luis Pérez', role: 'Dev' },
+    completedAt: `${YEAR}-09-01T10:00:00`,
+  },
+]
 
 function renderPage() {
   return render(
     <MemoryRouter>
-      <DashboardPage />
-    </MemoryRouter>
+      <AuthProvider>
+        <TenantProvider>
+          <DashboardPage />
+        </TenantProvider>
+      </AuthProvider>
+    </MemoryRouter>,
   )
 }
 
-/** Lee el store de colapsables de forma segura (localStorage puede no existir en el entorno) */
-function readCollapsedStore(): Record<string, boolean> {
-  try {
-    return JSON.parse(window.localStorage?.getItem('dashboard-collapsed') ?? '{}')
-  } catch {
-    return {}
-  }
-}
-
-describe('DashboardPage', () => {
+describe('DashboardPage — Resumen ejecutivo de cartera', () => {
   beforeEach(() => {
+    cleanup()
     vi.clearAllMocks()
-    try {
-      window.localStorage?.clear()
-    } catch {
-      /* entorno sin localStorage */
+    vi.mocked(useTenantFilteredProjects).mockReturnValue(projects)
+    vi.mocked(useProjectsDataset).mockReturnValue({
+      projects,
+      workItems,
+      sprints: [],
+      milestones,
+      docs: [],
+    })
+  })
+
+  it('renderiza cabecera, vistas, roadmap con Hoy y los 4 KPIs', () => {
+    renderPage()
+    expect(screen.getByText('Cartera de Proyectos')).toBeDefined()
+    for (const tab of ['Resumen', 'Cronograma', 'Hitos', 'Riesgos', 'Presupuesto']) {
+      expect(screen.getAllByText(tab).length).toBeGreaterThanOrEqual(1)
     }
+    expect(screen.getByText('Macro-Roadmap de cartera · ' + YEAR)).toBeDefined()
+    expect(screen.getAllByText('Hoy').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getByText('Proyectos activos')).toBeDefined()
+    expect(screen.getByText('Avance promedio')).toBeDefined()
+    expect(screen.getByText('Desviación de cronograma')).toBeDefined()
+    expect(screen.getByText('Presupuesto ejecutado')).toBeDefined()
   })
 
-  it('muestra el estado de carga cuando loading y sin stats', () => {
-    vi.mocked(useDashboard).mockReturnValue(makeDashboard({ loading: true, stats: null }) as never)
-
+  it('elimina las tortas de metodología y salud abstracta', () => {
     renderPage()
-
-    expect(screen.getByText('Cargando dashboard...')).toBeInTheDocument()
-    expect(screen.queryByText('Ventas y Flujo de Caja')).not.toBeInTheDocument()
+    expect(screen.queryByText('Proyectos por metodología')).toBeNull()
+    expect(screen.queryByText('Salud de cartera')).toBeNull()
   })
 
-  it('muestra el error y Reintentar llama a refresh', async () => {
-    const user = userEvent.setup()
-    const dashboard = makeDashboard({ error: 'No hay conexión', stats: null })
-    vi.mocked(useDashboard).mockReturnValue(dashboard as never)
-
+  it('muestra la tabla con semáforo operativo y acordeón con Curva S', () => {
     renderPage()
+    const table = within(screen.getByTestId('portfolio-table'))
+    expect(table.getByText('MINEDU Dotación 2027')).toBeDefined()
+    expect(screen.getAllByText('En riesgo').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('En objetivo').length).toBeGreaterThanOrEqual(2)
+    expect(table.getByText('Validación UGEL')).toBeDefined()
 
-    expect(screen.getByText('Error al cargar')).toBeInTheDocument()
-    expect(screen.getByText('No hay conexión')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'Reintentar' }))
-    expect(dashboard.refresh).toHaveBeenCalledTimes(1)
+    fireEvent.click(table.getByText('MINEDU Dotación 2027'))
+    expect(screen.getByText('Hitos principales')).toBeDefined()
+    expect(screen.getByText('Avance del proyecto · Curva S')).toBeDefined()
+    expect(screen.getByText('Presupuesto y equipo')).toBeDefined()
+    expect(screen.getByText('Aprobación del plan de trabajo')).toBeDefined()
   })
 
-  it('renderiza cabecera Resumen, KPIs reales y secciones colapsables', () => {
-    const dashboard = makeDashboard()
-    vi.mocked(useDashboard).mockReturnValue(dashboard as never)
-
+  it('filtra por píldoras y muestra agenda lateral', () => {
     renderPage()
+    fireEvent.click(screen.getAllByText('En objetivo')[0])
+    const table = within(screen.getByTestId('portfolio-table'))
+    // La tabla filtra; el roadmap conserva la visión completa de cartera
+    expect(table.queryByText('MINEDU Dotación 2027')).toBeNull()
+    expect(table.getByText('Plataforma Qaway Lab')).toBeDefined()
 
-    // Cabecera fusionada
-    expect(screen.getByText('Resumen')).toBeInTheDocument()
-
-    // KPIs con data real
-    expect(screen.getByText('Productos activos')).toBeInTheDocument()
-    expect(screen.getByText('25')).toBeInTheDocument()
-    expect(screen.getByText('Ventas del mes')).toBeInTheDocument()
-    expect(screen.getByText('Compras del mes')).toBeInTheDocument()
-    expect(screen.getByText('Stock disponible')).toBeInTheDocument()
-    expect(screen.getByText('320 un.')).toBeInTheDocument()
-
-    // Secciones colapsables presentes
-    expect(screen.getByText('Ventas y Flujo de Caja')).toBeInTheDocument()
-    expect(screen.getByText('Inventario')).toBeInTheDocument()
-    expect(screen.getByText('Comercial')).toBeInTheDocument()
-    expect(screen.getByText('Análisis de ventas')).toBeInTheDocument()
-  })
-
-  it('las secciones colapsables se pliegan y despliegan, persistiendo en localStorage', async () => {
-    const user = userEvent.setup()
-    vi.mocked(useDashboard).mockReturnValue(makeDashboard() as never)
-
-    renderPage()
-
-    // "Inventario" inicia comprimido (defaultOpen={false})
-    expect(screen.queryByText('Valor inventario')).not.toBeInTheDocument()
-
-    // Expandir
-    await user.click(screen.getByText('Inventario'))
-    expect(screen.getByText('Valor inventario')).toBeInTheDocument()
-    if (window.localStorage) {
-      expect(readCollapsedStore().inventario).toBe(true)
-    }
-
-    // Comprimir
-    await user.click(screen.getByText('Inventario'))
-    expect(screen.queryByText('Valor inventario')).not.toBeInTheDocument()
-    if (window.localStorage) {
-      expect(readCollapsedStore().inventario).toBe(false)
-    }
-  })
-
-  it('renderiza QuickAccessCards y accesos rápidos', () => {
-    vi.mocked(useDashboard).mockReturnValue(makeDashboard() as never)
-
-    renderPage()
-
-    expect(screen.getByText('Accesos Rápidos Prioritarios')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Pedidos Web/ })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Punto de Venta/ })).toBeInTheDocument()
-  })
-
-  it('el botón Actualizar llama a refresh', async () => {
-    const user = userEvent.setup()
-    const dashboard = makeDashboard()
-    vi.mocked(useDashboard).mockReturnValue(dashboard as never)
-
-    renderPage()
-
-    await user.click(screen.getByRole('button', { name: 'Actualizar' }))
-    expect(dashboard.refresh).toHaveBeenCalledTimes(1)
-  })
-
-  it('con inventario vacío muestra el estado vacío con links de acción', () => {
-    vi.mocked(useDashboard).mockReturnValue(makeDashboard({
-      stats: {
-        totalProducts: 0, totalStock: 0, inventoryValue: 0, lowStockCount: 0,
-        outOfStockCount: 0, activeProducts: 0, productsInOffer: 0, productsInLiquidation: 0,
-        totalCustomers: 0, pendingQuotations: 0, activeCampaigns: 0,
-        salesToday: 0, salesWeek: 0, salesMonth: 0, revenueToday: 0, revenueWeek: 0,
-        revenueMonth: 0, pendingPayments: 0, pendingPaymentsAmount: 0,
-        purchasesMonth: 0, purchasesMonthAmount: 0,
-      },
-      recentActivity: [],
-      topProducts: [],
-      lowStockProducts: [],
-      salesData: [],
-    }) as never)
-
-    renderPage()
-
-    expect(screen.getByText('Tu inventario está vacío')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Ver inventario' })).toHaveAttribute('href', '/inventario')
-  })
-
-  it('sin datos no renderiza gráficos ni secciones de productos', () => {
-    vi.mocked(useDashboard).mockReturnValue(makeDashboard({
-      recentActivity: [],
-      topProducts: [],
-      lowStockProducts: [],
-      salesData: [],
-      categoryData: [],
-      trendData: [],
-    }) as never)
-
-    renderPage()
-
-    expect(screen.queryByText('Análisis de ventas')).not.toBeInTheDocument()
-    expect(screen.queryByText('Productos con stock bajo')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Todos'))
+    expect(within(screen.getByTestId('portfolio-table')).getByText('MINEDU Dotación 2027')).toBeDefined()
+    expect(screen.getByText('Proyectos en atención (1)')).toBeDefined()
+    expect(screen.getByText('Actividad reciente')).toBeDefined()
   })
 })
