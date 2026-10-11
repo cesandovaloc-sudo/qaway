@@ -29,9 +29,11 @@ import { useProjectPerspective } from '../../../context/ProjectPerspectiveContex
 import {
   FOLLOW_UP_META,
   KANBAN_STATE_ORDER,
+  TASK_NATURE_META,
   WORK_ITEM_PRIORITY_META,
   WORK_ITEM_STATE_META,
   type ColumnPolicy,
+  type TaskNature,
   type WorkItem,
   type WorkItemState,
 } from '@/types/project.types'
@@ -55,6 +57,13 @@ const emptyDrafts: Record<WorkItemState, string> = {
   in_progress: '',
   review: '',
   done: '',
+}
+
+/** Etiqueta compacta de naturaleza para la tarjeta (el label completo va en tooltip). */
+const TASK_NATURE_SHORT: Record<TaskNature, string> = {
+  obligacion_normativa: 'NORM',
+  control_complementario: 'COMPL',
+  contingencia_operativa: 'CONTING',
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -726,6 +735,14 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
                       {card.tShirtSize && (
                         <span className="rounded bg-zinc-900 px-1.5 py-px font-mono text-[9px] font-extrabold text-white" title={`Talla ${card.tShirtSize}`}>
                           {card.tShirtSize}
+                        </span>
+                      )}
+                      {card.taskNature && (
+                        <span
+                          className={`rounded border px-1.5 py-px text-[9px] font-extrabold tracking-wide ${TASK_NATURE_META[card.taskNature].badgeClass}`}
+                          title={TASK_NATURE_META[card.taskNature].label}
+                        >
+                          {TASK_NATURE_SHORT[card.taskNature]}
                         </span>
                       )}
                       {card.isCriticalPath && (

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Check, ChevronDown, Clock, Flag, MessageCircle } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, Clock, Flag, MessageCircle } from 'lucide-react'
 import { useProjectsDataset } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import {
@@ -7,6 +7,7 @@ import {
   MILESTONE_STATUS_META,
   WORK_ITEM_STATE_META,
   type MilestoneStatus,
+  type WorkItem,
 } from '@/types/project.types'
 import {
   buildFollowUpMessage,
@@ -42,6 +43,91 @@ function formatDate(value: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '—'
   return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+/** Riesgo accionable para la salud del hito: no cerrada + (bloqueada | urgente | vencida). */
+function isMilestoneTaskAtRisk(item: WorkItem): boolean {
+  if (item.state === 'done') return false
+  return (
+    Boolean(item.isBlocked) ||
+    item.priority === 'URGENTE' ||
+    getFollowUpStatus(item.followUpDate, item.state) === 'vencido'
+  )
+}
+
+function MilestoneChildRow({
+  child,
+  onOpenTask,
+}: {
+  child: WorkItem
+  onOpenTask: (taskId: string) => void
+}) {
+  const followStatus = getFollowUpStatus(child.followUpDate, child.state)
+  const followMeta = FOLLOW_UP_META[followStatus]
+  const contact = toFollowUpContact(child)
+  const waUrl = buildWhatsAppUrl(child.assignee.phone, buildFollowUpMessage(contact))
+  return (
+    <li className="flex items-center gap-2.5 rounded-xl border border-zinc-100 bg-white p-2.5 shadow-sm">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-zinc-900 text-[11px] font-extrabold text-white">
+        {child.assignee.name.trim().charAt(0).toUpperCase()}
+      </span>
+      <button
+        type="button"
+        onClick={() => onOpenTask(child.id)}
+        className="min-w-0 flex-1 text-left"
+      >
+        <span className="block truncate text-[13px] font-bold text-zinc-800 hover:text-brand">
+          {child.title}
+        </span>
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-zinc-500">
+          <span className="font-mono">{child.id}</span>
+          <span className="font-semibold">{WORK_ITEM_STATE_META[child.state].label}</span>
+          <span className="truncate">{child.assignee.name}</span>
+          {child.scopeTag && (
+            <span className="rounded bg-sky-50 px-1.5 py-px font-bold text-sky-700">
+              {child.scopeTag}
+            </span>
+          )}
+          <span
+            className="inline-flex items-center gap-1 font-bold"
+            style={{ color: followMeta.color }}
+          >
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: followMeta.color }}
+            />
+            {formatFollowUpDate(child.followUpDate)}
+          </span>
+        </span>
+        {child.threatensMilestone && child.threatNote && (
+          <span className="mt-0.5 flex items-start gap-1 text-[11px] font-semibold leading-snug text-amber-700">
+            <AlertTriangle size={11} className="mt-0.5 shrink-0" />
+            {child.threatNote}
+          </span>
+        )}
+      </button>
+      {waUrl ? (
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`WhatsApp a ${child.assignee.name}`}
+          aria-label={`WhatsApp a ${child.assignee.name}`}
+          onClick={(event) => event.stopPropagation()}
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#25d366] text-white shadow-sm transition-transform hover:scale-105"
+        >
+          <MessageCircle size={16} />
+        </a>
+      ) : (
+        <span
+          title="Sin teléfono registrado"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-zinc-100 text-zinc-300"
+        >
+          <MessageCircle size={16} />
+        </span>
+      )}
+    </li>
+  )
 }
 
 export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
@@ -95,6 +181,18 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
             const childTasks = dataset.workItems.filter(
               (item) => item.milestoneId === milestone.id,
             )
+            // Fase 2 (A35): las complementarias no afectan la salud del hito salvo
+            // amenaza explícita; las legacy sin naturaleza cuentan como normativas.
+            const normativeTasks = childTasks.filter(
+              (item) => (item.taskNature ?? 'obligacion_normativa') === 'obligacion_normativa',
+            )
+            const complementaryTasks = childTasks.filter(
+              (item) => (item.taskNature ?? 'obligacion_normativa') !== 'obligacion_normativa',
+            )
+            const normativeAtRisk = normativeTasks.filter(isMilestoneTaskAtRisk)
+            const threatening = complementaryTasks.filter(
+              (item) => item.threatensMilestone && isMilestoneTaskAtRisk(item),
+            )
             const expanded = expandedId === milestone.id
             return (
               <li key={milestone.id} className="relative flex gap-4 pb-6 last:pb-0">
@@ -128,6 +226,24 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
                     >
                       {meta.label}
                     </span>
+                    {normativeAtRisk.length > 0 && (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-700"
+                        title="Tareas normativas con retraso, bloqueo o urgencia"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                        Riesgo normativo ({normativeAtRisk.length})
+                      </span>
+                    )}
+                    {normativeAtRisk.length === 0 && threatening.length > 0 && (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700"
+                        title="Una tarea complementaria amenaza preventivamente al hito"
+                      >
+                        <AlertTriangle size={11} />
+                        Amenaza al hito ({threatening.length})
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-[13px] leading-relaxed text-zinc-600">
                     {milestone.deliverableSummary}
@@ -170,83 +286,43 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
                     </span>
                   </button>
                   {expanded && (
-                    <ul className="mt-2 space-y-2">
-                      {childTasks.length === 0 && (
-                        <li className="rounded-xl border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-400">
-                          Sin tareas vinculadas a este hito.
-                        </li>
-                      )}
-                      {childTasks.map((child) => {
-                        const followStatus = getFollowUpStatus(child.followUpDate, child.state)
-                        const followMeta = FOLLOW_UP_META[followStatus]
-                        const contact = toFollowUpContact(child)
-                        const waUrl = buildWhatsAppUrl(
-                          child.assignee.phone,
-                          buildFollowUpMessage(contact),
-                        )
-                        return (
-                          <li
-                            key={child.id}
-                            className="flex items-center gap-2.5 rounded-xl border border-zinc-100 bg-white p-2.5 shadow-sm"
-                          >
-                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-zinc-900 text-[11px] font-extrabold text-white">
-                              {child.assignee.name.trim().charAt(0).toUpperCase()}
+                    <div className="mt-2 space-y-3">
+                      {normativeTasks.length > 0 && (
+                        <div>
+                          <p className="mb-1.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-zinc-500">
+                            Entregables Normativos
+                            <span className="rounded-full bg-white px-2 py-0.5 font-mono text-[11px] text-zinc-500 shadow-sm">
+                              {normativeTasks.length}
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => onOpenTask(child.id)}
-                              className="min-w-0 flex-1 text-left"
-                            >
-                              <span className="block truncate text-[13px] font-bold text-zinc-800 hover:text-brand">
-                                {child.title}
-                              </span>
-                              <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-zinc-500">
-                                <span className="font-mono">{child.id}</span>
-                                <span className="font-semibold">
-                                  {WORK_ITEM_STATE_META[child.state].label}
-                                </span>
-                                <span className="truncate">{child.assignee.name}</span>
-                                {child.scopeTag && (
-                                  <span className="rounded bg-sky-50 px-1.5 py-px font-bold text-sky-700">
-                                    {child.scopeTag}
-                                  </span>
-                                )}
-                                <span
-                                  className="inline-flex items-center gap-1 font-bold"
-                                  style={{ color: followMeta.color }}
-                                >
-                                  <span
-                                    className="h-1.5 w-1.5 rounded-full"
-                                    style={{ backgroundColor: followMeta.color }}
-                                  />
-                                  {formatFollowUpDate(child.followUpDate)}
-                                </span>
-                              </span>
-                            </button>
-                            {waUrl ? (
-                              <a
-                                href={waUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title={`WhatsApp a ${child.assignee.name}`}
-                                aria-label={`WhatsApp a ${child.assignee.name}`}
-                                onClick={(event) => event.stopPropagation()}
-                                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#25d366] text-white shadow-sm transition-transform hover:scale-105"
-                              >
-                                <MessageCircle size={16} />
-                              </a>
-                            ) : (
-                              <span
-                                title="Sin teléfono registrado"
-                                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-zinc-100 text-zinc-300"
-                              >
-                                <MessageCircle size={16} />
-                              </span>
-                            )}
-                          </li>
-                        )
-                      })}
-                    </ul>
+                          </p>
+                          <ul className="space-y-2">
+                            {normativeTasks.map((child) => (
+                              <MilestoneChildRow key={child.id} child={child} onOpenTask={onOpenTask} />
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {complementaryTasks.length > 0 && (
+                        <div>
+                          <p className="mb-1.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-zinc-500">
+                            Controles Complementarios
+                            <span className="rounded-full bg-white px-2 py-0.5 font-mono text-[11px] text-zinc-500 shadow-sm">
+                              {complementaryTasks.length}
+                            </span>
+                          </p>
+                          <ul className="space-y-2">
+                            {complementaryTasks.map((child) => (
+                              <MilestoneChildRow key={child.id} child={child} onOpenTask={onOpenTask} />
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {childTasks.length === 0 && (
+                        <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-400">
+                          Sin tareas vinculadas a este hito.
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               </li>

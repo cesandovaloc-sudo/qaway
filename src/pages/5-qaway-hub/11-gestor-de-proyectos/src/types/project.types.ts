@@ -78,6 +78,12 @@ export interface WorkItemAssignee {
 export type TaskOriginType = 'oficial_oficio' | 'accion_emergente'
 export type TaskResponseStatus = 'sin_notificar' | 'esperando_respuesta' | 'respondido'
 
+// ── Fase 2 (A35): Naturaleza contractual de la tarea ──
+export type TaskNature =
+  | 'obligacion_normativa'
+  | 'control_complementario'
+  | 'contingencia_operativa'
+
 export interface NotificationAudit {
   whatsappSentAt?: string
   whatsappSentBy?: string
@@ -100,6 +106,9 @@ export interface WorkItem {
   milestoneId?: string // Hito Rector vinculado (Fase 10)
   milestoneRef?: string // Referencia normativa oficial ej: "OM 032 · Hito 1.2" (Fase 11)
   originType?: TaskOriginType // 'oficial_oficio' vs 'accion_emergente' (Fase 11)
+  taskNature?: TaskNature // Obligación normativa vs control/contingencia (Fase 2 A35)
+  threatensMilestone?: boolean // Su retraso amenaza al hito aunque sea complementaria (Fase 2 A35)
+  threatNote?: string // Motivo de la amenaza preventiva al hito (Fase 2 A35)
   epicTitle?: string // Épica / agrupador funcional (Fase 9)
   title: string
   description?: string
@@ -376,6 +385,27 @@ export const WORK_ITEM_PRIORITY_META: Record<
   ALTA: { color: '#cf7143', badgeClass: 'bg-[#fdf3ed] text-[#b85a2f] border-[#f5d8c8]' },
   MEDIA: { color: '#52525b', badgeClass: 'bg-[#f4f4f5] text-[#3f3f46] border-[#e4e4e7]' },
   BAJA: { color: '#71717a', badgeClass: 'bg-zinc-100 text-zinc-600 border-zinc-200' },
+}
+
+export const TASK_NATURE_META: Record<
+  TaskNature,
+  { label: string; badgeClass: string; isContractual: boolean }
+> = {
+  obligacion_normativa: {
+    label: 'Obligación normativa',
+    badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    isContractual: true,
+  },
+  control_complementario: {
+    label: 'Control complementario',
+    badgeClass: 'bg-zinc-100 text-zinc-600 border-zinc-200',
+    isContractual: false,
+  },
+  contingencia_operativa: {
+    label: 'Contingencia operativa',
+    badgeClass: 'bg-amber-50 text-amber-700 border-amber-200',
+    isContractual: false,
+  },
 }
 
 export const WORK_ITEM_STATE_META: Record<
