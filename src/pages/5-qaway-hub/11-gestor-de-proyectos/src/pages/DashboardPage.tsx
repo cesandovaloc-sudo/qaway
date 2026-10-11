@@ -30,7 +30,7 @@ import {
 // ─────────────────────────────────────────────────────────────────────────
 
 const cardClass =
-  'rounded-2xl border border-[var(--hub-border)] bg-[var(--hub-surface,#fff)] shadow-[0_4px_20px_rgba(0,0,0,0.03)]'
+  'rounded-2xl border border-zinc-200/80 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] text-zinc-900 dark:bg-zinc-900 dark:border-white/10 dark:text-white'
 
 function formatCurrency(value: number, currency: string) {
   return new Intl.NumberFormat('es-PE', {
@@ -60,9 +60,9 @@ function MetricCard({
   accent: string
 }) {
   return (
-    <div className="group flex flex-col rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#fff)] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-transform duration-200 ease-out hover:-translate-y-0.5">
+    <div className="group flex flex-col rounded-xl border border-zinc-200/80 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] text-zinc-900 dark:bg-zinc-900 dark:border-white/10 dark:text-white transition-transform duration-200 ease-out hover:-translate-y-0.5">
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="truncate text-xs font-semibold text-[var(--hub-dim)]">{label}</span>
+        <span className="truncate text-xs font-semibold text-zinc-500">{label}</span>
         <span
           className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white"
           style={{ backgroundColor: accent }}
@@ -70,10 +70,10 @@ function MetricCard({
           {icon}
         </span>
       </div>
-      <span className="text-2xl font-extrabold leading-tight tracking-[-0.6px] text-[var(--hub-text)]">
+      <span className="text-2xl font-extrabold leading-tight tracking-[-0.6px] text-zinc-900 dark:text-white">
         {value}
       </span>
-      <span className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-[var(--hub-dim)]">
+      <span className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
         {note}
       </span>
     </div>
@@ -203,14 +203,14 @@ export default function DashboardPage() {
       {/* Encabezado */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="grid h-[38px] w-[38px] place-items-center rounded-[10px] border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-text)]">
+          <div className="grid h-[38px] w-[38px] place-items-center rounded-[10px] border border-zinc-200/80 bg-zinc-50 text-zinc-700 dark:bg-zinc-800 dark:border-white/10 dark:text-zinc-200">
             <FolderKanban size={22} strokeWidth={1.8} />
           </div>
           <div>
-            <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.8px] text-[var(--hub-text)]">
+            <h1 className="text-[28px] font-extrabold leading-tight tracking-[-0.8px] text-zinc-900 dark:text-white">
               Cartera de Proyectos
             </h1>
-            <p className="text-[13px] text-[var(--hub-dim)]">
+            <p className="text-[13px] text-zinc-500">
               Salud, presupuesto, velocidad y riesgos de toda la cartera en tiempo real.
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => projectsService.resetDemoData()}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-surface,#fff)] px-4 text-sm font-semibold text-[var(--hub-text-soft)] transition-colors hover:bg-[var(--hub-chip)]"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-zinc-900 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-300 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
             title="Restablecer datos de demostración"
           >
             <RefreshCw size={15} />
@@ -280,8 +280,8 @@ export default function DashboardPage() {
       <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Distribución por metodología */}
         <div className={`${cardClass} p-5`}>
-          <h3 className="text-sm font-bold text-[var(--hub-text)]">Proyectos por metodología</h3>
-          <p className="mb-2 text-xs text-[var(--hub-dim)]">Distribución Scrum · P6 · Kanban · Híbrido</p>
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Proyectos por metodología</h3>
+          <p className="mb-2 text-xs text-zinc-500">Distribución Scrum · P6 · Kanban · Híbrido</p>
           {methodologyData.length > 0 ? (
             <div className="flex items-center gap-4">
               <div className="relative h-[180px] w-1/2">
@@ -314,8 +314,8 @@ export default function DashboardPage() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[10px] font-semibold uppercase text-[var(--hub-dim)]">Total</span>
-                  <span className="text-2xl font-extrabold text-[var(--hub-text)]">
+                  <span className="text-[10px] font-semibold uppercase text-zinc-500">Total</span>
+                  <span className="text-2xl font-extrabold text-zinc-900 dark:text-white">
                     {kpis.totalProjects}
                   </span>
                 </div>
@@ -323,7 +323,7 @@ export default function DashboardPage() {
               <ul className="flex-1 space-y-2.5">
                 {methodologyDistribution.map((item) => (
                   <li key={item.methodology} className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-2 font-semibold text-[var(--hub-text-soft)]">
+                    <span className="flex items-center gap-2 font-semibold text-zinc-600 dark:text-zinc-300">
                       <span
                         className="h-2.5 w-2.5 rounded-full"
                         style={{
@@ -333,20 +333,20 @@ export default function DashboardPage() {
                       />
                       {PROJECT_METHODOLOGY_META[item.methodology].short}
                     </span>
-                    <span className="font-bold text-[var(--hub-dim)]">{item.count}</span>
+                    <span className="font-bold text-zinc-500">{item.count}</span>
                   </li>
                 ))}
               </ul>
             </div>
           ) : (
-            <p className="py-16 text-center text-sm text-[var(--hub-dim)]">Sin proyectos registrados.</p>
+            <p className="py-16 text-center text-sm text-zinc-500">Sin proyectos registrados.</p>
           )}
         </div>
 
         {/* Ejecución presupuestaria por proyecto */}
         <div className={`${cardClass} p-5 lg:col-span-2`}>
-          <h3 className="text-sm font-bold text-[var(--hub-text)]">Ejecución presupuestaria</h3>
-          <p className="mb-4 text-xs text-[var(--hub-dim)]">Consumo del presupuesto asignado por proyecto</p>
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Ejecución presupuestaria</h3>
+          <p className="mb-4 text-xs text-zinc-500">Consumo del presupuesto asignado por proyecto</p>
           <div className="space-y-3">
             {budgetByProject.map((item) => {
               const pct = item.allocated > 0 ? Math.round((item.spent / item.allocated) * 100) : 0
@@ -355,8 +355,8 @@ export default function DashboardPage() {
               return (
                 <div key={item.projectId}>
                   <div className="mb-1 flex items-center justify-between gap-3 text-xs">
-                    <span className="truncate font-semibold text-[var(--hub-text-soft)]">
-                      <span className="mr-2 font-mono text-[11px] text-[var(--hub-dim)]">{item.code}</span>
+                    <span className="truncate font-semibold text-zinc-600 dark:text-zinc-300">
+                      <span className="mr-2 font-mono text-[11px] text-zinc-500">{item.code}</span>
                       {item.name}
                     </span>
                     <span
@@ -366,7 +366,7 @@ export default function DashboardPage() {
                       {pct}%
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-[var(--hub-chip)]">
+                  <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
@@ -375,7 +375,7 @@ export default function DashboardPage() {
                       }}
                     />
                   </div>
-                  <p className="mt-1 text-[10px] text-[var(--hub-dim)]">
+                  <p className="mt-1 text-[10px] text-zinc-500">
                     {formatCurrency(item.spent, item.currency)} de{' '}
                     {formatCurrency(item.allocated, item.currency)}
                   </p>
@@ -383,7 +383,7 @@ export default function DashboardPage() {
               )
             })}
             {budgetByProject.length === 0 && (
-              <p className="py-10 text-center text-sm text-[var(--hub-dim)]">Sin presupuestos registrados.</p>
+              <p className="py-10 text-center text-sm text-zinc-500">Sin presupuestos registrados.</p>
             )}
           </div>
         </div>
@@ -392,8 +392,8 @@ export default function DashboardPage() {
       {/* Salud + Cartera activa */}
       <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
         <div className={`${cardClass} p-5 lg:col-span-1`}>
-          <h3 className="text-sm font-bold text-[var(--hub-text)]">Salud de cartera</h3>
-          <p className="mb-4 text-xs text-[var(--hub-dim)]">Semáforo ejecutivo de proyectos</p>
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Salud de cartera</h3>
+          <p className="mb-4 text-xs text-zinc-500">Semáforo ejecutivo de proyectos</p>
           <div className="relative mx-auto h-[150px] w-[150px]">
             {healthDistribution.length > 0 ? (
               <>
@@ -423,24 +423,24 @@ export default function DashboardPage() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[10px] font-semibold uppercase text-[var(--hub-dim)]">Salud</span>
-                  <span className="text-2xl font-extrabold text-[var(--hub-text)]">
+                  <span className="text-[10px] font-semibold uppercase text-zinc-500">Salud</span>
+                  <span className="text-2xl font-extrabold text-zinc-900 dark:text-white">
                     {kpis.avgHealthScore}%
                   </span>
                 </div>
               </>
             ) : (
-              <div className="grid h-full place-items-center text-xs text-[var(--hub-dim)]">Sin datos</div>
+              <div className="grid h-full place-items-center text-xs text-zinc-500">Sin datos</div>
             )}
           </div>
           <ul className="mt-4 space-y-2">
             {healthDistribution.map((item) => (
               <li key={item.health} className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 font-semibold text-[var(--hub-text-soft)]">
+                <span className="flex items-center gap-2 font-semibold text-zinc-600 dark:text-zinc-300">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
                   {item.label}
                 </span>
-                <span className="font-bold text-[var(--hub-dim)]">
+                <span className="font-bold text-zinc-500">
                   {item.value}
                   <span className="ml-1 text-[10px] font-medium">
                     ({healthTotal ? Math.round((item.value / healthTotal) * 100) : 0}%)
@@ -453,14 +453,14 @@ export default function DashboardPage() {
 
         {/* Cartera activa */}
         <div className={`${cardClass} overflow-hidden lg:col-span-3`}>
-          <div className="flex items-center justify-between gap-3 border-b border-[var(--hub-border)] px-5 py-4">
+          <div className="flex items-center justify-between gap-3 border-b border-zinc-200/80 dark:border-white/10 px-5 py-4">
             <div>
-              <h3 className="text-sm font-bold text-[var(--hub-text)]">Cartera activa</h3>
-              <p className="text-xs text-[var(--hub-dim)]">
+              <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Cartera activa</h3>
+              <p className="text-xs text-zinc-500">
                 Proyectos priorizados por nivel de riesgo · avance en vivo
               </p>
             </div>
-            <span className="rounded-full bg-[var(--hub-chip)] px-3 py-1 text-xs font-bold text-[var(--hub-dim)]">
+            <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-xs font-bold text-zinc-500">
               {prioritizedProjects.length}
             </span>
           </div>
@@ -468,7 +468,7 @@ export default function DashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] border-collapse text-left">
               <thead>
-                <tr className="border-b border-[var(--hub-border)] text-[11px] font-bold uppercase tracking-wider text-[var(--hub-dim)]">
+                <tr className="border-b border-zinc-200/80 dark:border-white/10 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
                   <th className="px-5 py-2.5">Proyecto</th>
                   <th className="px-5 py-2.5">Metodología</th>
                   <th className="px-5 py-2.5">Avance</th>
@@ -491,11 +491,11 @@ export default function DashboardPage() {
                       }}
                       tabIndex={0}
                       title={`Abrir ${project.name}`}
-                      className="cursor-pointer border-b border-[var(--hub-border)] transition-colors outline-none last:border-0 hover:bg-[var(--hub-chip)] focus-visible:ring-2 focus-visible:ring-brand/40"
+                      className="cursor-pointer border-b border-zinc-200/80 dark:border-white/10 transition-colors outline-none last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800 focus-visible:ring-2 focus-visible:ring-brand/40"
                     >
                       <td className="px-5 py-3">
-                        <p className="text-sm font-bold text-[var(--hub-text)]">{project.name}</p>
-                        <p className="text-[11px] text-[var(--hub-dim)]">
+                        <p className="text-sm font-bold text-zinc-900 dark:text-white">{project.name}</p>
+                        <p className="text-[11px] text-zinc-500">
                           <span className="font-mono">{project.code}</span> · {project.client}
                         </p>
                       </td>
@@ -508,18 +508,18 @@ export default function DashboardPage() {
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="h-1.5 w-[110px] overflow-hidden rounded-full bg-[var(--hub-chip)]">
+                          <div className="h-1.5 w-[110px] overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                             <div
                               className="h-full rounded-full bg-brand transition-all duration-500"
                               style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
                             />
                           </div>
-                          <span className="font-mono text-[12px] font-bold text-[var(--hub-text-soft)]">
+                          <span className="font-mono text-[12px] font-bold text-zinc-600 dark:text-zinc-300">
                             {project.progress}%
                           </span>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-5 py-3 text-[12px] text-[var(--hub-dim)]">
+                      <td className="whitespace-nowrap px-5 py-3 text-[12px] text-zinc-500">
                         {formatDate(project.targetDate)}
                       </td>
                       <td className="px-5 py-3">
@@ -539,11 +539,11 @@ export default function DashboardPage() {
 
             {prioritizedProjects.length === 0 && (
               <div className="flex flex-col items-center justify-center gap-2 px-6 py-14 text-center">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--hub-chip)] text-[var(--hub-dim)]">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
                   <FolderKanban size={22} />
                 </div>
-                <p className="text-sm font-semibold text-[var(--hub-text)]">Sin proyectos en cartera</p>
-                <p className="max-w-sm text-[13px] text-[var(--hub-dim)]">
+                <p className="text-sm font-semibold text-zinc-900 dark:text-white">Sin proyectos en cartera</p>
+                <p className="max-w-sm text-[13px] text-zinc-500">
                   Crea tu primer proyecto para empezar a monitorear salud, presupuesto y avance.
                 </p>
               </div>

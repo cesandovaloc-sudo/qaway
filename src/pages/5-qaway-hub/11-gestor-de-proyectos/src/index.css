@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Dark mode por clase (el Header alterna `.dark` en <html>): habilita `dark:` */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* ── Colors: Qaway Design System (Paleta Editorial Anti-tóxica) ── */
   --color-brand: var(--hub-brand, #d9532f);

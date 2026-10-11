@@ -119,11 +119,11 @@ export default function ProjectWorkspacePage() {
     badge: number | null
   }> = [
     { key: 'resumen', label: 'Resumen', icon: <LayoutDashboard size={16} />, badge: null },
+    { key: 'gantt', label: 'Cronograma P6', icon: <GanttChart size={16} />, badge: null },
+    { key: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} />, badge: null },
+    { key: 'hitos', label: 'Hitos', icon: <Milestone size={16} />, badge: pendingMilestones || null },
     { key: 'kanban', label: 'Kanban', icon: <KanbanSquare size={16} />, badge: workItems.length },
     { key: 'sprints', label: 'Sprints', icon: <Flame size={16} />, badge: sprintTasksCount || null },
-    { key: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} />, badge: null },
-    { key: 'gantt', label: 'Cronograma P6', icon: <GanttChart size={16} />, badge: null },
-    { key: 'hitos', label: 'Hitos', icon: <Milestone size={16} />, badge: pendingMilestones || null },
     { key: 'docs', label: 'Wiki Docs', icon: <BookOpen size={16} />, badge: docsCount || null },
   ]
 
@@ -226,20 +226,20 @@ export default function ProjectWorkspacePage() {
           onGoDocs={() => setActiveTab('docs')}
         />
       )}
+      {activeTab === 'gantt' && (
+        <GanttTab projectId={project.id} onOpenTask={setSelectedTaskId} />
+      )}
+      {activeTab === 'calendar' && (
+        <CalendarTab projectId={project.id} onOpenTask={setSelectedTaskId} />
+      )}
+      {activeTab === 'hitos' && (
+        <MilestonesTab projectId={project.id} onOpenTask={setSelectedTaskId} />
+      )}
       {activeTab === 'kanban' && (
         <KanbanBoardTab projectId={project.id} onOpenTask={setSelectedTaskId} />
       )}
       {activeTab === 'sprints' && (
         <SprintEngineTab projectId={project.id} onOpenTask={setSelectedTaskId} />
-      )}
-      {activeTab === 'calendar' && (
-        <CalendarTab projectId={project.id} onOpenTask={setSelectedTaskId} />
-      )}
-      {activeTab === 'gantt' && (
-        <GanttTab projectId={project.id} onOpenTask={setSelectedTaskId} />
-      )}
-      {activeTab === 'hitos' && (
-        <MilestonesTab projectId={project.id} onOpenTask={setSelectedTaskId} />
       )}
       {activeTab === 'docs' && <DocsTab projectId={project.id} />}
 
