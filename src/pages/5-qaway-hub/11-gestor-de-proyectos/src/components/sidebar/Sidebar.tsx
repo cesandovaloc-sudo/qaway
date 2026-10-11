@@ -49,16 +49,19 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const [isProjectsExpanded, setIsProjectsExpanded] = useState(true)
 
   const { projects, workItems } = useProjectsDataset()
-  const { isGestor } = useProjectPerspective()
+  const { currentPersona, isGestor } = useProjectPerspective()
 
   const myTaskCount = useMemo(() => {
-    if (isGestor) {
-      return workItems.filter(
-        (i) => i.assignee.name.toLowerCase().includes('carlos') && i.state !== 'done'
-      ).length
-    }
-    return workItems.filter((i) => i.state !== 'done').length
-  }, [workItems, isGestor])
+    const openItems = workItems.filter((i) => i.state !== 'done')
+    if (!isGestor) return openItems.length
+    // Perspectiva real del gestor (sin hardcodeos): coincide nombre completo o de pila.
+    const me = currentPersona.name.trim().toLowerCase()
+    const firstName = me.split(/\s+/)[0] ?? ''
+    return openItems.filter((i) => {
+      const assignee = i.assignee.name.trim().toLowerCase()
+      return assignee === me || (firstName !== '' && (assignee.split(/\s+/)[0] ?? '') === firstName)
+    }).length
+  }, [workItems, isGestor, currentPersona])
 
   const urgentCount = useMemo(() => {
     return workItems.filter(
@@ -66,16 +69,31 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     ).length
   }, [workItems])
 
+  const BASE_PREFIXES = [
+    '/hub/proyectos',
+    '/hub/gestor-proyectos-app',
+    '/hub/inventario',
+    '/inventario',
+  ]
+  const detectBase = (pathname: string) =>
+    BASE_PREFIXES.find((prefix) => pathname.startsWith(prefix)) ?? ''
+
   const getHref = (to: string) => {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
-    const basePrefix =
-      ['/hub/proyectos', '/hub/gestor-proyectos-app', '/hub/inventario', '/inventario'].find(
-        (prefix) => pathname.startsWith(prefix)
-      ) ?? ''
+    const basePrefix = detectBase(pathname)
     if (!basePrefix) return to
     if (to === '/') return basePrefix
     return `${basePrefix}${to.startsWith('/') ? to : `/${to}`}`
   }
+
+  const location = useLocation()
+
+  // Proyecto activo por URL (Fase 23): /proyectos/:id. Los enlaces de
+  // PLANIFICACIÓN apuntan a ese proyecto; fuera de un proyecto usan el fallback.
+  const modulePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
+  const projectIdMatch = modulePath.match(/^\/proyectos\/([^/]+)/)
+  const activeProjectId = projectIdMatch ? projectIdMatch[1] : null
+  const planningProjectId = activeProjectId ?? 'proj-minedu-2027'
 
   const sections: NavSection[] = [
     {
@@ -120,7 +138,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               statusColor: 'bg-emerald-500',
             },
             {
-              to: '/proyectos/proj-minedu-2027?tab=gantt&sub=om050',
+              to: '/proyectos/proj-minedu-om050',
               label: 'Redistribución OM 050',
               statusColor: 'bg-amber-500',
             },
@@ -132,27 +150,27 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       title: 'PLANIFICACIÓN',
       items: [
         {
-          to: '/proyectos/proj-minedu-2027?tab=gantt',
+          to: `/proyectos/${planningProjectId}?tab=gantt`,
           label: 'Diagrama Gantt',
           icon: <GanttChart size={18} />,
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=calendar',
+          to: `/proyectos/${planningProjectId}?tab=calendar`,
           label: 'Calendario',
           icon: <CalendarDays size={18} />,
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=hitos',
+          to: `/proyectos/${planningProjectId}?tab=hitos`,
           label: 'Hitos & Entregables',
           icon: <Milestone size={18} />,
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=kanban',
+          to: `/proyectos/${planningProjectId}?tab=kanban`,
           label: 'Gestores & Territorio',
           icon: <Users size={18} />,
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=docs',
+          to: `/proyectos/${planningProjectId}?tab=docs`,
           label: 'Normativa & Wiki',
           icon: <BookOpen size={18} />,
         },
@@ -160,16 +178,18 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     },
   ]
 
-  const location = useLocation()
-
   // URL actual completa (ruta + query). NavLink solo compara el pathname, por eso
-  // todos los items que comparten /proyectos/proj-minedu-2027 se encendían a la
-  // vez al cambiar de ?tab=. La coincidencia aquí es exacta e incluye el query.
+  // todos los items que comparten /proyectos/:id se encendían a la vez al
+  // cambiar de ?tab=. La coincidencia aquí es exacta e incluye el query.
   const currentUrl = `${location.pathname}${location.search}`
 
-  // Primer href (orden de documento, hijos incluidos) con coincidencia exacta.
-  // Las URLs se diferencian por ?view= (bandeja / criticas / sin view): solo un
-  // item coincide con currentUrl a la vez. First-wins queda como resguardo.
+  // Proyecto :id declarado por un hijo de CARTERA (Fase 23).
+  const childProjectId = (to: string) => {
+    const match = to.match(/^\/proyectos\/([^/?]+)/)
+    return match ? match[1] : null
+  }
+
+  // 1. Coincidencia exacta ruta+query (first-wins): como máximo un candidato.
   let activeHref: string | null = null
   for (const sec of sections) {
     for (const item of sec.items) {
@@ -181,7 +201,25 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       }
     }
   }
+
+  // 2. Sin coincidencia exacta y dentro de un proyecto → se ilumina el hijo con
+  // ese :id, sin importar el ?tab= (los hijos entran a la raíz/Resumen).
+  let activeProjectChild: string | null = null
+  if (activeHref === null && activeProjectId) {
+    for (const sec of sections) {
+      for (const item of sec.items) {
+        for (const child of item.children ?? []) {
+          if (activeProjectChild === null && childProjectId(child.to) === activeProjectId) {
+            activeProjectChild = child.to
+          }
+        }
+      }
+    }
+  }
+
   const isHrefActive = (to: string) => activeHref !== null && getHref(to) === activeHref
+  const isProjectChildActive = (to: string) =>
+    activeProjectChild !== null && getHref(to) === activeProjectChild
 
   return (
     <aside
@@ -319,7 +357,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                           to={getHref(child.to)}
                           className={() =>
                             `flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs transition-colors truncate ${
-                              isHrefActive(child.to)
+                              isHrefActive(child.to) || isProjectChildActive(child.to)
                                 ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold'
                                 : 'text-[var(--hub-dim)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
                             }`
