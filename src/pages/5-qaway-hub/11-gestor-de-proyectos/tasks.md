@@ -156,3 +156,44 @@
   - Sellado automático de marca de tiempo al hacer clic en WhatsApp o Correo.
   - Sección interactiva "Descargo / Reporte de Campo del Gestor" para registrar minutas, compromisos y conmutar a `Respondido`.
 - [x] **Task 11.7:** Verificación de compilación TypeScript (`npm run typecheck` 0 errores) y confirmación HTTP 200 en Dev Server.
+
+---
+
+## 🧭 Fase 12: STATIK Kanban — Límites WIP y Políticas Explícitas por Proyecto (A33)
+- [x] **Task 12.1:** Extender `src/types/project.types.ts` con `ColumnPolicy`, `ProjectKanbanSettings` y `DEFAULT_KANBAN_SETTINGS`.
+- [x] **Task 12.2:** Semilla `proj-minedu-2027` en `mock-projects-data.ts` con políticas territoriales específicas (PECOSA, actas de recepción).
+- [x] **Task 12.3:** Métodos en `projectsService.ts`: `getProjectKanbanSettings` y mutación profunda y segura `updateProjectKanbanSettings`.
+- [x] **Task 12.4:** Integrar popover de políticas de columna `Info` (20x20) en las cabeceras de `KanbanBoardTab.tsx` con control de permisos por rol (`isCoordinador`/`isSuperAdmin` editan; `isGestor` modo lectura).
+
+---
+
+## 🧭 Fase 13: Navegación Lateral Unívoca y Vistas Funcionales Kanban (A34)
+- [x] **Task 13.1:** Actualizar rutas del Sidebar en `Sidebar.tsx` con query params funcionales (`?tab=kanban&view=bandeja`, `&view=criticas`, y `?tab=kanban`).
+- [x] **Task 13.2:** Eliminar la selección múltiple indeseada en el Sidebar garantizando que solo la vista activa se marque.
+- [x] **Task 13.3:** Sincronizar `KanbanBoardTab.tsx` para leer `?view=` de la URL y aplicar reactivamente el filtro de críticas o bandeja personal.
+
+---
+
+## 🛡️ Fase 14: Naturaleza Contractual de Tareas e Hitos Rectores (A35)
+- [x] **Task 14.1:** Extender `project.types.ts` con `TaskNature = 'obligacion_normativa' | 'control_complementario' | 'contingencia_operativa'`, `TASK_NATURE_META`, `threatensMilestone` y `threatNote`.
+- [x] **Task 14.2:** Clasificar tareas semilla de MINEDU en `mock-projects-data.ts` con sus respectivas naturalezas.
+- [x] **Task 14.3:** En `MilestonesTab.tsx`, separar entregables normativos de controles complementarios. El retraso de una tarea complementaria no marca incumplido el hito salvo que `threatensMilestone === true`.
+- [x] **Task 14.4:** Añadir micro-badges sobrios de naturaleza contractual en tarjetas de `KanbanBoardTab.tsx`.
+
+---
+
+## 📅 Fase 15: Calendario Mensual de Espacio de Trabajo (A36)
+- [x] **Task 15.1:** Crear `src/pages/projects/workspace/CalendarTab.tsx` conectado al store existente de tareas e hitos sin duplicación de registros.
+- [x] **Task 15.2:** Diferenciar visualmente hitos de entrega frente a tareas Kanban.
+- [x] **Task 15.3:** Control de permisos por rol: edición de fechas para coordinadores/superadmins y modo lectura para gestores.
+- [x] **Task 15.4:** Registrar pestaña `calendar` en `ProjectWorkspacePage.tsx` y enlace `?tab=calendar` en `Sidebar.tsx`.
+
+---
+
+## ✅ Fase 16: Subetapas Operativas Verificables en Tarjetas Kanban (A37)
+- [x] **Task 16.1:** Conservar intactas las 5 columnas canónicas del Kanban sin crear columnas arbitrarias.
+- [x] **Task 16.2:** Definir `TaskChecklistItem` en `project.types.ts` y añadir `checklist?: TaskChecklistItem[]` a `WorkItem`.
+- [x] **Task 16.3:** Crear métodos en `projectsService.ts`: `addTaskChecklistItem`, `toggleTaskChecklistItem` y `deleteTaskChecklistItem`, asegurando cero impacto sobre el avance general (`project.progress`), EVM ni burndown.
+- [x] **Task 16.4:** Sección interactiva en `SlideOverTaskSheet.tsx` para configurar y marcar verificaciones con sellado de fecha y responsable.
+- [x] **Task 16.5:** Micro-indicador compacto `ListChecks` (`X/Y`) en tarjetas de `KanbanBoardTab.tsx`.
+
