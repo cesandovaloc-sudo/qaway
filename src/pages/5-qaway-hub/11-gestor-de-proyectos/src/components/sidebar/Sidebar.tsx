@@ -120,7 +120,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               statusColor: 'bg-emerald-500',
             },
             {
-              to: '/proyectos/proj-minedu-2027?tab=gantt',
+              to: '/proyectos/proj-minedu-2027?tab=gantt&sub=om050',
               label: 'Redistribución OM 050',
               statusColor: 'bg-amber-500',
             },
