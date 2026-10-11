@@ -1,6 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react'
 import {
-  AlertTriangle,
   Ban,
   Bell,
   CheckCircle2,
@@ -218,7 +217,7 @@ function isCriticalTask(item: WorkItem): boolean {
 }
 
 export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {  const workItems = useProjectWorkItems(projectId)
-  const { perspective, isGestor, isCoordinador, isSuperAdmin, currentPersona } = useProjectPerspective()
+  const { perspective, isGestor, isCoordinador, isSuperAdmin } = useProjectPerspective()
   const settings = useProjectKanbanSettings(projectId)
   const canEditSettings = !isGestor && (isCoordinador || isSuperAdmin)
   const [policyOpen, setPolicyOpen] = useState<WorkItemState | null>(null)

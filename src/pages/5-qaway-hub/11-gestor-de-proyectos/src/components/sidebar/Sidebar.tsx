@@ -49,7 +49,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const [isProjectsExpanded, setIsProjectsExpanded] = useState(true)
 
   const { projects, workItems } = useProjectsDataset()
-  const { currentPersona, isGestor } = useProjectPerspective()
+  const { isGestor } = useProjectPerspective()
 
   const myTaskCount = useMemo(() => {
     if (isGestor) {
@@ -266,7 +266,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                       {!collapsed && (
                         <>
                           <span className="truncate">{item.label}</span>
-                          {typeof item.badge !== 'undefined' && item.badge > 0 && (
+                          {item.badge !== undefined && (typeof item.badge === 'number' ? item.badge > 0 : Boolean(item.badge)) && (
                             <span
                               className={`ml-auto font-mono text-[11px] px-1.5 py-0.2 rounded shrink-0 ${
                                 item.badgeVariant === 'urgent'
