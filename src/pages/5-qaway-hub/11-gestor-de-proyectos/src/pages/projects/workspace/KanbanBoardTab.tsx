@@ -10,6 +10,7 @@ import {
   Clock,
   FileText,
   Flag,
+  Info,
   Link2,
   Mail,
   MapPin,
@@ -21,15 +22,15 @@ import {
   X,
   Zap,
 } from 'lucide-react'
-import { useProjectWorkItems } from '@/hooks/useProjects'
+import { useProjectKanbanSettings, useProjectWorkItems } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import { useProjectPerspective } from '../../../context/ProjectPerspectiveContext'
 import {
   FOLLOW_UP_META,
   KANBAN_STATE_ORDER,
-  KANBAN_WIP_LIMITS,
   WORK_ITEM_PRIORITY_META,
   WORK_ITEM_STATE_META,
+  type ColumnPolicy,
   type WorkItemState,
 } from '@/types/project.types'
 import { formatFollowUpDate, getFollowUpStatus } from '@/utils/followUp'
@@ -54,9 +55,153 @@ const emptyDrafts: Record<WorkItemState, string> = {
   done: '',
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// ColumnPolicyPopover — Políticas explícitas por columna (Fase 1 STATIK)
+// Solo lectura para Gestor; Coordinador / SuperAdmin edita WIP y criterios.
+// No altera tipografías ni layout del tablero (panel absoluto compacto).
+// ─────────────────────────────────────────────────────────────────────────
+
+function ColumnPolicyPopover({
+  state,
+  policy,
+  wipLimit,
+  readOnly,
+  onClose,
+  onSave,
+}: {
+  state: WorkItemState
+  policy: ColumnPolicy
+  wipLimit: number
+  readOnly: boolean
+  onClose: () => void
+  onSave: (state: WorkItemState, wip: number, entry: string[], exit: string[]) => void
+}) {
+  const meta = WORK_ITEM_STATE_META[state]
+  const [wipDraft, setWipDraft] = useState(String(wipLimit))
+  const [entryDraft, setEntryDraft] = useState(policy.entryCriteria.join('\n'))
+  const [exitDraft, setExitDraft] = useState(policy.exitCriteria.join('\n'))
+
+  const parseLines = (text: string) =>
+    text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+
+  const handleSave = () => {
+    const parsed = Math.round(Number(wipDraft))
+    if (!Number.isFinite(parsed) || parsed < 1) return
+    const entry = parseLines(entryDraft)
+    const exit = parseLines(exitDraft)
+    if (entry.length === 0 || exit.length === 0) return
+    onSave(state, Math.min(99, parsed), entry, exit)
+  }
+
+  return (
+    <div className="absolute left-2 right-2 top-11 z-30 rounded-xl border border-zinc-200 bg-white p-3 shadow-xl">
+      <div className="mb-2 flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: meta.accent }} />
+        <p className="text-[11px] font-extrabold uppercase tracking-wide text-zinc-700">
+          Políticas · {meta.label}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar políticas"
+          className="ml-auto grid h-6 w-6 place-items-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+        >
+          <X size={12} />
+        </button>
+      </div>
+
+      {readOnly ? (
+        <div className="space-y-2">
+          <div>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              Para entrar
+            </p>
+            <ul className="space-y-1">
+              {policy.entryCriteria.map((criterion) => (
+                <li key={criterion} className="text-[11px] leading-snug text-zinc-600">
+                  • {criterion}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              Para salir
+            </p>
+            <ul className="space-y-1">
+              {policy.exitCriteria.map((criterion) => (
+                <li key={criterion} className="text-[11px] leading-snug text-zinc-600">
+                  • {criterion}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="rounded-lg bg-zinc-50 px-2 py-1.5 text-[10px] font-semibold text-zinc-500">
+            Límite WIP: {wipLimit >= 99 ? 'sin límite' : wipLimit} · Solo lectura para tu rol.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            Límite WIP (1–99)
+            <input
+              type="number"
+              min={1}
+              max={99}
+              value={wipDraft}
+              onChange={(event) => setWipDraft(event.target.value)}
+              className="mt-1 h-8 w-full rounded-lg border border-zinc-200 bg-white px-2 text-xs font-bold text-zinc-800 outline-none focus:border-brand"
+            />
+          </label>
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            Para entrar (uno por línea)
+            <textarea
+              value={entryDraft}
+              onChange={(event) => setEntryDraft(event.target.value)}
+              rows={2}
+              className="mt-1 w-full resize-none rounded-lg border border-zinc-200 bg-white p-2 text-[11px] text-zinc-700 outline-none focus:border-brand"
+            />
+          </label>
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            Para salir (uno por línea)
+            <textarea
+              value={exitDraft}
+              onChange={(event) => setExitDraft(event.target.value)}
+              rows={2}
+              className="mt-1 w-full resize-none rounded-lg border border-zinc-200 bg-white p-2 text-[11px] text-zinc-700 outline-none focus:border-brand"
+            />
+          </label>
+          <div className="flex items-center justify-end gap-1.5 pt-0.5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-8 rounded-lg px-3 text-[11px] font-bold text-zinc-500 transition-colors hover:bg-zinc-100"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="h-8 rounded-lg bg-zinc-900 px-3 text-[11px] font-bold text-white transition-colors hover:bg-brand"
+            >
+              Guardar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
   const workItems = useProjectWorkItems(projectId)
   const { perspective, isGestor, isCoordinador, isSuperAdmin, currentPersona } = useProjectPerspective()
+  const settings = useProjectKanbanSettings(projectId)
+  const canEditSettings = !isGestor && (isCoordinador || isSuperAdmin)
+  const [policyOpen, setPolicyOpen] = useState<WorkItemState | null>(null)
   const [drafts, setDrafts] = useState<Record<WorkItemState, string>>(emptyDrafts)
   const [memberFilter, setMemberFilter] = useState<string | null>(() => {
     return perspective === 'gestor' ? 'Carlos Sandoval' : null
@@ -89,6 +234,16 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isDropdownOpen])
+
+  // Cierre del popover de políticas con Escape (Fase 1 STATIK)
+  useEffect(() => {
+    if (!policyOpen) return
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setPolicyOpen(null)
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [policyOpen])
 
   const memberStats = useMemo(() => {
     interface Stat {
@@ -199,6 +354,14 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
       originType: 'accion_emergente',
     })
     setDrafts((prev) => ({ ...prev, [state]: '' }))
+  }
+
+  const savePolicy = (state: WorkItemState, wip: number, entry: string[], exit: string[]) => {
+    projectsService.updateProjectKanbanSettings(projectId, {
+      wipLimits: { [state]: wip },
+      columnPolicies: { [state]: { entryCriteria: entry, exitCriteria: exit } },
+    })
+    setPolicyOpen(null)
   }
 
   return (
@@ -409,12 +572,12 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
         const meta = WORK_ITEM_STATE_META[state]
         const columnTotal = workItems.filter((item) => item.state === state).length
         const cards = visibleItems.filter((item) => item.state === state)
-        const wipLimit = KANBAN_WIP_LIMITS[state]
+        const wipLimit = settings.wipLimits[state]
         const bottleneck = columnTotal > wipLimit
         return (
           <section
             key={state}
-            className={`flex min-h-[280px] flex-col rounded-2xl border bg-zinc-50/70 p-2.5 transition-colors ${
+            className={`relative flex min-h-[280px] flex-col rounded-2xl border bg-zinc-50/70 p-2.5 transition-colors ${
               bottleneck ? 'border-[#f5cfca] ring-1 ring-[#f5cfca]' : 'border-zinc-200'
             }`}
           >
@@ -431,7 +594,32 @@ export function KanbanBoardTab({ projectId, onOpenTask }: KanbanBoardTabProps) {
               >
                 {wipLimit >= 99 ? columnTotal : `${columnTotal}/${wipLimit}`}
               </span>
+              {/* Micro-botón de políticas explícitas (Fase 1 STATIK) */}
+              <button
+                type="button"
+                onClick={() => setPolicyOpen(policyOpen === state ? null : state)}
+                aria-label={`Ver políticas de ${meta.label}`}
+                title={`Políticas de ${meta.label}`}
+                className={`grid h-5 w-5 shrink-0 place-items-center rounded-md transition-colors ${
+                  policyOpen === state
+                    ? 'bg-zinc-900 text-white'
+                    : 'text-zinc-400 hover:bg-zinc-200 hover:text-zinc-700'
+                }`}
+              >
+                <Info size={12} />
+              </button>
             </header>
+            {policyOpen === state && (
+              <ColumnPolicyPopover
+                key={state}
+                state={state}
+                policy={settings.columnPolicies[state]}
+                wipLimit={wipLimit}
+                readOnly={!canEditSettings}
+                onClose={() => setPolicyOpen(null)}
+                onSave={savePolicy}
+              />
+            )}
             {bottleneck && (
               <p className="mb-2 flex items-center gap-1.5 rounded-lg border border-[#f5cfca] bg-[#fcedea] px-2.5 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-[#9a2820]">
                 <Ban size={12} /> Cuello de botella

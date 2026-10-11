@@ -50,6 +50,7 @@ export interface Project {
   activeSprint?: string
   manager: string
   membersCount: number
+  kanbanSettings?: ProjectKanbanSettings // Límites WIP y políticas por proyecto (Fase 1 STATIK)
 }
 
 // ── B. Tarea / Work Item ──
@@ -441,6 +442,18 @@ export const TSHIRT_POINTS: Record<TShirtSize, number> = {
   XL: 8,
 }
 
+/** Criterios explícitos de entrada/salida de una columna Kanban (Fase 1 STATIK). */
+export interface ColumnPolicy {
+  entryCriteria: string[]
+  exitCriteria: string[]
+}
+
+/** Configuración Kanban por proyecto: WIP + políticas explícitas (Fase 1 STATIK). */
+export interface ProjectKanbanSettings {
+  wipLimits: Record<WorkItemState, number>
+  columnPolicies: Record<WorkItemState, ColumnPolicy>
+}
+
 /** Límites WIP por columna Kanban; 99 = sin límite (Fase 9). */
 export const KANBAN_WIP_LIMITS: Record<WorkItemState, number> = {
   backlog: 99,
@@ -448,6 +461,39 @@ export const KANBAN_WIP_LIMITS: Record<WorkItemState, number> = {
   in_progress: 4,
   review: 3,
   done: 99,
+}
+
+/** Ajustes Kanban universales: límites actuales + políticas genéricas (Fase 1 STATIK). */
+export const DEFAULT_KANBAN_SETTINGS: ProjectKanbanSettings = {
+  wipLimits: {
+    backlog: 99,
+    todo: 6,
+    in_progress: 4,
+    review: 3,
+    done: 99,
+  },
+  columnPolicies: {
+    backlog: {
+      entryCriteria: ['La tarjeta tiene título claro y responsable asignado'],
+      exitCriteria: ['Priorizada y movida a Por Hacer para planificar'],
+    },
+    todo: {
+      entryCriteria: ['Compromiso del equipo en la planificación'],
+      exitCriteria: ['Trabajo iniciado o devuelto a Backlog con motivo'],
+    },
+    in_progress: {
+      entryCriteria: ['Un responsable activo tomó la tarjeta'],
+      exitCriteria: ['Trabajo terminado y listo para revisión'],
+    },
+    review: {
+      entryCriteria: ['Entregable disponible para verificar'],
+      exitCriteria: ['Aprobada contra los criterios de aceptación'],
+    },
+    done: {
+      entryCriteria: ['Verificación aprobada en revisión'],
+      exitCriteria: ['Valor entregado y avance registrado'],
+    },
+  },
 }
 
 export const WORKLOAD_RISK_META: Record<

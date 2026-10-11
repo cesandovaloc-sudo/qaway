@@ -31,6 +31,38 @@ export const mockProjectsDataset: ProjectsDataset = {
       progress: 34,
       manager: 'Coordinador General DIGERE',
       membersCount: 12,
+      // Ajustes Kanban territoriales MINEDU (Fase 1 STATIK)
+      kanbanSettings: {
+        wipLimits: {
+          backlog: 99,
+          todo: 6,
+          in_progress: 4,
+          review: 3,
+          done: 99,
+        },
+        columnPolicies: {
+          backlog: {
+            entryCriteria: ['Tarea reportada por gestor territorial o UGEL'],
+            exitCriteria: ['Clasificada como normativa OM 032 o acción táctica de campo'],
+          },
+          todo: {
+            entryCriteria: ['Comprometida con gestor territorial y UGEL responsable'],
+            exitCriteria: ['Iniciada en campo o devuelta con motivo registrado'],
+          },
+          in_progress: {
+            entryCriteria: ['Gestor en campo con evidencia de avance'],
+            exitCriteria: ['Descargo de campo registrado (fotos y actas)'],
+          },
+          review: {
+            entryCriteria: ['Actas y PECOSA adjuntas para verificación'],
+            exitCriteria: ['PECOSA validada contra el aplicativo MC SIGA'],
+          },
+          done: {
+            entryCriteria: ['Conformidad de la UGEL firmada'],
+            exitCriteria: ['Acta PECOSA registrada al 100% en SIAGIE Materiales'],
+          },
+        },
+      },
     },
     {
       id: 'proj-001',

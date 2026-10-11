@@ -7,6 +7,7 @@ import type {
   MethodologyDistribution,
   PortfolioKpis,
   Project,
+  ProjectKanbanSettings,
   ProjectsDataset,
   Sprint,
   TeamMemberWorkload,
@@ -95,6 +96,18 @@ export function useTeamWorkload(projectId: string | undefined): TeamMemberWorklo
   const dataset = useProjectsDataset()
   return useMemo(
     () => (projectId ? projectsService.getTeamWorkload(projectId) : []),
+    [dataset, projectId],
+  )
+}
+
+// ── Ajustes Kanban por proyecto (Fase 1 STATIK) ──
+
+const NO_PROJECT_ID = '__no_project__'
+
+export function useProjectKanbanSettings(projectId: string | undefined): ProjectKanbanSettings {
+  const dataset = useProjectsDataset()
+  return useMemo(
+    () => projectsService.getProjectKanbanSettings(projectId ?? NO_PROJECT_ID),
     [dataset, projectId],
   )
 }

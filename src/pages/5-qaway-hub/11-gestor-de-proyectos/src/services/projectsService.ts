@@ -1,6 +1,7 @@
 import type {
   BudgetByProject,
   BurndownSnapshot,
+  ColumnPolicy,
   CostStatus,
   EarnedValueMetrics,
   GestorFeedback,
@@ -11,6 +12,7 @@ import type {
   PortfolioKpis,
   Project,
   ProjectDoc,
+  ProjectKanbanSettings,
   ProjectsDataset,
   ProjectMethodology,
   ScheduleStatus,
@@ -18,13 +20,21 @@ import type {
   TeamMemberWorkload,
   WorkItem,
   WorkItemAssignee,
+  WorkItemState,
   WorkloadRisk,
 } from '@/types/project.types'
 import {
+  DEFAULT_KANBAN_SETTINGS,
   HEALTH_SCORE,
   PROJECT_METHODOLOGY_META,
   TSHIRT_POINTS,
 } from '@/types/project.types'
+
+/** Parche parcial y profundo para ajustes Kanban (Fase 1 STATIK). */
+export interface KanbanSettingsPatch {
+  wipLimits?: Partial<Record<WorkItemState, number>>
+  columnPolicies?: Partial<Record<WorkItemState, Partial<ColumnPolicy>>>
+}
 import { mockProjectsDataset } from '@/data/mock-projects-data'
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -277,6 +287,44 @@ export const projectsService = {
       projects: state.projects.map((project) =>
         project.id === projectId ? { ...project, ...patch, id: project.id } : project,
       ),
+    })
+  },
+
+  // ── Ajustes Kanban por proyecto (Fase 1 STATIK) ──
+  // Lectura con fallback a clon de defaults; escritura con merge profundo y
+  // parcial: cambiar una columna no sobreescribe las demás ni toca otros
+  // proyectos. setState persiste en qaway_projects_v3 y notifica.
+
+  getProjectKanbanSettings(projectId: string): ProjectKanbanSettings {
+    const project = state.projects.find((item) => item.id === projectId)
+    if (!project?.kanbanSettings) return clone(DEFAULT_KANBAN_SETTINGS)
+    return clone(project.kanbanSettings)
+  },
+
+  updateProjectKanbanSettings(projectId: string, patch: KanbanSettingsPatch): void {
+    setState({
+      ...state,
+      projects: state.projects.map((project) => {
+        if (project.id !== projectId) return project
+        const base = project.kanbanSettings ?? clone(DEFAULT_KANBAN_SETTINGS)
+        const wipLimits: Record<WorkItemState, number> = {
+          ...base.wipLimits,
+          ...(patch.wipLimits ?? {}),
+        }
+        const columnPolicies: Record<WorkItemState, ColumnPolicy> = { ...base.columnPolicies }
+        const policyPatch = patch.columnPolicies ?? {}
+        for (const key of Object.keys(policyPatch) as WorkItemState[]) {
+          const columnPatch = policyPatch[key]
+          if (!columnPatch) continue
+          columnPolicies[key] = {
+            entryCriteria:
+              columnPatch.entryCriteria ?? [...base.columnPolicies[key].entryCriteria],
+            exitCriteria:
+              columnPatch.exitCriteria ?? [...base.columnPolicies[key].exitCriteria],
+          }
+        }
+        return { ...project, kanbanSettings: { wipLimits, columnPolicies } }
+      }),
     })
   },
 
