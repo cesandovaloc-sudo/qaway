@@ -7,6 +7,7 @@ import {
   Inbox,
   AlertCircle,
   GanttChart,
+  CalendarDays,
   Milestone,
   Users,
   BookOpen,
@@ -134,6 +135,11 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           to: '/proyectos/proj-minedu-2027?tab=gantt',
           label: 'Cronograma Maestro',
           icon: <GanttChart size={18} />,
+        },
+        {
+          to: '/proyectos/proj-minedu-2027?tab=calendar',
+          label: 'Calendario',
+          icon: <CalendarDays size={18} />,
         },
         {
           to: '/proyectos/proj-minedu-2027?tab=hitos',

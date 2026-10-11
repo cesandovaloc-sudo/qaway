@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   BookOpen,
+  CalendarDays,
   Flame,
   FolderKanban,
   GanttChart,
@@ -20,23 +21,25 @@ import {
 import { OverviewTab } from './workspace/OverviewTab'
 import { KanbanBoardTab } from './workspace/KanbanBoardTab'
 import { SprintEngineTab } from './workspace/SprintEngineTab'
+import { CalendarTab } from './workspace/CalendarTab'
 import { GanttTab } from './workspace/GanttTab'
 import { MilestonesTab } from './workspace/MilestonesTab'
 import { DocsTab } from './workspace/DocsTab'
 
 // ─────────────────────────────────────────────────────────────────────────
-// ProjectWorkspacePage.tsx — Espacio de Trabajo del Proyecto (Fase 4, 5, 6 y 9)
+// ProjectWorkspacePage.tsx — Espacio de Trabajo del Proyecto (Fase 4, 5, 6, 9 y 3 A36)
 // Ruta /proyectos/:id con header de proyecto y pestañas completas:
-// Resumen · Kanban · Sprints · Cronograma Gantt P6 · Hitos PMBOK · Wiki.
+// Resumen · Kanban · Sprints · Calendario · Cronograma Gantt P6 · Hitos PMBOK · Wiki.
 // ─────────────────────────────────────────────────────────────────────────
 
-type WorkspaceTab = 'resumen' | 'kanban' | 'sprints' | 'gantt' | 'hitos' | 'docs'
+type WorkspaceTab = 'resumen' | 'kanban' | 'sprints' | 'calendar' | 'gantt' | 'hitos' | 'docs'
 
 function isWorkspaceTab(value: string | null): value is WorkspaceTab {
   return (
     value === 'resumen' ||
     value === 'kanban' ||
     value === 'sprints' ||
+    value === 'calendar' ||
     value === 'gantt' ||
     value === 'hitos' ||
     value === 'docs'
@@ -118,6 +121,7 @@ export default function ProjectWorkspacePage() {
     { key: 'resumen', label: 'Resumen', icon: <LayoutDashboard size={16} />, badge: null },
     { key: 'kanban', label: 'Kanban', icon: <KanbanSquare size={16} />, badge: workItems.length },
     { key: 'sprints', label: 'Sprints', icon: <Flame size={16} />, badge: sprintTasksCount || null },
+    { key: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} />, badge: null },
     { key: 'gantt', label: 'Cronograma P6', icon: <GanttChart size={16} />, badge: null },
     { key: 'hitos', label: 'Hitos', icon: <Milestone size={16} />, badge: pendingMilestones || null },
     { key: 'docs', label: 'Wiki Docs', icon: <BookOpen size={16} />, badge: docsCount || null },
@@ -227,6 +231,9 @@ export default function ProjectWorkspacePage() {
       )}
       {activeTab === 'sprints' && (
         <SprintEngineTab projectId={project.id} onOpenTask={setSelectedTaskId} />
+      )}
+      {activeTab === 'calendar' && (
+        <CalendarTab projectId={project.id} onOpenTask={setSelectedTaskId} />
       )}
       {activeTab === 'gantt' && (
         <GanttTab projectId={project.id} onOpenTask={setSelectedTaskId} />
