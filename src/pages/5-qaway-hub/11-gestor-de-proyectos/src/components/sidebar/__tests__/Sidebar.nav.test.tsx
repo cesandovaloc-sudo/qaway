@@ -46,7 +46,7 @@ const CASES: Array<{ url: string; expected: string; tenant?: string }> = [
   { url: '/proyectos', expected: 'Proyectos' },
   { url: '/proyectos/proj-minedu-2027', expected: 'Dotación 2027' },
   { url: '/proyectos/proj-minedu-2027?tab=kanban', expected: 'Gestores & Territorio' },
-  { url: '/proyectos/proj-minedu-2027?tab=kanban&view=bandeja', expected: 'Bandeja' },
+  { url: '/bandeja', expected: 'Bandeja' },
   { url: '/proyectos?view=criticas', expected: 'Alertas Críticas' },
   { url: '/proyectos/proj-minedu-2027?tab=gantt', expected: 'Diagrama Gantt' },
   { url: '/proyectos/proj-minedu-2027?tab=hitos', expected: 'Hitos & Entregables' },

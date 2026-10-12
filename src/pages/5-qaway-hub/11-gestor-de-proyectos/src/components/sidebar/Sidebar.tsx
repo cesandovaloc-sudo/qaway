@@ -128,7 +128,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           end: true,
         },
         {
-          to: '/proyectos/proj-minedu-2027?tab=kanban&view=bandeja',
+          to: '/bandeja',
           label: isGestor ? 'Mi Bandeja' : 'Bandeja de Tareas',
           icon: <Inbox size={18} />,
           badge: myTaskCount,

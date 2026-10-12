@@ -7,6 +7,7 @@ import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
 import ProjectsListPage from '@/pages/projects/ProjectsListPage'
 import ProjectWorkspacePage from '@/pages/projects/ProjectWorkspacePage'
+import TasksInboxPage from '@/pages/tasks/TasksInboxPage'
 import ProductsPage from '@/pages/inventory/ProductsPage'
 import SedesPanelPage from '@/pages/inventory/SedesPanelPage'
 import ProductDetailPage from '@/pages/inventory/ProductDetailPage'
@@ -73,6 +74,9 @@ export default function AppRouter() {
 
           {/* Espacio de Trabajo del Proyecto (Fase 4, 5 y 6): gana a ":id" por segmento estático */}
           <Route path="proyectos/:id" element={<ProjectWorkspacePage />} />
+
+          {/* Bandeja de Tareas dedicada (Task Inbox): ruta estática canónica */}
+          <Route path="bandeja" element={<TasksInboxPage />} />
 
           {/* Productos / Inventario — lectura: cualquier autenticado */}
           <Route path="productos" element={<RequirePlanFeature feature="products"><ProductsPage /></RequirePlanFeature>} />
