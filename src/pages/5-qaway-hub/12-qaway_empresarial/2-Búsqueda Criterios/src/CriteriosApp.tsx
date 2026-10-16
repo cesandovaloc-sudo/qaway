@@ -15,7 +15,6 @@ import {
   FileSpreadsheet,
   FileText,
   Layers,
-  Building2,
   History,
   Settings,
   Code2,
@@ -28,6 +27,9 @@ import {
   ExternalLink,
   ChevronDown,
   Copy,
+  PanelLeftClose,
+  PanelLeftOpen,
+  FolderPlus,
 } from "lucide-react";
 import { HubIcon } from "./components/ui/HubIcon";
 
@@ -158,8 +160,23 @@ const EXCEL_GRID_ROWS: Array<{ n: number; label: string; value: string }> = [
   { n: 17, label: "", value: "" },
 ];
 
+interface ProjectWorkspace {
+  id: string;
+  name: string;
+  category: string;
+  stats: string;
+}
+
+const DEFAULT_PROJECTS: ProjectWorkspace[] = [
+  { id: "auditoria-q3", name: "Auditoría Financiera & Laboral", category: "Finanzas & Legal", stats: "3 fuentes • 26,920 vectores" },
+  { id: "reglamento-general", name: "Reglamento y Normativa General", category: "Corporativo & Compliance", stats: "8 fuentes • 14,200 vectores" },
+  { id: "contratos-2026", name: "Contratos y Proveedores 2026", category: "Operaciones", stats: "12 fuentes • 31,500 vectores" },
+];
+
 export default function CriteriosApp() {
   const [theme, setTheme] = useState<RagThemeId>("rag-neutral");
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [activeProjectId, setActiveProjectId] = useState<string>("auditoria-q3");
   const [activeScenario, setActiveScenario] = useState<string>("auditoria");
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>(2);
   const [inspectorOpen, setInspectorOpen] = useState<boolean>(true);
@@ -176,6 +193,19 @@ export default function CriteriosApp() {
   const [toast, setToast] = useState<string | null>(null);
 
   const palette = THEME_CONFIG[theme];
+
+  function handleResetHome() {
+    setQuery("¿Cuál es la contingencia laboral por horas extras no registradas y su impacto en el EBITDA del Q3?");
+    setActiveScenario("auditoria");
+    setInspectorTab(2);
+    setInspectorOpen(true);
+    setActiveNav("nuevo");
+    showToastMessage("Vista de inicio restablecida");
+  }
+
+  function handleUploadFolder() {
+    showToastMessage("Selecciona una carpeta o archivos para indexar en este proyecto");
+  }
 
   function handleScenario(id: string) {
     setActiveScenario(id);
@@ -281,34 +311,53 @@ export default function CriteriosApp() {
             backgroundColor: palette.bgSurface,
             borderColor: palette.borderDefault,
           }}
-          className="w-full h-14 shrink-0 border-b flex items-center justify-between px-4 sm:px-6 z-30 sticky top-0 shadow-xs"
+          className="w-full h-14 shrink-0 border-b flex items-center justify-between px-3 sm:px-4 z-30 sticky top-0 shadow-xs"
         >
-          {/* Lado izquierdo: Logo + Píldora del Asistente */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex items-center gap-2.5 shrink-0">
-              <span
-                style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSurface }}
-                className="w-8 h-8 rounded-lg border flex items-center justify-center shadow-xs"
+          {/* Lado izquierdo: Bloque del Logo (delimitado al ancho del sidebar) + Toggle Sidebar */}
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-[236px] flex items-center justify-between shrink-0 pr-2 border-r border-zinc-200/80 mr-1">
+              {/* Logo Completo como Botón de Inicio */}
+              <button
+                type="button"
+                onClick={handleResetHome}
+                className="flex items-center gap-2 text-left cursor-pointer hover:opacity-80 transition-opacity"
+                title="Reiniciar y volver al inicio"
               >
-                <HubIcon icon={Layers} size={18} className="text-zinc-800" />
-              </span>
-              <span style={{ fontSize: 17 }} className="font-bold tracking-tight text-zinc-900 hidden sm:inline">
-                RAG Hub
-              </span>
-              <span
-                style={{
-                  backgroundColor: palette.accentCitationBg,
-                  color: palette.accentCitation,
-                  fontSize: 12,
-                }}
-                className="px-2 py-0.5 rounded font-mono font-semibold"
+                <span
+                  style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSurface }}
+                  className="w-8 h-8 rounded-lg border flex items-center justify-center shadow-xs shrink-0"
+                >
+                  <HubIcon icon={Layers} size={18} className="text-zinc-800" />
+                </span>
+                <span style={{ fontSize: 16.5 }} className="font-bold tracking-tight text-zinc-900 hidden sm:inline">
+                  RAG Hub
+                </span>
+                <span
+                  style={{
+                    backgroundColor: palette.accentCitationBg,
+                    color: palette.accentCitation,
+                    fontSize: 11.5,
+                  }}
+                  className="px-1.5 py-0.5 rounded font-mono font-semibold"
+                >
+                  v4.0
+                </span>
+              </button>
+
+              {/* Botón para colapsar/desplegar el panel izquierdo */}
+              <button
+                type="button"
+                onClick={() => setSidebarOpen((v) => !v)}
+                style={{ borderColor: palette.borderDefault }}
+                className="p-1.5 rounded-lg border hover:bg-zinc-100 cursor-pointer text-zinc-600 transition-colors"
+                title={sidebarOpen ? "Ocultar panel lateral izquierdo" : "Mostrar panel lateral izquierdo"}
+                aria-label={sidebarOpen ? "Ocultar panel lateral izquierdo" : "Mostrar panel lateral izquierdo"}
               >
-                v4.0
-              </span>
+                <HubIcon icon={sidebarOpen ? PanelLeftClose : PanelLeftOpen} size={16} />
+              </button>
             </div>
 
-            <div className="h-5 w-px bg-zinc-200 hidden md:block mx-1" />
-
+            {/* Píldora del Asistente */}
             <span
               style={{
                 borderColor: palette.borderDefault,
@@ -316,31 +365,15 @@ export default function CriteriosApp() {
                 backgroundColor: palette.bgSubtle,
                 fontSize: 13,
               }}
-              className="hidden sm:inline-flex items-center px-3 py-1 rounded-full border truncate"
+              className="hidden md:inline-flex items-center px-3 py-1 rounded-full border truncate"
             >
               Asistente multi-fuente (Ley + Excel + Documentos)
             </span>
           </div>
 
-          {/* Lado derecho: SQL & Edge Function + Perfil con Switcher de Tema */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setShowSqlModal(true)}
-              style={{
-                borderColor: palette.borderDefault,
-                backgroundColor: palette.bgSurface,
-                color: palette.textPrimary,
-                fontSize: 13.5,
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium hover:opacity-90 cursor-pointer shadow-xs transition-colors"
-            >
-              <HubIcon icon={Code2} size={15} />
-              <span className="hidden md:inline">&lt;/&gt; Ver SQL &amp; Edge Function</span>
-              <span className="md:hidden">SQL</span>
-            </button>
-
-            {/* Avatar Carlos con Menú Desplegable de Temas */}
+          {/* Lado derecho: Perfil con Switcher de Tema en 1 sola línea */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Avatar Carlos con Menú Desplegable */}
             <div className="relative flex items-center gap-1.5">
               <span
                 style={{ backgroundColor: palette.actionPrimary }}
@@ -348,14 +381,14 @@ export default function CriteriosApp() {
               >
                 C
               </span>
-              <span style={{ fontSize: 14 }} className="font-medium text-zinc-800 hidden sm:inline">
+              <span style={{ fontSize: 13.5 }} className="font-medium text-zinc-800 hidden sm:inline">
                 Carlos
               </span>
               <button
                 type="button"
                 onClick={() => setShowUserMenu((v) => !v)}
                 className="p-1 rounded hover:bg-zinc-100 cursor-pointer text-zinc-500"
-                aria-label="Abrir menú y temas"
+                aria-label="Abrir menú de usuario"
               >
                 <HubIcon icon={ChevronDown} size={15} />
               </button>
@@ -367,16 +400,20 @@ export default function CriteriosApp() {
                     backgroundColor: palette.bgSurface,
                     borderColor: palette.borderDefault,
                     color: palette.textPrimary,
-                    fontSize: 13.5,
                   }}
-                  className="absolute right-0 top-full mt-2 w-64 rounded-xl border shadow-xl py-2 z-40"
+                  className="absolute right-0 top-full mt-2 w-64 rounded-xl border shadow-xl py-1.5 z-40 text-xs"
                 >
-                  {/* Selector de Temas Paper & Ink */}
-                  <div className="px-3 pb-2.5 border-b border-zinc-100">
-                    <p style={{ fontSize: 11.5 }} className="font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                      Paleta White-Label (Tema)
-                    </p>
-                    <div className="space-y-1">
+                  {/* Selector de Temas en UNA sola línea */}
+                  <div className="px-3 py-2 border-b border-zinc-100">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider">
+                        Tema visual
+                      </span>
+                      <span className="text-[11px] text-zinc-500 font-medium truncate max-w-[120px]">
+                        {palette.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 bg-zinc-100/90 p-1 rounded-lg">
                       {(Object.keys(THEME_CONFIG) as RagThemeId[]).map((tid) => {
                         const th = THEME_CONFIG[tid];
                         const isCurrent = theme === tid;
@@ -388,38 +425,41 @@ export default function CriteriosApp() {
                               setTheme(tid);
                               showToastMessage(`Tema ${th.name} activado`);
                             }}
-                            style={{
-                              backgroundColor: isCurrent ? th.accentCitationBg : "transparent",
-                              color: isCurrent ? th.accentCitation : palette.textPrimary,
-                            }}
-                            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors hover:bg-zinc-50"
+                            title={th.name}
+                            className={`flex-1 py-1 px-1 rounded-md text-[11px] font-medium flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                              isCurrent
+                                ? "bg-white text-zinc-900 shadow-xs font-semibold"
+                                : "text-zinc-500 hover:text-zinc-800"
+                            }`}
                           >
-                            <span className="flex items-center gap-2">
-                              <span
-                                className="w-2.5 h-2.5 rounded-full shrink-0"
-                                style={{ backgroundColor: th.accentCitation }}
-                              />
-                              <span className="font-semibold">{th.name}</span>
-                            </span>
-                            {isCurrent && <HubIcon icon={Check} size={14} />}
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: th.accentCitation }}
+                            />
+                            <span className="truncate">{th.name.split(" ")[0]}</span>
                           </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  <div className="pt-2 px-1">
-                    {["Mi perfil", "Mis análisis", "Cerrar sesión"].map((opt) => (
+                  {/* Opciones de perfil */}
+                  <div className="py-1 px-1">
+                    {[
+                      { label: "Mi perfil", action: "Perfil" },
+                      { label: "Mis análisis guardados", action: "Análisis" },
+                      { label: "Cerrar sesión", action: "Sesión" },
+                    ].map((opt) => (
                       <button
-                        key={opt}
+                        key={opt.label}
                         type="button"
                         onClick={() => {
                           setShowUserMenu(false);
-                          showToastMessage(`${opt} seleccionado`);
+                          showToastMessage(`${opt.label} seleccionado`);
                         }}
-                        className="w-full text-left px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 rounded-md cursor-pointer"
+                        className="w-full text-left px-2.5 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 rounded-md cursor-pointer transition-colors"
                       >
-                        {opt}
+                        {opt.label}
                       </button>
                     ))}
                   </div>
@@ -433,172 +473,174 @@ export default function CriteriosApp() {
          * CONTENEDOR DE PANELES (DEBAJO DEL HEADER GLOBAL)
          * ========================================================================= */}
         <div className="flex-1 flex overflow-hidden min-h-0">
-          {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO (DISEÑO LIMPIO ANTERIOR) ===== */}
-          <aside
-            style={{
-              backgroundColor: palette.bgPage,
-              borderColor: palette.borderDefault,
-            }}
-            className="hidden lg:flex w-[248px] shrink-0 border-r flex-col overflow-y-auto"
-          >
-            {/* Sección: Proyecto / Marca */}
-            <div className="px-3 pt-3">
-              <p
-                style={{ color: palette.textSecondary, fontSize: 13 }}
-                className="px-1 pb-2 font-semibold uppercase tracking-wider"
-              >
-                Proyecto / Marca
-              </p>
-              <div className="space-y-1">
+          {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO CON MÓDULOS UNIVERSALES ===== */}
+          {sidebarOpen && (
+            <aside
+              style={{
+                backgroundColor: palette.bgPage,
+                borderColor: palette.borderDefault,
+              }}
+              className="w-[248px] shrink-0 border-r flex flex-col overflow-y-auto"
+            >
+              {/* Sección 1: Espacio de Trabajo / Proyecto Activo */}
+              <div className="px-3 pt-3">
+                <div className="flex items-center justify-between px-1 pb-1.5">
+                  <span
+                    style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                    className="font-semibold uppercase tracking-wider"
+                  >
+                    Proyecto Activo
+                  </span>
+                  <span style={{ fontSize: 11 }} className="text-zinc-400 font-mono">
+                    Workspace
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <select
+                    value={activeProjectId}
+                    onChange={(e) => {
+                      setActiveProjectId(e.target.value);
+                      const p = DEFAULT_PROJECTS.find((x) => x.id === e.target.value);
+                      if (p) showToastMessage(`Cambiado a: ${p.name}`);
+                    }}
+                    style={{
+                      backgroundColor: palette.bgSurface,
+                      borderColor: palette.borderDefault,
+                      fontSize: 13,
+                    }}
+                    className="w-full px-2.5 py-2 rounded-lg border font-medium text-zinc-900 shadow-xs cursor-pointer focus:outline-none appearance-none pr-7"
+                  >
+                    {DEFAULT_PROJECTS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                  <HubIcon
+                    icon={ChevronDown}
+                    size={14}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
+                  />
+                </div>
+
+                {/* Botón: Cargar documentos o carpeta */}
                 <button
                   type="button"
-                  onClick={() => setTheme("rag-neutral")}
+                  onClick={handleUploadFolder}
                   style={{
-                    backgroundColor: theme === "rag-neutral" ? "#EFF6FF" : "transparent",
-                    borderLeft: theme === "rag-neutral" ? "3px solid #2563EB" : "3px solid transparent",
+                    borderColor: palette.borderDefault,
+                    backgroundColor: palette.bgSurface,
                   }}
-                  className="w-full text-left px-3 py-2 rounded-r-md flex items-center gap-2.5 cursor-pointer transition-colors"
+                  className="w-full mt-2 px-2.5 py-1.5 rounded-lg border border-dashed text-xs font-medium text-zinc-700 flex items-center justify-center gap-1.5 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
                 >
-                  <HubIcon icon={Building2} size={18} className="text-sky-600" />
-                  <span>
-                    <span style={{ fontSize: 14.5 }} className="block font-semibold leading-tight text-zinc-900">
-                      Corporativo
-                    </span>
-                    <span style={{ color: palette.textSecondary, fontSize: 13 }} className="block leading-tight">
-                      Documentos internos
-                    </span>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTheme("rag-legal")}
-                  style={{
-                    backgroundColor: theme === "rag-legal" ? "#FEF2F2" : "transparent",
-                    borderLeft: theme === "rag-legal" ? "3px solid #DC2626" : "3px solid transparent",
-                  }}
-                  className="w-full text-left px-3 py-2 rounded-r-md flex items-center gap-2.5 cursor-pointer transition-colors"
-                >
-                  <HubIcon icon={Scale} size={18} className="text-red-600" />
-                  <span>
-                    <span style={{ fontSize: 14.5 }} className="block font-semibold leading-tight text-zinc-900">
-                      Legal / Leyes
-                    </span>
-                    <span style={{ color: palette.textSecondary, fontSize: 13 }} className="block leading-tight">
-                      Normativa y artículos
-                    </span>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTheme("rag-finance")}
-                  style={{
-                    backgroundColor: theme === "rag-finance" ? "#ECFDF5" : "transparent",
-                    borderLeft: theme === "rag-finance" ? "3px solid #059669" : "3px solid transparent",
-                  }}
-                  className="w-full text-left px-3 py-2 rounded-r-md flex items-center gap-2.5 cursor-pointer transition-colors"
-                >
-                  <HubIcon icon={FileSpreadsheet} size={18} className="text-emerald-600" />
-                  <span>
-                    <span style={{ fontSize: 14.5 }} className="block font-semibold leading-tight text-zinc-900">
-                      Finanzas / Excel
-                    </span>
-                    <span style={{ color: palette.textSecondary, fontSize: 13 }} className="block leading-tight">
-                      Reportes y modelos
-                    </span>
-                  </span>
+                  <HubIcon icon={FolderPlus} size={15} className="text-zinc-500" />
+                  <span>+ Cargar documentos / carpeta</span>
                 </button>
               </div>
-            </div>
 
-            {/* Sección: Navegación */}
-            <div className="px-3 mt-5">
-              <p
-                style={{ color: palette.textSecondary, fontSize: 13 }}
-                className="px-1 pb-2 font-semibold uppercase tracking-wider"
-              >
-                Navegación
-              </p>
-              <nav className="space-y-0.5">
-                {[
-                  { id: "nuevo", label: "Nuevo análisis", icon: Search },
-                  { id: "historial", label: "Historial", icon: History },
-                  { id: "colecciones", label: "Colecciones", icon: Layers },
-                  { id: "config", label: "Configuración", icon: Settings },
-                ].map((item) => {
-                  const isActive = activeNav === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setActiveNav(item.id)}
-                      style={{
-                        backgroundColor: isActive ? palette.accentCitationBg : "transparent",
-                        borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
-                        color: isActive ? palette.accentCitation : palette.textPrimary,
-                        fontSize: 14.5,
-                      }}
-                      className={`w-full text-left px-3 py-2 flex items-center gap-2.5 cursor-pointer transition-colors ${
-                        isActive ? "rounded-r-md font-semibold" : "hover:bg-zinc-100 rounded-md"
-                      }`}
-                    >
-                      <HubIcon icon={item.icon} size={16} />
-                      <span>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-
-            <div className="flex-1 min-h-6" />
-
-            {/* Sección: Colecciones activas (Tarjeta limpia) */}
-            <div className="p-3 pb-4">
-              <div
-                style={{
-                  borderColor: palette.borderDefault,
-                  backgroundColor: palette.bgSurface,
-                }}
-                className="border rounded-xl p-3 space-y-2.5 shadow-xs"
-              >
-                <p style={{ fontSize: 14 }} className="font-semibold text-zinc-900">
-                  Colecciones activas
+              {/* Sección 2: Módulos de la Aplicación (Navegación Universal) */}
+              <div className="px-3 mt-4">
+                <p
+                  style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                  className="px-1 pb-1.5 font-semibold uppercase tracking-wider"
+                >
+                  Módulos
                 </p>
-                <div className="flex items-start gap-2.5">
-                  <span className="mt-1 w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0" />
-                  <div>
-                    <span style={{ fontSize: 14 }} className="block font-semibold leading-tight text-zinc-900">
-                      Documentos
-                    </span>
-                    <span style={{ color: palette.textSecondary, fontSize: 13 }} className="block leading-tight">
-                      124 docs • 12,480 vectores
+                <nav className="space-y-0.5">
+                  {[
+                    { id: "nuevo", label: "Consulta & Asistente", icon: Search },
+                    { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
+                    { id: "historial", label: "Historial de Consultas", icon: History },
+                    { id: "config", label: "Parámetros del Motor", icon: Settings },
+                  ].map((item) => {
+                    const isActive = activeNav === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveNav(item.id);
+                          if (item.id === "nuevo") {
+                            // vista de consulta
+                          } else {
+                            showToastMessage(`Módulo: ${item.label}`);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: isActive ? palette.accentCitationBg : "transparent",
+                          borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
+                          color: isActive ? palette.accentCitation : palette.textPrimary,
+                          fontSize: 14,
+                        }}
+                        className={`w-full text-left px-3 py-2 flex items-center gap-2.5 cursor-pointer transition-colors ${
+                          isActive ? "rounded-r-md font-semibold" : "hover:bg-zinc-100 rounded-md font-medium"
+                        }`}
+                      >
+                        <HubIcon icon={item.icon} size={16} />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div className="flex-1 min-h-6" />
+
+              {/* Sección 3: Fuentes Indexadas en Proyecto */}
+              <div className="p-3 pb-4">
+                <div
+                  style={{
+                    borderColor: palette.borderDefault,
+                    backgroundColor: palette.bgSurface,
+                  }}
+                  className="border rounded-xl p-3 space-y-2.5 shadow-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <p style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
+                      Fuentes en proyecto
+                    </p>
+                    <span style={{ fontSize: 11 }} className="text-zinc-400 font-mono">
+                      3 activas
                     </span>
                   </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
-                  <div>
-                    <span style={{ fontSize: 14 }} className="block font-semibold leading-tight text-zinc-900">
-                      Leyes
-                    </span>
-                    <span style={{ color: palette.textSecondary, fontSize: 13 }} className="block leading-tight">
-                      86 docs • 8,320 vectores
-                    </span>
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0" />
+                    <div>
+                      <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                        Documentos &amp; Manuales
+                      </span>
+                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                        124 docs • 12,480 fragmentos
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="mt-1 w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-                  <div>
-                    <span style={{ fontSize: 14 }} className="block font-semibold leading-tight text-zinc-900">
-                      Excel
-                    </span>
-                    <span style={{ color: palette.textSecondary, fontSize: 13 }} className="block leading-tight">
-                      42 archivos • 6,120 vectores
-                    </span>
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
+                    <div>
+                      <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                        Leyes &amp; Normativa
+                      </span>
+                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                        86 docs • 8,320 fragmentos
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                    <div>
+                      <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                        Matrices Excel / CSV
+                      </span>
+                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                        42 archivos • 6,120 fragmentos
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </aside>
+            </aside>
+          )}
 
           {/* ===== COLUMNA 2: PANEL CENTRAL - WORKSPACE CON SCROLL ===== */}
           <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
@@ -1015,7 +1057,7 @@ export default function CriteriosApp() {
               >
                 <div className="flex items-center gap-2">
                   <h2 style={{ fontSize: 15 }} className="font-bold text-zinc-900">
-                    Inspector de fuentes
+                    Inspector de evidencias
                   </h2>
                   <span
                     style={{ backgroundColor: palette.bgSubtle, color: palette.textSecondary, fontSize: 11 }}
