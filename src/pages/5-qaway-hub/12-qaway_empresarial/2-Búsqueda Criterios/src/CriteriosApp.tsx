@@ -489,6 +489,21 @@ export default function CriteriosApp() {
   const [activeRerankerProviderId, setActiveRerankerProviderId] = useState<string>("cohere");
   const [activeEmbeddingProviderId, setActiveEmbeddingProviderId] = useState<string>("openai");
 
+  // Proveedor LLM activo resuelto con fallback seguro
+  const activeLlmProvider =
+    aiProviders.find((p) => p.id === activeLlmProviderId) ||
+    aiProviders[0] || {
+      id: "openai",
+      name: "OpenAI GPT-4o",
+      selectedModel: "gpt-4o",
+      contextWindow: "128k",
+      latency: 180,
+      costTier: "Medio",
+      apiKeyMask: "sk-proj-••••••••••••••••••••3x9A",
+      models: ["gpt-4o", "gpt-4o-mini", "o1-preview"],
+      isLocal: false,
+    };
+
   // Buscador y filtros del Header (Rojo)
   const [headerSearch, setHeaderSearch] = useState<string>("");
   const [showQuickSearch, setShowQuickSearch] = useState<boolean>(false);
@@ -755,7 +770,9 @@ export default function CriteriosApp() {
       citation = "Manual de Políticas Laborales, Sección 4.2 - Control de asistencia (Pág. 28, v2.1 - 2026). Coseno: 0.88.";
     }
     if (navigator.clipboard?.writeText) {
-      void navigator.clipboard.writeText(citation);
+      navigator.clipboard.writeText(citation).catch(() => {
+        // Fallback silencioso para entornos sin permisos de portapapeles (ej. Playwright headless)
+      });
       showToastMessage("Cita formal copiada al portapapeles");
     } else {
       showToastMessage("Cita copiada");
@@ -1339,6 +1356,7 @@ export default function CriteriosApp() {
                   </p>
                   <nav className="space-y-0.5">
                     {[
+                      { id: "nuevo", label: "Asistente & Chat", icon: MessageSquare },
                       { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
                       { id: "historial", label: "Historial de Consultas", icon: History },
                       { id: "config", label: "Configuración & IA", icon: Settings },
