@@ -32,6 +32,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   FolderPlus,
+  Plus,
   SlidersHorizontal,
   Filter,
   Clock,
@@ -473,6 +474,8 @@ export default function CriteriosApp() {
   const [isRecordingVoice, setIsRecordingVoice] = useState<boolean>(false);
   const [collapseScenariosHeader, setCollapseScenariosHeader] = useState<boolean>(false);
   const [showChatFilterModal, setShowChatFilterModal] = useState<boolean>(false);
+  const [showModeDropdown, setShowModeDropdown] = useState<boolean>(false);
+  const modeDropdownRef = useRef<HTMLDivElement>(null);
 
   // Pestaña activa en Configuración
   const [configTab, setConfigTab] = useState<"providers" | "engine">("providers");
@@ -521,6 +524,10 @@ export default function CriteriosApp() {
       }
       if (quickSearchRef.current && !quickSearchRef.current.contains(event.target as Node)) {
         setShowQuickSearch(false);
+        setShowModeDropdown(false);
+      }
+      if (modeDropdownRef.current && !modeDropdownRef.current.contains(event.target as Node)) {
+        setShowModeDropdown(false);
       }
     }
     function handleKeyDown(event: KeyboardEvent) {
@@ -709,7 +716,7 @@ export default function CriteriosApp() {
       })
     );
     const p = aiProviders.find((x) => x.id === providerId);
-    showToastMessage(`Ping a ${p?.name}: ${p?.latency || 120} ms • Estado: Óptimo ⚡`);
+    showToastMessage(`Ping a ${p?.name}: ${p?.latency || 120} ms • Estado: Óptimo`);
   }
 
   function handleModelChange(providerId: string, modelName: string) {
@@ -864,10 +871,10 @@ export default function CriteriosApp() {
                     borderColor: palette.borderDefault,
                     color: palette.textPrimary,
                   }}
-                  className="w-full pl-9 pr-20 py-1.5 rounded-lg border text-xs shadow-xs focus:outline-none focus:ring-1 focus:ring-zinc-400 transition-all placeholder:text-zinc-400"
+                  className="w-full pl-9 pr-24 h-10 rounded-xl border text-[13.5px] shadow-xs focus:outline-none focus:ring-1.5 focus:ring-blue-500/30 transition-all placeholder:text-zinc-400"
                 />
                 <div className="absolute right-2 flex items-center gap-1.5">
-                  <span className="hidden lg:inline-block px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 bg-zinc-100 rounded border border-zinc-200">
+                  <span className="hidden lg:inline-block px-1.5 py-0.5 text-[11px] font-mono text-zinc-400 bg-zinc-100 rounded border border-zinc-200">
                     ⌘K
                   </span>
                   <button
@@ -877,18 +884,24 @@ export default function CriteriosApp() {
                       backgroundColor:
                         filterSourceType !== "all" || similarityThreshold !== 0.75
                           ? palette.accentCitationBg
-                          : "transparent",
+                          : "#f4f4f5",
+                      borderColor:
+                        filterSourceType !== "all" || similarityThreshold !== 0.75
+                          ? palette.accentCitation
+                          : "#e4e4e7",
                       color:
                         filterSourceType !== "all" || similarityThreshold !== 0.75
                           ? palette.accentCitation
-                          : palette.textSecondary,
+                          : "#52525b",
                     }}
-                    className="p-1 rounded-md hover:bg-zinc-100 cursor-pointer text-zinc-500 transition-colors relative"
+                    className="h-8 px-2 rounded-lg border hover:bg-zinc-200/70 cursor-pointer transition-all relative flex items-center justify-center gap-1 shadow-2xs"
                     title="Filtros avanzados de recuperación"
+                    aria-label="Filtros avanzados de recuperación"
                   >
-                    <HubIcon icon={SlidersHorizontal} size={14} />
+                    <HubIcon icon={SlidersHorizontal} size={15} />
+                    <span className="text-[11.5px] font-medium hidden md:inline">Filtro</span>
                     {(filterSourceType !== "all" || similarityThreshold !== 0.75) && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                     )}
                   </button>
                 </div>
@@ -1217,7 +1230,7 @@ export default function CriteriosApp() {
               borderColor: palette.borderDefault,
             }}
             className={`shrink-0 border-r flex flex-col transition-all duration-200 overflow-y-auto ${
-              sidebarOpen ? "w-[248px]" : "w-16 items-center"
+              sidebarOpen ? "w-[264px]" : "w-16 items-center"
             }`}
           >
             {sidebarOpen ? (
@@ -1227,7 +1240,7 @@ export default function CriteriosApp() {
                 <div className="px-3 pt-3">
                   <div className="flex items-center justify-between px-1 pb-1.5">
                     <span
-                      style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                      style={{ color: palette.textSecondary, fontSize: 12 }}
                       className="font-semibold uppercase tracking-wider"
                     >
                       Proyecto Activo
@@ -1311,15 +1324,15 @@ export default function CriteriosApp() {
                     }}
                     className="w-full px-3 py-2 rounded-lg text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all flex items-center justify-center gap-2"
                   >
-                    <HubIcon icon={MessageSquarePlus} size={15} />
-                    <span>+ Nueva Conversación</span>
+                    <HubIcon icon={Plus} size={16} />
+                    <span className="text-[13.5px] font-medium">Nueva Conversación</span>
                   </button>
                 </div>
 
                 {/* Sección 2: Módulos de la Aplicación (ARRIBA, para que al desplegar chats no los tape) */}
                 <div className="px-3 mt-3">
                   <p
-                    style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                    style={{ color: palette.textSecondary, fontSize: 12 }}
                     className="px-1 pb-1 font-semibold uppercase tracking-wider"
                   >
                     Módulos
@@ -1343,9 +1356,9 @@ export default function CriteriosApp() {
                             backgroundColor: isActive ? palette.accentCitationBg : "transparent",
                             borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
                             color: isActive ? palette.accentCitation : palette.textPrimary,
-                            fontSize: 13.5,
+                            fontSize: 14.5,
                           }}
-                          className={`w-full text-left px-2.5 py-1.5 flex items-center gap-2.5 cursor-pointer transition-colors ${
+                          className={`w-full text-left px-3 py-2 flex items-center gap-3 cursor-pointer transition-colors ${
                             isActive ? "rounded-r-md font-semibold" : "hover:bg-zinc-100 rounded-md font-medium"
                           }`}
                         >
@@ -1367,7 +1380,7 @@ export default function CriteriosApp() {
                     >
                       <HubIcon icon={isChatsListOpen ? ChevronDown : ChevronRight} size={13} />
                       <span
-                        style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                        style={{ color: palette.textSecondary, fontSize: 12.5 }}
                         className="font-semibold uppercase tracking-wider"
                       >
                         Conversaciones
@@ -1402,10 +1415,10 @@ export default function CriteriosApp() {
                                 size={13}
                                 className={isCurrent ? "text-blue-600 shrink-0" : "text-zinc-400 shrink-0"}
                               />
-                              <span className="truncate text-[12.5px]">{session.title}</span>
+                              <span className="truncate text-[13.5px] text-zinc-800">{session.title}</span>
                             </div>
                             <div className="flex items-center gap-1 shrink-0 ml-1">
-                              <span className="text-[10px] font-mono text-zinc-400">
+                              <span className="text-[11.5px] font-mono text-zinc-400 shrink-0">
                                 {session.date === "Hoy" ? "9m" : session.date}
                               </span>
                               {chatSessions.length > 1 && (
@@ -2125,27 +2138,112 @@ export default function CriteriosApp() {
                         <HubIcon icon={isRecordingVoice ? MicOff : Mic} size={16} />
                       </button>
 
-                      {/* Selector de Capacidad / Profundidad */}
-                      <select
-                        value={chatMode}
-                        onChange={(e) => {
-                          const mode = e.target.value as "fast" | "standard" | "deep";
-                          setChatMode(mode);
-                          const labels = {
-                            fast: "Modo Rápido activo (Groq LPU ~42ms)",
-                            standard: "Modo Estándar activo (GPT-4o)",
-                            deep: "Modo Razonamiento Profundo activo (DeepSeek R1 / o1)",
-                          };
-                          showToastMessage(labels[mode]);
-                        }}
-                        style={{ fontSize: 11.5 }}
-                        className="px-2 py-1 rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700 font-semibold cursor-pointer focus:outline-none"
-                        title="Elegir capacidad y profundidad del razonamiento"
-                      >
-                        <option value="fast">Rápido (Groq)</option>
-                        <option value="standard">Estándar (GPT-4o)</option>
-                        <option value="deep">Razonamiento Profundo</option>
-                      </select>
+                      {/* Selector de Capacidad / Profundidad con icono Lucide compacto y modal redondeado */}
+                      <div className="relative shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setShowModeDropdown((v) => !v)}
+                          className={`p-1.5 rounded-lg border transition-all cursor-pointer flex items-center justify-center ${
+                            chatMode === "fast"
+                              ? "border-amber-200 bg-amber-50 text-amber-600"
+                              : chatMode === "deep"
+                              ? "border-purple-200 bg-purple-50 text-purple-600"
+                              : "border-blue-200 bg-blue-50 text-blue-600"
+                          }`}
+                          title={`Capacidad de IA: ${
+                            chatMode === "fast"
+                              ? "Rápido (Groq LPU)"
+                              : chatMode === "deep"
+                              ? "Razonamiento Profundo (DeepSeek R1/o1)"
+                              : "Estándar (GPT-4o)"
+                          }`}
+                          aria-label="Seleccionar capacidad del modelo"
+                        >
+                          <HubIcon
+                            icon={chatMode === "fast" ? Zap : chatMode === "deep" ? Sparkles : Cpu}
+                            size={16}
+                          />
+                        </button>
+
+                        {/* Modal Flotante de Selección de Capacidad (Diseño 100% redondeado y estético) */}
+                        {showModeDropdown && (
+                          <div
+                            ref={modeDropdownRef}
+                            style={{
+                              backgroundColor: palette.bgSurface,
+                              borderColor: palette.borderDefault,
+                            }}
+                            className="absolute bottom-full mb-2 left-0 w-72 rounded-2xl border shadow-2xl p-2.5 z-50 text-xs space-y-1.5 animate-in fade-in slide-in-from-bottom-2"
+                          >
+                            <div className="px-2 py-1 flex items-center justify-between border-b border-zinc-100 pb-1.5 mb-1">
+                              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                                Capacidad del Modelo
+                              </span>
+                              <span className="text-[10.5px] text-zinc-400 font-mono">IA Activa</span>
+                            </div>
+
+                            {[
+                              {
+                                id: "fast",
+                                label: "Rápido (Groq LPU)",
+                                desc: "Ultra baja latencia (~42ms) para respuestas ágiles",
+                                icon: Zap,
+                                color: "text-amber-500",
+                                bg: "bg-amber-50 border-amber-200 text-amber-700",
+                              },
+                              {
+                                id: "standard",
+                                label: "Estándar (GPT-4o)",
+                                desc: "Equilibrio ideal entre velocidad y precisión analítica",
+                                icon: Cpu,
+                                color: "text-blue-600",
+                                bg: "bg-blue-50 border-blue-200 text-blue-700",
+                              },
+                              {
+                                id: "deep",
+                                label: "Razonamiento Profundo",
+                                desc: "Cadena de deducción detallada para auditorías",
+                                icon: Sparkles,
+                                color: "text-purple-600",
+                                bg: "bg-purple-50 border-purple-200 text-purple-700",
+                              },
+                            ].map((modeItem) => {
+                              const isSelected = chatMode === modeItem.id;
+                              return (
+                                <button
+                                  key={modeItem.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setChatMode(modeItem.id as "fast" | "standard" | "deep");
+                                    setShowModeDropdown(false);
+                                    showToastMessage(`Modo cambiado a: ${modeItem.label}`);
+                                  }}
+                                  className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                                    isSelected
+                                      ? modeItem.bg + " shadow-xs font-semibold"
+                                      : "border-transparent hover:bg-zinc-50 text-zinc-700"
+                                  }`}
+                                >
+                                  <span className={`mt-0.5 p-1 rounded-lg bg-white border border-zinc-200/60 shadow-2xs ${modeItem.color}`}>
+                                    <HubIcon icon={modeItem.icon} size={15} />
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <span className="block leading-tight text-[12.5px] font-semibold">
+                                      {modeItem.label}
+                                    </span>
+                                    <span className="block leading-tight text-[11px] text-zinc-500 mt-0.5">
+                                      {modeItem.desc}
+                                    </span>
+                                  </div>
+                                  {isSelected && (
+                                    <HubIcon icon={Check} size={14} className="text-blue-600 shrink-0 mt-0.5" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
 
                       <input
                         type="text"
@@ -2433,7 +2531,7 @@ export default function CriteriosApp() {
                           <span>•</span>
                           <span>8,320 fragmentos vectorizados</span>
                           <span>•</span>
-                          <span className="text-emerald-600 font-medium">Indexado ✓</span>
+                          <span className="text-emerald-600 font-medium">Indexado</span>
                         </div>
                       </div>
                     </div>
@@ -2482,7 +2580,7 @@ export default function CriteriosApp() {
                           <span>•</span>
                           <span>6,120 fragmentos vectorizados</span>
                           <span>•</span>
-                          <span className="text-emerald-600 font-medium">Indexado ✓</span>
+                          <span className="text-emerald-600 font-medium">Indexado</span>
                         </div>
                       </div>
                     </div>
@@ -2531,7 +2629,7 @@ export default function CriteriosApp() {
                           <span>•</span>
                           <span>12,480 fragmentos vectorizados</span>
                           <span>•</span>
-                          <span className="text-emerald-600 font-medium">Indexado ✓</span>
+                          <span className="text-emerald-600 font-medium">Indexado</span>
                         </div>
                       </div>
                     </div>
@@ -3248,7 +3346,7 @@ export default function CriteriosApp() {
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-zinc-900">Traza Supabase Vector</span>
                         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                          RLS Verificado ✓
+                          RLS Verificado
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-1 text-[11.5px] pt-1">
@@ -3428,7 +3526,7 @@ export default function CriteriosApp() {
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-zinc-900">Traza Supabase Vector</span>
                         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                          RLS Verificado ✓
+                          RLS Verificado
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-1 text-[11.5px] pt-1">
@@ -3472,7 +3570,7 @@ export default function CriteriosApp() {
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-zinc-900">Traza Supabase Vector</span>
                         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                          RLS Verificado ✓
+                          RLS Verificado
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-1 text-[11.5px] pt-1">
