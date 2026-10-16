@@ -25,6 +25,7 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Copy,
   PanelLeftClose,
   PanelLeftOpen,
@@ -465,6 +466,7 @@ export default function CriteriosApp() {
   // Sesiones de Chat
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(DEFAULT_CHAT_SESSIONS);
   const [activeSessionId, setActiveSessionId] = useState<string>("session-1");
+  const [isChatsListOpen, setIsChatsListOpen] = useState<boolean>(true);
 
   // Capacidades avanzadas del chat
   const [chatMode, setChatMode] = useState<"fast" | "standard" | "deep">("standard");
@@ -836,19 +838,6 @@ export default function CriteriosApp() {
                 </span>
               </button>
             </div>
-
-            {/* Píldora del Asistente */}
-            <span
-              style={{
-                borderColor: palette.borderDefault,
-                color: palette.textSecondary,
-                backgroundColor: palette.bgSubtle,
-                fontSize: 13,
-              }}
-              className="hidden lg:inline-flex items-center px-3 py-1 rounded-full border truncate"
-            >
-              Asistente multi-fuente (Ley + Excel + Documentos)
-            </span>
           </div>
 
           {/* Lado Central: Buscador y Filtro Global Avanzado (Rojo) */}
@@ -1117,23 +1106,8 @@ export default function CriteriosApp() {
             )}
           </div>
 
-          {/* Lado derecho: Perfil con Switcher de Tema en 1 sola línea + Botón Inspector */}
+          {/* Lado derecho: Perfil con Switcher de Tema en 1 sola línea */}
           <div className="flex items-center gap-2.5 shrink-0">
-            {/* Botón para abrir/cerrar el Inspector de evidencias (mismo icono simétrico) */}
-            <button
-              type="button"
-              onClick={() => setInspectorOpen((v) => !v)}
-              style={{ borderColor: palette.borderDefault }}
-              className={`p-1.5 rounded-lg border cursor-pointer transition-colors ${
-                inspectorOpen
-                  ? "bg-blue-50 text-blue-600 border-blue-200"
-                  : "hover:bg-zinc-100 text-zinc-600 bg-white"
-              }`}
-              title={inspectorOpen ? "Colapsar Inspector de evidencias" : "Abrir Inspector de evidencias"}
-              aria-label={inspectorOpen ? "Colapsar Inspector de evidencias" : "Abrir Inspector de evidencias"}
-            >
-              <HubIcon icon={inspectorOpen ? PanelRightClose : PanelRightOpen} size={16} />
-            </button>
 
             {/* Avatar Carlos con Menú Desplegable */}
             <div ref={userMenuRef} className="relative flex items-center gap-1.5">
@@ -1312,18 +1286,46 @@ export default function CriteriosApp() {
                   </button>
                 </div>
 
-                {/* Sección 2: Módulos de la Aplicación */}
-                <div className="px-3 mt-4">
+                {/* Botón Prominente + Nueva Conversación (Estilo Antigravity 2.0) */}
+                <div className="px-3 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newId = `session-${Date.now()}`;
+                      const newSession: ChatSession = {
+                        id: newId,
+                        title: `Conversación ${chatSessions.length + 1}`,
+                        preview: "Conversación abierta, lista para recibir consultas al motor...",
+                        date: "Ahora",
+                        messagesCount: 1,
+                        provider: activeLlmProvider.name,
+                      };
+                      setChatSessions((prev) => [newSession, ...prev]);
+                      setActiveSessionId(newId);
+                      handleResetChat();
+                      setActiveNav("nuevo");
+                      showToastMessage("Nueva conversación iniciada");
+                    }}
+                    style={{
+                      backgroundColor: palette.actionPrimary,
+                    }}
+                    className="w-full px-3 py-2 rounded-lg text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all flex items-center justify-center gap-2"
+                  >
+                    <HubIcon icon={MessageSquarePlus} size={15} />
+                    <span>+ Nueva Conversación</span>
+                  </button>
+                </div>
+
+                {/* Sección 2: Módulos de la Aplicación (ARRIBA, para que al desplegar chats no los tape) */}
+                <div className="px-3 mt-3">
                   <p
                     style={{ color: palette.textSecondary, fontSize: 11.5 }}
-                    className="px-1 pb-1.5 font-semibold uppercase tracking-wider"
+                    className="px-1 pb-1 font-semibold uppercase tracking-wider"
                   >
                     Módulos
                   </p>
                   <nav className="space-y-0.5">
                     {[
-                      { id: "nuevo", label: "Asistente & Chat", icon: MessageSquare },
-                      { id: "chats", label: "Sesiones de Chat", icon: MessageSquarePlus },
                       { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
                       { id: "historial", label: "Historial de Consultas", icon: History },
                       { id: "config", label: "Configuración & IA", icon: Settings },
@@ -1335,21 +1337,19 @@ export default function CriteriosApp() {
                           type="button"
                           onClick={() => {
                             setActiveNav(item.id);
-                            if (item.id !== "nuevo") {
-                              showToastMessage(`Módulo: ${item.label}`);
-                            }
+                            showToastMessage(`Módulo: ${item.label}`);
                           }}
                           style={{
                             backgroundColor: isActive ? palette.accentCitationBg : "transparent",
                             borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
                             color: isActive ? palette.accentCitation : palette.textPrimary,
-                            fontSize: 14,
+                            fontSize: 13.5,
                           }}
-                          className={`w-full text-left px-3 py-2 flex items-center gap-2.5 cursor-pointer transition-colors ${
+                          className={`w-full text-left px-2.5 py-1.5 flex items-center gap-2.5 cursor-pointer transition-colors ${
                             isActive ? "rounded-r-md font-semibold" : "hover:bg-zinc-100 rounded-md font-medium"
                           }`}
                         >
-                          <HubIcon icon={item.icon} size={16} />
+                          <HubIcon icon={item.icon} size={15} />
                           <span>{item.label}</span>
                         </button>
                       );
@@ -1357,54 +1357,131 @@ export default function CriteriosApp() {
                   </nav>
                 </div>
 
-                <div className="flex-1 min-h-6" />
+                {/* Sección 3: Conversaciones & Chats Desplegables (Estilo Antigravity 2.0) */}
+                <div className="px-3 mt-3 flex-1 flex flex-col min-h-0">
+                  <div className="flex items-center justify-between px-1 pb-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsChatsListOpen((v) => !v)}
+                      className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-800 cursor-pointer"
+                    >
+                      <HubIcon icon={isChatsListOpen ? ChevronDown : ChevronRight} size={13} />
+                      <span
+                        style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                        className="font-semibold uppercase tracking-wider"
+                      >
+                        Conversaciones
+                      </span>
+                    </button>
+                    <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">
+                      {chatSessions.length}
+                    </span>
+                  </div>
 
-                {/* Sección 3: Fuentes Indexadas en Proyecto */}
-                <div className="p-3 pb-4">
+                  {isChatsListOpen && (
+                    <div className="space-y-0.5 overflow-y-auto max-h-[220px] pr-0.5 scrollbar-thin">
+                      {chatSessions.map((session) => {
+                        const isCurrent = activeNav === "nuevo" && activeSessionId === session.id;
+                        return (
+                          <div
+                            key={session.id}
+                            className={`group flex items-center justify-between px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-all ${
+                              isCurrent
+                                ? "bg-zinc-200/70 text-zinc-900 font-semibold"
+                                : "text-zinc-600 hover:bg-zinc-100"
+                            }`}
+                            onClick={() => {
+                              setActiveSessionId(session.id);
+                              setActiveNav("nuevo");
+                              showToastMessage(`Cargada: ${session.title}`);
+                            }}
+                          >
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <HubIcon
+                                icon={MessageSquare}
+                                size={13}
+                                className={isCurrent ? "text-blue-600 shrink-0" : "text-zinc-400 shrink-0"}
+                              />
+                              <span className="truncate text-[12.5px]">{session.title}</span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 ml-1">
+                              <span className="text-[10px] font-mono text-zinc-400">
+                                {session.date === "Hoy" ? "9m" : session.date}
+                              </span>
+                              {chatSessions.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setChatSessions((prev) => prev.filter((s) => s.id !== session.id));
+                                    if (activeSessionId === session.id) {
+                                      const remaining = chatSessions.filter((s) => s.id !== session.id);
+                                      setActiveSessionId(remaining[0]?.id || "");
+                                    }
+                                    showToastMessage(`Sesión eliminada`);
+                                  }}
+                                  className="opacity-0 group-hover:opacity-100 p-0.5 text-zinc-400 hover:text-red-500 rounded transition-opacity"
+                                  title="Eliminar conversación"
+                                >
+                                  <HubIcon icon={Trash2} size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-h-2" />
+
+                {/* Sección 4: Fuentes Indexadas en Proyecto */}
+                <div className="p-3 pb-3 mt-auto">
                   <div
                     style={{
                       borderColor: palette.borderDefault,
                       backgroundColor: palette.bgSurface,
                     }}
-                    className="border rounded-xl p-3 space-y-2.5 shadow-xs"
+                    className="border rounded-xl p-3 space-y-2 shadow-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <p style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
+                      <p style={{ fontSize: 12.5 }} className="font-semibold text-zinc-800">
                         Fuentes en proyecto
                       </p>
-                      <span style={{ fontSize: 11 }} className="text-zinc-400 font-mono">
+                      <span style={{ fontSize: 10.5 }} className="text-zinc-400 font-mono">
                         3 activas
                       </span>
                     </div>
-                    <div className="flex items-start gap-2.5">
-                      <span className="mt-1 w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0" />
+                    <div className="flex items-start gap-2">
+                      <HubIcon icon={FileText} size={14} className="text-blue-600 mt-0.5 shrink-0" />
                       <div>
-                        <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                        <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
                           Documentos &amp; Manuales
                         </span>
-                        <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                        <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
                           124 docs • 12,480 fragmentos
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-start gap-2.5">
-                      <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
+                    <div className="flex items-start gap-2">
+                      <HubIcon icon={Scale} size={14} className="text-red-500 mt-0.5 shrink-0" />
                       <div>
-                        <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                        <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
                           Leyes &amp; Normativa
                         </span>
-                        <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                        <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
                           86 docs • 8,320 fragmentos
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-start gap-2.5">
-                      <span className="mt-1 w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                    <div className="flex items-start gap-2">
+                      <HubIcon icon={FileSpreadsheet} size={14} className="text-emerald-600 mt-0.5 shrink-0" />
                       <div>
-                        <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                        <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
                           Matrices Excel / CSV
                         </span>
-                        <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                        <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
                           42 archivos • 6,120 fragmentos
                         </span>
                       </div>
@@ -1425,12 +1502,36 @@ export default function CriteriosApp() {
                   <HubIcon icon={PanelLeftOpen} size={18} />
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newId = `session-${Date.now()}`;
+                    const newSession: ChatSession = {
+                      id: newId,
+                      title: `Conversación ${chatSessions.length + 1}`,
+                      preview: "Conversación abierta, lista para recibir consultas al motor...",
+                      date: "Ahora",
+                      messagesCount: 1,
+                      provider: activeLlmProvider.name,
+                    };
+                    setChatSessions((prev) => [newSession, ...prev]);
+                    setActiveSessionId(newId);
+                    handleResetChat();
+                    setActiveNav("nuevo");
+                    showToastMessage("Nueva conversación iniciada");
+                  }}
+                  className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center cursor-pointer transition-colors shadow-xs"
+                  title="Nueva Conversación"
+                  aria-label="Nueva Conversación"
+                >
+                  <HubIcon icon={MessageSquarePlus} size={17} />
+                </button>
+
                 <div className="w-8 h-px bg-zinc-200 my-1" />
 
                 <nav className="space-y-1.5 w-full flex flex-col items-center">
                   {[
                     { id: "nuevo", label: "Asistente & Chat", icon: MessageSquare },
-                    { id: "chats", label: "Sesiones de Chat", icon: MessageSquarePlus },
                     { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
                     { id: "historial", label: "Historial de Consultas", icon: History },
                     { id: "config", label: "Configuración & IA", icon: Settings },
@@ -3012,7 +3113,7 @@ export default function CriteriosApp() {
         </main>
 
           {/* ===== COLUMNA 3: INSPECTOR DE FUENTES (COLAPSABLE, NO TOCA EL HEADER) ===== */}
-          {inspectorOpen && (
+          {inspectorOpen ? (
             <aside
               style={{
                 backgroundColor: palette.bgSurface,
@@ -3384,6 +3485,25 @@ export default function CriteriosApp() {
                   </div>
                 )}
               </div>
+            </aside>
+          ) : (
+            /* Rail colapsado del Inspector en el panel lateral derecho (abajo, dentro de la columna, no en el topbar) */
+            <aside
+              style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgPage }}
+              className="hidden xl:flex flex-col items-center pt-3 pb-4 px-1.5 border-l shrink-0 justify-between"
+            >
+              <button
+                type="button"
+                onClick={() => setInspectorOpen(true)}
+                className="p-2 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-100 cursor-pointer text-zinc-600 transition-all shadow-xs flex flex-col items-center gap-1.5 group"
+                title="Abrir Inspector de evidencias"
+                aria-label="Abrir Inspector de evidencias"
+              >
+                <HubIcon icon={PanelRightOpen} size={16} />
+                <span className="text-[10px] font-semibold text-zinc-500 [writing-mode:vertical-lr] tracking-wider py-1 group-hover:text-zinc-900">
+                  Inspector
+                </span>
+              </button>
             </aside>
           )}
         </div>
