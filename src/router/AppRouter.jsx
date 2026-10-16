@@ -56,6 +56,7 @@ const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/A
 // PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
 const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
+const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
 // Tienda de cliente: las páginas viven en inventario y se sirven aquí, dentro
 // del Layout, para que lleven el navbar oficial de Qaway Lab.
 const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/TiendaClientePage'))
@@ -420,6 +421,23 @@ export default function AppRouter() {
         <Route
           path="hub/gestor-proyectos-app/*"
           element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+        />
+        {/* Búsqueda de Criterios RAG (12-qaway_empresarial): nativo con shell oficial Hub */}
+        <Route
+          path="/hub/criterios/*"
+          element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        <Route
+          path="/hub/criterios"
+          element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        <Route
+          path="hub/criterios/*"
+          element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        <Route
+          path="hub/criterios"
+          element={renderRoute('hub', <CriteriosAppPage />)}
         />
         {/* Biblioteca: standalone FUERA del Layout → sin navbar, solo logo interno */}
         <Route

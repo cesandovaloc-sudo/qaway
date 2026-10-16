@@ -40,6 +40,7 @@ const publicPathAllowList = new Set([
   '/hub/blog-editor',
   '/hub/blog-editor/editor/:id',
   '/hub/inventario',
+  '/hub/criterios',
   '/hub/pagos',
   '/hub/pagos/checkout',
   '/hub/pagos/purchases',
