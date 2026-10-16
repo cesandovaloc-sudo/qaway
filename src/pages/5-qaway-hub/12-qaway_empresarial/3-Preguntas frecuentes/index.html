@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MINEDU • DIGERE - Banco de Casuísticas y Preguntas Frecuentes</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase JS Client (v2 Oficial) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    .accordion-content {
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    }
+    @keyframes pulseSubtle {
+      0%, 100% { background-color: #f8fafc; }
+      50% { background-color: #f1f5f9; }
+    }
+    .highlight-pulse {
+      animation: pulseSubtle 1.2s ease-in-out 2;
+    }
+    mark.search-highlight {
+      background-color: #fef08a;
+      color: #854d0e;
+      padding: 0 3px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+    ::placeholder, input::placeholder, textarea::placeholder {
+      color: #94a3b8 !important;
+      opacity: 0.55 !important;
+      font-weight: 300 !important;
+    }
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen py-6 px-4 sm:px-6 lg:px-8 antialiased selection:bg-slate-200 selection:text-slate-900">
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="max-w-7xl mx-auto space-y-5">
+
+    <!-- 1. ENCABEZADO PRINCIPAL (HERO BANNER) -->
+    <header class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#b91c1c] via-[#c81e1e] to-[#dc2626] text-white shadow-sm px-6 py-7 sm:px-9 sm:py-8">
+      <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 overflow-hidden">
+        <svg class="absolute right-0 top-0 h-full w-full transform translate-x-12 scale-125 opacity-20" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <path d="M180 300C240 160 360 60 500 20V300H180Z" fill="#ffffff" fill-opacity="0.35"/>
+          <path d="M290 300C330 140 410 40 500 -20V300H290Z" fill="#ffffff" fill-opacity="0.45"/>
+          <circle cx="420" cy="240" r="190" fill="url(#paint0_radial)" fill-opacity="0.3"/>
+          <defs>
+            <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(420 240) rotate(90) scale(190)">
+              <stop stop-color="white"/>
+              <stop offset="1" stop-color="white" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div class="max-w-3xl space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] sm:text-xs font-bold tracking-[0.16em] uppercase text-red-100/90">
+              MINEDU • DIGERE
+            </span>
+          </div>
+          <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Banco de casuísticas y preguntas frecuentes
+          </h1>
+          <p class="text-sm sm:text-base leading-relaxed text-red-50/90 font-normal pt-0.5 max-w-2xl">
+            Banco oficial de consulta para registrar y revisar casuísticas recurrentes identificadas durante el monitoreo a las UGEL en el marco del MC SIGA.
+          </p>
+        </div>
+
+        <!-- Botones de Cabecera (Administración) -->
+        <div id="header-admin-controls" class="hidden flex-shrink-0 flex items-center gap-2">
+          <button
+            type="button"
+            onclick="openManagementModal('form')"
+            class="group inline-flex items-center gap-2.5 rounded-xl bg-white text-[#b91c1c] hover:bg-red-50 px-4 py-3 text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all transform active:scale-95"
+            title="Cargar casuísticas de modo manual"
+          >
+            <div class="w-6 h-6 rounded-lg bg-red-100 text-[#b91c1c] flex items-center justify-center group-hover:bg-red-200 transition">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+              </svg>
+            </div>
+            <span>+ Nueva Pregunta</span>
+            <span id="header-total-badge" class="ml-0.5 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-100/90 text-[#b91c1c]">
+              14 casos
+            </span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. CUADRÍCULA DE DIRECCIONES (ICONOS LUCIDE OFICIALES) -->
+    <section aria-label="Direcciones de Educación">
+      <div id="directions-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4.5">
+        <!-- Render dinámico -->
+      </div>
+    </section>
+
+    <!-- 3. BARRA DE BÚSQUEDA OPTIMIZADA Y PANEL DE FILTRO (DISTINTIVO Y ELEVADO) -->
+    <section class="rounded-2xl bg-slate-50/90 border border-slate-200/90 shadow-[0_2px_8px_-2px_rgba(15,23,42,0.04)] p-4 sm:p-5 space-y-3.5">
+      <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+        
+        <!-- Input de búsqueda con altura ergonómica (h-12) y fondo blanco contrastado -->
+        <div class="relative flex-1">
+          <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+            <svg class="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+          </span>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Buscar por casuística, problema reportado, grado, código o palabras clave..."
+            class="w-full h-12 rounded-xl bg-white pl-11 pr-24 text-sm text-slate-800 placeholder:text-slate-400/50 placeholder:font-light border border-slate-300/80 shadow-2xs focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-300/50 transition"
+          />
+
+          <!-- Botón limpiar y badge de algoritmo -->
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 gap-1.5">
+            <button
+              id="clear-search-btn"
+              type="button"
+              title="Limpiar búsqueda"
+              class="hidden text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
+            <span class="hidden sm:inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500 border border-slate-200" title="Búsqueda inteligente con ponderación y tolerancia difusa">
+              Fuzzy
+            </span>
+          </div>
+        </div>
+
+        <!-- Botones de acción (Colapsar todo y Primera coincidencia) SIN duplicar botón de Nueva Pregunta -->
+        <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap">
+          <button
+            id="toggle-all-btn"
+            type="button"
+            class="h-12 flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 px-4 text-xs sm:text-[13px] font-semibold border border-slate-300/80 shadow-2xs transition active:scale-[0.98]"
+          >
+            <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>
+            </svg>
+            <span id="toggle-all-text">Colapsar todo</span>
+          </button>
+
+          <button
+            id="open-first-btn"
+            type="button"
+            class="h-12 flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 px-4 text-xs sm:text-[13px] font-semibold border border-slate-300/80 shadow-2xs transition active:scale-[0.98]"
+          >
+            <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>Primera coincidencia</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de estado y filtros activos integrada y despejada -->
+      <div class="pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-[13px] text-slate-500">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-[#b91c1c]"></span>
+          <div id="status-bar-text" class="text-slate-600 font-medium">
+            Dirección seleccionada: <strong class="font-bold text-slate-800">DEI</strong>.
+          </div>
+        </div>
+        <div id="search-stats-badge" class="hidden sm:inline-flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. CONTENEDOR PRINCIPAL DE CASUÍSTICAS (ACORDEÓN EXCLUSIVO) -->
+    <main class="rounded-2xl bg-white border border-slate-200/75 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.04)] p-4 sm:p-6 space-y-4">
+      
+      <!-- Cabecera de la sección activa -->
+      <div id="section-header" class="flex items-center justify-between border-b border-slate-100 pb-3.5">
+        <!-- Render dinámico -->
+      </div>
+
+      <!-- Lista de Acordeones de Casos -->
+      <div id="cases-container" class="space-y-3">
+        <!-- Render dinámico -->
+      </div>
+
+    </main>
+
+    <!-- 5. FOOTER INSTITUCIONAL Y SWITCH DE MODO ADMINISTRADOR -->
+    <footer class="pt-6 pb-8 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-slate-700">MINEDU • DIGERE</span>
+        <span class="text-slate-300">|</span>
+        <span>Monitoreo Cuadro de Distribución MC SIGA</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span id="storage-mode-footer" class="text-slate-400">Almacenamiento: Caché Local</span>
+        <button
+          type="button"
+          id="admin-mode-toggle"
+          onclick="toggleAdminMode()"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 font-medium transition cursor-pointer text-[11px] shadow-2xs"
+          title="Alternar entre vista pública de consulta y modo administrador"
+        >
+          <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span id="admin-mode-toggle-text">Acceso Administrador</span>
+        </button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- 5. MODAL / PANEL DE GESTIÓN Y CARGA MANUAL -->
+  <div
+    id="management-modal"
+    class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 transition-opacity"
+    aria-modal="true"
+    role="dialog"
+  >
+    <div class="relative w-full max-w-4xl rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Cabecera del Panel -->
+      <div class="bg-gradient-to-r from-[#b91c1c] to-[#dc2626] text-white px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-white">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold tracking-tight">Panel de Gestión • Banco de Casuísticas</h3>
+            <p class="text-xs text-red-100 font-normal">Crear nuevas preguntas o modificar casos registrados</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="closeManagementModal()"
+          class="rounded-lg p-1.5 text-white/80 hover:text-white hover:bg-white/15 transition focus:outline-none"
+          title="Cerrar panel"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Barra de Pestañas -->
+      <div class="flex items-center border-b border-slate-200 bg-slate-50/70 px-6 pt-2 gap-2 overflow-x-auto">
+        <button
+          id="tab-btn-form"
+          type="button"
+          onclick="switchPanelTab('form')"
+          class="inline-flex items-center gap-2 border-b-2 border-[#b91c1c] px-3.5 py-2.5 text-xs sm:text-[13px] font-bold text-[#b91c1c] transition"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/><path d="M12 5v14"/>
+          </svg>
+          <span id="tab-form-title">Nueva Pregunta</span>
+        </button>
+
+        <button
+          id="tab-btn-list"
+          type="button"
+          onclick="switchPanelTab('list')"
+          class="inline-flex items-center gap-2 border-b-2 border-transparent px-3.5 py-2.5 text-xs sm:text-[13px] font-semibold text-slate-500 hover:text-slate-800 transition"
+        >
+          <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+          <span>Modificar Preguntas Elaboradas</span>
+          <span id="modal-list-badge" class="ml-1 px-2 py-0.2 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">12</span>
+        </button>
+
+        <button
+          id="tab-btn-cloud"
+          type="button"
+          onclick="switchPanelTab('cloud')"
+          class="inline-flex items-center gap-2 border-b-2 border-transparent px-3.5 py-2.5 text-xs sm:text-[13px] font-semibold text-slate-500 hover:text-slate-800 transition"
+        >
+          <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+          </svg>
+          <span>Conexión Supabase</span>
+        </button>
+      </div>
+
+      <!-- Contenido de las Pestañas -->
+      <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
+
+        <!-- TAB 1: FORMULARIO -->
+        <div id="panel-tab-form" class="space-y-4">
+          
+          <!-- Banner modo edición (visible únicamente al editar una casuística existente desde Tab 2 o lista) -->
+          <div id="editing-alert" class="hidden rounded-xl bg-amber-50 border border-amber-300 p-3.5 flex items-center justify-between text-xs sm:text-[13px] text-amber-900 shadow-xs">
+            <div class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-amber-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+              </svg>
+              <span>Estás modificando la casuística: <strong id="editing-case-label">01</strong></span>
+            </div>
+            <button
+              type="button"
+              onclick="cancelEditing()"
+              class="font-bold underline text-amber-900 hover:text-black ml-3 px-2 py-1 rounded bg-amber-100/80 hover:bg-amber-200 transition"
+            >
+              Cancelar y volver a Nueva Pregunta
+            </button>
+          </div>
+
+          <form id="case-form" onsubmit="handleFormSubmit(event)" class="space-y-4 pt-1">
+            <input type="hidden" id="form-case-id" value="" />
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+              
+              <!-- Selección de Dirección -->
+              <div class="sm:col-span-5 space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Dirección pedagógica <span class="text-red-500">*</span>
+                </label>
+                <select
+                  id="form-direction"
+                  required
+                  class="w-full h-11 rounded-xl bg-slate-50 border border-slate-200/90 px-3.5 text-xs sm:text-[13px] text-slate-800 font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition"
+                  onchange="updateSuggestedNumber()"
+                >
+                  <option value="DEI">DEI - Educación Inicial</option>
+                  <option value="DEP">DEP - Educación Primaria</option>
+                  <option value="DISER">DISER - Servicios Educativos Rurales</option>
+                  <option value="DEBA">DEBA - Educación Básica Alternativa</option>
+                  <option value="DEBE">DEBE - Educación Básica Especial</option>
+                  <option value="DES">DES - Educación Secundaria</option>
+                </select>
+              </div>
+
+              <!-- Número de caso (CORRELATIVO BLOQUEADO AUTOMÁTICO) -->
+              <div class="sm:col-span-3 space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
+                  <span>Número</span>
+                  <span class="text-[10px] text-slate-400 font-normal">Automático</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="form-number"
+                    readonly
+                    tabindex="-1"
+                    title="El correlativo es asignado automáticamente según la dirección."
+                    class="w-full h-11 rounded-xl bg-slate-100/80 border border-slate-200/90 px-3.5 text-xs sm:text-[13px] text-slate-600 font-extrabold text-center cursor-not-allowed select-none shadow-inner"
+                  />
+                  <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 pointer-events-none">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Título de Criterio -->
+              <div class="sm:col-span-4 space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Criterio rector <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="form-criterio-title"
+                  required
+                  placeholder="Ej: Pertinencia y suficiencia"
+                  class="w-full h-11 rounded-xl bg-slate-50 border border-slate-200/90 px-3.5 text-xs sm:text-[13px] text-slate-800 placeholder:text-slate-400/50 placeholder:font-light focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition"
+                />
+              </div>
+            </div>
+
+            <!-- Título del caso -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Título del caso / Pregunta Frecuente identificada <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="form-title"
+                required
+                placeholder="Ej: Cambio de característica de una institución educativa: ¿a qué dirección corresponde asignar los materiales?"
+                class="w-full h-11 rounded-xl bg-slate-50 border border-slate-200/90 px-3.5 text-xs sm:text-[13.5px] font-semibold text-slate-800 placeholder:text-slate-400/50 placeholder:font-light focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition"
+              />
+            </div>
+
+            <!-- Descripción del Criterio -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Descripción o fundamento del Criterio <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="form-criterio-desc"
+                required
+                rows="2"
+                placeholder="Detalla el principio normativo o pedagógico en el marco del cuadro de distribución..."
+                class="w-full rounded-xl bg-slate-50 border border-slate-200/90 p-3 text-xs sm:text-[13px] text-slate-800 placeholder:text-slate-400/50 placeholder:font-light leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition"
+              ></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              <!-- Desarrollo -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Desarrollo del caso <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="form-desarrollo"
+                  required
+                  rows="4"
+                  placeholder="Explica qué ocurrió exactamente durante la recepción o monitoreo..."
+                  class="w-full rounded-xl bg-slate-50 border border-slate-200/90 p-3 text-xs sm:text-[13px] text-slate-800 placeholder:text-slate-400/50 placeholder:font-light leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition"
+                ></textarea>
+              </div>
+
+              <!-- Acción -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Acción sugerida <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="form-accion"
+                  required
+                  rows="4"
+                  placeholder="Paso inmediato a realizar por la UGEL o directivo..."
+                  class="w-full rounded-xl bg-slate-50 border border-slate-200/90 p-3 text-xs sm:text-[13px] text-slate-800 placeholder:text-slate-400/50 placeholder:font-light leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition"
+                ></textarea>
+              </div>
+
+              <!-- Solución -->
+              <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider text-emerald-800">
+                  Solución referencial <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="form-solucion"
+                  required
+                  rows="4"
+                  placeholder="Resolución final, reasignación pecosa o regularización..."
+                  class="w-full rounded-xl bg-slate-50 border border-slate-200/90 p-3 text-xs sm:text-[13px] text-slate-800 placeholder:text-slate-400/50 placeholder:font-light leading-relaxed focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="pt-2 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onclick="cancelEditing()"
+                class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-xs sm:text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition"
+              >
+                Limpiar campos
+              </button>
+              <button
+                type="submit"
+                class="h-11 inline-flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-black text-white px-5 text-xs sm:text-[13px] font-semibold shadow-xs transition active:scale-[0.98]"
+              >
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span id="submit-btn-text">Guardar Pregunta en el Banco</span>
+              </button>
+            </div>
+          </form>
+
+        </div>
+
+        <!-- TAB 2: INVENTARIO / MODIFICAR -->
+        <div id="panel-tab-list" class="hidden space-y-4">
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-slate-800">Preguntas registradas en el banco</h4>
+              <p class="text-[11px] text-slate-500">Selecciona cualquier caso para editar sus textos o soluciones.</p>
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <label class="text-xs font-bold text-slate-600">Filtrar:</label>
+              <select
+                id="modal-filter-dir"
+                onchange="renderModalList()"
+                class="rounded-lg bg-white border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none"
+              >
+                <option value="ALL">Todas las direcciones</option>
+                <option value="DEI">DEI - Inicial</option>
+                <option value="DEP">DEP - Primaria</option>
+                <option value="DISER">DISER - Rurales</option>
+                <option value="DEBA">DEBA - EBA</option>
+                <option value="DEBE">DEBE - EBE</option>
+                <option value="DES">DES - Secundaria</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Buscador en modal -->
+          <div class="relative w-full">
+            <input
+              type="text"
+              id="modal-search-cases"
+              oninput="renderModalList()"
+              placeholder="Buscar pregunta por palabra clave o criterio..."
+              class="w-full h-10 rounded-xl bg-slate-50 border border-slate-200 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400/50 placeholder:font-light focus:outline-none focus:bg-white focus:ring-2 focus:ring-slate-200"
+            />
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+              </svg>
+            </span>
+          </div>
+
+          <!-- Lista de casos en modal -->
+          <div id="modal-cases-list" class="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
+          </div>
+        </div>
+
+        <!-- TAB 3: CONEXIÓN SUPABASE -->
+        <div id="panel-tab-cloud" class="hidden space-y-4">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800">Conexión con Supabase (Nube Oficial)</h4>
+                <p class="text-xs text-slate-500">Ingresa tus credenciales para sincronizar automáticamente el banco en tiempo real.</p>
+              </div>
+            </div>
+
+            <div class="space-y-3 pt-2">
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700">Project URL de Supabase</label>
+                <input
+                  type="text"
+                  id="supabase-url-input"
+                  placeholder="https://xyzcompany.supabase.co"
+                  class="w-full h-10 rounded-xl bg-white border border-slate-300 px-3 text-xs font-mono text-slate-800 placeholder:text-slate-400/50 placeholder:font-light focus:outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
+
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-700">Anon Public Key (API Key)</label>
+                <input
+                  type="password"
+                  id="supabase-key-input"
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+                  class="w-full h-10 rounded-xl bg-white border border-slate-300 px-3 text-xs font-mono text-slate-800 placeholder:text-slate-400/50 placeholder:font-light focus:outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
+
+              <div class="pt-2 flex items-center justify-between">
+                <span id="supabase-test-feedback" class="text-xs font-semibold text-slate-500"></span>
+                <button
+                  type="button"
+                  onclick="saveSupabaseConfig()"
+                  class="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 text-xs font-semibold transition shadow-xs"
+                >
+                  Guardar y Conectar Supabase
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pie del Panel -->
+      <div class="border-t border-slate-200 bg-slate-50 px-6 py-3.5 flex items-center justify-between text-xs text-slate-500">
+        <span id="storage-mode-footer">Almacenamiento: Sincronizado</span>
+        <button
+          type="button"
+          onclick="closeManagementModal()"
+          class="rounded-lg bg-slate-200/80 hover:bg-slate-300/80 text-slate-700 px-3.5 py-1.5 font-semibold transition"
+        >
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST DE NOTIFICACIÓN -->
+  <div
+    id="toast-notification"
+    class="pointer-events-none fixed bottom-5 right-5 z-50 transform translate-y-12 opacity-0 transition-all duration-200 ease-out flex items-center gap-2.5 rounded-xl bg-slate-900 text-white px-4 py-3 shadow-xl border border-slate-700 text-xs sm:text-sm font-medium"
+  >
+    <span id="toast-icon"></span>
+    <span id="toast-message">Mensaje</span>
+  </div>
+
+  <!-- LÓGICA DE LA APLICACIÓN -->
+  <script>
+    // -------------------------------------------------------------
+    // CONFIGURACIÓN DE SUPABASE (Almacenamiento en Nube Oficial)
+    // -------------------------------------------------------------
+    const SUPABASE_STORAGE_URL_KEY = 'minedu_supabase_url_v1';
+    const SUPABASE_STORAGE_KEY_KEY = 'minedu_supabase_key_v1';
+
+    let supabaseClient = null;
+    let isSupabaseConnected = false;
+
+    // Inicializar cliente Supabase si hay credenciales guardadas
+    function initSupabase() {
+      const savedUrl = localStorage.getItem(SUPABASE_STORAGE_URL_KEY) || '';
+      const savedKey = localStorage.getItem(SUPABASE_STORAGE_KEY_KEY) || '';
+
+      const urlInput = document.getElementById('supabase-url-input');
+      const keyInput = document.getElementById('supabase-key-input');
+      if (urlInput) urlInput.value = savedUrl;
+      if (keyInput) keyInput.value = savedKey;
+
+      if (savedUrl && savedKey && window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(savedUrl, savedKey);
+          updateSupabaseStatus(true, 'Conectado a Supabase');
+          loadCasesFromSupabase();
+          listenToRealtime();
+          return;
+        } catch (e) {
+          console.warn('Error al iniciar Supabase:', e);
+        }
+      }
+      updateSupabaseStatus(false, 'Modo Local (Sin Supabase)');
+    }
+
+    function updateSupabaseStatus(connected, text) {
+      isSupabaseConnected = connected;
+      const dot = document.getElementById('supabase-status-dot');
+      const label = document.getElementById('supabase-status-label');
+      const footer = document.getElementById('storage-mode-footer');
+
+      if (dot && label) {
+        if (connected) {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+          label.textContent = 'Supabase Cloud Activo';
+          if (footer) footer.textContent = 'Almacenamiento: Supabase Cloud (Tiempo Real)';
+        } else {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
+          label.textContent = 'Modo Local (Configurar Nube)';
+          if (footer) footer.textContent = 'Almacenamiento: LocalStorage / Caché';
+        }
+      }
+    }
+
+    window.openSupabaseModal = function() {
+      openManagementModal('cloud');
+    };
+
+    window.saveSupabaseConfig = async function() {
+      const url = document.getElementById('supabase-url-input').value.trim();
+      const key = document.getElementById('supabase-key-input').value.trim();
+      const feedback = document.getElementById('supabase-test-feedback');
+
+      if (!url || !key) {
+        feedback.className = 'text-xs font-semibold text-rose-600';
+        feedback.textContent = 'Ingresa la URL y el Anon Key de tu proyecto.';
+        return;
+      }
+
+      feedback.className = 'text-xs font-semibold text-slate-500';
+      feedback.textContent = 'Probando conexión...';
+
+      try {
+        const testClient = window.supabase.createClient(url, key);
+        const { data, error } = await testClient.from('casuisticas').select('id').limit(1);
+
+        if (error) {
+          feedback.className = 'text-xs font-semibold text-rose-600';
+          feedback.textContent = 'Error: ' + error.message;
+          return;
+        }
+
+        localStorage.setItem(SUPABASE_STORAGE_URL_KEY, url);
+        localStorage.setItem(SUPABASE_STORAGE_KEY_KEY, key);
+        supabaseClient = testClient;
+
+        feedback.className = 'text-xs font-semibold text-emerald-600';
+        feedback.textContent = 'Conexión exitosa con Supabase.';
+        updateSupabaseStatus(true, 'Supabase Cloud Activo');
+        showToast('Conectado exitosamente a Supabase', 'success');
+
+        await loadCasesFromSupabase();
+        listenToRealtime();
+        closeManagementModal();
+      } catch (err) {
+        feedback.className = 'text-xs font-semibold text-rose-600';
+        feedback.textContent = 'Fallo de conexión: ' + err.message;
+      }
+    };
+
+    async function loadCasesFromSupabase() {
+      if (!supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('casuisticas')
+          .select('*')
+          .order('number', { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          // Reconstruir estructura de direcciones
+          directionsData.forEach(dir => {
+            const dirCases = data.filter(c => c.direction_id === dir.id);
+            dir.cases = dirCases.map(c => ({
+              id: c.id,
+              number: c.number,
+              title: c.title,
+              criterioTitle: c.criterio_title,
+              criterioDesc: c.criterio_desc,
+              desarrollo: c.desarrollo,
+              accion: c.accion,
+              solucion: c.solucion,
+              isOpen: false
+            }));
+          });
+          renderDirectionsGrid();
+          renderCasesSection();
+          renderModalList();
+          populateQuickCaseSelector();
+        }
+      } catch (err) {
+        console.warn('Error cargando de Supabase:', err);
+      }
+    }
+
+    function listenToRealtime() {
+      if (!supabaseClient) return;
+      try {
+        supabaseClient
+          .channel('casuisticas-changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'casuisticas' }, () => {
+            loadCasesFromSupabase();
+          })
+          .subscribe();
+      } catch (e) {
+        console.warn('Realtime no habilitado:', e);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // ICONOS LUCIDE OFICIALES (stroke-width: 1.75, currentColor)
+    // -------------------------------------------------------------
+    const directionIcons = {
+      DEI: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+            </svg>`,
+      DEP: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>`,
+      DISER: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+              </svg>`,
+      DEBA: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+             </svg>`,
+      DEBE: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+               <circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1"/><path d="m5 8 3-3 5.5 3-2.36 3.5"/><path d="M4.24 14.5a5 5 0 0 0 6.88 6"/><path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>
+             </svg>`,
+      DES: `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+            </svg>`
+    };
+
+    // -------------------------------------------------------------
+    // BANCO PREDETERMINADO OFICIAL (12 CASUÍSTICAS COLAPSADAS)
+    // -------------------------------------------------------------
+    const defaultDirectionsData = [
+      {
+        id: 'DEI',
+        code: 'DEI',
+        name: 'Educación Inicial',
+        cases: [
+          {
+            id: 'dei-01',
+            number: '01',
+            title: 'Material asignado que no corresponde a la característica del servicio',
+            criterioTitle: 'Pertinencia',
+            criterioDesc: 'El material debe corresponder a la característica del servicio educativo.',
+            desarrollo: 'Se asignó material de inicial ciclo II a una IE que atiende ciclo I, generando inconsistencias con la población matriculada.',
+            accion: 'Verificar el nivel y ciclo de atención de la IE y solicitar el reajuste de materiales según corresponda.',
+            solucion: 'Procede el reajuste con el material correspondiente al ciclo de atención registrado en el SIAGIE.',
+            isOpen: false
+          },
+          {
+            id: 'dei-02',
+            number: '02',
+            title: 'Cantidad de materiales menor a la matrícula atendida',
+            criterioTitle: 'Suficiencia / Cobertura',
+            criterioDesc: 'La dotación debe cubrir el 100% de niños y niñas matriculados en el aula.',
+            desarrollo: 'La IE recibió cuadernos de trabajo en una cantidad inferior a los estudiantes registrados en las nóminas vigentes del ciclo II.',
+            accion: 'Identificar la brecha en el acta de recepción y reportar el déficit al especialista de material educativo de la UGEL.',
+            solucion: 'Redistribución de excedentes disponibles en el almacén de la UGEL o modulación entre II.EE. cercanas de la jurisdicción.',
+            isOpen: false
+          }
+        ]
+      },
+      {
+        id: 'DEP',
+        code: 'DEP',
+        name: 'Educación Primaria',
+        cases: [
+          {
+            id: 'dep-01',
+            number: '01',
+            title: 'Cuadernos de trabajo entregados en grado distinto al solicitado',
+            criterioTitle: 'Concordancia de grado',
+            criterioDesc: 'El material distribuido debe coincidir con la matrícula por grado del nivel primaria.',
+            desarrollo: 'Durante el monitoreo se detectaron paquetes de 4.° grado entregados en secciones multigrado que únicamente atienden de 1.° a 3.° grado.',
+            accion: 'Registrar la observación en el sistema de seguimiento y coordinar con el área de Abastecimiento de la UGEL el recojo y canje.',
+            solucion: 'Reasignación inmediata mediante pecosa complementaria con cargo al stock de contingencia de la UGEL.',
+            isOpen: false
+          },
+          {
+            id: 'dep-02',
+            number: '02',
+            title: 'Retraso en la recepción de bibliotecas de aula para el III ciclo',
+            criterioTitle: 'Oportunidad',
+            criterioDesc: 'Los materiales deben encontrarse en la IE antes del inicio o durante el primer bimestre escolar.',
+            desarrollo: 'La ruta de transporte programada presentó incidencias climáticas, postergando la llegada de los módulos de lectura a 5 II.EE.',
+            accion: 'Reprogramar la ruta priorizada en coordinación con el transportista y notificar al director de la IE la nueva fecha de entrega.',
+            solucion: 'Suscripción del acta de entrega reprogramada y actualización del estado de recepción en el módulo SIGA.',
+            isOpen: false
+          },
+          {
+            id: 'dep-03',
+            number: '03',
+            title: 'Cambio de característica de una institución educativa: ¿a qué dirección corresponde asignar los materiales?',
+            criterioTitle: 'Pertinencia y suficiencia',
+            criterioDesc: 'En el marco del numeral 1.6 «Elaboración del Cuadro de Distribución Local en el MC SIGA», la dotación de materiales educativos debe responder a la característica de servicio validada en el padrón oficial.',
+            desarrollo: 'La UGEL identifica una institución educativa que ha cambiado de característica o modalidad en su servicio (ej. multigrado a polidocente completo, o primaria regular a servicio rural/EIB). Se consulta qué dirección pedagógica (DEP o DISER) debe asumir la dotación y asignación de materiales educativos en el MC SIGA.',
+            accion: 'Verificar el reporte actualizado en SIAGIE y coordinar entre especialistas de DEP y DISER para validar la matrícula real y la nómina oficial antes de la emisión de la pecosa.',
+            solucion: 'Corresponde a la dirección pedagógica que atiende la nueva característica validada en el padrón oficial MINEDU. La UGEL emite el informe técnico y efectúa la reasignación en el MC SIGA.',
+            isOpen: false
+          }
+        ]
+      },
+      {
+        id: 'DISER',
+        code: 'DISER',
+        name: 'Servicios educativos rurales',
+        cases: [
+          {
+            id: 'diser-01',
+            number: '01',
+            title: 'Material EIB asignado en lengua originaria distinta a la de la comunidad',
+            criterioTitle: 'Pertinencia lingüística',
+            criterioDesc: 'Los cuadernos EIB deben corresponder a la lengua originaria y variante registrada en el RNIIEE-EIB.',
+            desarrollo: 'Una IE bilingüe de revitalización cultural recibió cuadernos en variante quechua chanka cuando su registro corresponde a quechua collao.',
+            accion: 'Contrastación con el padrón EIB vigente y comunicación inmediata con el especialista EIB de la UGEL.',
+            solucion: 'Transferencia de material adecuado desde el lote de reserva regional y actualización de la caracterización lingüística.',
+            isOpen: false
+          },
+          {
+            id: 'diser-02',
+            number: '02',
+            title: 'Fichas de autoaprendizaje incompletas para aulas multigrado monolingües',
+            criterioTitle: 'Integralidad del módulo',
+            criterioDesc: 'El kit rural multigrado requiere guías docentes y fichas para todas las edades agrupadas.',
+            desarrollo: 'Se evidenció la llegada de fichas de Matemática sin sus respectivas guías metodológicas para el docente rural.',
+            accion: 'Facilitar temporalmente el repositorio digital oficial y gestionar el envío físico de los ejemplares faltantes.',
+            solucion: 'Entrega complementaria en el siguiente tramo de distribución rural y descarga asistida de guías en tableta.',
+            isOpen: false
+          },
+          {
+            id: 'diser-03',
+            number: '03',
+            title: 'Cambio de característica de una IE a servicio rural o EIB: asignación de materiales en MC SIGA',
+            criterioTitle: 'Pertinencia y suficiencia',
+            criterioDesc: 'En el marco del numeral 1.6 «Elaboración del Cuadro de Distribución Local en el MC SIGA», la dotación de materiales educativos debe responder a la característica de servicio validada en el padrón oficial.',
+            desarrollo: 'La UGEL identifica una institución educativa que ha transitado a servicio educativo rural o EIB. Se consulta el procedimiento de asignación entre DEP y DISER en el MC SIGA.',
+            accion: 'Contrastar con el padrón RIE/RNIIEE-EIB y coordinar entre especialistas de DEP y DISER para conciliar la nómina oficial en SIAGIE.',
+            solucion: 'Corresponde a DISER asumir la dotación de los materiales pertinentes a la nueva característica. La UGEL formaliza la reasignación en el MC SIGA según el numeral 1.6.',
+            isOpen: false
+          }
+        ]
+      },
+      {
+        id: 'DEBA',
+        code: 'DEBA',
+        name: 'Educación Básica Alternativa',
+        cases: [
+          {
+            id: 'deba-01',
+            number: '01',
+            title: 'Portafolios y textos del ciclo avanzado sin entrega en periféricos del CEBA',
+            criterioTitle: 'Alcance de atención',
+            criterioDesc: 'El material debe llegar tanto a la sede central del CEBA como a sus aulas periféricas autorizadas.',
+            desarrollo: 'El material permaneció almacenado en la sede central del CEBA sin distribuirse a los dos centros periféricos de turno nocturno.',
+            accion: 'Orientar al director del CEBA sobre el cronograma interno de reparto y verificar las actas de entrega a los docentes responsables.',
+            solucion: 'Distribución interna validada mediante acta firmada por los coordinadores de aulas periféricas.',
+            isOpen: false
+          },
+          {
+            id: 'deba-02',
+            number: '02',
+            title: 'Variación de matrícula por periodos promocionales semestrales',
+            criterioTitle: 'Flexibilidad de dotación',
+            criterioDesc: 'La asignación debe prever la matrícula por periodos de atención propios de la modalidad EBA.',
+            desarrollo: 'Incremento de estudiantes jóvenes y adultos en el segundo periodo promocional supera el stock inicial remitido.',
+            accion: 'Consolidar el reporte de matrícula actualizada en SIAGIE y solicitar dotación adicional a la UGEL.',
+            solucion: 'Asignación de módulos disponibles en el stock de reserva de la modalidad EBA.',
+            isOpen: false
+          }
+        ]
+      },
+      {
+        id: 'DEBE',
+        code: 'DEBE',
+        name: 'Educación Básica Especial',
+        cases: [
+          {
+            id: 'debe-01',
+            number: '01',
+            title: 'Material concreto adaptado pendiente de distribución a PRITE y CEBE',
+            criterioTitle: 'Accesibilidad y adaptación',
+            criterioDesc: 'Los recursos educativos deben responder a las necesidades educativas especiales asociadas a discapacidad.',
+            desarrollo: 'Kits sensoriales y material en relieve llegaron al almacén de la UGEL pero no contaban con cuadro de distribución actualizado para el PRITE.',
+            accion: 'Elaborar el cuadro de distribución junto con el especialista de EBE según la nómina de atención temprana.',
+            solucion: 'Emisión de pecosas específicas y entrega priorizada a los centros de Educación Básica Especial.',
+            isOpen: false
+          },
+          {
+            id: 'debe-02',
+            number: '02',
+            title: 'Requerimiento de textos en formato macrotipo o sistema Braille para II.EE. inclusivas',
+            criterioTitle: 'Inclusión educativa',
+            criterioDesc: 'Los estudiantes incluidos en EBR con baja visión o ceguera requieren formatos accesibles oportunos.',
+            desarrollo: 'Se identificó a dos estudiantes con discapacidad visual matriculados en EBR que aún no cuentan con material adaptado a su condición.',
+            accion: 'Articular con el SAANEE y reportar el requerimiento nominal al equipo de materiales de la DRE/MINEDU.',
+            solucion: 'Envío personalizado del paquete en sistema Braille y macrotipo a través del servicio de apoyo SAANEE.',
+            isOpen: false
+          }
+        ]
+      },
+      {
+        id: 'DES',
+        code: 'DES',
+        name: 'Educación Secundaria',
+        cases: [
+          {
+            id: 'des-01',
+            number: '01',
+            title: 'Desbalance de fichas de Matemática y Comunicación en 1.° y 2.° de secundaria',
+            criterioTitle: 'Proporcionalidad por sección',
+            criterioDesc: 'Cada estudiante de nivel secundaria debe contar con su ejemplar individual para el trabajo pedagógico.',
+            desarrollo: 'Incremento de dos secciones adicionales en 1.° de secundaria generó un faltante de 60 ejemplares en la IE.',
+            accion: 'Verificar la resolución de ampliación de secciones y contrastar con el padrón de modulación de la UGEL.',
+            solucion: 'Atención del déficit con el saldo de contingencia de la UGEL y registro en el aplicativo de monitoreo.',
+            isOpen: false
+          },
+          {
+            id: 'des-02',
+            number: '02',
+            title: 'Módulos de laboratorio de Ciencia y Tecnología sin recepción conforme en modelos JEC',
+            criterioTitle: 'Conformidad técnica',
+            criterioDesc: 'La recepción de equipamiento y material pedagógico requiere verificación de componentes completos.',
+            desarrollo: 'El director de la IE JEC reportó cajas con precinto observado antes de la firma de la pecosa correspondiente.',
+            accion: 'Levantar acta de verificación conjunta entre el responsable de almacén de la IE y el representante de la UGEL.',
+            solucion: 'Reposición de los insumos observados por parte del proveedor dentro del plazo de garantía contractual.',
+            isOpen: false
+          }
+        ]
+      }
+    ];
+
+    const LOCAL_STORAGE_KEY = 'minedu_casuisticas_db_v2';
+
+    function loadInitialDatabase() {
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(dir => ({
+              ...dir,
+              cases: dir.cases.map(c => ({ ...c, isOpen: false }))
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('Error al leer caché local', err);
+      }
+      return JSON.parse(JSON.stringify(defaultDirectionsData));
+    }
+
+    function saveLocalCache(data) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+      } catch (err) {
+        console.error('Error al guardar caché local', err);
+      }
+    }
+
+    let directionsData = loadInitialDatabase();
+    let selectedDirectionId = 'DEI';
+    let searchQuery = '';
+    let searchDebounceTimer = null;
+    let isAdminMode = new URLSearchParams(window.location.search).get('admin') === 'true' || localStorage.getItem('minedu_admin_mode') === 'true';
+
+    const directionsGridEl = document.getElementById('directions-grid');
+    const searchInputEl = document.getElementById('search-input');
+    const clearSearchBtnEl = document.getElementById('clear-search-btn');
+    const toggleAllBtnEl = document.getElementById('toggle-all-btn');
+    const toggleAllTextEl = document.getElementById('toggle-all-text');
+    const openFirstBtnEl = document.getElementById('open-first-btn');
+    const statusBarTextEl = document.getElementById('status-bar-text');
+    const searchStatsBadgeEl = document.getElementById('search-stats-badge');
+    const sectionHeaderEl = document.getElementById('section-header');
+    const casesContainerEl = document.getElementById('cases-container');
+    const headerTotalBadgeEl = document.getElementById('header-total-badge');
+
+    const managementModalEl = document.getElementById('management-modal');
+    const caseFormEl = document.getElementById('case-form');
+    const formCaseIdEl = document.getElementById('form-case-id');
+    const formDirectionEl = document.getElementById('form-direction');
+    const formNumberEl = document.getElementById('form-number');
+    const formTitleEl = document.getElementById('form-title');
+    const formCriterioTitleEl = document.getElementById('form-criterio-title');
+    const formCriterioDescEl = document.getElementById('form-criterio-desc');
+    const formDesarrolloEl = document.getElementById('form-desarrollo');
+    const formAccionEl = document.getElementById('form-accion');
+    const formSolucionEl = document.getElementById('form-solucion');
+    const submitBtnTextEl = document.getElementById('submit-btn-text');
+    const editingAlertEl = document.getElementById('editing-alert');
+    const editingCaseLabelEl = document.getElementById('editing-case-label');
+    const quickCaseSelectorEl = document.getElementById('quick-case-selector');
+    const modalCasesListEl = document.getElementById('modal-cases-list');
+    const modalFilterDirEl = document.getElementById('modal-filter-dir');
+    const modalSearchCasesEl = document.getElementById('modal-search-cases');
+    const modalListBadgeEl = document.getElementById('modal-list-badge');
+
+    function normalizeText(str) {
+      if (!str) return '';
+      return String(str)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    }
+
+    function levenshteinDistance(a, b) {
+      if (a.length === 0) return b.length;
+      if (b.length === 0) return a.length;
+      const matrix = [];
+      for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+      for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          if (b.charAt(i - 1) === a.charAt(j - 1)) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j - 1] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j] + 1
+            );
+          }
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    function matchesFuzzyWord(word, token) {
+      if (word === token) return true;
+      if (word.startsWith(token)) return true;
+      if (token.length >= 4) {
+        const maxDist = token.length >= 7 ? 2 : 1;
+        if (Math.abs(word.length - token.length) <= maxDist) {
+          if (levenshteinDistance(word, token) <= maxDist) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function scoreCase(item, queryTokens, rawQueryNorm) {
+      const fields = [
+        { key: 'title', weight: 24 },
+        { key: 'criterioTitle', weight: 16 },
+        { key: 'solucion', weight: 12 },
+        { key: 'accion', weight: 10 },
+        { key: 'desarrollo', weight: 8 },
+        { key: 'criterioDesc', weight: 6 },
+        { key: 'dirCode', weight: 10 },
+        { key: 'dirName', weight: 6 },
+        { key: 'number', weight: 14 }
+      ];
+
+      let totalScore = 0;
+      let matchedTokensCount = 0;
+
+      const fullTextNormalized = normalizeText(
+        `${item.number} ${item.title} ${item.criterioTitle} ${item.criterioDesc} ${item.desarrollo} ${item.accion} ${item.solucion} ${item.dirCode} ${item.dirName}`
+      );
+      if (rawQueryNorm.length > 2 && fullTextNormalized.includes(rawQueryNorm)) {
+        totalScore += 50;
+      }
+
+      queryTokens.forEach(token => {
+        let tokenMatchedInItem = false;
+
+        fields.forEach(f => {
+          const rawValue = item[f.key] || '';
+          const normValue = normalizeText(rawValue);
+          if (!normValue) return;
+
+          if (normValue.includes(token)) {
+            totalScore += f.weight;
+            tokenMatchedInItem = true;
+            if (normValue.startsWith(token) || normValue.includes(' ' + token)) {
+              totalScore += Math.round(f.weight * 0.5);
+            }
+          } else {
+            const words = normValue.split(/[\s,.;:()/-]+/);
+            for (let w of words) {
+              if (matchesFuzzyWord(w, token)) {
+                totalScore += Math.round(f.weight * 0.7);
+                tokenMatchedInItem = true;
+                break;
+              }
+            }
+          }
+        });
+
+        if (tokenMatchedInItem) {
+          matchedTokensCount++;
+        }
+      });
+
+      const minRequiredMatches = queryTokens.length <= 2 ? queryTokens.length : Math.ceil(queryTokens.length * 0.6);
+      if (matchedTokensCount < minRequiredMatches) {
+        return 0;
+      }
+
+      return totalScore;
+    }
+
+    function highlightQuery(text, queryTokens) {
+      if (!text || !queryTokens || queryTokens.length === 0) return text;
+
+      const escapedTokens = queryTokens
+        .filter(t => t.length > 1)
+        .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+
+      if (escapedTokens.length === 0) return text;
+
+      const pattern = new RegExp(`(${escapedTokens.join('|')})`, 'gi');
+      return String(text).replace(pattern, '<mark class="search-highlight">$1</mark>');
+    }
+
+    function getFilteredCases() {
+      const currentDir = directionsData.find(d => d.id === selectedDirectionId) || directionsData[0];
+      const rawQuery = searchQuery.trim();
+      const rawQueryNorm = normalizeText(rawQuery);
+
+      if (!rawQueryNorm) {
+        return {
+          mode: 'direction',
+          direction: currentDir,
+          tokens: [],
+          items: currentDir.cases.map(c => ({
+            ...c,
+            dirCode: currentDir.code,
+            dirName: currentDir.name,
+            dirId: currentDir.id,
+            score: 0
+          }))
+        };
+      }
+
+      const queryTokens = rawQueryNorm.split(/\s+/).filter(t => t.length > 0);
+      const scoredItems = [];
+      directionsData.forEach(dir => {
+        dir.cases.forEach(c => {
+          const item = {
+            ...c,
+            dirCode: dir.code,
+            dirName: dir.name,
+            dirId: dir.id
+          };
+          const score = scoreCase(item, queryTokens, rawQueryNorm);
+          if (score > 0) {
+            scoredItems.push({
+              ...item,
+              score: score
+            });
+          }
+        });
+      });
+
+      scoredItems.sort((a, b) => b.score - a.score);
+
+      return {
+        mode: 'search',
+        direction: currentDir,
+        tokens: queryTokens,
+        items: scoredItems
+      };
+    }
+
+    function getTotalCasesCount() {
+      return directionsData.reduce((acc, dir) => acc + dir.cases.length, 0);
+    }
+
+    function renderDirectionsGrid() {
+      const totalCases = getTotalCasesCount();
+      headerTotalBadgeEl.textContent = `${totalCases} ${totalCases === 1 ? 'caso' : 'casos'}`;
+      if (modalListBadgeEl) modalListBadgeEl.textContent = totalCases;
+
+      directionsGridEl.innerHTML = directionsData.map(dir => {
+        const isSelected = dir.id === selectedDirectionId && !searchQuery;
+        const count = dir.cases.length;
+
+        const cardClasses = isSelected
+          ? 'bg-white border-2 border-[#b91c1c] shadow-[0_4px_16px_-4px_rgba(185,28,28,0.12)] ring-4 ring-rose-50'
+          : 'bg-white border border-slate-200/90 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5';
+
+        const iconBoxClasses = isSelected
+          ? 'text-[#b91c1c] bg-rose-50 border border-rose-100'
+          : 'text-slate-700 bg-slate-50 border border-slate-200/60 group-hover:text-slate-900 group-hover:bg-slate-100';
+
+        const badgeClasses = isSelected
+          ? 'bg-rose-100 text-[#b91c1c] border border-rose-200'
+          : 'bg-slate-100 text-slate-700 border border-slate-200 group-hover:bg-slate-200/70';
+
+        const arrowClasses = isSelected
+          ? 'text-[#b91c1c] translate-x-1'
+          : 'text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5';
+
+        return `
+          <button
+            type="button"
+            onclick="selectDirection('${dir.id}')"
+            aria-pressed="${isSelected}"
+            class="group w-full text-left rounded-2xl min-h-[78px] sm:min-h-[84px] px-5 py-4 sm:px-6 sm:py-4.5 transition-all duration-200 flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b91c1c] ${cardClasses}"
+          >
+            <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+              <div class="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${iconBoxClasses}">
+                ${directionIcons[dir.id] || ''}
+              </div>
+
+              <span class="flex-shrink-0 inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-xs font-black tracking-wide ${badgeClasses}">
+                ${dir.code}
+              </span>
+
+              <div class="min-w-0">
+                <span class="block truncate text-sm sm:text-base font-bold text-slate-800 tracking-tight leading-snug">
+                  ${dir.name}
+                </span>
+                <span class="block text-xs font-medium text-slate-400 mt-0.5">
+                  ${count} ${count === 1 ? 'casuística' : 'casuísticas'}
+                </span>
+              </div>
+            </div>
+
+            <span class="flex-shrink-0 transition-transform duration-150 ${arrowClasses}">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderCasesSection() {
+      const { mode, direction, tokens, items } = getFilteredCases();
+
+      if (mode === 'direction') {
+        statusBarTextEl.innerHTML = `Dirección seleccionada: <span class="font-bold text-slate-700">${direction.code} - ${direction.name}</span>. Se muestran sus casuísticas oficiales.`;
+        searchStatsBadgeEl.classList.add('hidden');
+      } else {
+        statusBarTextEl.innerHTML = `Búsqueda optimizada: <span class="font-bold text-slate-800">"${searchQuery.trim()}"</span>. Se encontraron <span class="font-bold text-[#b91c1c]">${items.length}</span> coincidencia(s) clasificadas por relevancia.`;
+        searchStatsBadgeEl.classList.remove('hidden');
+        searchStatsBadgeEl.innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Coincidencia difusa activa</span>
+        `;
+      }
+
+      const countLabel = items.length === 1 ? '1 casuística registrada' : `${items.length} casuísticas registradas`;
+      sectionHeaderEl.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-100/90 border border-slate-200/60 text-slate-600 flex items-center justify-center flex-shrink-0">
+            ${mode === 'search' ? `
+              <svg class="w-5 h-5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+              </svg>
+            ` : (directionIcons[direction.id] || '')}
+          </div>
+          <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 border border-slate-200/70">
+            ${mode === 'search' ? 'RESULTADOS' : direction.code}
+          </span>
+          <div>
+            <h2 class="text-sm sm:text-[15px] font-bold text-slate-800 leading-tight">
+              ${mode === 'search' ? 'Casuísticas encontradas en el banco' : direction.name}
+            </h2>
+            <p class="text-xs text-slate-400 font-medium mt-0.5">
+              ${countLabel} ${mode === 'search' ? '• Ordenadas por relevancia' : ''}
+            </p>
+          </div>
+        </div>
+
+        ${isAdminMode ? `
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="openManagementModal('form', '${direction.id}')"
+            class="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-black transition"
+            title="Añadir nueva casuística a esta dirección"
+          >
+            <svg class="w-3.5 h-3.5 text-[#b91c1c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
+            <span>+ Añadir a ${direction.code}</span>
+          </button>
+        </div>
+        ` : ''}
+      `;
+
+      if (items.length === 0) {
+        casesContainerEl.innerHTML = `
+          <div class="rounded-2xl bg-slate-50/70 border border-slate-200/70 p-8 text-center space-y-3">
+            <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+              </svg>
+            </div>
+            <p class="text-sm font-bold text-slate-800">No se encontraron casuísticas que coincidan con la búsqueda</p>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">
+              Intenta con otra palabra clave o selecciona otra dirección.
+            </p>
+            <div class="pt-1 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onclick="clearSearchInput()"
+                class="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              >
+                Limpiar búsqueda
+              </button>
+            </div>
+          </div>
+        `;
+        updateToggleAllButtonLabel([]);
+        return;
+      }
+
+      casesContainerEl.innerHTML = items.map((item) => {
+        const isOpen = item.isOpen;
+
+        const highlightedTitle = highlightQuery(item.title, tokens);
+        const highlightedCriterioTitle = highlightQuery(item.criterioTitle, tokens);
+        const highlightedCriterioDesc = highlightQuery(item.criterioDesc, tokens);
+        const highlightedDesarrollo = highlightQuery(item.desarrollo, tokens);
+        const highlightedAccion = highlightQuery(item.accion, tokens);
+        const highlightedSolucion = highlightQuery(item.solucion, tokens);
+
+        return `
+          <article
+            id="case-card-${item.id}"
+            class="rounded-2xl border border-slate-200/80 bg-[#f8fafc] overflow-hidden transition-all duration-200 hover:border-slate-300/80 shadow-[0_1px_3px_rgba(15,23,42,0.02)]"
+          >
+            <div class="flex items-center justify-between bg-[#f8fafc] hover:bg-[#f1f5f9]/70 transition-colors">
+              <button
+                type="button"
+                onclick="toggleCase('${item.id}')"
+                aria-expanded="${isOpen}"
+                class="flex-1 px-4 py-3.5 sm:px-5 sm:py-4 flex items-center justify-between gap-4 text-left focus:outline-none"
+              >
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <span class="flex-shrink-0 w-9 h-8 rounded-lg bg-slate-200/75 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-300/40">
+                    ${item.number}
+                  </span>
+
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                      <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded">
+                        ${item.dirCode} • ${item.dirName}
+                      </span>
+                      ${item.score > 0 ? `
+                        <span class="inline-block text-[10px] font-bold text-amber-700 bg-amber-100/90 px-1.5 py-0.2 rounded">
+                          Relevancia: ${item.score}
+                        </span>
+                      ` : ''}
+                    </div>
+                    <h3 class="text-xs sm:text-[14px] font-bold text-slate-800 leading-snug">
+                      ${highlightedTitle}
+                    </h3>
+                  </div>
+                </div>
+
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200/70 text-slate-600 flex items-center justify-center transition-transform duration-200 ${isOpen ? 'rotate-180 bg-slate-200 text-slate-700' : ''}">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m6 9 6 6 6-6"/>
+                  </svg>
+                </span>
+              </button>
+
+              ${isAdminMode ? `
+              <!-- Botones de administración -->
+              <div class="pr-3.5 flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onclick="editCaseDirectly('${item.id}', '${item.dirId}')"
+                  title="Modificar esta casuística"
+                  class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onclick="confirmDeleteCase('${item.id}', '${item.dirId}')"
+                  title="Eliminar este caso"
+                  class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+              ` : ''}
+            </div>
+
+            <!-- Cuerpo del caso -->
+            <div class="${isOpen ? 'block' : 'hidden'} border-t border-slate-200/70 bg-[#fcfcfd] px-4 py-5 sm:px-6 sm:py-5">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Columna 1: CRITERIO (OCULTO A NIVEL VISUAL SEGÚN DIRECTIVA, SE CONSERVA EN CÓDIGO) -->
+                <div class="hidden" data-field="criterio" aria-hidden="true">
+                  <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">CRITERIO</p>
+                  <p class="text-[13.5px] font-bold text-slate-800">${highlightedCriterioTitle}</p>
+                  <p class="text-xs text-slate-600">${highlightedCriterioDesc}</p>
+                </div>
+
+                <!-- Columna 2: DESARROLLO -->
+                <div class="flex items-start gap-3.5">
+                  <div class="flex-shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-slate-100 text-slate-500 border border-slate-200/70 flex items-center justify-center">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      DESARROLLO / CASUÍSTICA
+                    </p>
+                    <p class="text-xs sm:text-[13px] leading-relaxed text-slate-700 mt-1.5 font-normal">
+                      ${highlightedDesarrollo}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Columna 3: ACCIÓN SUGERIDA -->
+                <div class="md:border-l md:border-slate-200/75 md:pl-6 flex items-start gap-3.5">
+                  <div class="flex-shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-slate-100 text-slate-500 border border-slate-200/70 flex items-center justify-center">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 4h-7"/><path d="M10 4H3"/><circle cx="12" cy="4" r="2"/><path d="M21 12h-9"/><path d="M8 12H3"/><circle cx="10" cy="12" r="2"/><path d="M21 20h-5"/><path d="M12 20H3"/><circle cx="14" cy="20" r="2"/>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      ACCIÓN SUGERIDA
+                    </p>
+                    <p class="text-xs sm:text-[13px] leading-relaxed text-slate-700 mt-1.5 font-normal">
+                      ${highlightedAccion}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Columna 4: SOLUCIÓN REFERENCIAL -->
+                <div class="md:border-l md:border-slate-200/75 md:pl-6 flex items-start gap-3.5">
+                  <div class="flex-shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                    </svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                      SOLUCIÓN REFERENCIAL
+                    </p>
+                    <p class="text-xs sm:text-[13px] leading-relaxed text-slate-800 mt-1.5 font-medium">
+                      ${highlightedSolucion}
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      updateToggleAllButtonLabel(items);
+    }
+
+    function updateToggleAllButtonLabel(items) {
+      if (!items || items.length === 0) {
+        toggleAllTextEl.textContent = 'Colapsar todo';
+        return;
+      }
+      const anyOpen = items.some(item => item.isOpen);
+      toggleAllTextEl.textContent = anyOpen ? 'Colapsar todo' : 'Expandir todo';
+    }
+
+    // -------------------------------------------------------------
+    // INTERACCIONES Y EVENTOS
+    // -------------------------------------------------------------
+
+    window.toggleAdminMode = function() {
+      isAdminMode = !isAdminMode;
+      localStorage.setItem('minedu_admin_mode', isAdminMode ? 'true' : 'false');
+      updateAdminUI();
+      renderCasesSection();
+      showToast(isAdminMode ? 'Modo Administrador activado' : 'Modo Público (Lectura) activado', 'info');
+    };
+
+    function updateAdminUI() {
+      const headerControls = document.getElementById('header-admin-controls');
+      if (headerControls) {
+        if (isAdminMode) {
+          headerControls.classList.remove('hidden');
+        } else {
+          headerControls.classList.add('hidden');
+        }
+      }
+      const toggleText = document.getElementById('admin-mode-toggle-text');
+      if (toggleText) {
+        toggleText.textContent = isAdminMode ? 'Cerrar Modo Admin' : 'Acceso Administrador';
+      }
+    }
+
+    window.selectDirection = function(dirId) {
+      selectedDirectionId = dirId;
+      searchQuery = '';
+      searchInputEl.value = '';
+      clearSearchBtnEl.classList.add('hidden');
+
+      directionsData.forEach(dir => {
+        dir.cases.forEach(c => {
+          c.isOpen = false;
+        });
+      });
+
+      renderDirectionsGrid();
+      renderCasesSection();
+    };
+
+    window.toggleCase = function(caseId) {
+      directionsData.forEach(dir => {
+        dir.cases.forEach(c => {
+          if (c.id === caseId) {
+            c.isOpen = !c.isOpen;
+          } else {
+            c.isOpen = false;
+          }
+        });
+      });
+      renderCasesSection();
+    };
+
+    searchInputEl.addEventListener('input', (e) => {
+      clearTimeout(searchDebounceTimer);
+      const val = e.target.value;
+      if (val.trim().length > 0) {
+        clearSearchBtnEl.classList.remove('hidden');
+      } else {
+        clearSearchBtnEl.classList.add('hidden');
+      }
+
+      searchDebounceTimer = setTimeout(() => {
+        searchQuery = val;
+        renderCasesSection();
+      }, 120);
+    });
+
+    function clearSearchInput() {
+      searchQuery = '';
+      searchInputEl.value = '';
+      clearSearchBtnEl.classList.add('hidden');
+      renderCasesSection();
+    }
+    clearSearchBtnEl.addEventListener('click', clearSearchInput);
+
+    toggleAllBtnEl.addEventListener('click', () => {
+      const { items } = getFilteredCases();
+      if (items.length === 0) return;
+
+      const anyOpen = items.some(item => item.isOpen);
+      const targetIds = new Set(items.map(i => i.id));
+
+      directionsData.forEach(dir => {
+        dir.cases.forEach(c => {
+          if (targetIds.has(c.id)) {
+            c.isOpen = !anyOpen;
+          }
+        });
+      });
+
+      renderCasesSection();
+    });
+
+    openFirstBtnEl.addEventListener('click', () => {
+      const { items } = getFilteredCases();
+      if (items.length === 0) return;
+
+      const firstId = items[0].id;
+      directionsData.forEach(dir => {
+        dir.cases.forEach(c => {
+          c.isOpen = (c.id === firstId);
+        });
+      });
+
+      renderCasesSection();
+
+      const firstCardEl = document.getElementById(`case-card-${firstId}`);
+      if (firstCardEl) {
+        firstCardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        firstCardEl.classList.add('highlight-pulse');
+        setTimeout(() => firstCardEl.classList.remove('highlight-pulse'), 2400);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !managementModalEl.classList.contains('hidden')) {
+        closeManagementModal();
+      }
+      if ((e.ctrlKey && e.key.toLowerCase() === 'k') || (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA')) {
+        e.preventDefault();
+        searchInputEl.focus();
+        searchInputEl.select();
+      }
+    });
+
+    // -------------------------------------------------------------
+    // GESTIÓN MANUAL Y SINCRONIZACIÓN
+    // -------------------------------------------------------------
+
+    window.openManagementModal = function(tabName = 'form', targetDirId = null) {
+      if (targetDirId) {
+        formDirectionEl.value = targetDirId;
+      } else if (!formCaseIdEl.value) {
+        formDirectionEl.value = selectedDirectionId;
+      }
+      updateSuggestedNumber();
+      populateQuickCaseSelector();
+      switchPanelTab(tabName);
+      managementModalEl.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    };
+
+    window.closeManagementModal = function() {
+      managementModalEl.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+      cancelEditing();
+    };
+
+    window.switchPanelTab = function(tabName) {
+      const tabs = ['form', 'list', 'cloud'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`panel-tab-${t}`);
+        if (t === tabName) {
+          btn.className = 'inline-flex items-center gap-2 border-b-2 border-[#b91c1c] px-3.5 py-2.5 text-xs sm:text-[13px] font-bold text-[#b91c1c] transition';
+          content.classList.remove('hidden');
+        } else {
+          btn.className = 'inline-flex items-center gap-2 border-b-2 border-transparent px-3.5 py-2.5 text-xs sm:text-[13px] font-semibold text-slate-500 hover:text-slate-800 transition';
+          content.classList.add('hidden');
+        }
+      });
+
+      if (tabName === 'list') {
+        renderModalList();
+      }
+    };
+
+    function populateQuickCaseSelector() {
+      if (!quickCaseSelectorEl) return;
+      let html = '<option value="">-- Seleccionar pregunta --</option>';
+
+      directionsData.forEach(dir => {
+        if (dir.cases.length > 0) {
+          html += `<optgroup label="${dir.code} - ${dir.name}">`;
+          dir.cases.forEach(c => {
+            const shortTitle = c.title.length > 55 ? c.title.substring(0, 52) + '...' : c.title;
+            html += `<option value="${c.id}" ${formCaseIdEl.value === c.id ? 'selected' : ''}>[Caso ${c.number}] ${shortTitle}</option>`;
+          });
+          html += `</optgroup>`;
+        }
+      });
+
+      quickCaseSelectorEl.innerHTML = html;
+    }
+
+    window.onQuickCaseSelect = function(caseId) {
+      if (!caseId) return;
+      editCaseDirectly(caseId);
+    };
+
+    window.updateSuggestedNumber = function() {
+      if (formCaseIdEl.value) return;
+
+      const dirCode = formDirectionEl.value;
+      const targetDir = directionsData.find(d => d.id === dirCode);
+      if (!targetDir) return;
+
+      const nextNum = targetDir.cases.length + 1;
+      formNumberEl.value = String(nextNum).padStart(2, '0');
+    };
+
+    window.resetFormFields = function() {
+      formCaseIdEl.value = '';
+      formTitleEl.value = '';
+      formCriterioTitleEl.value = '';
+      formCriterioDescEl.value = '';
+      formDesarrolloEl.value = '';
+      formAccionEl.value = '';
+      formSolucionEl.value = '';
+      submitBtnTextEl.textContent = 'Guardar Pregunta en el Banco';
+      document.getElementById('tab-form-title').textContent = 'Nueva Pregunta';
+      editingAlertEl.classList.add('hidden');
+      updateSuggestedNumber();
+      populateQuickCaseSelector();
+    };
+
+    window.cancelEditing = function() {
+      resetFormFields();
+    };
+
+    window.handleFormSubmit = async function(e) {
+      e.preventDefault();
+
+      const caseId = formCaseIdEl.value;
+      const dirId = formDirectionEl.value;
+      const title = formTitleEl.value.trim();
+      const criterioTitle = formCriterioTitleEl.value.trim();
+      const criterioDesc = formCriterioDescEl.value.trim();
+      const desarrollo = formDesarrolloEl.value.trim();
+      const accion = formAccionEl.value.trim();
+      const solucion = formSolucionEl.value.trim();
+
+      const targetDir = directionsData.find(d => d.id === dirId);
+      if (!targetDir) {
+        showToast('Dirección no válida', 'error');
+        return;
+      }
+
+      if (caseId) {
+        let updatedNumber = formNumberEl.value;
+
+        // Si hay Supabase conectado, sincronizar en la nube
+        if (supabaseClient) {
+          try {
+            await supabaseClient
+              .from('casuisticas')
+              .update({
+                direction_id: dirId,
+                title,
+                criterio_title: criterioTitle,
+                criterio_desc: criterioDesc,
+                desarrollo,
+                accion,
+                solucion
+              })
+              .eq('id', caseId);
+          } catch (err) {
+            console.error('Error Supabase update:', err);
+          }
+        }
+
+        directionsData.forEach(dir => {
+          const index = dir.cases.findIndex(c => c.id === caseId);
+          if (index !== -1) {
+            if (dir.id === dirId) {
+              dir.cases[index] = {
+                ...dir.cases[index],
+                title,
+                criterioTitle,
+                criterioDesc,
+                desarrollo,
+                accion,
+                solucion
+              };
+              updatedNumber = dir.cases[index].number;
+            } else {
+              const newNumber = String(targetDir.cases.length + 1).padStart(2, '0');
+              const oldCase = dir.cases.splice(index, 1)[0];
+              targetDir.cases.push({
+                ...oldCase,
+                number: newNumber,
+                title,
+                criterioTitle,
+                criterioDesc,
+                desarrollo,
+                accion,
+                solucion
+              });
+              updatedNumber = newNumber;
+            }
+          }
+        });
+
+        saveLocalCache(directionsData);
+        showToast(`Casuística ${updatedNumber} modificada con éxito`, 'success');
+      } else {
+        const autoNumber = String(targetDir.cases.length + 1).padStart(2, '0');
+        const newId = `${dirId.toLowerCase()}-${Date.now().toString(36)}`;
+        
+        // Si hay Supabase conectado, insertar en la nube
+        if (supabaseClient) {
+          try {
+            await supabaseClient.from('casuisticas').insert({
+              id: newId,
+              direction_id: dirId,
+              number: autoNumber,
+              title,
+              criterio_title: criterioTitle,
+              criterio_desc: criterioDesc,
+              desarrollo,
+              accion,
+              solucion
+            });
+          } catch (err) {
+            console.error('Error Supabase insert:', err);
+          }
+        }
+
+        const newCase = {
+          id: newId,
+          number: autoNumber,
+          title,
+          criterioTitle,
+          criterioDesc,
+          desarrollo,
+          accion,
+          solucion,
+          isOpen: false
+        };
+        targetDir.cases.push(newCase);
+        saveLocalCache(directionsData);
+        showToast(`Nueva casuística ${autoNumber} agregada a ${targetDir.code}`, 'success');
+      }
+
+      resetFormFields();
+      selectedDirectionId = dirId;
+      renderDirectionsGrid();
+      renderCasesSection();
+      renderModalList();
+      populateQuickCaseSelector();
+      closeManagementModal();
+    };
+
+    window.editCaseDirectly = function(caseId, dirId = null) {
+      let foundCase = null;
+      let foundDir = null;
+
+      directionsData.forEach(dir => {
+        dir.cases.forEach(c => {
+          if (c.id === caseId) {
+            foundCase = c;
+            foundDir = dir;
+          }
+        });
+      });
+
+      if (!foundCase) return;
+
+      openManagementModal('form', foundDir.id);
+
+      formCaseIdEl.value = foundCase.id;
+      formDirectionEl.value = foundDir.id;
+      formNumberEl.value = foundCase.number;
+      formTitleEl.value = foundCase.title;
+      formCriterioTitleEl.value = foundCase.criterioTitle;
+      formCriterioDescEl.value = foundCase.criterioDesc;
+      formDesarrolloEl.value = foundCase.desarrollo;
+      formAccionEl.value = foundCase.accion;
+      formSolucionEl.value = foundCase.solucion;
+
+      submitBtnTextEl.textContent = 'Guardar Modificaciones';
+      document.getElementById('tab-form-title').textContent = `Modificando Caso ${foundCase.number}`;
+      editingCaseLabelEl.textContent = `${foundDir.code} • Caso ${foundCase.number}: "${foundCase.title.substring(0, 45)}..."`;
+      editingAlertEl.classList.remove('hidden');
+
+      populateQuickCaseSelector();
+      if (quickCaseSelectorEl) quickCaseSelectorEl.value = foundCase.id;
+    };
+
+    window.confirmDeleteCase = async function(caseId, dirId) {
+      let targetTitle = '';
+      directionsData.forEach(dir => {
+        const c = dir.cases.find(x => x.id === caseId);
+        if (c) targetTitle = `${dir.code} (Caso ${c.number}): "${c.title}"`;
+      });
+
+      if (confirm(`¿Estás seguro de que deseas eliminar esta casuística?\n\n${targetTitle}`)) {
+        if (supabaseClient) {
+          try {
+            await supabaseClient.from('casuisticas').delete().eq('id', caseId);
+          } catch (e) {
+            console.error('Error al borrar de Supabase:', e);
+          }
+        }
+
+        directionsData.forEach(dir => {
+          dir.cases = dir.cases.filter(c => c.id !== caseId);
+        });
+        saveLocalCache(directionsData);
+        showToast('Casuística eliminada correctamente', 'info');
+        renderDirectionsGrid();
+        renderCasesSection();
+        renderModalList();
+        populateQuickCaseSelector();
+      }
+    };
+
+    function renderModalList() {
+      const selectedDir = modalFilterDirEl.value;
+      const q = normalizeText(modalSearchCasesEl ? modalSearchCasesEl.value : '');
+
+      let allCases = [];
+      directionsData.forEach(dir => {
+        if (selectedDir === 'ALL' || dir.id === selectedDir) {
+          dir.cases.forEach(c => {
+            allCases.push({
+              ...c,
+              dirCode: dir.code,
+              dirName: dir.name,
+              dirId: dir.id
+            });
+          });
+        }
+      });
+
+      if (q) {
+        allCases = allCases.filter(c => {
+          const haystack = normalizeText(`${c.dirCode} ${c.number} ${c.title} ${c.criterioTitle} ${c.desarrollo}`);
+          return haystack.includes(q);
+        });
+      }
+
+      if (allCases.length === 0) {
+        modalCasesListEl.innerHTML = `
+          <div class="rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500">
+            No se encontraron casuísticas con el filtro actual.
+          </div>
+        `;
+        return;
+      }
+
+      modalCasesListEl.innerHTML = allCases.map(c => `
+        <div class="rounded-xl border border-slate-200/90 bg-white p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 transition">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="inline-block rounded bg-rose-50 text-[#b91c1c] text-[10px] font-bold px-1.5 py-0.5 border border-rose-100">
+                ${c.dirCode}
+              </span>
+              <span class="text-xs font-extrabold text-slate-700">Caso ${c.number}</span>
+              <span class="text-xs font-semibold text-slate-500 truncate">• ${c.criterioTitle}</span>
+            </div>
+            <p class="text-xs sm:text-[13px] font-bold text-slate-800 line-clamp-2">
+              ${c.title}
+            </p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onclick="editCaseDirectly('${c.id}', '${c.dirId}')"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-black text-white px-3 py-1.5 text-xs font-bold transition shadow-2xs"
+            >
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+              </svg>
+              <span>Modificar este caso</span>
+            </button>
+            <button
+              type="button"
+              onclick="confirmDeleteCase('${c.id}', '${c.dirId}')"
+              class="rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 transition"
+              title="Eliminar caso"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showToast(message, type = 'info') {
+      const toastEl = document.getElementById('toast-notification');
+      const msgEl = document.getElementById('toast-message');
+      const iconEl = document.getElementById('toast-icon');
+
+      msgEl.textContent = message;
+
+      if (type === 'success') {
+        iconEl.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      } else if (type === 'error') {
+        iconEl.innerHTML = `<svg class="w-4 h-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+      } else {
+        iconEl.innerHTML = `<svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>`;
+      }
+
+      toastEl.classList.remove('translate-y-12', 'opacity-0');
+      toastEl.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toastEl.classList.remove('translate-y-0', 'opacity-100');
+        toastEl.classList.add('translate-y-12', 'opacity-0');
+      }, 3200);
+    }
+
+    // Inicialización limpia
+    renderDirectionsGrid();
+    renderCasesSection();
+    initSupabase();
+  </script>
+</body>
+</html>

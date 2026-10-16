@@ -1,0 +1,6 @@
+estamos en etapa de planificación, ebo realizar reuniones para divulgar inforamción relevantes esde MINEDU, existen reglas y lineamientos de la gestion de distribución de materiales eductivos
+2- Se distribuyen libros y cuadernos escolares. Teniendo fechas e hitos para cumplmineto. Un alcance a tener en cuenta, compromisos de desempeño
+3-Si, el sieguimiento es total, pero aun no entramos en esa etpa
+4-Todo lasherramientas
+5-Quiero que los conceptos que estoy aprendendo podamos aterizarlo en lo que corcienne a este trabajao, que es en la pracica, un proyecto, yu se puede gestionar así. A pesar de haberuna estructura realizada por MINEDU en lo que concierne a reglamento, a nivel regional, se establecen cirterios individuales para el cumplimiento de los hitos, y esto se puede gestionar como proyectos. Sin embargo, aun no he etado asignado a esta región, por tanto, aun no conozco como estan desarrollando sus estaretgias.
+Se crearán apps para seguimiento, y un flujo operativo para seguimiento, tipo, gant, o tipo pipepline entree otros. Pero eso cómo propuestasd e valor

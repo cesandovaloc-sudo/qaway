@@ -1,0 +1,14 @@
+{
+  "name": "minedu-preguntas-frecuentes",
+  "version": "1.0.0",
+  "description": "MINEDU DIGERE - Banco de Casuísticas y Preguntas Frecuentes",
+  "main": "index.html",
+  "scripts": {
+    "dev": "node dev-server.js",
+    "start": "node dev-server.js",
+    "serve": "node dev-server.js"
+  },
+  "keywords": ["minedu", "digere", "casuisticas", "preguntas-frecuentes"],
+  "author": "MINEDU",
+  "license": "MIT"
+}
