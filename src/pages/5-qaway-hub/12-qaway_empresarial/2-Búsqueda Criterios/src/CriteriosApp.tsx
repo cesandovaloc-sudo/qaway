@@ -18,16 +18,18 @@ import {
   History,
   Settings,
   Code2,
-  X,
   Bookmark,
   Share2,
   Check,
   BarChart3,
   ExternalLink,
   ChevronDown,
+  ChevronUp,
   Copy,
   PanelLeftClose,
   PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   FolderPlus,
   SlidersHorizontal,
   Filter,
@@ -41,9 +43,13 @@ import {
   Key,
   ShieldCheck,
   MessageSquare,
+  MessageSquarePlus,
   Bot,
   Sparkles,
   Trash2,
+  Paperclip,
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { HubIcon } from "./components/ui/HubIcon";
 
@@ -356,6 +362,42 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
   },
 ];
 
+interface ChatSession {
+  id: string;
+  title: string;
+  date: string;
+  preview: string;
+  messagesCount: number;
+  provider: string;
+}
+
+const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
+  {
+    id: "session-1",
+    title: "Auditoría Financiera & EBITDA Q3",
+    date: "Hoy, 10:14 AM",
+    preview: "¿Cuál es la contingencia laboral por horas extras no registradas...",
+    messagesCount: 2,
+    provider: "OpenAI GPT-4o",
+  },
+  {
+    id: "session-2",
+    title: "Cálculo de sobretiempo D.S. 007-2002-TR",
+    date: "Ayer, 4:30 PM",
+    preview: "Análisis de sobretasas del 25% y 35% y carga de la prueba...",
+    messagesCount: 4,
+    provider: "Anthropic Claude 3.5",
+  },
+  {
+    id: "session-3",
+    title: "Revisión de Cláusulas de Auditoría RRHH",
+    date: "14 Oct 2026",
+    preview: "Procedimiento de la Sección 4.2 del Manual Interno...",
+    messagesCount: 6,
+    provider: "Cohere Command R+",
+  },
+];
+
 interface QuickSearchResult {
   id: string;
   title: string;
@@ -411,7 +453,7 @@ export default function CriteriosApp() {
   const [activeProjectId, setActiveProjectId] = useState<string>("auditoria-q3");
   const [activeScenario, setActiveScenario] = useState<string>("auditoria");
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>(2);
-  const [inspectorOpen, setInspectorOpen] = useState<boolean>(true);
+  const [inspectorOpen, setInspectorOpen] = useState<boolean>(false); // Inicialmente colapsado
   const [query, setQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showSqlModal, setShowSqlModal] = useState<boolean>(false);
@@ -419,6 +461,19 @@ export default function CriteriosApp() {
   const [activeNav, setActiveNav] = useState<string>("nuevo");
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  // Sesiones de Chat
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>(DEFAULT_CHAT_SESSIONS);
+  const [activeSessionId, setActiveSessionId] = useState<string>("session-1");
+
+  // Capacidades avanzadas del chat
+  const [chatMode, setChatMode] = useState<"fast" | "standard" | "deep">("standard");
+  const [isRecordingVoice, setIsRecordingVoice] = useState<boolean>(false);
+  const [collapseScenariosHeader, setCollapseScenariosHeader] = useState<boolean>(false);
+  const [showChatFilterModal, setShowChatFilterModal] = useState<boolean>(false);
+
+  // Pestaña activa en Configuración
+  const [configTab, setConfigTab] = useState<"providers" | "engine">("providers");
 
   // Chat multiturmo
   const [chatMessages, setChatMessages] = useState<ChatTurn[]>(INITIAL_CHAT_TURNS);
@@ -752,7 +807,7 @@ export default function CriteriosApp() {
         >
           {/* Lado izquierdo: Bloque del Logo (delimitado al ancho del sidebar) + Toggle Sidebar */}
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-[236px] flex items-center justify-between shrink-0 pr-2 border-r border-zinc-200/80 mr-1">
+            <div className="flex items-center gap-2 shrink-0 pr-3 border-r border-zinc-200/80 mr-1">
               {/* Logo Completo como Botón de Inicio */}
               <button
                 type="button"
@@ -779,18 +834,6 @@ export default function CriteriosApp() {
                 >
                   v4.0
                 </span>
-              </button>
-
-              {/* Botón para colapsar/desplegar el panel izquierdo */}
-              <button
-                type="button"
-                onClick={() => setSidebarOpen((v) => !v)}
-                style={{ borderColor: palette.borderDefault }}
-                className="p-1.5 rounded-lg border hover:bg-zinc-100 cursor-pointer text-zinc-600 transition-colors"
-                title={sidebarOpen ? "Ocultar panel lateral izquierdo" : "Mostrar panel lateral izquierdo"}
-                aria-label={sidebarOpen ? "Ocultar panel lateral izquierdo" : "Mostrar panel lateral izquierdo"}
-              >
-                <HubIcon icon={sidebarOpen ? PanelLeftClose : PanelLeftOpen} size={16} />
               </button>
             </div>
 
@@ -1074,8 +1117,24 @@ export default function CriteriosApp() {
             )}
           </div>
 
-          {/* Lado derecho: Perfil con Switcher de Tema en 1 sola línea */}
+          {/* Lado derecho: Perfil con Switcher de Tema en 1 sola línea + Botón Inspector */}
           <div className="flex items-center gap-2.5 shrink-0">
+            {/* Botón para abrir/cerrar el Inspector de evidencias (mismo icono simétrico) */}
+            <button
+              type="button"
+              onClick={() => setInspectorOpen((v) => !v)}
+              style={{ borderColor: palette.borderDefault }}
+              className={`p-1.5 rounded-lg border cursor-pointer transition-colors ${
+                inspectorOpen
+                  ? "bg-blue-50 text-blue-600 border-blue-200"
+                  : "hover:bg-zinc-100 text-zinc-600 bg-white"
+              }`}
+              title={inspectorOpen ? "Colapsar Inspector de evidencias" : "Abrir Inspector de evidencias"}
+              aria-label={inspectorOpen ? "Colapsar Inspector de evidencias" : "Abrir Inspector de evidencias"}
+            >
+              <HubIcon icon={inspectorOpen ? PanelRightClose : PanelRightOpen} size={16} />
+            </button>
+
             {/* Avatar Carlos con Menú Desplegable */}
             <div ref={userMenuRef} className="relative flex items-center gap-1.5">
               <span
@@ -1177,86 +1236,204 @@ export default function CriteriosApp() {
          * ========================================================================= */}
         <div className="flex-1 flex overflow-hidden min-h-0">
           {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO CON MÓDULOS UNIVERSALES ===== */}
-          {sidebarOpen && (
-            <aside
-              style={{
-                backgroundColor: palette.bgPage,
-                borderColor: palette.borderDefault,
-              }}
-              className="w-[248px] shrink-0 border-r flex flex-col overflow-y-auto"
-            >
-              {/* Sección 1: Espacio de Trabajo / Proyecto Activo */}
-              <div className="px-3 pt-3">
-                <div className="flex items-center justify-between px-1 pb-1.5">
-                  <span
-                    style={{ color: palette.textSecondary, fontSize: 11.5 }}
-                    className="font-semibold uppercase tracking-wider"
-                  >
-                    Proyecto Activo
-                  </span>
-                  <span style={{ fontSize: 11 }} className="text-zinc-400 font-mono">
-                    Workspace
-                  </span>
-                </div>
+                    {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO CON MÓDULOS UNIVERSALES (COLAPSABLE A ICONOS) ===== */}
+          <aside
+            style={{
+              backgroundColor: palette.bgPage,
+              borderColor: palette.borderDefault,
+            }}
+            className={`shrink-0 border-r flex flex-col transition-all duration-200 overflow-y-auto ${
+              sidebarOpen ? "w-[248px]" : "w-16 items-center"
+            }`}
+          >
+            {sidebarOpen ? (
+              // Modo Expandido
+              <>
+                {/* Cabecera del Panel con botón de colapso */}
+                <div className="px-3 pt-3">
+                  <div className="flex items-center justify-between px-1 pb-1.5">
+                    <span
+                      style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                      className="font-semibold uppercase tracking-wider"
+                    >
+                      Proyecto Activo
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSidebarOpen(false)}
+                      className="p-1 rounded-md hover:bg-zinc-100 cursor-pointer text-zinc-500 transition-colors"
+                      title="Colapsar panel a iconos"
+                      aria-label="Colapsar panel lateral izquierdo"
+                    >
+                      <HubIcon icon={PanelLeftClose} size={16} />
+                    </button>
+                  </div>
 
-                <div className="relative">
-                  <select
-                    value={activeProjectId}
-                    onChange={(e) => {
-                      setActiveProjectId(e.target.value);
-                      const p = DEFAULT_PROJECTS.find((x) => x.id === e.target.value);
-                      if (p) showToastMessage(`Cambiado a: ${p.name}`);
-                    }}
+                  <div className="relative">
+                    <select
+                      value={activeProjectId}
+                      onChange={(e) => {
+                        setActiveProjectId(e.target.value);
+                        const p = DEFAULT_PROJECTS.find((x) => x.id === e.target.value);
+                        if (p) showToastMessage(`Cambiado a: ${p.name}`);
+                      }}
+                      style={{
+                        backgroundColor: palette.bgSurface,
+                        borderColor: palette.borderDefault,
+                        fontSize: 13,
+                      }}
+                      className="w-full px-2.5 py-2 rounded-lg border font-medium text-zinc-900 shadow-xs cursor-pointer focus:outline-none appearance-none pr-7"
+                    >
+                      {DEFAULT_PROJECTS.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                    <HubIcon
+                      icon={ChevronDown}
+                      size={14}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
+                    />
+                  </div>
+
+                  {/* Botón: Cargar documentos o carpeta */}
+                  <button
+                    type="button"
+                    onClick={handleUploadFolder}
                     style={{
-                      backgroundColor: palette.bgSurface,
                       borderColor: palette.borderDefault,
-                      fontSize: 13,
+                      backgroundColor: palette.bgSurface,
                     }}
-                    className="w-full px-2.5 py-2 rounded-lg border font-medium text-zinc-900 shadow-xs cursor-pointer focus:outline-none appearance-none pr-7"
+                    className="w-full mt-2 px-2.5 py-1.5 rounded-lg border border-dashed text-xs font-medium text-zinc-700 flex items-center justify-center gap-1.5 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
                   >
-                    {DEFAULT_PROJECTS.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                  <HubIcon
-                    icon={ChevronDown}
-                    size={14}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
-                  />
+                    <HubIcon icon={FolderPlus} size={15} className="text-zinc-500" />
+                    <span>+ Cargar documentos / carpeta</span>
+                  </button>
                 </div>
 
-                {/* Botón: Cargar documentos o carpeta */}
+                {/* Sección 2: Módulos de la Aplicación */}
+                <div className="px-3 mt-4">
+                  <p
+                    style={{ color: palette.textSecondary, fontSize: 11.5 }}
+                    className="px-1 pb-1.5 font-semibold uppercase tracking-wider"
+                  >
+                    Módulos
+                  </p>
+                  <nav className="space-y-0.5">
+                    {[
+                      { id: "nuevo", label: "Asistente & Chat", icon: MessageSquare },
+                      { id: "chats", label: "Sesiones de Chat", icon: MessageSquarePlus },
+                      { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
+                      { id: "historial", label: "Historial de Consultas", icon: History },
+                      { id: "config", label: "Configuración & IA", icon: Settings },
+                    ].map((item) => {
+                      const isActive = activeNav === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveNav(item.id);
+                            if (item.id !== "nuevo") {
+                              showToastMessage(`Módulo: ${item.label}`);
+                            }
+                          }}
+                          style={{
+                            backgroundColor: isActive ? palette.accentCitationBg : "transparent",
+                            borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
+                            color: isActive ? palette.accentCitation : palette.textPrimary,
+                            fontSize: 14,
+                          }}
+                          className={`w-full text-left px-3 py-2 flex items-center gap-2.5 cursor-pointer transition-colors ${
+                            isActive ? "rounded-r-md font-semibold" : "hover:bg-zinc-100 rounded-md font-medium"
+                          }`}
+                        >
+                          <HubIcon icon={item.icon} size={16} />
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
+
+                <div className="flex-1 min-h-6" />
+
+                {/* Sección 3: Fuentes Indexadas en Proyecto */}
+                <div className="p-3 pb-4">
+                  <div
+                    style={{
+                      borderColor: palette.borderDefault,
+                      backgroundColor: palette.bgSurface,
+                    }}
+                    className="border rounded-xl p-3 space-y-2.5 shadow-xs"
+                  >
+                    <div className="flex items-center justify-between">
+                      <p style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
+                        Fuentes en proyecto
+                      </p>
+                      <span style={{ fontSize: 11 }} className="text-zinc-400 font-mono">
+                        3 activas
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-1 w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0" />
+                      <div>
+                        <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                          Documentos &amp; Manuales
+                        </span>
+                        <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                          124 docs • 12,480 fragmentos
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
+                      <div>
+                        <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                          Leyes &amp; Normativa
+                        </span>
+                        <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                          86 docs • 8,320 fragmentos
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-1 w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                      <div>
+                        <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                          Matrices Excel / CSV
+                        </span>
+                        <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                          42 archivos • 6,120 fragmentos
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              // Modo Colapsado (Solo Iconos Centrados con Tooltips)
+              <div className="py-3 px-2 flex flex-col items-center gap-3 w-full">
                 <button
                   type="button"
-                  onClick={handleUploadFolder}
-                  style={{
-                    borderColor: palette.borderDefault,
-                    backgroundColor: palette.bgSurface,
-                  }}
-                  className="w-full mt-2 px-2.5 py-1.5 rounded-lg border border-dashed text-xs font-medium text-zinc-700 flex items-center justify-center gap-1.5 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
+                  onClick={() => setSidebarOpen(true)}
+                  className="p-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 cursor-pointer text-zinc-600 transition-colors shadow-2xs"
+                  title="Expandir panel lateral"
+                  aria-label="Expandir panel lateral izquierdo"
                 >
-                  <HubIcon icon={FolderPlus} size={15} className="text-zinc-500" />
-                  <span>+ Cargar documentos / carpeta</span>
+                  <HubIcon icon={PanelLeftOpen} size={18} />
                 </button>
-              </div>
 
-              {/* Sección 2: Módulos de la Aplicación (Navegación Universal) */}
-              <div className="px-3 mt-4">
-                <p
-                  style={{ color: palette.textSecondary, fontSize: 11.5 }}
-                  className="px-1 pb-1.5 font-semibold uppercase tracking-wider"
-                >
-                  Módulos
-                </p>
-                <nav className="space-y-0.5">
+                <div className="w-8 h-px bg-zinc-200 my-1" />
+
+                <nav className="space-y-1.5 w-full flex flex-col items-center">
                   {[
-                    { id: "nuevo", label: "Consulta & Asistente", icon: MessageSquare },
+                    { id: "nuevo", label: "Asistente & Chat", icon: MessageSquare },
+                    { id: "chats", label: "Sesiones de Chat", icon: MessageSquarePlus },
                     { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
                     { id: "historial", label: "Historial de Consultas", icon: History },
-                    { id: "providers", label: "Proveedores de IA (7)", icon: Cpu },
-                    { id: "config", label: "Parámetros del Motor", icon: Settings },
+                    { id: "config", label: "Configuración & IA", icon: Settings },
                   ].map((item) => {
                     const isActive = activeNav === item.id;
                     return (
@@ -1265,86 +1442,39 @@ export default function CriteriosApp() {
                         type="button"
                         onClick={() => {
                           setActiveNav(item.id);
-                          if (item.id === "nuevo") {
-                            // vista de consulta
-                          } else {
+                          if (item.id !== "nuevo") {
                             showToastMessage(`Módulo: ${item.label}`);
                           }
                         }}
+                        title={item.label}
+                        aria-label={item.label}
                         style={{
                           backgroundColor: isActive ? palette.accentCitationBg : "transparent",
-                          borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
                           color: isActive ? palette.accentCitation : palette.textPrimary,
-                          fontSize: 14,
                         }}
-                        className={`w-full text-left px-3 py-2 flex items-center gap-2.5 cursor-pointer transition-colors ${
-                          isActive ? "rounded-r-md font-semibold" : "hover:bg-zinc-100 rounded-md font-medium"
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-colors ${
+                          isActive ? "font-bold shadow-xs border border-zinc-200" : "hover:bg-zinc-100 text-zinc-600"
                         }`}
                       >
-                        <HubIcon icon={item.icon} size={16} />
-                        <span>{item.label}</span>
+                        <HubIcon icon={item.icon} size={18} />
                       </button>
                     );
                   })}
                 </nav>
-              </div>
 
-              <div className="flex-1 min-h-6" />
+                <div className="flex-1" />
 
-              {/* Sección 3: Fuentes Indexadas en Proyecto */}
-              <div className="p-3 pb-4">
-                <div
-                  style={{
-                    borderColor: palette.borderDefault,
-                    backgroundColor: palette.bgSurface,
-                  }}
-                  className="border rounded-xl p-3 space-y-2.5 shadow-xs"
+                <button
+                  type="button"
+                  onClick={handleUploadFolder}
+                  title="Cargar documentos"
+                  className="w-10 h-10 rounded-xl border border-dashed border-zinc-300 hover:bg-zinc-100 flex items-center justify-center text-zinc-600 cursor-pointer transition-colors"
                 >
-                  <div className="flex items-center justify-between">
-                    <p style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
-                      Fuentes en proyecto
-                    </p>
-                    <span style={{ fontSize: 11 }} className="text-zinc-400 font-mono">
-                      3 activas
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-slate-500 shrink-0" />
-                    <div>
-                      <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
-                        Documentos &amp; Manuales
-                      </span>
-                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                        124 docs • 12,480 fragmentos
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
-                    <div>
-                      <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
-                        Leyes &amp; Normativa
-                      </span>
-                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                        86 docs • 8,320 fragmentos
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-                    <div>
-                      <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
-                        Matrices Excel / CSV
-                      </span>
-                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                        42 archivos • 6,120 fragmentos
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                  <HubIcon icon={FolderPlus} size={17} />
+                </button>
               </div>
-            </aside>
-          )}
+            )}
+          </aside>
 
           {/* ===== COLUMNA 2: PANEL CENTRAL - WORKSPACE CON SCROLL ===== */}
           <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
@@ -1367,6 +1497,87 @@ export default function CriteriosApp() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                    {/* Botón de Filtro Contextual Flotante (no roba altura al chat) */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowChatFilterModal((v) => !v)}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors ${
+                          showChatFilterModal
+                            ? "bg-blue-50 border-blue-300 text-blue-700"
+                            : "border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700"
+                        }`}
+                        title="Filtros de recuperación para el chat"
+                      >
+                        <HubIcon icon={SlidersHorizontal} size={13} />
+                        <span>Filtros</span>
+                      </button>
+
+                      {showChatFilterModal && (
+                        <div
+                          style={{
+                            backgroundColor: palette.bgSurface,
+                            borderColor: palette.borderDefault,
+                          }}
+                          className="absolute right-0 top-full mt-2 w-72 rounded-xl border shadow-xl p-3 z-30 space-y-2.5 text-xs"
+                        >
+                          <div className="flex items-center justify-between pb-1.5 border-b border-zinc-100">
+                            <span className="font-semibold text-zinc-900 text-xs">Filtros de Recuperación</span>
+                            <button
+                              type="button"
+                              onClick={() => setShowChatFilterModal(false)}
+                              className="text-[11px] text-zinc-400 hover:text-zinc-700 cursor-pointer"
+                            >
+                              Cerrar
+                            </button>
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                              Período
+                            </label>
+                            <div className="flex gap-1">
+                              {["q3", "2026", "all"].map((p) => (
+                                <button
+                                  key={p}
+                                  type="button"
+                                  onClick={() => {
+                                    setFilterPeriod(p);
+                                    showToastMessage(`Período: ${p.toUpperCase()}`);
+                                  }}
+                                  className={`flex-1 py-1 rounded text-[11px] border font-medium cursor-pointer ${
+                                    filterPeriod === p
+                                      ? "bg-zinc-900 text-white border-zinc-900"
+                                      : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
+                                  }`}
+                                >
+                                  {p === "q3" ? "Q3 2026" : p === "2026" ? "Año 2026" : "Histórico"}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+                                Corte Similitud
+                              </label>
+                              <span className="font-mono text-[11px] font-bold text-blue-600">
+                                ≥ {similarityThreshold.toFixed(2)}
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0.60"
+                              max="0.95"
+                              step="0.05"
+                              value={similarityThreshold}
+                              onChange={(e) => setSimilarityThreshold(parseFloat(e.target.value))}
+                              className="w-full accent-blue-600 cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <button
                       type="button"
                       onClick={handleResetChat}
@@ -1378,56 +1589,73 @@ export default function CriteriosApp() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setActiveNav("providers")}
+                      onClick={() => {
+                        setActiveNav("config");
+                        setConfigTab("providers");
+                      }}
                       className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                     >
                       <HubIcon icon={Cpu} size={13} />
-                      <span>Cambiar IA</span>
+                      <span>Configurar IA</span>
                     </button>
                   </div>
                 </div>
 
-                {/* 4 Tarjetas de escenarios sugeridos */}
+                {/* 4 Tarjetas de escenarios sugeridos con Toggle para Minimizar y ganar espacio */}
                 <div>
-                  <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
-                    Consultas y Escenarios Rápidos
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5">
-                    {SCENARIO_CARDS.map((c) => {
-                      const isActive = activeScenario === c.id;
-                      return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => handleScenario(c.id)}
-                          style={{
-                            borderColor: isActive ? palette.accentCitation : palette.borderDefault,
-                            backgroundColor: palette.bgSurface,
-                            boxShadow: isActive ? `0 0 0 1px ${palette.accentCitation}` : "none",
-                          }}
-                          className="text-left p-3 rounded-xl border flex items-start gap-2.5 cursor-pointer hover:border-zinc-300 transition-all shadow-xs"
-                        >
-                          <span
-                            style={{ backgroundColor: c.iconBg, color: c.iconColor }}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                          >
-                            <HubIcon icon={c.icon} size={17} />
-                          </span>
-                          <span className="min-w-0">
-                            <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
-                              {c.title}
-                            </span>
-                            <span style={{ color: palette.textMuted, fontSize: 12 }} className="block leading-tight mt-0.5">
-                              {c.subtitle}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                      Consultas y Escenarios Rápidos
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCollapseScenariosHeader((v) => !v)}
+                      className="text-[11.5px] text-zinc-500 hover:text-zinc-800 flex items-center gap-1 cursor-pointer"
+                      title={collapseScenariosHeader ? "Mostrar escenarios" : "Ocultar escenarios para más espacio"}
+                    >
+                      <span>{collapseScenariosHeader ? "Mostrar tarjetas" : "Minimizar"}</span>
+                      <HubIcon icon={collapseScenariosHeader ? ChevronDown : ChevronUp} size={13} />
+                    </button>
                   </div>
+
+                  {!collapseScenariosHeader && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 animate-in fade-in">
+                      {SCENARIO_CARDS.map((c) => {
+                        const isActive = activeScenario === c.id;
+                        return (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => handleScenario(c.id)}
+                            style={{
+                              borderColor: isActive ? palette.accentCitation : palette.borderDefault,
+                              backgroundColor: palette.bgSurface,
+                              boxShadow: isActive ? `0 0 0 1px ${palette.accentCitation}` : "none",
+                            }}
+                            className="text-left p-3 rounded-xl border flex items-start gap-2.5 cursor-pointer hover:border-zinc-300 transition-all shadow-xs"
+                          >
+                            <span
+                              style={{ backgroundColor: c.iconBg, color: c.iconColor }}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                            >
+                              <HubIcon icon={c.icon} size={17} />
+                            </span>
+                            <span className="min-w-0">
+                              <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                                {c.title}
+                              </span>
+                              <span style={{ color: palette.textMuted, fontSize: 12 }} className="block leading-tight mt-0.5">
+                                {c.subtitle}
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
-                              {/* Hilo de Mensajes del Chat */}
+                {/* Hilo de Mensajes del Chat */}
                 <div className="space-y-4 pt-2">
                   {chatMessages.map((msg) => {
                     if (msg.sender === "user") {
@@ -1749,24 +1977,86 @@ export default function CriteriosApp() {
                   )}
                 </div>
 
-                {/* Compositor / Barra de Chat fijada ergonómica */}
+                {/* Compositor / Barra de Chat fijada ergonómica con Capacidades Avanzadas */}
                 <div className="sticky bottom-0 pt-3 pb-2 bg-gradient-to-t from-white via-white to-transparent">
                   <form onSubmit={handleSubmit}>
                     <div
                       style={{
-                        borderColor: palette.borderDefault,
+                        borderColor: isRecordingVoice ? "#EF4444" : palette.borderDefault,
                         backgroundColor: palette.bgSurface,
                       }}
-                      className="rounded-xl border shadow-md flex items-center gap-2 pl-4 pr-2 py-2"
+                      className={`rounded-xl border shadow-md flex items-center gap-2 pl-3 pr-2 py-2 transition-all ${
+                        isRecordingVoice ? "ring-2 ring-red-300" : ""
+                      }`}
                     >
-                      <HubIcon icon={MessageSquare} size={16} className="text-zinc-400 shrink-0" />
+                      {/* Botón Adjuntar Archivo / Imagen */}
+                      <button
+                        type="button"
+                        onClick={() => showToastMessage("Adjuntar documento, captura o planilla Excel para análisis")}
+                        className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 cursor-pointer transition-colors"
+                        title="Adjuntar archivo o imagen"
+                        aria-label="Adjuntar archivo o imagen"
+                      >
+                        <HubIcon icon={Paperclip} size={16} />
+                      </button>
+
+                      {/* Botón Dictado por Voz */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextState = !isRecordingVoice;
+                          setIsRecordingVoice(nextState);
+                          if (nextState) {
+                            showToastMessage("Escuchando dictado por voz... (habla para consultar)");
+                            setQuery("¿Cuál es la provisión estimada en la matriz Excel del Q3?");
+                          } else {
+                            showToastMessage("Dictado por voz finalizado");
+                          }
+                        }}
+                        className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
+                          isRecordingVoice
+                            ? "bg-red-100 text-red-600 animate-pulse"
+                            : "hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800"
+                        }`}
+                        title={isRecordingVoice ? "Detener grabación" : "Dictar consulta por voz"}
+                        aria-label={isRecordingVoice ? "Detener grabación" : "Dictar consulta por voz"}
+                      >
+                        <HubIcon icon={isRecordingVoice ? MicOff : Mic} size={16} />
+                      </button>
+
+                      {/* Selector de Capacidad / Profundidad */}
+                      <select
+                        value={chatMode}
+                        onChange={(e) => {
+                          const mode = e.target.value as "fast" | "standard" | "deep";
+                          setChatMode(mode);
+                          const labels = {
+                            fast: "Modo Rápido activo (Groq LPU ~42ms)",
+                            standard: "Modo Estándar activo (GPT-4o)",
+                            deep: "Modo Razonamiento Profundo activo (DeepSeek R1 / o1)",
+                          };
+                          showToastMessage(labels[mode]);
+                        }}
+                        style={{ fontSize: 11.5 }}
+                        className="px-2 py-1 rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700 font-semibold cursor-pointer focus:outline-none"
+                        title="Elegir capacidad y profundidad del razonamiento"
+                      >
+                        <option value="fast">Rápido (Groq)</option>
+                        <option value="standard">Estándar (GPT-4o)</option>
+                        <option value="deep">Razonamiento Profundo</option>
+                      </select>
+
                       <input
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         style={{ fontSize: 15 }}
                         className="flex-1 bg-transparent focus:outline-none min-w-0 text-zinc-900 placeholder:text-zinc-400"
-                        placeholder="Escribe tu consulta o repregunta en este hilo... (Enter para enviar)"
+                        placeholder={
+                          isRecordingVoice
+                            ? "Escuchando tu voz..."
+                            : "Escribe tu consulta o repregunta en este hilo... (Enter para enviar)"
+                        }
                         aria-label="Consulta en chat"
                       />
                       <button
@@ -1803,243 +2093,113 @@ export default function CriteriosApp() {
               </div>
             )}
 
-            {/* ===== MÓDULO 4: PROVEEDORES DE IA (7 PROVIDERS) ===== */}
-            {activeNav === "providers" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[960px] w-full mx-auto space-y-6 flex-1">
+            {/* ===== MÓDULO: SESIONES DE CHAT / CONVERSACIONES ===== */}
+            {activeNav === "chats" && (
+              <div className="px-4 sm:px-6 py-6 max-w-[920px] w-full mx-auto space-y-5 flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
-                        Proveedores de Inteligencia Artificial (7)
-                      </h1>
-                      <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                        Multi-Provider Engine
-                      </span>
-                    </div>
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                      Sesiones de Conversación &amp; Chats
+                    </h1>
                     <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
-                      Orquestación multi-modelo para generación de respuestas, cálculo de embeddings y reranking semántico.
+                      Historial de hilos interactivos con el motor RAG. Cada sesión mantiene su contexto documental.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => {
-                      aiProviders.forEach((p) => handlePingTest(p.id));
-                      showToastMessage("Comprobando latencia de todos los proveedores...");
+                      const newId = `session-${Date.now()}`;
+                      const newSession: ChatSession = {
+                        id: newId,
+                        title: `Conversación ${chatSessions.length + 1}`,
+                        preview: "Conversación abierta, lista para recibir consultas al motor...",
+                        date: "Hoy",
+                        messagesCount: 1,
+                        provider: activeLlmProvider.name,
+                      };
+                      setChatSessions((prev) => [newSession, ...prev]);
+                      setActiveSessionId(newId);
+                      handleResetChat();
+                      setActiveNav("nuevo");
+                      showToastMessage("Nueva conversación creada");
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-semibold shadow-xs cursor-pointer transition-all self-start sm:self-auto"
+                    style={{ backgroundColor: palette.actionPrimary }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all self-start sm:self-auto"
                   >
-                    <HubIcon icon={Zap} size={14} />
-                    <span>Test de Latencia Global</span>
+                    <HubIcon icon={MessageSquarePlus} size={15} />
+                    <span>+ Nueva Conversación</span>
                   </button>
                 </div>
 
-                {/* 4 KPIs de Infraestructura IA */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-3.5 rounded-xl border shadow-xs"
-                  >
-                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                      LLM Primario
-                    </span>
-                    <span className="text-base font-bold text-zinc-900 block mt-1 truncate">
-                      {aiProviders.find((p) => p.id === activeLlmProviderId)?.name}
-                    </span>
-                    <span className="text-[11.5px] text-blue-600 font-mono mt-0.5 block truncate">
-                      {aiProviders.find((p) => p.id === activeLlmProviderId)?.selectedModel}
-                    </span>
-                  </div>
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-3.5 rounded-xl border shadow-xs"
-                  >
-                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                      Reranker de Precisión
-                    </span>
-                    <span className="text-base font-bold text-purple-700 block mt-1 truncate">
-                      {aiProviders.find((p) => p.id === activeRerankerProviderId)?.name}
-                    </span>
-                    <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
-                      rerank-v3.5 (Cross-Encoder)
-                    </span>
-                  </div>
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-3.5 rounded-xl border shadow-xs"
-                  >
-                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                      Embeddings Vectoriales
-                    </span>
-                    <span className="text-base font-bold text-emerald-700 block mt-1 truncate">
-                      {aiProviders.find((p) => p.id === activeEmbeddingProviderId)?.name}
-                    </span>
-                    <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
-                      1536 dimensiones (Coseno)
-                    </span>
-                  </div>
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-3.5 rounded-xl border shadow-xs"
-                  >
-                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                      Latencia Media
-                    </span>
-                    <span className="text-base font-bold text-zinc-900 block mt-1 flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span>~128 ms</span>
-                    </span>
-                    <span className="text-[11.5px] text-zinc-500 mt-0.5 block">
-                      Groq LPU a 42 ms récord
-                    </span>
-                  </div>
-                </div>
-
-                {/* Grid con las 7 Tarjetas de Proveedores */}
-                <div className="space-y-3.5">
-                  {aiProviders.map((prov) => {
-                    const isPrimaryLlm = prov.id === activeLlmProviderId;
-                    const isReranker = prov.id === activeRerankerProviderId;
-                    const isEmbedding = prov.id === activeEmbeddingProviderId;
-
+                {/* Lista de Sesiones de Chat */}
+                <div className="space-y-3">
+                  {chatSessions.map((session) => {
+                    const isSelected = activeSessionId === session.id;
                     return (
                       <div
-                        key={prov.id}
+                        key={session.id}
                         style={{
                           backgroundColor: palette.bgSurface,
-                          borderColor: isPrimaryLlm ? palette.accentCitation : palette.borderDefault,
-                          boxShadow: isPrimaryLlm ? `0 0 0 1px ${palette.accentCitation}40` : "none",
+                          borderColor: isSelected ? palette.accentCitation : palette.borderDefault,
+                          boxShadow: isSelected ? `0 0 0 1px ${palette.accentCitation}40` : "none",
                         }}
-                        className="p-4 rounded-xl border shadow-xs transition-all space-y-3"
+                        className="p-4 rounded-xl border shadow-xs hover:border-zinc-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="flex items-start gap-3">
-                            <span
-                              style={{ backgroundColor: `${prov.logoColor}15`, color: prov.logoColor }}
-                              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border border-zinc-200/80"
-                            >
-                              <HubIcon icon={Cpu} size={20} />
-                            </span>
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-bold text-zinc-900 text-sm">{prov.name}</span>
-                                <span className="text-xs text-zinc-400 font-mono">({prov.company})</span>
-                                {isPrimaryLlm && (
-                                  <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-blue-100 text-blue-800 font-bold border border-blue-300">
-                                    ★ LLM Primario
-                                  </span>
-                                )}
-                                {isReranker && (
-                                  <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-purple-100 text-purple-800 font-bold border border-purple-300">
-                                    ✦ Reranker
-                                  </span>
-                                )}
-                                {isEmbedding && (
-                                  <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
-                                    ● Embeddings
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-zinc-500 mt-0.5">{prov.description}</p>
-                            </div>
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-zinc-900 text-sm block">{session.title}</span>
+                            {isSelected && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-50 text-blue-700 font-semibold border border-blue-200">
+                                Activa
+                              </span>
+                            )}
                           </div>
-
-                          {/* Ping en vivo y Context Window */}
-                          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                            <div className="text-right">
-                              <span className="font-mono text-xs font-bold text-zinc-900 block">
-                                {prov.latency} ms
-                              </span>
-                              <span className="text-[10.5px] text-emerald-600 block flex items-center gap-1 justify-end">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                                <span>En línea</span>
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handlePingTest(prov.id)}
-                              className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
-                              title="Probar latencia"
-                            >
-                              <HubIcon icon={RefreshCw} size={14} />
-                            </button>
+                          <p className="text-xs text-zinc-600 line-clamp-2">{session.preview}</p>
+                          <div className="flex items-center gap-3 text-[11.5px] text-zinc-400 pt-1 flex-wrap">
+                            <span className="flex items-center gap-1">
+                              <HubIcon icon={Clock} size={12} />
+                              <span>{session.date}</span>
+                            </span>
+                            <span>•</span>
+                            <span className="font-medium text-zinc-600">{session.messagesCount} mensajes</span>
+                            <span>•</span>
+                            <span className="font-mono text-blue-600 font-semibold">{session.provider}</span>
                           </div>
                         </div>
 
-                        {/* Controles de Configuración del Proveedor */}
-                        <div className="pt-2 border-t border-zinc-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                          {/* Selector de Modelo */}
-                          <div>
-                            <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                              Modelo Activo
-                            </label>
-                            <select
-                              value={prov.selectedModel}
-                              onChange={(e) => handleModelChange(prov.id, e.target.value)}
-                              className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-400"
-                            >
-                              {prov.models.map((m) => (
-                                <option key={m} value={m}>
-                                  {m}
-                                </option>
-                              ))}
-                            </select>
-                            <span className="text-[10px] text-zinc-400 mt-0.5 block">
-                              Ventana: {prov.contextWindow}
-                            </span>
-                          </div>
-
-                          {/* API Key segura */}
-                          <div>
-                            <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                              Credenciales (API Key)
-                            </label>
-                            <div className="relative flex items-center">
-                              <span className="absolute left-2.5 text-zinc-400">
-                                <HubIcon icon={Key} size={12} />
-                              </span>
-                              <input
-                                type="password"
-                                readOnly
-                                value={prov.apiKeyMask}
-                                className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 font-mono text-zinc-600 text-[11px]"
-                              />
-                            </div>
-                            <span className="text-[10px] text-emerald-600 mt-0.5 block flex items-center gap-1">
-                              <HubIcon icon={ShieldCheck} size={11} />
-                              <span>Cifrado AES-256 local</span>
-                            </span>
-                          </div>
-
-                          {/* Acciones de Asignación */}
-                          <div className="flex flex-col justify-end gap-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => handleSwitchPrimaryLlm(prov.id)}
-                                disabled={isPrimaryLlm}
-                                className={`flex-1 py-1.5 px-2 rounded-lg font-semibold text-[11.5px] cursor-pointer transition-all ${
-                                  isPrimaryLlm
-                                    ? "bg-blue-600 text-white cursor-default"
-                                    : "border border-zinc-200 hover:bg-zinc-100 text-zinc-700"
-                                }`}
-                              >
-                                {isPrimaryLlm ? "✓ LLM Primario" : "Hacer Primario"}
-                              </button>
-                              {(prov.id === "cohere" || prov.id === "openai") && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    prov.id === "cohere"
-                                      ? handleSwitchReranker("cohere")
-                                      : handleSwitchEmbedding("openai")
-                                  }
-                                  className="py-1.5 px-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-600 text-[11px] font-medium cursor-pointer"
-                                >
-                                  {prov.id === "cohere" ? "Reranker" : "Embeddings"}
-                                </button>
-                              )}
-                            </div>
-                          </div>
+                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (chatSessions.length <= 1) {
+                                showToastMessage("Debe mantenerse al menos una sesión");
+                                return;
+                              }
+                              setChatSessions((prev) => prev.filter((s) => s.id !== session.id));
+                              if (activeSessionId === session.id) {
+                                const remaining = chatSessions.filter((s) => s.id !== session.id);
+                                setActiveSessionId(remaining[0]?.id || "");
+                              }
+                              showToastMessage(`Sesión eliminada: ${session.title}`);
+                            }}
+                            title="Eliminar sesión"
+                            className="p-1.5 rounded-lg border border-zinc-200 text-zinc-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all cursor-pointer"
+                          >
+                            <HubIcon icon={Trash2} size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveSessionId(session.id);
+                              setActiveNav("nuevo");
+                              showToastMessage(`Cargada: ${session.title}`);
+                            }}
+                            style={{ backgroundColor: palette.actionPrimary }}
+                            className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-all shadow-xs"
+                          >
+                            <span>Continuar Chat</span>
+                            <HubIcon icon={ArrowRight} size={14} />
+                          </button>
                         </div>
                       </div>
                     );
@@ -2408,177 +2568,445 @@ export default function CriteriosApp() {
             </div>
           )}
 
-          {/* ===== MÓDULO 4: PARÁMETROS DEL MOTOR RAG ===== */}
+          {/* ===== MÓDULO UNIFICADO: CONFIGURACIÓN & PROVEEDORES IA (7) ===== */}
           {activeNav === "config" && (
-            <div className="px-6 py-6 max-w-[900px] w-full mx-auto space-y-5 flex-1">
-              <div>
-                <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
-                  Parámetros del Motor RAG
-                </h1>
-                <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
-                  Ajuste técnico de embeddings, similitud semántica y arquitectura de recuperación.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                {/* 1. Modelo de Embedding */}
-                <div
-                  style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                  className="p-4 rounded-xl border shadow-xs space-y-2"
-                >
-                  <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                    Modelo de Embeddings Vectoriales
-                  </label>
-                  <select
-                    value={embeddingModel}
-                    onChange={(e) => setEmbeddingModel(e.target.value)}
-                    className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400 cursor-pointer"
-                  >
-                    <option value="text-embedding-3-small">OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)</option>
-                    <option value="text-embedding-3-large">OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)</option>
-                    <option value="cohere-multilingual">Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)</option>
-                  </select>
-                  <p className="text-[11.5px] text-zinc-400">
-                    Determina la densidad del espacio latente y la precisión en búsquedas semánticas multilingües.
+            <div className="px-4 sm:px-6 py-6 max-w-[960px] w-full mx-auto space-y-5 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                    Configuración del Sistema RAG
+                  </h1>
+                  <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
+                    Gestión de proveedores de Inteligencia Artificial, modelos fundacionales y parámetros del motor vectorial.
                   </p>
                 </div>
 
-                {/* 2. Corte de Similitud Coseno */}
-                <div
-                  style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                  className="p-4 rounded-xl border shadow-xs space-y-2"
-                >
+                {/* Sub-Tabs de Configuración */}
+                <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setConfigTab("providers")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                      configTab === "providers"
+                        ? "bg-white text-zinc-900 shadow-xs"
+                        : "text-zinc-600 hover:text-zinc-900"
+                    }`}
+                  >
+                    <HubIcon icon={Cpu} size={14} />
+                    <span>Proveedores de IA (7)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfigTab("engine")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                      configTab === "engine"
+                        ? "bg-white text-zinc-900 shadow-xs"
+                        : "text-zinc-600 hover:text-zinc-900"
+                    }`}
+                  >
+                    <HubIcon icon={Settings} size={14} />
+                    <span>Parámetros del Motor</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-Tab 1: 7 Proveedores de IA */}
+              {configTab === "providers" && (
+                <div className="space-y-5 animate-in fade-in">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                      Umbral Mínimo de Similitud Coseno
-                    </label>
-                    <span className="font-mono text-sm font-bold text-blue-600">
-                      ≥ {similarityThreshold.toFixed(2)}
+                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                      Matriz de Orquestación Multi-Modelo
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        aiProviders.forEach((p) => handlePingTest(p.id));
+                        showToastMessage("Comprobando latencia de todos los proveedores...");
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-semibold shadow-xs cursor-pointer transition-all"
+                    >
+                      <HubIcon icon={Zap} size={13} />
+                      <span>Test de Latencia Global</span>
+                    </button>
                   </div>
-                  <input
-                    type="range"
-                    min="0.60"
-                    max="0.95"
-                    step="0.05"
-                    value={similarityThreshold}
-                    onChange={(e) => setSimilarityThreshold(parseFloat(e.target.value))}
-                    className="w-full accent-blue-600 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-xs text-zinc-400">
-                    <span>0.60 (Mayor cobertura de fuentes)</span>
-                    <span>0.75 (Balanceado recomendado)</span>
-                    <span>0.95 (Solo coincidencias exactas)</span>
+
+                  {/* 4 KPIs de Infraestructura IA */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-3.5 rounded-xl border shadow-xs"
+                    >
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        LLM Primario
+                      </span>
+                      <span className="text-base font-bold text-zinc-900 block mt-1 truncate">
+                        {aiProviders.find((p) => p.id === activeLlmProviderId)?.name}
+                      </span>
+                      <span className="text-[11.5px] text-blue-600 font-mono mt-0.5 block truncate">
+                        {aiProviders.find((p) => p.id === activeLlmProviderId)?.selectedModel}
+                      </span>
+                    </div>
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-3.5 rounded-xl border shadow-xs"
+                    >
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Reranker de Precisión
+                      </span>
+                      <span className="text-base font-bold text-purple-700 block mt-1 truncate">
+                        {aiProviders.find((p) => p.id === activeRerankerProviderId)?.name}
+                      </span>
+                      <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
+                        rerank-v3.5 (Cross-Encoder)
+                      </span>
+                    </div>
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-3.5 rounded-xl border shadow-xs"
+                    >
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Embeddings Vectoriales
+                      </span>
+                      <span className="text-base font-bold text-emerald-700 block mt-1 truncate">
+                        {aiProviders.find((p) => p.id === activeEmbeddingProviderId)?.name}
+                      </span>
+                      <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
+                        1536 dimensiones (Coseno)
+                      </span>
+                    </div>
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-3.5 rounded-xl border shadow-xs"
+                    >
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Latencia Media
+                      </span>
+                      <span className="text-base font-bold text-zinc-900 block mt-1 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <span>~128 ms</span>
+                      </span>
+                      <span className="text-[11.5px] text-zinc-500 mt-0.5 block">
+                        Groq LPU a 42 ms récord
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tarjetas de los 7 Proveedores */}
+                  <div className="space-y-3">
+                    {aiProviders.map((prov) => {
+                      const isPrimaryLlm = prov.id === activeLlmProviderId;
+                      const isReranker = prov.id === activeRerankerProviderId;
+                      const isEmbedding = prov.id === activeEmbeddingProviderId;
+
+                      return (
+                        <div
+                          key={prov.id}
+                          style={{
+                            backgroundColor: palette.bgSurface,
+                            borderColor: isPrimaryLlm ? palette.accentCitation : palette.borderDefault,
+                            boxShadow: isPrimaryLlm ? `0 0 0 1px ${palette.accentCitation}40` : "none",
+                          }}
+                          className="p-4 rounded-xl border shadow-xs transition-all space-y-3"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                              <span
+                                style={{ backgroundColor: `${prov.logoColor}15`, color: prov.logoColor }}
+                                className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border border-zinc-200/80"
+                              >
+                                <HubIcon icon={Cpu} size={20} />
+                              </span>
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-zinc-900 text-sm">{prov.name}</span>
+                                  <span className="text-xs text-zinc-400 font-mono">({prov.company})</span>
+                                  {isPrimaryLlm && (
+                                    <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-blue-100 text-blue-800 font-bold border border-blue-300 flex items-center gap-1">
+                                      <HubIcon icon={Sparkles} size={11} />
+                                      <span>LLM Primario</span>
+                                    </span>
+                                  )}
+                                  {isReranker && (
+                                    <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-purple-100 text-purple-800 font-bold border border-purple-300 flex items-center gap-1">
+                                      <HubIcon icon={Zap} size={11} />
+                                      <span>Reranker</span>
+                                    </span>
+                                  )}
+                                  {isEmbedding && (
+                                    <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1">
+                                      <HubIcon icon={CheckCircle2} size={11} />
+                                      <span>Embeddings</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-zinc-500 mt-0.5">{prov.description}</p>
+                              </div>
+                            </div>
+
+                            {/* Ping en vivo */}
+                            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                              <div className="text-right">
+                                <span className="font-mono text-xs font-bold text-zinc-900 block">
+                                  {prov.latency} ms
+                                </span>
+                                <span className="text-[10.5px] text-emerald-600 block flex items-center gap-1 justify-end">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                                  <span>En línea</span>
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handlePingTest(prov.id)}
+                                className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
+                                title="Probar latencia"
+                              >
+                                <HubIcon icon={RefreshCw} size={14} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Controles de Configuración del Proveedor */}
+                          <div className="pt-2 border-t border-zinc-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div>
+                              <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                                Modelo Activo
+                              </label>
+                              <select
+                                value={prov.selectedModel}
+                                onChange={(e) => handleModelChange(prov.id, e.target.value)}
+                                className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                              >
+                                {prov.models.map((m) => (
+                                  <option key={m} value={m}>
+                                    {m}
+                                  </option>
+                                ))}
+                              </select>
+                              <span className="text-[10px] text-zinc-400 mt-0.5 block">
+                                Ventana: {prov.contextWindow}
+                              </span>
+                            </div>
+
+                            <div>
+                              <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                                Credenciales (API Key)
+                              </label>
+                              <div className="relative flex items-center">
+                                <span className="absolute left-2.5 text-zinc-400">
+                                  <HubIcon icon={Key} size={12} />
+                                </span>
+                                <input
+                                  type="password"
+                                  readOnly
+                                  value={prov.apiKeyMask}
+                                  className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 font-mono text-zinc-600 text-[11px]"
+                                />
+                              </div>
+                              <span className="text-[10px] text-emerald-600 mt-0.5 block flex items-center gap-1">
+                                <HubIcon icon={ShieldCheck} size={11} />
+                                <span>Cifrado AES-256 local</span>
+                              </span>
+                            </div>
+
+                            <div className="flex flex-col justify-end gap-1.5">
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSwitchPrimaryLlm(prov.id)}
+                                  disabled={isPrimaryLlm}
+                                  className={`flex-1 py-1.5 px-2 rounded-lg font-semibold text-[11.5px] cursor-pointer transition-all ${
+                                    isPrimaryLlm
+                                      ? "bg-blue-600 text-white cursor-default"
+                                      : "border border-zinc-200 hover:bg-zinc-100 text-zinc-700"
+                                  }`}
+                                >
+                                  {isPrimaryLlm ? "LLM Primario Activo" : "Hacer Primario"}
+                                </button>
+                                {(prov.id === "cohere" || prov.id === "openai") && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      prov.id === "cohere"
+                                        ? handleSwitchReranker("cohere")
+                                        : handleSwitchEmbedding("openai")
+                                    }
+                                    className="py-1.5 px-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-600 text-[11px] font-medium cursor-pointer"
+                                  >
+                                    {prov.id === "cohere" ? "Reranker" : "Embeddings"}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+              )}
 
-                {/* 3. Top-K Chunks */}
-                <div
-                  style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                  className="p-4 rounded-xl border shadow-xs space-y-2"
-                >
-                  <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                    Profundidad de Recuperación (Top-K Chunks)
-                  </label>
-                  <div className="flex items-center gap-2">
-                    {[3, 5, 8, 12].map((k) => (
+              {/* Sub-Tab 2: Parámetros del Motor RAG */}
+              {configTab === "engine" && (
+                <div className="space-y-4 animate-in fade-in">
+                  {/* 1. Modelo de Embedding */}
+                  <div
+                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                    className="p-4 rounded-xl border shadow-xs space-y-2"
+                  >
+                    <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                      Modelo de Embeddings Vectoriales
+                    </label>
+                    <select
+                      value={embeddingModel}
+                      onChange={(e) => setEmbeddingModel(e.target.value)}
+                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400 cursor-pointer"
+                    >
+                      <option value="text-embedding-3-small">OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)</option>
+                      <option value="text-embedding-3-large">OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)</option>
+                      <option value="cohere-multilingual">Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)</option>
+                    </select>
+                    <p className="text-[11.5px] text-zinc-400">
+                      Determina la densidad del espacio latente y la precisión en búsquedas semánticas multilingües.
+                    </p>
+                  </div>
+
+                  {/* 2. Corte de Similitud Coseno */}
+                  <div
+                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                    className="p-4 rounded-xl border shadow-xs space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Umbral Mínimo de Similitud Coseno
+                      </label>
+                      <span className="font-mono text-sm font-bold text-blue-600">
+                        ≥ {similarityThreshold.toFixed(2)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.60"
+                      max="0.95"
+                      step="0.05"
+                      value={similarityThreshold}
+                      onChange={(e) => setSimilarityThreshold(parseFloat(e.target.value))}
+                      className="w-full accent-blue-600 cursor-pointer"
+                    />
+                    <div className="flex justify-between text-xs text-zinc-400">
+                      <span>0.60 (Mayor cobertura de fuentes)</span>
+                      <span>0.75 (Balanceado recomendado)</span>
+                      <span>0.95 (Solo coincidencias exactas)</span>
+                    </div>
+                  </div>
+
+                  {/* 3. Top-K Chunks */}
+                  <div
+                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                    className="p-4 rounded-xl border shadow-xs space-y-2"
+                  >
+                    <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                      Profundidad de Recuperación (Top-K Chunks)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      {[3, 5, 8, 12].map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => setTopK(k)}
+                          className={`flex-1 py-2 px-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                            topK === k
+                              ? "border-zinc-900 bg-zinc-900 text-white"
+                              : "border-zinc-200 hover:bg-zinc-50 text-zinc-700"
+                          }`}
+                        >
+                          {k} fragmentos
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[11.5px] text-zinc-400">
+                      Cantidad de fragmentos más relevantes inyectados en el contexto de generación del LLM.
+                    </p>
+                  </div>
+
+                  {/* 4. Toggles de Optimización */}
+                  <div
+                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                    className="p-4 rounded-xl border shadow-xs space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-sm text-zinc-900 block">Reranker de Precisión (Cohere Cross-Encoder)</span>
+                        <span className="text-xs text-zinc-500 block">
+                          Reordena los fragmentos recuperados para reducir alucinaciones en un 42%.
+                        </span>
+                      </div>
                       <button
-                        key={k}
                         type="button"
-                        onClick={() => setTopK(k)}
-                        className={`flex-1 py-2 px-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
-                          topK === k
-                            ? "border-zinc-900 bg-zinc-900 text-white"
-                            : "border-zinc-200 hover:bg-zinc-50 text-zinc-700"
+                        onClick={() => setEnableReranker((v) => !v)}
+                        className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                          enableReranker ? "bg-blue-600" : "bg-zinc-300"
                         }`}
                       >
-                        {k} fragmentos
+                        <span
+                          className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
+                            enableReranker ? "right-1" : "left-1"
+                          }`}
+                        />
                       </button>
-                    ))}
-                  </div>
-                  <p className="text-[11.5px] text-zinc-400">
-                    Cantidad de fragmentos más relevantes inyectados en el contexto de generación del LLM.
-                  </p>
-                </div>
-
-                {/* 4. Toggles de Optimización */}
-                <div
-                  style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                  className="p-4 rounded-xl border shadow-xs space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-zinc-900 block">Reranking Semántico Cross-Encoder</span>
-                      <span className="text-xs text-zinc-500 block">
-                        Reordena los fragmentos candidatos utilizando Cohere Rerank v3 para eliminar ruido.
-                      </span>
                     </div>
+
+                    <div className="h-px bg-zinc-100" />
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-sm text-zinc-900 block">Búsqueda Híbrida (Dense Vector + BM25 Sparse)</span>
+                        <span className="text-xs text-zinc-500 block">
+                          Combina embeddings con coincidencia léxica exacta para números de ley y celdas Excel.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setHybridSearch((v) => !v)}
+                        className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                          hybridSearch ? "bg-blue-600" : "bg-zinc-300"
+                        }`}
+                      >
+                        <span
+                          className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
+                            hybridSearch ? "right-1" : "left-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Botones de acción */}
+                  <div className="flex items-center justify-end gap-3 pt-2">
                     <button
                       type="button"
-                      onClick={() => setEnableReranker((v) => !v)}
-                      className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                        enableReranker ? "bg-blue-600" : "bg-zinc-300"
-                      }`}
+                      onClick={() => {
+                        setEmbeddingModel("text-embedding-3-small");
+                        setSimilarityThreshold(0.75);
+                        setTopK(5);
+                        setEnableReranker(true);
+                        setHybridSearch(true);
+                        showToastMessage("Valores de fábrica restablecidos");
+                      }}
+                      className="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 cursor-pointer transition-colors"
                     >
-                      <span
-                        className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
-                          enableReranker ? "right-1" : "left-1"
-                        }`}
-                      />
+                      Restablecer Valores
                     </button>
-                  </div>
-
-                  <div className="h-px bg-zinc-100" />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-sm text-zinc-900 block">Búsqueda Híbrida (Dense Vector + BM25 Sparse)</span>
-                      <span className="text-xs text-zinc-500 block">
-                        Combina embeddings con coincidencia léxica exacta para números de ley y celdas Excel.
-                      </span>
-                    </div>
                     <button
                       type="button"
-                      onClick={() => setHybridSearch((v) => !v)}
-                      className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                        hybridSearch ? "bg-blue-600" : "bg-zinc-300"
-                      }`}
+                      onClick={() => showToastMessage("Parámetros del motor guardados correctamente")}
+                      style={{ backgroundColor: palette.actionPrimary }}
+                      className="px-4 py-2 rounded-lg text-xs font-semibold text-white shadow-xs hover:opacity-90 cursor-pointer transition-colors"
                     >
-                      <span
-                        className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
-                          hybridSearch ? "right-1" : "left-1"
-                        }`}
-                      />
+                      Guardar Parámetros
                     </button>
                   </div>
                 </div>
-
-                {/* Botones de acción */}
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmbeddingModel("text-embedding-3-small");
-                      setSimilarityThreshold(0.75);
-                      setTopK(5);
-                      setEnableReranker(true);
-                      setHybridSearch(true);
-                      showToastMessage("Valores de fábrica restablecidos");
-                    }}
-                    className="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 cursor-pointer transition-colors"
-                  >
-                    Restablecer Valores
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => showToastMessage("Parámetros del motor guardados correctamente")}
-                    style={{ backgroundColor: palette.actionPrimary }}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold text-white shadow-xs hover:opacity-90 cursor-pointer transition-colors"
-                  >
-                    Guardar Parámetros
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           )}
         </main>
@@ -2622,10 +3050,11 @@ export default function CriteriosApp() {
                   <button
                     type="button"
                     onClick={() => setInspectorOpen(false)}
-                    className="p-1 rounded hover:bg-zinc-100 cursor-pointer text-zinc-500"
-                    aria-label="Cerrar inspector"
+                    className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 cursor-pointer text-zinc-500 transition-colors"
+                    title="Colapsar inspector de evidencias"
+                    aria-label="Colapsar inspector de evidencias"
                   >
-                    <HubIcon icon={X} size={17} />
+                    <HubIcon icon={PanelRightClose} size={16} />
                   </button>
                 </div>
               </div>
