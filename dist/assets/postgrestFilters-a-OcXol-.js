@@ -1,0 +1,1 @@
+function e(e){return String(e??``).replace(/[(),"'\\]/g,` `).replace(/\s+/g,` `).trim().slice(0,120)}function t(t,n){let r=e(n);return r?t.map(e=>`${e}.ilike.%${r}%`).join(`,`):``}export{t};

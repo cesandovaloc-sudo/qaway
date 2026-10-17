@@ -1,0 +1,1 @@
+import{t as e}from"./dist-B14mbHA-.js";var t=`https://qrusdsqgygfolxfrafyd.supabase.co`,n=`sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi`,r=!!n,i=r?e(t,n,{auth:{persistSession:!0,autoRefreshToken:!0}}):e(`https://placeholder.supabase.co`,`placeholder-key`);typeof localStorage<`u`&&localStorage.removeItem(`qaway_inventario_auth_token`);export{r as n,i as t};

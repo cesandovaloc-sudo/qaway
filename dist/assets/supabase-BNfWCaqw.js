@@ -1,0 +1,1 @@
+import{t as e}from"./dist-B14mbHA-.js";var t=e(`https://qrusdsqgygfolxfrafyd.supabase.co`,`sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi`);export{t};

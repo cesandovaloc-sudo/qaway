@@ -314,7 +314,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
     <div className="w-full min-h-screen bg-[#f8fafc] text-slate-800 antialiased flex flex-col font-sans">
       {/* 1. TOP NAVBAR INSTITUCIONAL DE CONTROL */}
       <nav className="w-full bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+        <div className="w-full max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -377,7 +377,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
       </nav>
 
       {/* 2. CONTENIDO PRINCIPAL CENTRADO A MÁXIMO ANCHO ERGONÓMICO */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-5 flex-1">
+      <main className="w-full max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3.5 flex-1">
         {/* TITULAR Y DESCRIPCIÓN */}
         <div>
           <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
@@ -388,91 +388,99 @@ ON public.minedu_casuisticas FOR ALL USING (true);
           </p>
         </div>
 
-        {/* 3. TARJETAS KPI SUPERIORES (ESTILO INVENTI PRO) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* 3. TARJETAS KPI SUPERIORES (ESTILO COMPACTO INVENTI PRO) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {/* Card 1: Total Casos */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="bg-white rounded-xl border border-slate-200/80 px-3.5 py-2.5 shadow-2xs flex items-center justify-between min-h-[68px]">
+            <div className="min-w-0 pr-2">
+              <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
                 Total Casuísticas
               </span>
-              <span className="text-2xl sm:text-3xl font-black text-slate-900 mt-1 block">
-                {stats.total}
-              </span>
-              <span className="text-[11px] font-semibold text-slate-500">
-                En {stats.dirsWithCases} direcciones activas
-              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-none">
+                  {stats.total}
+                </span>
+                <span className="text-[11px] font-medium text-slate-500 truncate">
+                  {stats.dirsWithCases} direcciones
+                </span>
+              </div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-red-50 text-[#d81b3d] flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-rose-50 text-[#b91c1c] flex items-center justify-center shrink-0">
+              <BookOpen className="w-4 h-4" />
             </div>
           </div>
 
           {/* Card 2: Con Base Normativa */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="bg-white rounded-xl border border-slate-200/80 px-3.5 py-2.5 shadow-2xs flex items-center justify-between min-h-[68px]">
+            <div className="min-w-0 pr-2">
+              <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
                 Con Base Normativa
               </span>
-              <span className="text-2xl sm:text-3xl font-black text-emerald-700 mt-1 block">
-                {stats.withNormativa}
-              </span>
-              <span className="text-[11px] font-semibold text-emerald-600">
-                {Math.round((stats.withNormativa / Math.max(1, stats.total)) * 100)}% fundamentadas
-              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-xl sm:text-2xl font-bold text-emerald-700 tracking-tight leading-none">
+                  {stats.withNormativa}
+                </span>
+                <span className="text-[11px] font-medium text-emerald-600 truncate">
+                  {Math.round((stats.withNormativa / Math.max(1, stats.total)) * 100)}% oficial
+                </span>
+              </div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-              <FileCheck className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+              <FileCheck className="w-4 h-4" />
             </div>
           </div>
 
           {/* Card 3: Casos con UGEL */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="bg-white rounded-xl border border-slate-200/80 px-3.5 py-2.5 shadow-2xs flex items-center justify-between min-h-[68px]">
+            <div className="min-w-0 pr-2">
+              <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
                 Casos Específicos UGEL
               </span>
-              <span className="text-2xl sm:text-3xl font-black text-amber-700 mt-1 block">
-                {stats.withUgel}
-              </span>
-              <span className="text-[11px] font-semibold text-amber-600">
-                Incidencias territoriales
-              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-xl sm:text-2xl font-bold text-amber-700 tracking-tight leading-none">
+                  {stats.withUgel}
+                </span>
+                <span className="text-[11px] font-medium text-amber-600 truncate">
+                  Territoriales
+                </span>
+              </div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
-              <MapPin className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+              <MapPin className="w-4 h-4" />
             </div>
           </div>
 
           {/* Card 4: Almacenamiento Nube */}
-          <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs flex items-center justify-between">
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="bg-white rounded-xl border border-slate-200/80 px-3.5 py-2.5 shadow-2xs flex items-center justify-between min-h-[68px]">
+            <div className="min-w-0 pr-2">
+              <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 truncate">
                 Estado Supabase
               </span>
-              <span
-                className={`text-lg sm:text-xl font-black mt-1 block ${
-                  isSupabaseConnected ? 'text-sky-700' : 'text-slate-700'
-                }`}
-              >
-                {isSupabaseConnected ? 'Conectado' : 'Caché Local'}
-              </span>
-              <span className="text-[11px] font-semibold text-slate-500 font-mono">
-                minedu_casuisticas
-              </span>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span
+                  className={`text-lg sm:text-xl font-bold tracking-tight leading-none ${
+                    isSupabaseConnected ? 'text-sky-700' : 'text-slate-700'
+                  }`}
+                >
+                  {isSupabaseConnected ? 'Conectado' : 'Caché'}
+                </span>
+                <span className="text-[11px] font-mono text-slate-400 truncate">
+                  minedu_casuisticas
+                </span>
+              </div>
             </div>
             <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                 isSupabaseConnected ? 'bg-sky-50 text-sky-700' : 'bg-slate-100 text-slate-600'
               }`}
             >
-              <Cloud className="w-5 h-5" />
+              <Cloud className="w-4 h-4" />
             </div>
           </div>
         </div>
 
         {/* 4. BARRA DE FILTROS ESTILO INVENTI PRO */}
-        <div className="bg-white rounded-xl border border-slate-200/90 p-3.5 shadow-2xs space-y-3">
+        <div className="bg-white rounded-xl border border-slate-200/90 p-2.5 sm:p-3 shadow-2xs space-y-3">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Buscador */}
             <div className="relative flex-1">
@@ -680,7 +688,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
             <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
                 <tr>
-                  <th className="w-10 px-3 py-3 text-center">
+                  <th className="w-10 px-3 py-2.5 text-center">
                     <input
                       type="checkbox"
                       checked={
@@ -691,13 +699,13 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                       className="rounded text-[#d81b3d] focus:ring-[#d81b3d] cursor-pointer"
                     />
                   </th>
-                  <th className="w-14 px-2 py-3 text-center">N°</th>
-                  <th className="w-24 px-3 py-3">Dirección</th>
-                  <th className="min-w-[280px] px-4 py-3">Título / Pregunta Central</th>
-                  <th className="w-40 min-w-[160px] px-3 py-3">UGEL / Ámbito</th>
-                  <th className="min-w-[280px] px-4 py-3">Solución / Criterio Oficial</th>
-                  <th className="w-36 min-w-[140px] px-3 py-3">Normativa</th>
-                  <th className="w-28 px-3 py-3 text-center">Acciones</th>
+                  <th className="w-12 px-2 py-2.5 text-center">N°</th>
+                  <th className="w-24 px-3 py-2.5">Dirección</th>
+                  <th className="min-w-[280px] px-3.5 py-2.5">Título / Pregunta Central</th>
+                  <th className="w-40 min-w-[160px] px-3 py-2.5">UGEL / Ámbito</th>
+                  <th className="min-w-[280px] px-3.5 py-2.5">Solución / Criterio Oficial</th>
+                  <th className="w-36 min-w-[140px] px-3 py-2.5">Normativa</th>
+                  <th className="w-24 px-3 py-2.5 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/80 text-slate-700">
@@ -734,7 +742,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                         }`}
                       >
                         {/* Checkbox */}
-                        <td className="px-3 py-3 text-center">
+                        <td className="px-3 py-2.5 text-center">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -744,12 +752,12 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                         </td>
 
                         {/* Número */}
-                        <td className="px-2 py-3 text-center font-bold text-slate-600 font-mono">
+                        <td className="px-2 py-2.5 text-center font-bold text-slate-600 font-mono">
                           {row.number}
                         </td>
 
                         {/* Dirección Badge y Nivel */}
-                        <td className="px-3 py-3 whitespace-nowrap">
+                        <td className="px-3 py-2.5 whitespace-nowrap">
                           <div className="flex flex-col gap-1 items-start">
                             <span
                               className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-black border uppercase tracking-wider ${badgeInfo.colorClass} ${badgeInfo.borderClass}`}
@@ -775,7 +783,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                         </td>
 
                         {/* Título de la pregunta */}
-                        <td className="px-4 py-3">
+                        <td className="px-3.5 py-2.5">
                           <div className="space-y-0.5">
                             <span
                               onClick={() =>
@@ -805,9 +813,9 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                         </td>
 
                         {/* UGEL / Ámbito específico */}
-                        <td className="px-3 py-3">
+                        <td className="px-3 py-2.5">
                           {row.casoEspecifico ? (
-                            <span className="inline-block px-2 py-1 rounded bg-amber-50 text-amber-900 border border-amber-200/80 text-[11px] font-bold">
+                            <span className="inline-block px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200/80 text-[11px] font-bold">
                               {row.casoEspecifico}
                             </span>
                           ) : (
@@ -816,14 +824,14 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                         </td>
 
                         {/* Solución Oficial */}
-                        <td className="px-4 py-3 text-slate-600">
+                        <td className="px-3.5 py-2.5 text-slate-600">
                           <p className="line-clamp-2 text-xs leading-relaxed text-slate-700">
                             {row.solucion}
                           </p>
                         </td>
 
                         {/* Normativa Legal */}
-                        <td className="px-3 py-3 whitespace-nowrap">
+                        <td className="px-3 py-2.5 whitespace-nowrap">
                           {row.normativa ? (
                             <span
                               className="inline-block max-w-[150px] truncate px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-semibold font-mono"
@@ -837,7 +845,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                         </td>
 
                         {/* Acciones */}
-                        <td className="px-3 py-3 text-center whitespace-nowrap">
+                        <td className="px-3 py-2.5 text-center whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1.5">
                             {/* Ver detalle */}
                             <button

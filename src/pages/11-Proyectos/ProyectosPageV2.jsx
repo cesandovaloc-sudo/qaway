@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
+import { isRouteEnabled } from '@/config/siteVisibility'
 import mockupGelato from '../8-landings/8-desarollo web/assets/Hero-2.webp'
 import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
 import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max)2.webp'
@@ -528,8 +529,9 @@ export default function ProyectosPageV2() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 max-w-6xl mx-auto">
+          <div className={`grid grid-cols-1 ${isRouteEnabled('estudio') ? 'lg:grid-cols-2' : 'max-w-2xl'} gap-7 max-w-6xl mx-auto`}>
             {/* Tarjeta Izquierda: Qaway Estudio (Creamos) */}
+            {isRouteEnabled('estudio') && (
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -573,6 +575,7 @@ export default function ProyectosPageV2() {
                 </div>
               </div>
             </motion.div>
+            )}
 
             {/* Tarjeta Derecha: Qaway Academy (Enseñamos / Aprende a Hacer) */}
             <motion.div

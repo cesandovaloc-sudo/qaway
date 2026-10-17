@@ -42,7 +42,7 @@ import '@/pages/4-academy/academy.css'
 import '@/pages/1-inicio/inicio.css'
 import { supabase } from '@/config/supabase'
 import { enviarFormularioContacto } from '@/services/contactoService'
-import { isPublicSiteMode } from '@/config/siteVisibility'
+import { isPublicSiteMode, isRouteEnabled } from '@/config/siteVisibility'
 
 const base = '/assets/pages/1-inicio/'
 const displayFont = {
@@ -618,19 +618,23 @@ function PrimaryAreas() {
           </h2>
         </Reveal>
 
-        <div className="grid border-t border-white/18 lg:grid-cols-3">
-          {primaryAreas.map(({ title, description, link, ctaLabel, icon: Icon }, index) => {
-            const dir = index === 0 ? { x: -50 } : index === 1 ? { y: 50 } : { x: 50 }
-            return (
-              <motion.div
-                key={title}
-                initial={reduceMotion ? false : { opacity: 0, ...dir }}
-                whileInView={{ opacity: 1, x: 0, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.7, delay: index * 0.18, ease: [0.22, 1, 0.36, 1] }}
-                className={`group relative flex flex-col overflow-hidden border-b border-white/18 py-6 transition-all duration-500 lg:border-b-0 lg:px-12 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(255,75,11,0.1),inset_0_0_0_1px_rgba(255,75,11,0.25)] ${index ? 'lg:border-l' : ''
-                  } ${index === 0 ? 'lg:pl-12' : ''}`}
-              >
+        {(() => {
+          const visibleAreas = primaryAreas.filter(a => a.link !== '/estudio' || isRouteEnabled('estudio'))
+          const colsClass = visibleAreas.length === 2 ? 'lg:grid-cols-2 max-w-4xl mx-auto' : 'lg:grid-cols-3'
+          return (
+            <div className={`grid border-t border-white/18 ${colsClass}`}>
+              {visibleAreas.map(({ title, description, link, ctaLabel, icon: Icon }, index) => {
+                const dir = index === 0 ? { x: -50 } : index === 1 ? { y: 50 } : { x: 50 }
+                return (
+                  <motion.div
+                    key={title}
+                    initial={reduceMotion ? false : { opacity: 0, ...dir }}
+                    whileInView={{ opacity: 1, x: 0, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.7, delay: index * 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className={`group relative flex flex-col overflow-hidden border-b border-white/18 py-6 transition-all duration-500 lg:border-b-0 lg:px-12 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(255,75,11,0.1),inset_0_0_0_1px_rgba(255,75,11,0.25)] ${index ? 'lg:border-l' : ''
+                      } ${index === 0 ? 'lg:pl-12' : ''}`}
+                  >
                 <span className="pointer-events-none absolute -top-6 left-4 select-none text-[10rem] font-bold leading-none text-white/[0.04]">
                   0{index + 1}
                 </span>
@@ -654,6 +658,8 @@ function PrimaryAreas() {
             )
           })}
         </div>
+          )
+        })()}
       </div>
     </section>
   )
@@ -1323,7 +1329,7 @@ export default function InicioPage() {
         <BrandMarquee />
         <EcosystemIntro />
         <PrimaryAreas />
-        <EstudioSection />
+        {isRouteEnabled('estudio') && <EstudioSection />}
         <SistemasDigitalesSection />
         <AcademyFeature />
         {false && <CoursesLandings />}

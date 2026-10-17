@@ -10,7 +10,7 @@ export const ACADEMY_CONFIG = {
 
 export const routeVisibility = {
   inicio: true,
-  estudio: true,
+  estudio: false,
   proyectos: true,
   brief: true,
   sistemasDigitales: true,
@@ -34,7 +34,6 @@ const publicPathAllowList = new Set([
   '/checkout',
   '/editor/:id',
   '/editor/new',
-  '/estudio',
   '/formularios/test-preparacion-digital',
   '/hub',
   '/hub/blog-editor',

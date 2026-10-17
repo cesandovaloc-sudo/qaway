@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { ArrowRight, Search, ChevronDown } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
+import { isRouteEnabled } from '@/config/siteVisibility'
 import { supabase } from '@/config/supabase'
 import mockupGelato from '../8-landings/8-desarollo web/assets/Hero-2.webp'
 import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
@@ -669,7 +670,7 @@ export default function ProyectosPage() {
 
       <section className="projects-areas overflow-hidden">
         <div className="projects-shell projects-areas__grid">
-          {categories.map((category, idx) => (
+          {categories.filter(c => c.path !== '/estudio' || isRouteEnabled('estudio')).map((category, idx) => (
             <motion.div
               key={category.label}
               initial={{ opacity: 0, x: idx === 0 ? -60 : 60 }}
