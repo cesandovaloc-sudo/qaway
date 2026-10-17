@@ -411,45 +411,44 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
               {/* DESARROLLO */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Desarrollo de la casuística (Situación identificada){' '}
-                  <span className="text-red-500">*</span>
+                  Desarrollo <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   required
                   rows={3}
                   value={formDesarrollo}
                   onChange={(e) => setFormDesarrollo(e.target.value)}
-                  placeholder="Detalla qué ocurrió durante el monitoreo a la UGEL..."
+                  placeholder="Detalla la situación identificada por la UGEL o IE..."
                   className="w-full rounded-xl bg-white border border-slate-300 p-3.5 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-[#b91c1c]/20 transition shadow-2xs"
                 ></textarea>
               </div>
 
-              {/* ACCIÓN SUGERIDA */}
+              {/* SOLUCIÓN */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Acción sugerida <span className="text-red-500">*</span>
+                  Solución <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   required
                   rows={3}
                   value={formAccion}
                   onChange={(e) => setFormAccion(e.target.value)}
-                  placeholder="Paso inmediato a realizar por la UGEL o directivo..."
+                  placeholder="Indica qué debe verificar y efectuar la UGEL..."
                   className="w-full rounded-xl bg-white border border-slate-300 p-3.5 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-[#b91c1c]/20 transition shadow-2xs"
                 ></textarea>
               </div>
 
-              {/* SOLUCIÓN REFERENCIAL */}
+              {/* EJEMPLO / RESULTADO ESPERADO */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-emerald-800">
-                  Solución referencial <span className="text-red-500">*</span>
+                  Ejemplo / Resultado esperado <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   required
                   rows={3}
                   value={formSolucion}
                   onChange={(e) => setFormSolucion(e.target.value)}
-                  placeholder="Resolución final, reasignación pecosa o regularización..."
+                  placeholder="Ejemplo práctico o resultado esperado al finalizar en el MC SIGA..."
                   className="w-full rounded-xl bg-white border border-slate-300 p-3.5 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-[#b91c1c]/20 transition shadow-2xs"
                 ></textarea>
               </div>

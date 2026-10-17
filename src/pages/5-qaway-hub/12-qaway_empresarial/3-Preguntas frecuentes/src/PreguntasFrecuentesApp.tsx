@@ -15,7 +15,7 @@ import { ManagementModal } from './components/ManagementModal';
 import { Toast } from './components/Toast';
 
 // Claves aisladas de almacenamiento local
-const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v1';
+const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v2';
 const SUPABASE_STORAGE_URL_KEY = 'qaway_minedu_supabase_url_v1';
 const SUPABASE_STORAGE_KEY_KEY = 'qaway_minedu_supabase_key_v1';
 const ADMIN_MODE_KEY = 'qaway_minedu_admin_mode_v1';
@@ -163,7 +163,7 @@ export default function PreguntasFrecuentesApp() {
     return JSON.parse(JSON.stringify(DEFAULT_DIRECTIONS_DATA));
   });
 
-  const [selectedDirectionId, setSelectedDirectionId] = useState<DirectionId>('DEI');
+  const [selectedDirectionId, setSelectedDirectionId] = useState<DirectionId>('DEP');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -568,8 +568,8 @@ export default function PreguntasFrecuentesApp() {
           />
         </div>
 
-        {/* 4. LISTA DE CASUÍSTICAS Y FOOTER CON SCROLL INTERNO COMPLETO HASTA EL FINAL Y BARRA GRIS CLARO */}
-        <div className="casuisticas-scroll-area flex-1 min-h-0 overflow-y-auto overscroll-y-contain max-h-[calc(100vh-156px)] pr-2 -mr-2 pb-12 space-y-5">
+        {/* 4. LISTA DE CASUÍSTICAS Y FOOTER INTEGRADOS AL SCROLL NATURAL DE LA PÁGINA */}
+        <div className="flex-1 min-h-0 pb-12 space-y-5">
           <CasesList
             items={items}
             mode={mode}
