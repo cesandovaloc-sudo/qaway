@@ -15,7 +15,7 @@ import { ManagementModal } from './components/ManagementModal';
 import { Toast } from './components/Toast';
 
 // Claves aisladas de almacenamiento local
-const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v4';
+const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v5';
 const SUPABASE_STORAGE_URL_KEY = 'qaway_minedu_supabase_url_v1';
 const SUPABASE_STORAGE_KEY_KEY = 'qaway_minedu_supabase_key_v1';
 const ADMIN_MODE_KEY = 'qaway_minedu_admin_mode_v1';
@@ -182,7 +182,7 @@ export default function PreguntasFrecuentesApp() {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState<'form' | 'list' | 'cloud'>('form');
+  const [modalTab, setModalTab] = useState<'form' | 'list' | 'table' | 'cloud'>('form');
   const [editingCase, setEditingCase] = useState<{
     caseItem: Casuistica;
     dirId: DirectionId;
@@ -254,6 +254,57 @@ export default function PreguntasFrecuentesApp() {
       console.error('Error conectando a Supabase:', err);
       return false;
     }
+  };
+
+  // Guardar en bloque desde la Tabla Excel y sincronizar a Supabase
+  const handleBulkSaveCases = async (newDirections: DirectionData[]): Promise<boolean> => {
+    persistDirections(newDirections);
+
+    if (isSupabaseConnected && supabaseUrl && supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const client = createClient(supabaseUrl, supabaseKey);
+
+        const rowsToUpsert: any[] = [];
+        newDirections.forEach((dir) => {
+          dir.cases.forEach((c) => {
+            rowsToUpsert.push({
+              id: c.id,
+              dir_id: dir.id,
+              dir_code: dir.code,
+              dir_name: dir.name,
+              number: c.number,
+              title: c.title,
+              criterio_title: c.criterioTitle,
+              criterio_desc: c.criterioDesc,
+              desarrollo: c.desarrollo,
+              solucion: c.solucion,
+              ejemplo: c.ejemplo,
+              normativa: c.normativa || '',
+              caso_especifico: c.casoEspecifico || '',
+              updated_at: new Date().toISOString()
+            });
+          });
+        });
+
+        const { error } = await client.from('casuisticas').upsert(rowsToUpsert);
+        if (error) {
+          console.warn('Error sincronizando a Supabase en bloque:', error);
+          showToast('Guardado localmente. Error al sincronizar con Supabase.', 'error');
+          return false;
+        }
+
+        showToast('¡Tabla Excel sincronizada exitosamente con Supabase y guardada localmente!', 'success');
+        return true;
+      } catch (err) {
+        console.error('Error sincronizando con Supabase:', err);
+        showToast('Guardado localmente. Revisa la conexión de Supabase.', 'error');
+        return false;
+      }
+    }
+
+    showToast('¡Cambios de la Tabla Excel guardados exitosamente en la aplicación!', 'success');
+    return true;
   };
 
   const totalCasesCount = useMemo(() => {
@@ -660,6 +711,7 @@ export default function PreguntasFrecuentesApp() {
         supabaseKey={supabaseKey}
         onSaveSupabaseConfig={handleSaveSupabaseConfig}
         isSupabaseConnected={isSupabaseConnected}
+        onBulkSaveCases={handleBulkSaveCases}
       />
 
       {/* TOAST DE NOTIFICACIÓN */}

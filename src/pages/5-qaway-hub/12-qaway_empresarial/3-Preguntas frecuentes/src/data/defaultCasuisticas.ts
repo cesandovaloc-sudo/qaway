@@ -1,11 +1,27 @@
-import { DirectionData } from '../types/casuistica';
+import { DirectionData, Casuistica } from '../types/casuistica';
+import rawDeiCases from './casuisticas_veedores_2026-09-28.json';
+
+const DEI_CASES: Casuistica[] = (rawDeiCases as any[]).map((c) => ({
+  id: c.id,
+  number: c.number,
+  title: c.title,
+  criterioTitle: c.criterioTitle,
+  criterioDesc: c.criterioDesc,
+  desarrollo: c.desarrollo,
+  solucion: c.solucion,
+  ejemplo: c.ejemplo,
+  normativa: c.normativa || '',
+  accion: c.accion || '',
+  casoEspecifico: c.casoEspecifico || '',
+  isOpen: false
+}));
 
 export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DEI',
     code: 'DEI',
     name: 'Ed. Inicial',
-    cases: []
+    cases: DEI_CASES
   },
   {
     id: 'DEP',
