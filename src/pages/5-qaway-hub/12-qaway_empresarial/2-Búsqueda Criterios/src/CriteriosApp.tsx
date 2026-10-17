@@ -1194,8 +1194,9 @@ export default function CriteriosApp() {
 
     const lowerQ = q.toLowerCase().trim();
     const activeProjName = (projects.find((p) => p.id === activeProjectId) || projects[0]).name;
-    const activeProvider = aiProviders.find((p) => p.id === activeLlmProviderId) || aiProviders[0];
-    const activeSources = projectSources.filter((s) => s.projectId === activeProjectId);
+    const activeSources = projectSources
+      .filter((s) => s.projectId === activeProjectId)
+      .filter((s) => (filterSourceType === "all" ? true : s.type === filterSourceType));
 
     // Detectar saludos o mensajes conversacionales cortos sin intención de búsqueda documental
     const isConversationalGreeting =
@@ -1837,7 +1838,7 @@ export default function CriteriosApp() {
                   onFocus={() => {
                     if (headerSearch.trim()) setShowQuickSearch(true);
                   }}
-                  placeholder="Buscar norma, cuenta, fórmula... (Ctrl+K)"
+                  placeholder="Buscar criterios, normativas, datos o políticas... (Ctrl+K)"
                   style={{
                     backgroundColor: palette.bgPage,
                     borderColor: palette.borderDefault,
@@ -1993,14 +1994,14 @@ export default function CriteriosApp() {
                 {/* Tipo de Fuente */}
                 <div>
                   <label className="block text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Fuente de Datos
+                    Fuente de Información
                   </label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
                       { id: "all", label: "Todas las fuentes" },
-                      { id: "legal", label: "Leyes (TR / D.S.)" },
-                      { id: "excel", label: "Matrices Excel" },
-                      { id: "doc", label: "Manuales RRHH" },
+                      { id: "legal", label: "Normas & Políticas" },
+                      { id: "excel", label: "Tablas & Métricas" },
+                      { id: "doc", label: "Manuales & Guías" },
                     ].map((item) => (
                       <button
                         key={item.id}
@@ -2021,16 +2022,16 @@ export default function CriteriosApp() {
                   </div>
                 </div>
 
-                {/* Período Contable / Legal */}
+                {/* Rango Temporal / Período */}
                 <div>
                   <label className="block text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Período Contable / Legal
+                    Rango Temporal / Período
                   </label>
                   <div className="flex items-center gap-1.5">
                     {[
-                      { id: "q3", label: "Tercer Trimestre (Q3)" },
+                      { id: "q3", label: "Vigente / Actual" },
                       { id: "2026", label: "Año 2026" },
-                      { id: "all", label: "Histórico" },
+                      { id: "all", label: "Histórico / Todo" },
                     ].map((p) => (
                       <button
                         key={p.id}
@@ -2851,9 +2852,10 @@ export default function CriteriosApp() {
             {activeNav === "nuevo" && (
               <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-2 max-w-[940px] w-full mx-auto flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header de la conversación (ESTÁTICO) */}
-                <div className="shrink-0 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                <div className="shrink-0 pb-2 space-y-2.5">
+                  {/* Fila 1: Título, Badge de Modelo y Descripción con ancho completo */}
+                  <div>
+                    <div className="flex items-center gap-2.5">
                       <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900 leading-tight">
                         Asistente de Conocimiento &amp; Chat RAG
                       </h1>
@@ -2862,13 +2864,16 @@ export default function CriteriosApp() {
                         <span>{aiProviders.find((p) => p.id === activeLlmProviderId)?.name || "Google DeepMind"}</span>
                       </span>
                     </div>
-                    <p style={{ color: palette.textSecondary }} className="mt-2 text-[14.5px] leading-relaxed">
-                      Consulta multi-fuente en lenguaje natural con citas interactivas vinculadas a leyes, Excel y políticas.
+                    <p style={{ color: palette.textSecondary }} className="mt-1.5 text-[14.5px] leading-relaxed">
+                      Consulta multi-fuente en lenguaje natural con citas interactivas vinculadas a documentos, normas y métricas.
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                    {/* Botón de Filtro Contextual Flotante (no roba altura al chat) */}
-                    <div className="relative" ref={chatFilterRef}>
+
+                  {/* Fila 2: Barra de Herramientas y Filtros (Totalmente desacoplada del título para cero saltos visuales) */}
+                  <div className="flex items-center justify-between gap-2 pt-0.5 border-b border-zinc-100 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      {/* Botón de Filtro Contextual Flotante (no roba altura al chat) */}
+                      <div className="relative" ref={chatFilterRef}>
                       <button
                         type="button"
                         onClick={() => {
@@ -2906,24 +2911,57 @@ export default function CriteriosApp() {
                           </div>
                           <div>
                             <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                              Período
+                              Fuente de Información
                             </label>
-                            <div className="flex gap-1">
-                              {["q3", "2026", "all"].map((p) => (
+                            <div className="grid grid-cols-2 gap-1 mb-2">
+                              {[
+                                { id: "all", label: "Todas" },
+                                { id: "legal", label: "Normas" },
+                                { id: "excel", label: "Tablas" },
+                                { id: "doc", label: "Manuales" },
+                              ].map((item) => (
                                 <button
-                                  key={p}
+                                  key={item.id}
                                   type="button"
                                   onClick={() => {
-                                    setFilterPeriod(p);
-                                    showToastMessage(`Período: ${p.toUpperCase()}`);
+                                    setFilterSourceType(item.id);
+                                    showToastMessage(`Filtrando: ${item.label}`);
                                   }}
-                                  className={`flex-1 py-1 rounded text-[11px] border font-medium cursor-pointer ${
-                                    filterPeriod === p
-                                      ? "bg-zinc-900 text-white border-zinc-900"
+                                  className={`py-1 px-1.5 rounded text-[11px] border font-medium cursor-pointer text-center ${
+                                    filterSourceType === item.id
+                                      ? "bg-zinc-900 text-white border-zinc-900 font-semibold"
                                       : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
                                   }`}
                                 >
-                                  {p === "q3" ? "Q3 2026" : p === "2026" ? "Año 2026" : "Histórico"}
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                              Rango Temporal
+                            </label>
+                            <div className="flex gap-1">
+                              {[
+                                { id: "q3", label: "Vigente" },
+                                { id: "2026", label: "Año 2026" },
+                                { id: "all", label: "Histórico" },
+                              ].map((p) => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setFilterPeriod(p.id);
+                                    showToastMessage(`Período: ${p.label}`);
+                                  }}
+                                  className={`flex-1 py-1 rounded text-[11px] border font-medium cursor-pointer ${
+                                    filterPeriod === p.id
+                                      ? "bg-zinc-900 text-white border-zinc-900 font-semibold"
+                                      : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
+                                  }`}
+                                >
+                                  {p.label}
                                 </button>
                               ))}
                             </div>
@@ -3107,7 +3145,9 @@ export default function CriteriosApp() {
                         );
                       })()}
                     </div>
+                  </div>
 
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={handleResetChat}
@@ -3130,6 +3170,7 @@ export default function CriteriosApp() {
                     </button>
                   </div>
                 </div>
+              </div>
 
                 {/* Hilo de Mensajes del Chat y Escenarios en flujo con Scroll */}
                 <div className="flex-1 overflow-y-auto min-h-0 space-y-4 py-2 pr-1 scrollbar-thin">
