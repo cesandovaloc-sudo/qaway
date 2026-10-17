@@ -33,22 +33,92 @@ function resolveCommonCategory(num: string): CommonCategory {
   return 'General';
 }
 
-const ALL_PARSED_CASES: Casuistica[] = (rawCases as any[]).map((c) => ({
-  id: c.id,
-  number: c.number,
-  title: c.title,
-  criterioTitle: c.criterioTitle,
-  criterioDesc: c.criterioDesc,
-  desarrollo: c.desarrollo,
-  solucion: c.solucion,
-  ejemplo: c.ejemplo,
-  normativa: c.normativa || '',
-  accion: c.accion || '',
-  casoEspecifico: c.casoEspecifico || '',
-  isOpen: false,
-  nivel: resolveLevel(c.number),
-  categoriaComun: resolveCommonCategory(c.number)
-}));
+function cleanInstitutionalText(text: string): string {
+  if (!text) return '';
+  return text
+    // Typo y siglas
+    .replace(/\bPRONOE!/g, 'PRONOEI')
+    .replace(/\bPronois\b/gi, 'PRONOEI')
+    .replace(/\bPronoi\b/gi, 'PRONOEI')
+    // Tono oral / primera y segunda persona a redacción técnica institucional
+    .replace(/\bnuestros cuadernos de trabajo\b/gi, 'los cuadernos de trabajo')
+    .replace(/\bnuestros materiales\b/gi, 'los materiales educativos')
+    .replace(/\bnuestra distribución\b/gi, 'la distribución')
+    .replace(/\bnuestras instituciones\b/gi, 'las instituciones educativas')
+    .replace(/\bahí tienes que esperar la redistribución\b/gi, 'corresponde esperar el proceso de redistribución')
+    .replace(/\bahí tienes que esperar\b/gi, 'corresponde esperar')
+    .replace(/\btienes que esperar\b/gi, 'corresponde esperar')
+    .replace(/\btienes que\b/gi, 'se debe')
+    .replace(/\bpoder dialogar directamente con la UGEL\b/gi, 'coordinar las gestiones directamente con la UGEL')
+    .replace(/\bdialogar directamente con la UGEL\b/gi, 'coordinar directamente con la UGEL')
+    .replace(/\btendríamos que atender\b/gi, 'corresponde atender')
+    .replace(/\btendría que atender\b/gi, 'corresponde ser atendido')
+    .replace(/\bse toma nota para la absolución interna\b/gi, 'se deriva a la dirección competente para su atención técnica')
+    .replace(/\bse toma nota para la coordinación interna\b/gi, 'se canaliza con el equipo técnico correspondiente');
+}
+
+function cleanUgelMentions(text: string): string {
+  if (!text) return '';
+  return text
+    // Eliminar nombres específicos de UGEL en ejemplos y descripciones públicas
+    .replace(/Nuevo Pronoi en UGEL Fajardo/gi, 'Nuevo PRONOEI')
+    .replace(/Una cuna con auxiliar en UGEL Huamanga/gi, 'Una cuna (Ciclo I)')
+    .replace(/Lengua Harakbut en UGEL Manu/gi, 'Lengua Harakbut')
+    .replace(/Nueva IE EIB creada en UGEL La Convención/gi, 'Nueva IE EIB de reciente creación')
+    .replace(/Lengua asháninka en Coronel Portillo/gi, 'Lengua Asháninka')
+    .replace(/Solicitud de material para Harakbut en UGEL Manu/gi, 'Solicitud de material para lengua Harakbut')
+    .replace(/UGEL Ambos asignó/gi, 'Se identifica que una UGEL asignó')
+    .replace(/UGEL Ambo asignó/gi, 'Se identifica que una UGEL asignó')
+    .replace(/\ben\s+(?:la\s+)?UGEL\s+(?:Fajardo|Manu|Huamanga|Ambos|Ambo|La Convención|Bellavista|Coronel Portillo)\b/gi, 'en la UGEL')
+    .replace(/\bUGEL\s+(?:Fajardo|Manu|Huamanga|Ambos|Ambo|La Convención|Bellavista|Coronel Portillo)\b/gi, 'la UGEL')
+    .replace(/\ben Coronel Portillo\b/gi, 'en la jurisdicción correspondiente')
+    .replace(/Desde Coronel Portillo se indica que/gi, 'Se reporta que')
+    .replace(/Desde UGEL Manu se indica que/gi, 'Se reporta que')
+    .replace(/Desde UGEL Manu se solicita/gi, 'Se solicita')
+    .replace(/Desde UGEL Fajardo se indica que/gi, 'Se reporta que')
+    .replace(/Desde UGEL La Convención se consulta si/gi, 'Se consulta si');
+}
+
+function parseTitleParts(rawTitle: string, criterioTitle: string): { tema: string; pregunta: string } {
+  if (!rawTitle) return { tema: criterioTitle || 'Consulta', pregunta: '' };
+  if (rawTitle.includes(':')) {
+    const idx = rawTitle.indexOf(':');
+    return {
+      tema: rawTitle.slice(0, idx).trim(),
+      pregunta: rawTitle.slice(idx + 1).trim()
+    };
+  }
+  return {
+    tema: criterioTitle || 'Consulta general',
+    pregunta: rawTitle.trim()
+  };
+}
+
+const ALL_PARSED_CASES: Casuistica[] = (rawCases as any[]).map((c) => {
+  const { tema, pregunta } = parseTitleParts(c.title, c.criterioTitle);
+  const cleanDesarrollo = cleanInstitutionalText(cleanUgelMentions(c.desarrollo || ''));
+  const cleanSolucion = cleanInstitutionalText(c.solucion || c.accion || '');
+  const cleanEjemplo = cleanInstitutionalText(cleanUgelMentions(c.ejemplo || ''));
+
+  return {
+    id: c.id,
+    number: c.number,
+    title: c.title,
+    tema,
+    pregunta,
+    criterioTitle: c.criterioTitle,
+    criterioDesc: c.criterioDesc,
+    desarrollo: cleanDesarrollo,
+    solucion: cleanSolucion,
+    ejemplo: cleanEjemplo,
+    normativa: c.normativa || '',
+    accion: c.accion || '',
+    casoEspecifico: c.casoEspecifico || '',
+    isOpen: false,
+    nivel: resolveLevel(c.number),
+    categoriaComun: resolveCommonCategory(c.number)
+  };
+});
 
 // Clasificación oficial de las casuísticas por Dirección Pedagógica
 const DEI_NUMBERS = new Set(['01', '06', '07', '12', '13']);

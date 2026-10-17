@@ -95,12 +95,25 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
     caseItem.casoEspecifico && caseItem.casoEspecifico.trim()
   );
 
+  const rawTitle = caseItem.title || '';
+  const tema =
+    caseItem.tema ||
+    (rawTitle.includes(':')
+      ? rawTitle.slice(0, rawTitle.indexOf(':')).trim()
+      : caseItem.criterioTitle || 'Consulta general');
+  const pregunta =
+    caseItem.pregunta ||
+    (rawTitle.includes(':')
+      ? rawTitle.slice(rawTitle.indexOf(':') + 1).trim()
+      : rawTitle);
+
   const buildShareText = (withBold: boolean) => {
     const b = withBold ? '*' : '';
     const lines = [
       `${b}Dirección:${b} ${dirLabel}`,
       ``,
-      `${b}Caso:${b} ${caseItem.title}`,
+      `${b}Tema:${b} ${tema}`,
+      `${b}Consulta:${b} ${pregunta}`,
       ``,
       `${b}Desarrollo:${b} ${caseItem.desarrollo}`,
       ``,
@@ -125,7 +138,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
 
   const handleShareEmail = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const subject = `[MINEDU • DIGERE] Caso #${caseItem.number}: ${caseItem.title}`;
+    const subject = `[MINEDU • DIGERE] Caso #${caseItem.number}: ${tema}`;
     const body = buildShareText(false);
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setIsShareOpen(false);
@@ -180,8 +193,8 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
             </span>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-1">
-                <span className="inline-block text-xs uppercase tracking-wider px-2 py-0.5 rounded text-rose-800 bg-rose-100/60 border border-rose-200/70 font-semibold">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-1.5">
+                <span className="inline-block text-[11px] uppercase tracking-wider px-2 py-0.5 rounded text-rose-800 bg-rose-100/60 border border-rose-200/70 font-semibold">
                   {caseItem.dirCode} • {caseItem.dirName}
                 </span>
                 {caseItem.nivel && (
@@ -210,13 +223,20 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                   </span>
                 )}
               </div>
-              <h3
-                className={`text-sm leading-snug transition-colors ${
-                  isOpen ? 'font-semibold text-slate-900' : 'font-medium text-slate-700'
-                }`}
-              >
-                {highlightContent(caseItem.title, tokens)}
-              </h3>
+
+              {/* Tema y Consulta apilados uno debajo del otro */}
+              <div className="space-y-0.5">
+                <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  {highlightContent(tema, tokens)}
+                </span>
+                <h3
+                  className={`text-sm sm:text-[14px] leading-snug transition-colors ${
+                    isOpen ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'
+                  }`}
+                >
+                  {highlightContent(pregunta, tokens)}
+                </h3>
+              </div>
             </div>
           </div>
 

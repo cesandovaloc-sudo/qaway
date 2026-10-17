@@ -15,6 +15,8 @@ export interface Casuistica {
   id: string;
   number: string;
   title: string;
+  tema?: string;
+  pregunta?: string;
   criterioTitle: string;
   criterioDesc: string;
   desarrollo: string;

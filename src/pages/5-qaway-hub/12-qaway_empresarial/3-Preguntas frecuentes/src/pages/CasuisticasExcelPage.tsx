@@ -782,34 +782,48 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                           </div>
                         </td>
 
-                        {/* Título de la pregunta */}
+                        {/* Título de la pregunta (Tema y Consulta apilados) */}
                         <td className="px-3.5 py-2.5">
-                          <div className="space-y-0.5">
-                            <span
-                              onClick={() =>
-                                setDetailModalCase({
-                                  caseItem: row,
-                                  dirId: row.dirId,
-                                  dirName: row.dirName,
-                                  dirCode: row.dirCode
-                                })
-                              }
-                              className="font-bold text-slate-900 hover:text-[#d81b3d] transition cursor-pointer text-xs sm:text-sm line-clamp-2 leading-snug"
-                              title={row.title}
-                            >
-                              {row.title}
-                            </span>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="block text-[11px] text-slate-500 font-medium">
-                                Criterio: {row.criterioTitle}
-                              </span>
-                              {row.categoriaComun && row.categoriaComun !== 'General' && (
-                                <span className="inline-block text-[10px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                                  {row.categoriaComun}
+                          {(() => {
+                            const rawT = row.title || '';
+                            const rowTema =
+                              row.tema ||
+                              (rawT.includes(':')
+                                ? rawT.slice(0, rawT.indexOf(':')).trim()
+                                : row.criterioTitle || 'Tema General');
+                            const rowPregunta =
+                              row.pregunta ||
+                              (rawT.includes(':')
+                                ? rawT.slice(rawT.indexOf(':') + 1).trim()
+                                : rawT);
+
+                            return (
+                              <div className="space-y-0.5">
+                                <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                  {rowTema}
                                 </span>
-                              )}
-                            </div>
-                          </div>
+                                <span
+                                  onClick={() =>
+                                    setDetailModalCase({
+                                      caseItem: row,
+                                      dirId: row.dirId,
+                                      dirName: row.dirName,
+                                      dirCode: row.dirCode
+                                    })
+                                  }
+                                  className="font-bold text-slate-900 hover:text-[#d81b3d] transition cursor-pointer text-xs sm:text-[13px] line-clamp-2 leading-snug block"
+                                  title={rowPregunta}
+                                >
+                                  {rowPregunta}
+                                </span>
+                                {row.categoriaComun && row.categoriaComun !== 'General' && (
+                                  <span className="inline-block text-[10px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200 mt-0.5">
+                                    {row.categoriaComun}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* UGEL / Ámbito específico */}
@@ -1006,9 +1020,30 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                     </span>
                   )}
                 </div>
-                <h3 className="text-base font-bold text-slate-900 mt-1">
-                  {detailModalCase.caseItem.title}
-                </h3>
+                {(() => {
+                  const modalRaw = detailModalCase.caseItem.title || '';
+                  const modalTema =
+                    detailModalCase.caseItem.tema ||
+                    (modalRaw.includes(':')
+                      ? modalRaw.slice(0, modalRaw.indexOf(':')).trim()
+                      : detailModalCase.caseItem.criterioTitle || 'Tema General');
+                  const modalPregunta =
+                    detailModalCase.caseItem.pregunta ||
+                    (modalRaw.includes(':')
+                      ? modalRaw.slice(modalRaw.indexOf(':') + 1).trim()
+                      : modalRaw);
+
+                  return (
+                    <div className="space-y-0.5 mt-1.5">
+                      <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        {modalTema}
+                      </span>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                        {modalPregunta}
+                      </h3>
+                    </div>
+                  );
+                })()}
               </div>
               <button
                 type="button"
