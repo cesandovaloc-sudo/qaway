@@ -1,4 +1,4 @@
-export type DirectionId = 'DEI' | 'DEP' | 'DISER' | 'DEBA' | 'DEBE' | 'DES';
+export type DirectionId = 'DEI' | 'DEP' | 'DISER' | 'DEBA' | 'DEBE' | 'DES' | 'DEIB';
 
 export interface Casuistica {
   id: string;

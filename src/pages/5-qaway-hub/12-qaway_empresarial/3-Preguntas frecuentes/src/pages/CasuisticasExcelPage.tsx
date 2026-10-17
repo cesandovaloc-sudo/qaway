@@ -31,10 +31,11 @@ const DIRECTION_TABS: { id: string; label: string; code: string }[] = [
   { id: 'ALL', label: 'Todas las Direcciones', code: 'ALL' },
   { id: 'DEI', label: 'DEI (Inicial)', code: 'DEI' },
   { id: 'DEP', label: 'DEP (Primaria)', code: 'DEP' },
+  { id: 'DES', label: 'DES (Secundaria)', code: 'DES' },
   { id: 'DISER', label: 'DISER (Rural)', code: 'DISER' },
-  { id: 'DEBA', label: 'DEBA (Alternativa)', code: 'DEBA' },
+  { id: 'DEIB', label: 'DEIB (Bilingüe)', code: 'DEIB' },
   { id: 'DEBE', label: 'DEBE (Especial)', code: 'DEBE' },
-  { id: 'DES', label: 'DES (Secundaria)', code: 'DES' }
+  { id: 'DEBA', label: 'DEBA (Alternativa)', code: 'DEBA' }
 ];
 
 export const CasuisticasExcelPage: React.FC<CasuisticasExcelPageProps> = ({

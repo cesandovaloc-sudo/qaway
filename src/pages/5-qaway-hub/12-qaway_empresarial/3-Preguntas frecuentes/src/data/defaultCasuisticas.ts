@@ -1,7 +1,7 @@
 import { DirectionData, Casuistica } from '../types/casuistica';
-import rawDeiCases from './casuisticas_veedores_2026-09-28.json';
+import rawCases from './casuisticas_veedores_2026-09-28.json';
 
-const DEI_CASES: Casuistica[] = (rawDeiCases as any[]).map((c) => ({
+const ALL_PARSED_CASES: Casuistica[] = (rawCases as any[]).map((c) => ({
   id: c.id,
   number: c.number,
   title: c.title,
@@ -16,12 +16,38 @@ const DEI_CASES: Casuistica[] = (rawDeiCases as any[]).map((c) => ({
   isOpen: false
 }));
 
+// Clasificación oficial de las 52 casuísticas por Dirección Pedagógica
+const DEI_NUMBERS = new Set(['01', '06', '07', '12', '13']);
+const DEP_NUMBERS = new Set(['11', '16', '19', '20', '23', '27', '35', '40', '52']);
+const DES_NUMBERS = new Set(['14', '15', '17', '18', '21', '31', '38']);
+const DISER_NUMBERS = new Set(['08', '32', '33', '34', '36', '37', '39', '42', '43', '44', '45']);
+const DEBE_NUMBERS = new Set(['02', '04', '10']);
+const DEIB_NUMBERS = new Set([
+  '03',
+  '05',
+  '09',
+  '22',
+  '24',
+  '25',
+  '26',
+  '28',
+  '29',
+  '30',
+  '41',
+  '46',
+  '47',
+  '48',
+  '49',
+  '50',
+  '51'
+]);
+
 export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DEI',
     code: 'DEI',
     name: 'Ed. Inicial',
-    cases: DEI_CASES
+    cases: ALL_PARSED_CASES.filter((c) => DEI_NUMBERS.has(c.number))
   },
   {
     id: 'DEP',
@@ -30,7 +56,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
     cases: [
       {
         id: 'dep-01',
-        number: '01',
+        number: '00',
         title: 'Cambio de característica de una institución educativa: ¿a qué dirección corresponde asignar los materiales?',
         criterioTitle: 'DEP – DISER',
         criterioDesc: 'Asignación de materiales educativos por cambio de característica de la institución educativa en el MC SIGA.',
@@ -40,9 +66,16 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
         normativa: 'RM N.° 373-2026-MINEDU — Norma técnica sobre dotación y distribución de materiales educativos para el año lectivo.\nOficio Múltiple N.° 032-2026-MINEDU/VMGP/DIGERE — Orientaciones para el monitoreo y asignación de materiales en el MC SIGA según característica de la IE.',
         accion: '',
         casoEspecifico: '',
-        isOpen: true
-      }
+        isOpen: false
+      },
+      ...ALL_PARSED_CASES.filter((c) => DEP_NUMBERS.has(c.number))
     ]
+  },
+  {
+    id: 'DES',
+    code: 'DES',
+    name: 'Ed. Secundaria',
+    cases: ALL_PARSED_CASES.filter((c) => DES_NUMBERS.has(c.number))
   },
   {
     id: 'DISER',
@@ -51,7 +84,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
     cases: [
       {
         id: 'diser-01',
-        number: '01',
+        number: '00',
         title: 'Cambio de característica de una institución educativa: ¿a qué dirección corresponde asignar los materiales?',
         criterioTitle: 'DEP – DISER',
         criterioDesc: 'Asignación de materiales educativos por cambio de característica de la institución educativa en el MC SIGA.',
@@ -61,26 +94,27 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
         normativa: 'RM N.° 373-2026-MINEDU — Norma técnica sobre dotación y distribución de materiales educativos para el año lectivo.\nOficio Múltiple N.° 032-2026-MINEDU/VMGP/DIGERE — Orientaciones para el monitoreo y asignación de materiales en el MC SIGA según característica de la IE.',
         accion: '',
         casoEspecifico: '',
-        isOpen: true
-      }
+        isOpen: false
+      },
+      ...ALL_PARSED_CASES.filter((c) => DISER_NUMBERS.has(c.number))
     ]
   },
   {
-    id: 'DEBA',
-    code: 'DEBA',
-    name: 'Básica Alternativa',
-    cases: []
+    id: 'DEIB',
+    code: 'DEIB',
+    name: 'Intercultural Bilingüe',
+    cases: ALL_PARSED_CASES.filter((c) => DEIB_NUMBERS.has(c.number))
   },
   {
     id: 'DEBE',
     code: 'DEBE',
     name: 'Básica Especial',
-    cases: []
+    cases: ALL_PARSED_CASES.filter((c) => DEBE_NUMBERS.has(c.number))
   },
   {
-    id: 'DES',
-    code: 'DES',
-    name: 'Ed. Secundaria',
+    id: 'DEBA',
+    code: 'DEBA',
+    name: 'Básica Alternativa',
     cases: []
   }
 ];

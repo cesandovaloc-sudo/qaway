@@ -36,10 +36,11 @@ interface ManagementModalProps {
 const DIRECTION_OPTIONS: { id: DirectionId; code: string; name: string }[] = [
   { id: 'DEI', code: 'DEI', name: 'Ed. Inicial' },
   { id: 'DEP', code: 'DEP', name: 'Ed. Primaria' },
+  { id: 'DES', code: 'DES', name: 'Ed. Secundaria' },
   { id: 'DISER', code: 'DISER', name: 'Servicios Rurales' },
-  { id: 'DEBA', code: 'DEBA', name: 'Básica Alternativa' },
+  { id: 'DEIB', code: 'DEIB', name: 'Intercultural Bilingüe' },
   { id: 'DEBE', code: 'DEBE', name: 'Básica Especial' },
-  { id: 'DES', code: 'DES', name: 'Ed. Secundaria' }
+  { id: 'DEBA', code: 'DEBA', name: 'Básica Alternativa' }
 ];
 
 export const ManagementModal: React.FC<ManagementModalProps> = ({

@@ -15,8 +15,8 @@ import { ManagementModal } from './components/ManagementModal';
 import { Toast } from './components/Toast';
 import { CasuisticasExcelPage } from './pages/CasuisticasExcelPage';
 
-// Claves aisladas de almacenamiento local (versión 7 con los 52 casos oficiales DEI garantizados)
-const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v7_dei52';
+// Claves aisladas de almacenamiento local (versión 9 multidir con DEIB)
+const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v9_multidir_deib';
 const SUPABASE_STORAGE_URL_KEY = 'qaway_minedu_supabase_url_v1';
 const SUPABASE_STORAGE_KEY_KEY = 'qaway_minedu_supabase_key_v1';
 const ADMIN_MODE_KEY = 'qaway_minedu_admin_mode_v1';
@@ -157,25 +157,21 @@ export default function PreguntasFrecuentesApp() {
           const nameMap: Record<string, string> = {
             DEI: 'Ed. Inicial',
             DEP: 'Ed. Primaria',
+            DES: 'Ed. Secundaria',
             DISER: 'Servicios Rurales',
+            DEIB: 'Intercultural Bilingüe',
             DEBA: 'Básica Alternativa',
-            DEBE: 'Básica Especial',
-            DES: 'Ed. Secundaria'
+            DEBE: 'Básica Especial'
           };
-          // Asegurar que DEI tenga siempre los 52 casos oficiales
-          const defaultDei = DEFAULT_DIRECTIONS_DATA.find((d) => d.id === 'DEI');
-          return parsed.map((dir: DirectionData) => {
-            const currentCases =
-              dir.id === 'DEI' && (!dir.cases || dir.cases.length < 50) && defaultDei
-                ? defaultDei.cases
-                : dir.cases;
-
-            return {
-              ...dir,
-              name: nameMap[dir.id] || dir.name,
-              cases: currentCases.map((c) => ({ ...c, isOpen: false }))
-            };
-          });
+          const hasDeib = parsed.some((d: DirectionData) => d.id === 'DEIB');
+          if (!hasDeib || parsed.length < DEFAULT_DIRECTIONS_DATA.length) {
+            return JSON.parse(JSON.stringify(DEFAULT_DIRECTIONS_DATA));
+          }
+          return parsed.map((dir: DirectionData) => ({
+            ...dir,
+            name: nameMap[dir.id] || dir.name,
+            cases: (dir.cases || []).map((c) => ({ ...c, isOpen: false }))
+          }));
         }
       }
     } catch (e) {
@@ -237,16 +233,11 @@ export default function PreguntasFrecuentesApp() {
     }
   }, []);
 
-  // Verificación reactiva: asegurar que DEI tenga siempre los 52 casos oficiales cargados
+  // Verificación reactiva: asegurar que existan las 7 direcciones oficiales con sus casos
   useEffect(() => {
-    const dei = directionsData.find((d) => d.id === 'DEI');
-    const defaultDei = DEFAULT_DIRECTIONS_DATA.find((d) => d.id === 'DEI');
-    if (dei && defaultDei && dei.cases.length < defaultDei.cases.length) {
-      const updated = directionsData.map((d) => {
-        if (d.id === 'DEI') return { ...d, cases: defaultDei.cases };
-        return d;
-      });
-      persistDirections(updated);
+    const hasDeib = directionsData.some((d) => d.id === 'DEIB');
+    if (!hasDeib || directionsData.length < DEFAULT_DIRECTIONS_DATA.length) {
+      persistDirections(JSON.parse(JSON.stringify(DEFAULT_DIRECTIONS_DATA)));
     }
   }, [directionsData, persistDirections]);
 

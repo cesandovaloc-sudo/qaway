@@ -6,6 +6,7 @@ import {
   Building2,
   Layers,
   GraduationCap,
+  Languages,
   ChevronRight
 } from 'lucide-react';
 import { DirectionData, DirectionId } from '../types/casuistica';
@@ -31,6 +32,8 @@ const renderDirectionIcon = (id: DirectionId) => {
       return <Layers className="w-4 h-4" />;
     case 'DES':
       return <GraduationCap className="w-4 h-4" />;
+    case 'DEIB':
+      return <Languages className="w-4 h-4" />;
     default:
       return <BookOpen className="w-4 h-4" />;
   }
@@ -73,6 +76,11 @@ const DIRECTION_STYLES: Record<
     iconBoxIdle: 'text-[#d81b3d] bg-rose-50 border border-rose-200/80 group-hover:bg-rose-100',
     iconBoxSelected: 'text-rose-700 bg-rose-100 border border-rose-300',
     badge: 'bg-rose-50 text-[#d81b3d] border border-rose-200'
+  },
+  DEIB: {
+    iconBoxIdle: 'text-violet-600 bg-violet-50 border border-violet-200/80 group-hover:bg-violet-100',
+    iconBoxSelected: 'text-violet-700 bg-violet-100 border border-violet-300',
+    badge: 'bg-violet-50 text-violet-700 border border-violet-200'
   }
 };
 
