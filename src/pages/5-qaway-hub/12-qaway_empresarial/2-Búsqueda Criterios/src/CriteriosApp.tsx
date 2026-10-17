@@ -764,6 +764,7 @@ export default function CriteriosApp() {
   const [isRecordingVoice, setIsRecordingVoice] = useState<boolean>(false);
   const [collapseScenariosHeader, setCollapseScenariosHeader] = useState<boolean>(false);
   const [showChatFilterModal, setShowChatFilterModal] = useState<boolean>(false);
+  const chatFilterRef = useRef<HTMLDivElement>(null);
   const [showModeDropdown, setShowModeDropdown] = useState<boolean>(false);
   const modeDropdownRef = useRef<HTMLDivElement>(null);
   const [showAgentMenu, setShowAgentMenu] = useState<boolean>(false);
@@ -867,6 +868,9 @@ export default function CriteriosApp() {
       if (agentMenuRef.current && !agentMenuRef.current.contains(target)) {
         setShowAgentMenu(false);
       }
+      if (chatFilterRef.current && !chatFilterRef.current.contains(target)) {
+        setShowChatFilterModal(false);
+      }
       if (projectDropdownRef.current && !projectDropdownRef.current.contains(target)) {
         setShowProjectDropdown(false);
       }
@@ -887,6 +891,7 @@ export default function CriteriosApp() {
         setShowQuickSearch(false);
         setShowModeDropdown(false);
         setShowAgentMenu(false);
+        setShowChatFilterModal(false);
         setShowUploadModal(false);
         setShowNewProjectModal(false);
         setShowProjectDropdown(false);
@@ -2801,6 +2806,9 @@ export default function CriteriosApp() {
                         type="button"
                         onClick={() => {
                           setActiveNav(item.id);
+                          setShowChatFilterModal(false);
+                          setShowAgentMenu(false);
+                          setShowModeDropdown(false);
                           if (item.id !== "nuevo") setInspectorOpen(false);
                         }}
                         title={item.label}
@@ -2844,26 +2852,29 @@ export default function CriteriosApp() {
               <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-2 max-w-[940px] w-full mx-auto flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header de la conversación (ESTÁTICO) */}
                 <div className="shrink-0 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                      <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900 leading-tight">
                         Asistente de Conocimiento &amp; Chat RAG
                       </h1>
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-blue-50 text-blue-700 border border-blue-200 font-semibold flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-blue-50 text-blue-700 border border-blue-200 font-semibold flex items-center gap-1 shrink-0">
                         <HubIcon icon={Bot} size={13} />
-                        <span>{aiProviders.find((p) => p.id === activeLlmProviderId)?.name || "OpenAI"}</span>
+                        <span>{aiProviders.find((p) => p.id === activeLlmProviderId)?.name || "Google DeepMind"}</span>
                       </span>
                     </div>
-                    <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
+                    <p style={{ color: palette.textSecondary }} className="mt-2 text-[14.5px] leading-relaxed">
                       Consulta multi-fuente en lenguaje natural con citas interactivas vinculadas a leyes, Excel y políticas.
                     </p>
                   </div>
                   <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                     {/* Botón de Filtro Contextual Flotante (no roba altura al chat) */}
-                    <div className="relative">
+                    <div className="relative" ref={chatFilterRef}>
                       <button
                         type="button"
-                        onClick={() => setShowChatFilterModal((v) => !v)}
+                        onClick={() => {
+                          setShowChatFilterModal((v) => !v);
+                          setShowAgentMenu(false);
+                        }}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors ${
                           showChatFilterModal
                             ? "bg-blue-50 border-blue-300 text-blue-700"
@@ -2953,26 +2964,33 @@ export default function CriteriosApp() {
                           <>
                             <button
                               type="button"
-                              onClick={() => setShowAgentMenu((v) => !v)}
-                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs transition-colors ${
+                              onClick={() => {
+                                setShowAgentMenu((v) => !v);
+                                setShowChatFilterModal(false);
+                              }}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center justify-between min-w-[210px] gap-2 cursor-pointer shadow-xs transition-colors ${
                                 showAgentMenu
                                   ? "bg-zinc-100 border-zinc-300 text-zinc-900"
                                   : "border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800"
                               }`}
                               title="Configurar Agente Especializado y Tono de Respuesta"
                             >
-                              <span style={{ color: curProf.color }} className="shrink-0">
-                                <HubIcon icon={curProf.icon} size={14} />
-                              </span>
-                              <span className="font-semibold text-zinc-900">{curProf.shortName}</span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-100 text-zinc-600 font-medium font-mono">
-                                {curTone.name}
-                              </span>
-                              <HubIcon
-                                icon={ChevronDown}
-                                size={12}
-                                className={`text-zinc-400 transition-transform ${showAgentMenu ? "rotate-180" : ""}`}
-                              />
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span style={{ color: curProf.color }} className="shrink-0">
+                                  <HubIcon icon={curProf.icon} size={14} />
+                                </span>
+                                <span className="font-semibold text-zinc-900 truncate">{curProf.shortName}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-100 text-zinc-600 font-medium font-mono">
+                                  {curTone.name}
+                                </span>
+                                <HubIcon
+                                  icon={ChevronDown}
+                                  size={12}
+                                  className={`text-zinc-400 transition-transform ${showAgentMenu ? "rotate-180" : ""}`}
+                                />
+                              </div>
                             </button>
 
                             {showAgentMenu && (
