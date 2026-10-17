@@ -2283,7 +2283,10 @@ export default function CriteriosApp() {
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => setActiveNav(item.id)}
+                          onClick={() => {
+                            setActiveNav(item.id);
+                            if (item.id !== "nuevo") setInspectorOpen(false);
+                          }}
                           style={{
                             backgroundColor: isActive ? palette.accentCitationBg : "transparent",
                             borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
@@ -2514,7 +2517,10 @@ export default function CriteriosApp() {
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => setActiveNav(item.id)}
+                        onClick={() => {
+                          setActiveNav(item.id);
+                          if (item.id !== "nuevo") setInspectorOpen(false);
+                        }}
                         title={item.label}
                         aria-label={item.label}
                         style={{
@@ -2768,22 +2774,24 @@ export default function CriteriosApp() {
                     chatMessages.map((msg) => {
                       if (msg.sender === "user") {
                         return (
-                          <div key={msg.id} className="flex items-start gap-3 justify-end">
+                          <div key={msg.id} className="flex justify-end w-full">
                             <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-zinc-900 text-white px-4 py-3 shadow-sm">
                               <div className="flex items-center justify-between gap-3 mb-1 text-[11px] text-zinc-400">
-                                <span className="font-semibold text-zinc-300">Carlos (Tú)</span>
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    style={{ backgroundColor: palette.actionPrimary }}
+                                    className="w-5 h-5 rounded-full text-white flex items-center justify-center font-bold text-[10px]"
+                                  >
+                                    C
+                                  </span>
+                                  <span className="font-semibold text-zinc-300">Carlos (Tú)</span>
+                                </div>
                                 <span>{msg.timestamp}</span>
                               </div>
                               <p style={{ fontSize: 14.5, lineHeight: 1.55 }} className="text-zinc-100">
                                 {msg.text}
                               </p>
                             </div>
-                            <span
-                              style={{ backgroundColor: palette.actionPrimary }}
-                              className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1 shadow-xs"
-                            >
-                              C
-                            </span>
                           </div>
                         );
                       }
@@ -2793,36 +2801,38 @@ export default function CriteriosApp() {
                       const linkedSources = msg.sources || [];
                       const hasLinkedSources = linkedSources.length > 0;
 
-                      // Mensaje del Asistente (Sin textos hardcodeados)
+                      // Mensaje del Asistente (Ancho completo, sangrado simétrico con el resto del canvas)
                       return (
-                        <div key={msg.id} className="flex items-start gap-3">
-                          <span className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1 shadow-xs">
-                            <HubIcon icon={Sparkles} size={15} />
-                          </span>
-                          <div
-                            style={{
-                              borderColor: palette.borderDefault,
-                              backgroundColor: palette.bgSurface,
-                            }}
-                            className="flex-1 rounded-2xl border p-5 space-y-4 shadow-xs"
-                          >
-                            {/* Header del Turno Asistente */}
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex items-start gap-2.5">
-                                <span className="mt-0.5 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                                  <HubIcon icon={Check} size={15} />
-                                </span>
-                                <div>
+                        <div
+                          key={msg.id}
+                          style={{
+                            borderColor: palette.borderDefault,
+                            backgroundColor: palette.bgSurface,
+                          }}
+                          className="w-full rounded-2xl border p-5 space-y-4 shadow-xs"
+                        >
+                          {/* Header del Turno Asistente */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-2.5">
+                              <span className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow-2xs">
+                                <HubIcon icon={Sparkles} size={15} />
+                              </span>
+                              <div>
+                                <div className="flex items-center gap-2">
                                   <span style={{ fontSize: 14.5 }} className="block font-semibold text-zinc-900">
                                     Respuesta generada ({msg.latency || "134 ms"})
                                   </span>
-                                  <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block">
-                                    {hasLinkedSources
-                                      ? `Con base en ${linkedSources.length} fuente(s) verificada(s) (Umbral ≥ ${similarityThreshold.toFixed(2)})`
-                                      : `Asistente conversacional • ${(projects.find((p) => p.id === activeProjectId) || projects[0]).name}`}
+                                  <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                    <HubIcon icon={Check} size={11} />
                                   </span>
                                 </div>
+                                <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block mt-0.5">
+                                  {hasLinkedSources
+                                    ? `Con base en ${linkedSources.length} fuente(s) verificada(s) (Umbral ≥ ${similarityThreshold.toFixed(2)})`
+                                    : `Asistente conversacional • ${(projects.find((p) => p.id === activeProjectId) || projects[0]).name}`}
+                                </span>
                               </div>
+                            </div>
                               <div className="flex items-center gap-1.5">
                                 <button
                                   type="button"
@@ -3015,9 +3025,8 @@ export default function CriteriosApp() {
                               </div>
                             )}
                           </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })
                   )}
 
                   {/* Estado de generación interactivo */}
@@ -3258,7 +3267,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO: SESIONES DE CHAT / CONVERSACIONES ===== */}
             {activeNav === "chats" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3353,7 +3362,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO 2: REPOSITORIO DE FUENTES DINÁMICO ===== */}
             {activeNav === "fuentes" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3378,44 +3387,44 @@ export default function CriteriosApp() {
                   </button>
                 </div>
 
-                {/* Métricas Dinámicas del Repositorio */}
+                {/* Métricas Dinámicas del Repositorio (Estandarizadas con escala tipográfica sobria) */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div
                     style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
                     className="p-3.5 rounded-xl border shadow-xs"
                   >
-                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
+                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
                       Fuentes Activas
                     </span>
-                    <span className="text-2xl font-bold text-zinc-900 block mt-1">
+                    <span className="text-base font-bold text-zinc-900 block mt-1">
                       {currentProjectSources.length} archivos
                     </span>
-                    <span className="text-xs text-zinc-500 mt-0.5 block">100% vectorizadas y auditadas</span>
+                    <span className="text-[11.5px] text-zinc-500 mt-0.5 block">100% vectorizadas y auditadas</span>
                   </div>
                   <div
                     style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
                     className="p-3.5 rounded-xl border shadow-xs"
                   >
-                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
+                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
                       Total Fragmentos
                     </span>
-                    <span className="text-2xl font-bold text-blue-600 block mt-1">
+                    <span className="text-base font-bold text-blue-600 block mt-1">
                       {totalChunksCount.toLocaleString()} chunks
                     </span>
-                    <span className="text-xs text-zinc-500 mt-0.5 block">{embeddingModel}</span>
+                    <span className="text-[11.5px] text-zinc-500 mt-0.5 block">{embeddingModel}</span>
                   </div>
                   <div
                     style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
                     className="p-3.5 rounded-xl border shadow-xs"
                   >
-                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
+                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
                       Estado de Sincronización
                     </span>
-                    <span className="text-2xl font-bold text-emerald-600 flex items-center gap-1.5 mt-1">
-                      <HubIcon icon={CheckCircle2} size={20} />
+                    <span className="text-base font-bold text-emerald-600 flex items-center gap-1.5 mt-1">
+                      <HubIcon icon={CheckCircle2} size={16} />
                       <span>Al día</span>
                     </span>
-                    <span className="text-xs text-zinc-500 mt-0.5 block">Sincronizado con pgvector</span>
+                    <span className="text-[11.5px] text-zinc-500 mt-0.5 block">Sincronizado con pgvector</span>
                   </div>
                 </div>
 
@@ -3592,7 +3601,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO 3: HISTORIAL DE CONSULTAS DINÁMICO ===== */}
             {activeNav === "historial" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3676,7 +3685,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO UNIFICADO: CONFIGURACIÓN & PROVEEDORES IA (7) ===== */}
             {activeNav === "config" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -4239,7 +4248,7 @@ export default function CriteriosApp() {
             )}
           </main>
 
-          {/* ===== COLUMNA 3: INSPECTOR DE FUENTES (COLAPSABLE, NO TOCA EL HEADER) ===== */}
+          {/* ===== COLUMNA 3: INSPECTOR DE EVIDENCIAS (DRAWER SLIDE-OVER QUE PRESERVA EL ANCHO DEL CANVAS) ===== */}
           {inspectorOpen ? (
             <aside
               style={{
@@ -4247,7 +4256,7 @@ export default function CriteriosApp() {
                 backgroundColor: palette.bgSurface,
                 borderColor: palette.borderDefault,
               }}
-              className="hidden xl:flex shrink-0 border-l flex-col h-full overflow-y-auto relative transition-[width] duration-75"
+              className="fixed top-14 right-0 bottom-0 z-40 border-l flex flex-col h-[calc(100vh-3.5rem)] overflow-y-auto shadow-2xl animate-in slide-in-from-right duration-150"
             >
               {/* Tirador de redimensionamiento con mouse */}
               <div
@@ -4706,24 +4715,20 @@ export default function CriteriosApp() {
           )}
         </aside>
           ) : (
-            /* Rail colapsado del Inspector en el panel lateral derecho (abajo, dentro de la columna, no en el topbar) */
-            <aside
-              style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgPage }}
-              className="hidden xl:flex flex-col items-center pt-3 pb-4 px-1.5 border-l shrink-0 justify-between"
+            /* Botón flotante del Inspector colapsado en el borde derecho que no deforma el ancho de main */
+            <button
+              type="button"
+              onClick={() => setInspectorOpen(true)}
+              style={{ borderColor: palette.borderDefault }}
+              className="fixed right-0 top-20 z-30 py-2.5 px-1.5 rounded-l-xl border-y border-l bg-white hover:bg-zinc-50 cursor-pointer text-zinc-600 transition-all shadow-md flex flex-col items-center gap-1.5 group"
+              title="Abrir Inspector de evidencias"
+              aria-label="Abrir Inspector de evidencias"
             >
-              <button
-                type="button"
-                onClick={() => setInspectorOpen(true)}
-                className="p-2 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-100 cursor-pointer text-zinc-600 transition-all shadow-xs flex flex-col items-center gap-1.5 group"
-                title="Abrir Inspector de evidencias"
-                aria-label="Abrir Inspector de evidencias"
-              >
-                <HubIcon icon={PanelRightOpen} size={16} />
-                <span className="text-[10px] font-semibold text-zinc-500 [writing-mode:vertical-lr] tracking-wider py-1 group-hover:text-zinc-900">
-                  Inspector
-                </span>
-              </button>
-            </aside>
+              <HubIcon icon={PanelRightOpen} size={15} />
+              <span className="text-[10px] font-semibold text-zinc-500 [writing-mode:vertical-lr] tracking-wider py-0.5 group-hover:text-zinc-900">
+                Inspector
+              </span>
+            </button>
           )}
         </div>
 
