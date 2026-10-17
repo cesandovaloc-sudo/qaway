@@ -29,6 +29,9 @@ const DEFAULT_SUPABASE_KEY =
   (import.meta as any).env?.VITE_SUPABASE_ANON_KEY ||
   'sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi';
 
+// Nombre de la tabla aislada y dedicada en Supabase (sin mezclar con otras tablas)
+const SUPABASE_TABLE_NAME = 'minedu_casuisticas';
+
 // Normalizador de texto (ignora mayúsculas y acentos)
 function normalizeText(str: string): string {
   if (!str) return '';
@@ -249,7 +252,7 @@ export default function PreguntasFrecuentesApp() {
       try {
         const { createClient } = await import('@supabase/supabase-js');
         const client = createClient(supabaseUrl, supabaseKey);
-        const { error } = await client.from('casuisticas').select('id').limit(1);
+        const { error } = await client.from(SUPABASE_TABLE_NAME).select('id').limit(1);
         if (isMounted) {
           if (!error || error.code === 'PGRST205') {
             setIsSupabaseConnected(true);
@@ -265,6 +268,53 @@ export default function PreguntasFrecuentesApp() {
     };
   }, [supabaseUrl, supabaseKey]);
 
+  // Cargar datos remotos desde Supabase si la tabla minedu_casuisticas ya contiene registros
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRemoteCases = async () => {
+      if (!isSupabaseConnected || !supabaseUrl || !supabaseKey) return;
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const client = createClient(supabaseUrl, supabaseKey);
+        const { data, error } = await client
+          .from(SUPABASE_TABLE_NAME)
+          .select('*')
+          .order('number', { ascending: true });
+
+        if (!error && data && data.length > 0 && isMounted) {
+          const updatedDirs: DirectionData[] = DEFAULT_DIRECTIONS_DATA.map((dir) => {
+            const dirRows = data.filter((row: any) => row.dir_id === dir.id);
+            if (dirRows.length === 0) return dir;
+            return {
+              ...dir,
+              cases: dirRows.map((r: any) => ({
+                id: r.id,
+                number: r.number,
+                title: r.title,
+                criterioTitle: r.criterio_title || '',
+                criterioDesc: r.criterio_desc || '',
+                desarrollo: r.desarrollo,
+                solucion: r.solucion,
+                ejemplo: r.ejemplo || '',
+                normativa: r.normativa || '',
+                casoEspecifico: r.caso_especifico || '',
+                accion: r.accion || '',
+                isOpen: false
+              }))
+            };
+          });
+          persistDirections(updatedDirs);
+        }
+      } catch (err) {
+        console.warn('[Supabase] Carga remota:', err);
+      }
+    };
+    fetchRemoteCases();
+    return () => {
+      isMounted = false;
+    };
+  }, [isSupabaseConnected, supabaseUrl, supabaseKey, persistDirections]);
+
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message);
     setToastType(type);
@@ -276,14 +326,14 @@ export default function PreguntasFrecuentesApp() {
   const handleResetOfficialCases = () => {
     if (
       !window.confirm(
-        '¿Deseas restablecer todas las casuísticas a la versión oficial (incluyendo los 52 casos de DEI)?'
+        '¿Deseas restablecer todas las casuísticas a la versión oficial (54 casos en 7 direcciones)?'
       )
     ) {
       return;
     }
     const fresh = JSON.parse(JSON.stringify(DEFAULT_DIRECTIONS_DATA));
     persistDirections(fresh);
-    showToast('¡Casuísticas oficiales restablecidas (52 casos de Inicial DEI)!', 'success');
+    showToast('¡Casuísticas oficiales restablecidas (54 casos multidir)!', 'success');
   };
 
   const toggleAdminMode = () => {
@@ -302,11 +352,10 @@ export default function PreguntasFrecuentesApp() {
   const handleSaveSupabaseConfig = async (url: string, key: string): Promise<boolean> => {
     if (!url || !key) return false;
     try {
-      // Dynamic import to avoid breaking if supabase fails
       const { createClient } = await import('@supabase/supabase-js');
       const client = createClient(url, key);
-      const { error } = await client.from('casuisticas').select('id').limit(1);
-      if (error) {
+      const { error } = await client.from(SUPABASE_TABLE_NAME).select('id').limit(1);
+      if (error && error.code !== 'PGRST205') {
         console.warn('Supabase test query error:', error);
         return false;
       }
@@ -323,7 +372,7 @@ export default function PreguntasFrecuentesApp() {
     }
   };
 
-  // Guardar en bloque desde la Tabla Excel y sincronizar a Supabase
+  // Guardar en bloque y sincronizar a Supabase en tabla aislada minedu_casuisticas
   const handleBulkSaveCases = async (newDirections: DirectionData[]): Promise<boolean> => {
     persistDirections(newDirections);
 
@@ -346,20 +395,21 @@ export default function PreguntasFrecuentesApp() {
               criterio_desc: c.criterioDesc,
               desarrollo: c.desarrollo,
               solucion: c.solucion,
-              ejemplo: c.ejemplo,
+              ejemplo: c.ejemplo || '',
               normativa: c.normativa || '',
               caso_especifico: c.casoEspecifico || '',
+              accion: c.accion || '',
               updated_at: new Date().toISOString()
             });
           });
         });
 
-        const { error } = await client.from('casuisticas').upsert(rowsToUpsert);
+        const { error } = await client.from(SUPABASE_TABLE_NAME).upsert(rowsToUpsert);
         if (error) {
           console.warn('Error sincronizando a Supabase en bloque:', error);
           if (error.code === 'PGRST205') {
             showToast(
-              'Guardado localmente. Falta crear la tabla "casuisticas" en Supabase (usa el botón Script Supabase)',
+              'Guardado localmente. Falta crear la tabla "' + SUPABASE_TABLE_NAME + '" en Supabase (usa el botón Script Supabase)',
               'error'
             );
           } else {
@@ -369,7 +419,7 @@ export default function PreguntasFrecuentesApp() {
         }
 
         showToast(
-          '¡Tabla Excel sincronizada exitosamente con Supabase y guardada localmente!',
+          '¡Sincronizado exitosamente con la tabla ' + SUPABASE_TABLE_NAME + ' de Supabase!',
           'success'
         );
         return true;
@@ -380,7 +430,7 @@ export default function PreguntasFrecuentesApp() {
       }
     }
 
-    showToast('¡Cambios de la Tabla Excel guardados exitosamente en la aplicación!', 'success');
+    showToast('¡Cambios guardados exitosamente en la aplicación!', 'success');
     return true;
   };
 
@@ -659,7 +709,7 @@ export default function PreguntasFrecuentesApp() {
 
   if (viewMode === 'excel') {
     return (
-      <div className="w-full min-h-screen bg-slate-100 flex flex-col">
+      <div className="w-full min-h-screen bg-[#f8fafc] flex flex-col">
         <CasuisticasExcelPage
           directions={directionsData}
           onBack={() => setViewMode('consultas')}
@@ -669,6 +719,35 @@ export default function PreguntasFrecuentesApp() {
           supabaseKey={supabaseKey}
           isSupabaseConnected={isSupabaseConnected}
           onSyncSupabase={() => handleBulkSaveCases(directionsData)}
+          onEditCase={(dirId, item) => {
+            setEditingCase({ caseItem: item, dirId });
+            setModalTab('form');
+            setIsModalOpen(true);
+          }}
+          onAddNewCase={handleOpenNewCaseModal}
+        />
+        <ManagementModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          activeTab={modalTab}
+          onChangeTab={setModalTab}
+          directions={directionsData}
+          editingCase={editingCase}
+          onSaveCase={handleSaveCase}
+          onDeleteCase={handleDeleteCase}
+          onEditCaseFromList={(item) => {
+            setEditingCase({ caseItem: item, dirId: item.dirId });
+            setModalTab('form');
+          }}
+          supabaseUrl={supabaseUrl}
+          supabaseKey={supabaseKey}
+          onSaveSupabaseConfig={handleSaveSupabaseConfig}
+          isSupabaseConnected={isSupabaseConnected}
+          onBulkSaveCases={handleBulkSaveCases}
+          onOpenFullScreenTable={() => {
+            setIsModalOpen(false);
+            setViewMode('excel');
+          }}
         />
         <Toast message={toastMessage} type={toastType} />
       </div>
