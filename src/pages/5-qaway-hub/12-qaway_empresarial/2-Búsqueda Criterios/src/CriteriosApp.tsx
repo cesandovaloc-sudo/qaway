@@ -4256,7 +4256,7 @@ export default function CriteriosApp() {
                 backgroundColor: palette.bgSurface,
                 borderColor: palette.borderDefault,
               }}
-              className="fixed top-14 right-0 bottom-0 z-40 border-l flex flex-col h-[calc(100vh-3.5rem)] overflow-y-auto shadow-2xl animate-in slide-in-from-right duration-150"
+              className="fixed top-14 right-0 bottom-0 z-40 border-l flex flex-col h-[calc(100vh-3.5rem)] overflow-hidden shadow-2xl animate-in slide-in-from-right duration-150"
             >
               {/* Tirador de redimensionamiento con mouse */}
               <div
@@ -4311,7 +4311,7 @@ export default function CriteriosApp() {
 
               {/* 3 Tabs segmentados o Estado Vacío */}
               {currentProjectSources.length === 0 ? (
-                <div className="p-8 text-center space-y-3">
+                <div className="flex-1 overflow-y-auto p-8 text-center space-y-3">
                   <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-400 mx-auto flex items-center justify-center">
                     <HubIcon icon={FileText} size={24} />
                   </div>
@@ -4333,7 +4333,7 @@ export default function CriteriosApp() {
                   </button>
                 </div>
               ) : activeProjectId !== "auditoria-q3" ? (
-                <div className="p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ scrollbarGutter: "stable" }}>
                   {(() => {
                     const activeSrc = currentProjectSources[inspectorTab - 1] || currentProjectSources[0];
                     return (
@@ -4386,63 +4386,69 @@ export default function CriteriosApp() {
                 </div>
               ) : (
                 <>
-                  {/* 3 Tabs segmentados */}
-                  <div className="px-4 pt-3 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setInspectorTab(1)}
-                  style={{
-                    backgroundColor: inspectorTab === 1 ? palette.bgSurface : "transparent",
-                    borderColor: inspectorTab === 1 ? "#DC2626" : "transparent",
-                    borderWidth: 1.5,
-                  }}
-                  className="flex-1 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer border transition-all"
-                >
-                  <span className="w-5 h-5 rounded bg-red-600 text-white flex items-center justify-center text-xs font-bold">
-                    1
-                  </span>
-                  <span style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
-                    Ley
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setInspectorTab(2)}
-                  style={{
-                    backgroundColor: inspectorTab === 2 ? palette.bgSurface : "transparent",
-                    borderColor: inspectorTab === 2 ? "#059669" : "transparent",
-                    borderWidth: 1.5,
-                  }}
-                  className="flex-1 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer border transition-all"
-                >
-                  <span className="w-5 h-5 rounded bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
-                    2
-                  </span>
-                  <span style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
-                    Excel
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setInspectorTab(3)}
-                  style={{
-                    backgroundColor: inspectorTab === 3 ? palette.bgSurface : "transparent",
-                    borderColor: inspectorTab === 3 ? "#64748B" : "transparent",
-                    borderWidth: 1.5,
-                  }}
-                  className="flex-1 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer border transition-all"
-                >
-                  <span className="w-5 h-5 rounded bg-slate-500 text-white flex items-center justify-center text-xs font-bold">
-                    3
-                  </span>
-                  <span style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
-                    Documento
-                  </span>
-                </button>
-              </div>
+                  {/* 3 Tabs segmentados FIJOS (Sin salto de layout) */}
+                  <div className="px-4 py-2.5 flex items-center gap-2 shrink-0 border-b border-zinc-100 bg-zinc-50/50">
+                    <button
+                      type="button"
+                      onClick={() => setInspectorTab(1)}
+                      style={{
+                        backgroundColor: inspectorTab === 1 ? palette.bgSurface : "transparent",
+                        borderColor: inspectorTab === 1 ? "#DC2626" : "transparent",
+                      }}
+                      className={`flex-1 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer border-2 transition-colors ${
+                        inspectorTab === 1 ? "shadow-2xs font-bold" : "hover:bg-zinc-100/70"
+                      }`}
+                    >
+                      <span className="w-5 h-5 rounded bg-red-600 text-white flex items-center justify-center text-xs font-bold">
+                        1
+                      </span>
+                      <span style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
+                        Ley
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInspectorTab(2)}
+                      style={{
+                        backgroundColor: inspectorTab === 2 ? palette.bgSurface : "transparent",
+                        borderColor: inspectorTab === 2 ? "#059669" : "transparent",
+                      }}
+                      className={`flex-1 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer border-2 transition-colors ${
+                        inspectorTab === 2 ? "shadow-2xs font-bold" : "hover:bg-zinc-100/70"
+                      }`}
+                    >
+                      <span className="w-5 h-5 rounded bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
+                        2
+                      </span>
+                      <span style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
+                        Excel
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInspectorTab(3)}
+                      style={{
+                        backgroundColor: inspectorTab === 3 ? palette.bgSurface : "transparent",
+                        borderColor: inspectorTab === 3 ? "#64748B" : "transparent",
+                      }}
+                      className={`flex-1 rounded-lg px-2 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer border-2 transition-colors ${
+                        inspectorTab === 3 ? "shadow-2xs font-bold" : "hover:bg-zinc-100/70"
+                      }`}
+                    >
+                      <span className="w-5 h-5 rounded bg-slate-500 text-white flex items-center justify-center text-xs font-bold">
+                        3
+                      </span>
+                      <span style={{ fontSize: 13.5 }} className="font-semibold text-zinc-900">
+                        Documento
+                      </span>
+                    </button>
+                  </div>
 
-              {/* Contenido de la pestaña activa */}
-              <div className="p-4 space-y-4">
+                  {/* Contenido de la pestaña activa con scroll independiente estable */}
+                  <div
+                    className="flex-1 overflow-y-auto p-4 space-y-4"
+                    style={{ scrollbarGutter: "stable" }}
+                  >
                 {/* Pestaña 1: Ley */}
                 {inspectorTab === 1 && (
                   <div className="space-y-3">
