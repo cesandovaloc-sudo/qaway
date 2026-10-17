@@ -20,19 +20,19 @@ interface DirectionsGridProps {
 const renderDirectionIcon = (id: DirectionId) => {
   switch (id) {
     case 'DEI':
-      return <Sparkles className="w-5 h-5" />;
+      return <Sparkles className="w-4 h-4" />;
     case 'DEP':
-      return <BookOpen className="w-5 h-5" />;
+      return <BookOpen className="w-4 h-4" />;
     case 'DISER':
-      return <Compass className="w-5 h-5" />;
+      return <Compass className="w-4 h-4" />;
     case 'DEBA':
-      return <Building2 className="w-5 h-5" />;
+      return <Building2 className="w-4 h-4" />;
     case 'DEBE':
-      return <Layers className="w-5 h-5" />;
+      return <Layers className="w-4 h-4" />;
     case 'DES':
-      return <GraduationCap className="w-5 h-5" />;
+      return <GraduationCap className="w-4 h-4" />;
     default:
-      return <BookOpen className="w-5 h-5" />;
+      return <BookOpen className="w-4 h-4" />;
   }
 };
 
@@ -71,33 +71,33 @@ export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
               type="button"
               onClick={() => onSelectDirection(dir.id)}
               aria-pressed={isSelected}
-              className={`group w-full text-left rounded-2xl h-[82px] sm:h-[86px] px-5 py-3.5 sm:px-6 sm:py-4 transition-colors duration-150 flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b91c1c] cursor-pointer ${cardClasses}`}
+              className={`group w-full text-left rounded-xl h-[68px] sm:h-[72px] px-4 sm:px-4.5 py-2.5 sm:py-3 transition-colors duration-150 flex items-center justify-between gap-3.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b91c1c] cursor-pointer ${cardClasses}`}
             >
-              <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
                 <div
-                  className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${iconBoxClasses}`}
+                  className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${iconBoxClasses}`}
                 >
                   {renderDirectionIcon(dir.id)}
                 </div>
 
                 <span
-                  className={`flex-shrink-0 inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-xs font-black tracking-wide ${badgeClasses}`}
+                  className={`flex-shrink-0 inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-black tracking-wide ${badgeClasses}`}
                 >
                   {dir.code}
                 </span>
 
                 <div className="min-w-0">
-                  <span className="block truncate text-sm sm:text-base font-bold text-slate-800 tracking-tight leading-snug">
+                  <span className="block truncate text-sm font-bold text-slate-800 tracking-tight leading-tight">
                     {dir.name}
                   </span>
-                  <span className="block text-xs font-medium text-slate-400 mt-0.5">
+                  <span className="block text-[11px] font-medium text-slate-400 mt-0.5">
                     {count} {count === 1 ? 'casuística' : 'casuísticas'}
                   </span>
                 </div>
               </div>
 
               <span className={`flex-shrink-0 transition-transform duration-150 ${arrowClasses}`}>
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4" />
               </span>
             </button>
           );

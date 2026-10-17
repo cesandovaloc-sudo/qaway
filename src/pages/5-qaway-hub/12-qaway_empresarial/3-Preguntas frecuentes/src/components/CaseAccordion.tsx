@@ -71,7 +71,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
           className="flex-1 px-4 py-3.5 sm:px-5 sm:py-4 flex items-center justify-between gap-4 text-left focus:outline-none cursor-pointer"
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <span className="flex-shrink-0 w-9 h-8 rounded-lg bg-slate-200/75 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-300/40">
+            <span className="flex-shrink-0 w-8 h-7 rounded-md bg-slate-200/80 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-300/40">
               {caseItem.number}
             </span>
 
@@ -86,7 +86,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                   </span>
                 )}
               </div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+              <h3 className="text-sm font-semibold text-slate-800 leading-snug">
                 {highlightContent(caseItem.title, tokens)}
               </h3>
             </div>

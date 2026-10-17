@@ -159,8 +159,8 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
           <div className="w-1/3 bg-rose-500"></div>
         </div>
 
-        {/* 5. CONTENIDO DEL BANNER CENTRADO DENTRO DE LA FRANJA ROJA A ANCHO COMPLETO */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 min-h-[220px] sm:min-h-[250px] flex flex-col justify-between">
+        {/* 5. CONTENIDO DEL BANNER CENTRADO DENTRO DE LA FRANJA ROJA A ANCHO COMPLETO (+15% AIRE VERTICAL) */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-13 min-h-[265px] sm:min-h-[300px] flex flex-col justify-between">
           {/* TÍTULO Y LÍNEA DIVISORIA */}
           <div className="max-w-3xl space-y-2.5">
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
