@@ -647,6 +647,7 @@ export default function CriteriosApp() {
   const [isResizingSidebar, setIsResizingSidebar] = useState<boolean>(false);
   const [isResizingInspector, setIsResizingInspector] = useState<boolean>(false);
   const chatTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showSqlModal, setShowSqlModal] = useState<boolean>(false);
@@ -794,6 +795,13 @@ export default function CriteriosApp() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  // Auto-scroll del hilo de mensajes cuando se envían preguntas o llegan respuestas
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages.length, isSearching]);
 
   // Controladores de redimensionamiento de paneles con el mouse
   const startResizingSidebar = useCallback((e: React.MouseEvent) => {
@@ -2538,11 +2546,11 @@ export default function CriteriosApp() {
           </aside>
 
           {/* ===== COLUMNA 2: PANEL CENTRAL - WORKSPACE CON SCROLL ===== */}
-          <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
+          <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden" style={{ scrollbarGutter: "stable" }}>
             {activeNav === "nuevo" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[920px] w-full mx-auto space-y-5 flex-1 flex flex-col min-h-0">
-                {/* Header de la conversación */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="px-4 sm:px-6 pt-5 pb-2 max-w-[940px] w-full mx-auto flex-1 flex flex-col min-h-0 overflow-hidden">
+                {/* Header de la conversación (ESTÁTICO) */}
+                <div className="shrink-0 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
                       <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -2662,8 +2670,8 @@ export default function CriteriosApp() {
                   </div>
                 </div>
 
-                {/* 4 Tarjetas de escenarios sugeridos con Toggle para Minimizar y ganar espacio */}
-                <div>
+                {/* 4 Tarjetas de escenarios sugeridos con Toggle para Minimizar y ganar espacio (ESTÁTICO) */}
+                <div className="shrink-0 pb-3">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
                       Consultas y Escenarios Rápidos
@@ -2716,8 +2724,8 @@ export default function CriteriosApp() {
                   )}
                 </div>
 
-                {/* Hilo de Mensajes del Chat */}
-                <div className="space-y-4 pt-2 flex-1">
+                {/* Hilo de Mensajes del Chat (SCROLL INDEPENDIENTE) */}
+                <div className="flex-1 overflow-y-auto min-h-0 space-y-4 py-2 pr-1 scrollbar-thin">
                   {chatMessages.length === 0 ? (
                     <div
                       style={{
@@ -3021,10 +3029,11 @@ export default function CriteriosApp() {
                       </span>
                     </div>
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Compositor / Barra de Chat fijada ergonómica con Capacidades Avanzadas */}
-                <div className="sticky bottom-0 pt-3 pb-2 bg-gradient-to-t from-white via-white to-transparent">
+                <div className="shrink-0 pt-2 pb-1 bg-gradient-to-t from-white via-white to-transparent">
                   <form onSubmit={handleSubmit}>
                     <div
                       style={{
@@ -3249,7 +3258,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO: SESIONES DE CHAT / CONVERSACIONES ===== */}
             {activeNav === "chats" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[920px] w-full mx-auto space-y-5 flex-1">
+              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3344,7 +3353,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO 2: REPOSITORIO DE FUENTES DINÁMICO ===== */}
             {activeNav === "fuentes" && (
-              <div className="px-6 py-6 max-w-[900px] w-full mx-auto space-y-5 flex-1">
+              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3583,7 +3592,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO 3: HISTORIAL DE CONSULTAS DINÁMICO ===== */}
             {activeNav === "historial" && (
-              <div className="px-6 py-6 max-w-[900px] w-full mx-auto space-y-5 flex-1">
+              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3667,7 +3676,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO UNIFICADO: CONFIGURACIÓN & PROVEEDORES IA (7) ===== */}
             {activeNav === "config" && (
-              <div className="px-4 sm:px-6 py-6 max-w-[960px] w-full mx-auto space-y-5 flex-1">
+              <div className="px-4 sm:px-6 py-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
