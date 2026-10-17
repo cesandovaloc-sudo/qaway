@@ -38,6 +38,7 @@ interface CasuisticasTablePageProps {
   onSyncSupabase: () => Promise<boolean>;
   onEditCase?: (dirId: DirectionId, item: Casuistica) => void;
   onAddNewCase?: () => void;
+  isAdmin?: boolean;
 }
 
 const DIRECTION_BADGES: Record<
@@ -98,7 +99,8 @@ export const CasuisticasExcelPage: React.FC<CasuisticasTablePageProps> = ({
   isSupabaseConnected,
   onSyncSupabase,
   onEditCase,
-  onAddNewCase
+  onAddNewCase,
+  isAdmin = false
 }) => {
   // Estados de filtrado y búsqueda (estilo Inventi Pro)
   const [searchTerm, setSearchTerm] = useState('');
@@ -337,42 +339,44 @@ ON public.minedu_casuisticas FOR ALL USING (true);
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowSqlModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs transition cursor-pointer"
-              title="Ver script de la tabla aislada minedu_casuisticas"
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              <span>Script Supabase</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSyncCloud}
-              disabled={isSyncing}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shadow-2xs ${
-                isSupabaseConnected
-                  ? 'bg-sky-600 hover:bg-sky-700 text-white'
-                  : 'bg-slate-800 hover:bg-slate-900 text-white'
-              }`}
-            >
-              <Cloud className="w-3.5 h-3.5" />
-              <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar Supabase'}</span>
-            </button>
-
-            {onAddNewCase && (
+          {isAdmin && (
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={onAddNewCase}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#d81b3d] hover:bg-rose-700 text-white font-bold text-xs transition cursor-pointer shadow-2xs"
+                onClick={() => setShowSqlModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs transition cursor-pointer"
+                title="Ver script de la tabla aislada minedu_casuisticas"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>+ Nueva Casuística</span>
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Script Supabase</span>
               </button>
-            )}
-          </div>
+
+              <button
+                type="button"
+                onClick={handleSyncCloud}
+                disabled={isSyncing}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shadow-2xs ${
+                  isSupabaseConnected
+                    ? 'bg-sky-600 hover:bg-sky-700 text-white'
+                    : 'bg-slate-800 hover:bg-slate-900 text-white'
+                }`}
+              >
+                <Cloud className="w-3.5 h-3.5" />
+                <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar Supabase'}</span>
+              </button>
+
+              {onAddNewCase && (
+                <button
+                  type="button"
+                  onClick={onAddNewCase}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#d81b3d] hover:bg-rose-700 text-white font-bold text-xs transition cursor-pointer shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Nueva Casuística</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </nav>
 
@@ -702,6 +706,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                   <th className="w-12 px-2 py-2.5 text-center">N°</th>
                   <th className="w-24 px-3 py-2.5">Dirección</th>
                   <th className="min-w-[280px] px-3.5 py-2.5">Título / Pregunta Central</th>
+                  <th className="min-w-[280px] px-3.5 py-2.5">Caso Real (Literal)</th>
                   <th className="w-40 min-w-[160px] px-3 py-2.5">UGEL / Ámbito</th>
                   <th className="min-w-[280px] px-3.5 py-2.5">Solución / Criterio Oficial</th>
                   <th className="w-36 min-w-[140px] px-3 py-2.5">Normativa</th>
@@ -711,7 +716,7 @@ ON public.minedu_casuisticas FOR ALL USING (true);
               <tbody className="divide-y divide-slate-200/80 text-slate-700">
                 {paginatedCases.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center text-slate-400">
+                    <td colSpan={9} className="py-16 text-center text-slate-400">
                       <div className="max-w-xs mx-auto space-y-2">
                         <Filter className="w-8 h-8 text-slate-300 mx-auto" />
                         <p className="text-sm font-semibold text-slate-600">
@@ -826,6 +831,16 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                           })()}
                         </td>
 
+                        {/* Caso Real (Literal / Consulta Original) */}
+                        <td className="px-3.5 py-2.5 text-slate-700">
+                          <p
+                            className="line-clamp-2 text-xs leading-relaxed font-normal text-slate-800"
+                            title={row.desarrollo}
+                          >
+                            {row.desarrollo}
+                          </p>
+                        </td>
+
                         {/* UGEL / Ámbito específico */}
                         <td className="px-3 py-2.5">
                           {row.casoEspecifico ? (
@@ -878,27 +893,30 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                               <Eye className="w-4 h-4" />
                             </button>
 
-                            {/* Editar en modal */}
-                            {onEditCase && (
-                              <button
-                                type="button"
-                                onClick={() => onEditCase(row.dirId, row)}
-                                className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition cursor-pointer"
-                                title="Editar casuística"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                            )}
+                            {/* Solo Administrador: Editar y Eliminar */}
+                            {isAdmin && (
+                              <>
+                                {onEditCase && (
+                                  <button
+                                    type="button"
+                                    onClick={() => onEditCase(row.dirId, row)}
+                                    className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition cursor-pointer"
+                                    title="Editar casuística"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                  </button>
+                                )}
 
-                            {/* Eliminar */}
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteCase(row.id, row.dirId)}
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                              title="Eliminar casuística"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCase(row.id, row.dirId)}
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                                  title="Eliminar casuística"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>

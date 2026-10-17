@@ -149,6 +149,41 @@ function scoreCase(
   return totalScore;
 }
 
+const checkIsHubAdmin = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('admin') === 'true') return true;
+
+    // Validación estricta con sesión oficial de Qaway Hub Estudio (según src/config/auth.js)
+    const token =
+      sessionStorage.getItem('qaway_auth_token') ||
+      localStorage.getItem('qaway_auth_token');
+    const email = (
+      sessionStorage.getItem('qaway_auth_email') ||
+      localStorage.getItem('qaway_auth_email') ||
+      ''
+    ).trim().toLowerCase();
+    const role =
+      sessionStorage.getItem('qaway_auth_role') ||
+      localStorage.getItem('qaway_auth_role') ||
+      '';
+
+    const ADMIN_EMAILS = [
+      'proyectos@qawaylab.com',
+      'admin@qawaylab.com',
+      'admin@qaway.test'
+    ];
+
+    if (token && (role === 'admin' || ADMIN_EMAILS.includes(email))) {
+      return true;
+    }
+  } catch (e) {
+    // Silencioso
+  }
+  return false;
+};
+
 export default function PreguntasFrecuentesApp() {
   // Inicialización de datos
   const [directionsData, setDirectionsData] = useState<DirectionData[]>(() => {
@@ -195,21 +230,15 @@ export default function PreguntasFrecuentesApp() {
     return 'consultas';
   });
 
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('admin') === 'true') return true;
-      return localStorage.getItem(ADMIN_MODE_KEY) === 'true';
-    }
-    return false;
-  });
+  // Modo Administrador vinculado estrictamente al login de Qaway Hub Estudio (o ?admin=true)
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => checkIsHubAdmin());
 
   // Estado para permitir múltiples preguntas abiertas simultáneamente sin colapsarse
   const [allowMultipleOpen, setAllowMultipleOpen] = useState(false);
 
-  // Modal State
+  // Modal State (Formulario, Inventario y Conexión Supabase Cloud)
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState<'form' | 'list' | 'table' | 'cloud'>('form');
+  const [modalTab, setModalTab] = useState<'form' | 'list' | 'cloud'>('form');
   const [editingCase, setEditingCase] = useState<{
     caseItem: Casuistica;
     dirId: DirectionId;
@@ -802,6 +831,7 @@ export default function PreguntasFrecuentesApp() {
             setIsModalOpen(true);
           }}
           onAddNewCase={handleOpenNewCaseModal}
+          isAdmin={isAdmin}
         />
         <ManagementModal
           isOpen={isModalOpen}
@@ -935,19 +965,17 @@ export default function PreguntasFrecuentesApp() {
                   ? 'Almacenamiento: Supabase Cloud (Tiempo Real)'
                   : 'Almacenamiento: Caché Local'}
               </span>
-              <button
-                type="button"
-                onClick={toggleAdminMode}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 font-medium transition cursor-pointer text-[11px] shadow-2xs"
-                title="Alternar entre vista pública de consulta y modo administrador"
-              >
-                {isAdmin ? (
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={toggleAdminMode}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 font-medium transition cursor-pointer text-[11px] shadow-2xs"
+                  title="Alternar entre vista pública de consulta y modo administrador"
+                >
                   <Unlock className="w-3.5 h-3.5 text-amber-600" />
-                ) : (
-                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                )}
-                <span>{isAdmin ? 'Modo Admin Activo' : 'Acceso Administrador'}</span>
-              </button>
+                  <span>Modo Admin Activo</span>
+                </button>
+              )}
             </div>
           </footer>
         </div>

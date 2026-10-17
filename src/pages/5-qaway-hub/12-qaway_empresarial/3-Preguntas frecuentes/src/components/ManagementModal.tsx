@@ -8,18 +8,15 @@ import {
   Pencil,
   Trash2,
   Search,
-  ChevronDown,
-  Table,
-  Save,
-  RotateCcw
+  ChevronDown
 } from 'lucide-react';
 import { Casuistica, DirectionData, DirectionId, ScoredCasuistica } from '../types/casuistica';
 
 interface ManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  activeTab: 'form' | 'list' | 'table' | 'cloud';
-  onChangeTab: (tab: 'form' | 'list' | 'table' | 'cloud') => void;
+  activeTab: 'form' | 'list' | 'cloud';
+  onChangeTab: (tab: 'form' | 'list' | 'cloud') => void;
   directions: DirectionData[];
   editingCase: { caseItem: Casuistica; dirId: DirectionId } | null;
   onSaveCase: (dirId: DirectionId, caseItem: Casuistica) => void;
@@ -89,50 +86,6 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
     message: string;
     type: 'success' | 'error' | 'info';
   } | null>(null);
-
-  // Excel Table Editor State (Solo Admin)
-  const [tableData, setTableData] = useState<DirectionData[]>(directions);
-  const [isSavingTable, setIsSavingTable] = useState(false);
-  const [tableSearch, setTableSearch] = useState('');
-  const [tableDirFilter, setTableDirFilter] = useState('ALL');
-
-  useEffect(() => {
-    setTableData(directions);
-  }, [directions]);
-
-  const handleCellChange = (
-    dirId: DirectionId,
-    caseId: string,
-    field: keyof Casuistica,
-    value: string
-  ) => {
-    setTableData((prev) =>
-      prev.map((dir) => {
-        if (dir.id !== dirId) return dir;
-        return {
-          ...dir,
-          cases: dir.cases.map((c) => {
-            if (c.id !== caseId) return c;
-            return {
-              ...c,
-              [field]: value
-            };
-          })
-        };
-      })
-    );
-  };
-
-  const handleSaveExcelTable = async () => {
-    if (!onBulkSaveCases) return;
-    setIsSavingTable(true);
-    await onBulkSaveCases(tableData);
-    setIsSavingTable(false);
-  };
-
-  const handleResetExcelTable = () => {
-    setTableData(directions);
-  };
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -328,19 +281,6 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
 
           <button
             type="button"
-            onClick={() => onChangeTab('table')}
-            className={`flex items-center gap-2 px-4 py-2.5 border-b-2 rounded-t-xl transition cursor-pointer text-sm whitespace-nowrap ${
-              activeTab === 'table'
-                ? 'border-emerald-600 text-emerald-700 bg-white font-bold shadow-xs'
-                : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-            }`}
-          >
-            <Table className="w-4 h-4 text-emerald-600" />
-            <span>Tabla Excel (Edición Rápida)</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => onChangeTab('cloud')}
             className={`flex items-center gap-2 px-4 py-2.5 border-b-2 rounded-t-xl transition cursor-pointer text-sm whitespace-nowrap ${
               activeTab === 'cloud'
@@ -490,17 +430,17 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
                 />
               </div>
 
-              {/* DESARROLLO */}
+              {/* CASO REAL (LITERAL / CONSULTA ORIGINAL) */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Desarrollo <span className="text-red-500">*</span>
+                  Caso Real (Literal / Consulta Original) <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   required
                   rows={3}
                   value={formDesarrollo}
                   onChange={(e) => setFormDesarrollo(e.target.value)}
-                  placeholder="Detalla la situación identificada por la UGEL o IE..."
+                  placeholder="Detalla el caso real tal como se presentó de manera literal..."
                   className="w-full rounded-xl bg-white border border-slate-300 p-3.5 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-[#b91c1c]/20 transition shadow-2xs"
                 ></textarea>
               </div>
@@ -698,236 +638,8 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
             </div>
           )}
 
-          {/* TAB 3: TABLA EXCEL (EDICIÓN RÁPIDA EN VIVO - SOLO ADMIN) */}
-          {activeTab === 'table' && (
-            <div className="space-y-4">
-              {/* Barra de herramientas de la Tabla Excel */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                    <Table className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm sm:text-base font-bold text-slate-900">
-                      Editor Tipo Tabla Excel (Modo Administrador)
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      Edita directamente en las celdas y guarda todos los cambios en bloque en la base de datos.
-                    </p>
-                  </div>
-                </div>
+          {/* TAB 3: CONEXIÓN SUPABASE */}
 
-                <div className="flex items-center gap-2 self-end sm:self-auto">
-                  {onOpenFullScreenTable && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        onOpenFullScreenTable();
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-xs font-bold text-emerald-800 transition cursor-pointer"
-                      title="Abrir en página dedicada a pantalla completa"
-                    >
-                      <span>Pantalla Completa ↗</span>
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleResetExcelTable}
-                    title="Restablecer cambios no guardados"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Descartar</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={isSavingTable}
-                    onClick={handleSaveExcelTable}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>
-                      {isSavingTable
-                        ? 'Guardando...'
-                        : isSupabaseConnected
-                        ? 'Guardar y Sincronizar a Supabase'
-                        : 'Guardar Cambios en la App'}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Filtro rápido dentro de la tabla */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                <div className="relative flex-1">
-                  <Search className="w-4 h-4 absolute inset-y-0 left-3.5 my-auto text-slate-400" />
-                  <input
-                    type="text"
-                    value={tableSearch}
-                    onChange={(e) => setTableSearch(e.target.value)}
-                    placeholder="Filtrar filas por título, desarrollo o solución..."
-                    className="w-full h-9 pl-9 pr-3 rounded-lg bg-white border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  />
-                </div>
-
-                <select
-                  value={tableDirFilter}
-                  onChange={(e) => setTableDirFilter(e.target.value)}
-                  className="h-9 rounded-lg bg-white border border-slate-300 px-3 text-xs font-semibold text-slate-700 focus:outline-none cursor-pointer"
-                >
-                  <option value="ALL">Todas las direcciones</option>
-                  {DIRECTION_OPTIONS.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.code} — {d.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Contenedor Cuadrícula Excel con Scroll Horizontal Suave */}
-              <div className="rounded-xl border border-slate-200 overflow-x-auto max-h-[55vh] overflow-y-auto bg-white shadow-2xs">
-                <table className="w-full text-left text-xs border-collapse min-w-[980px]">
-                  <thead className="bg-slate-100/90 text-slate-700 sticky top-0 z-20 border-b border-slate-300">
-                    <tr>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] w-12 text-center border-r border-slate-200">
-                        N°
-                      </th>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] w-20 border-r border-slate-200">
-                        Dir.
-                      </th>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] min-w-[200px] border-r border-slate-200">
-                        Título de la Casuística
-                      </th>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] min-w-[240px] border-r border-slate-200">
-                        Desarrollo (Público)
-                      </th>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] min-w-[240px] border-r border-slate-200">
-                        Solución
-                      </th>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] min-w-[200px] border-r border-slate-200">
-                        Ejemplo / Resultado
-                      </th>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] min-w-[180px] border-r border-slate-200">
-                        Normativa
-                      </th>
-                      <th className="px-3 py-2.5 font-bold uppercase tracking-wider text-[11px] min-w-[180px]">
-                        Detalle UGEL (Admin)
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 text-slate-800">
-                    {tableData
-                      .filter((d) => tableDirFilter === 'ALL' || d.id === tableDirFilter)
-                      .flatMap((dir) =>
-                        dir.cases
-                          .filter((c) => {
-                            if (!tableSearch.trim()) return true;
-                            const q = tableSearch.toLowerCase();
-                            return (
-                              c.title.toLowerCase().includes(q) ||
-                              c.desarrollo.toLowerCase().includes(q) ||
-                              c.solucion.toLowerCase().includes(q) ||
-                              (c.casoEspecifico || '').toLowerCase().includes(q)
-                            );
-                          })
-                          .map((c) => ({ ...c, dirId: dir.id, dirCode: dir.code }))
-                      )
-                      .map((row) => (
-                        <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="px-2 py-1.5 text-center font-bold text-slate-600 bg-slate-50/50 border-r border-slate-200">
-                            <input
-                              type="text"
-                              value={row.number}
-                              onChange={(e) =>
-                                handleCellChange(row.dirId, row.id, 'number', e.target.value)
-                              }
-                              className="w-10 text-center font-bold bg-transparent border-b border-transparent hover:border-slate-300 focus:border-emerald-500 focus:outline-none"
-                            />
-                          </td>
-                          <td className="px-2 py-1.5 font-bold text-[#b91c1c] border-r border-slate-200">
-                            <span className="px-1.5 py-0.5 rounded bg-red-50 text-[10px]">
-                              {row.dirCode}
-                            </span>
-                          </td>
-                          <td className="p-1 border-r border-slate-200">
-                            <textarea
-                              rows={2}
-                              value={row.title}
-                              onChange={(e) =>
-                                handleCellChange(row.dirId, row.id, 'title', e.target.value)
-                              }
-                              className="w-full p-1.5 rounded bg-transparent border border-transparent hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-none resize-y text-xs font-semibold"
-                            />
-                          </td>
-                          <td className="p-1 border-r border-slate-200">
-                            <textarea
-                              rows={2}
-                              value={row.desarrollo}
-                              onChange={(e) =>
-                                handleCellChange(row.dirId, row.id, 'desarrollo', e.target.value)
-                              }
-                              className="w-full p-1.5 rounded bg-transparent border border-transparent hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-none resize-y text-xs"
-                            />
-                          </td>
-                          <td className="p-1 border-r border-slate-200">
-                            <textarea
-                              rows={2}
-                              value={row.solucion}
-                              onChange={(e) =>
-                                handleCellChange(row.dirId, row.id, 'solucion', e.target.value)
-                              }
-                              className="w-full p-1.5 rounded bg-transparent border border-transparent hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-none resize-y text-xs text-slate-700"
-                            />
-                          </td>
-                          <td className="p-1 border-r border-slate-200">
-                            <textarea
-                              rows={2}
-                              value={row.ejemplo || ''}
-                              onChange={(e) =>
-                                handleCellChange(row.dirId, row.id, 'ejemplo', e.target.value)
-                              }
-                              className="w-full p-1.5 rounded bg-transparent border border-transparent hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-none resize-y text-xs text-emerald-800"
-                            />
-                          </td>
-                          <td className="p-1 border-r border-slate-200">
-                            <textarea
-                              rows={2}
-                              value={row.normativa || ''}
-                              onChange={(e) =>
-                                handleCellChange(row.dirId, row.id, 'normativa', e.target.value)
-                              }
-                              placeholder="RM N.° 373-2026-MINEDU..."
-                              className="w-full p-1.5 rounded bg-transparent border border-transparent hover:border-slate-300 focus:border-emerald-500 focus:bg-white focus:outline-none resize-y text-[11px] text-slate-600"
-                            />
-                          </td>
-                          <td className="p-1">
-                            <textarea
-                              rows={2}
-                              value={row.casoEspecifico || ''}
-                              onChange={(e) =>
-                                handleCellChange(
-                                  row.dirId,
-                                  row.id,
-                                  'casoEspecifico',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Detalle UGEL interno..."
-                              className="w-full p-1.5 rounded bg-amber-50/40 border border-transparent hover:border-amber-300 focus:border-amber-500 focus:bg-white focus:outline-none resize-y text-[11px] text-amber-900"
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: CONEXIÓN SUPABASE */}
           {activeTab === 'cloud' && (
             <div className="space-y-4">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3.5">
