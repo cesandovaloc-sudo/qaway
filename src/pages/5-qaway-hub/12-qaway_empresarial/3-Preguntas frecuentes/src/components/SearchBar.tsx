@@ -190,9 +190,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                                     {item.dirName}
                                   </span>
                                 </div>
-                                <p className="text-sm font-semibold text-slate-800 group-hover:text-rose-600 transition-colors line-clamp-1 mt-1">
-                                  {item.title}
-                                </p>
+                                {item.title.includes(': ') ? (
+                                  <div className="mt-1 space-y-0.5">
+                                    <p className="text-xs font-semibold text-slate-500 truncate uppercase tracking-wide">
+                                      {item.title.split(': ')[0]}
+                                    </p>
+                                    <p className="text-sm font-semibold text-slate-800 group-hover:text-rose-600 transition-colors line-clamp-1">
+                                      {item.title.split(': ').slice(1).join(': ')}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p className="text-sm font-semibold text-slate-800 group-hover:text-rose-600 transition-colors line-clamp-1 mt-1">
+                                    {item.title}
+                                  </p>
+                                )}
                                 <p className="text-xs text-slate-500 line-clamp-1 mt-0.5 font-normal">
                                   {item.criterioTitle || item.criterioDesc || item.solucion}
                                 </p>
