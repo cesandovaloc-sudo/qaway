@@ -61,9 +61,17 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
   return (
     <article
       id={`case-card-${caseItem.id}`}
-      className="rounded-2xl border border-slate-200/80 bg-[#f8fafc] overflow-hidden transition-all duration-200 hover:border-slate-300/80 shadow-[0_1px_3px_rgba(15,23,42,0.02)]"
+      className={`rounded-2xl overflow-hidden transition-all duration-200 ${
+        isOpen
+          ? 'border-2 border-[#d81b3d]/50 bg-white shadow-[0_4px_20px_-4px_rgba(216,27,61,0.12)] ring-4 ring-rose-50/70'
+          : 'border border-slate-200/80 bg-[#f8fafc] hover:border-slate-300 shadow-[0_1px_3px_rgba(15,23,42,0.02)]'
+      }`}
     >
-      <div className="flex items-center justify-between bg-[#f8fafc] hover:bg-[#f1f5f9]/70 transition-colors">
+      <div
+        className={`flex items-center justify-between transition-colors ${
+          isOpen ? 'bg-rose-50/25' : 'bg-[#f8fafc] hover:bg-[#f1f5f9]/70'
+        }`}
+      >
         <button
           type="button"
           onClick={onToggle}
@@ -71,13 +79,25 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
           className="flex-1 px-4 py-3.5 sm:px-5 sm:py-4 flex items-center justify-between gap-4 text-left focus:outline-none cursor-pointer"
         >
           <div className="flex items-center gap-3.5 min-w-0">
-            <span className="flex-shrink-0 w-8 h-7 rounded-md bg-slate-200/80 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-300/40">
+            <span
+              className={`flex-shrink-0 w-8 h-7 rounded-md font-bold text-xs flex items-center justify-center border transition-colors ${
+                isOpen
+                  ? 'bg-rose-100 text-[#d81b3d] border-rose-200 font-black'
+                  : 'bg-slate-200/80 text-slate-700 border-slate-300/40'
+              }`}
+            >
               {caseItem.number}
             </span>
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="inline-block text-xs font-bold uppercase tracking-wider text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded">
+                <span
+                  className={`inline-block text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded transition-colors ${
+                    isOpen
+                      ? 'text-[#d81b3d] bg-rose-100/70'
+                      : 'text-slate-600 bg-slate-200/80'
+                  }`}
+                >
                   {caseItem.dirCode} • {caseItem.dirName}
                 </span>
                 {caseItem.score > 0 && (
@@ -86,15 +106,21 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                   </span>
                 )}
               </div>
-              <h3 className="text-sm font-semibold text-slate-800 leading-snug">
+              <h3
+                className={`text-sm leading-snug transition-colors ${
+                  isOpen ? 'font-bold text-[#d81b3d]' : 'font-semibold text-slate-800'
+                }`}
+              >
                 {highlightContent(caseItem.title, tokens)}
               </h3>
             </div>
           </div>
 
           <span
-            className={`flex-shrink-0 w-8 h-8 rounded-full bg-slate-200/70 text-slate-600 flex items-center justify-center transition-transform duration-200 ${
-              isOpen ? 'rotate-180 bg-slate-200 text-slate-700' : ''
+            className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+              isOpen
+                ? 'rotate-180 bg-rose-100 text-[#d81b3d]'
+                : 'bg-slate-200/70 text-slate-600'
             }`}
           >
             <ChevronDown className="w-4 h-4" />

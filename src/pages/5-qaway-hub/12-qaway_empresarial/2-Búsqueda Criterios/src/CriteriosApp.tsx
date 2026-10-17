@@ -1454,10 +1454,6 @@ export default function CriteriosApp() {
         .qaway-criterios-root {
           scrollbar-width: thin;
           scrollbar-color: #d4d4d8 transparent;
-          scrollbar-gutter: stable;
-        }
-        .qaway-criterios-root main {
-          scrollbar-gutter: stable;
         }
       `}</style>
 
@@ -2552,9 +2548,9 @@ export default function CriteriosApp() {
           </aside>
 
           {/* ===== COLUMNA 2: PANEL CENTRAL - WORKSPACE CON SCROLL ===== */}
-          <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden" style={{ scrollbarGutter: "stable" }}>
+          <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
             {activeNav === "nuevo" && (
-              <div className="px-4 sm:px-6 pt-5 pb-2 max-w-[940px] w-full mx-auto flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-2 max-w-[940px] w-full mx-auto flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header de la conversación (ESTÁTICO) */}
                 <div className="shrink-0 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
@@ -3267,7 +3263,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO: SESIONES DE CHAT / CONVERSACIONES ===== */}
             {activeNav === "chats" && (
-              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3362,7 +3358,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO 2: REPOSITORIO DE FUENTES DINÁMICO ===== */}
             {activeNav === "fuentes" && (
-              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3601,7 +3597,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO 3: HISTORIAL DE CONSULTAS DINÁMICO ===== */}
             {activeNav === "historial" && (
-              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
@@ -3685,7 +3681,7 @@ export default function CriteriosApp() {
 
             {/* ===== MÓDULO UNIFICADO: CONFIGURACIÓN & PROVEEDORES IA (7) ===== */}
             {activeNav === "config" && (
-              <div className="px-4 sm:px-6 pt-5 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
+              <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">

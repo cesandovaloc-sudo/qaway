@@ -36,6 +36,39 @@ const renderDirectionIcon = (id: DirectionId) => {
   }
 };
 
+const DIRECTION_STYLES: Record<
+  DirectionId,
+  {
+    iconBox: string;
+    badge: string;
+  }
+> = {
+  DEI: {
+    iconBox: 'text-amber-600 bg-amber-50 border border-amber-200/80 group-hover:bg-amber-100',
+    badge: 'bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100'
+  },
+  DEP: {
+    iconBox: 'text-blue-600 bg-blue-50 border border-blue-200/80 group-hover:bg-blue-100',
+    badge: 'bg-blue-50 text-blue-700 border border-blue-200 group-hover:bg-blue-100'
+  },
+  DISER: {
+    iconBox: 'text-emerald-600 bg-emerald-50 border border-emerald-200/80 group-hover:bg-emerald-100',
+    badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200 group-hover:bg-emerald-100'
+  },
+  DEBA: {
+    iconBox: 'text-indigo-600 bg-indigo-50 border border-indigo-200/80 group-hover:bg-indigo-100',
+    badge: 'bg-indigo-50 text-indigo-700 border border-indigo-200 group-hover:bg-indigo-100'
+  },
+  DEBE: {
+    iconBox: 'text-purple-600 bg-purple-50 border border-purple-200/80 group-hover:bg-purple-100',
+    badge: 'bg-purple-50 text-purple-700 border border-purple-200 group-hover:bg-purple-100'
+  },
+  DES: {
+    iconBox: 'text-[#d81b3d] bg-rose-50 border border-rose-200/80 group-hover:bg-rose-100',
+    badge: 'bg-rose-50 text-[#d81b3d] border border-rose-200 group-hover:bg-rose-100'
+  }
+};
+
 export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
   directions,
   selectedDirectionId,
@@ -48,21 +81,22 @@ export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
         {directions.map((dir) => {
           const isSelected = dir.id === selectedDirectionId && !isSearching;
           const count = dir.cases.length;
+          const style = DIRECTION_STYLES[dir.id];
 
           const cardClasses = isSelected
-            ? 'bg-white border-2 border-[#b91c1c] shadow-[0_4px_16px_-4px_rgba(185,28,28,0.12)] ring-4 ring-rose-50'
+            ? 'bg-white border-2 border-[#d81b3d] shadow-[0_4px_16px_-4px_rgba(216,27,61,0.14)] ring-4 ring-rose-50'
             : 'bg-white border-2 border-slate-200/80 hover:border-slate-300 hover:shadow-xs';
 
           const iconBoxClasses = isSelected
-            ? 'text-[#b91c1c] bg-rose-50 border border-rose-100'
-            : 'text-slate-700 bg-slate-50 border border-slate-200/60 group-hover:text-slate-900 group-hover:bg-slate-100';
+            ? 'text-[#d81b3d] bg-rose-50 border border-rose-200'
+            : style.iconBox;
 
           const badgeClasses = isSelected
-            ? 'bg-rose-100 text-[#b91c1c] border border-rose-200'
-            : 'bg-slate-100 text-slate-700 border border-slate-200 group-hover:bg-slate-200/70';
+            ? 'bg-rose-100 text-[#d81b3d] border border-rose-200'
+            : style.badge;
 
           const arrowClasses = isSelected
-            ? 'text-[#b91c1c] translate-x-1'
+            ? 'text-[#d81b3d] translate-x-1'
             : 'text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5';
 
           return (
