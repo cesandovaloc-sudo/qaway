@@ -45,34 +45,34 @@ const DIRECTION_STYLES: Record<
   }
 > = {
   DEI: {
-    iconBoxIdle: 'text-amber-600 bg-amber-100/80 border border-amber-200/90 group-hover:bg-amber-200/70',
-    iconBoxSelected: 'bg-amber-500 text-white border border-amber-600 shadow-xs',
-    badge: 'bg-amber-50 text-amber-700 border border-amber-200 group-hover:bg-amber-100'
+    iconBoxIdle: 'text-amber-600 bg-amber-50 border border-amber-200/80 group-hover:bg-amber-100',
+    iconBoxSelected: 'text-amber-700 bg-amber-100 border border-amber-300',
+    badge: 'bg-amber-50 text-amber-700 border border-amber-200'
   },
   DEP: {
-    iconBoxIdle: 'text-blue-600 bg-blue-100/80 border border-blue-200/90 group-hover:bg-blue-200/70',
-    iconBoxSelected: 'bg-blue-600 text-white border border-blue-700 shadow-xs',
-    badge: 'bg-blue-50 text-blue-700 border border-blue-200 group-hover:bg-blue-100'
+    iconBoxIdle: 'text-blue-600 bg-blue-50 border border-blue-200/80 group-hover:bg-blue-100',
+    iconBoxSelected: 'text-blue-700 bg-blue-100 border border-blue-300',
+    badge: 'bg-blue-50 text-blue-700 border border-blue-200'
   },
   DISER: {
-    iconBoxIdle: 'text-emerald-600 bg-emerald-100/80 border border-emerald-200/90 group-hover:bg-emerald-200/70',
-    iconBoxSelected: 'bg-emerald-600 text-white border border-emerald-700 shadow-xs',
-    badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200 group-hover:bg-emerald-100'
+    iconBoxIdle: 'text-emerald-600 bg-emerald-50 border border-emerald-200/80 group-hover:bg-emerald-100',
+    iconBoxSelected: 'text-emerald-700 bg-emerald-100 border border-emerald-300',
+    badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200'
   },
   DEBA: {
-    iconBoxIdle: 'text-indigo-600 bg-indigo-100/80 border border-indigo-200/90 group-hover:bg-indigo-200/70',
-    iconBoxSelected: 'bg-indigo-600 text-white border border-indigo-700 shadow-xs',
-    badge: 'bg-indigo-50 text-indigo-700 border border-indigo-200 group-hover:bg-indigo-100'
+    iconBoxIdle: 'text-indigo-600 bg-indigo-50 border border-indigo-200/80 group-hover:bg-indigo-100',
+    iconBoxSelected: 'text-indigo-700 bg-indigo-100 border border-indigo-300',
+    badge: 'bg-indigo-50 text-indigo-700 border border-indigo-200'
   },
   DEBE: {
-    iconBoxIdle: 'text-purple-600 bg-purple-100/80 border border-purple-200/90 group-hover:bg-purple-200/70',
-    iconBoxSelected: 'bg-purple-600 text-white border border-purple-700 shadow-xs',
-    badge: 'bg-purple-50 text-purple-700 border border-purple-200 group-hover:bg-purple-100'
+    iconBoxIdle: 'text-purple-600 bg-purple-50 border border-purple-200/80 group-hover:bg-purple-100',
+    iconBoxSelected: 'text-purple-700 bg-purple-100 border border-purple-300',
+    badge: 'bg-purple-50 text-purple-700 border border-purple-200'
   },
   DES: {
-    iconBoxIdle: 'text-[#d81b3d] bg-rose-100/80 border border-rose-200/90 group-hover:bg-rose-200/70',
-    iconBoxSelected: 'bg-[#d81b3d] text-white border border-rose-700 shadow-xs',
-    badge: 'bg-rose-50 text-[#d81b3d] border border-rose-200 group-hover:bg-rose-100'
+    iconBoxIdle: 'text-[#d81b3d] bg-rose-50 border border-rose-200/80 group-hover:bg-rose-100',
+    iconBoxSelected: 'text-rose-700 bg-rose-100 border border-rose-300',
+    badge: 'bg-rose-50 text-[#d81b3d] border border-rose-200'
   }
 };
 
@@ -91,19 +91,17 @@ export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
           const style = DIRECTION_STYLES[dir.id];
 
           const cardClasses = isSelected
-            ? 'bg-white border-2 border-[#d81b3d] shadow-[0_4px_16px_-4px_rgba(216,27,61,0.14)] ring-4 ring-rose-50'
+            ? 'bg-white border-2 border-rose-300 shadow-2xs'
             : 'bg-white border-2 border-slate-200/80 hover:border-slate-300 hover:shadow-xs';
 
           const iconBoxClasses = isSelected
             ? style.iconBoxSelected
             : style.iconBoxIdle;
 
-          const badgeClasses = isSelected
-            ? 'bg-rose-100 text-[#d81b3d] border border-rose-200'
-            : style.badge;
+          const badgeClasses = style.badge;
 
           const arrowClasses = isSelected
-            ? 'text-[#d81b3d] translate-x-1'
+            ? 'text-rose-500 translate-x-1'
             : 'text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5';
 
           return (
@@ -112,7 +110,7 @@ export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
               type="button"
               onClick={() => onSelectDirection(dir.id)}
               aria-pressed={isSelected}
-              className={`group w-full text-left rounded-xl h-[68px] sm:h-[72px] px-4 sm:px-4.5 py-2.5 sm:py-3 transition-colors duration-150 flex items-center justify-between gap-3.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b91c1c] cursor-pointer ${cardClasses}`}
+              className={`group w-full text-left rounded-xl h-[68px] sm:h-[72px] px-4 sm:px-4.5 py-2.5 sm:py-3 flex items-center justify-between gap-3.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 cursor-pointer ${cardClasses}`}
             >
               <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
                 <div

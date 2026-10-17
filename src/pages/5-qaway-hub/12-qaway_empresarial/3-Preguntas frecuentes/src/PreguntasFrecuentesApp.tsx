@@ -403,8 +403,7 @@ export default function PreguntasFrecuentesApp() {
 
   const handleSelectDirection = (id: DirectionId) => {
     setSelectedDirectionId(id);
-    setSearchQuery('');
-    scrollToDirectionsSection();
+    if (searchQuery) setSearchQuery('');
   };
 
   const handleOpenFirstMatch = () => {

@@ -63,13 +63,13 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
       id={`case-card-${caseItem.id}`}
       className={`rounded-2xl overflow-hidden transition-all duration-200 ${
         isOpen
-          ? 'border border-rose-200/80 bg-white shadow-[0_1px_4px_rgba(216,27,61,0.03)]'
-          : 'border border-slate-200/80 bg-white hover:border-slate-300 shadow-[0_1px_3px_rgba(15,23,42,0.02)]'
+          ? 'border border-rose-300/80 bg-white shadow-[0_1px_4px_rgba(216,27,61,0.04)]'
+          : 'border border-rose-200/50 bg-white hover:border-rose-300/70 shadow-[0_1px_3px_rgba(15,23,42,0.02)]'
       }`}
     >
       <div
         className={`flex items-center justify-between transition-colors ${
-          isOpen ? 'bg-rose-50/30 border-b border-rose-100/60' : 'bg-rose-50/20 hover:bg-rose-50/35'
+          isOpen ? 'bg-rose-50/65 border-b border-rose-200/60' : 'bg-rose-50/45 hover:bg-rose-100/40'
         }`}
       >
         <button
@@ -82,8 +82,8 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
             <span
               className={`flex-shrink-0 w-8 h-7 rounded-md text-xs flex items-center justify-center border transition-colors ${
                 isOpen
-                  ? 'bg-rose-100 text-rose-800 border-rose-200 font-bold'
-                  : 'bg-rose-50/70 text-slate-700 border-rose-200/50 font-bold'
+                  ? 'bg-rose-100 text-rose-800 border-rose-300/80 font-bold'
+                  : 'bg-rose-50 text-rose-800 border-rose-200/60 font-bold'
               }`}
             >
               {caseItem.number}
@@ -92,7 +92,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span
-                  className="inline-block text-xs uppercase tracking-wider px-2 py-0.5 rounded text-rose-800 bg-rose-50/70 border border-rose-200/50 font-semibold"
+                  className="inline-block text-xs uppercase tracking-wider px-2 py-0.5 rounded text-rose-800 bg-rose-100/60 border border-rose-200/70 font-semibold"
                 >
                   {caseItem.dirCode} • {caseItem.dirName}
                 </span>
@@ -115,8 +115,8 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
           <span
             className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
               isOpen
-                ? 'rotate-180 bg-rose-100 text-rose-700 border border-rose-200/60'
-                : 'bg-white/80 text-slate-500 border border-slate-200/60'
+                ? 'rotate-180 bg-rose-100 text-rose-700 border border-rose-200'
+                : 'bg-white/90 text-rose-600 border border-rose-200/60'
             }`}
           >
             <ChevronDown className="w-4 h-4" />
