@@ -30,6 +30,7 @@ interface ManagementModalProps {
   onSaveSupabaseConfig: (url: string, key: string) => Promise<boolean>;
   isSupabaseConnected: boolean;
   onBulkSaveCases?: (newDirections: DirectionData[]) => Promise<boolean>;
+  onOpenFullScreenTable?: () => void;
 }
 
 const DIRECTION_OPTIONS: { id: DirectionId; code: string; name: string }[] = [
@@ -54,7 +55,9 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
   supabaseUrl,
   supabaseKey,
   onSaveSupabaseConfig,
-  isSupabaseConnected
+  isSupabaseConnected,
+  onBulkSaveCases,
+  onOpenFullScreenTable
 }) => {
   // Form State
   const [formDirId, setFormDirId] = useState<DirectionId>('DEI');
@@ -712,6 +715,20 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-auto">
+                  {onOpenFullScreenTable && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenFullScreenTable();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-xs font-bold text-emerald-800 transition cursor-pointer"
+                      title="Abrir en página dedicada a pantalla completa"
+                    >
+                      <span>Pantalla Completa ↗</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={handleResetExcelTable}

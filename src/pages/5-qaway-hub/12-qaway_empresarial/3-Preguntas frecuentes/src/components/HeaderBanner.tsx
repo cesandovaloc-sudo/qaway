@@ -1,10 +1,11 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, FileSpreadsheet } from 'lucide-react';
 
 interface HeaderBannerProps {
   totalCases: number;
   isAdmin: boolean;
   onOpenNewCaseModal: () => void;
+  onOpenExcelPage?: () => void;
   isVisible?: boolean;
 }
 
@@ -12,6 +13,7 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
   totalCases,
   isAdmin,
   onOpenNewCaseModal,
+  onOpenExcelPage,
   isVisible = true
 }) => {
   return (
@@ -177,22 +179,35 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
               Herramienta interactiva de consulta para registrar, analizar y resolver casuísticas recurrentes durante el monitoreo a las UGEL e II.EE. en el marco del MC SIGA.
             </p>
 
-            <div className="flex-shrink-0 self-end">
+            <div className="flex-shrink-0 self-end flex items-center gap-2.5">
               {isAdmin ? (
-                <button
-                  type="button"
-                  onClick={onOpenNewCaseModal}
-                  className="group inline-flex items-center gap-2.5 rounded-xl bg-white text-[#d81b3d] hover:bg-red-50 px-5 py-3 text-sm font-bold shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer"
-                  title="Cargar casuísticas de modo manual"
-                >
-                  <div className="w-6 h-6 rounded-lg bg-red-100 text-[#d81b3d] flex items-center justify-center group-hover:bg-red-200 transition">
-                    <Plus className="w-4 h-4" />
-                  </div>
-                  <span>+ Nueva Pregunta</span>
-                  <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-red-100 text-[#d81b3d]">
-                    {totalCases}
-                  </span>
-                </button>
+                <>
+                  {onOpenExcelPage && (
+                    <button
+                      type="button"
+                      onClick={onOpenExcelPage}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-xs border border-white/40 px-4 py-3 text-sm font-bold shadow-xs hover:shadow-md transition cursor-pointer"
+                      title="Abrir la Hoja de Cálculo tipo Excel a Pantalla Completa"
+                    >
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
+                      <span>Hoja de Cálculo Excel</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onOpenNewCaseModal}
+                    className="group inline-flex items-center gap-2.5 rounded-xl bg-white text-[#d81b3d] hover:bg-red-50 px-5 py-3 text-sm font-bold shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer"
+                    title="Cargar casuísticas de modo manual"
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-red-100 text-[#d81b3d] flex items-center justify-center group-hover:bg-red-200 transition">
+                      <Plus className="w-4 h-4" />
+                    </div>
+                    <span>+ Nueva Pregunta</span>
+                    <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-red-100 text-[#d81b3d]">
+                      {totalCases}
+                    </span>
+                  </button>
+                </>
               ) : (
                 <div className="inline-flex items-center gap-2 rounded-xl bg-white/20 backdrop-blur-xs px-4 py-2 text-sm font-semibold text-white border border-white/30">
                   <span className="text-white/90">Casos activos:</span>

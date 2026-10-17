@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Lock, Unlock } from 'lucide-react';
+import { Lock, Unlock, FileSpreadsheet } from 'lucide-react';
 import {
   Casuistica,
   DirectionData,
@@ -13,12 +13,21 @@ import { SearchBar } from './components/SearchBar';
 import { CasesList } from './components/CasesList';
 import { ManagementModal } from './components/ManagementModal';
 import { Toast } from './components/Toast';
+import { CasuisticasExcelPage } from './pages/CasuisticasExcelPage';
 
-// Claves aisladas de almacenamiento local
-const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v5';
+// Claves aisladas de almacenamiento local (versión 7 con los 52 casos oficiales DEI garantizados)
+const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v7_dei52';
 const SUPABASE_STORAGE_URL_KEY = 'qaway_minedu_supabase_url_v1';
 const SUPABASE_STORAGE_KEY_KEY = 'qaway_minedu_supabase_key_v1';
 const ADMIN_MODE_KEY = 'qaway_minedu_admin_mode_v1';
+
+// Configuración Supabase por defecto desde entorno
+const DEFAULT_SUPABASE_URL =
+  (import.meta as any).env?.VITE_SUPABASE_URL ||
+  'https://qrusdsqgygfolxfrafyd.supabase.co';
+const DEFAULT_SUPABASE_KEY =
+  (import.meta as any).env?.VITE_SUPABASE_ANON_KEY ||
+  'sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi';
 
 // Normalizador de texto (ignora mayúsculas y acentos)
 function normalizeText(str: string): string {
@@ -153,11 +162,20 @@ export default function PreguntasFrecuentesApp() {
             DEBE: 'Básica Especial',
             DES: 'Ed. Secundaria'
           };
-          return parsed.map((dir: DirectionData) => ({
-            ...dir,
-            name: nameMap[dir.id] || dir.name,
-            cases: dir.cases.map((c) => ({ ...c, isOpen: false }))
-          }));
+          // Asegurar que DEI tenga siempre los 52 casos oficiales
+          const defaultDei = DEFAULT_DIRECTIONS_DATA.find((d) => d.id === 'DEI');
+          return parsed.map((dir: DirectionData) => {
+            const currentCases =
+              dir.id === 'DEI' && (!dir.cases || dir.cases.length < 50) && defaultDei
+                ? defaultDei.cases
+                : dir.cases;
+
+            return {
+              ...dir,
+              name: nameMap[dir.id] || dir.name,
+              cases: currentCases.map((c) => ({ ...c, isOpen: false }))
+            };
+          });
         }
       }
     } catch (e) {
@@ -166,8 +184,16 @@ export default function PreguntasFrecuentesApp() {
     return JSON.parse(JSON.stringify(DEFAULT_DIRECTIONS_DATA));
   });
 
-  const [selectedDirectionId, setSelectedDirectionId] = useState<DirectionId>('DEP');
+  const [selectedDirectionId, setSelectedDirectionId] = useState<DirectionId>('DEI');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'consultas' | 'excel'>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('view') === 'excel' || urlParams.get('tab') === 'excel') return 'excel';
+    }
+    return 'consultas';
+  });
+
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -192,12 +218,12 @@ export default function PreguntasFrecuentesApp() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
-  // Supabase State
+  // Supabase State (con credenciales preconfiguradas del entorno)
   const [supabaseUrl, setSupabaseUrl] = useState(() => {
-    return localStorage.getItem(SUPABASE_STORAGE_URL_KEY) || '';
+    return localStorage.getItem(SUPABASE_STORAGE_URL_KEY) || DEFAULT_SUPABASE_URL;
   });
   const [supabaseKey, setSupabaseKey] = useState(() => {
-    return localStorage.getItem(SUPABASE_STORAGE_KEY_KEY) || '';
+    return localStorage.getItem(SUPABASE_STORAGE_KEY_KEY) || DEFAULT_SUPABASE_KEY;
   });
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
 
@@ -211,12 +237,62 @@ export default function PreguntasFrecuentesApp() {
     }
   }, []);
 
+  // Verificación reactiva: asegurar que DEI tenga siempre los 52 casos oficiales cargados
+  useEffect(() => {
+    const dei = directionsData.find((d) => d.id === 'DEI');
+    const defaultDei = DEFAULT_DIRECTIONS_DATA.find((d) => d.id === 'DEI');
+    if (dei && defaultDei && dei.cases.length < defaultDei.cases.length) {
+      const updated = directionsData.map((d) => {
+        if (d.id === 'DEI') return { ...d, cases: defaultDei.cases };
+        return d;
+      });
+      persistDirections(updated);
+    }
+  }, [directionsData, persistDirections]);
+
+  // Verificación de conectividad inicial a Supabase
+  useEffect(() => {
+    let isMounted = true;
+    const testConn = async () => {
+      if (!supabaseUrl || !supabaseKey) return;
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const client = createClient(supabaseUrl, supabaseKey);
+        const { error } = await client.from('casuisticas').select('id').limit(1);
+        if (isMounted) {
+          if (!error || error.code === 'PGRST205') {
+            setIsSupabaseConnected(true);
+          }
+        }
+      } catch (e) {
+        console.warn('[Supabase] Verificación no crítica:', e);
+      }
+    };
+    testConn();
+    return () => {
+      isMounted = false;
+    };
+  }, [supabaseUrl, supabaseKey]);
+
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setTimeout(() => {
       setToastMessage(null);
     }, 2800);
+  };
+
+  const handleResetOfficialCases = () => {
+    if (
+      !window.confirm(
+        '¿Deseas restablecer todas las casuísticas a la versión oficial (incluyendo los 52 casos de DEI)?'
+      )
+    ) {
+      return;
+    }
+    const fresh = JSON.parse(JSON.stringify(DEFAULT_DIRECTIONS_DATA));
+    persistDirections(fresh);
+    showToast('¡Casuísticas oficiales restablecidas (52 casos de Inicial DEI)!', 'success');
   };
 
   const toggleAdminMode = () => {
@@ -290,11 +366,21 @@ export default function PreguntasFrecuentesApp() {
         const { error } = await client.from('casuisticas').upsert(rowsToUpsert);
         if (error) {
           console.warn('Error sincronizando a Supabase en bloque:', error);
-          showToast('Guardado localmente. Error al sincronizar con Supabase.', 'error');
+          if (error.code === 'PGRST205') {
+            showToast(
+              'Guardado localmente. Falta crear la tabla "casuisticas" en Supabase (usa el botón Script Supabase)',
+              'error'
+            );
+          } else {
+            showToast('Guardado localmente. Error al sincronizar con Supabase.', 'error');
+          }
           return false;
         }
 
-        showToast('¡Tabla Excel sincronizada exitosamente con Supabase y guardada localmente!', 'success');
+        showToast(
+          '¡Tabla Excel sincronizada exitosamente con Supabase y guardada localmente!',
+          'success'
+        );
         return true;
       } catch (err) {
         console.error('Error sincronizando con Supabase:', err);
@@ -580,6 +666,24 @@ export default function PreguntasFrecuentesApp() {
     setIsModalOpen(false);
   };
 
+  if (viewMode === 'excel') {
+    return (
+      <div className="w-full min-h-screen bg-slate-100 flex flex-col">
+        <CasuisticasExcelPage
+          directions={directionsData}
+          onBack={() => setViewMode('consultas')}
+          onSave={handleBulkSaveCases}
+          onResetOfficial={handleResetOfficialCases}
+          supabaseUrl={supabaseUrl}
+          supabaseKey={supabaseKey}
+          isSupabaseConnected={isSupabaseConnected}
+          onSyncSupabase={() => handleBulkSaveCases(directionsData)}
+        />
+        <Toast message={toastMessage} type={toastType} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen antialiased selection:bg-slate-200 selection:text-slate-900 bg-[#f8fafc] text-[#1e293b] flex flex-col">
       {/* 1. ENCABEZADO INSTITUCIONAL A ANCHO COMPLETO (100% FULL-WIDTH) */}
@@ -587,6 +691,7 @@ export default function PreguntasFrecuentesApp() {
         totalCases={totalCasesCount}
         isAdmin={isAdmin}
         onOpenNewCaseModal={handleOpenNewCaseModal}
+        onOpenExcelPage={() => setViewMode('excel')}
       />
 
       {/* ESTILOS AISLADOS DE SCROLLBAR GRIS CLARO MINIMALISTA Y CERO REBOTE */}
@@ -712,6 +817,10 @@ export default function PreguntasFrecuentesApp() {
         onSaveSupabaseConfig={handleSaveSupabaseConfig}
         isSupabaseConnected={isSupabaseConnected}
         onBulkSaveCases={handleBulkSaveCases}
+        onOpenFullScreenTable={() => {
+          setIsModalOpen(false);
+          setViewMode('excel');
+        }}
       />
 
       {/* TOAST DE NOTIFICACIÓN */}
