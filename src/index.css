@@ -146,9 +146,9 @@
   /* Estandarizacion tipografica global para toda la web (Excluyendo Blog/Editor/Josue/Aurea/Plantora/Saniclick/Dental/MesaSelecta/Academy) */
   :not(.blog-content):not(.blog-content *):not(.blog-prose):not(.blog-prose *):not(.blog-editor):not(.blog-editor *):not(.blog-editor-root):not(.blog-editor-root *):not(.tiptap):not(.tiptap *):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *):not(.epc-landing):not(.epc-landing *):not(.academy-app-root):not(.academy-app-root *) > h1:not(.blog-title):not(.no-qw),
   h1:not(.blog-title):not(.no-qw):not(.blog-content *):not(.blog-prose *):not(.blog-editor *):not(.blog-editor-root *):not(.tiptap *):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing):not(.epc-landing):not(.epc-landing *):not(.academy-app-root *):not(.academy-app-root) {
-    font-size: clamp(2.6rem, 4.2vw, 5.5rem);
-    line-height: 0.91;
-    letter-spacing: -0.055em;
+    font-size: clamp(2.15rem, 3.4vw, 4.4rem);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
   }
 
   :not(.blog-content):not(.blog-content *):not(.blog-prose):not(.blog-prose *):not(.blog-editor):not(.blog-editor *):not(.blog-editor-root):not(.blog-editor-root *):not(.tiptap):not(.tiptap *):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *):not(.epc-landing):not(.epc-landing *):not(.academy-app-root):not(.academy-app-root *) > h2:not(.blog-subtitle):not(.no-qw),
@@ -596,9 +596,9 @@
   }
 
   .qw-hero-title {
-    font-size: clamp(2.6rem, 4.2vw, 5.5rem);
-    line-height: 0.91;
-    letter-spacing: -0.055em;
+    font-size: clamp(2.15rem, 3.4vw, 4.4rem);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
   }
 
   .qw-hero-copy {
