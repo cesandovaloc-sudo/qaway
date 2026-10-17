@@ -622,6 +622,10 @@ export default function CriteriosApp() {
   const [showNewProjectModal, setShowNewProjectModal] = useState<boolean>(false);
   const [newProjectName, setNewProjectName] = useState<string>("");
   const [newProjectCategory, setNewProjectCategory] = useState<string>("Finanzas & Legal");
+  const [showProjectDropdown, setShowProjectDropdown] = useState<boolean>(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState<boolean>(false);
+  const [openProviderModelDropdownId, setOpenProviderModelDropdownId] = useState<string | null>(null);
+  const [showEmbeddingDropdown, setShowEmbeddingDropdown] = useState<boolean>(false);
 
   const [activeScenario, setActiveScenario] = useState<string>("auditoria");
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>(2);
@@ -738,6 +742,10 @@ export default function CriteriosApp() {
         setShowModeDropdown(false);
         setShowUploadModal(false);
         setShowNewProjectModal(false);
+        setShowProjectDropdown(false);
+        setShowCategoryDropdown(false);
+        setOpenProviderModelDropdownId(null);
+        setShowEmbeddingDropdown(false);
       }
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
@@ -791,6 +799,7 @@ export default function CriteriosApp() {
     setActiveProjectId(newId);
     setNewProjectName("");
     setShowNewProjectModal(false);
+    setShowCategoryDropdown(false);
     handleCreateNewSession(`Chat: ${trimmed}`, newId);
   }
 
@@ -868,30 +877,90 @@ export default function CriteriosApp() {
     setIsSearching(true);
 
     setTimeout(() => {
-      let ansText = `Analizando tu consulta sobre "${q}" bajo el corte de similitud ≥ ${similarityThreshold.toFixed(2)}. `;
-      let sCount = projectSources.length;
+      const lowerQ = q.toLowerCase().trim();
+      const activeProjName = (projects.find((p) => p.id === activeProjectId) || projects[0]).name;
+      const activeProvider = aiProviders.find((p) => p.id === activeLlmProviderId) || aiProviders[0];
+
+      // Detectar saludos o mensajes conversacionales cortos sin intención de búsqueda documental
+      const isConversationalGreeting =
+        /^(hola|buenos d[ií]as|buenas tardes|buenas noches|buenas|hey|saludos|qu[eé] tal|c[oó]mo est[aá]s|gracias|muchas gracias|ok|listo|perfecto|ayuda|qu[eé] puedes hacer|qui[eé]n eres)([!.,?\s].*)?$/i.test(
+          lowerQ
+        ) &&
+        !lowerQ.includes("horas") &&
+        !lowerQ.includes("ebitda") &&
+        !lowerQ.includes("ley") &&
+        !lowerQ.includes("artículo") &&
+        !lowerQ.includes("manual") &&
+        !lowerQ.includes("provisión") &&
+        !lowerQ.includes("resumen");
+
+      let ansText = "";
       let hasTable = false;
       let tableData;
+      let turnSources: { id: number; name: string; section: string; tab: InspectorTab }[] = [];
 
-      const lowerQ = q.toLowerCase();
-      if (lowerQ.includes("horas extras") || lowerQ.includes("ebitda") || lowerQ.includes("contingencia") || lowerQ.includes("laboral") || lowerQ.includes("q4")) {
-        ansText += "El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes [1]. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp [2].";
+      if (isConversationalGreeting) {
+        if (lowerQ.startsWith("gracias") || lowerQ.includes("muchas gracias")) {
+          ansText = `¡Con gusto, Carlos! Quedo atento si necesitas cruzar otra norma, revisar celdas del modelo financiero o consultar algún manual en el proyecto "${activeProjName}".`;
+        } else {
+          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}" (${projectSources.length} fuentes indexadas con ${activeProvider.name}). Escribe tu consulta sobre normas legales, matrices financieras o manuales internos —o carga un nuevo documento desde el panel izquierdo— y te responderé con trazabilidad exacta.`;
+        }
+        turnSources = [];
+      } else if (
+        lowerQ.includes("horas extras") ||
+        lowerQ.includes("ebitda") ||
+        lowerQ.includes("contingencia") ||
+        lowerQ.includes("laboral") ||
+        lowerQ.includes("q4") ||
+        lowerQ.includes("provisión")
+      ) {
+        ansText =
+          "El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes [1]. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp [2].";
         hasTable = true;
         tableData = [
           { concept: "EBITDA (USD)", sin: "2,150,000", con: "2,101,500", var: "-48,500", isNegative: true },
           { concept: "Margen EBITDA", sin: "18.4%", con: "16.1%", var: "-2.3 pp", isNegative: true },
         ];
-      } else if (lowerQ.includes("artículo") || lowerQ.includes("ley") || lowerQ.includes("007") || lowerQ.includes("norma") || lowerQ.includes("15")) {
-        ansText += "Según el D.S. N.º 007-2002-TR (TUO de la Ley de Jornada de Trabajo), los artículos 9, 10 y 15 estipulan que el sobretiempo antes de la hora de entrada o después de la salida debe ser remunerado con sobretasa [1]. La empresa debe conservar los registros de asistencia por un mínimo de 5 años.";
-        sCount = 1;
-      } else if (lowerQ.includes("procedimiento") || lowerQ.includes("política") || lowerQ.includes("manual") || lowerQ.includes("rrhh") || lowerQ.includes("auditoría")) {
-        ansText += "La Sección 4.2 del Manual de Políticas Laborales establece que toda contingencia mayor a USD 25,000 requiere autorización del Comité de Auditoría y validación con RR.HH. [3]. Se recomienda emitir acta vinculante antes del cierre contable.";
-        sCount = 1;
+        turnSources = [
+          { id: 1, name: "D.S. N.º 007-2002-TR", section: "Art. 10 y 11 - Jornada y sobretiempo", tab: 1 },
+          { id: 2, name: "Contingencias_Laborales_Q3.xlsx", section: "Hoja: Resumen_Ejecutivo • Celda E14", tab: 2 },
+        ];
+      } else if (
+        lowerQ.includes("artículo") ||
+        lowerQ.includes("ley") ||
+        lowerQ.includes("007") ||
+        lowerQ.includes("norma") ||
+        lowerQ.includes("15")
+      ) {
+        ansText =
+          "Según el D.S. N.º 007-2002-TR (TUO de la Ley de Jornada de Trabajo), los artículos 9, 10 y 15 estipulan que el sobretiempo antes de la hora de entrada o después de la salida debe ser remunerado con sobretasa legal del 25% y 35% [1]. Asimismo, el empleador debe conservar los registros de asistencia por un mínimo de 5 años.";
+        turnSources = [
+          { id: 1, name: "D.S. N.º 007-2002-TR", section: "Art. 9, 10 y 15 - Jornada y sobretiempo", tab: 1 },
+        ];
+      } else if (
+        lowerQ.includes("procedimiento") ||
+        lowerQ.includes("política") ||
+        lowerQ.includes("manual") ||
+        lowerQ.includes("rrhh") ||
+        lowerQ.includes("auditoría")
+      ) {
+        ansText =
+          "La Sección 4.2 del Manual de Políticas Laborales establece que toda contingencia mayor a USD 25,000 requiere autorización del Comité de Auditoría y validación con RR.HH. [3]. Se recomienda emitir acta vinculante antes del cierre contable.";
+        turnSources = [
+          { id: 3, name: "Manual de Políticas Laborales", section: "Sección 4.2 - Control de asistencia", tab: 3 },
+        ];
       } else {
-        ansText += `Se recuperaron fragmentos vectorizados de alta concordancia en las ${projectSources.length} fuentes activas del proyecto. Los documentos corporativos y legales indican cumplimiento de plazos y validación previa de contingencias antes del cierre del ejercicio [1] [2].`;
+        ansText = `Respecto a "${q}" en el proyecto "${activeProjName}": tras consultar los vectores indexados (umbral ≥ ${similarityThreshold.toFixed(
+          2
+        )}) en las ${projectSources.length} fuentes activas (${projectSources
+          .slice(0, 3)
+          .map((s) => s.title)
+          .join(", ")}), los registros verificados establecen obligación de respaldo documental en el control de asistencia [1] y provisión presupuestal auditada en la matriz del periodo [2].`;
+        turnSources = [
+          { id: 1, name: projectSources[0]?.title || "D.S. N.º 007-2002-TR", section: projectSources[0]?.badge || "Norma Oficial", tab: 1 },
+          { id: 2, name: projectSources[1]?.title || "Modelo Financiero Q3 2026.xlsx", section: projectSources[1]?.badge || "Matriz Excel", tab: 2 },
+        ];
       }
-
-      const activeProvider = aiProviders.find((p) => p.id === activeLlmProviderId) || aiProviders[0];
 
       const assistantTurn: ChatTurn = {
         id: `turn-a-${Date.now()}`,
@@ -899,15 +968,11 @@ export default function CriteriosApp() {
         text: ansText,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         latency: `${activeProvider.latency} ms (${activeProvider.name})`,
-        sourcesCount: sCount,
+        sourcesCount: turnSources.length,
         scenarioId: activeScenario,
         hasTable,
         tableData,
-        sources: [
-          { id: 1, name: "D.S. N.º 007-2002-TR", section: "Art. 10 y 11 - Jornada y sobretiempo", tab: 1 },
-          { id: 2, name: "Contingencias_Laborales_Q3.xlsx", section: "Hoja: Resumen_Ejecutivo • Celda E14", tab: 2 },
-          { id: 3, name: "Manual de Políticas Laborales", section: "Sección 4.2 - Control de asistencia", tab: 3 },
-        ],
+        sources: turnSources,
       };
 
       setChatSessions((prev) =>
@@ -1637,25 +1702,17 @@ export default function CriteriosApp() {
             {sidebarOpen ? (
               // Modo Expandido
               <>
-                {/* Cabecera del Panel con botón + Nuevo Proyecto y botón de colapso */}
-                <div className="px-3 pt-3">
-                  <div className="flex items-center justify-between px-1 pb-1.5">
-                    <span
-                      style={{ color: palette.textSecondary, fontSize: 12 }}
-                      className="font-semibold uppercase tracking-wider"
-                    >
-                      Proyecto Activo
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setShowNewProjectModal((v) => !v)}
-                        className="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[11.5px] font-semibold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                        title="Crear un nuevo proyecto"
+                {/* Cabecera del Panel: 1. Proyecto Activo -> 2. Nuevo Proyecto -> 3. Carga de doc -> 4. Nueva Conversación */}
+                <div className="px-3 pt-3 space-y-2">
+                  {/* 1. Proyecto Activo + Botón de Colapsar Panel */}
+                  <div>
+                    <div className="flex items-center justify-between px-1 pb-1.5">
+                      <span
+                        style={{ color: palette.textSecondary, fontSize: 12 }}
+                        className="font-semibold uppercase tracking-wider"
                       >
-                        <HubIcon icon={Plus} size={12} />
-                        <span>Nuevo</span>
-                      </button>
+                        Proyecto Activo
+                      </span>
                       <button
                         type="button"
                         onClick={() => setSidebarOpen(false)}
@@ -1666,48 +1723,103 @@ export default function CriteriosApp() {
                         <HubIcon icon={PanelLeftClose} size={16} />
                       </button>
                     </div>
+
+                    {/* Selector de Proyecto Activo (Desplegable 100% Redondeado) */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowProjectDropdown((v) => !v);
+                          setShowCategoryDropdown(false);
+                        }}
+                        style={{
+                          backgroundColor: palette.bgSurface,
+                          borderColor: palette.borderDefault,
+                          fontSize: 13.5,
+                        }}
+                        className="w-full px-3 py-2 rounded-xl border font-semibold text-zinc-900 shadow-xs cursor-pointer focus:outline-none flex items-center justify-between gap-2 hover:border-zinc-300 transition-all text-left"
+                        aria-label="Seleccionar proyecto activo"
+                      >
+                        <span className="truncate">
+                          {(projects.find((p) => p.id === activeProjectId) || projects[0]).name}
+                        </span>
+                        <HubIcon
+                          icon={ChevronDown}
+                          size={14}
+                          className={`text-zinc-400 shrink-0 transition-transform ${
+                            showProjectDropdown ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {showProjectDropdown && (
+                        <div
+                          style={{
+                            backgroundColor: palette.bgSurface,
+                            borderColor: palette.borderDefault,
+                          }}
+                          className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border shadow-xl p-1.5 z-50 space-y-1 animate-in fade-in"
+                        >
+                          {projects.map((p) => {
+                            const isSelected = p.id === activeProjectId;
+                            return (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  setActiveProjectId(p.id);
+                                  setShowProjectDropdown(false);
+                                }}
+                                className={`w-full text-left px-2.5 py-2 rounded-xl text-[13px] flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                                  isSelected
+                                    ? "bg-blue-50 text-blue-700 font-semibold"
+                                    : "text-zinc-700 hover:bg-zinc-100 font-medium"
+                                }`}
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <span className="block truncate">{p.name}</span>
+                                  <span className="block text-[11px] text-zinc-400 truncate">{p.category}</span>
+                                </div>
+                                {isSelected && (
+                                  <HubIcon icon={Check} size={14} className="text-blue-600 shrink-0" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Selector de Proyecto Activo */}
-                  <div className="relative">
-                    <select
-                      value={activeProjectId}
-                      onChange={(e) => {
-                        setActiveProjectId(e.target.value);
-                      }}
-                      style={{
-                        backgroundColor: palette.bgSurface,
-                        borderColor: palette.borderDefault,
-                        fontSize: 13.5,
-                      }}
-                      className="w-full px-2.5 py-2 rounded-lg border font-semibold text-zinc-900 shadow-xs cursor-pointer focus:outline-none appearance-none pr-7"
-                      aria-label="Seleccionar proyecto activo"
-                    >
-                      {projects.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                    <HubIcon
-                      icon={ChevronDown}
-                      size={14}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
-                    />
-                  </div>
+                  {/* 2. Debajo: Botón de Nuevo Proyecto */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNewProjectModal((v) => !v);
+                      setShowProjectDropdown(false);
+                    }}
+                    className="w-full px-3 py-2 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100 text-blue-700 text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-2xs"
+                    title="Crear un nuevo proyecto"
+                  >
+                    <HubIcon icon={Plus} size={15} className="text-blue-600 shrink-0" />
+                    <span>Nuevo Proyecto</span>
+                  </button>
 
-                  {/* Formulario Inline Desplegable para Crear Nuevo Proyecto */}
+                  {/* Formulario Inline Desplegable para Crear Nuevo Proyecto (Con Selector Redondeado) */}
                   {showNewProjectModal && (
                     <form
                       onSubmit={handleCreateProject}
-                      className="mt-2 p-2.5 rounded-xl border border-blue-200 bg-blue-50/50 space-y-2 shadow-xs"
+                      className="p-3 rounded-2xl border border-blue-200 bg-blue-50/50 space-y-2.5 shadow-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[11.5px] font-bold text-blue-900">Crear Nuevo Proyecto</span>
+                        <span className="text-[12px] font-bold text-blue-900">Crear Nuevo Proyecto</span>
                         <button
                           type="button"
-                          onClick={() => setShowNewProjectModal(false)}
-                          className="text-zinc-400 hover:text-zinc-700 cursor-pointer"
+                          onClick={() => {
+                            setShowNewProjectModal(false);
+                            setShowCategoryDropdown(false);
+                          }}
+                          className="text-zinc-400 hover:text-zinc-700 cursor-pointer p-0.5 rounded-md hover:bg-blue-100/60"
                         >
                           <HubIcon icon={X} size={13} />
                         </button>
@@ -1717,30 +1829,75 @@ export default function CriteriosApp() {
                         value={newProjectName}
                         onChange={(e) => setNewProjectName(e.target.value)}
                         placeholder="Nombre del proyecto..."
-                        className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white text-[13px] text-zinc-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-[13px] text-zinc-900 focus:outline-none focus:ring-1.5 focus:ring-blue-500/40"
                         autoFocus
                       />
-                      <select
-                        value={newProjectCategory}
-                        onChange={(e) => setNewProjectCategory(e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 bg-white text-[12px] text-zinc-700 focus:outline-none"
-                      >
-                        <option value="Finanzas & Legal">Finanzas &amp; Legal</option>
-                        <option value="Corporativo & Compliance">Corporativo &amp; Compliance</option>
-                        <option value="Operaciones">Operaciones</option>
-                        <option value="RR.HH. & Laboral">RR.HH. &amp; Laboral</option>
-                      </select>
+
+                      {/* Desplegable Redondeado de Categoría (Reemplaza al <select> cuadrado de Windows) */}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowCategoryDropdown((v) => !v)}
+                          className="w-full px-3 py-2 rounded-xl border border-zinc-200 bg-white text-[12.5px] font-medium text-zinc-800 flex items-center justify-between gap-2 cursor-pointer hover:border-zinc-300 transition-all text-left"
+                        >
+                          <span className="truncate">{newProjectCategory}</span>
+                          <HubIcon
+                            icon={ChevronDown}
+                            size={14}
+                            className={`text-zinc-400 shrink-0 transition-transform ${
+                              showCategoryDropdown ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+
+                        {showCategoryDropdown && (
+                          <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-zinc-200 bg-white shadow-xl p-1.5 z-50 space-y-0.5 animate-in fade-in">
+                            {[
+                              "Finanzas & Legal",
+                              "Corporativo & Compliance",
+                              "Operaciones",
+                              "RR.HH. & Laboral",
+                            ].map((cat) => {
+                              const isCatSelected = newProjectCategory === cat;
+                              return (
+                                <button
+                                  key={cat}
+                                  type="button"
+                                  onClick={() => {
+                                    setNewProjectCategory(cat);
+                                    setShowCategoryDropdown(false);
+                                  }}
+                                  className={`w-full text-left px-2.5 py-2 rounded-xl text-[12.5px] flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                                    isCatSelected
+                                      ? "bg-blue-50 text-blue-700 font-semibold"
+                                      : "text-zinc-700 hover:bg-zinc-100 font-medium"
+                                  }`}
+                                >
+                                  <span>{cat}</span>
+                                  {isCatSelected && (
+                                    <HubIcon icon={Check} size={13} className="text-blue-600 shrink-0" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex items-center justify-end gap-1.5 pt-0.5">
                         <button
                           type="button"
-                          onClick={() => setShowNewProjectModal(false)}
-                          className="px-2.5 py-1 rounded-md border border-zinc-200 bg-white text-[11.5px] font-medium text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                          onClick={() => {
+                            setShowNewProjectModal(false);
+                            setShowCategoryDropdown(false);
+                          }}
+                          className="px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white text-[11.5px] font-medium text-zinc-600 hover:bg-zinc-50 cursor-pointer"
                         >
                           Cancelar
                         </button>
                         <button
                           type="submit"
-                          className="px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-[11.5px] font-semibold cursor-pointer shadow-2xs"
+                          className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11.5px] font-semibold cursor-pointer shadow-2xs"
                         >
                           Crear Proyecto
                         </button>
@@ -1748,26 +1905,24 @@ export default function CriteriosApp() {
                     </form>
                   )}
 
-                  {/* Botón Destacado: Cargar documentos o carpeta */}
+                  {/* 3. Debajo: Botón Carga de doc (Texto limpio en una sola línea) */}
                   <button
                     type="button"
                     onClick={handleUploadFolder}
-                    className="w-full mt-2.5 px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-800 text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-xs"
+                    className="w-full px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-800 text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-xs"
                   >
                     <HubIcon icon={FolderPlus} size={16} className="text-indigo-600 shrink-0" />
-                    <span>+ Cargar documentos / carpeta</span>
+                    <span>+ Carga de doc</span>
                   </button>
-                </div>
 
-                {/* Botón Prominente + Nueva Conversación (Estilo Antigravity 2.0) */}
-                <div className="px-3 mt-2.5">
+                  {/* 4. Debajo: Botón Nueva Conversación */}
                   <button
                     type="button"
                     onClick={() => handleCreateNewSession()}
                     style={{
                       backgroundColor: palette.actionPrimary,
                     }}
-                    className="w-full px-3 py-2 rounded-lg text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all flex items-center justify-center gap-2"
+                    className="w-full px-3 py-2 rounded-xl text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all flex items-center justify-center gap-2"
                   >
                     <HubIcon icon={Plus} size={16} />
                     <span className="text-[13.5px] font-semibold">Nueva Conversación</span>
@@ -2218,7 +2373,7 @@ export default function CriteriosApp() {
                           className="px-3.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-800 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
                         >
                           <HubIcon icon={FolderPlus} size={14} className="text-indigo-600" />
-                          <span>+ Cargar documentos a este proyecto</span>
+                          <span>+ Carga de doc</span>
                         </button>
                         <button
                           type="button"
@@ -2256,8 +2411,10 @@ export default function CriteriosApp() {
 
                       const isTurnSaved = savedTurnIds.includes(msg.id);
                       const isTurnCopied = copiedTurnId === msg.id;
+                      const linkedSources = msg.sources || [];
+                      const hasLinkedSources = linkedSources.length > 0;
 
-                      // Mensaje del Asistente
+                      // Mensaje del Asistente (Sin textos hardcodeados)
                       return (
                         <div key={msg.id} className="flex items-start gap-3">
                           <span className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1 shadow-xs">
@@ -2281,7 +2438,9 @@ export default function CriteriosApp() {
                                     Respuesta generada ({msg.latency || "134 ms"})
                                   </span>
                                   <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block">
-                                    Con base en {msg.sourcesCount || 3} fuentes verificadas (Umbral &ge; {similarityThreshold.toFixed(2)})
+                                    {hasLinkedSources
+                                      ? `Con base en ${linkedSources.length} fuente(s) verificada(s) (Umbral ≥ ${similarityThreshold.toFixed(2)})`
+                                      : `Asistente conversacional • ${(projects.find((p) => p.id === activeProjectId) || projects[0]).name}`}
                                   </span>
                                 </div>
                               </div>
@@ -2297,7 +2456,7 @@ export default function CriteriosApp() {
                                   }}
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-90 cursor-pointer shadow-xs transition-all"
                                 >
-                                  <HubIcon icon={ isTurnSaved ? Check : Bookmark } size={14} />
+                                  <HubIcon icon={isTurnSaved ? Check : Bookmark} size={14} />
                                   <span>{isTurnSaved ? "Guardado" : "Guardar"}</span>
                                 </button>
                                 <button
@@ -2316,41 +2475,29 @@ export default function CriteriosApp() {
                               </div>
                             </div>
 
-                            {/* Texto explicativo con citas interactivas */}
+                            {/* Texto explicativo real del turno con citas interactivas inline */}
                             <p style={{ fontSize: 14.5, lineHeight: 1.65, color: palette.textPrimary }}>
-                              {msg.text.includes("[1]") && msg.text.includes("[2]") ? (
-                                <>
-                                  El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes{" "}
-                                  <button
-                                    type="button"
-                                    onClick={() => openInspector(1)}
-                                    style={{
-                                      backgroundColor: palette.accentCitationBg,
-                                      color: palette.accentCitation,
-                                      borderColor: `${palette.accentCitation}40`,
-                                    }}
-                                    className="inline-flex items-center justify-center px-1.5 py-0.2 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
-                                  >
-                                    1
-                                  </button>
-                                  {" "}. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp{" "}
-                                  <button
-                                    type="button"
-                                    onClick={() => openInspector(2)}
-                                    style={{
-                                      backgroundColor: palette.accentCitationBg,
-                                      color: palette.accentCitation,
-                                      borderColor: `${palette.accentCitation}40`,
-                                    }}
-                                    className="inline-flex items-center justify-center px-1.5 py-0.2 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
-                                  >
-                                    2
-                                  </button>
-                                  {" "}.
-                                </>
-                              ) : (
-                                msg.text
-                              )}
+                              {msg.text.split(/(\[[123]\])/g).map((part, idx) => {
+                                if (part === "[1]" || part === "[2]" || part === "[3]") {
+                                  const tabNum = Number(part.replace(/\D/g, "")) as InspectorTab;
+                                  return (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={() => openInspector(tabNum)}
+                                      style={{
+                                        backgroundColor: palette.accentCitationBg,
+                                        color: palette.accentCitation,
+                                        borderColor: `${palette.accentCitation}40`,
+                                      }}
+                                      className="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
+                                    >
+                                      {tabNum}
+                                    </button>
+                                  );
+                                }
+                                return <span key={idx}>{part}</span>;
+                              })}
                             </p>
 
                             {/* Tabla: Comparativo de impacto financiero si aplica */}
@@ -2413,132 +2560,81 @@ export default function CriteriosApp() {
                               </div>
                             )}
 
-                            {/* Sección: Fuentes y referencias */}
-                            <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <h2 style={{ fontSize: 14 }} className="font-bold text-zinc-900">
-                                  Fuentes y referencias vinculadas ({msg.sourcesCount || 3})
-                                </h2>
-                                <span style={{ fontSize: 12, color: palette.textMuted }}>
-                                  Clic para abrir en el Inspector lateral
-                                </span>
+                            {/* Sección: Fuentes y referencias (Solo cuando el mensaje realmente citó fuentes) */}
+                            {hasLinkedSources && (
+                              <div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <h2 style={{ fontSize: 14 }} className="font-bold text-zinc-900">
+                                    Fuentes y referencias vinculadas ({linkedSources.length})
+                                  </h2>
+                                  <span style={{ fontSize: 12, color: palette.textMuted }}>
+                                    Clic para abrir en el Inspector lateral
+                                  </span>
+                                </div>
+                                <div className="space-y-2">
+                                  {linkedSources.map((src) => {
+                                    const isLaw = src.tab === 1;
+                                    const isExcel = src.tab === 2;
+                                    return (
+                                      <button
+                                        key={`${msg.id}-src-${src.id}`}
+                                        type="button"
+                                        onClick={() => openInspector(src.tab)}
+                                        style={{ borderColor: palette.borderDefault }}
+                                        className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
+                                      >
+                                        <div className="flex items-start gap-3 min-w-0">
+                                          <span
+                                            className={`w-7 h-7 rounded-md text-white flex items-center justify-center font-bold text-sm shrink-0 ${
+                                              isLaw ? "bg-red-600" : isExcel ? "bg-emerald-600" : "bg-slate-500"
+                                            }`}
+                                          >
+                                            {src.id}
+                                          </span>
+                                          <div>
+                                            <span
+                                              style={{ color: palette.accentCitation, fontSize: 14 }}
+                                              className="font-semibold block leading-tight"
+                                            >
+                                              {src.name}
+                                            </span>
+                                            <span
+                                              style={{ color: palette.textSecondary, fontSize: 12.5 }}
+                                              className="block leading-tight mt-0.5"
+                                            >
+                                              {src.section}
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div className="hidden md:block max-w-[340px] text-left">
+                                          <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
+                                            {isLaw
+                                              ? "Regulación del trabajo voluntario y recargo obligatorio: 25% las dos primeras horas y 35% las restantes."
+                                              : isExcel
+                                              ? "Impacto de provisiones por horas extras en EBITDA proyectado y margen porcentual."
+                                              : "Procedimiento interno para el registro de horas extras y validación con el área de RR.HH."}
+                                          </p>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                          <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                                            {isLaw ? "Pág. 14" : isExcel ? "Celda E14" : "p. 28"}
+                                          </span>
+                                          <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
+                                            {isLaw ? "Similitud 0.95" : isExcel ? "Similitud 0.92" : "v2.1 - 2026"}
+                                          </span>
+                                          <span
+                                            style={{ color: palette.accentCitation, fontSize: 12.5 }}
+                                            className="font-medium block mt-1 hover:underline"
+                                          >
+                                            {isLaw ? "Ver ley →" : isExcel ? "Ver celda →" : "Ver sección →"}
+                                          </span>
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                              <div className="space-y-2">
-                                {/* Fuente 1: Ley */}
-                                <button
-                                  type="button"
-                                  onClick={() => openInspector(1)}
-                                  style={{ borderColor: palette.borderDefault }}
-                                  className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
-                                >
-                                  <div className="flex items-start gap-3 min-w-0">
-                                    <span className="w-7 h-7 rounded-md bg-red-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                                      1
-                                    </span>
-                                    <div>
-                                      <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
-                                        D.S. N.º 007-2002-TR
-                                      </span>
-                                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
-                                        Artículos 10 y 11 - Jornada y sobretiempo
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="hidden md:block max-w-[340px] text-left">
-                                    <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
-                                      Regulación del trabajo voluntario y recargo obligatorio: 25% las dos primeras horas y 35% las restantes.
-                                    </p>
-                                  </div>
-                                  <div className="text-right shrink-0">
-                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                                      Pág. 14
-                                    </span>
-                                    <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
-                                      Similitud 0.95
-                                    </span>
-                                    <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
-                                      Ver ley →
-                                    </span>
-                                  </div>
-                                </button>
-
-                                {/* Fuente 2: Excel */}
-                                <button
-                                  type="button"
-                                  onClick={() => openInspector(2)}
-                                  style={{ borderColor: palette.borderDefault }}
-                                  className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
-                                >
-                                  <div className="flex items-start gap-3 min-w-0">
-                                    <span className="w-7 h-7 rounded-md bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                                      2
-                                    </span>
-                                    <div>
-                                      <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
-                                        Contingencias_Laborales_Q3.xlsx
-                                      </span>
-                                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
-                                        Hoja: Resumen_Ejecutivo • Celda E14
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="hidden md:block max-w-[340px] text-left">
-                                    <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
-                                      Impacto de provisiones por horas extras en EBITDA proyectado y margen porcentual.
-                                    </p>
-                                  </div>
-                                  <div className="text-right shrink-0">
-                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                                      Celda E14
-                                    </span>
-                                    <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
-                                      Similitud 0.92
-                                    </span>
-                                    <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
-                                      Ver celda →
-                                    </span>
-                                  </div>
-                                </button>
-
-                                {/* Fuente 3: Documento */}
-                                <button
-                                  type="button"
-                                  onClick={() => openInspector(3)}
-                                  style={{ borderColor: palette.borderDefault }}
-                                  className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
-                                >
-                                  <div className="flex items-start gap-3 min-w-0">
-                                    <span className="w-7 h-7 rounded-md bg-slate-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                                      3
-                                    </span>
-                                    <div>
-                                      <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
-                                        Manual de Políticas Laborales
-                                      </span>
-                                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
-                                        Sección 4.2 - Control de asistencia
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="hidden md:block max-w-[340px] text-left">
-                                    <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
-                                      Procedimiento interno para el registro de horas extras y validación con el área de RR.HH.
-                                    </p>
-                                  </div>
-                                  <div className="text-right shrink-0">
-                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                                      p. 28
-                                    </span>
-                                    <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
-                                      v2.1 - 2026
-                                    </span>
-                                    <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
-                                      Ver sección →
-                                    </span>
-                                  </div>
-                                </button>
-                              </div>
-                            </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -2868,10 +2964,10 @@ export default function CriteriosApp() {
                     type="button"
                     onClick={handleUploadFolder}
                     style={{ backgroundColor: palette.actionPrimary }}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-white font-semibold text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all self-start sm:self-auto"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-semibold text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all self-start sm:self-auto"
                   >
                     <HubIcon icon={FolderPlus} size={15} />
-                    <span>+ Cargar documentos / carpeta</span>
+                    <span>+ Carga de doc</span>
                   </button>
                 </div>
 
@@ -3350,17 +3446,51 @@ export default function CriteriosApp() {
                                 <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                                   Modelo Activo
                                 </label>
-                                <select
-                                  value={prov.selectedModel}
-                                  onChange={(e) => handleModelChange(prov.id, e.target.value)}
-                                  className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-400"
-                                >
-                                  {prov.models.map((m) => (
-                                    <option key={m} value={m}>
-                                      {m}
-                                    </option>
-                                  ))}
-                                </select>
+                                <div className="relative">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setOpenProviderModelDropdownId((prev) => (prev === prov.id ? null : prov.id))
+                                    }
+                                    className="w-full px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white font-medium text-zinc-800 cursor-pointer focus:outline-none flex items-center justify-between gap-2 hover:border-zinc-300 transition-all text-left"
+                                  >
+                                    <span className="truncate">{prov.selectedModel}</span>
+                                    <HubIcon
+                                      icon={ChevronDown}
+                                      size={13}
+                                      className={`text-zinc-400 shrink-0 transition-transform ${
+                                        openProviderModelDropdownId === prov.id ? "rotate-180" : ""
+                                      }`}
+                                    />
+                                  </button>
+                                  {openProviderModelDropdownId === prov.id && (
+                                    <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-zinc-200 bg-white shadow-xl p-1.5 z-50 space-y-0.5 animate-in fade-in">
+                                      {prov.models.map((m) => {
+                                        const isModSelected = prov.selectedModel === m;
+                                        return (
+                                          <button
+                                            key={m}
+                                            type="button"
+                                            onClick={() => {
+                                              handleModelChange(prov.id, m);
+                                              setOpenProviderModelDropdownId(null);
+                                            }}
+                                            className={`w-full text-left px-2.5 py-1.5 rounded-xl text-[12px] flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                                              isModSelected
+                                                ? "bg-blue-50 text-blue-700 font-semibold"
+                                                : "text-zinc-700 hover:bg-zinc-100 font-medium"
+                                            }`}
+                                          >
+                                            <span className="truncate">{m}</span>
+                                            {isModSelected && (
+                                              <HubIcon icon={Check} size={13} className="text-blue-600 shrink-0" />
+                                            )}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
                                 <span className="text-[10px] text-zinc-400 mt-0.5 block">
                                   Ventana: {prov.contextWindow}
                                 </span>
@@ -3457,7 +3587,7 @@ export default function CriteriosApp() {
                 {/* Sub-Tab 2: Parámetros del Motor RAG */}
                 {configTab === "engine" && (
                   <div className="space-y-4 animate-in fade-in">
-                    {/* 1. Modelo de Embedding */}
+                    {/* 1. Modelo de Embedding (Con Desplegable Redondeado) */}
                     <div
                       style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
                       className="p-4 rounded-xl border shadow-xs space-y-2"
@@ -3465,15 +3595,68 @@ export default function CriteriosApp() {
                       <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                         Modelo de Embeddings Vectoriales
                       </label>
-                      <select
-                        value={embeddingModel}
-                        onChange={(e) => setEmbeddingModel(e.target.value)}
-                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400 cursor-pointer"
-                      >
-                        <option value="text-embedding-3-small">OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)</option>
-                        <option value="text-embedding-3-large">OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)</option>
-                        <option value="cohere-multilingual">Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)</option>
-                      </select>
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowEmbeddingDropdown((v) => !v)}
+                          className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-xl border border-zinc-200 bg-white font-medium text-zinc-800 flex items-center justify-between gap-2 cursor-pointer hover:border-zinc-300 transition-all text-left"
+                        >
+                          <span className="truncate">
+                            {embeddingModel === "text-embedding-3-small"
+                              ? "OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)"
+                              : embeddingModel === "text-embedding-3-large"
+                              ? "OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)"
+                              : "Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)"}
+                          </span>
+                          <HubIcon
+                            icon={ChevronDown}
+                            size={15}
+                            className={`text-zinc-400 shrink-0 transition-transform ${
+                              showEmbeddingDropdown ? "rotate-180" : ""
+                            }`}
+                          />
+                        </button>
+                        {showEmbeddingDropdown && (
+                          <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-zinc-200 bg-white shadow-xl p-1.5 z-50 space-y-0.5 animate-in fade-in">
+                            {[
+                              {
+                                id: "text-embedding-3-small",
+                                label: "OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)",
+                              },
+                              {
+                                id: "text-embedding-3-large",
+                                label: "OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)",
+                              },
+                              {
+                                id: "cohere-multilingual",
+                                label: "Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)",
+                              },
+                            ].map((opt) => {
+                              const isEmbSelected = embeddingModel === opt.id;
+                              return (
+                                <button
+                                  key={opt.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setEmbeddingModel(opt.id);
+                                    setShowEmbeddingDropdown(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 rounded-xl text-xs sm:text-[13px] flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                                    isEmbSelected
+                                      ? "bg-blue-50 text-blue-700 font-semibold"
+                                      : "text-zinc-700 hover:bg-zinc-100 font-medium"
+                                  }`}
+                                >
+                                  <span className="truncate">{opt.label}</span>
+                                  {isEmbSelected && (
+                                    <HubIcon icon={Check} size={14} className="text-blue-600 shrink-0" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                       <p className="text-[11.5px] text-zinc-400">
                         Determina la densidad del espacio latente y la precisión en búsquedas semánticas multilingües.
                       </p>
