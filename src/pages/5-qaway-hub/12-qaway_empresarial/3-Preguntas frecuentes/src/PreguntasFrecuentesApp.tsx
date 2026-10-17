@@ -135,17 +135,16 @@ function scoreCase(
 }
 
 export default function PreguntasFrecuentesApp() {
-  // Freno estricto de desplazamiento: La página nunca puede desplazarse más allá del filtro
+  const filterSentinelRef = React.useRef<HTMLDivElement>(null);
+
+  // Freno estricto de desplazamiento: La página sube solo hasta el filtro (0px) y jamás pasa de ahí
   useEffect(() => {
     const handleWindowScroll = () => {
-      const filterSection = document.getElementById('seccion-filtro');
-      if (!filterSection) return;
-      const navbarHeight = 50;
-      const filterTop = filterSection.getBoundingClientRect().top;
-      // Si el filtro llega al navbar, frenar el scroll de la ventana para que no pase de ahí
-      if (filterTop < navbarHeight) {
-        const offset = navbarHeight - filterTop;
-        window.scrollBy({ top: -offset, behavior: 'instant' });
+      const sentinel = filterSentinelRef.current;
+      if (!sentinel) return;
+      const sentinelTop = sentinel.getBoundingClientRect().top;
+      if (sentinelTop < 0) {
+        window.scrollTo({ top: window.scrollY + sentinelTop, behavior: 'instant' });
       }
     };
     window.addEventListener('scroll', handleWindowScroll, { passive: false });
@@ -542,10 +541,13 @@ export default function PreguntasFrecuentesApp() {
           onSelectDirection={handleSelectDirection}
         />
 
-        {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (PEGADO AL TOPE A 48PX SIN HUECOS, FONDO TOTALMENTE OPACO) */}
+        {/* MARCADOR CENTINELA DE FRENO EXACTO A 0PX */}
+        <div ref={filterSentinelRef} className="h-0 w-full" aria-hidden="true" />
+
+        {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (PEGADO A 0PX DEL TOPE SIN HUECOS, FONDO TOTALMENTE SÓLIDO) */}
         <div
           id="seccion-filtro"
-          className="sticky top-[48px] sm:top-[50px] z-30 bg-[#f8fafc] pt-1 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200/80 shadow-2xs"
+          className="sticky top-0 z-40 bg-[#f8fafc] pt-2 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200/80 shadow-2xs"
         >
           <SearchBar
             searchQuery={searchQuery}
@@ -563,7 +565,7 @@ export default function PreguntasFrecuentesApp() {
         </div>
 
         {/* 4. LISTA DE CASUÍSTICAS CON SCROLL INTERNO AISLADO (NADA PASA POR DETRÁS DEL FILTRO) */}
-        <div className="flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-170px)] pr-1.5 -mr-1.5 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-140px)] pr-1.5 -mr-1.5 space-y-4">
           <CasesList
             items={items}
             mode={mode}
