@@ -7,8 +7,11 @@ export interface Casuistica {
   criterioTitle: string;
   criterioDesc: string;
   desarrollo: string;
-  accion: string;
   solucion: string;
+  ejemplo: string;
+  normativa?: string;
+  accion?: string;
+  casoEspecifico?: string;
   isOpen?: boolean;
 }
 

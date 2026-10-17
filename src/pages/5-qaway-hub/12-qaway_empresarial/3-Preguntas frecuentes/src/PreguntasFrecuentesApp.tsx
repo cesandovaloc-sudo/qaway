@@ -15,7 +15,7 @@ import { ManagementModal } from './components/ManagementModal';
 import { Toast } from './components/Toast';
 
 // Claves aisladas de almacenamiento local
-const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v2';
+const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v3';
 const SUPABASE_STORAGE_URL_KEY = 'qaway_minedu_supabase_url_v1';
 const SUPABASE_STORAGE_KEY_KEY = 'qaway_minedu_supabase_key_v1';
 const ADMIN_MODE_KEY = 'qaway_minedu_admin_mode_v1';
@@ -76,8 +76,11 @@ function scoreCase(
     { key: 'title', weight: 24 },
     { key: 'criterioTitle', weight: 16 },
     { key: 'solucion', weight: 12 },
+    { key: 'ejemplo', weight: 10 },
     { key: 'accion', weight: 10 },
     { key: 'desarrollo', weight: 8 },
+    { key: 'casoEspecifico', weight: 8 },
+    { key: 'normativa', weight: 6 },
     { key: 'criterioDesc', weight: 6 },
     { key: 'dirCode', weight: 10 },
     { key: 'dirName', weight: 6 },
@@ -88,7 +91,7 @@ function scoreCase(
   let matchedTokensCount = 0;
 
   const fullTextNormalized = normalizeText(
-    `${item.number} ${item.title} ${item.criterioTitle} ${item.criterioDesc} ${item.desarrollo} ${item.accion} ${item.solucion} ${item.dirCode} ${item.dirName}`
+    `${item.number} ${item.title} ${item.criterioTitle} ${item.criterioDesc} ${item.desarrollo} ${item.solucion} ${item.ejemplo || ''} ${item.normativa || ''} ${item.accion || ''} ${item.casoEspecifico || ''} ${item.dirCode} ${item.dirName}`
   );
   if (rawQueryNorm.length > 2 && fullTextNormalized.includes(rawQueryNorm)) {
     totalScore += 50;

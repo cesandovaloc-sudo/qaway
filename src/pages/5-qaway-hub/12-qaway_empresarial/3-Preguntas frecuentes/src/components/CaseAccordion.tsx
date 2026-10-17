@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ChevronDown,
+  ChevronRight,
   Pencil,
   Trash2,
   AlertCircle,
@@ -10,7 +11,9 @@ import {
   MessageCircle,
   Mail,
   Copy,
-  Check
+  Check,
+  Scale,
+  Lock
 } from 'lucide-react';
 import { ScoredCasuistica } from '../types/casuistica';
 
@@ -65,6 +68,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
 }) => {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isNormativaOpen, setIsNormativaOpen] = useState(false);
   const shareRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -84,6 +88,13 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
       ? caseItem.criterioTitle
       : `${caseItem.dirCode} – ${caseItem.dirName}`;
 
+  const solucionText = caseItem.solucion || caseItem.accion || '';
+  const ejemploText = caseItem.ejemplo || '';
+  const hasNormativa = Boolean(caseItem.normativa && caseItem.normativa.trim());
+  const hasCasoEspecifico = Boolean(
+    caseItem.casoEspecifico && caseItem.casoEspecifico.trim()
+  );
+
   const buildShareText = (withBold: boolean) => {
     const b = withBold ? '*' : '';
     const lines = [
@@ -93,10 +104,13 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
       ``,
       `${b}Desarrollo:${b} ${caseItem.desarrollo}`,
       ``,
-      `${b}Solución:${b} ${caseItem.accion}`
+      `${b}Solución:${b} ${solucionText}`
     ];
-    if (caseItem.solucion && caseItem.solucion.trim()) {
-      lines.push(``, `${caseItem.solucion}`);
+    if (ejemploText.trim()) {
+      lines.push(``, `${ejemploText}`);
+    }
+    if (hasNormativa) {
+      lines.push(``, `${b}Normativa:${b} ${caseItem.normativa!.trim()}`);
     }
     return lines.join('\n');
   };
@@ -286,7 +300,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
       {isOpen && (
         <div className="rounded-b-2xl border-t border-slate-200/60 bg-white px-4 py-5 sm:px-6 sm:py-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Sección oculta para lectores de pantalla */}
+            {/* Sección oculta para indexación y lectores de pantalla */}
             <div className="sr-only" aria-hidden="false">
               <h4>CRITERIO</h4>
               <p>{caseItem.criterioTitle}</p>
@@ -318,7 +332,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                   SOLUCIÓN
                 </p>
                 <p className="text-sm leading-relaxed text-slate-700 mt-1.5 font-normal">
-                  {highlightContent(caseItem.accion, tokens)}
+                  {highlightContent(solucionText, tokens)}
                 </p>
               </div>
             </div>
@@ -333,11 +347,52 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                   EJEMPLO / RESULTADO ESPERADO
                 </p>
                 <p className="text-sm leading-relaxed text-slate-900 mt-1.5 font-medium">
-                  {highlightContent(caseItem.solucion, tokens)}
+                  {ejemploText.trim()
+                    ? highlightContent(ejemploText, tokens)
+                    : '—'}
                 </p>
               </div>
             </div>
           </div>
+
+          {/* Bloque desplegable NORMATIVA (bajo línea horizontal, colapsado por defecto) */}
+          {hasNormativa && (
+            <div className="mt-4 pt-3 border-t border-slate-200/70">
+              <button
+                type="button"
+                onClick={() => setIsNormativaOpen((prev) => !prev)}
+                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-rose-700 transition cursor-pointer"
+              >
+                <ChevronRight
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    isNormativaOpen ? 'rotate-90 text-rose-700' : 'text-slate-400'
+                  }`}
+                />
+                <Scale className="w-3.5 h-3.5" />
+                <span>NORMATIVA</span>
+              </button>
+              {isNormativaOpen && (
+                <div className="mt-2.5 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5 text-xs leading-relaxed text-slate-700 whitespace-pre-line">
+                  {highlightContent(caseItem.normativa!, tokens)}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Nota interna de UGEL (Caso específico — Visible exclusivamente en Modo Admin) */}
+          {isAdmin && hasCasoEspecifico && (
+            <div className="mt-3 pt-3 border-t border-amber-200/60">
+              <div className="rounded-xl bg-amber-50/70 border border-amber-200/80 px-3.5 py-2.5 flex items-start gap-2.5">
+                <Lock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-amber-900 leading-relaxed">
+                  <span className="font-bold uppercase tracking-wider text-amber-800 mr-1.5">
+                    Detalle interno UGEL (Solo Admin):
+                  </span>
+                  <span>{highlightContent(caseItem.casoEspecifico!, tokens)}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </article>

@@ -62,8 +62,10 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
   const [formCriterioTitle, setFormCriterioTitle] = useState('');
   const [formCriterioDesc, setFormCriterioDesc] = useState('');
   const [formDesarrollo, setFormDesarrollo] = useState('');
-  const [formAccion, setFormAccion] = useState('');
   const [formSolucion, setFormSolucion] = useState('');
+  const [formEjemplo, setFormEjemplo] = useState('');
+  const [formNormativa, setFormNormativa] = useState('');
+  const [formCasoEspecifico, setFormCasoEspecifico] = useState('');
 
   // List Search & Filter State
   const [filterDir, setFilterDir] = useState<string>('ALL');
@@ -113,8 +115,10 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
       setFormCriterioTitle(editingCase.caseItem.criterioTitle || '');
       setFormCriterioDesc(editingCase.caseItem.criterioDesc || '');
       setFormDesarrollo(editingCase.caseItem.desarrollo);
-      setFormAccion(editingCase.caseItem.accion);
-      setFormSolucion(editingCase.caseItem.solucion);
+      setFormSolucion(editingCase.caseItem.solucion || editingCase.caseItem.accion || '');
+      setFormEjemplo(editingCase.caseItem.ejemplo || '');
+      setFormNormativa(editingCase.caseItem.normativa || '');
+      setFormCasoEspecifico(editingCase.caseItem.casoEspecifico || '');
     } else {
       resetForm();
     }
@@ -128,8 +132,10 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
     setFormCriterioTitle('Criterio General');
     setFormCriterioDesc('Dotación pertinente y suficiente según padrón oficial.');
     setFormDesarrollo('');
-    setFormAccion('');
     setFormSolucion('');
+    setFormEjemplo('');
+    setFormNormativa('');
+    setFormCasoEspecifico('');
   };
 
   if (!isOpen) return null;
@@ -143,8 +149,11 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
       criterioTitle: formCriterioTitle.trim() || 'Criterio General',
       criterioDesc: formCriterioDesc.trim() || 'Dotación pertinente y suficiente.',
       desarrollo: formDesarrollo.trim(),
-      accion: formAccion.trim(),
       solucion: formSolucion.trim(),
+      ejemplo: formEjemplo.trim(),
+      normativa: formNormativa.trim(),
+      accion: editingCase?.caseItem.accion || '',
+      casoEspecifico: formCasoEspecifico.trim(),
       isOpen: true
     };
     onSaveCase(formDirId, caseData);
@@ -186,7 +195,9 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
       const matchTitle = c.title.toLowerCase().includes(q);
       const matchDes = c.desarrollo.toLowerCase().includes(q);
       const matchSol = c.solucion.toLowerCase().includes(q);
-      return matchTitle || matchDes || matchSol;
+      const matchEj = (c.ejemplo || '').toLowerCase().includes(q);
+      const matchEsp = (c.casoEspecifico || '').toLowerCase().includes(q);
+      return matchTitle || matchDes || matchSol || matchEj || matchEsp;
     }
     return true;
   });
@@ -431,8 +442,8 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
                 <textarea
                   required
                   rows={3}
-                  value={formAccion}
-                  onChange={(e) => setFormAccion(e.target.value)}
+                  value={formSolucion}
+                  onChange={(e) => setFormSolucion(e.target.value)}
                   placeholder="Indica qué debe verificar y efectuar la UGEL..."
                   className="w-full rounded-xl bg-white border border-slate-300 p-3.5 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-[#b91c1c]/20 transition shadow-2xs"
                 ></textarea>
@@ -446,11 +457,41 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
                 <textarea
                   required
                   rows={3}
-                  value={formSolucion}
-                  onChange={(e) => setFormSolucion(e.target.value)}
+                  value={formEjemplo}
+                  onChange={(e) => setFormEjemplo(e.target.value)}
                   placeholder="Ejemplo práctico o resultado esperado al finalizar en el MC SIGA..."
                   className="w-full rounded-xl bg-white border border-slate-300 p-3.5 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-[#b91c1c]/20 transition shadow-2xs"
                 ></textarea>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* NORMATIVA (DESPLEGABLE OPCIONAL) */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Normativa (Desplegable opcional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={formNormativa}
+                    onChange={(e) => setFormNormativa(e.target.value)}
+                    placeholder="Ej: RM N.° 373-2026-MINEDU / Oficio Múltiple N.° 032-2026..."
+                    className="w-full rounded-xl bg-white border border-slate-300 p-3 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-[#b91c1c]/20 transition shadow-2xs"
+                  ></textarea>
+                </div>
+
+                {/* CASO ESPECÍFICO / DETALLE INTERNO UGEL (OCULTO EN PRODUCCIÓN, SOLO ADMIN + BUSCADOR) */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-800">
+                    Detalle interno de UGEL (Oculto en producción • Solo Admin)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={formCasoEspecifico}
+                    onChange={(e) => setFormCasoEspecifico(e.target.value)}
+                    placeholder="Caso con nombre de UGEL para referencia interna y buscador..."
+                    className="w-full rounded-xl bg-amber-50/40 border border-amber-200 p-3 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition shadow-2xs"
+                  ></textarea>
+                </div>
               </div>
 
               {/* Botones de Acción */}
