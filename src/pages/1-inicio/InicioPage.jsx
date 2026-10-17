@@ -288,7 +288,7 @@ function Hero() {
             </p>
             <h1
               className="max-w-[58rem] qw-hero-title text-[#20201f]"
-              style={{ ...displayFont, fontWeight: 700 }}
+              style={{ ...displayFont, fontWeight: 760 }}
             >
               <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>
             </h1>

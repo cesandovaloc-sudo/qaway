@@ -3,8 +3,8 @@
    Qaway Lab - Premium Case Study Page
    ============================================ */
 
-/* === DESIGN TOKENS === */
-:root {
+/* === DESIGN TOKENS & GLOBAL TEMPLATE STYLES (Scoped) === */
+.project-template {
   --pt-bg-primary: #0a0a0a;
   --pt-bg-secondary: #111111;
   --pt-bg-tertiary: #18181b;
@@ -21,10 +21,7 @@
   --pt-radius-lg: 24px;
   --pt-container: 1200px;
   --pt-section-gap: 160px;
-}
 
-/* === GLOBAL TEMPLATE STYLES === */
-.project-template {
   background: var(--pt-bg-primary);
   color: var(--pt-text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;

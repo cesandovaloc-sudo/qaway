@@ -98,24 +98,24 @@ const NotionInteractiveWorkspaceForm = lazy(() => import('@/pages/10-briefs/1- F
 const AirbnbWizardCardDeck = lazy(() => import('@/pages/10-briefs/1- Formularios/6-AirbnbWizardCardDeck.jsx'))
 const TestPreparacionDigital = lazy(() => import('@/pages/10-briefs/1- Formularios/7-TestPreparacionDigital.jsx'))
 
-// Proyectos (importación estática directa para máxima estabilidad y cero riesgo de carga diferida)
+// Proyectos (portada estática + subproyectos aislados por ruta con lazy loading para que sus CSS/tipografías no se filtren al inicio)
 import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
 import ProyectosPageV2 from '@/pages/11-Proyectos/ProyectosPageV2.jsx'
-import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'
-import HorizontePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'
-import HorizontePageReal from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'
-import EpcPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/EpcPage'
-import CoraVetAppPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/CoraVet/CoraVetAppPage'
-import HorizonteBackupPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizonteBackupPage'
-import PlantoraPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/8_Planta/PlantoraPage'
-import AureaSkincarePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'
-import PanaderiaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'
-import SaniclickPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'
-import DentalPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'
-import MesaSelectaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/2-MesaSelecta/MesaSelectaPage'
-import ValletInmobiliariaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletInmobiliariaPage'
-import ValletPropertyDetailPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletPropertyDetailPage'
-import ValletCatalogPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletCatalogPage'
+const TemplateDemo = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'))
+const HorizontePage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'))
+const HorizontePageReal = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'))
+const EpcPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/EpcPage'))
+const CoraVetAppPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/CoraVet/CoraVetAppPage'))
+const HorizonteBackupPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizonteBackupPage'))
+const PlantoraPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/8_Planta/PlantoraPage'))
+const AureaSkincarePage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'))
+const PanaderiaPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'))
+const SaniclickPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'))
+const DentalPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'))
+const MesaSelectaPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/2-MesaSelecta/MesaSelectaPage'))
+const ValletInmobiliariaPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletInmobiliariaPage'))
+const ValletPropertyDetailPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletPropertyDetailPage'))
+const ValletCatalogPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletCatalogPage'))
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
 function ProtectedRoute({ children }) {
@@ -329,11 +329,11 @@ export default function AppRouter() {
         />
         <Route
           path="/proyectos/epc/*"
-          element={<EpcPage />}
+          element={<RouteSuspense><EpcPage /></RouteSuspense>}
         />
         <Route
           path="/proyectos/coravet/*"
-          element={<CoraVetAppPage />}
+          element={<RouteSuspense><CoraVetAppPage /></RouteSuspense>}
         />
         <Route
           path="/hub/blog-editor"

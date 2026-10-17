@@ -7,6 +7,7 @@ import {
   Inbox,
   AlertCircle,
   Milestone,
+  BarChart3,
   ChevronDown,
   Plus,
   Check,
@@ -32,11 +33,12 @@ interface NavSection {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sidebar.tsx — Panel Izquierdo en Cascada (Alternativa A)
+// Sidebar.tsx — Panel Izquierdo en Cascada (Alternativa A + Opción A)
 // 1. Selector superior de PROYECTO ACTIVO con desplegable flotante (no empuja).
 // 2. Botón directo "+ Nuevo Proyecto".
 // 3. OPERACIÓN & CARTERA sin duplicar la lista de proyectos ni las pestañas superiores.
-// 4. Acordeón de SUBPROCESOS propio del proyecto activo (clic en todo el botón).
+// 4. Hitos & Fases con 3 filtros semafóricos (Pendientes, En revisión, Aprobados)
+//    + acceso directo al Reporteador de Monitoreo Territorial (CdD - SIGA).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: boolean }) {
@@ -90,7 +92,9 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   }
 
   const location = useLocation()
-  const hasMilestoneQuery = new URLSearchParams(location.search).has('milestone')
+  const searchParams = new URLSearchParams(location.search)
+  const hasHitosStatusFilter =
+    searchParams.get('tab') === 'hitos' && searchParams.has('status')
 
   // Proyecto activo por URL (/proyectos/:id) o último proyecto seleccionado en cascada
   const modulePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
@@ -104,10 +108,10 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   }, [activeProjectId])
 
   useEffect(() => {
-    if (hasMilestoneQuery) {
+    if (hasHitosStatusFilter) {
       setIsSubprocessesExpanded(true)
     }
-  }, [hasMilestoneQuery])
+  }, [hasHitosStatusFilter])
 
   const scopedProjects = useTenantFilteredProjects()
 
@@ -136,6 +140,32 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         .sort((a, b) => a.phaseNumber - b.phaseNumber),
     [milestones, activeProjectObj?.id],
   )
+
+  const milestoneStatusGroups = useMemo(() => {
+    const pending = activeProjectMilestones.filter((m) => m.status === 'pendiente').length
+    const review = activeProjectMilestones.filter((m) => m.status === 'en_revision').length
+    const approved = activeProjectMilestones.filter((m) => m.status === 'aprobado').length
+    return [
+      {
+        status: 'pendiente',
+        label: 'Pendientes / En riesgo',
+        count: pending,
+        dotColor: 'bg-rose-500',
+      },
+      {
+        status: 'en_revision',
+        label: 'En revisión',
+        count: review,
+        dotColor: 'bg-amber-500',
+      },
+      {
+        status: 'aprobado',
+        label: 'Aprobados',
+        count: approved,
+        dotColor: 'bg-emerald-500',
+      },
+    ]
+  }, [activeProjectMilestones])
 
   const sections: NavSection[] = [
     {
@@ -408,16 +438,16 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           </div>
         ))}
 
-        {/* NIVEL 2 EN CASCADA: HITOS & FASES DEL PROYECTO ACTIVO */}
+        {/* NIVEL 2 EN CASCADA: HITOS & FASES (Opción A: 3 semáforos) + MONITOREO TERRITORIAL */}
         {!collapsed && activeProjectObj && (
           <div className="space-y-1 pt-1">
             <div className="px-3 pb-1 flex items-center justify-between gap-2 select-none">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
-                SUBPROCESOS
+                SUBPROCESOS & CAMPO
               </span>
             </div>
 
-            {/* Botón completo: abre la vista de Hitos en el lienzo central Y despliega/colapsa */}
+            {/* Botón completo: abre la vista de Hitos en el lienzo central Y despliega los 3 estados */}
             <NavLink
               to={getHref(`/proyectos/${activeProjectObj.id}?tab=hitos`)}
               onClick={() => setIsSubprocessesExpanded((prev) => !prev)}
@@ -437,7 +467,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               <span className="flex-shrink-0">
                 <Milestone size={18} />
               </span>
-              <span className=" whitespace-nowrap">Hitos & Fases</span>
+              <span className="whitespace-nowrap">Hitos & Fases</span>
               <span className="ml-auto tabular-nums text-[11.5px] px-1.5 py-0.2 rounded shrink-0 text-[var(--hub-dim)] bg-[var(--hub-chip)]">
                 {activeProjectMilestones.length}
               </span>
@@ -449,49 +479,56 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               />
             </NavLink>
 
+            {/* Opción A: Solo los 3 filtros semafóricos por estado (sin repetir la lista de 10 hitos) */}
             {isSubprocessesExpanded && (
               <div className="ml-2 pl-2.5 border-l border-[var(--hub-border)] my-1.5 space-y-1">
-                {activeProjectMilestones.length === 0 ? (
-                  <div className="px-2.5 py-2 text-[13px] text-[var(--hub-dim)]">
-                    Sin subprocesos registrados
-                  </div>
-                ) : (
-                  activeProjectMilestones.map((m) => {
-                    const targetTo = `/proyectos/${activeProjectObj.id}?tab=hitos&milestone=${m.id}`
-                    const isSubprocessActive = isHrefActive(targetTo)
-                    const dotColor =
-                      m.status === 'aprobado'
-                        ? 'bg-emerald-500'
-                        : m.status === 'en_revision'
-                          ? 'bg-amber-500'
-                          : 'bg-rose-500'
-
-                    return (
-                      <NavLink
-                        key={m.id}
-                        to={getHref(targetTo)}
-                        title={`Fase ${m.phaseNumber}: ${m.name}`}
-                        className={() =>
-                          `flex items-start justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] leading-snug transition-colors ${
-                            isSubprocessActive
-                              ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
-                              : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
-                          }`
-                        }
-                      >
-                        <div className="flex items-start gap-2 min-w-0">
-                          <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${dotColor}`} />
-                          <span className="line-clamp-2 break-words">{m.name}</span>
-                        </div>
-                        <span className="tabular-nums text-[11.5px] font-medium text-[var(--hub-dim)] shrink-0 mt-0.5">
-                          F{m.phaseNumber}
-                        </span>
-                      </NavLink>
-                    )
-                  })
-                )}
+                {milestoneStatusGroups.map((group) => {
+                  const targetTo = `/proyectos/${activeProjectObj.id}?tab=hitos&status=${group.status}`
+                  const isGroupActive = isHrefActive(targetTo)
+                  return (
+                    <NavLink
+                      key={group.status}
+                      to={getHref(targetTo)}
+                      className={() =>
+                        `flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] leading-snug transition-colors ${
+                          isGroupActive
+                            ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
+                            : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
+                        }`
+                      }
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${group.dotColor}`} />
+                        <span className="truncate">{group.label}</span>
+                      </div>
+                      <span className="tabular-nums text-[11.5px] font-semibold text-[var(--hub-dim)] shrink-0">
+                        {group.count}
+                      </span>
+                    </NavLink>
+                  )
+                })}
               </div>
             )}
+
+            {/* Acceso directo al Reporteador de Monitoreo Territorial (CdD - MC SIGA / UGEL) */}
+            <NavLink
+              to={getHref(`/proyectos/${activeProjectObj.id}?tab=reporteador`)}
+              className={() =>
+                `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  isHrefActive(`/proyectos/${activeProjectObj.id}?tab=reporteador`)
+                    ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
+                    : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
+                }`
+              }
+            >
+              <span className="flex-shrink-0">
+                <BarChart3 size={18} />
+              </span>
+              <span className="truncate">Monitoreo Territorial</span>
+              <span className="ml-auto text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded shrink-0 text-[var(--hub-brand)] bg-[var(--hub-brand-soft,#fbf0ec)]">
+                SIGA
+              </span>
+            </NavLink>
           </div>
         )}
       </nav>
