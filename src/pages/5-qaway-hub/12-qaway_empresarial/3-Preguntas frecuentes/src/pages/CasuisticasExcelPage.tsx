@@ -520,25 +520,34 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                 </select>
               </div>
 
-              {/* Botón Más filtros estilo Inventi Pro */}
+              {/* Botón Más filtros estilo oficial MINEDU (Cero negro) */}
               <button
                 type="button"
                 onClick={() => setShowExtraFilters(!showExtraFilters)}
-                className={`inline-flex items-center gap-1.5 h-10 px-3.5 rounded-lg border text-xs font-bold transition cursor-pointer shadow-2xs ${
+                className={`inline-flex items-center gap-1.5 h-10 px-3.5 rounded-lg border text-xs transition cursor-pointer shadow-2xs ${
                   showExtraFilters ||
                   levelFilter !== 'ALL' ||
                   categoryFilter !== 'ALL' ||
                   normativaFilter !== 'ALL'
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                    ? 'bg-rose-50/90 hover:bg-rose-100/70 text-[#b91c1c] border-rose-300 font-bold shadow-xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 font-semibold'
                 }`}
               >
-                <Filter className="w-3.5 h-3.5" />
+                <Filter
+                  className={`w-3.5 h-3.5 ${
+                    showExtraFilters ||
+                    levelFilter !== 'ALL' ||
+                    categoryFilter !== 'ALL' ||
+                    normativaFilter !== 'ALL'
+                      ? 'text-[#b91c1c]'
+                      : 'text-slate-500'
+                  }`}
+                />
                 <span>Más filtros</span>
                 {(levelFilter !== 'ALL' ||
                   categoryFilter !== 'ALL' ||
                   normativaFilter !== 'ALL') && (
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-[#b91c1c]"></span>
                 )}
               </button>
 
