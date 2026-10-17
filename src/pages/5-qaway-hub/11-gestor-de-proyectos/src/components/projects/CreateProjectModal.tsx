@@ -9,6 +9,7 @@ import {
   PROJECT_METHODOLOGY_META,
   type Currency,
   type NewProjectInput,
+  type Project,
   type ProjectCategory,
   type ProjectMethodology,
 } from '@/types/project.types'
@@ -16,6 +17,7 @@ import {
 interface CreateProjectModalProps {
   isOpen: boolean
   onClose: () => void
+  onCreated?: (project: Project) => void
 }
 
 interface FormState {
@@ -91,7 +93,7 @@ function validate(form: FormState): FormErrors {
   return errors
 }
 
-export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps) {
+export function CreateProjectModal({ isOpen, onClose, onCreated }: CreateProjectModalProps) {
   const { scopedTenant, activeTenant } = useTenant()
   const defaultOrgId = scopedTenant?.id ?? activeTenant?.id ?? 'org-minedu'
   const [form, setForm] = useState<FormState>({ ...INITIAL_FORM, orgId: defaultOrgId })
@@ -137,9 +139,10 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
       membersCount: Number(form.membersCount),
       orgId: form.orgId,
     }
-    projectsService.createProject(payload)
+    const created = projectsService.createProject(payload)
     setSubmitting(false)
     onClose()
+    onCreated?.(created)
   }
 
   return (

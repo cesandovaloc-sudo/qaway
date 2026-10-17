@@ -287,8 +287,8 @@ function Hero() {
               Marcas, Automatización y formación con IA
             </p>
             <h1
-              className="max-w-[54rem] text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[0.92] text-[#20201f]"
-              style={{ ...displayFont, fontWeight: 760 }}
+              className="max-w-[58rem] qw-hero-title text-[#20201f]"
+              style={{ ...displayFont, fontWeight: 700 }}
             >
               <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>
             </h1>
