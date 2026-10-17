@@ -180,10 +180,30 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
             </span>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-1">
                 <span className="inline-block text-xs uppercase tracking-wider px-2 py-0.5 rounded text-rose-800 bg-rose-100/60 border border-rose-200/70 font-semibold">
                   {caseItem.dirCode} • {caseItem.dirName}
                 </span>
+                {caseItem.nivel && (
+                  <span
+                    className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded border ${
+                      caseItem.nivel === 'Inicial'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : caseItem.nivel === 'Primaria'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : caseItem.nivel === 'Secundaria'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200'
+                        : 'bg-purple-50 text-purple-700 border-purple-200'
+                    }`}
+                  >
+                    {caseItem.nivel}
+                  </span>
+                )}
+                {caseItem.categoriaComun && caseItem.categoriaComun !== 'General' && (
+                  <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                    {caseItem.categoriaComun}
+                  </span>
+                )}
                 {caseItem.score > 0 && (
                   <span className="inline-block text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
                     Relevancia: {caseItem.score}

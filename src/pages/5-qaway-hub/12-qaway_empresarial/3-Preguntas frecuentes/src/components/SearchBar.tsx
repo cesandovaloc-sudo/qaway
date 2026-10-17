@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ChevronsUpDown, Eye, ArrowUpRight, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DirectionData, DirectionId, ScoredCasuistica } from '../types/casuistica';
+import { DirectionData, DirectionId, ScoredCasuistica, EducationalLevel, CommonCategory } from '../types/casuistica';
+import { Filter, Layers, BookOpen, GraduationCap } from 'lucide-react';
 
 interface SearchBarProps {
   searchQuery: string;
@@ -15,6 +16,10 @@ interface SearchBarProps {
   resultsCount: number;
   quickResults?: ScoredCasuistica[];
   onSelectQuickResult?: (item: ScoredCasuistica) => void;
+  selectedLevel?: string;
+  onSelectLevel?: (lvl: string) => void;
+  selectedCategory?: string;
+  onSelectCategory?: (cat: string) => void;
 }
 
 const DIR_BADGE_STYLES: Record<string, string> = {
@@ -23,7 +28,15 @@ const DIR_BADGE_STYLES: Record<string, string> = {
   DISER: 'bg-emerald-100 text-emerald-800 border-emerald-200',
   DEBA: 'bg-indigo-100 text-indigo-800 border-indigo-200',
   DEBE: 'bg-purple-100 text-purple-800 border-purple-200',
-  DES: 'bg-rose-100 text-rose-800 border-rose-200'
+  DES: 'bg-rose-100 text-rose-800 border-rose-200',
+  DEIB: 'bg-violet-100 text-violet-800 border-violet-200'
+};
+
+const LEVEL_BADGE_STYLES: Record<string, string> = {
+  Inicial: 'bg-amber-50 text-amber-700 border-amber-200',
+  Primaria: 'bg-blue-50 text-blue-700 border-blue-200',
+  Secundaria: 'bg-rose-50 text-rose-700 border-rose-200',
+  Transversal: 'bg-purple-50 text-purple-700 border-purple-200'
 };
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -37,7 +50,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   isSearching,
   resultsCount,
   quickResults = [],
-  onSelectQuickResult
+  onSelectQuickResult,
+  selectedLevel = 'ALL',
+  onSelectLevel,
+  selectedCategory = 'ALL',
+  onSelectCategory
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -182,10 +199,25 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
                               {/* Información principal */}
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 flex-wrap">
                                   <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">
                                     Casuística #{item.number}
                                   </span>
+                                  {item.nivel && (
+                                    <span
+                                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                                        LEVEL_BADGE_STYLES[item.nivel] ||
+                                        'bg-slate-50 text-slate-600 border-slate-200'
+                                      }`}
+                                    >
+                                      {item.nivel}
+                                    </span>
+                                  )}
+                                  {item.categoriaComun && item.categoriaComun !== 'General' && (
+                                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                                      {item.categoriaComun}
+                                    </span>
+                                  )}
                                   <span className="text-xs font-medium text-slate-400 truncate">
                                     {item.dirName}
                                   </span>
@@ -247,6 +279,71 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <Eye className="w-4 h-4 text-slate-500" />
             <span>Primera coincidencia</span>
           </button>
+        </div>
+      </div>
+
+      {/* Selector de Nivel Educativo y Categorías Asociadas */}
+      <div className="pt-2.5 border-t border-slate-200/70 space-y-2">
+        {/* Fila 1: Nivel Educativo */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1.5">
+            <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+            <span>Nivel:</span>
+          </div>
+          {(['ALL', 'Inicial', 'Primaria', 'Secundaria', 'Transversal'] as const).map((lvl) => {
+            const isSelected = selectedLevel === lvl;
+            const label = lvl === 'ALL' ? 'Todos' : lvl;
+            return (
+              <button
+                key={lvl}
+                type="button"
+                onClick={() => onSelectLevel && onSelectLevel(lvl)}
+                className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-all shrink-0 cursor-pointer border ${
+                  isSelected
+                    ? 'bg-slate-800 text-white border-slate-800 shadow-xs font-semibold'
+                    : 'bg-white text-slate-600 border-slate-200/90 hover:bg-slate-100'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Fila 2: Categorías Comunes / Criterios Cruzados */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1.5">
+            <Layers className="w-3.5 h-3.5 text-slate-400" />
+            <span>Asociados:</span>
+          </div>
+          {(
+            [
+              'ALL',
+              'DEP – DISER',
+              'DEIB – DISER',
+              'Banco de Libros',
+              'Lenguas Originarias',
+              'Bibliotecas y Fungibles',
+              'Matrícula y Traslados'
+            ] as const
+          ).map((cat) => {
+            const isSelected = selectedCategory === cat;
+            const label = cat === 'ALL' ? 'Todas' : cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => onSelectCategory && onSelectCategory(cat)}
+                className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-all shrink-0 cursor-pointer border ${
+                  isSelected
+                    ? 'bg-rose-700 text-white border-rose-700 shadow-xs font-semibold'
+                    : 'bg-white text-slate-600 border-slate-200/90 hover:bg-slate-100'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

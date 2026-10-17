@@ -185,6 +185,8 @@ export default function PreguntasFrecuentesApp() {
 
   const [selectedDirectionId, setSelectedDirectionId] = useState<DirectionId>('DEI');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLevelFilter, setSelectedLevelFilter] = useState<string>('ALL');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<'consultas' | 'excel'>(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -444,22 +446,88 @@ export default function PreguntasFrecuentesApp() {
     );
   }, [directionsData, selectedDirectionId]);
 
-  // Cálculo de casos filtrados o clasificados por búsqueda
+  // Cálculo de casos filtrados o clasificados por búsqueda y filtros de nivel/asociados
   const { mode, tokens, items } = useMemo(() => {
     const rawQuery = searchQuery.trim();
     const rawQueryNorm = normalizeText(rawQuery);
+    const isFilterActive = selectedLevelFilter !== 'ALL' || selectedCategoryFilter !== 'ALL';
+
+    const matchesFilter = (c: Casuistica) => {
+      if (selectedLevelFilter !== 'ALL' && c.nivel !== selectedLevelFilter) {
+        return false;
+      }
+      if (selectedCategoryFilter !== 'ALL' && c.categoriaComun !== selectedCategoryFilter) {
+        return false;
+      }
+      return true;
+    };
 
     if (!rawQueryNorm) {
+      if (!isFilterActive) {
+        return {
+          mode: 'direction' as const,
+          tokens: [],
+          items: currentDirection.cases.map((c) => ({
+            ...c,
+            dirCode: currentDirection.code,
+            dirName: currentDirection.name,
+            dirId: currentDirection.id,
+            score: 0
+          }))
+        };
+      }
+
+      // Si hay filtro activo de categoría común (ej. "DEP – DISER"), buscamos transversalmente en todas las direcciones
+      const searchAcrossAll = selectedCategoryFilter !== 'ALL';
+      let candidateList: ScoredCasuistica[] = [];
+
+      if (searchAcrossAll) {
+        directionsData.forEach((dir) => {
+          dir.cases.forEach((c) => {
+            if (matchesFilter(c)) {
+              candidateList.push({
+                ...c,
+                dirCode: dir.code,
+                dirName: dir.name,
+                dirId: dir.id,
+                score: 10
+              });
+            }
+          });
+        });
+      } else {
+        // Si solo se filtró por nivel (ej. "Secundaria" en DISER), filtramos primero en la dirección actual
+        const inDirMatches = currentDirection.cases.filter(matchesFilter);
+        if (inDirMatches.length > 0) {
+          candidateList = inDirMatches.map((c) => ({
+            ...c,
+            dirCode: currentDirection.code,
+            dirName: currentDirection.name,
+            dirId: currentDirection.id,
+            score: 0
+          }));
+        } else {
+          // Si la dirección actual no tiene casos de ese nivel, buscamos en todas las direcciones
+          directionsData.forEach((dir) => {
+            dir.cases.forEach((c) => {
+              if (matchesFilter(c)) {
+                candidateList.push({
+                  ...c,
+                  dirCode: dir.code,
+                  dirName: dir.name,
+                  dirId: dir.id,
+                  score: 5
+                });
+              }
+            });
+          });
+        }
+      }
+
       return {
-        mode: 'direction' as const,
+        mode: 'search' as const,
         tokens: [],
-        items: currentDirection.cases.map((c) => ({
-          ...c,
-          dirCode: currentDirection.code,
-          dirName: currentDirection.name,
-          dirId: currentDirection.id,
-          score: 0
-        }))
+        items: candidateList
       };
     }
 
@@ -468,6 +536,8 @@ export default function PreguntasFrecuentesApp() {
 
     directionsData.forEach((dir) => {
       dir.cases.forEach((c) => {
+        if (!matchesFilter(c)) return;
+
         const item: ScoredCasuistica = {
           ...c,
           dirCode: dir.code,
@@ -492,7 +562,14 @@ export default function PreguntasFrecuentesApp() {
       tokens: queryTokens,
       items: scored
     };
-  }, [directionsData, selectedDirectionId, searchQuery, currentDirection]);
+  }, [
+    directionsData,
+    selectedDirectionId,
+    searchQuery,
+    currentDirection,
+    selectedLevelFilter,
+    selectedCategoryFilter
+  ]);
 
   const preserveScrollPosition = (action: () => void) => {
     const savedScrollY = window.scrollY;
@@ -805,7 +882,11 @@ export default function PreguntasFrecuentesApp() {
           <SearchBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            onClearSearch={() => setSearchQuery('')}
+            onClearSearch={() => {
+              setSearchQuery('');
+              setSelectedLevelFilter('ALL');
+              setSelectedCategoryFilter('ALL');
+            }}
             onToggleAll={handleToggleAll}
             isAnyOpen={isAnyOpen}
             onOpenFirstMatch={handleOpenFirstMatch}
@@ -814,6 +895,10 @@ export default function PreguntasFrecuentesApp() {
             resultsCount={items.length}
             quickResults={items}
             onSelectQuickResult={handleSelectQuickResult}
+            selectedLevel={selectedLevelFilter}
+            onSelectLevel={setSelectedLevelFilter}
+            selectedCategory={selectedCategoryFilter}
+            onSelectCategory={setSelectedCategoryFilter}
           />
         </div>
 

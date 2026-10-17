@@ -103,6 +103,8 @@ export const CasuisticasExcelPage: React.FC<CasuisticasTablePageProps> = ({
   // Estados de filtrado y búsqueda (estilo Inventi Pro)
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDirFilter, setSelectedDirFilter] = useState<string>('ALL');
+  const [levelFilter, setLevelFilter] = useState<string>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [normativaFilter, setNormativaFilter] = useState<'ALL' | 'WITH' | 'WITHOUT'>('ALL');
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
@@ -147,6 +149,14 @@ export const CasuisticasExcelPage: React.FC<CasuisticasTablePageProps> = ({
     return allCasesFlat.filter((item) => {
       // Filtro por Dirección
       if (selectedDirFilter !== 'ALL' && item.dirId !== selectedDirFilter) {
+        return false;
+      }
+      // Filtro por Nivel Educativo
+      if (levelFilter !== 'ALL' && item.nivel !== levelFilter) {
+        return false;
+      }
+      // Filtro por Categoría Común / Casos Asociados
+      if (categoryFilter !== 'ALL' && item.categoriaComun !== categoryFilter) {
         return false;
       }
       // Filtro por Normativa
@@ -509,6 +519,46 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                 </select>
               </div>
 
+              {/* Filtro Nivel Educativo */}
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-10 text-xs font-semibold text-slate-700">
+                <span className="text-slate-400 text-[11px] uppercase">Nivel:</span>
+                <select
+                  value={levelFilter}
+                  onChange={(e) => {
+                    setLevelFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
+                >
+                  <option value="ALL">Todos los niveles</option>
+                  <option value="Inicial">Inicial</option>
+                  <option value="Primaria">Primaria</option>
+                  <option value="Secundaria">Secundaria</option>
+                  <option value="Transversal">Transversal</option>
+                </select>
+              </div>
+
+              {/* Filtro Casos Asociados / Categorías Comunes */}
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-10 text-xs font-semibold text-slate-700">
+                <span className="text-slate-400 text-[11px] uppercase">Asociados:</span>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => {
+                    setCategoryFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
+                >
+                  <option value="ALL">Todas las temáticas</option>
+                  <option value="DEP – DISER">DEP – DISER</option>
+                  <option value="DEIB – DISER">DEIB – DISER</option>
+                  <option value="Banco de Libros">Banco de Libros</option>
+                  <option value="Lenguas Originarias">Lenguas Originarias</option>
+                  <option value="Bibliotecas y Fungibles">Bibliotecas y Fungibles</option>
+                  <option value="Matrícula y Traslados">Matrícula y Traslados</option>
+                </select>
+              </div>
+
               {/* Filtro Normativa */}
               <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-10 text-xs font-semibold text-slate-700">
                 <span className="text-slate-400 text-[11px] uppercase">Normativa:</span>
@@ -624,13 +674,30 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                           {row.number}
                         </td>
 
-                        {/* Dirección Badge */}
+                        {/* Dirección Badge y Nivel */}
                         <td className="px-3 py-3 whitespace-nowrap">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-black border uppercase tracking-wider ${badgeInfo.colorClass} ${badgeInfo.borderClass}`}
-                          >
-                            {badgeInfo.code}
-                          </span>
+                          <div className="flex flex-col gap-1 items-start">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-black border uppercase tracking-wider ${badgeInfo.colorClass} ${badgeInfo.borderClass}`}
+                            >
+                              {badgeInfo.code}
+                            </span>
+                            {row.nivel && (
+                              <span
+                                className={`inline-block px-1.5 py-0.2 rounded text-[10px] font-bold border ${
+                                  row.nivel === 'Inicial'
+                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                    : row.nivel === 'Primaria'
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                    : row.nivel === 'Secundaria'
+                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                    : 'bg-purple-50 text-purple-700 border-purple-200'
+                                }`}
+                              >
+                                {row.nivel}
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Título de la pregunta */}
@@ -650,9 +717,16 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                             >
                               {row.title}
                             </span>
-                            <span className="block text-[11px] text-slate-500 font-medium">
-                              Criterio: {row.criterioTitle}
-                            </span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="block text-[11px] text-slate-500 font-medium">
+                                Criterio: {row.criterioTitle}
+                              </span>
+                              {row.categoriaComun && row.categoriaComun !== 'General' && (
+                                <span className="inline-block text-[10px] font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                                  {row.categoriaComun}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
 
@@ -832,13 +906,23 @@ ON public.minedu_casuisticas FOR ALL USING (true);
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl border border-slate-200 space-y-4">
             <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="px-2 py-0.5 rounded text-[11px] font-black bg-red-100 text-[#d81b3d]">
                     {detailModalCase.dirCode} — {detailModalCase.dirName}
                   </span>
                   <span className="text-xs font-bold text-slate-500 font-mono">
                     Caso N° {detailModalCase.caseItem.number}
                   </span>
+                  {detailModalCase.caseItem.nivel && (
+                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                      Nivel: {detailModalCase.caseItem.nivel}
+                    </span>
+                  )}
+                  {detailModalCase.caseItem.categoriaComun && (
+                    <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                      {detailModalCase.caseItem.categoriaComun}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mt-1">
                   {detailModalCase.caseItem.title}

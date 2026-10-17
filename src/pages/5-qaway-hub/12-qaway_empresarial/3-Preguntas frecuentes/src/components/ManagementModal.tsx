@@ -206,7 +206,9 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
       normativa: formNormativa.trim(),
       accion: editingCase?.caseItem.accion || '',
       casoEspecifico: formCasoEspecifico.trim(),
-      isOpen: true
+      isOpen: true,
+      nivel: editingCase?.caseItem.nivel,
+      categoriaComun: editingCase?.caseItem.categoriaComun
     };
     onSaveCase(formDirId, caseData);
   };
