@@ -441,16 +441,16 @@ export default function PreguntasFrecuentesApp() {
   };
 
   return (
-    <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8 antialiased selection:bg-slate-200 selection:text-slate-900 bg-[#f8fafc] text-[#1e293b]">
-      {/* CONTENEDOR PRINCIPAL */}
-      <div className="max-w-7xl mx-auto space-y-5">
-        {/* 1. ENCABEZADO INSTITUCIONAL MINEDU • DIGERE */}
-        <HeaderBanner
-          totalCases={totalCasesCount}
-          isAdmin={isAdmin}
-          onOpenNewCaseModal={handleOpenNewCaseModal}
-        />
+    <div className="min-h-screen antialiased selection:bg-slate-200 selection:text-slate-900 bg-[#f8fafc] text-[#1e293b] flex flex-col">
+      {/* 1. ENCABEZADO INSTITUCIONAL A ANCHO COMPLETO (100% FULL-WIDTH) */}
+      <HeaderBanner
+        totalCases={totalCasesCount}
+        isAdmin={isAdmin}
+        onOpenNewCaseModal={handleOpenNewCaseModal}
+      />
 
+      {/* CONTENEDOR PRINCIPAL ERGONÓMICO */}
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-5 flex-1">
         {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS */}
         <DirectionsGrid
           directions={directionsData}

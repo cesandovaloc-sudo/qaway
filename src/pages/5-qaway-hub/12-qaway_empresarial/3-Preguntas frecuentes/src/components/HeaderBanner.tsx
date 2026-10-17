@@ -13,57 +13,58 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
   onOpenNewCaseModal
 }) => {
   return (
-    <div className="w-full shadow-sm">
-      {/* 1. BARRA SUPERIOR BLANCA (PERÚ RESPONDE ENCIMA DE TODO, TAL COMO EN LA LÁMINA OFICIAL) */}
-      <div className="bg-white rounded-t-2xl border border-slate-200/90 border-b-0 px-6 sm:px-9 py-2.5 sm:py-3 flex items-center justify-between gap-4">
-        {/* Lado izquierdo: Identificador institucional formal sin logos no autorizados */}
-        <div className="flex items-center gap-2.5">
-          <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-xs font-black tracking-wider uppercase text-slate-800 border border-slate-200">
-            DIGERE • MC SIGA
-          </span>
-          <span className="hidden sm:inline text-xs font-semibold text-slate-500">
-            Monitoreo Cuadro de Distribución de Materiales Educativos
-          </span>
-        </div>
-
-        {/* Lado derecho: Logotipo oficial de Perú Responde sobre fondo blanco */}
-        <div className="flex items-center gap-2.5">
-          {/* Isotipo gráfico oficial Perú Responde (manos unidas rojas) */}
-          <div className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 flex items-center justify-center">
-            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <rect width="40" height="40" rx="8" fill="#d81b3d" />
-              <path
-                d="M20 10 C16 6 10 9 10 15 C10 22 20 28 20 28 C20 28 30 22 30 15 C30 9 24 6 20 10 Z"
-                fill="white"
-              />
-              <path
-                d="M14 16 L20 22 L26 16"
-                stroke="#d81b3d"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+    <div className="w-full shadow-xs">
+      {/* 1. BARRA SUPERIOR BLANCA A ANCHO COMPLETO (PERÚ RESPONDE ENCIMA DE TODO) */}
+      <div className="w-full bg-white border-b border-slate-200/90">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-4">
+          {/* Lado izquierdo: Identificador institucional formal sin logos no autorizados */}
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-xs font-black tracking-wider uppercase text-slate-800 border border-slate-200">
+              DIGERE • MC SIGA
+            </span>
+            <span className="hidden sm:inline text-xs font-semibold text-slate-500">
+              Monitoreo Cuadro de Distribución de Materiales Educativos
+            </span>
           </div>
-          <div className="text-left">
-            <span className="block text-xs sm:text-sm font-black uppercase tracking-tight text-slate-900 leading-none">
-              Perú Responde
-            </span>
-            <span className="block text-[11px] font-medium text-slate-500 leading-tight mt-0.5">
-              Atención y Orientación
-            </span>
+
+          {/* Lado derecho: Logotipo oficial de Perú Responde sobre fondo blanco */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 flex items-center justify-center">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <rect width="40" height="40" rx="8" fill="#d81b3d" />
+                <path
+                  d="M20 10 C16 6 10 9 10 15 C10 22 20 28 20 28 C20 28 30 22 30 15 C30 9 24 6 20 10 Z"
+                  fill="white"
+                />
+                <path
+                  d="M14 16 L20 22 L26 16"
+                  stroke="#d81b3d"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div className="text-left">
+              <span className="block text-xs sm:text-sm font-black uppercase tracking-tight text-slate-900 leading-none">
+                Perú Responde
+              </span>
+              <span className="block text-[11px] font-medium text-slate-500 leading-tight mt-0.5">
+                Atención y Orientación
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 2. GRAN HERO BANNER ROJO CARMESÍ VIBRANTE (#d81b3d) */}
-      <header className="relative overflow-hidden rounded-b-2xl bg-[#d81b3d] text-white px-6 py-7 sm:px-9 sm:py-8 min-h-[220px] sm:min-h-[250px] flex flex-col justify-between">
-        {/* 3. ILUSTRACIÓN VECTORIAL DE LÍNEA BLANCA CON MÁSCARA (FONDO 100% LIMPIO DETRÁS DEL TEXTO) */}
+      {/* 2. GRAN HERO BANNER ROJO CARMESÍ A ANCHO COMPLETO (#d81b3d) */}
+      <header className="relative w-full overflow-hidden bg-[#d81b3d] text-white">
+        {/* 3. ILUSTRACIÓN VECTORIAL DE LÍNEA BLANCA CON MÁSCARA (FONDO LIMPIO DETRÁS DEL TEXTO) */}
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden select-none"
           style={{
-            maskImage: 'linear-gradient(to right, transparent 0%, transparent 35%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0.85) 85%, black 100%)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 35%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0.85) 85%, black 100%)'
+            maskImage: 'linear-gradient(to right, transparent 0%, transparent 35%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.9) 85%, black 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 35%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.9) 85%, black 100%)'
           }}
           aria-hidden="true"
         >
@@ -152,50 +153,53 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
         </div>
 
         {/* 4. FRANJA MULTICOLOR EN LA BASE DECORATIVA (AMARILLO, CIAN, ROSA) */}
-        <div className="absolute inset-x-0 bottom-0 h-1.5 flex" aria-hidden="true">
+        <div className="absolute inset-x-0 bottom-0 h-1.5 w-full flex" aria-hidden="true">
           <div className="w-1/3 bg-amber-400"></div>
           <div className="w-1/3 bg-cyan-400"></div>
           <div className="w-1/3 bg-rose-500"></div>
         </div>
 
-        {/* 5. CONTENIDO DEL BANNER: TÍTULO Y LÍNEA DIVISORIA */}
-        <div className="relative z-10 max-w-3xl space-y-2.5">
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            Banco de casuísticas y preguntas frecuentes
-          </h1>
-          <div className="w-full max-w-xl h-0.5 bg-white/40 rounded-full"></div>
-        </div>
+        {/* 5. CONTENIDO DEL BANNER CENTRADO DENTRO DE LA FRANJA ROJA A ANCHO COMPLETO */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 min-h-[220px] sm:min-h-[250px] flex flex-col justify-between">
+          {/* TÍTULO Y LÍNEA DIVISORIA */}
+          <div className="max-w-3xl space-y-2.5">
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+              Banco de casuísticas y preguntas frecuentes
+            </h1>
+            <div className="w-full max-w-xl h-0.5 bg-white/40 rounded-full"></div>
+          </div>
 
-        {/* 6. FILA INFERIOR: DESCRIPCIÓN Y BOTÓN ANCLADO ABAJO A LA DERECHA */}
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-5 pt-3 pb-1">
-          <p className="text-sm sm:text-base leading-relaxed text-white/95 font-normal max-w-2xl">
-            Herramienta interactiva de consulta para registrar, analizar y resolver casuísticas recurrentes durante el monitoreo a las UGEL e II.EE. en el marco del MC SIGA.
-          </p>
+          {/* FILA INFERIOR: DESCRIPCIÓN Y BOTÓN ANCLADO ABAJO A LA DERECHA */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 pt-3 pb-1">
+            <p className="text-sm sm:text-base leading-relaxed text-white/95 font-normal max-w-2xl">
+              Herramienta interactiva de consulta para registrar, analizar y resolver casuísticas recurrentes durante el monitoreo a las UGEL e II.EE. en el marco del MC SIGA.
+            </p>
 
-          <div className="flex-shrink-0 self-end">
-            {isAdmin ? (
-              <button
-                type="button"
-                onClick={onOpenNewCaseModal}
-                className="group inline-flex items-center gap-2.5 rounded-xl bg-white text-[#d81b3d] hover:bg-red-50 px-5 py-3 text-sm font-bold shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer"
-                title="Cargar casuísticas de modo manual"
-              >
-                <div className="w-6 h-6 rounded-lg bg-red-100 text-[#d81b3d] flex items-center justify-center group-hover:bg-red-200 transition">
-                  <Plus className="w-4 h-4" />
+            <div className="flex-shrink-0 self-end">
+              {isAdmin ? (
+                <button
+                  type="button"
+                  onClick={onOpenNewCaseModal}
+                  className="group inline-flex items-center gap-2.5 rounded-xl bg-white text-[#d81b3d] hover:bg-red-50 px-5 py-3 text-sm font-bold shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer"
+                  title="Cargar casuísticas de modo manual"
+                >
+                  <div className="w-6 h-6 rounded-lg bg-red-100 text-[#d81b3d] flex items-center justify-center group-hover:bg-red-200 transition">
+                    <Plus className="w-4 h-4" />
+                  </div>
+                  <span>+ Nueva Pregunta</span>
+                  <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-red-100 text-[#d81b3d]">
+                    {totalCases}
+                  </span>
+                </button>
+              ) : (
+                <div className="inline-flex items-center gap-2 rounded-xl bg-white/20 backdrop-blur-xs px-4 py-2 text-sm font-semibold text-white border border-white/30">
+                  <span className="text-white/90">Casos activos:</span>
+                  <span className="px-2.5 py-0.5 rounded-md bg-white text-[#d81b3d] font-black text-sm">
+                    {totalCases}
+                  </span>
                 </div>
-                <span>+ Nueva Pregunta</span>
-                <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-red-100 text-[#d81b3d]">
-                  {totalCases}
-                </span>
-              </button>
-            ) : (
-              <div className="inline-flex items-center gap-2 rounded-xl bg-white/20 backdrop-blur-xs px-4 py-2 text-sm font-semibold text-white border border-white/30">
-                <span className="text-white/90">Casos activos:</span>
-                <span className="px-2.5 py-0.5 rounded-md bg-white text-[#d81b3d] font-black text-sm">
-                  {totalCases}
-                </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </header>
