@@ -135,6 +135,29 @@ function scoreCase(
 }
 
 export default function PreguntasFrecuentesApp() {
+  // Comportamiento de Scroll Inteligente para el Hero (desaparece al bajar, aparece al subir)
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const lastScrollY = React.useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY <= 80) {
+        setIsHeroVisible(true);
+      } else if (currentScrollY > lastScrollY.current + 12) {
+        // Desplazamiento hacia abajo: ocultar hero suavemente
+        setIsHeroVisible(false);
+      } else if (currentScrollY < lastScrollY.current - 12) {
+        // Desplazamiento hacia arriba (regresa): mostrar hero
+        setIsHeroVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Inicialización de datos
   const [directionsData, setDirectionsData] = useState<DirectionData[]>(() => {
     try {
@@ -442,11 +465,12 @@ export default function PreguntasFrecuentesApp() {
 
   return (
     <div className="min-h-screen antialiased selection:bg-slate-200 selection:text-slate-900 bg-[#f8fafc] text-[#1e293b] flex flex-col">
-      {/* 1. ENCABEZADO INSTITUCIONAL A ANCHO COMPLETO (100% FULL-WIDTH) */}
+      {/* 1. ENCABEZADO INSTITUCIONAL A ANCHO COMPLETO (100% FULL-WIDTH CON SCROLL REVEAL) */}
       <HeaderBanner
         totalCases={totalCasesCount}
         isAdmin={isAdmin}
         onOpenNewCaseModal={handleOpenNewCaseModal}
+        isVisible={isHeroVisible}
       />
 
       {/* CONTENEDOR PRINCIPAL ERGONÓMICO */}

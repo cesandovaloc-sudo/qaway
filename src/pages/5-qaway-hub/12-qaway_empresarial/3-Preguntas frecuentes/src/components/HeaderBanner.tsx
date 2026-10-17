@@ -5,17 +5,23 @@ interface HeaderBannerProps {
   totalCases: number;
   isAdmin: boolean;
   onOpenNewCaseModal: () => void;
+  isVisible?: boolean;
 }
 
 export const HeaderBanner: React.FC<HeaderBannerProps> = ({
   totalCases,
   isAdmin,
-  onOpenNewCaseModal
+  onOpenNewCaseModal,
+  isVisible = true
 }) => {
   return (
-    <div className="w-full shadow-xs">
+    <div
+      className={`sticky top-0 z-40 w-full transition-transform duration-300 ease-in-out ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       {/* 1. BARRA SUPERIOR BLANCA A ANCHO COMPLETO (PERÚ RESPONDE ENCIMA DE TODO) */}
-      <div className="w-full bg-white border-b border-slate-200/90">
+      <div className="w-full bg-white border-b border-slate-200/90 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-4">
           {/* Lado izquierdo: Identificador institucional formal sin logos no autorizados */}
           <div className="flex items-center gap-2.5">
@@ -57,8 +63,8 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
         </div>
       </div>
 
-      {/* 2. GRAN HERO BANNER ROJO CARMESÍ A ANCHO COMPLETO (#d81b3d) */}
-      <header className="relative w-full overflow-hidden bg-[#d81b3d] text-white">
+      {/* 2. GRAN HERO BANNER ROJO CARMESÍ A ANCHO COMPLETO (#d81b3d) CON BORDES INFERIORES REDONDEADOS */}
+      <header className="relative w-full overflow-hidden bg-[#d81b3d] text-white rounded-b-2xl sm:rounded-b-3xl shadow-[0_6px_24px_-4px_rgba(216,27,61,0.28)]">
         {/* 3. ILUSTRACIÓN VECTORIAL DE LÍNEA BLANCA CON MÁSCARA (FONDO LIMPIO DETRÁS DEL TEXTO) */}
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden select-none"
