@@ -135,27 +135,21 @@ function scoreCase(
 }
 
 export default function PreguntasFrecuentesApp() {
-  // Comportamiento de Scroll Inteligente para el Hero (desaparece al bajar, aparece al subir)
-  const [isHeroVisible, setIsHeroVisible] = useState(true);
-  const lastScrollY = React.useRef(0);
-
+  // Freno estricto de desplazamiento: La página nunca puede desplazarse más allá del filtro
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY <= 80) {
-        setIsHeroVisible(true);
-      } else if (currentScrollY > lastScrollY.current + 12) {
-        // Desplazamiento hacia abajo: ocultar hero suavemente
-        setIsHeroVisible(false);
-      } else if (currentScrollY < lastScrollY.current - 12) {
-        // Desplazamiento hacia arriba (regresa): mostrar hero
-        setIsHeroVisible(true);
+    const handleWindowScroll = () => {
+      const filterSection = document.getElementById('seccion-filtro');
+      if (!filterSection) return;
+      const navbarHeight = 50;
+      const filterTop = filterSection.getBoundingClientRect().top;
+      // Si el filtro llega al navbar, frenar el scroll de la ventana para que no pase de ahí
+      if (filterTop < navbarHeight) {
+        const offset = navbarHeight - filterTop;
+        window.scrollBy({ top: -offset, behavior: 'instant' });
       }
-      lastScrollY.current = currentScrollY;
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleWindowScroll, { passive: false });
+    return () => window.removeEventListener('scroll', handleWindowScroll);
   }, []);
 
   // Inicialización de datos
@@ -549,8 +543,11 @@ export default function PreguntasFrecuentesApp() {
           onSelectDirection={handleSelectDirection}
         />
 
-        {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (EL SCROLL SE DETIENE EXACTAMENTE AQUÍ Y NO PASA DEL FILTRO) */}
-        <div id="seccion-filtro" className="sticky top-[52px] z-30 bg-[#f8fafc]/95 backdrop-blur-md py-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 shadow-2xs border-b border-slate-200/60">
+        {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (PEGADO AL TOPE A 48PX SIN HUECOS, FONDO TOTALMENTE OPACO) */}
+        <div
+          id="seccion-filtro"
+          className="sticky top-[48px] sm:top-[50px] z-30 bg-[#f8fafc] pt-1 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200/80 shadow-2xs"
+        >
           <SearchBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -566,23 +563,25 @@ export default function PreguntasFrecuentesApp() {
           />
         </div>
 
-        {/* 4. LISTA DE CASUÍSTICAS Y ACORDEONES */}
-        <CasesList
-          items={items}
-          mode={mode}
-          direction={currentDirection}
-          tokens={tokens}
-          isAdmin={isAdmin}
-          onToggleCase={handleToggleCase}
-          onEditCase={handleEditCase}
-          onDeleteCase={(item) => handleDeleteCase(item.id, item.dirId)}
-          onAddNewCase={handleOpenNewCaseModal}
-          onClearSearch={() => setSearchQuery('')}
-          allowMultipleOpen={allowMultipleOpen}
-          onToggleAllowMultiple={() => setAllowMultipleOpen((prev) => !prev)}
-          onToggleDirectionAll={handleToggleDirectionAll}
-          isAllOpenInDirection={isAllOpenInDirection}
-        />
+        {/* 4. LISTA DE CASUÍSTICAS CON SCROLL INTERNO AISLADO (NADA PASA POR DETRÁS DEL FILTRO) */}
+        <div className="flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-170px)] pr-1.5 -mr-1.5 space-y-4">
+          <CasesList
+            items={items}
+            mode={mode}
+            direction={currentDirection}
+            tokens={tokens}
+            isAdmin={isAdmin}
+            onToggleCase={handleToggleCase}
+            onEditCase={handleEditCase}
+            onDeleteCase={(item) => handleDeleteCase(item.id, item.dirId)}
+            onAddNewCase={handleOpenNewCaseModal}
+            onClearSearch={() => setSearchQuery('')}
+            allowMultipleOpen={allowMultipleOpen}
+            onToggleAllowMultiple={() => setAllowMultipleOpen((prev) => !prev)}
+            onToggleDirectionAll={handleToggleDirectionAll}
+            isAllOpenInDirection={isAllOpenInDirection}
+          />
+        </div>
 
         {/* 5. FOOTER INSTITUCIONAL Y SWITCH DE MODO ADMINISTRADOR */}
         <footer className="pt-6 pb-8 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
