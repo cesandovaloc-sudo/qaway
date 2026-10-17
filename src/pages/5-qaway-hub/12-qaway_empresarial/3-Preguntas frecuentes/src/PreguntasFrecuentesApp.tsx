@@ -19,7 +19,6 @@ import { CasuisticasExcelPage } from './pages/CasuisticasExcelPage';
 const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v9_multidir_deib';
 const SUPABASE_STORAGE_URL_KEY = 'qaway_minedu_supabase_url_v1';
 const SUPABASE_STORAGE_KEY_KEY = 'qaway_minedu_supabase_key_v1';
-const ADMIN_MODE_KEY = 'qaway_minedu_admin_mode_v1';
 
 // Configuración Supabase por defecto desde entorno
 const DEFAULT_SUPABASE_URL =
@@ -149,40 +148,8 @@ function scoreCase(
   return totalScore;
 }
 
-const checkIsHubAdmin = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('admin') === 'true') return true;
-
-    // Validación estricta con sesión oficial de Qaway Hub Estudio (según src/config/auth.js)
-    const token =
-      sessionStorage.getItem('qaway_auth_token') ||
-      localStorage.getItem('qaway_auth_token');
-    const email = (
-      sessionStorage.getItem('qaway_auth_email') ||
-      localStorage.getItem('qaway_auth_email') ||
-      ''
-    ).trim().toLowerCase();
-    const role =
-      sessionStorage.getItem('qaway_auth_role') ||
-      localStorage.getItem('qaway_auth_role') ||
-      '';
-
-    const ADMIN_EMAILS = [
-      'proyectos@qawaylab.com',
-      'admin@qawaylab.com',
-      'admin@qaway.test'
-    ];
-
-    if (token && (role === 'admin' || ADMIN_EMAILS.includes(email))) {
-      return true;
-    }
-  } catch (e) {
-    // Silencioso
-  }
-  return false;
-};
+// Claves autorizadas de acceso administrativo DIGERE / MINEDU (cero bypass por URL o sesiones filtradas)
+const ADMIN_ACCESS_PINS = ['DIGERE2026', 'MINEDU2026', 'QAWAY2026'];
 
 export default function PreguntasFrecuentesApp() {
   // Inicialización de datos
@@ -222,16 +189,10 @@ export default function PreguntasFrecuentesApp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevelFilter, setSelectedLevelFilter] = useState<string>('ALL');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
-  const [viewMode, setViewMode] = useState<'consultas' | 'excel'>(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('view') === 'excel' || urlParams.get('tab') === 'excel') return 'excel';
-    }
-    return 'consultas';
-  });
+  const [viewMode, setViewMode] = useState<'consultas' | 'excel'>('consultas');
 
-  // Modo Administrador vinculado estrictamente al login de Qaway Hub Estudio (o ?admin=true)
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => checkIsHubAdmin());
+  // Modo Administrador blindado: SIEMPRE FALSO por defecto en producción pública
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   // Estado para permitir múltiples preguntas abiertas simultáneamente sin colapsarse
   const [allowMultipleOpen, setAllowMultipleOpen] = useState(false);
@@ -367,16 +328,22 @@ export default function PreguntasFrecuentesApp() {
     showToast('¡Casuísticas oficiales restablecidas (54 casos multidir)!', 'success');
   };
 
-  const toggleAdminMode = () => {
-    setIsAdmin((prev) => {
-      const next = !prev;
-      localStorage.setItem(ADMIN_MODE_KEY, String(next));
-      showToast(
-        next ? 'Modo Administrador activado' : 'Modo Consulta (Público) activado',
-        'success'
-      );
-      return next;
-    });
+  const handleToggleAdminMode = () => {
+    if (isAdmin) {
+      setIsAdmin(false);
+      showToast('Modo Consulta Pública restablecido', 'success');
+      return;
+    }
+
+    const pin = window.prompt('Ingrese clave de acceso administrativo (DIGERE / MINEDU):');
+    if (pin === null) return;
+
+    if (ADMIN_ACCESS_PINS.includes(pin.trim())) {
+      setIsAdmin(true);
+      showToast('Modo Gestión Administrativa activado', 'success');
+    } else {
+      showToast('Clave incorrecta. Acceso restringido.', 'error');
+    }
   };
 
   // Manejo de Supabase opcional
@@ -965,17 +932,32 @@ export default function PreguntasFrecuentesApp() {
                   ? 'Almacenamiento: Supabase Cloud (Tiempo Real)'
                   : 'Almacenamiento: Caché Local'}
               </span>
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={toggleAdminMode}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 font-medium transition cursor-pointer text-[11px] shadow-2xs"
-                  title="Alternar entre vista pública de consulta y modo administrador"
-                >
-                  <Unlock className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Modo Admin Activo</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleToggleAdminMode}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition cursor-pointer shadow-2xs ${
+                  isAdmin
+                    ? 'border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold'
+                    : 'border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700'
+                }`}
+                title={
+                  isAdmin
+                    ? 'Salir del Modo Administrador y volver a la vista pública'
+                    : 'Acceso reservado para administradores DIGERE / MINEDU'
+                }
+              >
+                {isAdmin ? (
+                  <>
+                    <Unlock className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Modo Admin Activo (Salir)</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Acceso Gestión</span>
+                  </>
+                )}
+              </button>
             </div>
           </footer>
         </div>

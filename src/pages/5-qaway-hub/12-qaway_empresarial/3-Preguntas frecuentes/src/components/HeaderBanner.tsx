@@ -202,7 +202,7 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
                     <div className="w-6 h-6 rounded-lg bg-red-100 text-[#d81b3d] flex items-center justify-center group-hover:bg-red-200 transition">
                       <Plus className="w-4 h-4" />
                     </div>
-                    <span>+ Nueva Pregunta</span>
+                    <span>Nueva Pregunta</span>
                     <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-black bg-red-100 text-[#d81b3d]">
                       {totalCases}
                     </span>

@@ -116,7 +116,7 @@
                 <path d="M5 12h14"/><path d="M12 5v14"/>
               </svg>
             </div>
-            <span>+ Nueva Pregunta</span>
+            <span>Nueva Pregunta</span>
             <span id="header-total-badge" class="ml-0.5 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-100/90 text-[#b91c1c]">
               14 casos
             </span>
@@ -1035,7 +1035,7 @@
     let selectedDirectionId = 'DEI';
     let searchQuery = '';
     let searchDebounceTimer = null;
-    let isAdminMode = new URLSearchParams(window.location.search).get('admin') === 'true' || localStorage.getItem('minedu_admin_mode') === 'true';
+    let isAdminMode = false;
 
     const directionsGridEl = document.getElementById('directions-grid');
     const searchInputEl = document.getElementById('search-input');
@@ -1550,11 +1550,24 @@
     // -------------------------------------------------------------
 
     window.toggleAdminMode = function() {
-      isAdminMode = !isAdminMode;
-      localStorage.setItem('minedu_admin_mode', isAdminMode ? 'true' : 'false');
-      updateAdminUI();
-      renderCasesSection();
-      showToast(isAdminMode ? 'Modo Administrador activado' : 'Modo Público (Lectura) activado', 'info');
+      if (!isAdminMode) {
+        const pin = prompt('Ingrese clave de acceso administrativo (DIGERE / MINEDU):');
+        if (!pin) return;
+        const VALID_PINS = ['DIGERE2026', 'MINEDU2026', 'QAWAY2026'];
+        if (VALID_PINS.includes(pin.trim())) {
+          isAdminMode = true;
+          updateAdminUI();
+          renderCasesSection();
+          showToast('Modo Administrador activado', 'success');
+        } else {
+          showToast('Clave incorrecta. Acceso restringido.', 'error');
+        }
+      } else {
+        isAdminMode = false;
+        updateAdminUI();
+        renderCasesSection();
+        showToast('Modo Público de Consulta activado', 'info');
+      }
     };
 
     function updateAdminUI() {
