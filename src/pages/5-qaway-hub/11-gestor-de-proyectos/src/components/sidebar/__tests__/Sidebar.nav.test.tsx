@@ -1,17 +1,15 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Sidebar from '@/components/sidebar/Sidebar'
 import { TenantProvider } from '@/context/TenantContext'
 
 // ─────────────────────────────────────────────────────────────────────────
-// Sidebar.nav.test.tsx — Verificación E2E de navegación (Fase 20/24)
-// Recorre las URLs del sidebar y confirma 0 colisiones: como máximo UN item
-// con estilo activo a la vez, y que sea exactamente el esperado. Incluye
-// alcance por entidad (Fase 24): los hijos de CARTERA siguen al tenant.
-// Nota: NavLink marca aria-current por pathname (ignora el query); la app usa
-// coincidencia exacta ruta+query, por eso se audita la clase `font-semibold`.
+// Sidebar.nav.test.tsx — Verificación E2E de navegación en cascada (Alternativa A)
+// 1. Selector superior de PROYECTO ACTIVO flotante (sin duplicar lista de proyectos abajo).
+// 2. Enlaces de OPERACIÓN & CARTERA y SUBPROCESOS con 0 colisiones de selección activa.
+// 3. Los Subprocesos se filtran automáticamente según el proyecto activo / entidad.
 // ─────────────────────────────────────────────────────────────────────────
 
 vi.mock('@/context/AuthContext', () => ({
@@ -43,25 +41,27 @@ function activeLabelsAt(url: string, scopedTenantId?: string): string[] {
 
 const CASES: Array<{ url: string; expected: string; tenant?: string }> = [
   { url: '/', expected: 'Resumen' },
-  { url: '/proyectos', expected: 'Proyectos' },
-  { url: '/proyectos/proj-minedu-2027', expected: 'Dotación 2027' },
-  { url: '/proyectos/proj-minedu-2027?tab=kanban', expected: 'Gestores & Territorio' },
   { url: '/bandeja', expected: 'Bandeja' },
   { url: '/proyectos?view=criticas', expected: 'Alertas Críticas' },
-  { url: '/proyectos/proj-minedu-2027?tab=gantt', expected: 'Diagrama Gantt' },
-  { url: '/proyectos/proj-minedu-2027?tab=hitos', expected: 'Hitos & Entregables' },
-  { url: '/proyectos/proj-minedu-2027?tab=docs', expected: 'Normativa & Wiki' },
-  { url: '/proyectos/proj-minedu-om050', expected: 'OM 050' },
-  { url: '/proyectos/proj-minedu-om050?tab=gantt', expected: 'Diagrama Gantt' },
-  { url: '/proyectos/proj-minedu-om050?tab=kanban', expected: 'Gestores & Territorio' },
-  { url: '/proyectos/proj-minedu-om050?tab=resumen', expected: 'OM 050' },
+  { url: '/proyectos', expected: 'Proyectos' },
+  {
+    url: '/proyectos/proj-minedu-2027?tab=hitos&milestone=ML-M01',
+    expected: 'Comunicación de Directorio de Almacenes',
+  },
+  {
+    url: '/proyectos/proj-minedu-om050?tab=hitos&milestone=ML-O01',
+    expected: 'H1',
+    tenant: 'org-minedu',
+  },
+  {
+    url: '/proyectos/proj-005?tab=hitos&milestone=ML-501',
+    expected: 'Integración WMS Completa',
+    tenant: 'org-pacifico',
+  },
   { url: '/config', expected: 'Configuración' },
-  // Alcance por entidad (Fase 24)
-  { url: '/proyectos/proj-minedu-om050', expected: 'OM 050', tenant: 'org-minedu' },
-  { url: '/proyectos/proj-005', expected: 'Almacén', tenant: 'org-pacifico' },
 ]
 
-describe('Sidebar: selección activa unívoca', () => {
+describe('Sidebar: selección activa unívoca y cascada Alternativa A', () => {
   for (const { url, expected, tenant } of CASES) {
     it(`solo activa "${expected}" en ${url}${tenant ? ` [${tenant}]` : ''}`, () => {
       const labels = activeLabelsAt(url, tenant)
@@ -76,7 +76,30 @@ describe('Sidebar: selección activa unívoca', () => {
     }
   })
 
-  it('sin coincidencias no ilumina nada (tenant pacifico + url minedu)', () => {
-    expect(activeLabelsAt('/proyectos/proj-minedu-2027', 'org-pacifico')).toHaveLength(0)
+  it('el selector de PROYECTO ACTIVO es flotante (absolute) y el botón de Subprocesos colapsa con clic en todo el botón', () => {
+    const { getByText, container, unmount } = render(
+      <MemoryRouter initialEntries={['/proyectos/proj-minedu-2027']}>
+        <TenantProvider>
+          <Sidebar collapsed={false} />
+        </TenantProvider>
+      </MemoryRouter>,
+    )
+
+    // El botón de Subprocesos colapsa y expande al hacer clic en cualquier parte del botón
+    const subprocessBtn = getByText('Fases & Subprocesos').closest('button')
+    expect(subprocessBtn).toBeTruthy()
+    expect(subprocessBtn?.getAttribute('aria-expanded')).toBe('true')
+    fireEvent.click(subprocessBtn!)
+    expect(subprocessBtn?.getAttribute('aria-expanded')).toBe('false')
+
+    // El selector superior de proyecto activo despliega un menú flotante (absolute)
+    const activeSelectorBtn = container.querySelector('button[aria-expanded]')
+    expect(activeSelectorBtn).toBeTruthy()
+    fireEvent.click(activeSelectorBtn!)
+    const floatingMenu = container.querySelector('div.absolute.left-0.right-0.top-full')
+    expect(floatingMenu).toBeTruthy()
+
+    unmount()
   })
 })
+

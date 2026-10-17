@@ -151,11 +151,17 @@ export function GanttTab({ projectId, onOpenTask }: GanttTabProps) {
       )}
       <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-bold text-zinc-900">
-            <Calendar size={15} className="text-zinc-400" /> Diagrama Gantt
+          <h3 className="flex flex-wrap items-center gap-2 text-sm font-bold text-zinc-900">
+            <Calendar size={15} className="text-zinc-400" />
+            <span>Diagrama Gantt · {project?.name ?? 'Proyecto'}</span>
+            {project && (
+              <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-zinc-700">
+                {project.code} · {project.progress}% avance
+              </span>
+            )}
           </h3>
           <p className="text-xs text-zinc-500">
-            Barras proporcionales a duración · dependencias Fin-Comienzo (FS)
+            {workItems.length} tareas propias de este proyecto · dependencias Fin-Comienzo (FS)
           </p>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-4 text-[11px] font-semibold text-zinc-500">

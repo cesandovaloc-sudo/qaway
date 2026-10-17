@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, FileSpreadsheet } from 'lucide-react';
+import { Plus, FileSpreadsheet, ExternalLink } from 'lucide-react';
 
 interface HeaderBannerProps {
   totalCases: number;
@@ -182,6 +182,16 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
             <div className="flex-shrink-0 self-end flex items-center gap-2.5">
               {isAdmin ? (
                 <>
+                  <a
+                    href="/hub/casuisticas"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-white/20 hover:bg-white/30 text-white backdrop-blur-xs border border-white/40 px-3.5 py-3 text-sm font-bold shadow-xs hover:shadow-md transition cursor-pointer"
+                    title="Abrir la Vista Pública Oficial en una nueva pestaña"
+                  >
+                    <ExternalLink className="w-4 h-4 text-sky-200" />
+                    <span>Ver Vista Pública ↗</span>
+                  </a>
                   {onOpenExcelPage && (
                     <button
                       type="button"

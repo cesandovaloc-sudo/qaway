@@ -6,26 +6,15 @@ import {
   Settings,
   Inbox,
   AlertCircle,
-  GanttChart,
-  CalendarDays,
   Milestone,
-  Users,
-  BookOpen,
   ChevronDown,
   Plus,
   Check,
 } from 'lucide-react'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { useProjectsDataset, useTenantFilteredProjects } from '@/hooks/useProjects'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { useProjectPerspective } from '../../context/ProjectPerspectiveContext'
-
-interface NavChild {
-  to: string
-  label: string
-  code: string
-  progress: number
-  statusColor: string
-}
 
 interface NavItem {
   to: string
@@ -34,7 +23,6 @@ interface NavItem {
   badge?: number | string
   badgeVariant?: 'neutral' | 'urgent'
   end?: boolean
-  children?: NavChild[]
 }
 
 interface NavSection {
@@ -44,27 +32,32 @@ interface NavSection {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sidebar.tsx — Panel Izquierdo Canónico (Estándar visual 100% App Inventario / CRM)
-// Tokens inmutables: text-sm font-medium, px-3 py-2.5 rounded-lg, iconos Lucide size={18}.
-// Borde lateral izquierdo en items con desplegables para affordance visual claro.
+// Sidebar.tsx — Panel Izquierdo en Cascada (Alternativa A)
+// 1. Selector superior de PROYECTO ACTIVO con desplegable flotante (no empuja).
+// 2. Botón directo "+ Nuevo Proyecto".
+// 3. OPERACIÓN & CARTERA sin duplicar la lista de proyectos ni las pestañas superiores.
+// 4. Acordeón de SUBPROCESOS propio del proyecto activo (clic en todo el botón).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: boolean }) {
   const [internalCollapsed] = useState(false)
   const collapsed = collapsedProp ?? internalCollapsed
-  const [isProjectsExpanded, setIsProjectsExpanded] = useState(true)
+  const [isSubprocessesExpanded, setIsSubprocessesExpanded] = useState(true)
   const [isActiveSelectorOpen, setIsActiveSelectorOpen] = useState(false)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [rememberedProjectId, setRememberedProjectId] = useState<string>('proj-minedu-2027')
 
-  const { projects, workItems } = useProjectsDataset()
+  const selectorRef = useDismissOnEscapeOrOutside(isActiveSelectorOpen, () =>
+    setIsActiveSelectorOpen(false),
+  )
+
+  const { projects, workItems, milestones } = useProjectsDataset()
   const { currentPersona, isGestor } = useProjectPerspective()
   const navigate = useNavigate()
 
   const myTaskCount = useMemo(() => {
     const openItems = workItems.filter((i) => i.state !== 'done')
     if (!isGestor) return openItems.length
-    // Perspectiva real del gestor (sin hardcodeos): coincide nombre completo o de pila.
     const me = currentPersona.name.trim().toLowerCase()
     const firstName = me.split(/\s+/)[0] ?? ''
     return openItems.filter((i) => {
@@ -75,7 +68,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   const urgentCount = useMemo(() => {
     return workItems.filter(
-      (i) => (i.priority === 'URGENTE' || Boolean(i.isBlocked)) && i.state !== 'done'
+      (i) => (i.priority === 'URGENTE' || Boolean(i.isBlocked)) && i.state !== 'done',
     ).length
   }, [workItems])
 
@@ -98,8 +91,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   const location = useLocation()
 
-  // Proyecto activo por URL (Fase 23): /proyectos/:id. Los enlaces de
-  // PLANIFICACIÓN apuntan a ese proyecto; fuera de un proyecto recuerdan el último activo.
+  // Proyecto activo por URL (/proyectos/:id) o último proyecto seleccionado en cascada
   const modulePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
   const projectIdMatch = modulePath.match(/^\/proyectos\/([^/]+)/)
   const activeProjectId = projectIdMatch ? projectIdMatch[1] : null
@@ -110,48 +102,37 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     }
   }, [activeProjectId])
 
-  // Hijos de CARTERA desde la entidad activa (Fase 24): proyectos de la
-  // organización elegida o los principales de la cartera (no completados,
-  // hasta 8). Nunca fijos arbitrarios.
   const scopedProjects = useTenantFilteredProjects()
 
   const planningProjectId = useMemo(() => {
-    if (activeProjectId) return activeProjectId
+    if (activeProjectId && scopedProjects.some((p) => p.id === activeProjectId)) {
+      return activeProjectId
+    }
     if (scopedProjects.some((p) => p.id === rememberedProjectId)) return rememberedProjectId
     return scopedProjects[0]?.id ?? 'proj-minedu-2027'
   }, [activeProjectId, rememberedProjectId, scopedProjects])
 
   const activeProjectObj = useMemo(
     () =>
-      projects.find((p) => p.id === planningProjectId) ??
+      scopedProjects.find((p) => p.id === planningProjectId) ??
       scopedProjects[0] ??
+      projects.find((p) => p.id === planningProjectId) ??
       projects[0],
     [projects, planningProjectId, scopedProjects],
   )
 
-  const projectChildren: NavChild[] = useMemo(
+  // Subprocesos / Hitos propios del proyecto activo en cascada
+  const activeProjectMilestones = useMemo(
     () =>
-      scopedProjects
-        .filter((project) => project.status !== 'completado')
-        .slice(0, 8)
-        .map((project) => ({
-          to: `/proyectos/${project.id}`,
-          label: project.name,
-          code: project.code,
-          progress: project.progress,
-          statusColor:
-            project.health === 'optimo'
-              ? 'bg-emerald-500'
-              : project.health === 'atencion'
-                ? 'bg-amber-500'
-                : 'bg-rose-500',
-        })),
-    [scopedProjects],
+      milestones
+        .filter((m) => m.projectId === activeProjectObj?.id)
+        .sort((a, b) => a.phaseNumber - b.phaseNumber),
+    [milestones, activeProjectObj?.id],
   )
 
   const sections: NavSection[] = [
     {
-      title: 'OPERACIÓN',
+      title: 'OPERACIÓN & CARTERA',
       items: [
         {
           to: '/',
@@ -173,11 +154,6 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           badge: urgentCount,
           badgeVariant: 'urgent',
         },
-      ],
-    },
-    {
-      title: 'CARTERA',
-      items: [
         {
           to: '/proyectos',
           label: 'Proyectos',
@@ -185,95 +161,17 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           badge: scopedProjects.length,
           badgeVariant: 'neutral',
           end: true,
-          children: projectChildren,
-        },
-      ],
-    },
-    {
-      title: 'PLANIFICACIÓN',
-      subtitle: activeProjectObj?.code,
-      items: [
-        {
-          to: `/proyectos/${planningProjectId}?tab=gantt`,
-          label: 'Diagrama Gantt',
-          icon: <GanttChart size={18} />,
-        },
-        {
-          to: `/proyectos/${planningProjectId}?tab=calendar`,
-          label: 'Calendario',
-          icon: <CalendarDays size={18} />,
-        },
-        {
-          to: `/proyectos/${planningProjectId}?tab=hitos`,
-          label: 'Hitos & Entregables',
-          icon: <Milestone size={18} />,
-        },
-        {
-          to: `/proyectos/${planningProjectId}?tab=kanban`,
-          label: 'Gestores & Territorio',
-          icon: <Users size={18} />,
-        },
-        {
-          to: `/proyectos/${planningProjectId}?tab=docs`,
-          label: 'Normativa & Wiki',
-          icon: <BookOpen size={18} />,
         },
       ],
     },
   ]
 
-  // URL actual completa (ruta + query). NavLink solo compara el pathname, por eso
-  // todos los items que comparten /proyectos/:id se encendían a la vez al
-  // cambiar de ?tab=. La coincidencia aquí es exacta e incluye el query.
   const currentUrl = `${location.pathname}${location.search}`
-
-  // Proyecto :id declarado por un hijo de CARTERA (Fase 23).
-  const childProjectId = (to: string) => {
-    const match = to.match(/^\/proyectos\/([^/?]+)/)
-    return match ? match[1] : null
-  }
-
-  // 1. Coincidencia exacta ruta+query (first-wins): como máximo un candidato.
-  let activeHref: string | null = null
-  for (const sec of sections) {
-    for (const item of sec.items) {
-      const candidates = [item.to, ...(item.children ?? []).map((child) => child.to)]
-      for (const to of candidates) {
-        if (activeHref === null && getHref(to) === currentUrl) {
-          activeHref = getHref(to)
-        }
-      }
-    }
-  }
-
-  // 2. Sin coincidencia exacta y dentro de un proyecto → se ilumina el hijo con
-  // ese :id, sin importar el ?tab= (los hijos entran a la raíz/Resumen).
-  let activeProjectChild: string | null = null
-  if (activeHref === null && activeProjectId) {
-    for (const sec of sections) {
-      for (const item of sec.items) {
-        for (const child of item.children ?? []) {
-          if (activeProjectChild === null && childProjectId(child.to) === activeProjectId) {
-            activeProjectChild = child.to
-          }
-        }
-      }
-    }
-  }
-
-  const isHrefActive = (to: string) => activeHref !== null && getHref(to) === activeHref
-  const isProjectChildActive = (to: string) =>
-    activeProjectChild !== null && getHref(to) === activeProjectChild
-
-  // Verifica si un hijo de Proyectos corresponde al proyecto actualmente abierto en pantalla
-  // (incluso cuando estamos en ?tab=calendar, ?tab=gantt, etc.) para mantener su indicador visual.
-  const isCurrentContextProject = (to: string) =>
-    activeProjectId !== null && childProjectId(to) === activeProjectId
+  const isHrefActive = (to: string) => getHref(to) === currentUrl
 
   const handleSelectProjectInCascade = (projectId: string) => {
     setRememberedProjectId(projectId)
     setIsActiveSelectorOpen(false)
-    // Si ya estamos viendo una pestaña de proyecto (ej. ?tab=calendar), mantener esa pestaña
     const currentTab = new URLSearchParams(location.search).get('tab')
     const target = currentTab
       ? `/proyectos/${projectId}?tab=${currentTab}`
@@ -298,7 +196,8 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           <div
             className="w-[30px] h-[30px] flex-shrink-0 relative"
             style={{
-              background: 'linear-gradient(135deg, var(--hub-brand-hover, #c44523), var(--hub-brand, #d9532f))',
+              background:
+                'linear-gradient(135deg, var(--hub-brand-hover, #c44523), var(--hub-brand, #d9532f))',
               clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
             }}
           >
@@ -334,7 +233,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         )}
       </div>
 
-      {/* BLOQUE EN CASCADA 1: PROYECTO ACTIVO + ACCIONES RÁPIDAS (Estilo RAG Hub) */}
+      {/* NIVEL 1 EN CASCADA: PROYECTO ACTIVO (Flotante, no empuja el menú) + NUEVO PROYECTO */}
       {!collapsed && (
         <div className="px-3 pt-3 pb-2.5 border-b border-[var(--hub-border)] space-y-2 shrink-0">
           <div className="flex items-center justify-between px-1">
@@ -348,11 +247,12 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
             )}
           </div>
 
-          {/* Selector desplegable del Proyecto en Función */}
-          <div className="relative">
+          {/* Selector desplegable FLOTANTE del Proyecto en Función */}
+          <div ref={selectorRef} className="relative">
             <button
               type="button"
               onClick={() => setIsActiveSelectorOpen((prev) => !prev)}
+              aria-expanded={isActiveSelectorOpen}
               className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] hover:bg-[var(--hub-chip)] text-left transition-colors cursor-pointer shadow-2xs"
               title={activeProjectObj?.name ?? 'Seleccionar proyecto'}
             >
@@ -367,7 +267,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                   }`}
                 />
                 <div className="min-w-0">
-                  <div className="text-[13px] font-bold text-[var(--hub-text)] truncate leading-tight">
+                  <div className="text-[13.5px] font-bold text-[var(--hub-text)] truncate leading-tight">
                     {activeProjectObj?.name ?? 'Seleccionar proyecto'}
                   </div>
                   <div className="text-[11px] font-mono text-[var(--hub-dim)] truncate mt-0.5">
@@ -384,7 +284,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
             </button>
 
             {isActiveSelectorOpen && (
-              <div className="mt-1.5 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] p-1.5 shadow-lg space-y-0.5 max-h-60 overflow-y-auto z-50">
+              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] p-1.5 shadow-xl space-y-0.5 max-h-64 overflow-y-auto z-50">
                 {scopedProjects.map((proj) => {
                   const isSelected = proj.id === activeProjectObj?.id
                   return (
@@ -408,7 +308,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                         }`}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-medium leading-snug line-clamp-2">
+                        <div className="text-[13.5px] font-medium leading-snug line-clamp-2">
                           {proj.name}
                         </div>
                         <div className="text-[11px] font-mono text-[var(--hub-dim)] mt-0.5">
@@ -444,133 +344,161 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
             {collapsed ? (
               <div className="my-2.5 mx-auto w-7 h-[1px] bg-[var(--hub-border)]" />
             ) : (
-              <div className="px-3 pt-2 pb-1 flex items-center justify-between gap-2 select-none">
+              <div className="px-3 pt-1 pb-1 flex items-center justify-between gap-2 select-none">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
                   {sec.title}
                 </span>
-                {sec.subtitle && (
-                  <span
-                    className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--hub-chip)] text-[var(--hub-text-soft)] truncate max-w-[115px]"
-                    title={`Vistas del proyecto ${activeProjectObj?.name ?? ''}`}
-                  >
-                    {sec.subtitle}
-                  </span>
-                )}
               </div>
             )}
 
-            {sec.items.map((item) => {
-              const hasChildren = Boolean(item.children && item.children.length > 0)
-
-              return (
-                <div key={item.to + item.label} className="relative group">
-                  <div className="flex items-center">
-                    <NavLink
-                      to={getHref(item.to)}
-                      end={item.end}
-                      onClick={() => {
-                        if (hasChildren && !collapsed) {
-                          setIsProjectsExpanded((prev) => !prev)
-                        }
-                      }}
-                      className={() =>
-                        `flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                          hasChildren && isProjectsExpanded && !collapsed
-                            ? 'border-l-2 border-[var(--hub-brand)] bg-[var(--hub-chip)] text-[var(--hub-text)]'
-                            : ''
-                        } ${
-                          isHrefActive(item.to)
-                            ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
-                            : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
-                        } ${collapsed ? 'justify-center' : ''}`
-                      }
-                    >
-                      <span className="flex-shrink-0">{item.icon}</span>
-                      {!collapsed && (
-                        <>
-                          <span className="truncate">{item.label}</span>
-                          {item.badge !== undefined && (typeof item.badge === 'number' ? item.badge > 0 : Boolean(item.badge)) && (
-                            <span
-                              className={`ml-auto font-mono text-[11px] px-1.5 py-0.2 rounded shrink-0 ${
-                                item.badgeVariant === 'urgent'
-                                  ? 'bg-zinc-200/80 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 font-bold'
-                                  : 'text-[var(--hub-dim)] bg-[var(--hub-chip)]'
-                              }`}
-                            >
-                              {item.badge}
-                            </span>
-                          )}
-                          {hasChildren && (
-                            <ChevronDown
-                              size={15}
-                              className={`shrink-0 text-[var(--hub-dim)] transition-transform duration-200 ${
-                                item.badge !== undefined ? 'ml-1' : 'ml-auto'
-                              } ${isProjectsExpanded ? 'rotate-180' : ''}`}
-                            />
-                          )}
-                        </>
-                      )}
-                    </NavLink>
-                  </div>
-
-                  {/* Sub-elementos desplegados: tamaño legible 13.5px + % de avance propio */}
-                  {hasChildren && isProjectsExpanded && !collapsed && item.children && (
-                    <div className="ml-2 pl-2.5 border-l border-[var(--hub-border)] my-1.5 space-y-1">
-                      {item.children.map((child) => {
-                        const isStrictActive =
-                          isHrefActive(child.to) || isProjectChildActive(child.to)
-                        const isInProjectContext = isCurrentContextProject(child.to)
-                        return (
-                          <NavLink
-                            key={child.to}
-                            to={getHref(child.to)}
-                            title={`${child.label} (${child.progress}% avance)`}
-                            className={() =>
-                              `flex items-start justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] leading-snug transition-colors ${
-                                isStrictActive
-                                  ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
-                                  : isInProjectContext
-                                    ? 'bg-[var(--hub-chip)] text-[var(--hub-text)] font-medium border-l-2 border-[var(--hub-brand)]'
-                                    : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
-                              }`
-                            }
+            {sec.items.map((item) => (
+              <div key={item.to + item.label} className="relative group">
+                <NavLink
+                  to={getHref(item.to)}
+                  end={item.end}
+                  className={() =>
+                    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      isHrefActive(item.to)
+                        ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
+                        : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
+                    } ${collapsed ? 'justify-center' : ''}`
+                  }
+                >
+                  <span className="flex-shrink-0">{item.icon}</span>
+                  {!collapsed && (
+                    <>
+                      <span className="truncate">{item.label}</span>
+                      {item.badge !== undefined &&
+                        (typeof item.badge === 'number' ? item.badge > 0 : Boolean(item.badge)) && (
+                          <span
+                            className={`ml-auto font-mono text-[11px] px-1.5 py-0.2 rounded shrink-0 ${
+                              item.badgeVariant === 'urgent'
+                                ? 'bg-zinc-200/80 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 font-bold'
+                                : 'text-[var(--hub-dim)] bg-[var(--hub-chip)]'
+                            }`}
                           >
-                            <div className="flex items-start gap-2 min-w-0">
-                              <span
-                                className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${child.statusColor}`}
-                              />
-                              <span className="line-clamp-2 break-words">{child.label}</span>
-                            </div>
-                            <span className="font-mono text-[11px] text-[var(--hub-dim)] shrink-0 mt-0.5">
-                              {child.progress}%
-                            </span>
-                          </NavLink>
-                        )
-                      })}
-                    </div>
+                            {item.badge}
+                          </span>
+                        )}
+                    </>
                   )}
+                </NavLink>
 
-                  {/* Pop-up flotante al pasar el mouse por el ícono (modo colapsado) */}
-                  {collapsed && (
-                    <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
-                      <div
-                        className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap tracking-tight"
-                        style={{
-                          backgroundColor: 'var(--hub-surface, #ffffff)',
-                          color: 'var(--hub-text, #0f172a)',
-                          border: '1px solid var(--hub-border, #e2e8f0)',
-                          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
-                        }}
-                      >
-                        {item.label}
-                      </div>
+                {collapsed && (
+                  <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
+                    <div
+                      className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap tracking-tight"
+                      style={{
+                        backgroundColor: 'var(--hub-surface, #ffffff)',
+                        color: 'var(--hub-text, #0f172a)',
+                        border: '1px solid var(--hub-border, #e2e8f0)',
+                        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
+                      }}
+                    >
+                      {item.label}
                     </div>
-                  )}
-                </div>
-              )
-            })}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         ))}
+
+        {/* NIVEL 2 EN CASCADA: SUBPROCESOS / HITOS DEL PROYECTO ACTIVO */}
+        {!collapsed && activeProjectObj && (
+          <div className="space-y-1 pt-1">
+            <div className="px-3 pb-1 flex items-center justify-between gap-2 select-none">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
+                SUBPROCESOS
+              </span>
+              <span
+                className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--hub-chip)] text-[var(--hub-text-soft)] truncate max-w-[115px]"
+                title={`Subprocesos de ${activeProjectObj.name}`}
+              >
+                {activeProjectObj.code}
+              </span>
+            </div>
+
+            {/* Botón acordeón completo: clic en cualquier parte del botón abre/cierra */}
+            <button
+              type="button"
+              onClick={() => setIsSubprocessesExpanded((prev) => !prev)}
+              aria-expanded={isSubprocessesExpanded}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                isSubprocessesExpanded
+                  ? 'border-l-2 border-[var(--hub-brand)] bg-[var(--hub-chip)] text-[var(--hub-text)]'
+                  : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
+              }`}
+            >
+              <span className="flex-shrink-0">
+                <Milestone size={18} />
+              </span>
+              <span className="truncate">Fases & Subprocesos</span>
+              <span className="ml-auto font-mono text-[11px] px-1.5 py-0.2 rounded shrink-0 text-[var(--hub-dim)] bg-[var(--hub-chip)]">
+                {activeProjectMilestones.length}
+              </span>
+              <ChevronDown
+                size={15}
+                className={`shrink-0 text-[var(--hub-dim)] transition-transform duration-200 ml-1 ${
+                  isSubprocessesExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {isSubprocessesExpanded && (
+              <div className="ml-2 pl-2.5 border-l border-[var(--hub-border)] my-1.5 space-y-1">
+                {activeProjectMilestones.length === 0 ? (
+                  <NavLink
+                    to={getHref(`/proyectos/${activeProjectObj.id}?tab=hitos`)}
+                    className={() =>
+                      `block px-2.5 py-2 rounded-lg text-[13px] transition-colors ${
+                        isHrefActive(`/proyectos/${activeProjectObj.id}?tab=hitos`)
+                          ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
+                          : 'text-[var(--hub-dim)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
+                      }`
+                    }
+                  >
+                    Sin subprocesos registrados · Configurar hitos
+                  </NavLink>
+                ) : (
+                  activeProjectMilestones.map((m) => {
+                    const targetTo = `/proyectos/${activeProjectObj.id}?tab=hitos&milestone=${m.id}`
+                    const isSubprocessActive = isHrefActive(targetTo)
+                    const dotColor =
+                      m.status === 'aprobado'
+                        ? 'bg-emerald-500'
+                        : m.status === 'en_revision'
+                          ? 'bg-amber-500'
+                          : 'bg-rose-500'
+
+                    return (
+                      <NavLink
+                        key={m.id}
+                        to={getHref(targetTo)}
+                        title={`Fase ${m.phaseNumber}: ${m.name}`}
+                        className={() =>
+                          `flex items-start justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] leading-snug transition-colors ${
+                            isSubprocessActive
+                              ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
+                              : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
+                          }`
+                        }
+                      >
+                        <div className="flex items-start gap-2 min-w-0">
+                          <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${dotColor}`} />
+                          <span className="line-clamp-2 break-words">{m.name}</span>
+                        </div>
+                        <span className="font-mono text-[11px] text-[var(--hub-dim)] shrink-0 mt-0.5">
+                          F{m.phaseNumber}
+                        </span>
+                      </NavLink>
+                    )
+                  })
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* Settings (Exacto a App Inventario) */}
@@ -609,6 +537,16 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           )}
         </div>
       </div>
+
+      <CreateProjectModal
+        isOpen={isCreateProjectOpen}
+        onClose={() => setIsCreateProjectOpen(false)}
+        onCreated={(created) => {
+          setRememberedProjectId(created.id)
+          navigate(getHref(`/proyectos/${created.id}`))
+        }}
+      />
     </aside>
   )
 }
+

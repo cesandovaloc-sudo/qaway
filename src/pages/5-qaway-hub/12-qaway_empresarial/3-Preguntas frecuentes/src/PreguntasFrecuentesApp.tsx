@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Lock, Unlock, FileSpreadsheet } from 'lucide-react';
 import {
-  Casuistica,
   DirectionData,
   DirectionId,
   ScoredCasuistica
@@ -11,9 +9,7 @@ import { HeaderBanner } from './components/HeaderBanner';
 import { DirectionsGrid } from './components/DirectionsGrid';
 import { SearchBar } from './components/SearchBar';
 import { CasesList } from './components/CasesList';
-import { ManagementModal } from './components/ManagementModal';
 import { Toast } from './components/Toast';
-import { CasuisticasExcelPage } from './pages/CasuisticasExcelPage';
 
 // Claves aisladas de almacenamiento local (versión 9 multidir con DEIB)
 const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v9_multidir_deib';
@@ -148,9 +144,6 @@ function scoreCase(
   return totalScore;
 }
 
-// Claves autorizadas de acceso administrativo DIGERE / MINEDU (cero bypass por URL o sesiones filtradas)
-const ADMIN_ACCESS_PINS = ['DIGERE2026', 'MINEDU2026', 'QAWAY2026'];
-
 export default function PreguntasFrecuentesApp() {
   // Inicialización de datos
   const [directionsData, setDirectionsData] = useState<DirectionData[]>(() => {
@@ -189,21 +182,9 @@ export default function PreguntasFrecuentesApp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevelFilter, setSelectedLevelFilter] = useState<string>('ALL');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('ALL');
-  const [viewMode, setViewMode] = useState<'consultas' | 'excel'>('consultas');
-
-  // Modo Administrador blindado: SIEMPRE FALSO por defecto en producción pública
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   // Estado para permitir múltiples preguntas abiertas simultáneamente sin colapsarse
   const [allowMultipleOpen, setAllowMultipleOpen] = useState(false);
-
-  // Modal State (Formulario, Inventario y Conexión Supabase Cloud)
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState<'form' | 'list' | 'cloud'>('form');
-  const [editingCase, setEditingCase] = useState<{
-    caseItem: Casuistica;
-    dirId: DirectionId;
-  } | null>(null);
 
   // Toast State
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -315,122 +296,7 @@ export default function PreguntasFrecuentesApp() {
     }, 2800);
   };
 
-  const handleResetOfficialCases = () => {
-    if (
-      !window.confirm(
-        '¿Deseas restablecer todas las casuísticas a la versión oficial (54 casos en 7 direcciones)?'
-      )
-    ) {
-      return;
-    }
-    const fresh = JSON.parse(JSON.stringify(DEFAULT_DIRECTIONS_DATA));
-    persistDirections(fresh);
-    showToast('¡Casuísticas oficiales restablecidas (54 casos multidir)!', 'success');
-  };
 
-  const handleToggleAdminMode = () => {
-    if (isAdmin) {
-      setIsAdmin(false);
-      showToast('Modo Consulta Pública restablecido', 'success');
-      return;
-    }
-
-    const pin = window.prompt('Ingrese clave de acceso administrativo (DIGERE / MINEDU):');
-    if (pin === null) return;
-
-    if (ADMIN_ACCESS_PINS.includes(pin.trim())) {
-      setIsAdmin(true);
-      showToast('Modo Gestión Administrativa activado', 'success');
-    } else {
-      showToast('Clave incorrecta. Acceso restringido.', 'error');
-    }
-  };
-
-  // Manejo de Supabase opcional
-  const handleSaveSupabaseConfig = async (url: string, key: string): Promise<boolean> => {
-    if (!url || !key) return false;
-    try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const client = createClient(url, key);
-      const { error } = await client.from(SUPABASE_TABLE_NAME).select('id').limit(1);
-      if (error && error.code !== 'PGRST205') {
-        console.warn('Supabase test query error:', error);
-        return false;
-      }
-      localStorage.setItem(SUPABASE_STORAGE_URL_KEY, url);
-      localStorage.setItem(SUPABASE_STORAGE_KEY_KEY, key);
-      setSupabaseUrl(url);
-      setSupabaseKey(key);
-      setIsSupabaseConnected(true);
-      showToast('Conexión con Supabase configurada exitosamente');
-      return true;
-    } catch (err) {
-      console.error('Error conectando a Supabase:', err);
-      return false;
-    }
-  };
-
-  // Guardar en bloque y sincronizar a Supabase en tabla aislada minedu_casuisticas
-  const handleBulkSaveCases = async (newDirections: DirectionData[]): Promise<boolean> => {
-    persistDirections(newDirections);
-
-    if (isSupabaseConnected && supabaseUrl && supabaseKey) {
-      try {
-        const { createClient } = await import('@supabase/supabase-js');
-        const client = createClient(supabaseUrl, supabaseKey);
-
-        const rowsToUpsert: any[] = [];
-        newDirections.forEach((dir) => {
-          dir.cases.forEach((c) => {
-            rowsToUpsert.push({
-              id: c.id,
-              dir_id: dir.id,
-              dir_code: dir.code,
-              dir_name: dir.name,
-              number: c.number,
-              title: c.title,
-              criterio_title: c.criterioTitle,
-              criterio_desc: c.criterioDesc,
-              desarrollo: c.desarrollo,
-              solucion: c.solucion,
-              ejemplo: c.ejemplo || '',
-              normativa: c.normativa || '',
-              caso_especifico: c.casoEspecifico || '',
-              accion: c.accion || '',
-              updated_at: new Date().toISOString()
-            });
-          });
-        });
-
-        const { error } = await client.from(SUPABASE_TABLE_NAME).upsert(rowsToUpsert);
-        if (error) {
-          console.warn('Error sincronizando a Supabase en bloque:', error);
-          if (error.code === 'PGRST205') {
-            showToast(
-              'Guardado localmente. Falta crear la tabla "' + SUPABASE_TABLE_NAME + '" en Supabase (usa el botón Script Supabase)',
-              'error'
-            );
-          } else {
-            showToast('Guardado localmente. Error al sincronizar con Supabase.', 'error');
-          }
-          return false;
-        }
-
-        showToast(
-          '¡Sincronizado exitosamente con la tabla ' + SUPABASE_TABLE_NAME + ' de Supabase!',
-          'success'
-        );
-        return true;
-      } catch (err) {
-        console.error('Error sincronizando con Supabase:', err);
-        showToast('Guardado localmente. Revisa la conexión de Supabase.', 'error');
-        return false;
-      }
-    }
-
-    showToast('¡Cambios guardados exitosamente en la aplicación!', 'success');
-    return true;
-  };
 
   const totalCasesCount = useMemo(() => {
     return directionsData.reduce((acc, d) => acc + d.cases.length, 0);
@@ -693,149 +559,13 @@ export default function PreguntasFrecuentesApp() {
     scrollToDirectionsSection();
   };
 
-  // Creación y edición
-  const handleOpenNewCaseModal = () => {
-    setEditingCase(null);
-    setModalTab('form');
-    setIsModalOpen(true);
-  };
-
-  const handleEditCase = (item: ScoredCasuistica) => {
-    setEditingCase({
-      caseItem: item,
-      dirId: item.dirId
-    });
-    setModalTab('form');
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteCase = (caseId: string, dirId: DirectionId) => {
-    if (!window.confirm('¿Confirmas que deseas eliminar esta casuística del banco?')) {
-      return;
-    }
-    const updated = directionsData.map((dir) => {
-      if (dir.id === dirId) {
-        return {
-          ...dir,
-          cases: dir.cases.filter((c) => c.id !== caseId)
-        };
-      }
-      return dir;
-    });
-    persistDirections(updated);
-    showToast('Casuística eliminada correctamente');
-  };
-
-  const handleSaveCase = (dirId: DirectionId, caseItem: Casuistica) => {
-    let updated: DirectionData[];
-    const isEditing = !!editingCase;
-
-    if (isEditing) {
-      // Si cambió de dirección, remover de la anterior y agregar a la nueva
-      const oldDirId = editingCase.dirId;
-      if (oldDirId === dirId) {
-        updated = directionsData.map((dir) => {
-          if (dir.id === dirId) {
-            return {
-              ...dir,
-              cases: dir.cases.map((c) => (c.id === caseItem.id ? caseItem : c))
-            };
-          }
-          return dir;
-        });
-      } else {
-        updated = directionsData.map((dir) => {
-          if (dir.id === oldDirId) {
-            return {
-              ...dir,
-              cases: dir.cases.filter((c) => c.id !== caseItem.id)
-            };
-          }
-          if (dir.id === dirId) {
-            return {
-              ...dir,
-              cases: [...dir.cases, caseItem]
-            };
-          }
-          return dir;
-        });
-      }
-      showToast('Casuística actualizada exitosamente');
-    } else {
-      updated = directionsData.map((dir) => {
-        if (dir.id === dirId) {
-          return {
-            ...dir,
-            cases: [...dir.cases, caseItem]
-          };
-        }
-        return dir;
-      });
-      showToast('Nueva casuística registrada en el banco');
-    }
-
-    persistDirections(updated);
-    setSelectedDirectionId(dirId);
-    setSearchQuery('');
-    setIsModalOpen(false);
-  };
-
-  if (viewMode === 'excel') {
-    return (
-      <div className="w-full min-h-screen bg-[#f8fafc] flex flex-col">
-        <CasuisticasExcelPage
-          directions={directionsData}
-          onBack={() => setViewMode('consultas')}
-          onSave={handleBulkSaveCases}
-          onResetOfficial={handleResetOfficialCases}
-          supabaseUrl={supabaseUrl}
-          supabaseKey={supabaseKey}
-          isSupabaseConnected={isSupabaseConnected}
-          onSyncSupabase={() => handleBulkSaveCases(directionsData)}
-          onEditCase={(dirId, item) => {
-            setEditingCase({ caseItem: item, dirId });
-            setModalTab('form');
-            setIsModalOpen(true);
-          }}
-          onAddNewCase={handleOpenNewCaseModal}
-          isAdmin={isAdmin}
-        />
-        <ManagementModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          activeTab={modalTab}
-          onChangeTab={setModalTab}
-          directions={directionsData}
-          editingCase={editingCase}
-          onSaveCase={handleSaveCase}
-          onDeleteCase={handleDeleteCase}
-          onEditCaseFromList={(item) => {
-            setEditingCase({ caseItem: item, dirId: item.dirId });
-            setModalTab('form');
-          }}
-          supabaseUrl={supabaseUrl}
-          supabaseKey={supabaseKey}
-          onSaveSupabaseConfig={handleSaveSupabaseConfig}
-          isSupabaseConnected={isSupabaseConnected}
-          onBulkSaveCases={handleBulkSaveCases}
-          onOpenFullScreenTable={() => {
-            setIsModalOpen(false);
-            setViewMode('excel');
-          }}
-        />
-        <Toast message={toastMessage} type={toastType} />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen antialiased selection:bg-slate-200 selection:text-slate-900 bg-[#f8fafc] text-[#1e293b] flex flex-col">
       {/* 1. ENCABEZADO INSTITUCIONAL A ANCHO COMPLETO (100% FULL-WIDTH) */}
       <HeaderBanner
         totalCases={totalCasesCount}
-        isAdmin={isAdmin}
-        onOpenNewCaseModal={handleOpenNewCaseModal}
-        onOpenExcelPage={() => setViewMode('excel')}
+        isAdmin={false}
+        onOpenNewCaseModal={() => {}}
       />
 
       {/* ESTILOS AISLADOS DE SCROLLBAR GRIS CLARO MINIMALISTA Y CERO REBOTE */}
@@ -906,11 +636,11 @@ export default function PreguntasFrecuentesApp() {
             mode={mode}
             direction={currentDirection}
             tokens={tokens}
-            isAdmin={isAdmin}
+            isAdmin={false}
             onToggleCase={handleToggleCase}
-            onEditCase={handleEditCase}
-            onDeleteCase={(item) => handleDeleteCase(item.id, item.dirId)}
-            onAddNewCase={handleOpenNewCaseModal}
+            onEditCase={() => {}}
+            onDeleteCase={() => {}}
+            onAddNewCase={() => {}}
             onClearSearch={() => setSearchQuery('')}
             allowMultipleOpen={allowMultipleOpen}
             onToggleAllowMultiple={handleToggleAllowMultiple}
@@ -918,7 +648,7 @@ export default function PreguntasFrecuentesApp() {
             isAllOpenInDirection={isAllOpenInDirection}
           />
 
-          {/* 5. FOOTER INSTITUCIONAL Y SWITCH DE MODO ADMINISTRADOR */}
+          {/* 5. FOOTER INSTITUCIONAL LIMPIO DE SOLO CONSULTA */}
           <footer className="pt-6 pb-4 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-slate-700">MINEDU • DIGERE</span>
@@ -929,64 +659,13 @@ export default function PreguntasFrecuentesApp() {
             <div className="flex items-center gap-4">
               <span className="text-slate-400">
                 {isSupabaseConnected
-                  ? 'Almacenamiento: Supabase Cloud (Tiempo Real)'
-                  : 'Almacenamiento: Caché Local'}
+                  ? 'Base de Datos: Supabase Cloud'
+                  : 'Consulta Oficial MINEDU'}
               </span>
-              <button
-                type="button"
-                onClick={handleToggleAdminMode}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-medium transition cursor-pointer shadow-2xs ${
-                  isAdmin
-                    ? 'border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold'
-                    : 'border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700'
-                }`}
-                title={
-                  isAdmin
-                    ? 'Salir del Modo Administrador y volver a la vista pública'
-                    : 'Acceso reservado para administradores DIGERE / MINEDU'
-                }
-              >
-                {isAdmin ? (
-                  <>
-                    <Unlock className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Modo Admin Activo (Salir)</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Acceso Gestión</span>
-                  </>
-                )}
-              </button>
             </div>
           </footer>
         </div>
       </div>
-
-      {/* MODAL DE GESTIÓN Y ADMINISTRACIÓN */}
-      <ManagementModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        activeTab={modalTab}
-        onChangeTab={setModalTab}
-        directions={directionsData}
-        editingCase={editingCase}
-        onSaveCase={handleSaveCase}
-        onDeleteCase={handleDeleteCase}
-        onEditCaseFromList={(item) => {
-          setEditingCase({ caseItem: item, dirId: item.dirId });
-          setModalTab('form');
-        }}
-        supabaseUrl={supabaseUrl}
-        supabaseKey={supabaseKey}
-        onSaveSupabaseConfig={handleSaveSupabaseConfig}
-        isSupabaseConnected={isSupabaseConnected}
-        onBulkSaveCases={handleBulkSaveCases}
-        onOpenFullScreenTable={() => {
-          setIsModalOpen(false);
-          setViewMode('excel');
-        }}
-      />
 
       {/* TOAST DE NOTIFICACIÓN */}
       <Toast message={toastMessage} type={toastType} />

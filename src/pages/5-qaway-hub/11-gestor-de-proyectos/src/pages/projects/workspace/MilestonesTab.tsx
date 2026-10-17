@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { AlertTriangle, Check, ChevronDown, Clock, Flag, MessageCircle } from 'lucide-react'
 import { useProjectsDataset } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
@@ -132,7 +133,20 @@ function MilestoneChildRow({
 
 export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
   const dataset = useProjectsDataset()
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
+  const milestoneParam = searchParams.get('milestone')
+  const [expandedId, setExpandedId] = useState<string | null>(milestoneParam)
+
+  useEffect(() => {
+    if (milestoneParam) {
+      setExpandedId(milestoneParam)
+    }
+  }, [milestoneParam])
+
+  const project = useMemo(
+    () => dataset.projects.find((item) => item.id === projectId),
+    [dataset.projects, projectId],
+  )
 
   const milestones = useMemo(
     () =>
@@ -150,11 +164,17 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
       <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-bold text-zinc-900">
-            <Flag size={15} className="text-zinc-400" /> Hitos contractuales PMBOK
+          <h3 className="flex flex-wrap items-center gap-2 text-sm font-bold text-zinc-900">
+            <Flag size={15} className="text-zinc-400" />
+            <span>Subprocesos & Hitos · {project?.name ?? 'Proyecto'}</span>
+            {project && (
+              <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-zinc-700">
+                {project.code}
+              </span>
+            )}
           </h3>
           <p className="text-xs text-zinc-500">
-            {approved} de {milestones.length} fases aprobadas
+            {approved} de {milestones.length} subprocesos/fases aprobadas en este proyecto
           </p>
         </div>
         <div className="ml-auto flex min-w-[200px] items-center gap-2.5">
@@ -194,6 +214,7 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
               (item) => item.threatensMilestone && isMilestoneTaskAtRisk(item),
             )
             const expanded = expandedId === milestone.id
+            const isSelectedFromSidebar = milestoneParam === milestone.id
             return (
               <li key={milestone.id} className="relative flex gap-4 pb-6 last:pb-0">
                 {!isLast && (
@@ -216,7 +237,13 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
                   {milestone.status === 'aprobado' ? <Check size={17} /> : milestone.phaseNumber}
                 </span>
 
-                <div className="min-w-0 flex-1 rounded-2xl border border-zinc-100 p-4">
+                <div
+                  className={`min-w-0 flex-1 rounded-2xl border p-4 transition-colors ${
+                    isSelectedFromSidebar
+                      ? 'border-[var(--hub-brand)]/40 bg-zinc-50/60 ring-2 ring-[var(--hub-brand)]/15'
+                      : 'border-zinc-100'
+                  }`}
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-bold text-zinc-900">
                       Fase {milestone.phaseNumber} · {milestone.name}

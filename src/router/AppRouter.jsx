@@ -58,6 +58,7 @@ const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inv
 const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
 const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
 const PreguntasFrecuentesAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAppPage'))
+const PreguntasFrecuentesAdminAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAdminAppPage'))
 // Tienda de cliente: las páginas viven en inventario y se sirven aquí, dentro
 // del Layout, para que lleven el navbar oficial de Qaway Lab.
 const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/TiendaClientePage'))
@@ -440,7 +441,24 @@ export default function AppRouter() {
           path="hub/criterios"
           element={renderRoute('hub', <CriteriosAppPage />)}
         />
-        {/* Banco de Casuísticas y Preguntas Frecuentes MINEDU (12-qaway_empresarial): nativo con shell oficial Hub */}
+        {/* Banco de Casuísticas y Preguntas Frecuentes MINEDU - RUTA ADMINISTRADOR (Panel de Gestión Exclusivo) */}
+        <Route
+          path="/hub/casuisticas/admin"
+          element={renderRoute('hub', <PreguntasFrecuentesAdminAppPage />)}
+        />
+        <Route
+          path="hub/casuisticas/admin"
+          element={renderRoute('hub', <PreguntasFrecuentesAdminAppPage />)}
+        />
+        <Route
+          path="/hub/preguntas-frecuentes/admin"
+          element={renderRoute('hub', <PreguntasFrecuentesAdminAppPage />)}
+        />
+        <Route
+          path="hub/preguntas-frecuentes/admin"
+          element={renderRoute('hub', <PreguntasFrecuentesAdminAppPage />)}
+        />
+        {/* Banco de Casuísticas y Preguntas Frecuentes MINEDU (12-qaway_empresarial): Vista Pública 100% Solo Consulta */}
         <Route
           path="/hub/preguntas-frecuentes/*"
           element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
