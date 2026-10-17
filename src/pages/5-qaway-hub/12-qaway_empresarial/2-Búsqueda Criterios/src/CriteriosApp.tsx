@@ -2677,62 +2677,61 @@ export default function CriteriosApp() {
                   </div>
                 </div>
 
-                {/* 4 Tarjetas de escenarios sugeridos con Toggle para Minimizar y ganar espacio (ESTÁTICO) */}
-                <div className="shrink-0 pb-3">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                      Consultas y Escenarios Rápidos
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setCollapseScenariosHeader((v) => !v)}
-                      className="text-[11.5px] text-zinc-500 hover:text-zinc-800 flex items-center gap-1 cursor-pointer"
-                      title={collapseScenariosHeader ? "Mostrar escenarios" : "Ocultar escenarios para más espacio"}
-                    >
-                      <span>{collapseScenariosHeader ? "Mostrar tarjetas" : "Minimizar"}</span>
-                      <HubIcon icon={collapseScenariosHeader ? ChevronDown : ChevronUp} size={13} />
-                    </button>
-                  </div>
-
-                  {!collapseScenariosHeader && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 animate-in fade-in">
-                      {currentScenarioCards.map((c) => {
-                        const isActive = activeScenario === c.id;
-                        return (
-                          <button
-                            key={c.id}
-                            type="button"
-                            onClick={() => handleScenario(c.id)}
-                            style={{
-                              borderColor: isActive ? palette.accentCitation : palette.borderDefault,
-                              backgroundColor: palette.bgSurface,
-                              boxShadow: isActive ? `0 0 0 1px ${palette.accentCitation}` : "none",
-                            }}
-                            className="text-left p-3 rounded-xl border flex items-start gap-2.5 cursor-pointer hover:border-zinc-300 transition-all shadow-xs"
-                          >
-                            <span
-                              style={{ backgroundColor: c.iconBg, color: c.iconColor }}
-                              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                            >
-                              <HubIcon icon={c.icon} size={17} />
-                            </span>
-                            <span className="min-w-0">
-                              <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
-                                {c.title}
-                              </span>
-                              <span style={{ color: palette.textMuted, fontSize: 12 }} className="block leading-tight mt-0.5">
-                                {c.subtitle}
-                              </span>
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Hilo de Mensajes del Chat (SCROLL INDEPENDIENTE) */}
+                {/* Hilo de Mensajes del Chat y Escenarios en flujo con Scroll */}
                 <div className="flex-1 overflow-y-auto min-h-0 space-y-4 py-2 pr-1 scrollbar-thin">
+                  {/* 4 Tarjetas de escenarios sugeridos (Fluyen con el scroll natural) */}
+                  <div className="pb-1">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Consultas y Escenarios Rápidos
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setCollapseScenariosHeader((v) => !v)}
+                        className="text-[11.5px] text-zinc-500 hover:text-zinc-800 flex items-center gap-1 cursor-pointer"
+                        title={collapseScenariosHeader ? "Mostrar escenarios" : "Ocultar escenarios para más espacio"}
+                      >
+                        <span>{collapseScenariosHeader ? "Mostrar tarjetas" : "Minimizar"}</span>
+                        <HubIcon icon={collapseScenariosHeader ? ChevronDown : ChevronUp} size={13} />
+                      </button>
+                    </div>
+
+                    {!collapseScenariosHeader && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 animate-in fade-in">
+                        {currentScenarioCards.map((c) => {
+                          const isActive = activeScenario === c.id;
+                          return (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => handleScenario(c.id)}
+                              style={{
+                                borderColor: isActive ? palette.accentCitation : palette.borderDefault,
+                                backgroundColor: palette.bgSurface,
+                                boxShadow: isActive ? `0 0 0 1px ${palette.accentCitation}` : "none",
+                              }}
+                              className="text-left p-3 rounded-xl border flex items-start gap-2.5 cursor-pointer hover:border-zinc-300 transition-all shadow-xs"
+                            >
+                              <span
+                                style={{ backgroundColor: c.iconBg, color: c.iconColor }}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                              >
+                                <HubIcon icon={c.icon} size={17} />
+                              </span>
+                              <span className="min-w-0">
+                                <span style={{ fontSize: 13.5 }} className="block font-semibold leading-tight text-zinc-900">
+                                  {c.title}
+                                </span>
+                                <span style={{ color: palette.textMuted, fontSize: 12 }} className="block leading-tight mt-0.5">
+                                  {c.subtitle}
+                                </span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                   {chatMessages.length === 0 ? (
                     <div
                       style={{
