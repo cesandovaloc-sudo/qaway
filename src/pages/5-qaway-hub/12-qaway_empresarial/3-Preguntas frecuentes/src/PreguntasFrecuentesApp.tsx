@@ -525,12 +525,11 @@ export default function PreguntasFrecuentesApp() {
 
   return (
     <div className="min-h-screen antialiased selection:bg-slate-200 selection:text-slate-900 bg-[#f8fafc] text-[#1e293b] flex flex-col">
-      {/* 1. ENCABEZADO INSTITUCIONAL A ANCHO COMPLETO (100% FULL-WIDTH CON SCROLL REVEAL) */}
+      {/* 1. ENCABEZADO INSTITUCIONAL A ANCHO COMPLETO (100% FULL-WIDTH) */}
       <HeaderBanner
         totalCases={totalCasesCount}
         isAdmin={isAdmin}
         onOpenNewCaseModal={handleOpenNewCaseModal}
-        isVisible={isHeroVisible}
       />
 
       {/* CONTENEDOR PRINCIPAL ERGONÓMICO CON ESPACIADO COMPACTO */}
