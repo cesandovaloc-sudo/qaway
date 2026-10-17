@@ -60,6 +60,11 @@ import {
   Building2,
 } from "lucide-react";
 import { HubIcon } from "./components/ui/HubIcon";
+import {
+  queryGeminiRAG,
+  getStoredGeminiApiKey,
+  saveStoredGeminiApiKey,
+} from "./services/geminiRAGService";
 
 type RagThemeId = "rag-neutral" | "rag-legal" | "rag-finance";
 type InspectorTab = 1 | 2 | 3;
@@ -418,16 +423,31 @@ interface AiProvider {
 
 const DEFAULT_PROVIDERS: AiProvider[] = [
   {
+    id: "google",
+    name: "Google DeepMind",
+    company: "Google LLC",
+    logoColor: "#2563EB",
+    badge: "LLM Primario (Gemini)",
+    models: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash", "text-embedding-004"],
+    selectedModel: "gemini-1.5-flash",
+    status: "active",
+    latency: 142,
+    role: "primary_llm",
+    description: "Ventana de contexto masiva y velocidad ultrarrápida. Motor nativo RAG para leyes y matrices.",
+    apiKeyMask: "AIzaSy••••••••••••••••••••41Z9",
+    contextWindow: "1M-2M tokens",
+  },
+  {
     id: "openai",
     name: "OpenAI",
     company: "OpenAI Inc.",
     logoColor: "#10A37F",
-    badge: "LLM Primario",
+    badge: "Razonamiento Multimodal",
     models: ["gpt-4o", "gpt-4o-mini", "o1-preview", "text-embedding-3-small", "text-embedding-3-large"],
     selectedModel: "gpt-4o",
-    status: "active",
+    status: "connected",
     latency: 184,
-    role: "primary_llm",
+    role: "standby",
     description: "Líder de razonamiento multimodal y generación ejecutiva de alta coherencia sintáctica.",
     apiKeyMask: "sk-proj-••••••••••••••••••••39A2",
     contextWindow: "128k tokens",
@@ -446,21 +466,6 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     description: "Benchmark líder en análisis de contratos, normativas densas y reducción de alucinaciones.",
     apiKeyMask: "sk-ant-••••••••••••••••••••88B1",
     contextWindow: "200k tokens",
-  },
-  {
-    id: "google",
-    name: "Google DeepMind",
-    company: "Google LLC",
-    logoColor: "#2563EB",
-    badge: "Contexto Masivo",
-    models: ["gemini-1.5-pro", "gemini-1.5-flash", "text-embedding-004"],
-    selectedModel: "gemini-1.5-pro",
-    status: "connected",
-    latency: 162,
-    role: "standby",
-    description: "Ventana de contexto masiva de hasta 2 millones de tokens. Ideal para repositorios enteros de leyes.",
-    apiKeyMask: "AIzaSy••••••••••••••••••••41Z9",
-    contextWindow: "2M tokens",
   },
   {
     id: "cohere",
@@ -690,22 +695,29 @@ export default function CriteriosApp() {
   const [configTab, setConfigTab] = useState<"providers" | "engine">("providers");
 
   // Módulo de 7 Proveedores de IA
-  const [aiProviders, setAiProviders] = useState<AiProvider[]>(DEFAULT_PROVIDERS);
-  const [activeLlmProviderId, setActiveLlmProviderId] = useState<string>("openai");
+  const [aiProviders, setAiProviders] = useState<AiProvider[]>(() => {
+    const savedGeminiKey = getStoredGeminiApiKey();
+    if (savedGeminiKey) {
+      const masked = savedGeminiKey.slice(0, 6) + "••••••••" + savedGeminiKey.slice(-4);
+      return DEFAULT_PROVIDERS.map((p) => (p.id === "google" ? { ...p, apiKeyMask: masked } : p));
+    }
+    return DEFAULT_PROVIDERS;
+  });
+  const [activeLlmProviderId, setActiveLlmProviderId] = useState<string>("google");
   const [activeRerankerProviderId, setActiveRerankerProviderId] = useState<string>("cohere");
   const [activeEmbeddingProviderId, setActiveEmbeddingProviderId] = useState<string>("openai");
 
-  // Proveedor LLM activo resuelto con fallback seguro
+  // Proveedor LLM activo resuelto con fallback seguro (Google Gemini por defecto)
   const activeLlmProvider =
     aiProviders.find((p) => p.id === activeLlmProviderId) ||
     aiProviders[0] || {
-      id: "openai",
-      name: "OpenAI GPT-4o",
-      selectedModel: "gpt-4o",
-      contextWindow: "128k",
-      latency: 180,
-      apiKeyMask: "sk-proj-••••••••••••••••••••3x9A",
-      models: ["gpt-4o", "gpt-4o-mini", "o1-preview"],
+      id: "google",
+      name: "Google DeepMind",
+      selectedModel: "gemini-1.5-flash",
+      contextWindow: "1M-2M tokens",
+      latency: 142,
+      apiKeyMask: "AIzaSy••••••••••••••••••••41Z9",
+      models: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"],
     };
 
   // Sesión activa y mensajes de la sesión activa (nunca hardcodeados entre sesiones)
@@ -1010,7 +1022,7 @@ export default function CriteriosApp() {
     setHeaderSearch("");
   }
 
-  function handleSendMessage(textToSend?: string) {
+  async function handleSendMessage(textToSend?: string) {
     const q = (textToSend !== undefined ? textToSend : query).trim();
     if (!q) return;
 
@@ -1041,30 +1053,88 @@ export default function CriteriosApp() {
     setQuery("");
     setIsSearching(true);
 
-    setTimeout(() => {
-      const lowerQ = q.toLowerCase().trim();
-      const activeProjName = (projects.find((p) => p.id === activeProjectId) || projects[0]).name;
-      const activeProvider = aiProviders.find((p) => p.id === activeLlmProviderId) || aiProviders[0];
-      const activeSources = projectSources.filter((s) => s.projectId === activeProjectId);
+    const lowerQ = q.toLowerCase().trim();
+    const activeProjName = (projects.find((p) => p.id === activeProjectId) || projects[0]).name;
+    const activeProvider = aiProviders.find((p) => p.id === activeLlmProviderId) || aiProviders[0];
+    const activeSources = projectSources.filter((s) => s.projectId === activeProjectId);
 
-      // Detectar saludos o mensajes conversacionales cortos sin intención de búsqueda documental
-      const isConversationalGreeting =
-        /^(hola|buenos d[ií]as|buenas tardes|buenas noches|buenas|hey|saludos|qu[eé] tal|c[oó]mo est[aá]s|gracias|muchas gracias|ok|listo|perfecto|ayuda|qu[eé] puedes hacer|qui[eé]n eres)([!.,?\s].*)?$/i.test(
-          lowerQ
-        ) &&
-        !lowerQ.includes("horas") &&
-        !lowerQ.includes("ebitda") &&
-        !lowerQ.includes("ley") &&
-        !lowerQ.includes("artículo") &&
-        !lowerQ.includes("manual") &&
-        !lowerQ.includes("provisión") &&
-        !lowerQ.includes("resumen");
+    // Detectar saludos o mensajes conversacionales cortos sin intención de búsqueda documental
+    const isConversationalGreeting =
+      /^(hola|buenos d[ií]as|buenas tardes|buenas noches|buenas|hey|saludos|qu[eé] tal|c[oó]mo est[aá]s|gracias|muchas gracias|ok|listo|perfecto|ayuda|qu[eé] puedes hacer|qui[eé]n eres)([!.,?\s].*)?$/i.test(
+        lowerQ
+      ) &&
+      !lowerQ.includes("horas") &&
+      !lowerQ.includes("ebitda") &&
+      !lowerQ.includes("ley") &&
+      !lowerQ.includes("artículo") &&
+      !lowerQ.includes("manual") &&
+      !lowerQ.includes("provisión") &&
+      !lowerQ.includes("resumen");
 
-      let ansText = "";
-      let hasTable = false;
-      let tableData;
-      let turnSources: { id: number; name: string; section: string; tab: InspectorTab }[] = [];
+    let ansText = "";
+    let hasTable = false;
+    let tableData: any = undefined;
+    let turnSources: { id: number; name: string; section: string; tab: InspectorTab }[] = [];
+    let latencyLabel = `${activeProvider.latency} ms (${activeProvider.name})`;
 
+    const isGeminiActive = activeProvider.id === "google";
+    const geminiApiKey = getStoredGeminiApiKey();
+
+    // Inferencia real con Google Gemini si está activo y hay clave configurada
+    if (isGeminiActive && !isConversationalGreeting && geminiApiKey) {
+      try {
+        const geminiResult = await queryGeminiRAG({
+          query: q,
+          projectSources: activeSources.map((s, idx) => ({
+            id: s.id,
+            title: s.title,
+            type: s.type,
+            badge: s.badge,
+            description: s.description,
+            tab: s.inspectorTab,
+          })),
+          projectName: activeProjName,
+          model: activeProvider.selectedModel || "gemini-1.5-flash",
+          apiKey: geminiApiKey,
+        });
+
+        if (geminiResult.success && geminiResult.text) {
+          ansText = geminiResult.text;
+          latencyLabel = `${geminiResult.latencyMs} ms (Gemini en vivo)`;
+          if (geminiResult.tableData && geminiResult.tableData.length > 0) {
+            hasTable = true;
+            tableData = geminiResult.tableData;
+          }
+          if (geminiResult.citations.length > 0) {
+            turnSources = geminiResult.citations
+              .map((citNum) => {
+                const src = activeSources[citNum - 1];
+                if (!src) return null;
+                return {
+                  id: citNum,
+                  name: src.title,
+                  section: src.badge,
+                  tab: src.inspectorTab,
+                };
+              })
+              .filter(Boolean) as { id: number; name: string; section: string; tab: InspectorTab }[];
+          }
+          if (turnSources.length === 0 && activeSources.length > 0) {
+            turnSources = activeSources.slice(0, 2).map((s, idx) => ({
+              id: idx + 1,
+              name: s.title,
+              section: s.badge,
+              tab: s.inspectorTab,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("[Gemini RAG] Fallback al motor local RAG:", err);
+      }
+    }
+
+    // Si no se ejecutó llamada real o falló, procesar respuesta RAG local determinística
+    if (!ansText) {
       if (activeSources.length === 0) {
         if (isConversationalGreeting) {
           ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}". Actualmente este proyecto no cuenta con fuentes ni documentos indexados. Puedes cargar tus archivos (PDF, Excel, Word o carpetas completas) usando el botón "+ Carga de doc" en el panel lateral para habilitar consultas RAG con citas exactas.`;
@@ -1076,7 +1146,7 @@ export default function CriteriosApp() {
         if (lowerQ.startsWith("gracias") || lowerQ.includes("muchas gracias")) {
           ansText = `¡Con gusto, Carlos! Quedo atento si necesitas cruzar otra consulta o revisar documentos en el proyecto "${activeProjName}".`;
         } else {
-          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}" (${activeSources.length} fuente(s) indexada(s) con ${activeProvider.name}). Escribe tu consulta sobre normas, matrices o manuales —o carga más documentos desde el panel izquierdo— y te responderé con trazabilidad exacta.`;
+          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}" (${activeSources.length} fuente(s) indexada(s) con Google Gemini 1.5). Escribe tu consulta sobre normas, matrices o manuales —o carga más documentos desde el panel izquierdo— y te responderé con trazabilidad exacta.`;
         }
         turnSources = [];
       } else if (
@@ -1137,35 +1207,35 @@ export default function CriteriosApp() {
           tab: s.inspectorTab,
         }));
       }
+    }
 
-      const assistantTurn: ChatTurn = {
-        id: `turn-a-${Date.now()}`,
-        sender: "assistant",
-        text: ansText,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        latency: `${activeProvider.latency} ms (${activeProvider.name})`,
-        sourcesCount: turnSources.length,
-        scenarioId: activeScenario,
-        hasTable,
-        tableData,
-        sources: turnSources,
-      };
+    const assistantTurn: ChatTurn = {
+      id: `turn-a-${Date.now()}`,
+      sender: "assistant",
+      text: ansText,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      latency: latencyLabel,
+      sourcesCount: turnSources.length,
+      scenarioId: activeScenario,
+      hasTable,
+      tableData,
+      sources: turnSources,
+    };
 
-      setChatSessions((prev) =>
-        prev.map((s) => {
-          if (s.id !== targetSessionId) return s;
-          const nextTurns = [...s.turns, assistantTurn];
-          return {
-            ...s,
-            preview: ansText.slice(0, 90) + "...",
-            messagesCount: nextTurns.length,
-            provider: activeProvider.name,
-            turns: nextTurns,
-          };
-        })
-      );
-      setIsSearching(false);
-    }, 350);
+    setChatSessions((prev) =>
+      prev.map((s) => {
+        if (s.id !== targetSessionId) return s;
+        const nextTurns = [...s.turns, assistantTurn];
+        return {
+          ...s,
+          preview: ansText.slice(0, 90) + "...",
+          messagesCount: nextTurns.length,
+          provider: activeProvider.name,
+          turns: nextTurns,
+        };
+      })
+    );
+    setIsSearching(false);
   }
 
   function handleResetChat() {
@@ -2866,9 +2936,11 @@ export default function CriteriosApp() {
 
                             {/* Texto explicativo real del turno con citas interactivas inline */}
                             <p style={{ fontSize: 14.5, lineHeight: 1.65, color: palette.textPrimary }}>
-                              {msg.text.split(/(\[[123]\])/g).map((part, idx) => {
-                                if (part === "[1]" || part === "[2]" || part === "[3]") {
-                                  const tabNum = Number(part.replace(/\D/g, "")) as InspectorTab;
+                              {msg.text.split(/(\[\d+\])/g).map((part, idx) => {
+                                const match = part.match(/^\[(\d+)\]$/);
+                                if (match) {
+                                  const citNum = Number(match[1]);
+                                  const tabNum = (citNum >= 1 && citNum <= 3 ? citNum : 1) as InspectorTab;
                                   return (
                                     <button
                                       key={idx}
@@ -2880,8 +2952,9 @@ export default function CriteriosApp() {
                                         borderColor: `${palette.accentCitation}40`,
                                       }}
                                       className="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
+                                      title={`Abrir evidencia [${citNum}] en inspector`}
                                     >
-                                      {tabNum}
+                                      {citNum}
                                     </button>
                                   );
                                 }
@@ -3963,9 +4036,16 @@ export default function CriteriosApp() {
                                     onClick={() => {
                                       if (isEditingKey) {
                                         if (apiKeyDraft.trim()) {
+                                          if (prov.id === "google") {
+                                            saveStoredGeminiApiKey(apiKeyDraft.trim());
+                                          }
+                                          const cleanKey = apiKeyDraft.trim();
+                                          const masked = cleanKey.length > 10
+                                            ? cleanKey.slice(0, 6) + "••••••••" + cleanKey.slice(-4)
+                                            : cleanKey;
                                           setAiProviders((prev) =>
                                             prev.map((p) =>
-                                              p.id === prov.id ? { ...p, apiKeyMask: apiKeyDraft.trim() } : p
+                                              p.id === prov.id ? { ...p, apiKeyMask: masked } : p
                                             )
                                           );
                                         }
@@ -3973,7 +4053,11 @@ export default function CriteriosApp() {
                                         setApiKeyDraft("");
                                       } else {
                                         setEditingApiKeyId(prov.id);
-                                        setApiKeyDraft(prov.apiKeyMask);
+                                        if (prov.id === "google") {
+                                          setApiKeyDraft(getStoredGeminiApiKey() || "");
+                                        } else {
+                                          setApiKeyDraft(prov.apiKeyMask);
+                                        }
                                       }
                                     }}
                                     className="px-2 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-[11px] font-semibold text-zinc-700 cursor-pointer shrink-0"
