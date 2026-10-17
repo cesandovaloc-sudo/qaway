@@ -8,7 +8,8 @@ import {
   GraduationCap,
   Search,
   Plus,
-  AlertCircle
+  AlertCircle,
+  ChevronsUpDown
 } from 'lucide-react';
 import { DirectionData, DirectionId, ScoredCasuistica } from '../types/casuistica';
 import { CaseAccordion } from './CaseAccordion';
@@ -24,6 +25,10 @@ interface CasesListProps {
   onDeleteCase: (item: ScoredCasuistica) => void;
   onAddNewCase: () => void;
   onClearSearch: () => void;
+  allowMultipleOpen: boolean;
+  onToggleAllowMultiple: () => void;
+  onToggleDirectionAll: () => void;
+  isAllOpenInDirection: boolean;
 }
 
 const renderHeaderIcon = (mode: 'direction' | 'search', dirId: DirectionId) => {
@@ -58,7 +63,11 @@ export const CasesList: React.FC<CasesListProps> = ({
   onEditCase,
   onDeleteCase,
   onAddNewCase,
-  onClearSearch
+  onClearSearch,
+  allowMultipleOpen,
+  onToggleAllowMultiple,
+  onToggleDirectionAll,
+  isAllOpenInDirection
 }) => {
   const countLabel =
     items.length === 1 ? '1 casuística registrada' : `${items.length} casuísticas registradas`;
@@ -84,8 +93,39 @@ export const CasesList: React.FC<CasesListProps> = ({
           </div>
         </div>
 
-        {isAdmin && (
-          <div className="flex items-center gap-2">
+        {/* Botones de control del bloque: Visualizar varios desplegados y Añadir */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {items.length > 0 && (
+            <>
+              {/* Botón para poder visualizar varios desplegados (sin que se colapsen) */}
+              <button
+                type="button"
+                onClick={onToggleAllowMultiple}
+                aria-pressed={allowMultipleOpen}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition cursor-pointer ${
+                  allowMultipleOpen
+                    ? 'bg-rose-50 text-rose-800 border-rose-300 shadow-2xs font-bold'
+                    : 'bg-white text-slate-600 border-slate-200/90 hover:bg-slate-50'
+                }`}
+                title="Permitir visualizar varias preguntas desplegadas simultáneamente sin que se colapsen"
+              >
+                <ChevronsUpDown className="w-3.5 h-3.5 text-rose-600" />
+                <span>{allowMultipleOpen ? 'Varios desplegados: Sí' : 'Visualizar varios desplegados'}</span>
+              </button>
+
+              {/* Botón para expandir o contraer todas las de este bloque */}
+              <button
+                type="button"
+                onClick={onToggleDirectionAll}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                title={isAllOpenInDirection ? 'Contraer todas las preguntas de este bloque' : 'Desplegar todas las preguntas de este bloque'}
+              >
+                <span>{isAllOpenInDirection ? 'Contraer todo' : 'Desplegar todo'}</span>
+              </button>
+            </>
+          )}
+
+          {isAdmin && (
             <button
               type="button"
               onClick={onAddNewCase}
@@ -95,8 +135,8 @@ export const CasesList: React.FC<CasesListProps> = ({
               <Plus className="w-3.5 h-3.5 text-[#b91c1c]" />
               <span>+ Añadir a {direction.code}</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Lista de Acordeones o Estado Vacío */}

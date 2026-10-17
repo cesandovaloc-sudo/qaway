@@ -63,13 +63,13 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
       id={`case-card-${caseItem.id}`}
       className={`rounded-2xl overflow-hidden transition-all duration-200 ${
         isOpen
-          ? 'border border-rose-200/60 bg-[#fffbfa] shadow-[0_1px_4px_rgba(216,27,61,0.03)]'
-          : 'border border-slate-200/80 bg-[#f8fafc] hover:border-slate-300 shadow-[0_1px_3px_rgba(15,23,42,0.02)]'
+          ? 'border border-rose-200/80 bg-white shadow-[0_1px_4px_rgba(216,27,61,0.03)]'
+          : 'border border-slate-200/80 bg-white hover:border-slate-300 shadow-[0_1px_3px_rgba(15,23,42,0.02)]'
       }`}
     >
       <div
         className={`flex items-center justify-between transition-colors ${
-          isOpen ? 'bg-rose-50/20' : 'bg-[#f8fafc] hover:bg-[#f1f5f9]/70'
+          isOpen ? 'bg-rose-50/30 border-b border-rose-100/60' : 'bg-rose-50/20 hover:bg-rose-50/35'
         }`}
       >
         <button
@@ -82,8 +82,8 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
             <span
               className={`flex-shrink-0 w-8 h-7 rounded-md text-xs flex items-center justify-center border transition-colors ${
                 isOpen
-                  ? 'bg-rose-50 text-rose-800 border-rose-200/70 font-bold'
-                  : 'bg-slate-200/80 text-slate-700 border-slate-300/40 font-bold'
+                  ? 'bg-rose-100 text-rose-800 border-rose-200 font-bold'
+                  : 'bg-rose-50/70 text-slate-700 border-rose-200/50 font-bold'
               }`}
             >
               {caseItem.number}
@@ -92,11 +92,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span
-                  className={`inline-block text-xs uppercase tracking-wider px-2 py-0.5 rounded transition-colors ${
-                    isOpen
-                      ? 'text-rose-800 bg-rose-50/70 border border-rose-200/50 font-semibold'
-                      : 'text-slate-600 bg-slate-200/80 font-medium'
-                  }`}
+                  className="inline-block text-xs uppercase tracking-wider px-2 py-0.5 rounded text-rose-800 bg-rose-50/70 border border-rose-200/50 font-semibold"
                 >
                   {caseItem.dirCode} • {caseItem.dirName}
                 </span>
@@ -119,8 +115,8 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
           <span
             className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
               isOpen
-                ? 'rotate-180 bg-rose-50/80 text-rose-700 border border-rose-200/50'
-                : 'bg-slate-200/70 text-slate-600'
+                ? 'rotate-180 bg-rose-100 text-rose-700 border border-rose-200/60'
+                : 'bg-white/80 text-slate-500 border border-slate-200/60'
             }`}
           >
             <ChevronDown className="w-4 h-4" />
@@ -149,9 +145,9 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
         )}
       </div>
 
-      {/* Cuerpo desplegable con las 4 secciones */}
+      {/* Cuerpo desplegable con las 4 secciones (Fondo normal 100% blanco) */}
       {isOpen && (
-        <div className="border-t border-rose-100/40 bg-white px-4 py-5 sm:px-6 sm:py-5">
+        <div className="border-t border-slate-200/60 bg-white px-4 py-5 sm:px-6 sm:py-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Sección 1: Criterio Pedagógico/Normativo (disponible para lectores de pantalla) */}
             <div className="sr-only" aria-hidden="false">

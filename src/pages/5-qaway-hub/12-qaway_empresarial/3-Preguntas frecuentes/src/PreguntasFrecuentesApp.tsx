@@ -197,6 +197,9 @@ export default function PreguntasFrecuentesApp() {
     return false;
   });
 
+  // Estado para permitir múltiples preguntas abiertas simultáneamente sin colapsarse
+  const [allowMultipleOpen, setAllowMultipleOpen] = useState(false);
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTab, setModalTab] = useState<'form' | 'list' | 'cloud'>('form');
@@ -333,7 +336,7 @@ export default function PreguntasFrecuentesApp() {
     };
   }, [directionsData, selectedDirectionId, searchQuery, currentDirection]);
 
-  // Acciones sobre acordeones (acordeón exclusivo: al seleccionar uno, los demás se contraen)
+  // Acciones sobre acordeones
   const handleToggleCase = (caseId: string) => {
     const updated = directionsData.map((dir) => ({
       ...dir,
@@ -341,7 +344,7 @@ export default function PreguntasFrecuentesApp() {
         if (c.id === caseId) {
           return { ...c, isOpen: !c.isOpen };
         }
-        return { ...c, isOpen: false };
+        return allowMultipleOpen ? c : { ...c, isOpen: false };
       })
     }));
     setDirectionsData(updated);
@@ -350,6 +353,26 @@ export default function PreguntasFrecuentesApp() {
   const isAnyOpen = useMemo(() => {
     return items.some((item) => item.isOpen);
   }, [items]);
+
+  const isAllOpenInDirection = useMemo(() => {
+    if (items.length === 0) return false;
+    return items.every((item) => item.isOpen);
+  }, [items]);
+
+  const handleToggleDirectionAll = () => {
+    const shouldOpen = !isAllOpenInDirection;
+    const targetIds = new Set(items.map((i) => i.id));
+    const updated = directionsData.map((dir) => ({
+      ...dir,
+      cases: dir.cases.map((c) =>
+        targetIds.has(c.id) ? { ...c, isOpen: shouldOpen } : c
+      )
+    }));
+    if (shouldOpen) {
+      setAllowMultipleOpen(true);
+    }
+    setDirectionsData(updated);
+  };
 
   const handleToggleAll = () => {
     const shouldOpen = !isAnyOpen;
@@ -360,7 +383,28 @@ export default function PreguntasFrecuentesApp() {
         targetIds.has(c.id) ? { ...c, isOpen: shouldOpen } : c
       )
     }));
+    if (shouldOpen) {
+      setAllowMultipleOpen(true);
+    }
     setDirectionsData(updated);
+  };
+
+  // Scroll asistido calibrado exclusivamente hasta donde están los botones de las direcciones
+  const scrollToDirectionsSection = () => {
+    setTimeout(() => {
+      const el = document.getElementById('seccion-direcciones');
+      if (el) {
+        const yOffset = -60; // margen seguro para la barra blanca fija
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 40);
+  };
+
+  const handleSelectDirection = (id: DirectionId) => {
+    setSelectedDirectionId(id);
+    setSearchQuery('');
+    scrollToDirectionsSection();
   };
 
   const handleOpenFirstMatch = () => {
@@ -372,13 +416,8 @@ export default function PreguntasFrecuentesApp() {
     }));
     setDirectionsData(updated);
 
-    // Scroll asistido
-    setTimeout(() => {
-      const el = document.getElementById(`case-card-${first.id}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
+    // Scroll calibrado justo hasta donde están los botones de las direcciones
+    scrollToDirectionsSection();
   };
 
   // Creación y edición
@@ -485,10 +524,7 @@ export default function PreguntasFrecuentesApp() {
           directions={directionsData}
           selectedDirectionId={selectedDirectionId}
           isSearching={!!searchQuery.trim()}
-          onSelectDirection={(id) => {
-            setSelectedDirectionId(id);
-            setSearchQuery('');
-          }}
+          onSelectDirection={handleSelectDirection}
         />
 
         {/* 3. BARRA DE BÚSQUEDA Y FILTRO */}
@@ -516,6 +552,10 @@ export default function PreguntasFrecuentesApp() {
           onDeleteCase={(item) => handleDeleteCase(item.id, item.dirId)}
           onAddNewCase={handleOpenNewCaseModal}
           onClearSearch={() => setSearchQuery('')}
+          allowMultipleOpen={allowMultipleOpen}
+          onToggleAllowMultiple={() => setAllowMultipleOpen((prev) => !prev)}
+          onToggleDirectionAll={handleToggleDirectionAll}
+          isAllOpenInDirection={isAllOpenInDirection}
         />
 
         {/* 5. FOOTER INSTITUCIONAL Y SWITCH DE MODO ADMINISTRADOR */}
