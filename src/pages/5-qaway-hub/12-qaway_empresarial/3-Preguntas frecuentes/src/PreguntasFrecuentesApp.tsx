@@ -394,11 +394,34 @@ export default function PreguntasFrecuentesApp() {
     setTimeout(() => {
       const el = document.getElementById('seccion-direcciones');
       if (el) {
-        const yOffset = -60; // margen seguro para la barra blanca fija
+        const yOffset = -72; // margen seguro para la barra blanca fija superior
         const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
     }, 40);
+  };
+
+  // Salto directo desde el Super Filtro estilo CRM a una casuística específica
+  const handleSelectQuickResult = (item: ScoredCasuistica) => {
+    // 1. Fijar dirección
+    setSelectedDirectionId(item.dirId);
+
+    // 2. Desplegar la casuística seleccionada
+    const updated = directionsData.map((dir) => ({
+      ...dir,
+      cases: dir.cases.map((c) => (c.id === item.id ? { ...c, isOpen: true } : c))
+    }));
+    setDirectionsData(updated);
+
+    // 3. Scroll suave directo a la tarjeta de la pregunta
+    setTimeout(() => {
+      const targetCard = document.getElementById(`case-card-${item.id}`);
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        scrollToDirectionsSection();
+      }
+    }, 60);
   };
 
   const handleSelectDirection = (id: DirectionId) => {
@@ -526,7 +549,7 @@ export default function PreguntasFrecuentesApp() {
           onSelectDirection={handleSelectDirection}
         />
 
-        {/* 3. BARRA DE BÚSQUEDA Y FILTRO */}
+        {/* 3. BARRA DE BÚSQUEDA Y FILTRO CON SUPER FILTRO ESTILO CRM */}
         <SearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -537,6 +560,8 @@ export default function PreguntasFrecuentesApp() {
           selectedDirection={currentDirection}
           isSearching={mode === 'search'}
           resultsCount={items.length}
+          quickResults={items}
+          onSelectQuickResult={handleSelectQuickResult}
         />
 
         {/* 4. LISTA DE CASUÍSTICAS Y ACORDEONES */}

@@ -83,7 +83,11 @@ export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
   onSelectDirection
 }) => {
   return (
-    <section aria-label="Direcciones de Educación" id="seccion-direcciones">
+    <section
+      aria-label="Direcciones de Educación"
+      id="seccion-direcciones"
+      className="scroll-mt-20 sm:scroll-mt-24 transition-all"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4.5">
         {directions.map((dir) => {
           const isSelected = dir.id === selectedDirectionId && !isSearching;
