@@ -357,23 +357,81 @@ export const projectsService = {
         state.workItems.map((item) => item.id),
       ),
     }
-    setState({ ...state, workItems: [...state.workItems, workItem] })
+    const nextWorkItems = [...state.workItems, workItem]
+    const projectItems = nextWorkItems.filter((i) => i.projectId === workItem.projectId)
+    const nextProgress =
+      projectItems.length > 0
+        ? Math.round(
+            (projectItems.reduce((sum, i) => {
+              const weight = i.state === 'done' ? 1 : i.state === 'review' ? 0.75 : i.state === 'in_progress' ? 0.4 : 0
+              return sum + weight
+            }, 0) /
+              projectItems.length) *
+              100,
+          )
+        : 0
+    setState({
+      ...state,
+      workItems: nextWorkItems,
+      projects: state.projects.map((p) =>
+        p.id === workItem.projectId ? { ...p, progress: nextProgress } : p,
+      ),
+    })
     return workItem
   },
 
   updateWorkItem(workItemId: string, patch: Partial<WorkItem>): void {
+    const target = state.workItems.find((item) => item.id === workItemId)
+    const nextWorkItems = state.workItems.map((item) =>
+      item.id === workItemId ? { ...item, ...patch, id: item.id } : item,
+    )
+    const shouldSyncProgress = target && patch.state !== undefined && patch.state !== target.state
+    const nextProjects = shouldSyncProgress
+      ? state.projects.map((p) => {
+          if (p.id !== target.projectId) return p
+          const projectItems = nextWorkItems.filter((i) => i.projectId === target.projectId)
+          if (projectItems.length === 0) return p
+          const nextProgress = Math.round(
+            (projectItems.reduce((sum, i) => {
+              const weight = i.state === 'done' ? 1 : i.state === 'review' ? 0.75 : i.state === 'in_progress' ? 0.4 : 0
+              return sum + weight
+            }, 0) /
+              projectItems.length) *
+              100,
+          )
+          return { ...p, progress: nextProgress }
+        })
+      : state.projects
     setState({
       ...state,
-      workItems: state.workItems.map((item) =>
-        item.id === workItemId ? { ...item, ...patch, id: item.id } : item,
-      ),
+      workItems: nextWorkItems,
+      projects: nextProjects,
     })
   },
 
   deleteWorkItem(workItemId: string): void {
+    const target = state.workItems.find((item) => item.id === workItemId)
+    const nextWorkItems = state.workItems.filter((item) => item.id !== workItemId)
+    const nextProjects = target
+      ? state.projects.map((p) => {
+          if (p.id !== target.projectId) return p
+          const projectItems = nextWorkItems.filter((i) => i.projectId === target.projectId)
+          if (projectItems.length === 0) return { ...p, progress: 0 }
+          const nextProgress = Math.round(
+            (projectItems.reduce((sum, i) => {
+              const weight = i.state === 'done' ? 1 : i.state === 'review' ? 0.75 : i.state === 'in_progress' ? 0.4 : 0
+              return sum + weight
+            }, 0) /
+              projectItems.length) *
+              100,
+          )
+          return { ...p, progress: nextProgress }
+        })
+      : state.projects
     setState({
       ...state,
-      workItems: state.workItems.filter((item) => item.id !== workItemId),
+      workItems: nextWorkItems,
+      projects: nextProjects,
     })
   },
 

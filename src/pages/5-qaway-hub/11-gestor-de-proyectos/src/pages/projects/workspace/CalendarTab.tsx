@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, ChevronLeft, ChevronRight, Flag } from 'lucide-react'
 import { useProjectsDataset } from '@/hooks/useProjects'
 import { useProjectPerspective } from '../../../context/ProjectPerspectiveContext'
@@ -68,6 +68,10 @@ export function CalendarTab({ projectId, onOpenTask }: CalendarTabProps) {
   const [cursor, setCursor] = useState({ year: now.getFullYear(), month: now.getMonth() })
   const [editingDateFor, setEditingDateFor] = useState<string | null>(null)
 
+  const project = useMemo(
+    () => dataset.projects.find((item) => item.id === projectId),
+    [dataset.projects, projectId],
+  )
   const projectTasks = useMemo(
     () => dataset.workItems.filter((item) => item.projectId === projectId),
     [dataset, projectId],
@@ -76,6 +80,29 @@ export function CalendarTab({ projectId, onOpenTask }: CalendarTabProps) {
     () => dataset.milestones.filter((milestone) => milestone.projectId === projectId),
     [dataset, projectId],
   )
+
+  // Al cambiar de proyecto, enfocar automáticamente el mes donde este proyecto
+  // tiene sus tareas o hitos si el mes actual no tiene eventos de este proyecto.
+  useEffect(() => {
+    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth()
+    const prefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`
+    const allDates = [
+      ...projectTasks.map((t) => dateKey(t.endDate ?? t.startDate ?? t.followUpDate)),
+      ...projectMilestones.map((m) => dateKey(m.targetDate)),
+    ].filter((d): d is string => Boolean(d))
+
+    if (allDates.some((d) => d.startsWith(prefix)) || allDates.length === 0) {
+      setCursor({ year: currentYear, month: currentMonth })
+      return
+    }
+    const sorted = [...allDates].sort()
+    const first = sorted[0]
+    const [y, m] = first.split('-').map(Number)
+    if (y && m) {
+      setCursor({ year: y, month: m - 1 })
+    }
+  }, [projectId, projectTasks, projectMilestones])
 
   const today = todayKey()
 
@@ -150,11 +177,17 @@ export function CalendarTab({ projectId, onOpenTask }: CalendarTabProps) {
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
       <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-bold text-zinc-900">
-            <CalendarDays size={15} className="text-zinc-400" /> Calendario del proyecto
+          <h3 className="flex flex-wrap items-center gap-2 text-sm font-bold text-zinc-900">
+            <CalendarDays size={15} className="text-zinc-400" />
+            <span>Calendario · {project?.name ?? 'Proyecto'}</span>
+            {project && (
+              <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-zinc-700">
+                {project.code} · {project.progress}% avance
+              </span>
+            )}
           </h3>
           <p className="text-xs text-zinc-500">
-            Hitos normativos con fecha fija + tareas operativas
+            {projectMilestones.length} hitos normativos + {projectTasks.length} tareas propias de este proyecto
           </p>
         </div>
         <div className="ml-auto flex items-center gap-1.5">

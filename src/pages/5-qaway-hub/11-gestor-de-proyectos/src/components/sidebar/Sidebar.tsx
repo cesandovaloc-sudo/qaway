@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   FolderKanban,
@@ -12,13 +12,18 @@ import {
   Users,
   BookOpen,
   ChevronDown,
+  Plus,
+  Check,
 } from 'lucide-react'
+import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { useProjectsDataset, useTenantFilteredProjects } from '@/hooks/useProjects'
 import { useProjectPerspective } from '../../context/ProjectPerspectiveContext'
 
 interface NavChild {
   to: string
   label: string
+  code: string
+  progress: number
   statusColor: string
 }
 
@@ -34,6 +39,7 @@ interface NavItem {
 
 interface NavSection {
   title: string
+  subtitle?: string
   items: NavItem[]
 }
 
@@ -47,9 +53,13 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const [internalCollapsed] = useState(false)
   const collapsed = collapsedProp ?? internalCollapsed
   const [isProjectsExpanded, setIsProjectsExpanded] = useState(true)
+  const [isActiveSelectorOpen, setIsActiveSelectorOpen] = useState(false)
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
+  const [rememberedProjectId, setRememberedProjectId] = useState<string>('proj-minedu-2027')
 
   const { projects, workItems } = useProjectsDataset()
   const { currentPersona, isGestor } = useProjectPerspective()
+  const navigate = useNavigate()
 
   const myTaskCount = useMemo(() => {
     const openItems = workItems.filter((i) => i.state !== 'done')
@@ -89,24 +99,46 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const location = useLocation()
 
   // Proyecto activo por URL (Fase 23): /proyectos/:id. Los enlaces de
-  // PLANIFICACIÓN apuntan a ese proyecto; fuera de un proyecto usan el fallback.
+  // PLANIFICACIÓN apuntan a ese proyecto; fuera de un proyecto recuerdan el último activo.
   const modulePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
   const projectIdMatch = modulePath.match(/^\/proyectos\/([^/]+)/)
   const activeProjectId = projectIdMatch ? projectIdMatch[1] : null
-  const planningProjectId = activeProjectId ?? 'proj-minedu-2027'
+
+  useEffect(() => {
+    if (activeProjectId) {
+      setRememberedProjectId(activeProjectId)
+    }
+  }, [activeProjectId])
 
   // Hijos de CARTERA desde la entidad activa (Fase 24): proyectos de la
   // organización elegida o los principales de la cartera (no completados,
-  // hasta 5). Nunca fijos arbitrarios.
+  // hasta 8). Nunca fijos arbitrarios.
   const scopedProjects = useTenantFilteredProjects()
+
+  const planningProjectId = useMemo(() => {
+    if (activeProjectId) return activeProjectId
+    if (scopedProjects.some((p) => p.id === rememberedProjectId)) return rememberedProjectId
+    return scopedProjects[0]?.id ?? 'proj-minedu-2027'
+  }, [activeProjectId, rememberedProjectId, scopedProjects])
+
+  const activeProjectObj = useMemo(
+    () =>
+      projects.find((p) => p.id === planningProjectId) ??
+      scopedProjects[0] ??
+      projects[0],
+    [projects, planningProjectId, scopedProjects],
+  )
+
   const projectChildren: NavChild[] = useMemo(
     () =>
       scopedProjects
         .filter((project) => project.status !== 'completado')
-        .slice(0, 5)
+        .slice(0, 8)
         .map((project) => ({
           to: `/proyectos/${project.id}`,
           label: project.name,
+          code: project.code,
+          progress: project.progress,
           statusColor:
             project.health === 'optimo'
               ? 'bg-emerald-500'
@@ -150,7 +182,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           to: '/proyectos',
           label: 'Proyectos',
           icon: <FolderKanban size={18} />,
-          badge: projects.length,
+          badge: scopedProjects.length,
           badgeVariant: 'neutral',
           end: true,
           children: projectChildren,
@@ -159,6 +191,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     },
     {
       title: 'PLANIFICACIÓN',
+      subtitle: activeProjectObj?.code,
       items: [
         {
           to: `/proyectos/${planningProjectId}?tab=gantt`,
@@ -232,6 +265,22 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const isProjectChildActive = (to: string) =>
     activeProjectChild !== null && getHref(to) === activeProjectChild
 
+  // Verifica si un hijo de Proyectos corresponde al proyecto actualmente abierto en pantalla
+  // (incluso cuando estamos en ?tab=calendar, ?tab=gantt, etc.) para mantener su indicador visual.
+  const isCurrentContextProject = (to: string) =>
+    activeProjectId !== null && childProjectId(to) === activeProjectId
+
+  const handleSelectProjectInCascade = (projectId: string) => {
+    setRememberedProjectId(projectId)
+    setIsActiveSelectorOpen(false)
+    // Si ya estamos viendo una pestaña de proyecto (ej. ?tab=calendar), mantener esa pestaña
+    const currentTab = new URLSearchParams(location.search).get('tab')
+    const target = currentTab
+      ? `/proyectos/${projectId}?tab=${currentTab}`
+      : `/proyectos/${projectId}`
+    navigate(getHref(target))
+  }
+
   return (
     <aside
       className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-all duration-300 ${
@@ -285,15 +334,128 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         )}
       </div>
 
-      {/* Nav (Espaciado canónico App Inventario: py-4 px-3) */}
-      <nav className="flex-1 min-h-0 overflow-y-auto py-4 px-3 space-y-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* BLOQUE EN CASCADA 1: PROYECTO ACTIVO + ACCIONES RÁPIDAS (Estilo RAG Hub) */}
+      {!collapsed && (
+        <div className="px-3 pt-3 pb-2.5 border-b border-[var(--hub-border)] space-y-2 shrink-0">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
+              PROYECTO ACTIVO
+            </span>
+            {activeProjectObj && (
+              <span className="font-mono text-[11px] font-bold text-[var(--hub-brand)]">
+                {activeProjectObj.progress}%
+              </span>
+            )}
+          </div>
+
+          {/* Selector desplegable del Proyecto en Función */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsActiveSelectorOpen((prev) => !prev)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] hover:bg-[var(--hub-chip)] text-left transition-colors cursor-pointer shadow-2xs"
+              title={activeProjectObj?.name ?? 'Seleccionar proyecto'}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 ${
+                    activeProjectObj?.health === 'optimo'
+                      ? 'bg-emerald-500'
+                      : activeProjectObj?.health === 'atencion'
+                        ? 'bg-amber-500'
+                        : 'bg-rose-500'
+                  }`}
+                />
+                <div className="min-w-0">
+                  <div className="text-[13px] font-bold text-[var(--hub-text)] truncate leading-tight">
+                    {activeProjectObj?.name ?? 'Seleccionar proyecto'}
+                  </div>
+                  <div className="text-[11px] font-mono text-[var(--hub-dim)] truncate mt-0.5">
+                    {activeProjectObj?.code ?? '—'} · En función
+                  </div>
+                </div>
+              </div>
+              <ChevronDown
+                size={15}
+                className={`shrink-0 text-[var(--hub-dim)] transition-transform duration-200 ${
+                  isActiveSelectorOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {isActiveSelectorOpen && (
+              <div className="mt-1.5 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] p-1.5 shadow-lg space-y-0.5 max-h-60 overflow-y-auto z-50">
+                {scopedProjects.map((proj) => {
+                  const isSelected = proj.id === activeProjectObj?.id
+                  return (
+                    <button
+                      key={proj.id}
+                      type="button"
+                      onClick={() => handleSelectProjectInCascade(proj.id)}
+                      className={`w-full flex items-start gap-2 px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-[var(--hub-chip)] text-[var(--hub-text)]'
+                          : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-chip)] hover:text-[var(--hub-text)]'
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
+                          proj.health === 'optimo'
+                            ? 'bg-emerald-500'
+                            : proj.health === 'atencion'
+                              ? 'bg-amber-500'
+                              : 'bg-rose-500'
+                        }`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-medium leading-snug line-clamp-2">
+                          {proj.name}
+                        </div>
+                        <div className="text-[11px] font-mono text-[var(--hub-dim)] mt-0.5">
+                          {proj.code} · {proj.progress}% avance
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <Check size={14} className="shrink-0 text-[var(--hub-brand)] mt-1" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Botón directo en cascada: + Nuevo Proyecto */}
+          <button
+            type="button"
+            onClick={() => setIsCreateProjectOpen(true)}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-[var(--hub-brand)]/35 bg-[var(--hub-brand-soft,#fbf0ec)] hover:opacity-95 text-[13px] font-bold text-[var(--hub-brand)] transition-all cursor-pointer"
+          >
+            <Plus size={15} strokeWidth={2.4} />
+            <span>Nuevo Proyecto</span>
+          </button>
+        </div>
+      )}
+
+      {/* Nav (Espaciado canónico App Inventario: py-3 px-3) */}
+      <nav className="flex-1 min-h-0 overflow-y-auto py-3 px-3 space-y-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {sections.map((sec) => (
           <div key={sec.title} className="space-y-0.5">
             {collapsed ? (
               <div className="my-2.5 mx-auto w-7 h-[1px] bg-[var(--hub-border)]" />
             ) : (
-              <div className="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)] select-none">
-                {sec.title}
+              <div className="px-3 pt-2 pb-1 flex items-center justify-between gap-2 select-none">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
+                  {sec.title}
+                </span>
+                {sec.subtitle && (
+                  <span
+                    className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--hub-chip)] text-[var(--hub-text-soft)] truncate max-w-[115px]"
+                    title={`Vistas del proyecto ${activeProjectObj?.name ?? ''}`}
+                  >
+                    {sec.subtitle}
+                  </span>
+                )}
               </div>
             )}
 
@@ -306,6 +468,11 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                     <NavLink
                       to={getHref(item.to)}
                       end={item.end}
+                      onClick={() => {
+                        if (hasChildren && !collapsed) {
+                          setIsProjectsExpanded((prev) => !prev)
+                        }
+                      }}
                       className={() =>
                         `flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                           hasChildren && isProjectsExpanded && !collapsed
@@ -333,51 +500,53 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                               {item.badge}
                             </span>
                           )}
+                          {hasChildren && (
+                            <ChevronDown
+                              size={15}
+                              className={`shrink-0 text-[var(--hub-dim)] transition-transform duration-200 ${
+                                item.badge !== undefined ? 'ml-1' : 'ml-auto'
+                              } ${isProjectsExpanded ? 'rotate-180' : ''}`}
+                            />
+                          )}
                         </>
                       )}
                     </NavLink>
-
-                    {/* Botón chevron para desplegar opciones hijas */}
-                    {hasChildren && !collapsed && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setIsProjectsExpanded((prev) => !prev)
-                        }}
-                        className="p-2 ml-1 rounded-md text-[var(--hub-dim)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] transition-colors cursor-pointer"
-                        title={isProjectsExpanded ? 'Contraer proyectos' : 'Desplegar proyectos'}
-                        aria-label="Desplegar sub-opciones"
-                      >
-                        <ChevronDown
-                          size={14}
-                          className={`transition-transform duration-200 ${
-                            isProjectsExpanded ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </button>
-                    )}
                   </div>
 
-                  {/* Sub-elementos desplegados */}
+                  {/* Sub-elementos desplegados: tamaño legible 13.5px + % de avance propio */}
                   {hasChildren && isProjectsExpanded && !collapsed && item.children && (
-                    <div className="ml-5 pl-3 border-l border-[var(--hub-border)] my-1 space-y-0.5">
-                      {item.children.map((child) => (
-                        <NavLink
-                          key={child.to}
-                          to={getHref(child.to)}
-                          className={() =>
-                            `flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs transition-colors truncate ${
-                              isHrefActive(child.to) || isProjectChildActive(child.to)
-                                ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold'
-                                : 'text-[var(--hub-dim)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
-                            }`
-                          }
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${child.statusColor}`} />
-                          <span className="truncate">{child.label}</span>
-                        </NavLink>
-                      ))}
+                    <div className="ml-2 pl-2.5 border-l border-[var(--hub-border)] my-1.5 space-y-1">
+                      {item.children.map((child) => {
+                        const isStrictActive =
+                          isHrefActive(child.to) || isProjectChildActive(child.to)
+                        const isInProjectContext = isCurrentContextProject(child.to)
+                        return (
+                          <NavLink
+                            key={child.to}
+                            to={getHref(child.to)}
+                            title={`${child.label} (${child.progress}% avance)`}
+                            className={() =>
+                              `flex items-start justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] leading-snug transition-colors ${
+                                isStrictActive
+                                  ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
+                                  : isInProjectContext
+                                    ? 'bg-[var(--hub-chip)] text-[var(--hub-text)] font-medium border-l-2 border-[var(--hub-brand)]'
+                                    : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
+                              }`
+                            }
+                          >
+                            <div className="flex items-start gap-2 min-w-0">
+                              <span
+                                className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${child.statusColor}`}
+                              />
+                              <span className="line-clamp-2 break-words">{child.label}</span>
+                            </div>
+                            <span className="font-mono text-[11px] text-[var(--hub-dim)] shrink-0 mt-0.5">
+                              {child.progress}%
+                            </span>
+                          </NavLink>
+                        )
+                      })}
                     </div>
                   )}
 
