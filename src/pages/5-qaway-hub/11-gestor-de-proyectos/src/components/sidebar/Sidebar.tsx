@@ -42,7 +42,7 @@ interface NavSection {
 export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: boolean }) {
   const [internalCollapsed] = useState(false)
   const collapsed = collapsedProp ?? internalCollapsed
-  const [isSubprocessesExpanded, setIsSubprocessesExpanded] = useState(true)
+  const [isSubprocessesExpanded, setIsSubprocessesExpanded] = useState(false)
   const [isActiveSelectorOpen, setIsActiveSelectorOpen] = useState(false)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [rememberedProjectId, setRememberedProjectId] = useState<string>('proj-minedu-2027')
@@ -90,6 +90,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   }
 
   const location = useLocation()
+  const hasMilestoneQuery = new URLSearchParams(location.search).has('milestone')
 
   // Proyecto activo por URL (/proyectos/:id) o último proyecto seleccionado en cascada
   const modulePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
@@ -101,6 +102,12 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       setRememberedProjectId(activeProjectId)
     }
   }, [activeProjectId])
+
+  useEffect(() => {
+    if (hasMilestoneQuery) {
+      setIsSubprocessesExpanded(true)
+    }
+  }, [hasMilestoneQuery])
 
   const scopedProjects = useTenantFilteredProjects()
 
@@ -241,7 +248,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               PROYECTO ACTIVO
             </span>
             {activeProjectObj && (
-              <span className="font-mono text-[11px] font-bold text-[var(--hub-brand)]">
+              <span className="text-[11.5px] font-bold tabular-nums text-[var(--hub-brand)]">
                 {activeProjectObj.progress}%
               </span>
             )}
@@ -256,9 +263,9 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] hover:bg-[var(--hub-chip)] text-left transition-colors cursor-pointer shadow-2xs"
               title={activeProjectObj?.name ?? 'Seleccionar proyecto'}
             >
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-start gap-2 min-w-0">
                 <span
-                  className={`w-2 h-2 rounded-full shrink-0 ${
+                  className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
                     activeProjectObj?.health === 'optimo'
                       ? 'bg-emerald-500'
                       : activeProjectObj?.health === 'atencion'
@@ -267,11 +274,8 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                   }`}
                 />
                 <div className="min-w-0">
-                  <div className="text-[13.5px] font-bold text-[var(--hub-text)] truncate leading-tight">
+                  <div className="text-[13.5px] font-semibold text-[var(--hub-text)] line-clamp-2 leading-snug">
                     {activeProjectObj?.name ?? 'Seleccionar proyecto'}
-                  </div>
-                  <div className="text-[11px] font-mono text-[var(--hub-dim)] truncate mt-0.5">
-                    {activeProjectObj?.code ?? '—'} · En función
                   </div>
                 </div>
               </div>
@@ -311,8 +315,8 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                         <div className="text-[13.5px] font-medium leading-snug line-clamp-2">
                           {proj.name}
                         </div>
-                        <div className="text-[11px] font-mono text-[var(--hub-dim)] mt-0.5">
-                          {proj.code} · {proj.progress}% avance
+                        <div className="text-[11.5px] text-[var(--hub-dim)] tabular-nums mt-0.5">
+                          {proj.progress}% de avance
                         </div>
                       </div>
                       {isSelected && (
@@ -371,7 +375,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                       {item.badge !== undefined &&
                         (typeof item.badge === 'number' ? item.badge > 0 : Boolean(item.badge)) && (
                           <span
-                            className={`ml-auto font-mono text-[11px] px-1.5 py-0.2 rounded shrink-0 ${
+                            className={`ml-auto tabular-nums text-[11.5px] px-1.5 py-0.2 rounded shrink-0 ${
                               item.badgeVariant === 'urgent'
                                 ? 'bg-zinc-200/80 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 font-bold'
                                 : 'text-[var(--hub-dim)] bg-[var(--hub-chip)]'
@@ -404,37 +408,37 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           </div>
         ))}
 
-        {/* NIVEL 2 EN CASCADA: SUBPROCESOS / HITOS DEL PROYECTO ACTIVO */}
+        {/* NIVEL 2 EN CASCADA: HITOS & FASES DEL PROYECTO ACTIVO */}
         {!collapsed && activeProjectObj && (
           <div className="space-y-1 pt-1">
             <div className="px-3 pb-1 flex items-center justify-between gap-2 select-none">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
                 SUBPROCESOS
               </span>
-              <span
-                className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--hub-chip)] text-[var(--hub-text-soft)] truncate max-w-[115px]"
-                title={`Subprocesos de ${activeProjectObj.name}`}
-              >
-                {activeProjectObj.code}
-              </span>
             </div>
 
-            {/* Botón acordeón completo: clic en cualquier parte del botón abre/cierra */}
-            <button
-              type="button"
+            {/* Botón completo: abre la vista de Hitos en el lienzo central Y despliega/colapsa */}
+            <NavLink
+              to={getHref(`/proyectos/${activeProjectObj.id}?tab=hitos`)}
               onClick={() => setIsSubprocessesExpanded((prev) => !prev)}
               aria-expanded={isSubprocessesExpanded}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                isSubprocessesExpanded
-                  ? 'border-l-2 border-[var(--hub-brand)] bg-[var(--hub-chip)] text-[var(--hub-text)]'
-                  : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
-              }`}
+              className={() =>
+                `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                  isSubprocessesExpanded
+                    ? 'border-l-2 border-[var(--hub-brand)] bg-[var(--hub-chip)] text-[var(--hub-text)]'
+                    : ''
+                } ${
+                  isHrefActive(`/proyectos/${activeProjectObj.id}?tab=hitos`)
+                    ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
+                    : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
+                }`
+              }
             >
               <span className="flex-shrink-0">
                 <Milestone size={18} />
               </span>
-              <span className="truncate">Fases & Subprocesos</span>
-              <span className="ml-auto font-mono text-[11px] px-1.5 py-0.2 rounded shrink-0 text-[var(--hub-dim)] bg-[var(--hub-chip)]">
+              <span className=" whitespace-nowrap">Hitos & Fases</span>
+              <span className="ml-auto tabular-nums text-[11.5px] px-1.5 py-0.2 rounded shrink-0 text-[var(--hub-dim)] bg-[var(--hub-chip)]">
                 {activeProjectMilestones.length}
               </span>
               <ChevronDown
@@ -443,23 +447,14 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                   isSubprocessesExpanded ? 'rotate-180' : ''
                 }`}
               />
-            </button>
+            </NavLink>
 
             {isSubprocessesExpanded && (
               <div className="ml-2 pl-2.5 border-l border-[var(--hub-border)] my-1.5 space-y-1">
                 {activeProjectMilestones.length === 0 ? (
-                  <NavLink
-                    to={getHref(`/proyectos/${activeProjectObj.id}?tab=hitos`)}
-                    className={() =>
-                      `block px-2.5 py-2 rounded-lg text-[13px] transition-colors ${
-                        isHrefActive(`/proyectos/${activeProjectObj.id}?tab=hitos`)
-                          ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
-                          : 'text-[var(--hub-dim)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
-                      }`
-                    }
-                  >
-                    Sin subprocesos registrados · Configurar hitos
-                  </NavLink>
+                  <div className="px-2.5 py-2 text-[13px] text-[var(--hub-dim)]">
+                    Sin subprocesos registrados
+                  </div>
                 ) : (
                   activeProjectMilestones.map((m) => {
                     const targetTo = `/proyectos/${activeProjectObj.id}?tab=hitos&milestone=${m.id}`
@@ -488,7 +483,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
                           <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${dotColor}`} />
                           <span className="line-clamp-2 break-words">{m.name}</span>
                         </div>
-                        <span className="font-mono text-[11px] text-[var(--hub-dim)] shrink-0 mt-0.5">
+                        <span className="tabular-nums text-[11.5px] font-medium text-[var(--hub-dim)] shrink-0 mt-0.5">
                           F{m.phaseNumber}
                         </span>
                       </NavLink>

@@ -44,6 +44,7 @@ const CASES: Array<{ url: string; expected: string; tenant?: string }> = [
   { url: '/bandeja', expected: 'Bandeja' },
   { url: '/proyectos?view=criticas', expected: 'Alertas Críticas' },
   { url: '/proyectos', expected: 'Proyectos' },
+  { url: '/proyectos/proj-minedu-2027?tab=hitos', expected: 'Hitos & Fases' },
   {
     url: '/proyectos/proj-minedu-2027?tab=hitos&milestone=ML-M01',
     expected: 'Comunicación de Directorio de Almacenes',
@@ -76,7 +77,7 @@ describe('Sidebar: selección activa unívoca y cascada Alternativa A', () => {
     }
   })
 
-  it('el selector de PROYECTO ACTIVO es flotante (absolute) y el botón de Subprocesos colapsa con clic en todo el botón', () => {
+  it('el selector de PROYECTO ACTIVO es flotante (absolute) y el botón Hitos & Fases inicia colapsado y abre al hacer clic', () => {
     const { getByText, container, unmount } = render(
       <MemoryRouter initialEntries={['/proyectos/proj-minedu-2027']}>
         <TenantProvider>
@@ -85,12 +86,12 @@ describe('Sidebar: selección activa unívoca y cascada Alternativa A', () => {
       </MemoryRouter>,
     )
 
-    // El botón de Subprocesos colapsa y expande al hacer clic en cualquier parte del botón
-    const subprocessBtn = getByText('Fases & Subprocesos').closest('button')
-    expect(subprocessBtn).toBeTruthy()
-    expect(subprocessBtn?.getAttribute('aria-expanded')).toBe('true')
-    fireEvent.click(subprocessBtn!)
-    expect(subprocessBtn?.getAttribute('aria-expanded')).toBe('false')
+    // El botón Hitos & Fases inicia colapsado y expande/abre la vista al hacer clic
+    const subprocessLink = getByText('Hitos & Fases').closest('a')
+    expect(subprocessLink).toBeTruthy()
+    expect(subprocessLink?.getAttribute('aria-expanded')).toBe('false')
+    fireEvent.click(subprocessLink!)
+    expect(subprocessLink?.getAttribute('aria-expanded')).toBe('true')
 
     // El selector superior de proyecto activo despliega un menú flotante (absolute)
     const activeSelectorBtn = container.querySelector('button[aria-expanded]')
@@ -102,4 +103,5 @@ describe('Sidebar: selección activa unívoca y cascada Alternativa A', () => {
     unmount()
   })
 })
+
 

@@ -167,11 +167,6 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
           <h3 className="flex flex-wrap items-center gap-2 text-sm font-bold text-zinc-900">
             <Flag size={15} className="text-zinc-400" />
             <span>Subprocesos & Hitos · {project?.name ?? 'Proyecto'}</span>
-            {project && (
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-zinc-700">
-                {project.code}
-              </span>
-            )}
           </h3>
           <p className="text-xs text-zinc-500">
             {approved} de {milestones.length} subprocesos/fases aprobadas en este proyecto

@@ -181,8 +181,8 @@ export function CalendarTab({ projectId, onOpenTask }: CalendarTabProps) {
             <CalendarDays size={15} className="text-zinc-400" />
             <span>Calendario · {project?.name ?? 'Proyecto'}</span>
             {project && (
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-zinc-700">
-                {project.code} · {project.progress}% avance
+              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-600">
+                {project.progress}% avance
               </span>
             )}
           </h3>
