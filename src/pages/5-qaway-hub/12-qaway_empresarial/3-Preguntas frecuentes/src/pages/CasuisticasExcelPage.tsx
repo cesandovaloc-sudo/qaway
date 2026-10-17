@@ -663,7 +663,6 @@ ON public.minedu_casuisticas FOR ALL USING (true);
               </div>
             </div>
           )}
-          </div>
         </div>
 
         {/* 5. TABLA WEB PROFESIONAL (ESTILO INVENTI PRO) */}
