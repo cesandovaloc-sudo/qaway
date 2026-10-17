@@ -531,8 +531,30 @@ export default function PreguntasFrecuentesApp() {
         onOpenNewCaseModal={handleOpenNewCaseModal}
       />
 
+      {/* ESTILOS AISLADOS DE SCROLLBAR GRIS CLARO MINIMALISTA */}
+      <style>{`
+        .casuisticas-scroll-area {
+          scrollbar-width: thin;
+          scrollbar-color: #cbd5e1 transparent;
+        }
+        .casuisticas-scroll-area::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        .casuisticas-scroll-area::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .casuisticas-scroll-area::-webkit-scrollbar-thumb {
+          background-color: #cbd5e1;
+          border-radius: 9999px;
+        }
+        .casuisticas-scroll-area::-webkit-scrollbar-thumb:hover {
+          background-color: #94a3b8;
+        }
+      `}</style>
+
       {/* CONTENEDOR PRINCIPAL ERGONÓMICO CON ESPACIADO COMPACTO */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-2.5 sm:pt-3 pb-6 space-y-3.5 flex-1">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-2.5 sm:pt-3 pb-2 space-y-3.5 flex-1">
         {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS (FLUJO NORMAL, SIN ESPACIO EXCESIVO) */}
         <DirectionsGrid
           directions={directionsData}
@@ -564,8 +586,8 @@ export default function PreguntasFrecuentesApp() {
           />
         </div>
 
-        {/* 4. LISTA DE CASUÍSTICAS CON SCROLL INTERNO AISLADO (NADA PASA POR DETRÁS DEL FILTRO) */}
-        <div className="flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-140px)] pr-1.5 -mr-1.5 space-y-4">
+        {/* 4. LISTA DE CASUÍSTICAS Y FOOTER CON SCROLL INTERNO COMPLETO HASTA EL FINAL Y BARRA GRIS CLARO */}
+        <div className="casuisticas-scroll-area flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-155px)] pr-2 -mr-2 pb-12 space-y-5">
           <CasesList
             items={items}
             mode={mode}
@@ -582,37 +604,37 @@ export default function PreguntasFrecuentesApp() {
             onToggleDirectionAll={handleToggleDirectionAll}
             isAllOpenInDirection={isAllOpenInDirection}
           />
+
+          {/* 5. FOOTER INSTITUCIONAL Y SWITCH DE MODO ADMINISTRADOR */}
+          <footer className="pt-6 pb-4 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700">MINEDU • DIGERE</span>
+              <span className="text-slate-300">|</span>
+              <span>Monitoreo Cuadro de Distribución MC SIGA</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="text-slate-400">
+                {isSupabaseConnected
+                  ? 'Almacenamiento: Supabase Cloud (Tiempo Real)'
+                  : 'Almacenamiento: Caché Local'}
+              </span>
+              <button
+                type="button"
+                onClick={toggleAdminMode}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 font-medium transition cursor-pointer text-[11px] shadow-2xs"
+                title="Alternar entre vista pública de consulta y modo administrador"
+              >
+                {isAdmin ? (
+                  <Unlock className="w-3.5 h-3.5 text-amber-600" />
+                ) : (
+                  <Lock className="w-3.5 h-3.5 text-slate-400" />
+                )}
+                <span>{isAdmin ? 'Modo Admin Activo' : 'Acceso Administrador'}</span>
+              </button>
+            </div>
+          </footer>
         </div>
-
-        {/* 5. FOOTER INSTITUCIONAL Y SWITCH DE MODO ADMINISTRADOR */}
-        <footer className="pt-6 pb-8 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-700">MINEDU • DIGERE</span>
-            <span className="text-slate-300">|</span>
-            <span>Monitoreo Cuadro de Distribución MC SIGA</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="text-slate-400">
-              {isSupabaseConnected
-                ? 'Almacenamiento: Supabase Cloud (Tiempo Real)'
-                : 'Almacenamiento: Caché Local'}
-            </span>
-            <button
-              type="button"
-              onClick={toggleAdminMode}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 text-slate-600 font-medium transition cursor-pointer text-[11px] shadow-2xs"
-              title="Alternar entre vista pública de consulta y modo administrador"
-            >
-              {isAdmin ? (
-                <Unlock className="w-3.5 h-3.5 text-amber-600" />
-              ) : (
-                <Lock className="w-3.5 h-3.5 text-slate-400" />
-              )}
-              <span>{isAdmin ? 'Modo Admin Activo' : 'Acceso Administrador'}</span>
-            </button>
-          </div>
-        </footer>
       </div>
 
       {/* MODAL DE GESTIÓN Y ADMINISTRACIÓN */}

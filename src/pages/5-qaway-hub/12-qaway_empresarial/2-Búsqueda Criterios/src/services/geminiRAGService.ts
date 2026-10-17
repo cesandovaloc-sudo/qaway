@@ -22,6 +22,8 @@ export interface SourceContextItem {
   excerpt?: string;
 }
 
+export type AgentProfileId = "auditor_laboral" | "analista_financiero" | "oficial_cumplimiento";
+
 export interface GeminiRAGQueryParams {
   query: string;
   projectSources: SourceContextItem[];
@@ -30,6 +32,10 @@ export interface GeminiRAGQueryParams {
   apiKey?: string;
   history?: Array<{ sender: "user" | "assistant"; text: string }>;
   temperature?: number;
+  agentProfile?: AgentProfileId;
+  mode?: "fast" | "standard" | "deep";
+  similarityThreshold?: number;
+  topK?: number;
 }
 
 export interface GeminiRAGResponse {
@@ -102,13 +108,30 @@ export const CAPA_0_LEGAL_PERUANA = `
 `;
 
 /**
- * CAPA 1: Rol de Auditor Normativo y Tono Ejecutivo
+ * CAPA 1: Rol del Agente según Perfil Especializado
  */
-export function buildCapa1SystemPrompt(projectName: string = "Auditoría"): string {
+export function buildCapa1SystemPrompt(
+  projectName: string = "Auditoría",
+  profile: AgentProfileId = "auditor_laboral"
+): string {
+  let roleTitle = "Auditor Normativo & Laboral Senior";
+  let roleSpecialty =
+    "Especialista en derecho laboral peruano (D.S. 007-2002-TR, jornada de trabajo, sobretiempo, descansos remunerados y fiscalizaciones SUNAFIL).";
+
+  if (profile === "analista_financiero") {
+    roleTitle = "Analista Financiero & Nóminas Senior";
+    roleSpecialty =
+      "Especialista en modelado financiero, cálculo de provisiones contables, impacto en EBITDA y cotejo de matrices cuantitativas de contingencia.";
+  } else if (profile === "oficial_cumplimiento") {
+    roleTitle = "Oficial de Cumplimiento & Auditoría Interna";
+    roleSpecialty =
+      "Especialista en control interno, manuales de procedimientos corporativos, aprobación de comités y gobernanza de riesgos.";
+  }
+
   return `
-[CAPA 1 — ROL DEL AGENTE Y CONTEXTO OPERATIVO]
-- Rol: Auditor Normativo, Consultor Legal y Analista Financiero Senior de Qaway Lab y MINEDU.
-- Módulo: Búsqueda de Criterios (RAG Engine de Alta Precisión).
+[CAPA 1 — ROL DEL AGENTE ESPECIALIZADO (${roleTitle.toUpperCase()})]
+- Rol Asignado: ${roleTitle} de Qaway Lab y MINEDU.
+- Especialidad: ${roleSpecialty}
 - Proyecto Activo: "${projectName}".
 - Tono y Estilo:
   * Riguroso, técnico, conciso y de alto valor ejecutivo.
