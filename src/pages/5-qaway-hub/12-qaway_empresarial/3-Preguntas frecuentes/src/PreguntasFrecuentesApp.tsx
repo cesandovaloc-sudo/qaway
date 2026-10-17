@@ -135,22 +135,6 @@ function scoreCase(
 }
 
 export default function PreguntasFrecuentesApp() {
-  const filterSentinelRef = React.useRef<HTMLDivElement>(null);
-
-  // Freno estricto de desplazamiento: La página sube solo hasta el filtro (0px) y jamás pasa de ahí
-  useEffect(() => {
-    const handleWindowScroll = () => {
-      const sentinel = filterSentinelRef.current;
-      if (!sentinel) return;
-      const sentinelTop = sentinel.getBoundingClientRect().top;
-      if (sentinelTop < 0) {
-        window.scrollTo({ top: window.scrollY + sentinelTop, behavior: 'instant' });
-      }
-    };
-    window.addEventListener('scroll', handleWindowScroll, { passive: false });
-    return () => window.removeEventListener('scroll', handleWindowScroll);
-  }, []);
-
   // Inicialización de datos
   const [directionsData, setDirectionsData] = useState<DirectionData[]>(() => {
     try {
@@ -531,11 +515,12 @@ export default function PreguntasFrecuentesApp() {
         onOpenNewCaseModal={handleOpenNewCaseModal}
       />
 
-      {/* ESTILOS AISLADOS DE SCROLLBAR GRIS CLARO MINIMALISTA */}
+      {/* ESTILOS AISLADOS DE SCROLLBAR GRIS CLARO MINIMALISTA Y CERO REBOTE */}
       <style>{`
         .casuisticas-scroll-area {
           scrollbar-width: thin;
           scrollbar-color: #cbd5e1 transparent;
+          overscroll-behavior-y: contain;
         }
         .casuisticas-scroll-area::-webkit-scrollbar {
           width: 6px;
@@ -554,7 +539,7 @@ export default function PreguntasFrecuentesApp() {
       `}</style>
 
       {/* CONTENEDOR PRINCIPAL ERGONÓMICO CON ESPACIADO COMPACTO */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-2.5 sm:pt-3 pb-2 space-y-3.5 flex-1">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-2.5 sm:pt-3 pb-0 space-y-3.5 flex-1">
         {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS (FLUJO NORMAL, SIN ESPACIO EXCESIVO) */}
         <DirectionsGrid
           directions={directionsData}
@@ -562,9 +547,6 @@ export default function PreguntasFrecuentesApp() {
           isSearching={!!searchQuery.trim()}
           onSelectDirection={handleSelectDirection}
         />
-
-        {/* MARCADOR CENTINELA DE FRENO EXACTO A 0PX */}
-        <div ref={filterSentinelRef} className="h-0 w-full" aria-hidden="true" />
 
         {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (PEGADO A 0PX DEL TOPE SIN HUECOS, FONDO TOTALMENTE SÓLIDO) */}
         <div
@@ -587,7 +569,7 @@ export default function PreguntasFrecuentesApp() {
         </div>
 
         {/* 4. LISTA DE CASUÍSTICAS Y FOOTER CON SCROLL INTERNO COMPLETO HASTA EL FINAL Y BARRA GRIS CLARO */}
-        <div className="casuisticas-scroll-area flex-1 min-h-0 overflow-y-auto max-h-[calc(100vh-155px)] pr-2 -mr-2 pb-12 space-y-5">
+        <div className="casuisticas-scroll-area flex-1 min-h-0 overflow-y-auto overscroll-y-contain max-h-[calc(100vh-156px)] pr-2 -mr-2 pb-12 space-y-5">
           <CasesList
             items={items}
             mode={mode}

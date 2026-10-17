@@ -58,13 +58,22 @@ import {
   LogOut,
   User,
   Building2,
+  Database,
 } from "lucide-react";
 import { HubIcon } from "./components/ui/HubIcon";
 import {
   queryGeminiRAG,
   getStoredGeminiApiKey,
   saveStoredGeminiApiKey,
+  AgentProfileId,
 } from "./services/geminiRAGService";
+import {
+  syncSessionToSupabase,
+  syncTurnToSupabase,
+  testSupabaseConnection,
+  saveCustomSupabaseConfig,
+  getActiveSupabaseConfig,
+} from "./services/criteriosSupabaseService";
 
 type RagThemeId = "rag-neutral" | "rag-legal" | "rag-finance";
 type InspectorTab = 1 | 2 | 3;
@@ -529,6 +538,42 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
   },
 ];
 
+interface AgentProfileMeta {
+  id: AgentProfileId;
+  name: string;
+  badge: string;
+  description: string;
+  color: string;
+  badgeBg: string;
+}
+
+const RAG_AGENT_PROFILES: AgentProfileMeta[] = [
+  {
+    id: "auditor_laboral",
+    name: "Auditor Normativo & Laboral",
+    badge: "Leyes & SUNAFIL",
+    description: "Especialista en TUO D.S. 007-2002-TR, jornada de trabajo, sobretiempos y fiscalización laboral.",
+    color: "#DC2626",
+    badgeBg: "bg-red-50 text-red-700 border-red-200",
+  },
+  {
+    id: "analista_financiero",
+    name: "Analista Financiero & EBITDA",
+    badge: "Matriz Excel & Provisiones",
+    description: "Especialista en modelos contables, estimación de contingencias y provisiones de nómina.",
+    color: "#059669",
+    badgeBg: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+  {
+    id: "oficial_cumplimiento",
+    name: "Oficial de Cumplimiento & RRHH",
+    badge: "Políticas & Procedimientos",
+    description: "Especialista en manuales internos, actas vinculantes, comités y control biométrico.",
+    color: "#2563EB",
+    badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
+  },
+];
+
 interface ChatSession {
   id: string;
   title: string;
@@ -537,6 +582,7 @@ interface ChatSession {
   messagesCount: number;
   provider: string;
   projectId: string;
+  agentProfile?: AgentProfileId;
   turns: ChatTurn[];
 }
 
@@ -547,8 +593,9 @@ const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
     date: "Hoy",
     preview: "¿Cuál es la contingencia laboral por horas extras no registradas...",
     messagesCount: 2,
-    provider: "OpenAI GPT-4o",
+    provider: "Google DeepMind",
     projectId: "auditoria-q3",
+    agentProfile: "analista_financiero",
     turns: INITIAL_CHAT_TURNS,
   },
   {
@@ -557,8 +604,9 @@ const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
     date: "Ayer",
     preview: "¿Cuáles son los límites de jornada laboral y sobretiempo según el D.S. N.º 007-2002-TR?",
     messagesCount: 2,
-    provider: "Anthropic Claude",
+    provider: "Google DeepMind",
     projectId: "auditoria-q3",
+    agentProfile: "auditor_laboral",
     turns: SESSION_2_TURNS,
   },
   {
@@ -567,8 +615,9 @@ const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
     date: "14 Oct",
     preview: "¿Qué establece el Manual de Políticas Laborales sección 4.2 sobre el control de asistencia?",
     messagesCount: 2,
-    provider: "Cohere AI",
+    provider: "Google DeepMind",
     projectId: "auditoria-q3",
+    agentProfile: "oficial_cumplimiento",
     turns: SESSION_3_TURNS,
   },
 ];
@@ -691,8 +740,25 @@ export default function CriteriosApp() {
   const [showModeDropdown, setShowModeDropdown] = useState<boolean>(false);
   const modeDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Pestaña activa en Configuración
-  const [configTab, setConfigTab] = useState<"providers" | "engine">("providers");
+  // Pestaña activa en Configuración (Proveedores / Motor / Base de Datos Supabase)
+  const [configTab, setConfigTab] = useState<"providers" | "engine" | "database">("providers");
+
+  // Estado de conexión y pruebas de Supabase desacoplada
+  const [supabaseStatus, setSupabaseStatus] = useState<{
+    connected: boolean;
+    hasTables: boolean;
+    message: string;
+    url: string;
+  }>({
+    connected: false,
+    hasTables: false,
+    message: "Verificando conexión con Supabase...",
+    url: "",
+  });
+  const [customDbUrl, setCustomDbUrl] = useState<string>("");
+  const [customDbKey, setCustomDbKey] = useState<string>("");
+  const [isTestingDb, setIsTestingDb] = useState<boolean>(false);
+  const [dbSaveNotice, setDbSaveNotice] = useState<string>("");
 
   // Módulo de 7 Proveedores de IA
   const [aiProviders, setAiProviders] = useState<AiProvider[]>(() => {
@@ -808,6 +874,18 @@ export default function CriteriosApp() {
     };
   }, []);
 
+  // Verificación de conexión y esquema a Supabase al inicializar
+  useEffect(() => {
+    testSupabaseConnection().then((res) => {
+      setSupabaseStatus(res);
+    });
+    const conf = getActiveSupabaseConfig();
+    if (conf.isCustom) {
+      setCustomDbUrl(conf.url);
+      setCustomDbKey(conf.anonKey);
+    }
+  }, []);
+
   // Auto-scroll del hilo de mensajes cuando se envían preguntas o llegan respuestas
   useEffect(() => {
     if (chatMessages.length > 0) {
@@ -865,8 +943,10 @@ export default function CriteriosApp() {
     // Eliminado intencionalmente el popup flotante negro a solicitud del usuario
   }
 
-  function handleCreateNewSession(customTitle?: string, customProjectId?: string) {
+  function handleCreateNewSession(customTitle?: string, customProjectId?: string, initialProfile?: AgentProfileId) {
     const newId = `session-${Date.now()}`;
+    const pId = customProjectId || activeProjectId;
+    const profile = initialProfile || "auditor_laboral";
     const newSession: ChatSession = {
       id: newId,
       title: customTitle || "Nueva conversación",
@@ -874,13 +954,26 @@ export default function CriteriosApp() {
       date: "Ahora",
       messagesCount: 0,
       provider: activeLlmProvider.name,
-      projectId: customProjectId || activeProjectId,
+      projectId: pId,
+      agentProfile: profile,
       turns: [],
     };
     setChatSessions((prev) => [newSession, ...prev]);
     setActiveSessionId(newId);
     setQuery("");
     setActiveNav("nuevo");
+
+    // Persistir de forma no bloqueante a Supabase
+    syncSessionToSupabase({
+      id: newId,
+      projectId: pId,
+      title: newSession.title,
+      preview: newSession.preview,
+      provider: newSession.provider,
+      mode: chatMode,
+      agentProfile: profile,
+      messagesCount: 0,
+    });
   }
 
   function handleAddCategory() {
@@ -1027,12 +1120,18 @@ export default function CriteriosApp() {
     if (!q) return;
 
     const targetSessionId = activeSessionId;
+    const currentSession = chatSessions.find((s) => s.id === targetSessionId) || activeSession;
+    const currentAgentProfile = currentSession?.agentProfile || "auditor_laboral";
+
     const userTurn: ChatTurn = {
       id: `turn-u-${Date.now()}`,
       sender: "user",
       text: q,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
+
+    // Sincronizar turno de usuario en Supabase (no bloqueante)
+    syncTurnToSupabase(targetSessionId, userTurn);
 
     setChatSessions((prev) =>
       prev.map((s) => {
@@ -1080,7 +1179,7 @@ export default function CriteriosApp() {
     const isGeminiActive = activeProvider.id === "google";
     const geminiApiKey = getStoredGeminiApiKey();
 
-    // Inferencia real con Google Gemini si está activo y hay clave configurada
+    // Inferencia real con Google Gemini calibrada con perfil de agente, modo y umbral coseno
     if (isGeminiActive && !isConversationalGreeting && geminiApiKey) {
       try {
         const geminiResult = await queryGeminiRAG({
@@ -1096,6 +1195,10 @@ export default function CriteriosApp() {
           projectName: activeProjName,
           model: activeProvider.selectedModel || "gemini-1.5-flash",
           apiKey: geminiApiKey,
+          agentProfile: currentAgentProfile,
+          mode: chatMode,
+          similarityThreshold,
+          topK,
         });
 
         if (geminiResult.success && geminiResult.text) {
@@ -1226,13 +1329,28 @@ export default function CriteriosApp() {
       prev.map((s) => {
         if (s.id !== targetSessionId) return s;
         const nextTurns = [...s.turns, assistantTurn];
-        return {
+        const updated = {
           ...s,
           preview: ansText.slice(0, 90) + "...",
           messagesCount: nextTurns.length,
           provider: activeProvider.name,
           turns: nextTurns,
         };
+
+        // Persistir sesión y turno del asistente a Supabase de forma asíncrona
+        syncSessionToSupabase({
+          id: targetSessionId,
+          projectId: activeProjectId,
+          title: updated.title,
+          preview: updated.preview,
+          provider: activeProvider.name,
+          mode: chatMode,
+          agentProfile: currentAgentProfile,
+          messagesCount: nextTurns.length,
+        });
+        syncTurnToSupabase(targetSessionId, assistantTurn);
+
+        return updated;
       })
     );
     setIsSearching(false);
@@ -2724,6 +2842,35 @@ export default function CriteriosApp() {
                       )}
                     </div>
 
+                    {/* Selector de Perfil de Agente asignado a esta sesión */}
+                    <div className="relative shrink-0">
+                      <select
+                        value={activeSession?.agentProfile || "auditor_laboral"}
+                        onChange={(e) => {
+                          const newProfile = e.target.value as AgentProfileId;
+                          setChatSessions((prev) =>
+                            prev.map((s) => (s.id === activeSessionId ? { ...s, agentProfile: newProfile } : s))
+                          );
+                          syncSessionToSupabase({
+                            id: activeSessionId,
+                            projectId: activeProjectId,
+                            title: activeSession?.title || "Conversación",
+                            preview: activeSession?.preview || "",
+                            agentProfile: newProfile,
+                            messagesCount: activeSession?.turns.length || 0,
+                          });
+                        }}
+                        className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 cursor-pointer shadow-xs transition-colors focus:outline-none"
+                        title="Perfil de Agente especializado asignado a este chat"
+                      >
+                        {RAG_AGENT_PROFILES.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            🤖 {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
                     <button
                       type="button"
                       onClick={handleResetChat}
@@ -3795,6 +3942,25 @@ export default function CriteriosApp() {
                       <HubIcon icon={Settings} size={14} />
                       <span>Parámetros del Motor</span>
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfigTab("database");
+                        setIsTestingDb(true);
+                        testSupabaseConnection().then((res) => {
+                          setSupabaseStatus(res);
+                          setIsTestingDb(false);
+                        });
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                        configTab === "database"
+                          ? "bg-white text-zinc-900 shadow-xs"
+                          : "text-zinc-600 hover:text-zinc-900"
+                      }`}
+                    >
+                      <HubIcon icon={Database} size={14} />
+                      <span>Base de Datos (Supabase)</span>
+                    </button>
                   </div>
                 </div>
 
@@ -4325,6 +4491,183 @@ export default function CriteriosApp() {
                         {engineParamsSaved && <HubIcon icon={Check} size={14} />}
                         <span>{engineParamsSaved ? "¡Parámetros Guardados!" : "Guardar Parámetros"}</span>
                       </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-Tab 3: Base de Datos Supabase Desacoplada (BYODB) */}
+                {configTab === "database" && (
+                  <div className="space-y-5 animate-in fade-in">
+                    {/* Tarjeta de Estado de Conexión */}
+                    <div
+                      style={{
+                        backgroundColor: palette.bgSurface,
+                        borderColor: palette.borderDefault,
+                      }}
+                      className="p-5 rounded-2xl border shadow-xs space-y-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
+                              supabaseStatus.connected
+                                ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                                : "bg-red-50 text-red-600 border border-red-200"
+                            }`}
+                          >
+                            <HubIcon icon={Database} size={20} />
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-bold text-zinc-900">
+                                {getActiveSupabaseConfig().isCustom
+                                  ? "Instancia Propia de Supabase (BYODB Activa)"
+                                  : "Supabase Oficial de Qaway Lab"}
+                              </h3>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10.5px] font-bold border ${
+                                  supabaseStatus.connected
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : "bg-amber-50 text-amber-700 border-amber-200"
+                                }`}
+                              >
+                                {supabaseStatus.connected ? "Conectado" : "Pendiente"}
+                              </span>
+                            </div>
+                            <span className="font-mono text-xs text-zinc-500 block mt-0.5">
+                              {supabaseStatus.url || getActiveSupabaseConfig().url}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={isTestingDb}
+                          onClick={() => {
+                            setIsTestingDb(true);
+                            testSupabaseConnection().then((res) => {
+                              setSupabaseStatus(res);
+                              setIsTestingDb(false);
+                            });
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-xs font-semibold text-zinc-700 inline-flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                        >
+                          <HubIcon
+                            icon={RefreshCw}
+                            size={13}
+                            className={isTestingDb ? "animate-spin" : ""}
+                          />
+                          <span>{isTestingDb ? "Probando..." : "Probar Conexión"}</span>
+                        </button>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80 text-xs text-zinc-600 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              supabaseStatus.connected ? "bg-emerald-500" : "bg-amber-500"
+                            }`}
+                          />
+                          <span className="font-semibold text-zinc-800">Diagnóstico del Enlace:</span>
+                        </div>
+                        <p className="leading-relaxed pl-4">{supabaseStatus.message}</p>
+                      </div>
+                    </div>
+
+                    {/* Formulario BYODB para Desacoplamiento (Cloudflare Pages) */}
+                    <div
+                      style={{
+                        backgroundColor: palette.bgSurface,
+                        borderColor: palette.borderDefault,
+                      }}
+                      className="p-5 rounded-2xl border shadow-xs space-y-4"
+                    >
+                      <div>
+                        <h3 className="text-sm font-bold text-zinc-900">
+                          Desacoplamiento e Instancia Independiente (BYODB)
+                        </h3>
+                        <p style={{ color: palette.textSecondary, fontSize: 13 }} className="mt-0.5">
+                          Para cuando este módulo RAG se aloje en su propio repositorio o Cloudflare Pages, puedes conectarlo a su propio proyecto de Supabase sin tocar la base de datos central de Qaway Lab.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-xs font-semibold text-zinc-700 block mb-1">
+                            URL de Proyecto Supabase (Endpoint REST)
+                          </label>
+                          <input
+                            type="text"
+                            value={customDbUrl}
+                            onChange={(e) => setCustomDbUrl(e.target.value)}
+                            placeholder="https://tu-proyecto.supabase.co"
+                            className="w-full px-3 py-2 rounded-xl border border-zinc-200 font-mono text-xs text-zinc-900 focus:outline-none focus:border-blue-500 bg-zinc-50/50"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-semibold text-zinc-700 block mb-1">
+                            Clave Anónima Pública (Anon Key)
+                          </label>
+                          <input
+                            type="password"
+                            value={customDbKey}
+                            onChange={(e) => setCustomDbKey(e.target.value)}
+                            placeholder="sb_publishable_... o eyJhbGciOi..."
+                            className="w-full px-3 py-2 rounded-xl border border-zinc-200 font-mono text-xs text-zinc-900 focus:outline-none focus:border-blue-500 bg-zinc-50/50"
+                          />
+                        </div>
+
+                        {dbSaveNotice && (
+                          <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-800 flex items-center gap-1.5 animate-in fade-in">
+                            <HubIcon icon={Check} size={14} />
+                            <span>{dbSaveNotice}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              saveCustomSupabaseConfig("", "");
+                              setCustomDbUrl("");
+                              setCustomDbKey("");
+                              setDbSaveNotice("Restablecido a la instancia oficial de Qaway Lab.");
+                              setTimeout(() => setDbSaveNotice(""), 3000);
+                              testSupabaseConnection().then(setSupabaseStatus);
+                            }}
+                            className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 cursor-pointer"
+                          >
+                            Restablecer a Qaway Lab Oficial
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (customDbUrl.trim() && customDbKey.trim()) {
+                                saveCustomSupabaseConfig(customDbUrl, customDbKey);
+                                setDbSaveNotice("¡Instancia propia guardada con éxito!");
+                                setTimeout(() => setDbSaveNotice(""), 3000);
+                                testSupabaseConnection().then(setSupabaseStatus);
+                              }
+                            }}
+                            className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-black text-white text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                          >
+                            Guardar Instancia Supabase
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Nota de Aislamiento de Seguridad */}
+                    <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200/80 text-xs text-blue-900 space-y-1">
+                      <span className="font-bold flex items-center gap-1.5">
+                        <HubIcon icon={ShieldCheck} size={14} className="text-blue-600" />
+                        Aislamiento de Tablas Garantizado
+                      </span>
+                      <p className="text-blue-800/90 leading-relaxed text-[12.5px]">
+                        Este módulo opera exclusivamente con sus tablas dedicadas (<code>rag_projects</code>, <code>rag_sources</code>, <code>rag_sessions</code> y <code>rag_turns</code>). Jamás escribe ni lee tablas de usuarios, clientes, inventario ni pagos de Qaway Lab. Si ejecutas en un entorno sin migración, el sistema trabaja automáticamente con caché reactivo sin bloquearte.
+                      </p>
                     </div>
                   </div>
                 )}

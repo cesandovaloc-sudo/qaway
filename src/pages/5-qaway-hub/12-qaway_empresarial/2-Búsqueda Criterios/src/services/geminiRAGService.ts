@@ -176,10 +176,14 @@ export function formatProjectSourcesContext(sources: SourceContextItem[]): strin
 /**
  * Construye el prompt completo de instrucciones del sistema
  */
-export function compileFullRAGSystemInstruction(projectName: string, sources: SourceContextItem[]): string {
+export function compileFullRAGSystemInstruction(
+  projectName: string,
+  sources: SourceContextItem[],
+  agentProfile: AgentProfileId = "auditor_laboral"
+): string {
   return `${CAPA_0_LEGAL_PERUANA}
 
-${buildCapa1SystemPrompt(projectName)}
+${buildCapa1SystemPrompt(projectName, agentProfile)}
 
 ${CAPA_2_FEW_SHOT_CITATIONS}
 
@@ -240,8 +244,20 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     projectSources,
     projectName = "Auditoría Q3",
     model = DEFAULT_GEMINI_MODEL,
-    temperature = 0.2,
+    agentProfile = "auditor_laboral",
+    mode = "standard",
   } = params;
+
+  const resolvedTemp =
+    params.temperature !== undefined
+      ? params.temperature
+      : mode === "fast"
+      ? 0.1
+      : mode === "deep"
+      ? 0.25
+      : 0.2;
+
+  const maxTokens = mode === "fast" ? 800 : mode === "deep" ? 2000 : 1200;
 
   const resolvedApiKey = (params.apiKey && params.apiKey.trim()) || getStoredGeminiApiKey();
 
@@ -259,7 +275,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     };
   }
 
-  const systemInstructionText = compileFullRAGSystemInstruction(projectName, projectSources);
+  const systemInstructionText = compileFullRAGSystemInstruction(projectName, projectSources, agentProfile);
 
   // Formatear historial si existe
   const contents: any[] = [];
@@ -288,9 +304,9 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     },
     contents,
     generationConfig: {
-      temperature,
+      temperature: resolvedTemp,
       topP: 0.95,
-      maxOutputTokens: 1200,
+      maxOutputTokens: maxTokens,
     },
   };
 
