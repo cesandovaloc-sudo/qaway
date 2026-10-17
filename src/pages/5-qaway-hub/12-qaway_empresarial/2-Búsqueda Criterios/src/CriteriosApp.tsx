@@ -59,6 +59,7 @@ import {
   User,
   Building2,
   Database,
+  HardDrive,
 } from "lucide-react";
 import { HubIcon } from "./components/ui/HubIcon";
 import {
@@ -66,6 +67,7 @@ import {
   getStoredGeminiApiKey,
   saveStoredGeminiApiKey,
   AgentProfileId,
+  AgentToneId,
 } from "./services/geminiRAGService";
 import {
   syncSessionToSupabase,
@@ -538,11 +540,26 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
   },
 ];
 
-interface AgentProfileMeta {
-  id: AgentProfileId;
+interface AgentToneMeta {
+  id: AgentToneId;
   name: string;
   badge: string;
   description: string;
+}
+
+const RAG_AGENT_TONES: AgentToneMeta[] = [
+  { id: "ejecutivo", name: "Ejecutivo", badge: "Sobrio", description: "Directo, conciso y de alto impacto" },
+  { id: "tecnico", name: "Técnico", badge: "Rigor", description: "Citas normativas densas y desglose paso a paso" },
+  { id: "didactico", name: "Didáctico", badge: "Pedagógico", description: "Explicaciones claras y viñetas accesibles" },
+];
+
+interface AgentProfileMeta {
+  id: AgentProfileId;
+  shortName: string;
+  fullName: string;
+  badge: string;
+  description: string;
+  icon: any;
   color: string;
   badgeBg: string;
 }
@@ -550,25 +567,31 @@ interface AgentProfileMeta {
 const RAG_AGENT_PROFILES: AgentProfileMeta[] = [
   {
     id: "auditor_laboral",
-    name: "Auditor Normativo & Laboral",
+    shortName: "Agente Auditor",
+    fullName: "Auditor Normativo & Laboral",
     badge: "Leyes & SUNAFIL",
-    description: "Especialista en TUO D.S. 007-2002-TR, jornada de trabajo, sobretiempos y fiscalización laboral.",
+    description: "TUO D.S. 007-2002-TR, jornada legal y sobretiempos.",
+    icon: Scale,
     color: "#DC2626",
     badgeBg: "bg-red-50 text-red-700 border-red-200",
   },
   {
     id: "analista_financiero",
-    name: "Analista Financiero & EBITDA",
+    shortName: "Agente Finanzas",
+    fullName: "Analista Financiero & EBITDA",
     badge: "Matriz Excel & Provisiones",
-    description: "Especialista en modelos contables, estimación de contingencias y provisiones de nómina.",
+    description: "Modelos contables, contingencias y margen EBITDA.",
+    icon: BarChart3,
     color: "#059669",
     badgeBg: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
   {
     id: "oficial_cumplimiento",
-    name: "Oficial de Cumplimiento & RRHH",
+    shortName: "Agente Cumplimiento",
+    fullName: "Oficial de Cumplimiento & RRHH",
     badge: "Políticas & Procedimientos",
-    description: "Especialista en manuales internos, actas vinculantes, comités y control biométrico.",
+    description: "Manuales internos, actas vinculantes y comités.",
+    icon: ShieldCheck,
     color: "#2563EB",
     badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
   },
@@ -583,6 +606,7 @@ interface ChatSession {
   provider: string;
   projectId: string;
   agentProfile?: AgentProfileId;
+  tone?: AgentToneId;
   turns: ChatTurn[];
 }
 
@@ -596,6 +620,7 @@ const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
     provider: "Google DeepMind",
     projectId: "auditoria-q3",
     agentProfile: "analista_financiero",
+    tone: "ejecutivo",
     turns: INITIAL_CHAT_TURNS,
   },
   {
@@ -607,6 +632,7 @@ const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
     provider: "Google DeepMind",
     projectId: "auditoria-q3",
     agentProfile: "auditor_laboral",
+    tone: "tecnico",
     turns: SESSION_2_TURNS,
   },
   {
@@ -618,6 +644,7 @@ const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
     provider: "Google DeepMind",
     projectId: "auditoria-q3",
     agentProfile: "oficial_cumplimiento",
+    tone: "didactico",
     turns: SESSION_3_TURNS,
   },
 ];
@@ -739,6 +766,9 @@ export default function CriteriosApp() {
   const [showChatFilterModal, setShowChatFilterModal] = useState<boolean>(false);
   const [showModeDropdown, setShowModeDropdown] = useState<boolean>(false);
   const modeDropdownRef = useRef<HTMLDivElement>(null);
+  const [showAgentMenu, setShowAgentMenu] = useState<boolean>(false);
+  const agentMenuRef = useRef<HTMLDivElement>(null);
+  const backupFileInputRef = useRef<HTMLInputElement>(null);
 
   // Pestaña activa en Configuración (Proveedores / Motor / Base de Datos Supabase)
   const [configTab, setConfigTab] = useState<"providers" | "engine" | "database">("providers");
@@ -834,6 +864,9 @@ export default function CriteriosApp() {
       if (modeDropdownRef.current && !modeDropdownRef.current.contains(target)) {
         setShowModeDropdown(false);
       }
+      if (agentMenuRef.current && !agentMenuRef.current.contains(target)) {
+        setShowAgentMenu(false);
+      }
       if (projectDropdownRef.current && !projectDropdownRef.current.contains(target)) {
         setShowProjectDropdown(false);
       }
@@ -853,6 +886,7 @@ export default function CriteriosApp() {
         setShowFilterDropdown(false);
         setShowQuickSearch(false);
         setShowModeDropdown(false);
+        setShowAgentMenu(false);
         setShowUploadModal(false);
         setShowNewProjectModal(false);
         setShowProjectDropdown(false);
@@ -1122,6 +1156,7 @@ export default function CriteriosApp() {
     const targetSessionId = activeSessionId;
     const currentSession = chatSessions.find((s) => s.id === targetSessionId) || activeSession;
     const currentAgentProfile = currentSession?.agentProfile || "auditor_laboral";
+    const currentAgentTone = currentSession?.tone || "ejecutivo";
 
     const userTurn: ChatTurn = {
       id: `turn-u-${Date.now()}`,
@@ -1196,6 +1231,7 @@ export default function CriteriosApp() {
           model: activeProvider.selectedModel || "gemini-1.5-flash",
           apiKey: geminiApiKey,
           agentProfile: currentAgentProfile,
+          tone: currentAgentTone,
           mode: chatMode,
           similarityThreshold,
           topK,
@@ -1370,6 +1406,68 @@ export default function CriteriosApp() {
       )
     );
     setQuery("");
+  }
+
+  function handleExportLocalBackup() {
+    try {
+      const backupData = {
+        app: "Qaway Lab Criterios RAG",
+        version: "2.0",
+        exportDate: new Date().toISOString(),
+        activeProjectId,
+        projects,
+        projectSources,
+        chatSessions,
+        similarityThreshold,
+        filterPeriod,
+        topK,
+      };
+      const jsonStr = JSON.stringify(backupData, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `qaway_criterios_backup_${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToastMessage("Copia de seguridad (.json) guardada en tu PC.");
+    } catch (err) {
+      console.error("[Backup Export] Error:", err);
+      showToastMessage("Error al generar copia de seguridad.");
+    }
+  }
+
+  function handleImportLocalBackup(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const raw = event.target?.result as string;
+        const data = JSON.parse(raw);
+        if (data.chatSessions && Array.isArray(data.chatSessions)) {
+          setChatSessions(data.chatSessions);
+        }
+        if (data.projects && Array.isArray(data.projects)) {
+          setProjects(data.projects);
+        }
+        if (data.projectSources && Array.isArray(data.projectSources)) {
+          setProjectSources(data.projectSources);
+        }
+        if (typeof data.similarityThreshold === "number") {
+          setSimilarityThreshold(data.similarityThreshold);
+        }
+        showToastMessage("¡Respaldo (.json) restaurado con éxito en esta PC!");
+      } catch (err) {
+        console.error("[Backup Import] Error:", err);
+        showToastMessage("El archivo .json no tiene un formato de respaldo válido.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
   }
 
   function handleScenario(id: string) {
@@ -2842,33 +2940,154 @@ export default function CriteriosApp() {
                       )}
                     </div>
 
-                    {/* Selector de Perfil de Agente asignado a esta sesión */}
-                    <div className="relative shrink-0">
-                      <select
-                        value={activeSession?.agentProfile || "auditor_laboral"}
-                        onChange={(e) => {
-                          const newProfile = e.target.value as AgentProfileId;
-                          setChatSessions((prev) =>
-                            prev.map((s) => (s.id === activeSessionId ? { ...s, agentProfile: newProfile } : s))
-                          );
-                          syncSessionToSupabase({
-                            id: activeSessionId,
-                            projectId: activeProjectId,
-                            title: activeSession?.title || "Conversación",
-                            preview: activeSession?.preview || "",
-                            agentProfile: newProfile,
-                            messagesCount: activeSession?.turns.length || 0,
-                          });
-                        }}
-                        className="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 cursor-pointer shadow-xs transition-colors focus:outline-none"
-                        title="Perfil de Agente especializado asignado a este chat"
-                      >
-                        {RAG_AGENT_PROFILES.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            🤖 {p.name}
-                          </option>
-                        ))}
-                      </select>
+                    {/* Selector Desplegable de Agente Especializado y Tono (Sin Emojis, Diseño Nativo Qaway) */}
+                    <div className="relative shrink-0" ref={agentMenuRef}>
+                      {(() => {
+                        const curProf =
+                          RAG_AGENT_PROFILES.find((p) => p.id === (activeSession?.agentProfile || "auditor_laboral")) ||
+                          RAG_AGENT_PROFILES[0];
+                        const curTone =
+                          RAG_AGENT_TONES.find((t) => t.id === (activeSession?.tone || "ejecutivo")) ||
+                          RAG_AGENT_TONES[0];
+                        return (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => setShowAgentMenu((v) => !v)}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs transition-colors ${
+                                showAgentMenu
+                                  ? "bg-zinc-100 border-zinc-300 text-zinc-900"
+                                  : "border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800"
+                              }`}
+                              title="Configurar Agente Especializado y Tono de Respuesta"
+                            >
+                              <span style={{ color: curProf.color }} className="shrink-0">
+                                <HubIcon icon={curProf.icon} size={14} />
+                              </span>
+                              <span className="font-semibold text-zinc-900">{curProf.shortName}</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-100 text-zinc-600 font-medium font-mono">
+                                {curTone.name}
+                              </span>
+                              <HubIcon
+                                icon={ChevronDown}
+                                size={12}
+                                className={`text-zinc-400 transition-transform ${showAgentMenu ? "rotate-180" : ""}`}
+                              />
+                            </button>
+
+                            {showAgentMenu && (
+                              <div
+                                style={{
+                                  backgroundColor: palette.bgSurface,
+                                  borderColor: palette.borderDefault,
+                                }}
+                                className="absolute right-0 top-full mt-2 w-80 rounded-2xl border shadow-2xl p-3 z-40 text-xs space-y-3 animate-in fade-in slide-in-from-top-2"
+                              >
+                                {/* SECCIÓN 1: PERFIL DE AGENTE */}
+                                <div>
+                                  <div className="flex items-center justify-between pb-1.5 border-b border-zinc-100 mb-2">
+                                    <span className="text-[10.5px] font-bold text-zinc-400 uppercase tracking-wider">
+                                      Agente Especializado
+                                    </span>
+                                    <span className="text-[10px] text-zinc-400 font-mono">Motor RAG</span>
+                                  </div>
+                                  <div className="space-y-1.5">
+                                    {RAG_AGENT_PROFILES.map((p) => {
+                                      const isSelected = (activeSession?.agentProfile || "auditor_laboral") === p.id;
+                                      return (
+                                        <button
+                                          key={p.id}
+                                          type="button"
+                                          onClick={() => {
+                                            setChatSessions((prev) =>
+                                              prev.map((s) => (s.id === activeSessionId ? { ...s, agentProfile: p.id } : s))
+                                            );
+                                            syncSessionToSupabase({
+                                              id: activeSessionId,
+                                              projectId: activeProjectId,
+                                              title: activeSession?.title || "Conversación",
+                                              preview: activeSession?.preview || "",
+                                              agentProfile: p.id,
+                                              tone: activeSession?.tone || "ejecutivo",
+                                              messagesCount: activeSession?.turns.length || 0,
+                                            });
+                                            showToastMessage(`Perfil asignado: ${p.shortName}`);
+                                          }}
+                                          className={`w-full text-left p-2 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                                            isSelected
+                                              ? "bg-zinc-50 border-zinc-300 font-semibold shadow-2xs"
+                                              : "border-transparent hover:bg-zinc-50 text-zinc-700"
+                                          }`}
+                                        >
+                                          <span
+                                            className="mt-0.5 p-1.5 rounded-lg bg-white border border-zinc-200/80 shadow-2xs shrink-0"
+                                            style={{ color: p.color }}
+                                          >
+                                            <HubIcon icon={p.icon} size={14} />
+                                          </span>
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between">
+                                              <span className="font-semibold text-zinc-900 text-[12px]">{p.shortName}</span>
+                                              <span className={`text-[9.5px] px-1.5 py-0.5 rounded font-medium border ${p.badgeBg}`}>
+                                                {p.badge}
+                                              </span>
+                                            </div>
+                                            <p className="text-[11px] text-zinc-500 leading-tight mt-0.5">{p.description}</p>
+                                          </div>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                {/* SECCIÓN 2: TONO DE RESPUESTA */}
+                                <div className="pt-2 border-t border-zinc-100">
+                                  <div className="flex items-center justify-between mb-1.5">
+                                    <span className="text-[10.5px] font-bold text-zinc-400 uppercase tracking-wider">
+                                      Tono de Respuesta
+                                    </span>
+                                    <span className="text-[10px] text-zinc-400 font-mono">Capa 1 Prompt</span>
+                                  </div>
+                                  <div className="grid grid-cols-3 gap-1.5">
+                                    {RAG_AGENT_TONES.map((t) => {
+                                      const isSelected = (activeSession?.tone || "ejecutivo") === t.id;
+                                      return (
+                                        <button
+                                          key={t.id}
+                                          type="button"
+                                          onClick={() => {
+                                            setChatSessions((prev) =>
+                                              prev.map((s) => (s.id === activeSessionId ? { ...s, tone: t.id } : s))
+                                            );
+                                            syncSessionToSupabase({
+                                              id: activeSessionId,
+                                              projectId: activeProjectId,
+                                              title: activeSession?.title || "Conversación",
+                                              preview: activeSession?.preview || "",
+                                              agentProfile: activeSession?.agentProfile || "auditor_laboral",
+                                              tone: t.id,
+                                              messagesCount: activeSession?.turns.length || 0,
+                                            });
+                                            showToastMessage(`Tono configurado: ${t.name}`);
+                                          }}
+                                          className={`py-1.5 px-2 rounded-lg text-center border text-[11px] font-medium transition-all cursor-pointer ${
+                                            isSelected
+                                              ? "bg-zinc-900 text-white border-zinc-900 shadow-2xs font-semibold"
+                                              : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
+                                          }`}
+                                          title={t.description}
+                                        >
+                                          {t.name}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <button
@@ -4657,6 +4876,73 @@ export default function CriteriosApp() {
                           </button>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Almacenamiento Local en mi PC (Sin Supabase) */}
+                    <div
+                      style={{
+                        backgroundColor: palette.bgSurface,
+                        borderColor: palette.borderDefault,
+                      }}
+                      className="p-5 rounded-2xl border shadow-xs space-y-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <span className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center shrink-0 shadow-2xs">
+                            <HubIcon icon={HardDrive} size={20} />
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm font-bold text-zinc-900">Almacenamiento Local en tu PC</h3>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                                100% Privado &amp; Offline
+                              </span>
+                            </div>
+                            <p style={{ color: palette.textSecondary, fontSize: 13 }} className="mt-0.5">
+                              ¿Prefieres no sincronizar tus datos en la nube? Todos tus proyectos, fuentes, agentes,
+                              tonos y sesiones de chat se resguardan de forma privada en el almacenamiento local de tu navegador en esta PC.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <button
+                          type="button"
+                          onClick={handleExportLocalBackup}
+                          className="p-3.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 flex items-center gap-3 cursor-pointer shadow-2xs transition-all text-left"
+                        >
+                          <span className="p-2 rounded-lg bg-zinc-100 text-zinc-700">
+                            <HubIcon icon={Download} size={16} />
+                          </span>
+                          <div className="min-w-0">
+                            <span className="block text-xs font-bold text-zinc-900">Exportar Respaldo (.json) a mi PC</span>
+                            <span className="block text-[11px] text-zinc-500">Descarga un archivo .json completo</span>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => backupFileInputRef.current?.click()}
+                          className="p-3.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 flex items-center gap-3 cursor-pointer shadow-2xs transition-all text-left"
+                        >
+                          <span className="p-2 rounded-lg bg-zinc-100 text-zinc-700">
+                            <HubIcon icon={Upload} size={16} />
+                          </span>
+                          <div className="min-w-0">
+                            <span className="block text-xs font-bold text-zinc-900">Restaurar Respaldo (.json) desde PC</span>
+                            <span className="block text-[11px] text-zinc-500">Carga un archivo .json guardado</span>
+                          </div>
+                        </button>
+                      </div>
+
+                      <input
+                        type="file"
+                        ref={backupFileInputRef}
+                        onChange={handleImportLocalBackup}
+                        accept=".json,application/json"
+                        className="hidden"
+                      />
                     </div>
 
                     {/* Nota de Aislamiento de Seguridad */}

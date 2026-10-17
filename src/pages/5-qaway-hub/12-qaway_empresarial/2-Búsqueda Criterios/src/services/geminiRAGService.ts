@@ -23,6 +23,7 @@ export interface SourceContextItem {
 }
 
 export type AgentProfileId = "auditor_laboral" | "analista_financiero" | "oficial_cumplimiento";
+export type AgentToneId = "ejecutivo" | "tecnico" | "didactico";
 
 export interface GeminiRAGQueryParams {
   query: string;
@@ -33,6 +34,7 @@ export interface GeminiRAGQueryParams {
   history?: Array<{ sender: "user" | "assistant"; text: string }>;
   temperature?: number;
   agentProfile?: AgentProfileId;
+  tone?: AgentToneId;
   mode?: "fast" | "standard" | "deep";
   similarityThreshold?: number;
   topK?: number;
@@ -108,11 +110,12 @@ export const CAPA_0_LEGAL_PERUANA = `
 `;
 
 /**
- * CAPA 1: Rol del Agente según Perfil Especializado
+ * CAPA 1: Rol del Agente según Perfil Especializado y Tono
  */
 export function buildCapa1SystemPrompt(
   projectName: string = "Auditoría",
-  profile: AgentProfileId = "auditor_laboral"
+  profile: AgentProfileId = "auditor_laboral",
+  tone: AgentToneId = "ejecutivo"
 ): string {
   let roleTitle = "Auditor Normativo & Laboral Senior";
   let roleSpecialty =
@@ -128,14 +131,23 @@ export function buildCapa1SystemPrompt(
       "Especialista en control interno, manuales de procedimientos corporativos, aprobación de comités y gobernanza de riesgos.";
   }
 
+  let toneDirectives =
+    "Tono Ejecutivo Formal: Sobrio, conciso, orientado a conclusiones de impacto y directrices de alta dirección. Respuestas sin rodeos.";
+  if (tone === "tecnico") {
+    toneDirectives =
+      "Tono Técnico Exhaustivo: Máximo rigor dogmático, citas textuales de normas, artículos, cálculo de contingencias paso a paso y análisis pormenorizado.";
+  } else if (tone === "didactico") {
+    toneDirectives =
+      "Tono Didáctico y Accesible: Explicación pedagógica, lenguaje comprensible para gerentes o personal no legal, con viñetas limpias y resumen aclaratorio.";
+  }
+
   return `
 [CAPA 1 — ROL DEL AGENTE ESPECIALIZADO (${roleTitle.toUpperCase()})]
 - Rol Asignado: ${roleTitle} de Qaway Lab y MINEDU.
 - Especialidad: ${roleSpecialty}
 - Proyecto Activo: "${projectName}".
-- Tono y Estilo:
-  * Riguroso, técnico, conciso y de alto valor ejecutivo.
-  * Directo al grano: sin rodeos ni saludos innecesarios cuando se pregunta por criterios específicos.
+- Tono y Estilo Requerido:
+  * ${toneDirectives}
   * Terminología jurídica y contable peruana precisa (TUO, D.S., EBITDA, sobretiempos, provisiones, NIIF).
 `;
 }
@@ -179,11 +191,12 @@ export function formatProjectSourcesContext(sources: SourceContextItem[]): strin
 export function compileFullRAGSystemInstruction(
   projectName: string,
   sources: SourceContextItem[],
-  agentProfile: AgentProfileId = "auditor_laboral"
+  agentProfile: AgentProfileId = "auditor_laboral",
+  tone: AgentToneId = "ejecutivo"
 ): string {
   return `${CAPA_0_LEGAL_PERUANA}
 
-${buildCapa1SystemPrompt(projectName, agentProfile)}
+${buildCapa1SystemPrompt(projectName, agentProfile, tone)}
 
 ${CAPA_2_FEW_SHOT_CITATIONS}
 
@@ -245,6 +258,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     projectName = "Auditoría Q3",
     model = DEFAULT_GEMINI_MODEL,
     agentProfile = "auditor_laboral",
+    tone = "ejecutivo",
     mode = "standard",
   } = params;
 
@@ -275,7 +289,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     };
   }
 
-  const systemInstructionText = compileFullRAGSystemInstruction(projectName, projectSources, agentProfile);
+  const systemInstructionText = compileFullRAGSystemInstruction(projectName, projectSources, agentProfile, tone);
 
   // Formatear historial si existe
   const contents: any[] = [];

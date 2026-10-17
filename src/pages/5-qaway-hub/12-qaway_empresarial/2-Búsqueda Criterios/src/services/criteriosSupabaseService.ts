@@ -146,6 +146,7 @@ export async function syncSessionToSupabase(session: {
   provider?: string;
   mode?: string;
   agentProfile?: string;
+  tone?: string;
   messagesCount: number;
 }): Promise<boolean> {
   try {
@@ -158,6 +159,7 @@ export async function syncSessionToSupabase(session: {
       provider: session.provider || "Google DeepMind",
       mode: session.mode || "standard",
       agent_profile: session.agentProfile || "auditor_laboral",
+      tone: session.tone || "ejecutivo",
       messages_count: session.messagesCount,
       updated_at: new Date().toISOString(),
     });
