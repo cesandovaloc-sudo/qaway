@@ -2548,7 +2548,12 @@ export default function CriteriosApp() {
           </aside>
 
           {/* ===== COLUMNA 2: PANEL CENTRAL - WORKSPACE CON SCROLL ===== */}
-          <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+          <main
+            className="flex-1 flex flex-col min-w-0 h-full overflow-hidden transition-[padding] duration-75"
+            style={{
+              paddingRight: sidebarOpen ? `${sidebarWidth}px` : "4rem",
+            }}
+          >
             {activeNav === "nuevo" && (
               <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-2 max-w-[940px] w-full mx-auto flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header de la conversación (ESTÁTICO) */}
