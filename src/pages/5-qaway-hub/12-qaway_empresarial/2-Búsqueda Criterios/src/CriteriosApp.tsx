@@ -1446,6 +1446,10 @@ export default function CriteriosApp() {
         .qaway-criterios-root {
           scrollbar-width: thin;
           scrollbar-color: #d4d4d8 transparent;
+          scrollbar-gutter: stable;
+        }
+        .qaway-criterios-root main {
+          scrollbar-gutter: stable;
         }
       `}</style>
 
