@@ -142,8 +142,17 @@ export default function PreguntasFrecuentesApp() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const nameMap: Record<string, string> = {
+            DEI: 'Ed. Inicial',
+            DEP: 'Ed. Primaria',
+            DISER: 'Servicios Rurales',
+            DEBA: 'Básica Alternativa',
+            DEBE: 'Básica Especial',
+            DES: 'Ed. Secundaria'
+          };
           return parsed.map((dir: DirectionData) => ({
             ...dir,
+            name: nameMap[dir.id] || dir.name,
             cases: dir.cases.map((c) => ({ ...c, isOpen: false }))
           }));
         }

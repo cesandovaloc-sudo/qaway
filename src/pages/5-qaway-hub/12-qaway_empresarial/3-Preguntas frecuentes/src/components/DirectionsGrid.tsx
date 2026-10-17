@@ -51,7 +51,7 @@ export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
 
           const cardClasses = isSelected
             ? 'bg-white border-2 border-[#b91c1c] shadow-[0_4px_16px_-4px_rgba(185,28,28,0.12)] ring-4 ring-rose-50'
-            : 'bg-white border border-slate-200/90 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5';
+            : 'bg-white border-2 border-slate-200/80 hover:border-slate-300 hover:shadow-xs';
 
           const iconBoxClasses = isSelected
             ? 'text-[#b91c1c] bg-rose-50 border border-rose-100'
@@ -71,7 +71,7 @@ export const DirectionsGrid: React.FC<DirectionsGridProps> = ({
               type="button"
               onClick={() => onSelectDirection(dir.id)}
               aria-pressed={isSelected}
-              className={`group w-full text-left rounded-2xl min-h-[78px] sm:min-h-[84px] px-5 py-4 sm:px-6 sm:py-4.5 transition-all duration-200 flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b91c1c] cursor-pointer ${cardClasses}`}
+              className={`group w-full text-left rounded-2xl h-[82px] sm:h-[86px] px-5 py-3.5 sm:px-6 sm:py-4 transition-colors duration-150 flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b91c1c] cursor-pointer ${cardClasses}`}
             >
               <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
                 <div

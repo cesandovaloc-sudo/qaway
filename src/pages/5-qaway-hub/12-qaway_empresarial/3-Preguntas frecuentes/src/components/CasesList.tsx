@@ -75,10 +75,10 @@ export const CasesList: React.FC<CasesListProps> = ({
             {mode === 'search' ? 'RESULTADOS' : direction.code}
           </span>
           <div>
-            <h2 className="text-sm sm:text-[15px] font-bold text-slate-800 leading-tight">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
               {mode === 'search' ? 'Casuísticas encontradas en el banco' : direction.name}
             </h2>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
               {countLabel} {mode === 'search' ? '• Ordenadas por relevancia' : ''}
             </p>
           </div>

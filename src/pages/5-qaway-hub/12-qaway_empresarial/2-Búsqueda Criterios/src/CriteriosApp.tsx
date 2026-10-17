@@ -55,6 +55,9 @@ import {
   Mic,
   MicOff,
   X,
+  LogOut,
+  User,
+  Building2,
 } from "lucide-react";
 import { HubIcon } from "./components/ui/HubIcon";
 
@@ -639,6 +642,11 @@ export default function CriteriosApp() {
   const [activeScenario, setActiveScenario] = useState<string>("auditoria");
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>(2);
   const [inspectorOpen, setInspectorOpen] = useState<boolean>(false); // Inicialmente colapsado
+  const [sidebarWidth, setSidebarWidth] = useState<number>(264);
+  const [inspectorWidth, setInspectorWidth] = useState<number>(380);
+  const [isResizingSidebar, setIsResizingSidebar] = useState<boolean>(false);
+  const [isResizingInspector, setIsResizingInspector] = useState<boolean>(false);
+  const chatTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [query, setQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showSqlModal, setShowSqlModal] = useState<boolean>(false);
@@ -787,6 +795,51 @@ export default function CriteriosApp() {
     };
   }, []);
 
+  // Controladores de redimensionamiento de paneles con el mouse
+  const startResizingSidebar = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingSidebar(true);
+  }, []);
+
+  const startResizingInspector = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingInspector(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isResizingSidebar && !isResizingInspector) return;
+
+    function handleMouseMove(e: MouseEvent) {
+      if (isResizingSidebar) {
+        const newWidth = Math.max(200, Math.min(460, e.clientX));
+        setSidebarWidth(newWidth);
+      }
+      if (isResizingInspector) {
+        const newWidth = Math.max(280, Math.min(600, window.innerWidth - e.clientX));
+        setInspectorWidth(newWidth);
+      }
+    }
+
+    function handleMouseUp() {
+      setIsResizingSidebar(false);
+      setIsResizingInspector(false);
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    }
+
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    };
+  }, [isResizingSidebar, isResizingInspector]);
+
   // No-op para compatibilidad interna sin mostrar nunca la caja negra flotante
   function showToastMessage(_msg?: string) {
     // Eliminado intencionalmente el popup flotante negro a solicitud del usuario
@@ -796,7 +849,7 @@ export default function CriteriosApp() {
     const newId = `session-${Date.now()}`;
     const newSession: ChatSession = {
       id: newId,
-      title: customTitle || `Nueva conversación ${chatSessions.length + 1}`,
+      title: customTitle || "Nueva conversación",
       preview: "Conversación limpia • Escribe una consulta para comenzar",
       date: "Ahora",
       messagesCount: 0,
@@ -843,11 +896,12 @@ export default function CriteriosApp() {
   }
 
   function handleResetHome() {
-    setActiveSessionId("session-1");
-    setActiveScenario("auditoria");
-    setInspectorTab(2);
-    setInspectorOpen(false);
     setActiveNav("nuevo");
+    setInspectorOpen(false);
+    setShowQuickSearch(false);
+    setShowFilterDropdown(false);
+    setShowUserMenu(false);
+    setHeaderSearch("");
   }
 
   const currentProjectSources = useMemo(
@@ -1373,6 +1427,28 @@ export default function CriteriosApp() {
 
   return (
     <div className="qaway-criterios-root" style={{ backgroundColor: palette.bgPage, color: palette.textPrimary }}>
+      {/* Estilos mínimos y elegantes para scrollbars dentro del namespace, eliminando franjas oscuras */}
+      <style>{`
+        .qaway-criterios-root ::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        .qaway-criterios-root ::-webkit-scrollbar-track {
+          background: transparent !important;
+        }
+        .qaway-criterios-root ::-webkit-scrollbar-thumb {
+          background: #d4d4d8 !important;
+          border-radius: 9999px !important;
+        }
+        .qaway-criterios-root ::-webkit-scrollbar-thumb:hover {
+          background: #a1a1aa !important;
+        }
+        .qaway-criterios-root {
+          scrollbar-width: thin;
+          scrollbar-color: #d4d4d8 transparent;
+        }
+      `}</style>
+
       {/* Inputs ocultos reales para carga de archivos y carpetas desde el sistema */}
       <input
         ref={fileInputRef}
@@ -1401,39 +1477,47 @@ export default function CriteriosApp() {
             backgroundColor: palette.bgSurface,
             borderColor: palette.borderDefault,
           }}
-          className="w-full h-14 shrink-0 border-b flex items-center justify-between px-3 sm:px-4 z-30 sticky top-0 shadow-xs"
+          className="w-full h-14 shrink-0 border-b flex items-center justify-between px-0 z-30 sticky top-0 shadow-xs"
         >
-          {/* Lado izquierdo: Bloque del Logo (delimitado al ancho del sidebar) + Toggle Sidebar */}
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="flex items-center gap-2 shrink-0 pr-3 border-r border-zinc-200/80 mr-1">
-              {/* Logo Completo como Botón de Inicio */}
-              <button
-                type="button"
-                onClick={handleResetHome}
-                className="flex items-center gap-2 text-left cursor-pointer hover:opacity-80 transition-opacity"
-                title="Reiniciar y volver al inicio"
+          {/* Lado izquierdo: Bloque del Logo (ocupa exactamente el mismo espacio que el panel izquierdo) */}
+          <div
+            style={{
+              width: sidebarOpen ? `${sidebarWidth}px` : "4rem",
+              borderColor: palette.borderDefault,
+            }}
+            className="h-full shrink-0 border-r flex items-center px-3 transition-[width] duration-75 min-w-0"
+          >
+            {/* Logo Completo como Botón de Inicio */}
+            <button
+              type="button"
+              onClick={handleResetHome}
+              className="flex items-center gap-2.5 text-left cursor-pointer hover:opacity-85 transition-opacity w-full overflow-hidden"
+              title="Volver al inicio de la aplicación"
+            >
+              <span
+                style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSurface }}
+                className="w-8 h-8 rounded-lg border flex items-center justify-center shadow-xs shrink-0"
               >
-                <span
-                  style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSurface }}
-                  className="w-8 h-8 rounded-lg border flex items-center justify-center shadow-xs shrink-0"
-                >
-                  <HubIcon icon={Layers} size={18} className="text-zinc-800" />
-                </span>
-                <span style={{ fontSize: 16.5 }} className="font-bold tracking-tight text-zinc-900 hidden sm:inline">
-                  RAG Hub
-                </span>
-                <span
-                  style={{
-                    backgroundColor: palette.accentCitationBg,
-                    color: palette.accentCitation,
-                    fontSize: 11.5,
-                  }}
-                  className="px-1.5 py-0.5 rounded font-mono font-semibold"
-                >
-                  v4.0
-                </span>
-              </button>
-            </div>
+                <HubIcon icon={Layers} size={18} className="text-zinc-800" />
+              </span>
+              {sidebarOpen && (
+                <div className="flex items-center justify-between flex-1 min-w-0">
+                  <span style={{ fontSize: 16.5 }} className="font-bold tracking-tight text-zinc-900 truncate">
+                    RAG Hub
+                  </span>
+                  <span
+                    style={{
+                      backgroundColor: palette.accentCitationBg,
+                      color: palette.accentCitation,
+                      fontSize: 11.5,
+                    }}
+                    className="px-1.5 py-0.5 rounded font-mono font-semibold shrink-0"
+                  >
+                    v4.0
+                  </span>
+                </div>
+              )}
+            </button>
           </div>
 
           {/* Lado Central: Buscador y Filtro Global Avanzado (Rojo) */}
@@ -1711,27 +1795,36 @@ export default function CriteriosApp() {
           {/* Lado derecho: Perfil con Switcher de Tema en 1 sola línea */}
           <div className="flex items-center gap-2.5 shrink-0">
 
-            {/* Avatar Carlos con Menú Desplegable */}
-            <div ref={userMenuRef} className="relative flex items-center gap-1.5">
-              <span
-                style={{ backgroundColor: palette.actionPrimary }}
-                className="w-8 h-8 rounded-full text-white flex items-center justify-center font-semibold text-sm shadow-xs transition-colors"
-              >
-                C
-              </span>
-              <span style={{ fontSize: 13.5 }} className="font-medium text-zinc-800 hidden sm:inline">
-                Carlos
-              </span>
+            {/* Avatar Carlos con Menú Desplegable Completo según estándar Qaway SaaS */}
+            <div ref={userMenuRef} className="relative flex items-center pr-3">
               <button
                 type="button"
                 onClick={() => setShowUserMenu((v) => !v)}
-                className="p-1 rounded hover:bg-zinc-100 cursor-pointer text-zinc-500"
+                className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-xl hover:bg-zinc-100/80 cursor-pointer transition-colors"
                 aria-label="Abrir menú de usuario"
               >
-                <HubIcon icon={ChevronDown} size={15} />
+                <span
+                  style={{ backgroundColor: palette.actionPrimary }}
+                  className="w-8 h-8 rounded-full text-white flex items-center justify-center font-semibold text-sm shadow-xs transition-colors shrink-0"
+                >
+                  C
+                </span>
+                <div className="hidden sm:flex flex-col text-left leading-tight">
+                  <span style={{ fontSize: 13 }} className="font-semibold text-zinc-900">
+                    Carlos
+                  </span>
+                  <span style={{ fontSize: 11 }} className="text-zinc-500 font-medium">
+                    Admin
+                  </span>
+                </div>
+                <HubIcon
+                  icon={ChevronDown}
+                  size={14}
+                  className={`text-zinc-400 transition-transform ${showUserMenu ? "rotate-180" : ""}`}
+                />
               </button>
 
-              {/* Menú Desplegable */}
+              {/* Menú Desplegable Completo Qaway SaaS */}
               {showUserMenu && (
                 <div
                   style={{
@@ -1739,10 +1832,32 @@ export default function CriteriosApp() {
                     borderColor: palette.borderDefault,
                     color: palette.textPrimary,
                   }}
-                  className="absolute right-0 top-full mt-2 w-64 rounded-xl border shadow-xl py-1.5 z-40 text-xs"
+                  className="absolute right-0 top-full mt-2 w-72 rounded-2xl border shadow-2xl p-2 z-50 text-xs space-y-2 animate-in fade-in"
                 >
+                  {/* Ficha de Usuario & Workspace */}
+                  <div className="p-2.5 rounded-xl bg-zinc-50 border border-zinc-100 space-y-1.5">
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        style={{ backgroundColor: palette.actionPrimary }}
+                        className="w-9 h-9 rounded-full text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0"
+                      >
+                        C
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-zinc-900 text-[13px] truncate">Carlos Sandoval</p>
+                        <p className="text-[11.5px] text-zinc-500 truncate">carlos@qawaylab.com</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-zinc-200/60 text-[11px]">
+                      <span className="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200 font-semibold">
+                        Workspace Owner
+                      </span>
+                      <span className="text-zinc-500">Qaway Enterprise</span>
+                    </div>
+                  </div>
+
                   {/* Selector de Temas en UNA sola línea */}
-                  <div className="px-3 py-2 border-b border-zinc-100">
+                  <div className="px-2 py-1">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider">
                         Tema visual
@@ -1751,7 +1866,7 @@ export default function CriteriosApp() {
                         {palette.name}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 bg-zinc-100/90 p-1 rounded-lg">
+                    <div className="flex items-center gap-1 bg-zinc-100/90 p-1 rounded-xl">
                       {(Object.keys(THEME_CONFIG) as RagThemeId[]).map((tid) => {
                         const th = THEME_CONFIG[tid];
                         const isCurrent = theme === tid;
@@ -1764,7 +1879,7 @@ export default function CriteriosApp() {
                               showToastMessage(`Tema ${th.name} activado`);
                             }}
                             title={th.name}
-                            className={`flex-1 py-1 px-1 rounded-md text-[11px] font-medium flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                            className={`flex-1 py-1 px-1 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1 transition-all cursor-pointer ${
                               isCurrent
                                 ? "bg-white text-zinc-900 shadow-xs font-semibold"
                                 : "text-zinc-500 hover:text-zinc-800"
@@ -1781,12 +1896,13 @@ export default function CriteriosApp() {
                     </div>
                   </div>
 
-                  {/* Opciones de perfil */}
-                  <div className="py-1 px-1">
+                  {/* Accesos rápidos de navegación */}
+                  <div className="space-y-0.5 pt-1 border-t border-zinc-100">
                     {[
-                      { label: "Configuración & IA", nav: "config" },
-                      { label: "Mis análisis guardados", nav: "historial" },
-                      { label: "Repositorio de fuentes", nav: "fuentes" },
+                      { label: "Asistente & Chat principal", nav: "nuevo", icon: MessageSquare },
+                      { label: "Repositorio de fuentes", nav: "fuentes", icon: FileText },
+                      { label: "Historial de dictámenes", nav: "historial", icon: History },
+                      { label: "Configuración & IA", nav: "config", icon: Settings },
                     ].map((opt) => (
                       <button
                         key={opt.label}
@@ -1795,11 +1911,27 @@ export default function CriteriosApp() {
                           setShowUserMenu(false);
                           setActiveNav(opt.nav);
                         }}
-                        className="w-full text-left px-2.5 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 rounded-md cursor-pointer transition-colors"
+                        className="w-full text-left px-2.5 py-2 text-xs text-zinc-700 hover:bg-zinc-100 rounded-xl cursor-pointer transition-colors flex items-center gap-2"
                       >
-                        {opt.label}
+                        <HubIcon icon={opt.icon} size={14} className="text-zinc-500 shrink-0" />
+                        <span>{opt.label}</span>
                       </button>
                     ))}
+                  </div>
+
+                  {/* Cerrar sesión */}
+                  <div className="pt-1 border-t border-zinc-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        showToastMessage("Sesión cerrada (modo demostración)");
+                      }}
+                      className="w-full text-left px-2.5 py-2 text-xs text-red-600 hover:bg-red-50 rounded-xl cursor-pointer transition-colors flex items-center gap-2 font-medium"
+                    >
+                      <HubIcon icon={LogOut} size={14} className="text-red-500 shrink-0" />
+                      <span>Cerrar sesión</span>
+                    </button>
                   </div>
                 </div>
               )}
@@ -1814,13 +1946,24 @@ export default function CriteriosApp() {
           {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO CON MÓDULOS UNIVERSALES (COLAPSABLE A ICONOS) ===== */}
           <aside
             style={{
+              width: sidebarOpen ? `${sidebarWidth}px` : "4rem",
               backgroundColor: palette.bgPage,
               borderColor: palette.borderDefault,
             }}
-            className={`shrink-0 border-r flex flex-col transition-all duration-200 overflow-y-auto ${
-              sidebarOpen ? "w-[264px]" : "w-16 items-center"
+            className={`shrink-0 border-r flex flex-col relative transition-[width] duration-75 overflow-y-auto ${
+              sidebarOpen ? "" : "items-center"
             }`}
           >
+            {/* Tirador de redimensionamiento con mouse */}
+            {sidebarOpen && (
+              <div
+                onMouseDown={startResizingSidebar}
+                className={`absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-blue-500/50 transition-colors z-30 select-none ${
+                  isResizingSidebar ? "bg-blue-600 w-2" : ""
+                }`}
+                title="Arrastrar para redimensionar panel izquierdo"
+              />
+            )}
             {sidebarOpen ? (
               // Modo Expandido
               <>
@@ -2024,21 +2167,21 @@ export default function CriteriosApp() {
                                     className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-blue-300 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-zinc-900"
                                     autoFocus
                                   />
-                                  <div className="flex items-center justify-end gap-1">
+                                  <div className="grid grid-cols-2 gap-2 w-full pt-1">
                                     <button
                                       type="button"
                                       onClick={() => {
                                         setIsAddingCategory(false);
                                         setNewCategoryInput("");
                                       }}
-                                      className="px-2 py-1 rounded text-[11px] text-zinc-500 hover:bg-zinc-100 cursor-pointer"
+                                      className="w-full py-1.5 px-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-100 text-zinc-700 text-xs font-semibold transition-colors text-center cursor-pointer shadow-2xs"
                                     >
                                       Cancelar
                                     </button>
                                     <button
                                       type="button"
                                       onClick={handleAddCategory}
-                                      className="px-2.5 py-1 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-2xs"
+                                      className="w-full py-1.5 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-2xs transition-colors text-center cursor-pointer"
                                     >
                                       Añadir
                                     </button>
@@ -2062,20 +2205,21 @@ export default function CriteriosApp() {
                         )}
                       </div>
 
-                      <div className="flex items-center justify-end gap-1.5 pt-0.5">
+                      {/* Botones de acción del nuevo proyecto que ocupan todo el ancho */}
+                      <div className="grid grid-cols-2 gap-2 w-full pt-1">
                         <button
                           type="button"
                           onClick={() => {
                             setShowNewProjectModal(false);
                             setShowCategoryDropdown(false);
                           }}
-                          className="px-2.5 py-1.5 rounded-xl border border-zinc-200 bg-white text-[11.5px] font-medium text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                          className="w-full py-2 px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-100 text-zinc-700 text-xs font-semibold transition-colors text-center cursor-pointer shadow-2xs"
                         >
                           Cancelar
                         </button>
                         <button
                           type="submit"
-                          className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11.5px] font-semibold cursor-pointer shadow-2xs"
+                          className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-2xs transition-colors text-center cursor-pointer"
                         >
                           Crear Proyecto
                         </button>
@@ -2168,7 +2312,7 @@ export default function CriteriosApp() {
                   </div>
 
                   {isChatsListOpen && (
-                    <div className="space-y-0.5 overflow-y-auto max-h-[220px] pr-0.5 scrollbar-thin">
+                    <div className="space-y-1.5 overflow-y-auto max-h-[220px] pr-0.5 scrollbar-thin">
                       {currentChatSessions.length === 0 ? (
                         <div className="py-2.5 px-2 text-center text-zinc-400">
                           <p className="text-xs">Sin conversaciones en este proyecto</p>
@@ -2186,10 +2330,10 @@ export default function CriteriosApp() {
                           return (
                             <div
                               key={session.id}
-                              className={`group flex items-center justify-between px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-all ${
+                              className={`group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs cursor-pointer transition-all ${
                                 isCurrent
-                                  ? "bg-zinc-200/70 text-zinc-900 font-semibold"
-                                  : "text-zinc-600 hover:bg-zinc-100"
+                                  ? "bg-zinc-200/80 text-zinc-900 font-semibold shadow-2xs"
+                                  : "text-zinc-600 hover:bg-zinc-100/90"
                               }`}
                               onClick={() => {
                                 setActiveSessionId(session.id);
@@ -2576,34 +2720,34 @@ export default function CriteriosApp() {
                         borderColor: palette.borderDefault,
                         backgroundColor: palette.bgSurface,
                       }}
-                      className="rounded-2xl border border-dashed p-8 text-center space-y-3 my-4 shadow-2xs"
+                      className="rounded-2xl border border-dashed p-9 text-center space-y-4 my-6 shadow-2xs"
                     >
-                      <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center mx-auto shadow-2xs">
-                        <HubIcon icon={MessageSquarePlus} size={22} />
+                      <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center mx-auto shadow-2xs">
+                        <HubIcon icon={MessageSquarePlus} size={26} />
                       </div>
-                      <div className="space-y-1 max-w-md mx-auto">
-                        <h2 style={{ fontSize: 16 }} className="font-bold text-zinc-900">
-                          Nueva conversación lista ({activeSession?.title || "Hilo limpio"})
+                      <div className="space-y-1.5 max-w-lg mx-auto">
+                        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900">
+                          Nueva conversación lista
                         </h2>
-                        <p style={{ color: palette.textSecondary, fontSize: 13.5 }}>
+                        <p style={{ color: palette.textSecondary }} className="text-[14.5px] leading-relaxed">
                           Este hilo está completamente limpio. Escribe tu consulta en la barra inferior, selecciona uno de los escenarios rápidos arriba o carga nuevos documentos al proyecto.
                         </p>
                       </div>
-                      <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                      <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                         <button
                           type="button"
                           onClick={handleUploadFolder}
-                          className="px-3.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-800 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                          className="px-4 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-900 text-[13.5px] font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors shadow-2xs"
                         >
-                          <HubIcon icon={FolderPlus} size={14} className="text-indigo-600" />
+                          <HubIcon icon={FolderPlus} size={16} className="text-indigo-600" />
                           <span>+ Carga de doc</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleSendMessage("¿Cuál es el resumen ejecutivo de las fuentes activas en este proyecto?")}
-                          className="px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                          className="px-4 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 text-[13.5px] font-semibold inline-flex items-center gap-2 cursor-pointer transition-colors shadow-2xs"
                         >
-                          <HubIcon icon={Sparkles} size={14} className="text-blue-600" />
+                          <HubIcon icon={Sparkles} size={16} className="text-blue-600" />
                           <span>Generar resumen del proyecto</span>
                         </button>
                       </div>
@@ -2883,170 +3027,197 @@ export default function CriteriosApp() {
                         borderColor: isRecordingVoice ? "#EF4444" : palette.borderDefault,
                         backgroundColor: palette.bgSurface,
                       }}
-                      className={`rounded-xl border shadow-md flex items-center gap-2 pl-3 pr-2 py-2 transition-all ${
-                        isRecordingVoice ? "ring-2 ring-red-300" : ""
+                      className={`rounded-2xl border shadow-md flex flex-col gap-2 p-3 transition-all ${
+                        isRecordingVoice ? "ring-2 ring-red-300" : "focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20"
                       }`}
                     >
-                      {/* Botón Adjuntar Archivo / Imagen (abre selector real o modal de ingesta) */}
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 cursor-pointer transition-colors"
-                        title="Adjuntar e indexar documento o planilla Excel"
-                        aria-label="Adjuntar archivo o imagen"
-                      >
-                        <HubIcon icon={Paperclip} size={16} />
-                      </button>
-
-                      {/* Botón Dictado por Voz */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextState = !isRecordingVoice;
-                          setIsRecordingVoice(nextState);
-                          if (nextState) {
-                            setQuery("¿Cuál es la provisión estimada en la matriz Excel del Q3?");
+                      <textarea
+                        ref={chatTextareaRef}
+                        rows={1}
+                        value={query}
+                        onChange={(e) => {
+                          setQuery(e.target.value);
+                          e.target.style.height = "auto";
+                          const maxHeight = window.innerHeight * 0.35;
+                          e.target.style.height = `${Math.min(maxHeight, Math.max(48, e.target.scrollHeight))}px`;
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            if (query.trim() && !isSearching) {
+                              handleSubmit(e);
+                              if (chatTextareaRef.current) {
+                                chatTextareaRef.current.style.height = "auto";
+                              }
+                            }
                           }
                         }}
-                        className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
-                          isRecordingVoice
-                            ? "bg-red-100 text-red-600 animate-pulse"
-                            : "hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800"
-                        }`}
-                        title={isRecordingVoice ? "Detener grabación" : "Dictar consulta por voz"}
-                        aria-label={isRecordingVoice ? "Detener grabación" : "Dictar consulta por voz"}
-                      >
-                        <HubIcon icon={isRecordingVoice ? MicOff : Mic} size={16} />
-                      </button>
-
-                      {/* Selector de Capacidad / Profundidad con icono Lucide compacto y modal redondeado */}
-                      <div className="relative shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setShowModeDropdown((v) => !v)}
-                          className={`p-1.5 rounded-lg border transition-all cursor-pointer flex items-center justify-center ${
-                            chatMode === "fast"
-                              ? "border-amber-200 bg-amber-50 text-amber-600"
-                              : chatMode === "deep"
-                              ? "border-purple-200 bg-purple-50 text-purple-600"
-                              : "border-blue-200 bg-blue-50 text-blue-600"
-                          }`}
-                          title={`Capacidad de IA: ${
-                            chatMode === "fast"
-                              ? "Rápido (Groq LPU)"
-                              : chatMode === "deep"
-                              ? "Razonamiento Profundo (DeepSeek R1/o1)"
-                              : "Estándar (GPT-4o)"
-                          }`}
-                          aria-label="Seleccionar capacidad del modelo"
-                        >
-                          <HubIcon
-                            icon={chatMode === "fast" ? Zap : chatMode === "deep" ? Sparkles : Cpu}
-                            size={16}
-                          />
-                        </button>
-
-                        {/* Modal Flotante de Selección de Capacidad (Diseño 100% redondeado y estético) */}
-                        {showModeDropdown && (
-                          <div
-                            ref={modeDropdownRef}
-                            style={{
-                              backgroundColor: palette.bgSurface,
-                              borderColor: palette.borderDefault,
-                            }}
-                            className="absolute bottom-full mb-2 left-0 w-72 rounded-2xl border shadow-2xl p-2.5 z-50 text-xs space-y-1.5 animate-in fade-in slide-in-from-bottom-2"
-                          >
-                            <div className="px-2 py-1 flex items-center justify-between border-b border-zinc-100 pb-1.5 mb-1">
-                              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                                Capacidad del Modelo
-                              </span>
-                              <span className="text-[10.5px] text-zinc-400 font-mono">IA Activa</span>
-                            </div>
-
-                            {[
-                              {
-                                id: "fast",
-                                label: "Rápido (Groq LPU)",
-                                desc: "Ultra baja latencia (~42ms) para respuestas ágiles",
-                                icon: Zap,
-                                color: "text-amber-500",
-                                bg: "bg-amber-50 border-amber-200 text-amber-700",
-                              },
-                              {
-                                id: "standard",
-                                label: "Estándar (GPT-4o)",
-                                desc: "Equilibrio ideal entre velocidad y precisión analítica",
-                                icon: Cpu,
-                                color: "text-blue-600",
-                                bg: "bg-blue-50 border-blue-200 text-blue-700",
-                              },
-                              {
-                                id: "deep",
-                                label: "Razonamiento Profundo",
-                                desc: "Cadena de deducción detallada para auditorías",
-                                icon: Sparkles,
-                                color: "text-purple-600",
-                                bg: "bg-purple-50 border-purple-200 text-purple-700",
-                              },
-                            ].map((modeItem) => {
-                              const isSelected = chatMode === modeItem.id;
-                              return (
-                                <button
-                                  key={modeItem.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setChatMode(modeItem.id as "fast" | "standard" | "deep");
-                                    setShowModeDropdown(false);
-                                  }}
-                                  className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
-                                    isSelected
-                                      ? modeItem.bg + " shadow-xs font-semibold"
-                                      : "border-transparent hover:bg-zinc-50 text-zinc-700"
-                                  }`}
-                                >
-                                  <span className={`mt-0.5 p-1 rounded-lg bg-white border border-zinc-200/60 shadow-2xs ${modeItem.color}`}>
-                                    <HubIcon icon={modeItem.icon} size={15} />
-                                  </span>
-                                  <div className="flex-1 min-w-0">
-                                    <span className="block leading-tight text-[12.5px] font-semibold">
-                                      {modeItem.label}
-                                    </span>
-                                    <span className="block leading-tight text-[11px] text-zinc-500 mt-0.5">
-                                      {modeItem.desc}
-                                    </span>
-                                  </div>
-                                  {isSelected && (
-                                    <HubIcon icon={Check} size={14} className="text-blue-600 shrink-0 mt-0.5" />
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-
-                      <input
-                        type="text"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        style={{ fontSize: 15 }}
-                        className="flex-1 bg-transparent focus:outline-none min-w-0 text-zinc-900 placeholder:text-zinc-400"
+                        style={{
+                          fontSize: 15,
+                          maxHeight: "35vh",
+                          minHeight: "48px",
+                        }}
+                        className="w-full bg-transparent focus:outline-none resize-none text-zinc-900 placeholder:text-zinc-400 leading-relaxed overflow-y-auto px-1 py-1"
                         placeholder={
                           isRecordingVoice
                             ? "Escuchando tu voz..."
-                            : "Escribe tu consulta o repregunta en este hilo... (Enter para enviar)"
+                            : "Escribe tu consulta o repregunta en este hilo... (Enter para enviar, Shift+Enter para salto de línea)"
                         }
                         aria-label="Consulta en chat"
                       />
-                      <button
-                        type="submit"
-                        disabled={isSearching}
-                        style={{ backgroundColor: palette.actionPrimary }}
-                        className="w-9 h-9 rounded-lg text-white flex items-center justify-center hover:opacity-90 cursor-pointer shrink-0 transition-all shadow-xs disabled:opacity-50"
-                        aria-label="Enviar mensaje"
-                      >
-                        <HubIcon icon={isSearching ? RefreshCw : Send} size={16} className={isSearching ? "animate-spin" : ""} />
-                      </button>
+
+                      <div className="flex items-center justify-between pt-1 border-t border-zinc-100/90">
+                        <div className="flex items-center gap-1.5">
+                          {/* Botón Adjuntar Archivo / Imagen (abre selector real o modal de ingesta) */}
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 cursor-pointer transition-colors"
+                            title="Adjuntar e indexar documento o planilla Excel"
+                            aria-label="Adjuntar archivo o imagen"
+                          >
+                            <HubIcon icon={Paperclip} size={16} />
+                          </button>
+
+                          {/* Botón Dictado por Voz */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextState = !isRecordingVoice;
+                              setIsRecordingVoice(nextState);
+                              if (nextState) {
+                                setQuery("¿Cuál es la provisión estimada en la matriz Excel del Q3?");
+                              }
+                            }}
+                            className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
+                              isRecordingVoice
+                                ? "bg-red-100 text-red-600 animate-pulse"
+                                : "hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800"
+                            }`}
+                            title={isRecordingVoice ? "Detener grabación" : "Dictar consulta por voz"}
+                            aria-label={isRecordingVoice ? "Detener grabación" : "Dictar consulta por voz"}
+                          >
+                            <HubIcon icon={isRecordingVoice ? MicOff : Mic} size={16} />
+                          </button>
+
+                          {/* Selector de Capacidad / Profundidad con icono Lucide compacto y modal redondeado */}
+                          <div className="relative shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setShowModeDropdown((v) => !v)}
+                              className={`p-1.5 rounded-lg border transition-all cursor-pointer flex items-center justify-center ${
+                                chatMode === "fast"
+                                  ? "border-amber-200 bg-amber-50 text-amber-600"
+                                  : chatMode === "deep"
+                                  ? "border-purple-200 bg-purple-50 text-purple-600"
+                                  : "border-blue-200 bg-blue-50 text-blue-600"
+                              }`}
+                              title={`Capacidad de IA: ${
+                                chatMode === "fast"
+                                  ? "Rápido (Groq LPU)"
+                                  : chatMode === "deep"
+                                  ? "Razonamiento Profundo (DeepSeek R1/o1)"
+                                  : "Estándar (GPT-4o)"
+                              }`}
+                              aria-label="Seleccionar capacidad del modelo"
+                            >
+                              <HubIcon
+                                icon={chatMode === "fast" ? Zap : chatMode === "deep" ? Sparkles : Cpu}
+                                size={16}
+                              />
+                            </button>
+
+                            {/* Modal Flotante de Selección de Capacidad (Diseño 100% redondeado y estético) */}
+                            {showModeDropdown && (
+                              <div
+                                ref={modeDropdownRef}
+                                style={{
+                                  backgroundColor: palette.bgSurface,
+                                  borderColor: palette.borderDefault,
+                                }}
+                                className="absolute bottom-full mb-2 left-0 w-72 rounded-2xl border shadow-2xl p-2.5 z-50 text-xs space-y-1.5 animate-in fade-in slide-in-from-bottom-2"
+                              >
+                                <div className="px-2 py-1 flex items-center justify-between border-b border-zinc-100 pb-1.5 mb-1">
+                                  <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                                    Capacidad del Modelo
+                                  </span>
+                                  <span className="text-[10.5px] text-zinc-400 font-mono">IA Activa</span>
+                                </div>
+
+                                {[
+                                  {
+                                    id: "fast",
+                                    label: "Rápido (Groq LPU)",
+                                    desc: "Ultra baja latencia (~42ms) para respuestas ágiles",
+                                    icon: Zap,
+                                    color: "text-amber-500",
+                                    bg: "bg-amber-50 border-amber-200 text-amber-700",
+                                  },
+                                  {
+                                    id: "standard",
+                                    label: "Estándar (GPT-4o)",
+                                    desc: "Equilibrio ideal entre velocidad y precisión analítica",
+                                    icon: Cpu,
+                                    color: "text-blue-600",
+                                    bg: "bg-blue-50 border-blue-200 text-blue-700",
+                                  },
+                                  {
+                                    id: "deep",
+                                    label: "Razonamiento Profundo",
+                                    desc: "Cadena de deducción detallada para auditorías",
+                                    icon: Sparkles,
+                                    color: "text-purple-600",
+                                    bg: "bg-purple-50 border-purple-200 text-purple-700",
+                                  },
+                                ].map((modeItem) => {
+                                  const isSelected = chatMode === modeItem.id;
+                                  return (
+                                    <button
+                                      key={modeItem.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setChatMode(modeItem.id as "fast" | "standard" | "deep");
+                                        setShowModeDropdown(false);
+                                      }}
+                                      className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                                        isSelected
+                                          ? modeItem.bg + " shadow-xs font-semibold"
+                                          : "border-transparent hover:bg-zinc-50 text-zinc-700"
+                                      }`}
+                                    >
+                                      <span className={`mt-0.5 p-1 rounded-lg bg-white border border-zinc-200/60 shadow-2xs ${modeItem.color}`}>
+                                        <HubIcon icon={modeItem.icon} size={15} />
+                                      </span>
+                                      <div className="flex-1 min-w-0">
+                                        <span className="block leading-tight text-[12.5px] font-semibold">
+                                          {modeItem.label}
+                                        </span>
+                                        <span className="block leading-tight text-[11px] text-zinc-500 mt-0.5">
+                                          {modeItem.desc}
+                                        </span>
+                                      </div>
+                                      {isSelected && (
+                                        <HubIcon icon={Check} size={14} className="text-blue-600 shrink-0 mt-0.5" />
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={isSearching || !query.trim()}
+                          style={{ backgroundColor: palette.actionPrimary }}
+                          className="h-8 px-3 rounded-xl text-white font-semibold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 cursor-pointer shrink-0 transition-all shadow-xs disabled:opacity-40"
+                          aria-label="Enviar mensaje"
+                        >
+                          <HubIcon icon={isSearching ? RefreshCw : Send} size={14} className={isSearching ? "animate-spin" : ""} />
+                          <span>Enviar</span>
+                        </button>
+                      </div>
                     </div>
                   </form>
 
@@ -4059,11 +4230,20 @@ export default function CriteriosApp() {
           {inspectorOpen ? (
             <aside
               style={{
+                width: `${inspectorWidth}px`,
                 backgroundColor: palette.bgSurface,
                 borderColor: palette.borderDefault,
               }}
-              className="hidden xl:flex w-[380px] shrink-0 border-l flex-col h-full overflow-y-auto"
+              className="hidden xl:flex shrink-0 border-l flex-col h-full overflow-y-auto relative transition-[width] duration-75"
             >
+              {/* Tirador de redimensionamiento con mouse */}
+              <div
+                onMouseDown={startResizingInspector}
+                className={`absolute top-0 left-0 w-1.5 h-full cursor-col-resize hover:bg-blue-500/50 transition-colors z-30 select-none ${
+                  isResizingInspector ? "bg-blue-600 w-2" : ""
+                }`}
+                title="Arrastrar para redimensionar inspector"
+              />
               {/* Header del inspector */}
               <div
                 style={{ borderColor: palette.borderDefault }}

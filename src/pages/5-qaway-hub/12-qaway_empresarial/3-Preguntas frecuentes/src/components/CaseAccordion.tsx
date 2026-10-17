@@ -77,16 +77,16 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded">
+                <span className="inline-block text-xs font-bold uppercase tracking-wider text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded">
                   {caseItem.dirCode} • {caseItem.dirName}
                 </span>
                 {caseItem.score > 0 && (
-                  <span className="inline-block text-[10px] font-bold text-amber-700 bg-amber-100/90 px-1.5 py-0.2 rounded">
+                  <span className="inline-block text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
                     Relevancia: {caseItem.score}
                   </span>
                 )}
               </div>
-              <h3 className="text-xs sm:text-[14px] font-bold text-slate-800 leading-snug">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                 {highlightContent(caseItem.title, tokens)}
               </h3>
             </div>
@@ -140,10 +140,10 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                 <AlertCircle className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   DESARROLLO / CASUÍSTICA
                 </p>
-                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-700 mt-1.5 font-normal">
+                <p className="text-sm leading-relaxed text-slate-700 mt-1.5 font-normal">
                   {highlightContent(caseItem.desarrollo, tokens)}
                 </p>
               </div>
@@ -155,10 +155,10 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                 <SlidersHorizontal className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   ACCIÓN SUGERIDA
                 </p>
-                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-700 mt-1.5 font-normal">
+                <p className="text-sm leading-relaxed text-slate-700 mt-1.5 font-normal">
                   {highlightContent(caseItem.accion, tokens)}
                 </p>
               </div>
@@ -170,10 +170,10 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">
                   SOLUCIÓN REFERENCIAL
                 </p>
-                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-800 mt-1.5 font-medium">
+                <p className="text-sm leading-relaxed text-slate-900 mt-1.5 font-medium">
                   {highlightContent(caseItem.solucion, tokens)}
                 </p>
               </div>

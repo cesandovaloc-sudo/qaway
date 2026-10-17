@@ -4,7 +4,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DEI',
     code: 'DEI',
-    name: 'Educación Inicial',
+    name: 'Ed. Inicial',
     cases: [
       {
         id: 'dei-01',
@@ -33,7 +33,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DEP',
     code: 'DEP',
-    name: 'Educación Primaria',
+    name: 'Ed. Primaria',
     cases: [
       {
         id: 'dep-01',
@@ -73,7 +73,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DISER',
     code: 'DISER',
-    name: 'Servicios educativos rurales',
+    name: 'Servicios Rurales',
     cases: [
       {
         id: 'diser-01',
@@ -113,7 +113,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DEBA',
     code: 'DEBA',
-    name: 'Educación Básica Alternativa',
+    name: 'Básica Alternativa',
     cases: [
       {
         id: 'deba-01',
@@ -142,7 +142,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DEBE',
     code: 'DEBE',
-    name: 'Educación Básica Especial',
+    name: 'Básica Especial',
     cases: [
       {
         id: 'debe-01',
@@ -171,7 +171,7 @@ export const DEFAULT_DIRECTIONS_DATA: DirectionData[] = [
   {
     id: 'DES',
     code: 'DES',
-    name: 'Educación Secundaria',
+    name: 'Ed. Secundaria',
     cases: [
       {
         id: 'des-01',
