@@ -106,6 +106,7 @@ export const CasuisticasExcelPage: React.FC<CasuisticasTablePageProps> = ({
   const [levelFilter, setLevelFilter] = useState<string>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [normativaFilter, setNormativaFilter] = useState<'ALL' | 'WITH' | 'WITHOUT'>('ALL');
+  const [showExtraFilters, setShowExtraFilters] = useState<boolean>(false);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
   // Estados de paginación
@@ -497,9 +498,9 @@ ON public.minedu_casuisticas FOR ALL USING (true);
               )}
             </div>
 
-            {/* Selectores de Filtro */}
+            {/* Selectores de Filtro y Botón Más Filtros estilo Inventi Pro */}
             <div className="flex flex-wrap items-center gap-2">
-              {/* Filtro Dirección */}
+              {/* Filtro Dirección Compacto */}
               <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-10 text-xs font-semibold text-slate-700">
                 <span className="text-slate-400 text-[11px] uppercase">Dir:</span>
                 <select
@@ -519,62 +520,27 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                 </select>
               </div>
 
-              {/* Filtro Nivel Educativo */}
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-10 text-xs font-semibold text-slate-700">
-                <span className="text-slate-400 text-[11px] uppercase">Nivel:</span>
-                <select
-                  value={levelFilter}
-                  onChange={(e) => {
-                    setLevelFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
-                >
-                  <option value="ALL">Todos los niveles</option>
-                  <option value="Inicial">Inicial</option>
-                  <option value="Primaria">Primaria</option>
-                  <option value="Secundaria">Secundaria</option>
-                  <option value="Transversal">Transversal</option>
-                </select>
-              </div>
-
-              {/* Filtro Casos Asociados / Categorías Comunes */}
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-10 text-xs font-semibold text-slate-700">
-                <span className="text-slate-400 text-[11px] uppercase">Asociados:</span>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => {
-                    setCategoryFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
-                >
-                  <option value="ALL">Todas las temáticas</option>
-                  <option value="DEP – DISER">DEP – DISER</option>
-                  <option value="DEIB – DISER">DEIB – DISER</option>
-                  <option value="Banco de Libros">Banco de Libros</option>
-                  <option value="Lenguas Originarias">Lenguas Originarias</option>
-                  <option value="Bibliotecas y Fungibles">Bibliotecas y Fungibles</option>
-                  <option value="Matrícula y Traslados">Matrícula y Traslados</option>
-                </select>
-              </div>
-
-              {/* Filtro Normativa */}
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-10 text-xs font-semibold text-slate-700">
-                <span className="text-slate-400 text-[11px] uppercase">Normativa:</span>
-                <select
-                  value={normativaFilter}
-                  onChange={(e) => {
-                    setNormativaFilter(e.target.value as any);
-                    setCurrentPage(1);
-                  }}
-                  className="bg-transparent focus:outline-none cursor-pointer font-bold text-slate-800"
-                >
-                  <option value="ALL">Todas</option>
-                  <option value="WITH">Con RM oficial</option>
-                  <option value="WITHOUT">Sin normativa</option>
-                </select>
-              </div>
+              {/* Botón Más filtros estilo Inventi Pro */}
+              <button
+                type="button"
+                onClick={() => setShowExtraFilters(!showExtraFilters)}
+                className={`inline-flex items-center gap-1.5 h-10 px-3.5 rounded-lg border text-xs font-bold transition cursor-pointer shadow-2xs ${
+                  showExtraFilters ||
+                  levelFilter !== 'ALL' ||
+                  categoryFilter !== 'ALL' ||
+                  normativaFilter !== 'ALL'
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+              >
+                <Filter className="w-3.5 h-3.5" />
+                <span>Más filtros</span>
+                {(levelFilter !== 'ALL' ||
+                  categoryFilter !== 'ALL' ||
+                  normativaFilter !== 'ALL') && (
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                )}
+              </button>
 
               {/* Botón Exportar */}
               <button
@@ -592,11 +558,111 @@ ON public.minedu_casuisticas FOR ALL USING (true);
                 type="button"
                 onClick={onResetOfficial}
                 className="h-10 w-10 flex items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition cursor-pointer shadow-2xs"
-                title="Restablecer a versión oficial oficial de 54 casos"
+                title="Restablecer a versión oficial de 54 casos"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
             </div>
+          </div>
+
+          {/* Panel Desplegable de Más Filtros (Idéntico a Inventi Movimientos) */}
+          {showExtraFilters && (
+            <div className="pt-3 border-t border-slate-200/80 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* 1. Nivel Educativo */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Nivel Educativo
+                  </label>
+                  <select
+                    value={levelFilter}
+                    onChange={(e) => {
+                      setLevelFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#d81b3d]/20 focus:border-[#d81b3d] cursor-pointer"
+                  >
+                    <option value="ALL">Todos los niveles</option>
+                    <option value="Inicial">Inicial</option>
+                    <option value="Primaria">Primaria</option>
+                    <option value="Secundaria">Secundaria</option>
+                    <option value="Transversal">Transversal</option>
+                  </select>
+                </div>
+
+                {/* 2. Casos Asociados / Criterios Cruzados */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Casos Asociados / Criterios
+                  </label>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => {
+                      setCategoryFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#d81b3d]/20 focus:border-[#d81b3d] cursor-pointer"
+                  >
+                    <option value="ALL">Todas las temáticas</option>
+                    <option value="DEP – DISER">DEP – DISER (Cambio de característica)</option>
+                    <option value="DEIB – DISER">DEIB – DISER (Ámbitos rurales bilingües)</option>
+                    <option value="Banco de Libros">Banco de Libros</option>
+                    <option value="Lenguas Originarias">Lenguas Originarias</option>
+                    <option value="Bibliotecas y Fungibles">Bibliotecas y Fungibles</option>
+                    <option value="Matrícula y Traslados">Matrícula y Traslados (SIAGIE)</option>
+                  </select>
+                </div>
+
+                {/* 3. Normativa */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Estado Normativo
+                  </label>
+                  <select
+                    value={normativaFilter}
+                    onChange={(e) => {
+                      setNormativaFilter(e.target.value as any);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#d81b3d]/20 focus:border-[#d81b3d] cursor-pointer"
+                  >
+                    <option value="ALL">Todas las casuísticas</option>
+                    <option value="WITH">Con Resolución Ministerial oficial</option>
+                    <option value="WITHOUT">Sin normativa específica</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Botones de acción del panel desplegable estilo Inventi */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span className="text-xs text-slate-400">
+                  {filteredCases.length} casuística(s) coincidente(s)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLevelFilter('ALL');
+                      setCategoryFilter('ALL');
+                      setNormativaFilter('ALL');
+                      setShowExtraFilters(false);
+                      setCurrentPage(1);
+                    }}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                  >
+                    Cancelar / Limpiar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowExtraFilters(false)}
+                    className="px-3.5 py-1.5 rounded-lg bg-[#d81b3d] hover:bg-[#b91532] text-white text-xs font-bold shadow-xs cursor-pointer"
+                  >
+                    Aplicar filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           </div>
         </div>
 

@@ -56,7 +56,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   selectedCategory = 'ALL',
   onSelectCategory
 }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showExtraFilters, setShowExtraFilters] = useState(false);
+
+  const hasActiveFilters = selectedLevel !== 'ALL' || selectedCategory !== 'ALL';
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -260,8 +262,25 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           </AnimatePresence>
         </div>
 
-        {/* Botones de acción */}
+        {/* Botones de acción y Más filtros estilo Inventi Pro */}
         <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap">
+          {/* Botón Más filtros */}
+          <button
+            type="button"
+            onClick={() => setShowExtraFilters(!showExtraFilters)}
+            className={`h-12 px-4 rounded-xl text-xs sm:text-[13px] font-bold border transition inline-flex items-center gap-2 cursor-pointer shadow-2xs ${
+              showExtraFilters || hasActiveFilters
+                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300/80'
+            }`}
+          >
+            <Filter className="w-4 h-4" />
+            <span>Más filtros</span>
+            {hasActiveFilters && (
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            )}
+          </button>
+
           <button
             type="button"
             onClick={onToggleAll}
@@ -282,70 +301,108 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         </div>
       </div>
 
-      {/* Selector de Nivel Educativo y Categorías Asociadas */}
-      <div className="pt-2.5 border-t border-slate-200/70 space-y-2">
-        {/* Fila 1: Nivel Educativo */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1.5">
-            <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
-            <span>Nivel:</span>
-          </div>
-          {(['ALL', 'Inicial', 'Primaria', 'Secundaria', 'Transversal'] as const).map((lvl) => {
-            const isSelected = selectedLevel === lvl;
-            const label = lvl === 'ALL' ? 'Todos' : lvl;
-            return (
-              <button
-                key={lvl}
-                type="button"
-                onClick={() => onSelectLevel && onSelectLevel(lvl)}
-                className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-all shrink-0 cursor-pointer border ${
-                  isSelected
-                    ? 'bg-slate-800 text-white border-slate-800 shadow-xs font-semibold'
-                    : 'bg-white text-slate-600 border-slate-200/90 hover:bg-slate-100'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+      {/* Panel Desplegable de Filtros Adicionales (Estilo Inventi Pro) */}
+      <AnimatePresence>
+        {showExtraFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.18 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Campo 1: Nivel Educativo */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Nivel Educativo
+                  </label>
+                  <select
+                    value={selectedLevel}
+                    onChange={(e) => onSelectLevel && onSelectLevel(e.target.value)}
+                    className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50/60 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-slate-300 focus:border-slate-400 cursor-pointer transition"
+                  >
+                    <option value="ALL">Todos los niveles</option>
+                    <option value="Inicial">Inicial (0 - 5 años)</option>
+                    <option value="Primaria">Primaria (1° a 6° grado)</option>
+                    <option value="Secundaria">Secundaria (1° a 5° año)</option>
+                    <option value="Transversal">Transversal / Intersectorial</option>
+                  </select>
+                </div>
 
-        {/* Fila 2: Categorías Comunes / Criterios Cruzados */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1.5">
-            <Layers className="w-3.5 h-3.5 text-slate-400" />
-            <span>Asociados:</span>
-          </div>
-          {(
-            [
-              'ALL',
-              'DEP – DISER',
-              'DEIB – DISER',
-              'Banco de Libros',
-              'Lenguas Originarias',
-              'Bibliotecas y Fungibles',
-              'Matrícula y Traslados'
-            ] as const
-          ).map((cat) => {
-            const isSelected = selectedCategory === cat;
-            const label = cat === 'ALL' ? 'Todas' : cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => onSelectCategory && onSelectCategory(cat)}
-                className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-all shrink-0 cursor-pointer border ${
-                  isSelected
-                    ? 'bg-rose-700 text-white border-rose-700 shadow-xs font-semibold'
-                    : 'bg-white text-slate-600 border-slate-200/90 hover:bg-slate-100'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                {/* Campo 2: Casos Asociados / Criterios Cruzados */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Casos Asociados / Criterios
+                  </label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => onSelectCategory && onSelectCategory(e.target.value)}
+                    className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50/60 text-xs font-semibold text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-slate-300 focus:border-slate-400 cursor-pointer transition"
+                  >
+                    <option value="ALL">Todas las temáticas asociadas</option>
+                    <option value="DEP – DISER">DEP – DISER (Cambio característica IE)</option>
+                    <option value="DEIB – DISER">DEIB – DISER (Ámbitos rurales bilingües)</option>
+                    <option value="Banco de Libros">Banco de Libros (Pérdidas, PECOSA, custodia)</option>
+                    <option value="Lenguas Originarias">Lenguas Originarias (Alfabetos y cuadernos)</option>
+                    <option value="Bibliotecas y Fungibles">Bibliotecas Escolares y Material Fungible</option>
+                    <option value="Matrícula y Traslados">Matrícula y Traslados (SIAGIE)</option>
+                  </select>
+                </div>
+
+                {/* Campo 3: Dirección Institucional */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Dirección Activa
+                  </label>
+                  <div className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-100/70 flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span className="truncate">{selectedDirection.code} — {selectedDirection.name}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white text-slate-600 border border-slate-200 font-mono shrink-0 ml-2">
+                      Oficial
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Barra de Acciones del Panel estilo Inventi */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
+                <div className="text-xs text-slate-500 font-medium">
+                  {hasActiveFilters ? (
+                    <span className="text-rose-600 font-semibold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+                      Filtros avanzados activos
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">Sin filtros avanzados aplicados</span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onSelectLevel) onSelectLevel('ALL');
+                      if (onSelectCategory) onSelectCategory('ALL');
+                      setShowExtraFilters(false);
+                    }}
+                    className="h-9 px-3.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition cursor-pointer shadow-2xs"
+                  >
+                    Cancelar / Limpiar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowExtraFilters(false)}
+                    className="h-9 px-4 rounded-lg bg-[#b91c1c] hover:bg-rose-800 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+                  >
+                    Aplicar filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Barra de estado y filtros activos */}
       <div className="pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-[13px] text-slate-500">
