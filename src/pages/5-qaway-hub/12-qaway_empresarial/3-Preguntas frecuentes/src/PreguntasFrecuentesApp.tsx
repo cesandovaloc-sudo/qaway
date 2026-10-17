@@ -540,29 +540,32 @@ export default function PreguntasFrecuentesApp() {
       />
 
       {/* CONTENEDOR PRINCIPAL ERGONÓMICO */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-5 flex-1">
-        {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS */}
-        <DirectionsGrid
-          directions={directionsData}
-          selectedDirectionId={selectedDirectionId}
-          isSearching={!!searchQuery.trim()}
-          onSelectDirection={handleSelectDirection}
-        />
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 space-y-4 flex-1">
+        {/* CABECERA OPERATIVA FIJA (EL SCROLL SE DETIENE AQUÍ Y NUNCA PASA DE LAS DIRECCIONES NI DEL FILTRO) */}
+        <div className="sticky top-[52px] z-30 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-3 space-y-3.5 border-b border-slate-200/80 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 shadow-2xs">
+          {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS */}
+          <DirectionsGrid
+            directions={directionsData}
+            selectedDirectionId={selectedDirectionId}
+            isSearching={!!searchQuery.trim()}
+            onSelectDirection={handleSelectDirection}
+          />
 
-        {/* 3. BARRA DE BÚSQUEDA Y FILTRO CON SUPER FILTRO ESTILO CRM */}
-        <SearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onClearSearch={() => setSearchQuery('')}
-          onToggleAll={handleToggleAll}
-          isAnyOpen={isAnyOpen}
-          onOpenFirstMatch={handleOpenFirstMatch}
-          selectedDirection={currentDirection}
-          isSearching={mode === 'search'}
-          resultsCount={items.length}
-          quickResults={items}
-          onSelectQuickResult={handleSelectQuickResult}
-        />
+          {/* 3. BARRA DE BÚSQUEDA Y FILTRO CON SUPER FILTRO ESTILO CRM */}
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClearSearch={() => setSearchQuery('')}
+            onToggleAll={handleToggleAll}
+            isAnyOpen={isAnyOpen}
+            onOpenFirstMatch={handleOpenFirstMatch}
+            selectedDirection={currentDirection}
+            isSearching={mode === 'search'}
+            resultsCount={items.length}
+            quickResults={items}
+            onSelectQuickResult={handleSelectQuickResult}
+          />
+        </div>
 
         {/* 4. LISTA DE CASUÍSTICAS Y ACORDEONES */}
         <CasesList
