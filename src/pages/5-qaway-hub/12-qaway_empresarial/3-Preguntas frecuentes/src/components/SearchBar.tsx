@@ -56,6 +56,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   selectedCategory = 'ALL',
   onSelectCategory
 }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showExtraFilters, setShowExtraFilters] = useState(false);
 
   const hasActiveFilters = selectedLevel !== 'ALL' || selectedCategory !== 'ALL';
