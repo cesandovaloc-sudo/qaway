@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, X, ChevronsUpDown, Eye, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Search, X, ChevronsUpDown, Eye, ArrowUpRight, Sparkles, Filter, Layers, BookOpen, GraduationCap, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DirectionData, DirectionId, ScoredCasuistica, EducationalLevel, CommonCategory } from '../types/casuistica';
-import { Filter, Layers, BookOpen, GraduationCap } from 'lucide-react';
 
 interface SearchBarProps {
   searchQuery: string;
