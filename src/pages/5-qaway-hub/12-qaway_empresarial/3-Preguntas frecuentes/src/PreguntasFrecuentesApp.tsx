@@ -313,18 +313,28 @@ export default function PreguntasFrecuentesApp() {
     };
   }, [directionsData, selectedDirectionId, searchQuery, currentDirection]);
 
-  // Acciones sobre acordeones
+  const preserveScrollPosition = (action: () => void) => {
+    const savedScrollY = window.scrollY;
+    action();
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY, behavior: 'instant' });
+    });
+  };
+
+  // Acciones sobre acordeones manteniendo la posición exacta en pantalla (cero saltos)
   const handleToggleCase = (caseId: string) => {
-    const updated = directionsData.map((dir) => ({
-      ...dir,
-      cases: dir.cases.map((c) => {
-        if (c.id === caseId) {
-          return { ...c, isOpen: !c.isOpen };
-        }
-        return allowMultipleOpen ? c : { ...c, isOpen: false };
-      })
-    }));
-    setDirectionsData(updated);
+    preserveScrollPosition(() => {
+      const updated = directionsData.map((dir) => ({
+        ...dir,
+        cases: dir.cases.map((c) => {
+          if (c.id === caseId) {
+            return { ...c, isOpen: !c.isOpen };
+          }
+          return allowMultipleOpen ? c : { ...c, isOpen: false };
+        })
+      }));
+      setDirectionsData(updated);
+    });
   };
 
   const isAnyOpen = useMemo(() => {
@@ -336,34 +346,44 @@ export default function PreguntasFrecuentesApp() {
     return items.every((item) => item.isOpen);
   }, [items]);
 
+  const handleToggleAllowMultiple = () => {
+    preserveScrollPosition(() => {
+      setAllowMultipleOpen((prev) => !prev);
+    });
+  };
+
   const handleToggleDirectionAll = () => {
-    const shouldOpen = !isAllOpenInDirection;
-    const targetIds = new Set(items.map((i) => i.id));
-    const updated = directionsData.map((dir) => ({
-      ...dir,
-      cases: dir.cases.map((c) =>
-        targetIds.has(c.id) ? { ...c, isOpen: shouldOpen } : c
-      )
-    }));
-    if (shouldOpen) {
-      setAllowMultipleOpen(true);
-    }
-    setDirectionsData(updated);
+    preserveScrollPosition(() => {
+      const shouldOpen = !isAllOpenInDirection;
+      const targetIds = new Set(items.map((i) => i.id));
+      const updated = directionsData.map((dir) => ({
+        ...dir,
+        cases: dir.cases.map((c) =>
+          targetIds.has(c.id) ? { ...c, isOpen: shouldOpen } : c
+        )
+      }));
+      if (shouldOpen) {
+        setAllowMultipleOpen(true);
+      }
+      setDirectionsData(updated);
+    });
   };
 
   const handleToggleAll = () => {
-    const shouldOpen = !isAnyOpen;
-    const targetIds = new Set(items.map((i) => i.id));
-    const updated = directionsData.map((dir) => ({
-      ...dir,
-      cases: dir.cases.map((c) =>
-        targetIds.has(c.id) ? { ...c, isOpen: shouldOpen } : c
-      )
-    }));
-    if (shouldOpen) {
-      setAllowMultipleOpen(true);
-    }
-    setDirectionsData(updated);
+    preserveScrollPosition(() => {
+      const shouldOpen = !isAnyOpen;
+      const targetIds = new Set(items.map((i) => i.id));
+      const updated = directionsData.map((dir) => ({
+        ...dir,
+        cases: dir.cases.map((c) =>
+          targetIds.has(c.id) ? { ...c, isOpen: shouldOpen } : c
+        )
+      }));
+      if (shouldOpen) {
+        setAllowMultipleOpen(true);
+      }
+      setDirectionsData(updated);
+    });
   };
 
   // Scroll asistido calibrado exclusivamente hasta donde están los botones de las direcciones
@@ -568,8 +588,8 @@ export default function PreguntasFrecuentesApp() {
           />
         </div>
 
-        {/* 4. LISTA DE CASUÍSTICAS Y FOOTER INTEGRADOS AL SCROLL NATURAL DE LA PÁGINA */}
-        <div className="flex-1 min-h-0 pb-12 space-y-5">
+        {/* 4. LISTA DE CASUÍSTICAS Y FOOTER INTEGRADOS AL SCROLL NATURAL DE LA PÁGINA CON ALTURA MÍNIMA ESTABLE */}
+        <div className="flex-1 min-h-[calc(100vh-130px)] [overflow-anchor:none] pb-12 space-y-5 flex flex-col justify-between">
           <CasesList
             items={items}
             mode={mode}
@@ -582,7 +602,7 @@ export default function PreguntasFrecuentesApp() {
             onAddNewCase={handleOpenNewCaseModal}
             onClearSearch={() => setSearchQuery('')}
             allowMultipleOpen={allowMultipleOpen}
-            onToggleAllowMultiple={() => setAllowMultipleOpen((prev) => !prev)}
+            onToggleAllowMultiple={handleToggleAllowMultiple}
             onToggleDirectionAll={handleToggleDirectionAll}
             isAllOpenInDirection={isAllOpenInDirection}
           />
