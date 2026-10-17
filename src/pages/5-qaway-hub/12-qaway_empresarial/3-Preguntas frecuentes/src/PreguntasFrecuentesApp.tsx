@@ -333,11 +333,16 @@ export default function PreguntasFrecuentesApp() {
     };
   }, [directionsData, selectedDirectionId, searchQuery, currentDirection]);
 
-  // Acciones sobre acordeones
+  // Acciones sobre acordeones (acordeón exclusivo: al seleccionar uno, los demás se contraen)
   const handleToggleCase = (caseId: string) => {
     const updated = directionsData.map((dir) => ({
       ...dir,
-      cases: dir.cases.map((c) => (c.id === caseId ? { ...c, isOpen: !c.isOpen } : c))
+      cases: dir.cases.map((c) => {
+        if (c.id === caseId) {
+          return { ...c, isOpen: !c.isOpen };
+        }
+        return { ...c, isOpen: false };
+      })
     }));
     setDirectionsData(updated);
   };

@@ -15,13 +15,13 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
   isVisible = true
 }) => {
   return (
-    <div
-      className={`sticky top-0 z-40 w-full transition-transform duration-300 ease-in-out ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
-    >
-      {/* 1. BARRA SUPERIOR BLANCA A ANCHO COMPLETO (PERÚ RESPONDE ENCIMA DE TODO) */}
-      <div className="w-full bg-white border-b border-slate-200/90 shadow-2xs">
+    <div className="w-full">
+      {/* 1. NAVBAR SUPERIOR BLANCO CON SCROLL INTELIGENTE (PERÚ RESPONDE ENCIMA DE TODO) */}
+      <nav
+        className={`sticky top-0 z-40 w-full bg-white border-b border-slate-200/90 shadow-2xs transition-transform duration-300 ease-in-out ${
+          isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-4">
           {/* Lado izquierdo: Identificador institucional formal sin logos no autorizados */}
           <div className="flex items-center gap-2.5">
@@ -61,7 +61,7 @@ export const HeaderBanner: React.FC<HeaderBannerProps> = ({
             </div>
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* 2. GRAN HERO BANNER ROJO CARMESÍ A ANCHO COMPLETO (#d81b3d) CON BORDES INFERIORES REDONDEADOS */}
       <header className="relative w-full overflow-hidden bg-[#d81b3d] text-white rounded-b-2xl sm:rounded-b-3xl shadow-[0_6px_24px_-4px_rgba(216,27,61,0.28)]">

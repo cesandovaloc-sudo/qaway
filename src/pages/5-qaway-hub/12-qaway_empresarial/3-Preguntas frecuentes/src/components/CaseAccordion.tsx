@@ -63,13 +63,13 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
       id={`case-card-${caseItem.id}`}
       className={`rounded-2xl overflow-hidden transition-all duration-200 ${
         isOpen
-          ? 'border-2 border-[#d81b3d]/60 border-l-4 border-l-[#d81b3d] bg-white shadow-[0_6px_24px_-4px_rgba(216,27,61,0.16)] ring-4 ring-rose-100/70'
+          ? 'border border-rose-200/60 bg-[#fffbfa] shadow-[0_1px_4px_rgba(216,27,61,0.03)]'
           : 'border border-slate-200/80 bg-[#f8fafc] hover:border-slate-300 shadow-[0_1px_3px_rgba(15,23,42,0.02)]'
       }`}
     >
       <div
         className={`flex items-center justify-between transition-colors ${
-          isOpen ? 'bg-rose-50/35 border-b border-rose-100/70' : 'bg-[#f8fafc] hover:bg-[#f1f5f9]/70'
+          isOpen ? 'bg-rose-50/20' : 'bg-[#f8fafc] hover:bg-[#f1f5f9]/70'
         }`}
       >
         <button
@@ -80,10 +80,10 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
         >
           <div className="flex items-center gap-3.5 min-w-0">
             <span
-              className={`flex-shrink-0 w-8 h-7 rounded-md font-bold text-xs flex items-center justify-center border transition-colors ${
+              className={`flex-shrink-0 w-8 h-7 rounded-md text-xs flex items-center justify-center border transition-colors ${
                 isOpen
-                  ? 'bg-[#d81b3d] text-white border-rose-700 font-black shadow-2xs'
-                  : 'bg-slate-200/80 text-slate-700 border-slate-300/40'
+                  ? 'bg-rose-50 text-rose-800 border-rose-200/70 font-bold'
+                  : 'bg-slate-200/80 text-slate-700 border-slate-300/40 font-bold'
               }`}
             >
               {caseItem.number}
@@ -92,10 +92,10 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span
-                  className={`inline-block text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded transition-colors ${
+                  className={`inline-block text-xs uppercase tracking-wider px-2 py-0.5 rounded transition-colors ${
                     isOpen
-                      ? 'text-[#d81b3d] bg-rose-100 font-black border border-rose-200'
-                      : 'text-slate-600 bg-slate-200/80'
+                      ? 'text-rose-800 bg-rose-50/70 border border-rose-200/50 font-semibold'
+                      : 'text-slate-600 bg-slate-200/80 font-medium'
                   }`}
                 >
                   {caseItem.dirCode} • {caseItem.dirName}
@@ -108,7 +108,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
               </div>
               <h3
                 className={`text-sm leading-snug transition-colors ${
-                  isOpen ? 'font-bold text-[#d81b3d]' : 'font-semibold text-slate-800'
+                  isOpen ? 'font-semibold text-slate-900' : 'font-medium text-slate-700'
                 }`}
               >
                 {highlightContent(caseItem.title, tokens)}
@@ -119,7 +119,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
           <span
             className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
               isOpen
-                ? 'rotate-180 bg-rose-100 text-[#d81b3d]'
+                ? 'rotate-180 bg-rose-50/80 text-rose-700 border border-rose-200/50'
                 : 'bg-slate-200/70 text-slate-600'
             }`}
           >
@@ -151,7 +151,7 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
 
       {/* Cuerpo desplegable con las 4 secciones */}
       {isOpen && (
-        <div className="border-t border-rose-100/80 bg-gradient-to-b from-rose-50/15 via-white to-white px-4 py-5 sm:px-6 sm:py-5">
+        <div className="border-t border-rose-100/40 bg-white px-4 py-5 sm:px-6 sm:py-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Sección 1: Criterio Pedagógico/Normativo (disponible para lectores de pantalla) */}
             <div className="sr-only" aria-hidden="false">
