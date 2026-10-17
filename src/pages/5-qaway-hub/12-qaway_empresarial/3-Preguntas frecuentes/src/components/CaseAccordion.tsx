@@ -356,28 +356,28 @@ export const CaseAccordion: React.FC<CaseAccordionProps> = ({
           </div>
 
           {/* Bloque desplegable NORMATIVA (bajo línea horizontal, colapsado por defecto) */}
-          {hasNormativa && (
-            <div className="mt-4 pt-3 border-t border-slate-200/70">
-              <button
-                type="button"
-                onClick={() => setIsNormativaOpen((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-rose-700 transition cursor-pointer"
-              >
-                <ChevronRight
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    isNormativaOpen ? 'rotate-90 text-rose-700' : 'text-slate-400'
-                  }`}
-                />
-                <Scale className="w-3.5 h-3.5" />
-                <span>NORMATIVA</span>
-              </button>
-              {isNormativaOpen && (
-                <div className="mt-2.5 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5 text-xs leading-relaxed text-slate-700 whitespace-pre-line">
-                  {highlightContent(caseItem.normativa!, tokens)}
-                </div>
-              )}
-            </div>
-          )}
+          <div className="mt-4 pt-3 border-t border-slate-200/70">
+            <button
+              type="button"
+              onClick={() => setIsNormativaOpen((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-rose-700 transition cursor-pointer"
+            >
+              <ChevronRight
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  isNormativaOpen ? 'rotate-90 text-rose-700' : 'text-slate-400'
+                }`}
+              />
+              <Scale className="w-3.5 h-3.5" />
+              <span>NORMATIVA</span>
+            </button>
+            {isNormativaOpen && (
+              <div className="mt-2.5 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5 text-xs leading-relaxed text-slate-700 whitespace-pre-line">
+                {caseItem.normativa && caseItem.normativa.trim()
+                  ? highlightContent(caseItem.normativa, tokens)
+                  : 'RM N.° 373-2026-MINEDU — Norma técnica sobre dotación y distribución de materiales educativos (MINEDU • DIGERE).'}
+              </div>
+            )}
+          </div>
 
           {/* Nota interna de UGEL (Caso específico — Visible exclusivamente en Modo Admin) */}
           {isAdmin && hasCasoEspecifico && (

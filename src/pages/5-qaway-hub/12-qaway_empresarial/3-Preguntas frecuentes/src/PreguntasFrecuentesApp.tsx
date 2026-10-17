@@ -15,7 +15,7 @@ import { ManagementModal } from './components/ManagementModal';
 import { Toast } from './components/Toast';
 
 // Claves aisladas de almacenamiento local
-const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v3';
+const LOCAL_STORAGE_KEY = 'qaway_minedu_casuisticas_v4';
 const SUPABASE_STORAGE_URL_KEY = 'qaway_minedu_supabase_url_v1';
 const SUPABASE_STORAGE_KEY_KEY = 'qaway_minedu_supabase_key_v1';
 const ADMIN_MODE_KEY = 'qaway_minedu_admin_mode_v1';
@@ -561,9 +561,9 @@ export default function PreguntasFrecuentesApp() {
         }
       `}</style>
 
-      {/* CONTENEDOR PRINCIPAL ERGONÓMICO CON ESPACIADO COMPACTO */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-2.5 sm:pt-3 pb-0 space-y-3.5 flex-1">
-        {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS (FLUJO NORMAL, SIN ESPACIO EXCESIVO) */}
+      {/* CONTENEDOR PRINCIPAL ERGONÓMICO CON ESPACIADO Y AIRE EQUILIBRADO */}
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-0 space-y-6 sm:space-y-7 flex-1">
+        {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS (CON AIRE Y VISIBILIDAD INSTITUCIONAL) */}
         <DirectionsGrid
           directions={directionsData}
           selectedDirectionId={selectedDirectionId}
@@ -571,10 +571,10 @@ export default function PreguntasFrecuentesApp() {
           onSelectDirection={handleSelectDirection}
         />
 
-        {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (PEGADO A 0PX DEL TOPE SIN HUECOS, FONDO TOTALMENTE SÓLIDO) */}
+        {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (FONDO SÓLIDO Y ANCLADO LIMPIO) */}
         <div
           id="seccion-filtro"
-          className="sticky top-0 z-40 bg-[#f8fafc] pt-2 pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200/80 shadow-2xs"
+          className="sticky top-0 z-40 bg-[#f8fafc] pt-2 pb-2.5 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200/80 shadow-2xs"
         >
           <SearchBar
             searchQuery={searchQuery}
@@ -591,8 +591,8 @@ export default function PreguntasFrecuentesApp() {
           />
         </div>
 
-        {/* 4. LISTA DE CASUÍSTICAS Y FOOTER INTEGRADOS AL SCROLL NATURAL DE LA PÁGINA CON ALTURA MÍNIMA ESTABLE */}
-        <div className="flex-1 min-h-[calc(100vh-130px)] [overflow-anchor:none] pb-12 space-y-5 flex flex-col justify-between">
+        {/* 4. LISTA DE CASUÍSTICAS Y FOOTER INTEGRADOS AL SCROLL NATURAL CON AIRE SUPERIOR */}
+        <div className="flex-1 min-h-[calc(100vh-130px)] [overflow-anchor:none] pt-1 sm:pt-2 pb-12 space-y-6 flex flex-col justify-between">
           <CasesList
             items={items}
             mode={mode}
