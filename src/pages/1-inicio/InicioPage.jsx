@@ -46,9 +46,8 @@ import { isPublicSiteMode, isRouteEnabled } from '@/config/siteVisibility'
 
 const base = '/assets/pages/1-inicio/'
 const displayFont = {
-  fontFamily: "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif",
-  fontStretch: 'condensed',
-  fontWeight: 700,
+  fontFamily: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontWeight: 760,
 }
 
 const fadeUp = {
@@ -290,7 +289,7 @@ function Hero() {
               className="max-w-[58rem] qw-hero-title text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>
+              <span className="block">Construimos<br />marcas, sistemas<br />y <span className="text-[#fe6612]">formamos<br />con&nbsp;IA.</span></span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.

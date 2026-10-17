@@ -153,18 +153,19 @@ export default function Header({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
-  const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro'>(() => {
+  const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro' | 'ejecutivo'>(() => {
     const raw = localStorage.getItem('qaway.hubTheme')
     if (raw === 'claro' || raw === 'blanco') return 'blanco'
     if (raw === 'grises') return 'grises'
     if (raw === 'oscuro') return 'oscuro'
+    if (raw === 'ejecutivo') return 'ejecutivo'
     return 'contraste'
   })
 
   // Sincronización del tema con document.documentElement y localStorage (HubPanelPage.jsx:2144-2148)
   useEffect(() => {
     localStorage.setItem('qaway.hubTheme', themeMode)
-    document.documentElement.style.colorScheme = (themeMode === 'blanco' || themeMode === 'grises') ? 'light' : 'dark'
+    document.documentElement.style.colorScheme = (themeMode === 'blanco' || themeMode === 'grises' || themeMode === 'ejecutivo') ? 'light' : 'dark'
     document.documentElement.setAttribute('data-theme', themeMode)
     if (themeMode === 'oscuro') {
       document.documentElement.classList.add('dark')
@@ -174,11 +175,29 @@ export default function Header({
     window.dispatchEvent(new CustomEvent('qaway-theme-change', { detail: themeMode }))
   }, [themeMode])
 
-  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio' | 'personalizado'>(() => {
+  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio' | 'ejecutivo' | 'personalizado'>(() => {
     const raw = localStorage.getItem('qaway.colorPalette')
-    if (raw === 'carbon' || raw === 'estudio' || raw === 'personalizado') return raw
+    if (raw === 'carbon' || raw === 'estudio' || raw === 'ejecutivo' || raw === 'personalizado') return raw
     return 'terracota'
   })
+
+  // Sincronizar cambios disparados desde Configuración (/config)
+  useEffect(() => {
+    const onExternalTheme = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail && detail !== themeMode) setThemeMode(detail)
+    }
+    const onExternalPalette = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail && detail !== colorPalette) setColorPalette(detail)
+    }
+    window.addEventListener('qaway-theme-change', onExternalTheme)
+    window.addEventListener('qaway-palette-change', onExternalPalette)
+    return () => {
+      window.removeEventListener('qaway-theme-change', onExternalTheme)
+      window.removeEventListener('qaway-palette-change', onExternalPalette)
+    }
+  }, [themeMode, colorPalette])
 
   // Color de marca libre elegido por el usuario (4to swatch). Persiste en
   // localStorage y se aplica como variable inline para prevalecer sobre el CSS.
@@ -742,6 +761,17 @@ export default function Header({
                         <Contrast size={14} />
                       </button>
                       <button
+                        onClick={() => {
+                          setThemeMode('ejecutivo')
+                          setColorPalette('ejecutivo')
+                        }}
+                        title="Ejecutivo Territorial (Azul SIGA Moderno)"
+                        aria-label="Tema ejecutivo territorial"
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'ejecutivo' ? 'text-[var(--hub-text)] bg-[var(--hub-hover)] ring-1 ring-blue-400/50' : 'text-[var(--hub-faint)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'}`}
+                      >
+                        <Building2 size={14} />
+                      </button>
+                      <button
                         onClick={() => setThemeMode('oscuro')}
                         title="Oscuro Total"
                         aria-label="Tema oscuro"
@@ -784,6 +814,15 @@ export default function Header({
                           colorPalette === 'estudio' ? 'ring-2 ring-offset-1 ring-[#c8102e] scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
                         }`}
                         style={{ backgroundColor: '#c8102e' }}
+                      />
+                      <button
+                        onClick={() => setColorPalette('ejecutivo')}
+                        title="Azul SIGA Ejecutivo (Monitoreo Territorial)"
+                        aria-label="Paleta azul siga ejecutivo"
+                        className={`relative w-4 h-4 rounded-full transition-transform cursor-pointer flex items-center justify-center ${
+                          colorPalette === 'ejecutivo' ? 'ring-2 ring-offset-1 ring-[#1e3a8a] scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'
+                        }`}
+                        style={{ backgroundColor: '#1e3a8a' }}
                       />
                       <button
                         type="button"

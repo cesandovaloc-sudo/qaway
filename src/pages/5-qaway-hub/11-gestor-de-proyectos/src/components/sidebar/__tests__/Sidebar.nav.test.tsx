@@ -46,18 +46,22 @@ const CASES: Array<{ url: string; expected: string; tenant?: string }> = [
   { url: '/proyectos', expected: 'Proyectos' },
   { url: '/proyectos/proj-minedu-2027?tab=hitos', expected: 'Hitos & Fases' },
   {
-    url: '/proyectos/proj-minedu-2027?tab=hitos&milestone=ML-M01',
-    expected: 'Comunicación de Directorio de Almacenes',
+    url: '/proyectos/proj-minedu-2027?tab=hitos&status=pendiente',
+    expected: 'Pendientes / En riesgo',
   },
   {
-    url: '/proyectos/proj-minedu-om050?tab=hitos&milestone=ML-O01',
-    expected: 'H1',
+    url: '/proyectos/proj-minedu-2027?tab=hitos&status=en_revision',
+    expected: 'En revisión',
     tenant: 'org-minedu',
   },
   {
-    url: '/proyectos/proj-005?tab=hitos&milestone=ML-501',
-    expected: 'Integración WMS Completa',
+    url: '/proyectos/proj-005?tab=hitos&status=aprobado',
+    expected: 'Aprobados',
     tenant: 'org-pacifico',
+  },
+  {
+    url: '/proyectos/proj-minedu-2027?tab=reporteador',
+    expected: 'Monitoreo Territorial',
   },
   { url: '/config', expected: 'Configuración' },
 ]

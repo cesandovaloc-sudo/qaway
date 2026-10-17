@@ -12,6 +12,7 @@ import {
   ChevronDown,
   X,
   ShieldCheck,
+  Palette,
 } from 'lucide-react'
 import { fiscalService } from '@/services/fiscalService'
 import { governanceService } from '@/services/governanceService'
@@ -20,15 +21,16 @@ import type { BusinessSettings } from '@/types'
 import type { OrganizationRoleDefinition, ProjectModulePermissions } from '@/types/project.types'
 import { EMPTY_PROJECT_PERMISSIONS, PROJECT_PERMISSION_MODULES } from '@/types/project.types'
 
-type Tab = 'negocio' | 'usuarios'
+type Tab = 'temas' | 'usuarios' | 'negocio'
 
 const tabs: { key: Tab; label: string; icon: typeof Building2 }[] = [
-  { key: 'negocio', label: 'Negocio', icon: Building2 },
+  { key: 'temas', label: 'Apariencia & Temas', icon: Palette },
   { key: 'usuarios', label: 'Usuarios & Cargos', icon: Users },
+  { key: 'negocio', label: 'Negocio', icon: Building2 },
 ]
 
 export default function SettingsPage() {
-  const [tab, setTab] = useState<Tab>('usuarios')
+  const [tab, setTab] = useState<Tab>('temas')
   const [error, setError] = useState<string | null>(null)
 
   return (
@@ -36,7 +38,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Configuración</h1>
         <p className="text-sm text-muted mt-1">
-          Gobernanza de la organización: usuarios, cargos dinámicos y datos del negocio.
+          Temas visuales del sistema, gobernanza de usuarios, cargos dinámicos y datos del negocio.
         </p>
       </div>
 
@@ -65,8 +67,256 @@ export default function SettingsPage() {
         ))}
       </div>
 
+      {tab === 'temas' && <ThemesAppearanceTab />}
       {tab === 'negocio' && <BusinessTab onError={setError} />}
       {tab === 'usuarios' && <UsersRolesTab />}
+    </div>
+  )
+}
+
+function ThemesAppearanceTab() {
+  const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro' | 'ejecutivo'>(() => {
+    const raw = localStorage.getItem('qaway.hubTheme')
+    if (raw === 'claro' || raw === 'blanco') return 'blanco'
+    if (raw === 'grises') return 'grises'
+    if (raw === 'oscuro') return 'oscuro'
+    if (raw === 'ejecutivo') return 'ejecutivo'
+    return 'contraste'
+  })
+  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio' | 'ejecutivo' | 'personalizado'>(() => {
+    const raw = localStorage.getItem('qaway.colorPalette')
+    if (raw === 'carbon' || raw === 'estudio' || raw === 'ejecutivo' || raw === 'personalizado') return raw
+    return 'terracota'
+  })
+
+  const applyTheme = (mode: 'blanco' | 'grises' | 'contraste' | 'oscuro' | 'ejecutivo') => {
+    setThemeMode(mode)
+    localStorage.setItem('qaway.hubTheme', mode)
+    document.documentElement.setAttribute('data-theme', mode)
+    if (mode === 'oscuro') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    window.dispatchEvent(new CustomEvent('qaway-theme-change', { detail: mode }))
+  }
+
+  const applyPalette = (palette: 'terracota' | 'carbon' | 'estudio' | 'ejecutivo') => {
+    setColorPalette(palette)
+    localStorage.setItem('qaway.colorPalette', palette)
+    document.documentElement.setAttribute('data-palette', palette)
+    window.dispatchEvent(new CustomEvent('qaway-palette-change', { detail: palette }))
+  }
+
+  const themeCards: Array<{
+    key: 'ejecutivo' | 'blanco' | 'grises' | 'contraste' | 'oscuro'
+    title: string
+    badge?: string
+    desc: string
+    sidebarColor: string
+    canvasColor: string
+    accentColor: string
+    recommendedPalette?: 'ejecutivo' | 'estudio' | 'terracota' | 'carbon'
+  }> = [
+    {
+      key: 'ejecutivo',
+      title: 'Ejecutivo Territorial (Azul SIGA)',
+      badge: 'NUEVO · RECOMENDADO',
+      desc: 'Inspirado en el Reporteador UGEL: navegación azul marino profundo (#0F172A), lienzo limpio slate (#F1F5F9) y semáforos de alto contraste.',
+      sidebarColor: '#0f172a',
+      canvasColor: '#f1f5f9',
+      accentColor: '#1e3a8a',
+      recommendedPalette: 'ejecutivo',
+    },
+    {
+      key: 'blanco',
+      title: 'Blanco Puro (Inventi Pro)',
+      desc: 'Interfaz 100% luminosa con paneles blancos y bordes suaves para oficinas con alta iluminación.',
+      sidebarColor: '#ffffff',
+      canvasColor: '#f8fafc',
+      accentColor: '#1763ed',
+    },
+    {
+      key: 'grises',
+      title: 'Escala de Grises',
+      desc: 'Tonos neutros editoriales de baja fatiga visual para lectura prolongada de matrices y tablas.',
+      sidebarColor: '#f4f4f5',
+      canvasColor: '#fafafa',
+      accentColor: '#18181b',
+    },
+    {
+      key: 'contraste',
+      title: 'Claro-Oscuro (Contraste)',
+      desc: 'Barra lateral oscura clásica combinada con área de trabajo clara.',
+      sidebarColor: '#18181b',
+      canvasColor: '#fafafa',
+      accentColor: '#d9532f',
+    },
+    {
+      key: 'oscuro',
+      title: 'Oscuro Total',
+      desc: 'Modo nocturno integral en toda la aplicación para entornos con poca luz.',
+      sidebarColor: '#09090b',
+      canvasColor: '#121215',
+      accentColor: '#3b82f6',
+    },
+  ]
+
+  const paletteCards: Array<{
+    key: 'ejecutivo' | 'estudio' | 'terracota' | 'carbon'
+    title: string
+    desc: string
+    hex: string
+  }> = [
+    {
+      key: 'ejecutivo',
+      title: 'Azul SIGA Ejecutivo',
+      desc: 'Azul institucional moderno (#1E3A8A) con semáforos esmeralda, ámbar y rojo.',
+      hex: '#1e3a8a',
+    },
+    {
+      key: 'estudio',
+      title: 'Rojo MINEDU Perú',
+      desc: 'Acento institucional (#C8102E) para reportes oficiales sectoriales.',
+      hex: '#c8102e',
+    },
+    {
+      key: 'terracota',
+      title: 'Terracota Editorial',
+      desc: 'Tono cálido original de Qaway Hub (#D9532F).',
+      hex: '#d9532f',
+    },
+    {
+      key: 'carbon',
+      title: 'Carbón Escandinavo',
+      desc: 'Acento monocromático sobrio (#18181B).',
+      hex: '#18181b',
+    },
+  ]
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-extrabold text-slate-900">Temas de Interfaz</h2>
+            <p className="text-xs text-slate-500">
+              Selecciona la combinación de estructura visual. El tema <strong>Ejecutivo Territorial (Azul SIGA)</strong> aplica el estilo moderno de monitoreo regional.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              applyTheme('ejecutivo')
+              applyPalette('ejecutivo')
+            }}
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#1e3a8a] px-3.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#172554]"
+          >
+            <Check size={14} /> Activar Tema Ejecutivo Territorial
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {themeCards.map((item) => {
+            const active = themeMode === item.key
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => {
+                  applyTheme(item.key)
+                  if (item.recommendedPalette) applyPalette(item.recommendedPalette)
+                }}
+                className={`flex flex-col justify-between rounded-xl border p-4 text-left transition-all ${
+                  active
+                    ? 'border-blue-700 bg-blue-50/30 ring-2 ring-blue-700/20'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60'
+                }`}
+              >
+                <div>
+                  {/* Mini preview */}
+                  <div className="mb-3 flex h-20 overflow-hidden rounded-lg border border-slate-200 shadow-inner">
+                    <div
+                      className="flex w-1/4 flex-col gap-1.5 p-2"
+                      style={{ backgroundColor: item.sidebarColor }}
+                    >
+                      <div className="h-2 w-8 rounded-full opacity-80" style={{ backgroundColor: item.accentColor }} />
+                      <div className="h-1.5 w-full rounded-full bg-slate-400/40" />
+                      <div className="h-1.5 w-4/5 rounded-full bg-slate-400/40" />
+                    </div>
+                    <div
+                      className="flex flex-1 flex-col gap-1.5 p-2.5"
+                      style={{ backgroundColor: item.canvasColor }}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-12 rounded" style={{ backgroundColor: item.accentColor }} />
+                        <span className="h-2.5 w-6 rounded bg-emerald-500/80" />
+                        <span className="h-2.5 w-6 rounded bg-amber-500/80" />
+                      </div>
+                      <div className="grid flex-1 grid-cols-3 gap-1.5">
+                        <div className="rounded bg-white/90 shadow-2xs border border-slate-200/60" />
+                        <div className="rounded bg-white/90 shadow-2xs border border-slate-200/60" />
+                        <div className="rounded bg-white/90 shadow-2xs border border-slate-200/60" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-extrabold text-slate-900">{item.title}</span>
+                    {active && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-700 px-2 py-0.5 text-[10px] font-bold text-white">
+                        <Check size={11} /> Activo
+                      </span>
+                    )}
+                  </div>
+                  {item.badge && (
+                    <span className="mt-1 inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-900">
+                      {item.badge}
+                    </span>
+                  )}
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{item.desc}</p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-extrabold text-slate-900">Paleta de Acento Institucional</h2>
+        <p className="mb-4 text-xs text-slate-500">
+          Define el color primario de botones, indicadores activos y barras de progreso en todo el módulo.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {paletteCards.map((pal) => {
+            const active = colorPalette === pal.key
+            return (
+              <button
+                key={pal.key}
+                type="button"
+                onClick={() => applyPalette(pal.key)}
+                className={`flex items-start gap-3 rounded-xl border p-3.5 text-left transition-all ${
+                  active
+                    ? 'border-slate-900 bg-slate-50 ring-2 ring-slate-900/10'
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}
+              >
+                <span
+                  className="mt-0.5 h-6 w-6 shrink-0 rounded-full border border-white shadow-sm"
+                  style={{ backgroundColor: pal.hex }}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="truncate text-xs font-extrabold text-slate-900">{pal.title}</span>
+                    {active && <Check size={13} className="shrink-0 text-slate-900" />}
+                  </div>
+                  <p className="mt-1 text-[11px] leading-snug text-slate-500">{pal.desc}</p>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

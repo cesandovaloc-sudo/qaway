@@ -466,7 +466,7 @@
 
   /* Titulo del Hero Secundario */
   .qw-hero-secondary-title {
-    font-family: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-size: clamp(1.15rem, 2.0vw, 1.65rem);
     font-weight: 760;
     line-height: 1.15;

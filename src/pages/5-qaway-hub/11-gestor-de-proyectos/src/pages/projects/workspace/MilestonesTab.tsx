@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { AlertTriangle, Check, ChevronDown, Clock, Flag, MessageCircle } from 'lucide-react'
+import {
+  AlertTriangle,
+  BarChart3,
+  Check,
+  ChevronDown,
+  Clock,
+  Flag,
+  MessageCircle,
+  Plus,
+  X,
+} from 'lucide-react'
 import { useProjectsDataset } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import {
@@ -8,7 +18,9 @@ import {
   MILESTONE_STATUS_META,
   WORK_ITEM_STATE_META,
   type MilestoneStatus,
+  type TaskNature,
   type WorkItem,
+  type WorkItemPriority,
 } from '@/types/project.types'
 import {
   buildFollowUpMessage,
@@ -133,9 +145,19 @@ function MilestoneChildRow({
 
 export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
   const dataset = useProjectsDataset()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const milestoneParam = searchParams.get('milestone')
+  const statusParam = searchParams.get('status') as MilestoneStatus | null
   const [expandedId, setExpandedId] = useState<string | null>(milestoneParam)
+
+  // Estado del formulario rápido para crear tarea vinculada directamente a un hito
+  const [creatingForMilestoneId, setCreatingForMilestoneId] = useState<string | null>(null)
+  const [taskTitle, setTaskTitle] = useState('')
+  const [taskAssignee, setTaskAssignee] = useState('Carlos Sandoval')
+  const [taskScope, setTaskScope] = useState('UGEL Huancayo')
+  const [taskPriority, setTaskPriority] = useState<WorkItemPriority>('ALTA')
+  const [taskNature, setTaskNature] = useState<TaskNature>('obligacion_normativa')
+  const [taskDate, setTaskDate] = useState('')
 
   useEffect(() => {
     if (milestoneParam) {
@@ -156,9 +178,75 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
     [dataset, projectId],
   )
 
-  const approved = milestones.filter((milestone) => milestone.status === 'aprobado').length
+  const filteredMilestones = useMemo(() => {
+    if (!statusParam) return milestones
+    return milestones.filter((m) => m.status === statusParam)
+  }, [milestones, statusParam])
+
+  const counts = useMemo(
+    () => ({
+      all: milestones.length,
+      pendiente: milestones.filter((m) => m.status === 'pendiente').length,
+      en_revision: milestones.filter((m) => m.status === 'en_revision').length,
+      aprobado: milestones.filter((m) => m.status === 'aprobado').length,
+    }),
+    [milestones],
+  )
+
+  const approved = counts.aprobado
   const progress =
     milestones.length > 0 ? Math.round((approved / milestones.length) * 100) : 0
+
+  const handleFilterStatus = (nextStatus: MilestoneStatus | null) => {
+    const next = new URLSearchParams(searchParams)
+    next.set('tab', 'hitos')
+    if (nextStatus) {
+      next.set('status', nextStatus)
+    } else {
+      next.delete('status')
+    }
+    setSearchParams(next, { replace: true })
+  }
+
+  const openCreateForm = (milestoneId: string, defaultDate: string) => {
+    setExpandedId(milestoneId)
+    setCreatingForMilestoneId(milestoneId)
+    setTaskTitle('')
+    setTaskDate(defaultDate || new Date().toISOString().slice(0, 10))
+  }
+
+  const handleCreateLinkedTask = (
+    e: React.FormEvent,
+    milestone: { id: string; phaseNumber: number; name: string; targetDate: string },
+  ) => {
+    e.preventDefault()
+    if (!taskTitle.trim()) return
+    const created = projectsService.createWorkItem({
+      projectId,
+      milestoneId: milestone.id,
+      milestoneRef: `Fase ${milestone.phaseNumber} · ${milestone.name}`,
+      originType:
+        taskNature === 'obligacion_normativa' ? 'oficial_oficio' : 'accion_emergente',
+      taskNature,
+      threatensMilestone: taskPriority === 'URGENTE',
+      title: taskTitle.trim(),
+      description: `Tarea vinculada directamente al hito: Fase ${milestone.phaseNumber} · ${milestone.name}`,
+      state: 'todo',
+      priority: taskPriority,
+      assignee: {
+        name: taskAssignee.trim() || 'Gestor Territorial',
+        role: 'Gestor Territorial',
+        phone: '+51964112233',
+      },
+      storyPoints: 3,
+      followUpDate: taskDate || milestone.targetDate,
+      scopeTag: taskScope.trim() || undefined,
+    })
+    setCreatingForMilestoneId(null)
+    setTaskTitle('')
+    setExpandedId(milestone.id)
+    onOpenTask(created.id)
+  }
 
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
@@ -172,32 +260,93 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
             {approved} de {milestones.length} subprocesos/fases aprobadas en este proyecto
           </p>
         </div>
-        <div className="ml-auto flex min-w-[200px] items-center gap-2.5">
+
+        {/* Filtros por semáforo (Opción A sincronizada con Sidebar) */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => handleFilterStatus(null)}
+            className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+              !statusParam
+                ? 'bg-zinc-900 text-white'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+            }`}
+          >
+            Todos ({counts.all})
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFilterStatus('pendiente')}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+              statusParam === 'pendiente'
+                ? 'bg-rose-600 text-white'
+                : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+            }`}
+          >
+            <span className="h-2 w-2 rounded-full bg-current" />
+            Pendientes ({counts.pendiente})
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFilterStatus('en_revision')}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+              statusParam === 'en_revision'
+                ? 'bg-amber-500 text-white'
+                : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+            }`}
+          >
+            <span className="h-2 w-2 rounded-full bg-current" />
+            En revisión ({counts.en_revision})
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFilterStatus('aprobado')}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+              statusParam === 'aprobado'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+            }`}
+          >
+            <span className="h-2 w-2 rounded-full bg-current" />
+            Aprobados ({counts.aprobado})
+          </button>
+        </div>
+
+        <div className="ml-auto flex min-w-[180px] items-center gap-2.5">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-100">
             <div
               className="h-full rounded-full bg-[var(--hub-brand)] transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="font-mono text-xs font-bold text-zinc-700">{progress}%</span>
+          <span className="tabular-nums text-xs font-bold text-zinc-700">{progress}%</span>
         </div>
       </div>
 
-      {milestones.length === 0 ? (
-        <p className="px-5 py-14 text-center text-sm text-zinc-400">
-          Este proyecto aún no tiene hitos definidos.
-        </p>
+      {filteredMilestones.length === 0 ? (
+        <div className="px-5 py-14 text-center">
+          <p className="text-sm text-zinc-400">
+            No hay hitos en este estado para este proyecto.
+          </p>
+          {statusParam && (
+            <button
+              type="button"
+              onClick={() => handleFilterStatus(null)}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+            >
+              Ver todos los hitos ({counts.all})
+            </button>
+          )}
+        </div>
       ) : (
         <ol className="relative space-y-0 px-5 py-5">
-          {milestones.map((milestone, index) => {
+          {filteredMilestones.map((milestone, index) => {
             const meta = MILESTONE_STATUS_META[milestone.status]
             const next = NEXT_STATUS[milestone.status]
-            const isLast = index === milestones.length - 1
+            const isLast = index === filteredMilestones.length - 1
             const childTasks = dataset.workItems.filter(
               (item) => item.milestoneId === milestone.id,
             )
-            // Fase 2 (A35): las complementarias no afectan la salud del hito salvo
-            // amenaza explícita; las legacy sin naturaleza cuentan como normativas.
             const normativeTasks = childTasks.filter(
               (item) => (item.taskNature ?? 'obligacion_normativa') === 'obligacion_normativa',
             )
@@ -210,6 +359,8 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
             )
             const expanded = expandedId === milestone.id
             const isSelectedFromSidebar = milestoneParam === milestone.id
+            const isCreatingHere = creatingForMilestoneId === milestone.id
+
             return (
               <li key={milestone.id} className="relative flex gap-4 pb-6 last:pb-0">
                 {!isLast && (
@@ -279,31 +430,176 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
                         Requiere firma
                       </span>
                     )}
-                    {next && (
+
+                    <div className="ml-auto flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => projectsService.updateMilestone(milestone.id, { status: next })}
-                        className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-lg bg-zinc-900 px-3 text-xs font-bold text-white transition-colors hover:bg-brand"
+                        onClick={() =>
+                          setSearchParams(
+                            { tab: 'reporteador', milestone: milestone.id },
+                            { replace: false },
+                          )
+                        }
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 cursor-pointer"
+                        title="Abrir matriz de monitoreo territorial vinculada a este hito"
                       >
-                        <Check size={13} />
-                        {NEXT_LABEL[milestone.status as Exclude<MilestoneStatus, 'aprobado'>]}
+                        <BarChart3 size={13} className="text-[var(--hub-brand)]" />
+                        Monitoreo Territorial
                       </button>
-                    )}
+
+                      <button
+                        type="button"
+                        onClick={() => openCreateForm(milestone.id, milestone.targetDate)}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--hub-brand)]/35 bg-[var(--hub-brand-soft,#fbf0ec)] px-3 text-xs font-bold text-[var(--hub-brand)] transition-colors hover:opacity-90 cursor-pointer"
+                      >
+                        <Plus size={13} strokeWidth={2.4} />
+                        Crear tarea
+                      </button>
+
+                      {next && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            projectsService.updateMilestone(milestone.id, { status: next })
+                          }
+                          className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-zinc-900 px-3 text-xs font-bold text-white transition-colors hover:bg-brand cursor-pointer"
+                        >
+                          <Check size={13} />
+                          {NEXT_LABEL[milestone.status as Exclude<MilestoneStatus, 'aprobado'>]}
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Formulario rápido inline para crear una tarea amarrada a este hito */}
+                  {isCreatingHere && (
+                    <form
+                      onSubmit={(e) => handleCreateLinkedTask(e, milestone)}
+                      className="mt-3 rounded-xl border border-[var(--hub-brand)]/30 bg-zinc-50/90 p-3.5 space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-900">
+                          Nueva tarea vinculada a Fase {milestone.phaseNumber} · {milestone.name}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setCreatingForMilestoneId(null)}
+                          className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-700 cursor-pointer"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="sm:col-span-2">
+                          <label className="mb-1 block text-[11px] font-semibold text-zinc-600">
+                            Título de la tarea *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={taskTitle}
+                            onChange={(e) => setTaskTitle(e.target.value)}
+                            placeholder="Ej. Validar directorio de almacén UGEL Huancayo..."
+                            className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-900 outline-none focus:border-[var(--hub-brand)]"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold text-zinc-600">
+                            UGEL / Ámbito territorial
+                          </label>
+                          <input
+                            type="text"
+                            value={taskScope}
+                            onChange={(e) => setTaskScope(e.target.value)}
+                            placeholder="Ej. UGEL Satipo"
+                            className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-900 outline-none focus:border-[var(--hub-brand)]"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold text-zinc-600">
+                            Responsable / Gestor
+                          </label>
+                          <input
+                            type="text"
+                            value={taskAssignee}
+                            onChange={(e) => setTaskAssignee(e.target.value)}
+                            placeholder="Nombre del responsable"
+                            className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-900 outline-none focus:border-[var(--hub-brand)]"
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold text-zinc-600">
+                            Prioridad
+                          </label>
+                          <select
+                            value={taskPriority}
+                            onChange={(e) => setTaskPriority(e.target.value as WorkItemPriority)}
+                            className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-2.5 text-xs text-zinc-900 outline-none focus:border-[var(--hub-brand)]"
+                          >
+                            <option value="URGENTE">Urgente</option>
+                            <option value="ALTA">Alta</option>
+                            <option value="MEDIA">Media</option>
+                            <option value="BAJA">Baja</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold text-zinc-600">
+                            Naturaleza
+                          </label>
+                          <select
+                            value={taskNature}
+                            onChange={(e) => setTaskNature(e.target.value as TaskNature)}
+                            className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-2.5 text-xs text-zinc-900 outline-none focus:border-[var(--hub-brand)]"
+                          >
+                            <option value="obligacion_normativa">Obligación Normativa</option>
+                            <option value="contingencia_operativa">Contingencia Operativa</option>
+                            <option value="control_complementario">Control Complementario</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold text-zinc-600">
+                            Fecha límite
+                          </label>
+                          <input
+                            type="date"
+                            value={taskDate}
+                            onChange={(e) => setTaskDate(e.target.value)}
+                            className="h-9 w-full rounded-lg border border-zinc-200 bg-white px-2.5 text-xs text-zinc-900 outline-none focus:border-[var(--hub-brand)]"
+                          />
+                        </div>
+                        <div className="flex items-end justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setCreatingForMilestoneId(null)}
+                            className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="submit"
+                            className="h-9 rounded-lg bg-[var(--hub-brand)] px-3.5 text-xs font-bold text-white hover:opacity-95 cursor-pointer"
+                          >
+                            Guardar tarea
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  )}
 
                   {/* Acordeón de tareas hijas vinculadas (Fase 10) */}
                   <button
                     type="button"
                     onClick={() => setExpandedId(expanded ? null : milestone.id)}
                     aria-expanded={expanded}
-                    className="mt-3 flex w-full items-center gap-2 rounded-xl bg-zinc-50 px-3 py-2 text-left text-xs font-bold text-zinc-600 transition-colors hover:bg-zinc-100"
+                    className="mt-3 flex w-full items-center gap-2 rounded-xl bg-zinc-50 px-3 py-2 text-left text-xs font-bold text-zinc-600 transition-colors hover:bg-zinc-100 cursor-pointer"
                   >
                     <ChevronDown
                       size={14}
                       className={`shrink-0 text-zinc-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
                     />
                     Tareas vinculadas
-                    <span className="rounded-full bg-white px-2 py-0.5 font-mono text-[11px] text-zinc-500 shadow-sm">
+                    <span className="rounded-full bg-white px-2 py-0.5 tabular-nums text-[11px] text-zinc-500 shadow-sm">
                       {childTasks.length}
                     </span>
                   </button>
@@ -313,13 +609,17 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
                         <div>
                           <p className="mb-1.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-zinc-500">
                             Entregables Normativos
-                            <span className="rounded-full bg-white px-2 py-0.5 font-mono text-[11px] text-zinc-500 shadow-sm">
+                            <span className="rounded-full bg-white px-2 py-0.5 tabular-nums text-[11px] text-zinc-500 shadow-sm">
                               {normativeTasks.length}
                             </span>
                           </p>
                           <ul className="space-y-2">
                             {normativeTasks.map((child) => (
-                              <MilestoneChildRow key={child.id} child={child} onOpenTask={onOpenTask} />
+                              <MilestoneChildRow
+                                key={child.id}
+                                child={child}
+                                onOpenTask={onOpenTask}
+                              />
                             ))}
                           </ul>
                         </div>
@@ -327,22 +627,34 @@ export function MilestonesTab({ projectId, onOpenTask }: MilestonesTabProps) {
                       {complementaryTasks.length > 0 && (
                         <div>
                           <p className="mb-1.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-zinc-500">
-                            Controles Complementarios
-                            <span className="rounded-full bg-white px-2 py-0.5 font-mono text-[11px] text-zinc-500 shadow-sm">
+                            Controles Complementarios & Contingencias
+                            <span className="rounded-full bg-white px-2 py-0.5 tabular-nums text-[11px] text-zinc-500 shadow-sm">
                               {complementaryTasks.length}
                             </span>
                           </p>
                           <ul className="space-y-2">
                             {complementaryTasks.map((child) => (
-                              <MilestoneChildRow key={child.id} child={child} onOpenTask={onOpenTask} />
+                              <MilestoneChildRow
+                                key={child.id}
+                                child={child}
+                                onOpenTask={onOpenTask}
+                              />
                             ))}
                           </ul>
                         </div>
                       )}
-                      {childTasks.length === 0 && (
-                        <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-400">
-                          Sin tareas vinculadas a este hito.
-                        </p>
+                      {childTasks.length === 0 && !isCreatingHere && (
+                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-dashed border-zinc-200 px-4 py-3 text-xs text-zinc-500">
+                          <span>Sin tareas vinculadas a este hito todavía.</span>
+                          <button
+                            type="button"
+                            onClick={() => openCreateForm(milestone.id, milestone.targetDate)}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--hub-brand-soft,#fbf0ec)] px-3 py-1.5 text-xs font-bold text-[var(--hub-brand)] hover:opacity-90 cursor-pointer"
+                          >
+                            <Plus size={13} strokeWidth={2.4} />
+                            Crear primera tarea en este hito
+                          </button>
+                        </div>
                       )}
                     </div>
                   )}

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
+  BarChart3,
   BookOpen,
   CalendarDays,
   Flame,
@@ -25,14 +26,15 @@ import { CalendarTab } from './workspace/CalendarTab'
 import { GanttTab } from './workspace/GanttTab'
 import { MilestonesTab } from './workspace/MilestonesTab'
 import { DocsTab } from './workspace/DocsTab'
+import { TerritoryReporterTab } from '@/features/territory-reporter/TerritoryReporterTab'
 
 // ─────────────────────────────────────────────────────────────────────────
 // ProjectWorkspacePage.tsx — Espacio de Trabajo del Proyecto (Fase 4, 5, 6, 9 y 3 A36)
 // Ruta /proyectos/:id con header de proyecto y pestañas completas:
-// Resumen · Kanban · Sprints · Calendario · Diagrama Gantt · Hitos PMBOK · Wiki.
+// Resumen · Kanban · Sprints · Calendario · Diagrama Gantt · Hitos PMBOK · Monitoreo Territorial · Wiki.
 // ─────────────────────────────────────────────────────────────────────────
 
-type WorkspaceTab = 'resumen' | 'kanban' | 'sprints' | 'calendar' | 'gantt' | 'hitos' | 'docs'
+type WorkspaceTab = 'resumen' | 'kanban' | 'sprints' | 'calendar' | 'gantt' | 'hitos' | 'reporteador' | 'docs'
 
 function isWorkspaceTab(value: string | null): value is WorkspaceTab {
   return (
@@ -42,6 +44,7 @@ function isWorkspaceTab(value: string | null): value is WorkspaceTab {
     value === 'calendar' ||
     value === 'gantt' ||
     value === 'hitos' ||
+    value === 'reporteador' ||
     value === 'docs'
   )
 }
@@ -133,7 +136,8 @@ export default function ProjectWorkspacePage() {
     { key: 'resumen', label: 'Resumen', icon: <LayoutDashboard size={16} />, badge: null },
     { key: 'gantt', label: 'Diagrama Gantt', icon: <GanttChart size={16} />, badge: null },
     { key: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} />, badge: null },
-    { key: 'hitos', label: 'Hitos', icon: <Milestone size={16} />, badge: pendingMilestones || null },
+    { key: 'hitos', label: 'Hitos & Fases', icon: <Milestone size={16} />, badge: pendingMilestones || null },
+    { key: 'reporteador', label: 'Monitoreo Territorial', icon: <BarChart3 size={16} />, badge: 13 },
     { key: 'kanban', label: 'Kanban', icon: <KanbanSquare size={16} />, badge: workItems.length },
     { key: 'sprints', label: 'Sprints', icon: <Flame size={16} />, badge: sprintTasksCount || null },
     { key: 'docs', label: 'Wiki Docs', icon: <BookOpen size={16} />, badge: docsCount || null },
@@ -246,6 +250,9 @@ export default function ProjectWorkspacePage() {
       )}
       {activeTab === 'hitos' && (
         <MilestonesTab projectId={project.id} onOpenTask={setSelectedTaskId} />
+      )}
+      {activeTab === 'reporteador' && (
+        <TerritoryReporterTab projectId={project.id} onOpenTask={setSelectedTaskId} />
       )}
       {activeTab === 'kanban' && (
         <KanbanBoardTab projectId={project.id} onOpenTask={setSelectedTaskId} />

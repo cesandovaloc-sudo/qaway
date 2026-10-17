@@ -136,6 +136,27 @@
   --status-blocked-border: #fecdd3;
 }
 
+/* 4. Ejecutivo Territorial / Azul SIGA (Moderno & Semafórico) */
+.hub-shell[data-palette='ejecutivo'],
+[data-palette='ejecutivo'] {
+  --hub-brand: #1e3a8a;
+  --hub-brand-hover: #172554;
+  --hub-brand-soft: #eff6ff;
+  --hub-brand-glow: rgba(30, 58, 138, 0.16);
+
+  --status-ok: #059669;
+  --status-ok-bg: #ecfdf5;
+  --status-ok-border: #a7f3d0;
+
+  --status-risk: #d97706;
+  --status-risk-bg: #fffbeb;
+  --status-risk-border: #fde68a;
+
+  --status-blocked: #dc2626;
+  --status-blocked-bg: #fef2f2;
+  --status-blocked-border: #fecaca;
+}
+
 
 /* ── Themes ── */
 html.dark, [data-theme='dark'] {
@@ -146,12 +167,13 @@ html.dark, [data-theme='dark'] {
   --color-muted: #a1a1aa;
 }
 
-[data-theme='contraste'] {
-  color-scheme: dark;
-  --color-surface: #f4f4f5;
-  --color-surface-muted: #e4e4e7;
-  --color-ink: #09090b;
-  --color-muted: #71717a;
+[data-theme='contraste'],
+[data-theme='ejecutivo'] {
+  color-scheme: light;
+  --color-surface: #f1f5f9;
+  --color-surface-muted: #e2e8f0;
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
 }
 
 /* ── 1. MODO BLANCO PURO (Inventi Pro) ── */
@@ -222,6 +244,28 @@ html.dark, [data-theme='dark'] {
 .hub-shell[data-mode='contraste'] main {
   background-color: #fafafa !important;
   color: #18181b !important;
+}
+
+/* ── 3B. MODO EJECUTIVO TERRITORIAL (Azul SIGA - Slate Moderno) ── */
+.hub-shell[data-mode='ejecutivo'] {
+  --hub-bg: #0f172a;
+  --hub-surface: #0f172a;
+  --hub-surface-strong: #1e293b;
+  --hub-pop: #1e293b;
+  --hub-chip: rgba(255, 255, 255, 0.07);
+  --hub-hover: rgba(255, 255, 255, 0.06);
+  --hub-hover-strong: rgba(255, 255, 255, 0.11);
+  --hub-border: rgba(255, 255, 255, 0.09);
+  --hub-border-soft: rgba(255, 255, 255, 0.05);
+  --hub-text: #f8fafc;
+  --hub-text-soft: #cbd5e1;
+  --hub-dim: #94a3b8;
+  --hub-faint: #64748b;
+  --hub-footer: rgba(15, 23, 42, 0.85);
+}
+.hub-shell[data-mode='ejecutivo'] main {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
 /* ── 4. MODO OSCURO INTEGRAL ── */

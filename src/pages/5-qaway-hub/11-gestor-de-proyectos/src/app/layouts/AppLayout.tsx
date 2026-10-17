@@ -18,16 +18,17 @@ import Header from '@/components/header/Header'
  */
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
-  const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro'>(() => {
+  const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro' | 'ejecutivo'>(() => {
     const raw = localStorage.getItem('qaway.hubTheme')
     if (raw === 'claro' || raw === 'blanco') return 'blanco'
     if (raw === 'grises') return 'grises'
     if (raw === 'oscuro') return 'oscuro'
+    if (raw === 'ejecutivo') return 'ejecutivo'
     return 'contraste'
   })
-  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio' | 'personalizado'>(() => {
+  const [colorPalette, setColorPalette] = useState<'terracota' | 'carbon' | 'estudio' | 'ejecutivo' | 'personalizado'>(() => {
     const raw = localStorage.getItem('qaway.colorPalette')
-    if (raw === 'carbon' || raw === 'estudio' || raw === 'personalizado') return raw
+    if (raw === 'carbon' || raw === 'estudio' || raw === 'ejecutivo' || raw === 'personalizado') return raw
     return 'terracota'
   })
 
