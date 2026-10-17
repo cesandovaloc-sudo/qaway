@@ -539,19 +539,18 @@ export default function PreguntasFrecuentesApp() {
         isVisible={isHeroVisible}
       />
 
-      {/* CONTENEDOR PRINCIPAL ERGONÓMICO */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 space-y-4 flex-1">
-        {/* CABECERA OPERATIVA FIJA (EL SCROLL SE DETIENE AQUÍ Y NUNCA PASA DE LAS DIRECCIONES NI DEL FILTRO) */}
-        <div className="sticky top-[52px] z-30 bg-[#f8fafc]/95 backdrop-blur-md pt-2 pb-3 space-y-3.5 border-b border-slate-200/80 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 shadow-2xs">
-          {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS */}
-          <DirectionsGrid
-            directions={directionsData}
-            selectedDirectionId={selectedDirectionId}
-            isSearching={!!searchQuery.trim()}
-            onSelectDirection={handleSelectDirection}
-          />
+      {/* CONTENEDOR PRINCIPAL ERGONÓMICO CON ESPACIADO COMPACTO */}
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-2.5 sm:pt-3 pb-6 space-y-3.5 flex-1">
+        {/* 2. CUADRÍCULA DE DIRECCIONES PEDAGÓGICAS (FLUJO NORMAL, SIN ESPACIO EXCESIVO) */}
+        <DirectionsGrid
+          directions={directionsData}
+          selectedDirectionId={selectedDirectionId}
+          isSearching={!!searchQuery.trim()}
+          onSelectDirection={handleSelectDirection}
+        />
 
-          {/* 3. BARRA DE BÚSQUEDA Y FILTRO CON SUPER FILTRO ESTILO CRM */}
+        {/* 3. BARRA DE BÚSQUEDA Y FILTRO STICKY (EL SCROLL SE DETIENE EXACTAMENTE AQUÍ Y NO PASA DEL FILTRO) */}
+        <div id="seccion-filtro" className="sticky top-[52px] z-30 bg-[#f8fafc]/95 backdrop-blur-md py-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 shadow-2xs border-b border-slate-200/60">
           <SearchBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
