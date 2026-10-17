@@ -32,6 +32,8 @@ import {
   PanelRightClose,
   PanelRightOpen,
   FolderPlus,
+  FolderOpen,
+  Upload,
   Plus,
   SlidersHorizontal,
   Filter,
@@ -52,6 +54,7 @@ import {
   Paperclip,
   Mic,
   MicOff,
+  X,
 } from "lucide-react";
 import { HubIcon } from "./components/ui/HubIcon";
 
@@ -203,6 +206,7 @@ interface ChatTurn {
   latency?: string;
   scenarioId?: string;
   sourcesCount?: number;
+  hasTable?: boolean;
   sources?: { id: number; name: string; section: string; tab: InspectorTab }[];
   tableData?: {
     concept: string;
@@ -237,6 +241,159 @@ const INITIAL_CHAT_TURNS: ChatTurn[] = [
       { id: 2, name: "Contingencias_Laborales_Q3.xlsx", section: "Hoja: Resumen_Ejecutivo • Celda E14", tab: 2 },
       { id: 3, name: "Manual de Políticas Laborales", section: "Sección 4.2 - Control de asistencia", tab: 3 },
     ],
+  },
+];
+
+const SESSION_2_TURNS: ChatTurn[] = [
+  {
+    id: "turn-s2-u",
+    sender: "user",
+    text: "¿Cuáles son los límites de jornada laboral y sobretiempo según el D.S. N.º 007-2002-TR?",
+    timestamp: "Ayer, 4:30 PM",
+  },
+  {
+    id: "turn-s2-a",
+    sender: "assistant",
+    text: "Conforme a los artículos 9 y 10 del D.S. N.º 007-2002-TR, la jornada ordinaria máxima es de 8 horas diarias o 48 horas semanales. El tiempo trabajado que exceda la jornada diaria o semanal se considera sobretiempo y se abona con un recargo no menor al 25% por las dos primeras horas y 35% para las horas restantes.",
+    timestamp: "Ayer, 4:30 PM",
+    latency: "112 ms (Anthropic Claude)",
+    sourcesCount: 1,
+    scenarioId: "normativa",
+    sources: [
+      { id: 1, name: "D.S. N.º 007-2002-TR", section: "Art. 9 y 10 - Jornada y sobretiempo", tab: 1 },
+    ],
+  },
+];
+
+const SESSION_3_TURNS: ChatTurn[] = [
+  {
+    id: "turn-s3-u",
+    sender: "user",
+    text: "¿Qué establece el Manual de Políticas Laborales sección 4.2 sobre el control de asistencia?",
+    timestamp: "14 Oct, 11:20 AM",
+  },
+  {
+    id: "turn-s3-a",
+    sender: "assistant",
+    text: "La Sección 4.2 del Manual de Políticas Laborales v2.1 (pág. 28) dispone que todo registro de sobretiempo debe validarse en el sistema biométrico y contar con aprobación de gerencia. Asimismo, cualquier provisión contingente superior a USD 25,000 requiere dictamen vinculante del Comité de Auditoría antes del día 25 de cada mes.",
+    timestamp: "14 Oct, 11:20 AM",
+    latency: "118 ms (Cohere AI)",
+    sourcesCount: 1,
+    scenarioId: "procedimiento",
+    sources: [
+      { id: 3, name: "Manual de Políticas Laborales", section: "Sección 4.2 - Control de asistencia", tab: 3 },
+    ],
+  },
+];
+
+interface ProjectSourceItem {
+  id: string;
+  title: string;
+  type: "legal" | "excel" | "doc";
+  badge: string;
+  description: string;
+  metaPages: string;
+  chunksCount: number;
+  statusText: string;
+  inspectorTab: InspectorTab;
+  projectId: string;
+}
+
+const INITIAL_PROJECT_SOURCES: ProjectSourceItem[] = [
+  {
+    id: "src-1",
+    title: "D.S. N.º 007-2002-TR",
+    type: "legal",
+    badge: "Norma Oficial",
+    description: "Texto Único Ordenado de la Ley de Jornada de Trabajo, Horario y Trabajo en Sobretiempo.",
+    metaPages: "86 páginas",
+    chunksCount: 8320,
+    statusText: "Indexado",
+    inspectorTab: 1,
+    projectId: "auditoria-q3",
+  },
+  {
+    id: "src-2",
+    title: "Modelo Financiero Q3 2026.xlsx",
+    type: "excel",
+    badge: "Matriz Excel",
+    description: "Proyecciones de ingresos, costos de nómina, provisiones contingentes y cálculo de EBITDA.",
+    metaPages: "14 hojas / 1,420 celdas",
+    chunksCount: 6120,
+    statusText: "Indexado",
+    inspectorTab: 2,
+    projectId: "auditoria-q3",
+  },
+  {
+    id: "src-3",
+    title: "Manual de Políticas Laborales v2.1.pdf",
+    type: "doc",
+    badge: "Manual Interno",
+    description: "Normas internas de registro biométrico, control de horas extras y autorizaciones de gerencia.",
+    metaPages: "48 páginas",
+    chunksCount: 12480,
+    statusText: "Indexado",
+    inspectorTab: 3,
+    projectId: "auditoria-q3",
+  },
+];
+
+interface HistoryRecordItem {
+  id: string;
+  question: string;
+  scenario: string;
+  tab: InspectorTab;
+  date: string;
+  latency: string;
+  sourcesCount: number;
+  similarity: string;
+  summary: string;
+}
+
+const INITIAL_HISTORY_ITEMS: HistoryRecordItem[] = [
+  {
+    id: "h1",
+    question: "¿Cuál es la contingencia laboral por horas extras no registradas y su impacto en el EBITDA del Q3?",
+    scenario: "auditoria",
+    tab: 2,
+    date: "Hoy, 13:45",
+    latency: "134 ms",
+    sourcesCount: 3,
+    similarity: "0.95",
+    summary: "Contingencia de USD 48,500 reduciendo el margen EBITDA en 2.3 pp por omisión en sistema biométrico.",
+  },
+  {
+    id: "h2",
+    question: "¿Qué establece el Art. 9 del D.S. N.º 007-2002-TR sobre la inversión de la carga de la prueba en sobretiempo?",
+    scenario: "normativa",
+    tab: 1,
+    date: "Ayer, 17:15",
+    latency: "98 ms",
+    sourcesCount: 1,
+    similarity: "0.95",
+    summary: "La falta de registro biométrico oficial invierte automáticamente la carga de la prueba en favor del trabajador.",
+  },
+  {
+    id: "h3",
+    question: "¿Cuál es el EBITDA proyectado en el Modelo Financiero Q3 2026 sin la provisión por horas extras?",
+    scenario: "financiero",
+    tab: 2,
+    date: "14 Oct 2026, 11:20",
+    latency: "145 ms",
+    sourcesCount: 2,
+    similarity: "0.92",
+    summary: "El EBITDA sin provisión es USD 2,150,000 (18.4% margen), descendiendo a USD 2,101,500 con ajuste.",
+  },
+  {
+    id: "h4",
+    question: "¿Qué nivel de autorización exige la Sección 4.2 del Manual de Políticas Laborales para horas extras?",
+    scenario: "procedimiento",
+    tab: 3,
+    date: "12 Oct 2026, 16:04",
+    latency: "112 ms",
+    sourcesCount: 1,
+    similarity: "0.88",
+    summary: "Toda provisión contingente mayor a USD 25,000 requiere dictamen vinculante del comité de auditoría.",
   },
 ];
 
@@ -371,32 +528,40 @@ interface ChatSession {
   preview: string;
   messagesCount: number;
   provider: string;
+  projectId: string;
+  turns: ChatTurn[];
 }
 
 const DEFAULT_CHAT_SESSIONS: ChatSession[] = [
   {
     id: "session-1",
     title: "Auditoría Financiera & EBITDA Q3",
-    date: "Hoy, 10:14 AM",
+    date: "Hoy",
     preview: "¿Cuál es la contingencia laboral por horas extras no registradas...",
     messagesCount: 2,
     provider: "OpenAI GPT-4o",
+    projectId: "auditoria-q3",
+    turns: INITIAL_CHAT_TURNS,
   },
   {
     id: "session-2",
     title: "Cálculo de sobretiempo D.S. 007-2002-TR",
-    date: "Ayer, 4:30 PM",
-    preview: "Análisis de sobretasas del 25% y 35% y carga de la prueba...",
-    messagesCount: 4,
-    provider: "Anthropic Claude 3.5",
+    date: "Ayer",
+    preview: "¿Cuáles son los límites de jornada laboral y sobretiempo según el D.S. N.º 007-2002-TR?",
+    messagesCount: 2,
+    provider: "Anthropic Claude",
+    projectId: "auditoria-q3",
+    turns: SESSION_2_TURNS,
   },
   {
     id: "session-3",
     title: "Revisión de Cláusulas de Auditoría RRHH",
-    date: "14 Oct 2026",
-    preview: "Procedimiento de la Sección 4.2 del Manual Interno...",
-    messagesCount: 6,
-    provider: "Cohere Command R+",
+    date: "14 Oct",
+    preview: "¿Qué establece el Manual de Políticas Laborales sección 4.2 sobre el control de asistencia?",
+    messagesCount: 2,
+    provider: "Cohere AI",
+    projectId: "auditoria-q3",
+    turns: SESSION_3_TURNS,
   },
 ];
 
@@ -452,19 +617,41 @@ const ALL_SEARCHABLE_ITEMS: QuickSearchResult[] = [
 export default function CriteriosApp() {
   const [theme, setTheme] = useState<RagThemeId>("rag-neutral");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [projects, setProjects] = useState<ProjectWorkspace[]>(DEFAULT_PROJECTS);
   const [activeProjectId, setActiveProjectId] = useState<string>("auditoria-q3");
+  const [showNewProjectModal, setShowNewProjectModal] = useState<boolean>(false);
+  const [newProjectName, setNewProjectName] = useState<string>("");
+  const [newProjectCategory, setNewProjectCategory] = useState<string>("Finanzas & Legal");
+
   const [activeScenario, setActiveScenario] = useState<string>("auditoria");
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>(2);
   const [inspectorOpen, setInspectorOpen] = useState<boolean>(false); // Inicialmente colapsado
   const [query, setQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showSqlModal, setShowSqlModal] = useState<boolean>(false);
-  const [saved, setSaved] = useState<boolean>(false);
   const [activeNav, setActiveNav] = useState<string>("nuevo");
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
-  const [toast, setToast] = useState<string | null>(null);
 
-  // Sesiones de Chat
+  // Estados de feedback inline (sin toasts flotantes intrusivos)
+  const [savedTurnIds, setSavedTurnIds] = useState<string[]>([]);
+  const [copiedTurnId, setCopiedTurnId] = useState<string | null>(null);
+  const [citationCopied, setCitationCopied] = useState<boolean>(false);
+  const [reindexingSourceId, setReindexingSourceId] = useState<string | null>(null);
+  const [historyExported, setHistoryExported] = useState<boolean>(false);
+  const [engineParamsSaved, setEngineParamsSaved] = useState<boolean>(false);
+  const [editingApiKeyId, setEditingApiKeyId] = useState<string | null>(null);
+  const [apiKeyDraft, setApiKeyDraft] = useState<string>("");
+
+  // Fuentes indexadas dinámicas y modal de carga real
+  const [projectSources, setProjectSources] = useState<ProjectSourceItem[]>(INITIAL_PROJECT_SOURCES);
+  const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
+  // Historial dinámico de consultas
+  const [historyItems, setHistoryItems] = useState<HistoryRecordItem[]>(INITIAL_HISTORY_ITEMS);
+
+  // Sesiones de Chat (cada sesión guarda sus propios turnos)
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(DEFAULT_CHAT_SESSIONS);
   const [activeSessionId, setActiveSessionId] = useState<string>("session-1");
   const [isChatsListOpen, setIsChatsListOpen] = useState<boolean>(true);
@@ -479,9 +666,6 @@ export default function CriteriosApp() {
 
   // Pestaña activa en Configuración
   const [configTab, setConfigTab] = useState<"providers" | "engine">("providers");
-
-  // Chat multiturmo
-  const [chatMessages, setChatMessages] = useState<ChatTurn[]>(INITIAL_CHAT_TURNS);
 
   // Módulo de 7 Proveedores de IA
   const [aiProviders, setAiProviders] = useState<AiProvider[]>(DEFAULT_PROVIDERS);
@@ -498,13 +682,15 @@ export default function CriteriosApp() {
       selectedModel: "gpt-4o",
       contextWindow: "128k",
       latency: 180,
-      costTier: "Medio",
       apiKeyMask: "sk-proj-••••••••••••••••••••3x9A",
       models: ["gpt-4o", "gpt-4o-mini", "o1-preview"],
-      isLocal: false,
     };
 
-  // Buscador y filtros del Header (Rojo)
+  // Sesión activa y mensajes de la sesión activa (nunca hardcodeados entre sesiones)
+  const activeSession = chatSessions.find((s) => s.id === activeSessionId) || chatSessions[0];
+  const chatMessages: ChatTurn[] = activeSession ? activeSession.turns : [];
+
+  // Buscador y filtros del Header
   const [headerSearch, setHeaderSearch] = useState<string>("");
   const [showQuickSearch, setShowQuickSearch] = useState<boolean>(false);
   const [filterSourceType, setFilterSourceType] = useState<string>("all");
@@ -539,7 +725,6 @@ export default function CriteriosApp() {
       }
       if (quickSearchRef.current && !quickSearchRef.current.contains(event.target as Node)) {
         setShowQuickSearch(false);
-        setShowModeDropdown(false);
       }
       if (modeDropdownRef.current && !modeDropdownRef.current.contains(event.target as Node)) {
         setShowModeDropdown(false);
@@ -550,6 +735,9 @@ export default function CriteriosApp() {
         setShowUserMenu(false);
         setShowFilterDropdown(false);
         setShowQuickSearch(false);
+        setShowModeDropdown(false);
+        setShowUploadModal(false);
+        setShowNewProjectModal(false);
       }
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
@@ -565,17 +753,75 @@ export default function CriteriosApp() {
     };
   }, []);
 
+  // No-op para compatibilidad interna sin mostrar nunca la caja negra flotante
+  function showToastMessage(_msg?: string) {
+    // Eliminado intencionalmente el popup flotante negro a solicitud del usuario
+  }
+
+  function handleCreateNewSession(customTitle?: string, customProjectId?: string) {
+    const newId = `session-${Date.now()}`;
+    const newSession: ChatSession = {
+      id: newId,
+      title: customTitle || `Nueva conversación ${chatSessions.length + 1}`,
+      preview: "Conversación limpia • Escribe una consulta para comenzar",
+      date: "Ahora",
+      messagesCount: 0,
+      provider: activeLlmProvider.name,
+      projectId: customProjectId || activeProjectId,
+      turns: [],
+    };
+    setChatSessions((prev) => [newSession, ...prev]);
+    setActiveSessionId(newId);
+    setQuery("");
+    setActiveNav("nuevo");
+  }
+
+  function handleCreateProject(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = newProjectName.trim();
+    if (!trimmed) return;
+    const newId = `proj-${Date.now()}`;
+    const newProj: ProjectWorkspace = {
+      id: newId,
+      name: trimmed,
+      category: newProjectCategory,
+      stats: "0 fuentes • Listo para indexar",
+    };
+    setProjects((prev) => [newProj, ...prev]);
+    setActiveProjectId(newId);
+    setNewProjectName("");
+    setShowNewProjectModal(false);
+    handleCreateNewSession(`Chat: ${trimmed}`, newId);
+  }
+
   function handleResetHome() {
-    setQuery("¿Cuál es la contingencia laboral por horas extras no registradas y su impacto en el EBITDA del Q3?");
+    setActiveSessionId("session-1");
     setActiveScenario("auditoria");
     setInspectorTab(2);
-    setInspectorOpen(true);
+    setInspectorOpen(false);
     setActiveNav("nuevo");
-    showToastMessage("Vista de inicio restablecida");
   }
 
   const quickSearchResults = headerSearch.trim()
-    ? ALL_SEARCHABLE_ITEMS.filter(
+    ? [
+        ...ALL_SEARCHABLE_ITEMS,
+        ...projectSources
+          .filter((ps) => !ALL_SEARCHABLE_ITEMS.some((a) => a.title === ps.title))
+          .map((ps) => ({
+            id: ps.id,
+            title: ps.title,
+            subtitle: ps.metaPages,
+            badge: ps.badge,
+            badgeColor:
+              ps.type === "legal"
+                ? "bg-red-50 text-red-700 border-red-200"
+                : ps.type === "excel"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-slate-50 text-slate-700 border-slate-200",
+            tab: ps.inspectorTab,
+            snippet: ps.description,
+          })),
+      ].filter(
         (item) =>
           item.title.toLowerCase().includes(headerSearch.toLowerCase()) ||
           item.subtitle.toLowerCase().includes(headerSearch.toLowerCase()) ||
@@ -588,13 +834,13 @@ export default function CriteriosApp() {
     setInspectorOpen(true);
     setShowQuickSearch(false);
     setHeaderSearch("");
-    showToastMessage(`Inspeccionando: ${result.title}`);
   }
 
   function handleSendMessage(textToSend?: string) {
     const q = (textToSend !== undefined ? textToSend : query).trim();
     if (!q) return;
 
+    const targetSessionId = activeSessionId;
     const userTurn: ChatTurn = {
       id: `turn-u-${Date.now()}`,
       sender: "user",
@@ -602,32 +848,47 @@ export default function CriteriosApp() {
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setChatMessages((prev) => [...prev, userTurn]);
+    setChatSessions((prev) =>
+      prev.map((s) => {
+        if (s.id !== targetSessionId) return s;
+        const isFirstMessage = s.turns.length === 0 || s.title.startsWith("Nueva conversación") || s.title.startsWith("Conversación ");
+        const nextTitle = isFirstMessage ? (q.length > 38 ? `${q.slice(0, 38)}...` : q) : s.title;
+        const nextTurns = [...s.turns, userTurn];
+        return {
+          ...s,
+          title: nextTitle,
+          preview: q,
+          date: "Ahora",
+          messagesCount: nextTurns.length,
+          turns: nextTurns,
+        };
+      })
+    );
     setQuery("");
     setIsSearching(true);
 
     setTimeout(() => {
       let ansText = `Analizando tu consulta sobre "${q}" bajo el corte de similitud ≥ ${similarityThreshold.toFixed(2)}. `;
-      let sCount = 3;
+      let sCount = projectSources.length;
       let hasTable = false;
       let tableData;
 
       const lowerQ = q.toLowerCase();
-      if (lowerQ.includes("horas extras") || lowerQ.includes("ebitda") || lowerQ.includes("contingencia") || lowerQ.includes("laboral")) {
+      if (lowerQ.includes("horas extras") || lowerQ.includes("ebitda") || lowerQ.includes("contingencia") || lowerQ.includes("laboral") || lowerQ.includes("q4")) {
         ansText += "El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes [1]. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp [2].";
         hasTable = true;
         tableData = [
           { concept: "EBITDA (USD)", sin: "2,150,000", con: "2,101,500", var: "-48,500", isNegative: true },
           { concept: "Margen EBITDA", sin: "18.4%", con: "16.1%", var: "-2.3 pp", isNegative: true },
         ];
-      } else if (lowerQ.includes("artículo") || lowerQ.includes("ley") || lowerQ.includes("007") || lowerQ.includes("norma")) {
-        ansText += "Según el D.S. N.º 007-2002-TR (TUO de la Ley de Jornada de Trabajo), el artículo 9 y 10 estipulan que el sobretiempo antes de la hora de entrada o después de la salida debe ser remunerado con sobretasa [1]. La empresa debe resguardar registros de asistencia de al menos 5 años.";
+      } else if (lowerQ.includes("artículo") || lowerQ.includes("ley") || lowerQ.includes("007") || lowerQ.includes("norma") || lowerQ.includes("15")) {
+        ansText += "Según el D.S. N.º 007-2002-TR (TUO de la Ley de Jornada de Trabajo), los artículos 9, 10 y 15 estipulan que el sobretiempo antes de la hora de entrada o después de la salida debe ser remunerado con sobretasa [1]. La empresa debe conservar los registros de asistencia por un mínimo de 5 años.";
         sCount = 1;
-      } else if (lowerQ.includes("procedimiento") || lowerQ.includes("política") || lowerQ.includes("manual") || lowerQ.includes("rrhh")) {
-        ansText += "La Sección 4.2 del Manual de Políticas Laborales establece que toda contingencia mayor a USD 25,000 requiere autorización del Comité de Auditoría y validación con RR.HH. [3]. Se recomienda emitir acta antes del cierre contable.";
+      } else if (lowerQ.includes("procedimiento") || lowerQ.includes("política") || lowerQ.includes("manual") || lowerQ.includes("rrhh") || lowerQ.includes("auditoría")) {
+        ansText += "La Sección 4.2 del Manual de Políticas Laborales establece que toda contingencia mayor a USD 25,000 requiere autorización del Comité de Auditoría y validación con RR.HH. [3]. Se recomienda emitir acta vinculante antes del cierre contable.";
         sCount = 1;
       } else {
-        ansText += `Se recuperaron ${sCount} fragmentos vectorizados de alta concordancia. Los documentos corporativos y legales indican cumplimiento de plazos y validación previa de contingencias antes del cierre del ejercicio [1] [2] [3].`;
+        ansText += `Se recuperaron fragmentos vectorizados de alta concordancia en las ${projectSources.length} fuentes activas del proyecto. Los documentos corporativos y legales indican cumplimiento de plazos y validación previa de contingencias antes del cierre del ejercicio [1] [2].`;
       }
 
       const activeProvider = aiProviders.find((p) => p.id === activeLlmProviderId) || aiProviders[0];
@@ -649,16 +910,37 @@ export default function CriteriosApp() {
         ],
       };
 
-      setChatMessages((prev) => [...prev, assistantTurn]);
+      setChatSessions((prev) =>
+        prev.map((s) => {
+          if (s.id !== targetSessionId) return s;
+          const nextTurns = [...s.turns, assistantTurn];
+          return {
+            ...s,
+            preview: ansText.slice(0, 90) + "...",
+            messagesCount: nextTurns.length,
+            provider: activeProvider.name,
+            turns: nextTurns,
+          };
+        })
+      );
       setIsSearching(false);
-      showToastMessage(`Respuesta generada con ${activeProvider.name} (${activeProvider.latency} ms)`);
-    }, 400);
+    }, 350);
   }
 
   function handleResetChat() {
-    setChatMessages(INITIAL_CHAT_TURNS);
+    setChatSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId
+          ? {
+              ...s,
+              turns: [],
+              messagesCount: 0,
+              preview: "Conversación limpia • Lista para nuevas consultas",
+            }
+          : s
+      )
+    );
     setQuery("");
-    showToastMessage("Hilo de conversación reiniciado");
   }
 
   function handleScenario(id: string) {
@@ -697,8 +979,6 @@ export default function CriteriosApp() {
         status: p.id === providerId ? "active" : p.status,
       }))
     );
-    const p = aiProviders.find((x) => x.id === providerId);
-    showToastMessage(`${p?.name || providerId} establecido como LLM Primario`);
   }
 
   function handleSwitchReranker(providerId: string) {
@@ -709,14 +989,10 @@ export default function CriteriosApp() {
         role: p.id === providerId ? "reranker" : p.role === "reranker" ? "standby" : p.role,
       }))
     );
-    const p = aiProviders.find((x) => x.id === providerId);
-    showToastMessage(`${p?.name || providerId} establecido como Reranker`);
   }
 
   function handleSwitchEmbedding(providerId: string) {
     setActiveEmbeddingProviderId(providerId);
-    const p = aiProviders.find((x) => x.id === providerId);
-    showToastMessage(`${p?.name || providerId} asignado a Embeddings`);
   }
 
   function handlePingTest(providerId: string) {
@@ -730,34 +1006,111 @@ export default function CriteriosApp() {
         return p;
       })
     );
-    const p = aiProviders.find((x) => x.id === providerId);
-    showToastMessage(`Ping a ${p?.name}: ${p?.latency || 120} ms • Estado: Óptimo`);
   }
 
   function handleModelChange(providerId: string, modelName: string) {
     setAiProviders((prev) =>
       prev.map((p) => (p.id === providerId ? { ...p, selectedModel: modelName } : p))
     );
-    showToastMessage(`Modelo cambiado a ${modelName}`);
   }
 
   function handleUploadFolder() {
-    showToastMessage("Selecciona una carpeta o archivos para indexar en este proyecto");
+    setShowUploadModal(true);
   }
 
-  function showToastMessage(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2500);
+  function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const addedSources: ProjectSourceItem[] = Array.from(files).map((file, idx) => {
+      const lower = file.name.toLowerCase();
+      const isExcel = lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".csv");
+      const isLegal = lower.includes("ley") || lower.includes("ds") || lower.includes("decreto") || lower.includes("norma");
+      const type: "legal" | "excel" | "doc" = isExcel ? "excel" : isLegal ? "legal" : "doc";
+      const sizeKb = Math.max(12, Math.round(file.size / 1024));
+      const estimatedChunks = Math.max(120, sizeKb * 8);
+      return {
+        id: `src-up-${Date.now()}-${idx}`,
+        title: file.name,
+        type,
+        badge: isExcel ? "Matriz Excel" : isLegal ? "Norma Oficial" : "Documento Indexado",
+        description: `Archivo cargado localmente (${sizeKb} KB) e indexado en pgvector para el proyecto activo.`,
+        metaPages: isExcel ? "Hojas dinámicas" : `${Math.max(4, Math.round(sizeKb / 18))} páginas`,
+        chunksCount: estimatedChunks,
+        statusText: "Recién indexado",
+        inspectorTab: isExcel ? 2 : isLegal ? 1 : 3,
+        projectId: activeProjectId,
+      };
+    });
+
+    setProjectSources((prev) => [...addedSources, ...prev]);
+    e.target.value = "";
+    setShowUploadModal(false);
+    setActiveNav("fuentes");
   }
 
-  function handleShare() {
-    const textToCopy = `${query}\n\nEl trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes [1]. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp [2].`;
-    if (navigator.clipboard?.writeText) {
-      void navigator.clipboard.writeText(textToCopy);
-      showToastMessage("Respuesta copiada al portapapeles");
+  function handleAddQuickTemplateSource(template: {
+    title: string;
+    type: "legal" | "excel" | "doc";
+    badge: string;
+    description: string;
+    metaPages: string;
+    chunksCount: number;
+  }) {
+    const newSource: ProjectSourceItem = {
+      id: `src-tpl-${Date.now()}`,
+      title: template.title,
+      type: template.type,
+      badge: template.badge,
+      description: template.description,
+      metaPages: template.metaPages,
+      chunksCount: template.chunksCount,
+      statusText: "Recién indexado",
+      inspectorTab: template.type === "legal" ? 1 : template.type === "excel" ? 2 : 3,
+      projectId: activeProjectId,
+    };
+    setProjectSources((prev) => [newSource, ...prev]);
+    setShowUploadModal(false);
+    setActiveNav("fuentes");
+  }
+
+  function handleReindexSource(sourceId: string) {
+    setReindexingSourceId(sourceId);
+    setTimeout(() => {
+      setProjectSources((prev) =>
+        prev.map((s) => (s.id === sourceId ? { ...s, statusText: "Sincronizado ahora" } : s))
+      );
+      setReindexingSourceId(null);
+    }, 600);
+  }
+
+  function handleToggleSaveTurn(turn: ChatTurn) {
+    const isAlreadySaved = savedTurnIds.includes(turn.id);
+    if (isAlreadySaved) {
+      setSavedTurnIds((prev) => prev.filter((id) => id !== turn.id));
     } else {
-      showToastMessage("Enlace generado y copiado");
+      setSavedTurnIds((prev) => [...prev, turn.id]);
+      const newHist: HistoryRecordItem = {
+        id: `h-${Date.now()}`,
+        question: activeSession?.title || "Consulta guardada desde el Asistente RAG",
+        scenario: turn.scenarioId || activeScenario,
+        tab: inspectorTab,
+        date: "Ahora",
+        latency: turn.latency || "134 ms",
+        sourcesCount: turn.sourcesCount || 3,
+        similarity: similarityThreshold.toFixed(2),
+        summary: turn.text.slice(0, 140) + "...",
+      };
+      setHistoryItems((prev) => [newHist, ...prev]);
     }
+  }
+
+  function handleShareTurn(turn: ChatTurn) {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(turn.text).catch(() => {});
+    }
+    setCopiedTurnId(turn.id);
+    setTimeout(() => setCopiedTurnId(null), 2000);
   }
 
   function handleCopyCitation() {
@@ -770,13 +1123,10 @@ export default function CriteriosApp() {
       citation = "Manual de Políticas Laborales, Sección 4.2 - Control de asistencia (Pág. 28, v2.1 - 2026). Coseno: 0.88.";
     }
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(citation).catch(() => {
-        // Fallback silencioso para entornos sin permisos de portapapeles (ej. Playwright headless)
-      });
-      showToastMessage("Cita formal copiada al portapapeles");
-    } else {
-      showToastMessage("Cita copiada");
+      navigator.clipboard.writeText(citation).catch(() => {});
     }
+    setCitationCopied(true);
+    setTimeout(() => setCitationCopied(false), 2000);
   }
 
   function handleExcelExport() {
@@ -796,9 +1146,31 @@ export default function CriteriosApp() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToastMessage("Matriz Excel descargada (CSV)");
     } catch {
-      showToastMessage("No se pudo exportar la matriz");
+      // Fallback silencioso
+    }
+  }
+
+  function handleExportHistoryCsv() {
+    try {
+      let csv = "ID,Fecha,Consulta,Resumen,Fuentes,Similitud,Latencia\n";
+      for (const item of historyItems) {
+        csv += `"${item.id}","${item.date}","${item.question.replace(/"/g, '""')}","${item.summary.replace(/"/g, '""')}",${item.sourcesCount},${item.similarity},"${item.latency}"\n`;
+      }
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Historial_Consultas_RAG.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setHistoryExported(true);
+      setTimeout(() => setHistoryExported(false), 2000);
+    } catch {
+      setHistoryExported(true);
+      setTimeout(() => setHistoryExported(false), 2000);
     }
   }
 
@@ -807,19 +1179,32 @@ export default function CriteriosApp() {
     setInspectorOpen(true);
   }
 
+  const totalChunksCount = projectSources.reduce((acc, s) => acc + s.chunksCount, 0);
+  const legalSourcesCount = projectSources.filter((s) => s.type === "legal").length;
+  const excelSourcesCount = projectSources.filter((s) => s.type === "excel").length;
+  const docSourcesCount = projectSources.filter((s) => s.type === "doc").length;
+
   return (
     <div className="qaway-criterios-root" style={{ backgroundColor: palette.bgPage, color: palette.textPrimary }}>
+      {/* Inputs ocultos reales para carga de archivos y carpetas desde el sistema */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.xlsx,.xls,.csv,.docx,.txt,.md"
+        onChange={handleFilesSelected}
+        className="hidden"
+      />
+      <input
+        ref={folderInputRef}
+        type="file"
+        multiple
+        {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
+        onChange={handleFilesSelected}
+        className="hidden"
+      />
+
       <div className="h-screen w-full overflow-hidden flex flex-col font-sans antialiased transition-colors duration-200">
-        {/* Toast Notificación: abajo a la derecha no intrusivo */}
-        {toast && (
-          <div
-            style={{ zIndex: 100 }}
-            className="fixed bottom-6 right-6 bg-zinc-900 text-white text-sm px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 border border-zinc-700 transition-all pointer-events-none"
-          >
-            <HubIcon icon={Check} size={16} className="text-emerald-400" />
-            <span>{toast}</span>
-          </div>
-        )}
 
         {/* =========================================================================
          * HEADER GLOBAL FIJO Y PERENNE DE EXTREMO A EXTREMO (Top Bar Full Width)
@@ -1212,16 +1597,16 @@ export default function CriteriosApp() {
                   {/* Opciones de perfil */}
                   <div className="py-1 px-1">
                     {[
-                      { label: "Mi perfil", action: "Perfil" },
-                      { label: "Mis análisis guardados", action: "Análisis" },
-                      { label: "Cerrar sesión", action: "Sesión" },
+                      { label: "Configuración & IA", nav: "config" },
+                      { label: "Mis análisis guardados", nav: "historial" },
+                      { label: "Repositorio de fuentes", nav: "fuentes" },
                     ].map((opt) => (
                       <button
                         key={opt.label}
                         type="button"
                         onClick={() => {
                           setShowUserMenu(false);
-                          showToastMessage(`${opt.label} seleccionado`);
+                          setActiveNav(opt.nav);
                         }}
                         className="w-full text-left px-2.5 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 rounded-md cursor-pointer transition-colors"
                       >
@@ -1239,8 +1624,7 @@ export default function CriteriosApp() {
          * CONTENEDOR DE PANELES (DEBAJO DEL HEADER GLOBAL)
          * ========================================================================= */}
         <div className="flex-1 flex overflow-hidden min-h-0">
-          {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO CON MÓDULOS UNIVERSALES ===== */}
-                    {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO CON MÓDULOS UNIVERSALES (COLAPSABLE A ICONOS) ===== */}
+          {/* ===== COLUMNA 1: SIDEBAR IZQUIERDO CON MÓDULOS UNIVERSALES (COLAPSABLE A ICONOS) ===== */}
           <aside
             style={{
               backgroundColor: palette.bgPage,
@@ -1253,7 +1637,7 @@ export default function CriteriosApp() {
             {sidebarOpen ? (
               // Modo Expandido
               <>
-                {/* Cabecera del Panel con botón de colapso */}
+                {/* Cabecera del Panel con botón + Nuevo Proyecto y botón de colapso */}
                 <div className="px-3 pt-3">
                   <div className="flex items-center justify-between px-1 pb-1.5">
                     <span
@@ -1262,33 +1646,44 @@ export default function CriteriosApp() {
                     >
                       Proyecto Activo
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setSidebarOpen(false)}
-                      className="p-1 rounded-md hover:bg-zinc-100 cursor-pointer text-zinc-500 transition-colors"
-                      title="Colapsar panel a iconos"
-                      aria-label="Colapsar panel lateral izquierdo"
-                    >
-                      <HubIcon icon={PanelLeftClose} size={16} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowNewProjectModal((v) => !v)}
+                        className="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[11.5px] font-semibold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                        title="Crear un nuevo proyecto"
+                      >
+                        <HubIcon icon={Plus} size={12} />
+                        <span>Nuevo</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSidebarOpen(false)}
+                        className="p-1 rounded-md hover:bg-zinc-100 cursor-pointer text-zinc-500 transition-colors"
+                        title="Colapsar panel a iconos"
+                        aria-label="Colapsar panel lateral izquierdo"
+                      >
+                        <HubIcon icon={PanelLeftClose} size={16} />
+                      </button>
+                    </div>
                   </div>
 
+                  {/* Selector de Proyecto Activo */}
                   <div className="relative">
                     <select
                       value={activeProjectId}
                       onChange={(e) => {
                         setActiveProjectId(e.target.value);
-                        const p = DEFAULT_PROJECTS.find((x) => x.id === e.target.value);
-                        if (p) showToastMessage(`Cambiado a: ${p.name}`);
                       }}
                       style={{
                         backgroundColor: palette.bgSurface,
                         borderColor: palette.borderDefault,
-                        fontSize: 13,
+                        fontSize: 13.5,
                       }}
-                      className="w-full px-2.5 py-2 rounded-lg border font-medium text-zinc-900 shadow-xs cursor-pointer focus:outline-none appearance-none pr-7"
+                      className="w-full px-2.5 py-2 rounded-lg border font-semibold text-zinc-900 shadow-xs cursor-pointer focus:outline-none appearance-none pr-7"
+                      aria-label="Seleccionar proyecto activo"
                     >
-                      {DEFAULT_PROJECTS.map((p) => (
+                      {projects.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
                         </option>
@@ -1301,48 +1696,81 @@ export default function CriteriosApp() {
                     />
                   </div>
 
-                  {/* Botón: Cargar documentos o carpeta */}
+                  {/* Formulario Inline Desplegable para Crear Nuevo Proyecto */}
+                  {showNewProjectModal && (
+                    <form
+                      onSubmit={handleCreateProject}
+                      className="mt-2 p-2.5 rounded-xl border border-blue-200 bg-blue-50/50 space-y-2 shadow-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11.5px] font-bold text-blue-900">Crear Nuevo Proyecto</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowNewProjectModal(false)}
+                          className="text-zinc-400 hover:text-zinc-700 cursor-pointer"
+                        >
+                          <HubIcon icon={X} size={13} />
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={newProjectName}
+                        onChange={(e) => setNewProjectName(e.target.value)}
+                        placeholder="Nombre del proyecto..."
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white text-[13px] text-zinc-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        autoFocus
+                      />
+                      <select
+                        value={newProjectCategory}
+                        onChange={(e) => setNewProjectCategory(e.target.value)}
+                        className="w-full px-2 py-1.5 rounded-lg border border-zinc-200 bg-white text-[12px] text-zinc-700 focus:outline-none"
+                      >
+                        <option value="Finanzas & Legal">Finanzas &amp; Legal</option>
+                        <option value="Corporativo & Compliance">Corporativo &amp; Compliance</option>
+                        <option value="Operaciones">Operaciones</option>
+                        <option value="RR.HH. & Laboral">RR.HH. &amp; Laboral</option>
+                      </select>
+                      <div className="flex items-center justify-end gap-1.5 pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setShowNewProjectModal(false)}
+                          className="px-2.5 py-1 rounded-md border border-zinc-200 bg-white text-[11.5px] font-medium text-zinc-600 hover:bg-zinc-50 cursor-pointer"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-[11.5px] font-semibold cursor-pointer shadow-2xs"
+                        >
+                          Crear Proyecto
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Botón Destacado: Cargar documentos o carpeta */}
                   <button
                     type="button"
                     onClick={handleUploadFolder}
-                    style={{
-                      borderColor: palette.borderDefault,
-                      backgroundColor: palette.bgSurface,
-                    }}
-                    className="w-full mt-2 px-2.5 py-1.5 rounded-lg border border-dashed text-xs font-medium text-zinc-700 flex items-center justify-center gap-1.5 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
+                    className="w-full mt-2.5 px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-800 text-[13px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-xs"
                   >
-                    <HubIcon icon={FolderPlus} size={15} className="text-zinc-500" />
+                    <HubIcon icon={FolderPlus} size={16} className="text-indigo-600 shrink-0" />
                     <span>+ Cargar documentos / carpeta</span>
                   </button>
                 </div>
 
                 {/* Botón Prominente + Nueva Conversación (Estilo Antigravity 2.0) */}
-                <div className="px-3 mt-3">
+                <div className="px-3 mt-2.5">
                   <button
                     type="button"
-                    onClick={() => {
-                      const newId = `session-${Date.now()}`;
-                      const newSession: ChatSession = {
-                        id: newId,
-                        title: `Conversación ${chatSessions.length + 1}`,
-                        preview: "Conversación abierta, lista para recibir consultas al motor...",
-                        date: "Ahora",
-                        messagesCount: 1,
-                        provider: activeLlmProvider.name,
-                      };
-                      setChatSessions((prev) => [newSession, ...prev]);
-                      setActiveSessionId(newId);
-                      handleResetChat();
-                      setActiveNav("nuevo");
-                      showToastMessage("Nueva conversación iniciada");
-                    }}
+                    onClick={() => handleCreateNewSession()}
                     style={{
                       backgroundColor: palette.actionPrimary,
                     }}
                     className="w-full px-3 py-2 rounded-lg text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all flex items-center justify-center gap-2"
                   >
                     <HubIcon icon={Plus} size={16} />
-                    <span className="text-[13.5px] font-medium">Nueva Conversación</span>
+                    <span className="text-[13.5px] font-semibold">Nueva Conversación</span>
                   </button>
                 </div>
 
@@ -1366,10 +1794,7 @@ export default function CriteriosApp() {
                         <button
                           key={item.id}
                           type="button"
-                          onClick={() => {
-                            setActiveNav(item.id);
-                            showToastMessage(`Módulo: ${item.label}`);
-                          }}
+                          onClick={() => setActiveNav(item.id)}
                           style={{
                             backgroundColor: isActive ? palette.accentCitationBg : "transparent",
                             borderLeft: isActive ? `3px solid ${palette.accentCitation}` : "3px solid transparent",
@@ -1424,7 +1849,6 @@ export default function CriteriosApp() {
                             onClick={() => {
                               setActiveSessionId(session.id);
                               setActiveNav("nuevo");
-                              showToastMessage(`Cargada: ${session.title}`);
                             }}
                           >
                             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -1444,12 +1868,11 @@ export default function CriteriosApp() {
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setChatSessions((prev) => prev.filter((s) => s.id !== session.id));
+                                    const remaining = chatSessions.filter((s) => s.id !== session.id);
+                                    setChatSessions(remaining);
                                     if (activeSessionId === session.id) {
-                                      const remaining = chatSessions.filter((s) => s.id !== session.id);
                                       setActiveSessionId(remaining[0]?.id || "");
                                     }
-                                    showToastMessage(`Sesión eliminada`);
                                   }}
                                   className="opacity-0 group-hover:opacity-100 p-0.5 text-zinc-400 hover:text-red-500 rounded transition-opacity"
                                   title="Eliminar conversación"
@@ -1480,8 +1903,8 @@ export default function CriteriosApp() {
                       <p style={{ fontSize: 12.5 }} className="font-semibold text-zinc-800">
                         Fuentes en proyecto
                       </p>
-                      <span style={{ fontSize: 10.5 }} className="text-zinc-400 font-mono">
-                        3 activas
+                      <span style={{ fontSize: 10.5 }} className="text-indigo-600 font-mono font-semibold">
+                        {projectSources.length} activas
                       </span>
                     </div>
                     <div className="flex items-start gap-2">
@@ -1491,7 +1914,7 @@ export default function CriteriosApp() {
                           Documentos &amp; Manuales
                         </span>
                         <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
-                          124 docs • 12,480 fragmentos
+                          {docSourcesCount} fuente(s) • 12,480 fragmentos
                         </span>
                       </div>
                     </div>
@@ -1502,7 +1925,7 @@ export default function CriteriosApp() {
                           Leyes &amp; Normativa
                         </span>
                         <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
-                          86 docs • 8,320 fragmentos
+                          {legalSourcesCount} fuente(s) • 8,320 fragmentos
                         </span>
                       </div>
                     </div>
@@ -1513,7 +1936,7 @@ export default function CriteriosApp() {
                           Matrices Excel / CSV
                         </span>
                         <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
-                          42 archivos • 6,120 fragmentos
+                          {excelSourcesCount} archivo(s) • 6,120 fragmentos
                         </span>
                       </div>
                     </div>
@@ -1535,22 +1958,7 @@ export default function CriteriosApp() {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    const newId = `session-${Date.now()}`;
-                    const newSession: ChatSession = {
-                      id: newId,
-                      title: `Conversación ${chatSessions.length + 1}`,
-                      preview: "Conversación abierta, lista para recibir consultas al motor...",
-                      date: "Ahora",
-                      messagesCount: 1,
-                      provider: activeLlmProvider.name,
-                    };
-                    setChatSessions((prev) => [newSession, ...prev]);
-                    setActiveSessionId(newId);
-                    handleResetChat();
-                    setActiveNav("nuevo");
-                    showToastMessage("Nueva conversación iniciada");
-                  }}
+                  onClick={() => handleCreateNewSession()}
                   className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center cursor-pointer transition-colors shadow-xs"
                   title="Nueva Conversación"
                   aria-label="Nueva Conversación"
@@ -1572,12 +1980,7 @@ export default function CriteriosApp() {
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => {
-                          setActiveNav(item.id);
-                          if (item.id !== "nuevo") {
-                            showToastMessage(`Módulo: ${item.label}`);
-                          }
-                        }}
+                        onClick={() => setActiveNav(item.id)}
                         title={item.label}
                         aria-label={item.label}
                         style={{
@@ -1599,8 +2002,8 @@ export default function CriteriosApp() {
                 <button
                   type="button"
                   onClick={handleUploadFolder}
-                  title="Cargar documentos"
-                  className="w-10 h-10 rounded-xl border border-dashed border-zinc-300 hover:bg-zinc-100 flex items-center justify-center text-zinc-600 cursor-pointer transition-colors"
+                  title="Cargar documentos o carpeta"
+                  className="w-10 h-10 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center text-indigo-600 cursor-pointer transition-colors shadow-2xs"
                 >
                   <HubIcon icon={FolderPlus} size={17} />
                 </button>
@@ -1788,315 +2191,359 @@ export default function CriteriosApp() {
                 </div>
 
                 {/* Hilo de Mensajes del Chat */}
-                <div className="space-y-4 pt-2">
-                  {chatMessages.map((msg) => {
-                    if (msg.sender === "user") {
-                      return (
-                        <div key={msg.id} className="flex items-start gap-3 justify-end">
-                          <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-zinc-900 text-white px-4 py-3 shadow-sm">
-                            <div className="flex items-center justify-between gap-3 mb-1 text-[11px] text-zinc-400">
-                              <span className="font-semibold text-zinc-300">Carlos (Tú)</span>
-                              <span>{msg.timestamp}</span>
-                            </div>
-                            <p style={{ fontSize: 14.5, lineHeight: 1.55 }} className="text-zinc-100">
-                              {msg.text}
-                            </p>
-                          </div>
-                          <span
-                            style={{ backgroundColor: palette.actionPrimary }}
-                            className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1 shadow-xs"
-                          >
-                            C
-                          </span>
-                        </div>
-                      );
-                    }
-
-                    // Mensaje del Asistente
-                    return (
-                      <div key={msg.id} className="flex items-start gap-3">
-                        <span className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1 shadow-xs">
-                          <HubIcon icon={Sparkles} size={15} />
-                        </span>
-                        <div
-                          style={{
-                            borderColor: palette.borderDefault,
-                            backgroundColor: palette.bgSurface,
-                          }}
-                          className="flex-1 rounded-2xl border p-5 space-y-4 shadow-xs"
+                <div className="space-y-4 pt-2 flex-1">
+                  {chatMessages.length === 0 ? (
+                    <div
+                      style={{
+                        borderColor: palette.borderDefault,
+                        backgroundColor: palette.bgSurface,
+                      }}
+                      className="rounded-2xl border border-dashed p-8 text-center space-y-3 my-4 shadow-2xs"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center mx-auto shadow-2xs">
+                        <HubIcon icon={MessageSquarePlus} size={22} />
+                      </div>
+                      <div className="space-y-1 max-w-md mx-auto">
+                        <h2 style={{ fontSize: 16 }} className="font-bold text-zinc-900">
+                          Nueva conversación lista ({activeSession?.title || "Hilo limpio"})
+                        </h2>
+                        <p style={{ color: palette.textSecondary, fontSize: 13.5 }}>
+                          Este hilo está completamente limpio. Escribe tu consulta en la barra inferior, selecciona uno de los escenarios rápidos arriba o carga nuevos documentos al proyecto.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleUploadFolder}
+                          className="px-3.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50/90 hover:bg-indigo-100 text-indigo-800 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
                         >
-                          {/* Header del Turno Asistente */}
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-start gap-2.5">
-                              <span className="mt-0.5 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                                <HubIcon icon={Check} size={15} />
-                              </span>
-                              <div>
-                                <span style={{ fontSize: 14.5 }} className="block font-semibold text-zinc-900">
-                                  Respuesta generada ({msg.latency || "134 ms"})
+                          <HubIcon icon={FolderPlus} size={14} className="text-indigo-600" />
+                          <span>+ Cargar documentos a este proyecto</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSendMessage("¿Cuál es el resumen ejecutivo de las fuentes activas en este proyecto?")}
+                          className="px-3.5 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                        >
+                          <HubIcon icon={Sparkles} size={14} className="text-blue-600" />
+                          <span>Generar resumen del proyecto</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    chatMessages.map((msg) => {
+                      if (msg.sender === "user") {
+                        return (
+                          <div key={msg.id} className="flex items-start gap-3 justify-end">
+                            <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-zinc-900 text-white px-4 py-3 shadow-sm">
+                              <div className="flex items-center justify-between gap-3 mb-1 text-[11px] text-zinc-400">
+                                <span className="font-semibold text-zinc-300">Carlos (Tú)</span>
+                                <span>{msg.timestamp}</span>
+                              </div>
+                              <p style={{ fontSize: 14.5, lineHeight: 1.55 }} className="text-zinc-100">
+                                {msg.text}
+                              </p>
+                            </div>
+                            <span
+                              style={{ backgroundColor: palette.actionPrimary }}
+                              className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1 shadow-xs"
+                            >
+                              C
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      const isTurnSaved = savedTurnIds.includes(msg.id);
+                      const isTurnCopied = copiedTurnId === msg.id;
+
+                      // Mensaje del Asistente
+                      return (
+                        <div key={msg.id} className="flex items-start gap-3">
+                          <span className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1 shadow-xs">
+                            <HubIcon icon={Sparkles} size={15} />
+                          </span>
+                          <div
+                            style={{
+                              borderColor: palette.borderDefault,
+                              backgroundColor: palette.bgSurface,
+                            }}
+                            className="flex-1 rounded-2xl border p-5 space-y-4 shadow-xs"
+                          >
+                            {/* Header del Turno Asistente */}
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-start gap-2.5">
+                                <span className="mt-0.5 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                  <HubIcon icon={Check} size={15} />
                                 </span>
-                                <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block">
-                                  Con base en {msg.sourcesCount || 3} fuentes verificadas (Umbral &ge; {similarityThreshold.toFixed(2)})
-                                </span>
+                                <div>
+                                  <span style={{ fontSize: 14.5 }} className="block font-semibold text-zinc-900">
+                                    Respuesta generada ({msg.latency || "134 ms"})
+                                  </span>
+                                  <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block">
+                                    Con base en {msg.sourcesCount || 3} fuentes verificadas (Umbral &ge; {similarityThreshold.toFixed(2)})
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleSaveTurn(msg)}
+                                  style={{
+                                    borderColor: isTurnSaved ? palette.accentCitation : palette.borderDefault,
+                                    backgroundColor: isTurnSaved ? palette.accentCitationBg : palette.bgSurface,
+                                    color: isTurnSaved ? palette.accentCitation : palette.textPrimary,
+                                    fontSize: 12.5,
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-90 cursor-pointer shadow-xs transition-all"
+                                >
+                                  <HubIcon icon={ isTurnSaved ? Check : Bookmark } size={14} />
+                                  <span>{isTurnSaved ? "Guardado" : "Guardar"}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShareTurn(msg)}
+                                  style={{
+                                    borderColor: isTurnCopied ? "#10B981" : palette.borderDefault,
+                                    fontSize: 12.5,
+                                    color: isTurnCopied ? "#047857" : palette.textPrimary,
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white font-medium hover:bg-zinc-50 cursor-pointer shadow-xs transition-all"
+                                >
+                                  <HubIcon icon={isTurnCopied ? Check : Share2} size={14} />
+                                  <span>{isTurnCopied ? "¡Copiado!" : "Compartir"}</span>
+                                </button>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSaved((v) => !v);
-                                  showToastMessage(!saved ? "Guardado en análisis" : "Retirado de guardados");
-                                }}
-                                style={{
-                                  borderColor: saved ? palette.accentCitation : palette.borderDefault,
-                                  backgroundColor: saved ? palette.accentCitationBg : palette.bgSurface,
-                                  color: saved ? palette.accentCitation : palette.textPrimary,
-                                  fontSize: 12.5,
-                                }}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border font-medium hover:opacity-90 cursor-pointer shadow-xs"
-                              >
-                                <HubIcon icon={Bookmark} size={14} />
-                                <span>{saved ? "Guardado" : "Guardar"}</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleShare}
-                                style={{ borderColor: palette.borderDefault, fontSize: 12.5, color: palette.textPrimary }}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white font-medium hover:bg-zinc-50 cursor-pointer shadow-xs"
-                              >
-                                <HubIcon icon={Share2} size={14} />
-                                <span>Compartir</span>
-                              </button>
-                            </div>
-                          </div>
 
-                          {/* Texto explicativo con citas interactivas */}
-                          <p style={{ fontSize: 14.5, lineHeight: 1.65, color: palette.textPrimary }}>
-                            {msg.text.includes("[1]") || msg.text.includes("[2]") ? (
-                              <>
-                                El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes{" "}
+                            {/* Texto explicativo con citas interactivas */}
+                            <p style={{ fontSize: 14.5, lineHeight: 1.65, color: palette.textPrimary }}>
+                              {msg.text.includes("[1]") && msg.text.includes("[2]") ? (
+                                <>
+                                  El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes{" "}
+                                  <button
+                                    type="button"
+                                    onClick={() => openInspector(1)}
+                                    style={{
+                                      backgroundColor: palette.accentCitationBg,
+                                      color: palette.accentCitation,
+                                      borderColor: `${palette.accentCitation}40`,
+                                    }}
+                                    className="inline-flex items-center justify-center px-1.5 py-0.2 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
+                                  >
+                                    1
+                                  </button>
+                                  {" "}. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp{" "}
+                                  <button
+                                    type="button"
+                                    onClick={() => openInspector(2)}
+                                    style={{
+                                      backgroundColor: palette.accentCitationBg,
+                                      color: palette.accentCitation,
+                                      borderColor: `${palette.accentCitation}40`,
+                                    }}
+                                    className="inline-flex items-center justify-center px-1.5 py-0.2 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
+                                  >
+                                    2
+                                  </button>
+                                  {" "}.
+                                </>
+                              ) : (
+                                msg.text
+                              )}
+                            </p>
+
+                            {/* Tabla: Comparativo de impacto financiero si aplica */}
+                            {msg.tableData && (
+                              <div>
+                                <h2 style={{ fontSize: 14 }} className="font-bold text-zinc-900 mb-2">
+                                  Comparativo de impacto financiero
+                                </h2>
+                                <div
+                                  style={{ borderColor: palette.borderDefault }}
+                                  className="overflow-x-auto rounded-xl border shadow-xs"
+                                >
+                                  <table className="w-full text-left border-collapse">
+                                    <thead>
+                                      <tr
+                                        style={{ backgroundColor: palette.bgSubtle, color: palette.textSecondary }}
+                                        className="border-b"
+                                      >
+                                        <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-left">
+                                          Concepto
+                                        </th>
+                                        <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-center">
+                                          Sin provisión
+                                        </th>
+                                        <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-center">
+                                          Con provisión
+                                        </th>
+                                        <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-center">
+                                          Variación
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-zinc-200">
+                                      {msg.tableData.map((row, idx) => (
+                                        <tr key={idx}>
+                                          <td style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-medium text-zinc-900">
+                                            {row.concept}
+                                          </td>
+                                          <td style={{ fontSize: 13.5 }} className="py-2 px-3.5 text-center text-zinc-700">
+                                            {row.sin}
+                                          </td>
+                                          <td style={{ fontSize: 13.5 }} className="py-2 px-3.5 text-center text-zinc-700">
+                                            {row.con}
+                                          </td>
+                                          <td
+                                            style={{
+                                              backgroundColor: row.isNegative ? "#FEF2F2" : "#F0FDF4",
+                                              color: row.isNegative ? "#DC2626" : "#16A34A",
+                                              fontSize: 13.5,
+                                            }}
+                                            className="py-2 px-3.5 text-center font-semibold"
+                                          >
+                                            {row.var}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Sección: Fuentes y referencias */}
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <h2 style={{ fontSize: 14 }} className="font-bold text-zinc-900">
+                                  Fuentes y referencias vinculadas ({msg.sourcesCount || 3})
+                                </h2>
+                                <span style={{ fontSize: 12, color: palette.textMuted }}>
+                                  Clic para abrir en el Inspector lateral
+                                </span>
+                              </div>
+                              <div className="space-y-2">
+                                {/* Fuente 1: Ley */}
                                 <button
                                   type="button"
                                   onClick={() => openInspector(1)}
-                                  style={{
-                                    backgroundColor: palette.accentCitationBg,
-                                    color: palette.accentCitation,
-                                    borderColor: `${palette.accentCitation}40`,
-                                  }}
-                                  className="inline-flex items-center justify-center px-1.5 py-0.2 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
+                                  style={{ borderColor: palette.borderDefault }}
+                                  className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
                                 >
-                                  1
+                                  <div className="flex items-start gap-3 min-w-0">
+                                    <span className="w-7 h-7 rounded-md bg-red-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                      1
+                                    </span>
+                                    <div>
+                                      <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
+                                        D.S. N.º 007-2002-TR
+                                      </span>
+                                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
+                                        Artículos 10 y 11 - Jornada y sobretiempo
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="hidden md:block max-w-[340px] text-left">
+                                    <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
+                                      Regulación del trabajo voluntario y recargo obligatorio: 25% las dos primeras horas y 35% las restantes.
+                                    </p>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                                      Pág. 14
+                                    </span>
+                                    <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
+                                      Similitud 0.95
+                                    </span>
+                                    <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
+                                      Ver ley →
+                                    </span>
+                                  </div>
                                 </button>
-                                {" "}. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp{" "}
+
+                                {/* Fuente 2: Excel */}
                                 <button
                                   type="button"
                                   onClick={() => openInspector(2)}
-                                  style={{
-                                    backgroundColor: palette.accentCitationBg,
-                                    color: palette.accentCitation,
-                                    borderColor: `${palette.accentCitation}40`,
-                                  }}
-                                  className="inline-flex items-center justify-center px-1.5 py-0.2 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
+                                  style={{ borderColor: palette.borderDefault }}
+                                  className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
                                 >
-                                  2
+                                  <div className="flex items-start gap-3 min-w-0">
+                                    <span className="w-7 h-7 rounded-md bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                      2
+                                    </span>
+                                    <div>
+                                      <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
+                                        Contingencias_Laborales_Q3.xlsx
+                                      </span>
+                                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
+                                        Hoja: Resumen_Ejecutivo • Celda E14
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="hidden md:block max-w-[340px] text-left">
+                                    <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
+                                      Impacto de provisiones por horas extras en EBITDA proyectado y margen porcentual.
+                                    </p>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                                      Celda E14
+                                    </span>
+                                    <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
+                                      Similitud 0.92
+                                    </span>
+                                    <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
+                                      Ver celda →
+                                    </span>
+                                  </div>
                                 </button>
-                                {" "}.
-                              </>
-                            ) : (
-                              msg.text
-                            )}
-                          </p>
 
-                          {/* Tabla: Comparativo de impacto financiero si aplica */}
-                          {msg.tableData && (
-                            <div>
-                              <h2 style={{ fontSize: 14 }} className="font-bold text-zinc-900 mb-2">
-                                Comparativo de impacto financiero
-                              </h2>
-                              <div
-                                style={{ borderColor: palette.borderDefault }}
-                                className="overflow-x-auto rounded-xl border shadow-xs"
-                              >
-                                <table className="w-full text-left border-collapse">
-                                  <thead>
-                                    <tr
-                                      style={{ backgroundColor: palette.bgSubtle, color: palette.textSecondary }}
-                                      className="border-b"
-                                    >
-                                      <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-left">
-                                        Concepto
-                                      </th>
-                                      <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-center">
-                                        Sin provisión
-                                      </th>
-                                      <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-center">
-                                        Con provisión
-                                      </th>
-                                      <th style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-semibold text-center">
-                                        Variación
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-zinc-200">
-                                    {msg.tableData.map((row, idx) => (
-                                      <tr key={idx}>
-                                        <td style={{ fontSize: 13.5 }} className="py-2 px-3.5 font-medium text-zinc-900">
-                                          {row.concept}
-                                        </td>
-                                        <td style={{ fontSize: 13.5 }} className="py-2 px-3.5 text-center text-zinc-700">
-                                          {row.sin}
-                                        </td>
-                                        <td style={{ fontSize: 13.5 }} className="py-2 px-3.5 text-center text-zinc-700">
-                                          {row.con}
-                                        </td>
-                                        <td
-                                          style={{
-                                            backgroundColor: row.isNegative ? "#FEF2F2" : "#F0FDF4",
-                                            color: row.isNegative ? "#DC2626" : "#16A34A",
-                                            fontSize: 13.5,
-                                          }}
-                                          className="py-2 px-3.5 text-center font-semibold"
-                                        >
-                                          {row.var}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                                {/* Fuente 3: Documento */}
+                                <button
+                                  type="button"
+                                  onClick={() => openInspector(3)}
+                                  style={{ borderColor: palette.borderDefault }}
+                                  className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
+                                >
+                                  <div className="flex items-start gap-3 min-w-0">
+                                    <span className="w-7 h-7 rounded-md bg-slate-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                      3
+                                    </span>
+                                    <div>
+                                      <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
+                                        Manual de Políticas Laborales
+                                      </span>
+                                      <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
+                                        Sección 4.2 - Control de asistencia
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="hidden md:block max-w-[340px] text-left">
+                                    <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
+                                      Procedimiento interno para el registro de horas extras y validación con el área de RR.HH.
+                                    </p>
+                                  </div>
+                                  <div className="text-right shrink-0">
+                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
+                                      p. 28
+                                    </span>
+                                    <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
+                                      v2.1 - 2026
+                                    </span>
+                                    <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
+                                      Ver sección →
+                                    </span>
+                                  </div>
+                                </button>
                               </div>
-                            </div>
-                          )}
-
-                          {/* Sección: Fuentes y referencias */}
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <h2 style={{ fontSize: 14 }} className="font-bold text-zinc-900">
-                                Fuentes y referencias vinculadas ({msg.sourcesCount || 3})
-                              </h2>
-                              <span style={{ fontSize: 12, color: palette.textMuted }}>
-                                Clic para abrir en el Inspector lateral
-                              </span>
-                            </div>
-                            <div className="space-y-2">
-                              {/* Fuente 1: Ley */}
-                              <button
-                                type="button"
-                                onClick={() => openInspector(1)}
-                                style={{ borderColor: palette.borderDefault }}
-                                className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
-                              >
-                                <div className="flex items-start gap-3 min-w-0">
-                                  <span className="w-7 h-7 rounded-md bg-red-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                                    1
-                                  </span>
-                                  <div>
-                                    <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
-                                      D.S. N.º 007-2002-TR
-                                    </span>
-                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
-                                      Artículos 10 y 11 - Jornada y sobretiempo
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="hidden md:block max-w-[340px] text-left">
-                                  <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
-                                    Regulación del trabajo voluntario y recargo obligatorio: 25% las dos primeras horas y 35% las restantes.
-                                  </p>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                                    Pág. 14
-                                  </span>
-                                  <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
-                                    Similitud 0.95
-                                  </span>
-                                  <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
-                                    Ver ley →
-                                  </span>
-                                </div>
-                              </button>
-
-                              {/* Fuente 2: Excel */}
-                              <button
-                                type="button"
-                                onClick={() => openInspector(2)}
-                                style={{ borderColor: palette.borderDefault }}
-                                className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
-                              >
-                                <div className="flex items-start gap-3 min-w-0">
-                                  <span className="w-7 h-7 rounded-md bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                                    2
-                                  </span>
-                                  <div>
-                                    <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
-                                      Contingencias_Laborales_Q3.xlsx
-                                    </span>
-                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
-                                      Hoja: Resumen_Ejecutivo • Celda E14
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="hidden md:block max-w-[340px] text-left">
-                                  <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
-                                    Impacto de provisiones por horas extras en EBITDA proyectado y margen porcentual.
-                                  </p>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                                    Celda E14
-                                  </span>
-                                  <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
-                                    Similitud 0.92
-                                  </span>
-                                  <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
-                                    Ver celda →
-                                  </span>
-                                </div>
-                              </button>
-
-                              {/* Fuente 3: Documento */}
-                              <button
-                                type="button"
-                                onClick={() => openInspector(3)}
-                                style={{ borderColor: palette.borderDefault }}
-                                className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
-                              >
-                                <div className="flex items-start gap-3 min-w-0">
-                                  <span className="w-7 h-7 rounded-md bg-slate-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                                    3
-                                  </span>
-                                  <div>
-                                    <span style={{ color: palette.accentCitation, fontSize: 14 }} className="font-semibold block leading-tight">
-                                      Manual de Políticas Laborales
-                                    </span>
-                                    <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight mt-0.5">
-                                      Sección 4.2 - Control de asistencia
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="hidden md:block max-w-[340px] text-left">
-                                  <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
-                                    Procedimiento interno para el registro de horas extras y validación con el área de RR.HH.
-                                  </p>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                                    p. 28
-                                  </span>
-                                  <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
-                                    v2.1 - 2026
-                                  </span>
-                                  <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-medium block mt-1 hover:underline">
-                                    Ver sección →
-                                  </span>
-                                </div>
-                              </button>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
 
                   {/* Estado de generación interactivo */}
                   {isSearching && (
@@ -2121,12 +2568,12 @@ export default function CriteriosApp() {
                         isRecordingVoice ? "ring-2 ring-red-300" : ""
                       }`}
                     >
-                      {/* Botón Adjuntar Archivo / Imagen */}
+                      {/* Botón Adjuntar Archivo / Imagen (abre selector real o modal de ingesta) */}
                       <button
                         type="button"
-                        onClick={() => showToastMessage("Adjuntar documento, captura o planilla Excel para análisis")}
+                        onClick={() => fileInputRef.current?.click()}
                         className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 cursor-pointer transition-colors"
-                        title="Adjuntar archivo o imagen"
+                        title="Adjuntar e indexar documento o planilla Excel"
                         aria-label="Adjuntar archivo o imagen"
                       >
                         <HubIcon icon={Paperclip} size={16} />
@@ -2139,10 +2586,7 @@ export default function CriteriosApp() {
                           const nextState = !isRecordingVoice;
                           setIsRecordingVoice(nextState);
                           if (nextState) {
-                            showToastMessage("Escuchando dictado por voz... (habla para consultar)");
                             setQuery("¿Cuál es la provisión estimada en la matriz Excel del Q3?");
-                          } else {
-                            showToastMessage("Dictado por voz finalizado");
                           }
                         }}
                         className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
@@ -2234,7 +2678,6 @@ export default function CriteriosApp() {
                                   onClick={() => {
                                     setChatMode(modeItem.id as "fast" | "standard" | "deep");
                                     setShowModeDropdown(false);
-                                    showToastMessage(`Modo cambiado a: ${modeItem.label}`);
                                   }}
                                   className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
                                     isSelected
@@ -2319,27 +2762,12 @@ export default function CriteriosApp() {
                       Sesiones de Conversación &amp; Chats
                     </h1>
                     <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
-                      Historial de hilos interactivos con el motor RAG. Cada sesión mantiene su contexto documental.
+                      Historial de hilos interactivos con el motor RAG. Cada sesión mantiene su propio contexto documental.
                     </p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => {
-                      const newId = `session-${Date.now()}`;
-                      const newSession: ChatSession = {
-                        id: newId,
-                        title: `Conversación ${chatSessions.length + 1}`,
-                        preview: "Conversación abierta, lista para recibir consultas al motor...",
-                        date: "Hoy",
-                        messagesCount: 1,
-                        provider: activeLlmProvider.name,
-                      };
-                      setChatSessions((prev) => [newSession, ...prev]);
-                      setActiveSessionId(newId);
-                      handleResetChat();
-                      setActiveNav("nuevo");
-                      showToastMessage("Nueva conversación creada");
-                    }}
+                    onClick={() => handleCreateNewSession()}
                     style={{ backgroundColor: palette.actionPrimary }}
                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all self-start sm:self-auto"
                   >
@@ -2378,7 +2806,7 @@ export default function CriteriosApp() {
                               <span>{session.date}</span>
                             </span>
                             <span>•</span>
-                            <span className="font-medium text-zinc-600">{session.messagesCount} mensajes</span>
+                            <span className="font-medium text-zinc-600">{session.turns.length} mensajes</span>
                             <span>•</span>
                             <span className="font-mono text-blue-600 font-semibold">{session.provider}</span>
                           </div>
@@ -2388,16 +2816,12 @@ export default function CriteriosApp() {
                           <button
                             type="button"
                             onClick={() => {
-                              if (chatSessions.length <= 1) {
-                                showToastMessage("Debe mantenerse al menos una sesión");
-                                return;
-                              }
-                              setChatSessions((prev) => prev.filter((s) => s.id !== session.id));
+                              if (chatSessions.length <= 1) return;
+                              const remaining = chatSessions.filter((s) => s.id !== session.id);
+                              setChatSessions(remaining);
                               if (activeSessionId === session.id) {
-                                const remaining = chatSessions.filter((s) => s.id !== session.id);
                                 setActiveSessionId(remaining[0]?.id || "");
                               }
-                              showToastMessage(`Sesión eliminada: ${session.title}`);
                             }}
                             title="Eliminar sesión"
                             className="p-1.5 rounded-lg border border-zinc-200 text-zinc-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all cursor-pointer"
@@ -2409,7 +2833,6 @@ export default function CriteriosApp() {
                             onClick={() => {
                               setActiveSessionId(session.id);
                               setActiveNav("nuevo");
-                              showToastMessage(`Cargada: ${session.title}`);
                             }}
                             style={{ backgroundColor: palette.actionPrimary }}
                             className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-all shadow-xs"
@@ -2425,808 +2848,782 @@ export default function CriteriosApp() {
               </div>
             )}
 
-            {/* ===== MÓDULO 2: REPOSITORIO DE FUENTES ===== */}
-          {activeNav === "fuentes" && (
-            <div className="px-6 py-6 max-w-[900px] w-full mx-auto space-y-5 flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
-                    Repositorio de Fuentes del Proyecto
-                  </h1>
-                  <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
-                    Archivos, leyes y matrices indexadas para la recuperación vectorial del motor RAG.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleUploadFolder}
-                  style={{ backgroundColor: palette.actionPrimary }}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white font-medium text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all self-start sm:self-auto"
-                >
-                  <HubIcon icon={FolderPlus} size={15} />
-                  <span>+ Cargar documentos</span>
-                </button>
-              </div>
-
-              {/* Métricas del Repositorio */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div
-                  style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                  className="p-3.5 rounded-xl border shadow-xs"
-                >
-                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
-                    Fuentes Activas
-                  </span>
-                  <span className="text-2xl font-bold text-zinc-900 block mt-1">3 archivos</span>
-                  <span className="text-xs text-zinc-500 mt-0.5 block">100% vectorizadas y auditadas</span>
-                </div>
-                <div
-                  style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                  className="p-3.5 rounded-xl border shadow-xs"
-                >
-                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
-                    Total Fragmentos
-                  </span>
-                  <span className="text-2xl font-bold text-blue-600 block mt-1">26,920 chunks</span>
-                  <span className="text-xs text-zinc-500 mt-0.5 block">text-embedding-3-small (1536d)</span>
-                </div>
-                <div
-                  style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                  className="p-3.5 rounded-xl border shadow-xs"
-                >
-                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
-                    Estado de Sincronización
-                  </span>
-                  <span className="text-2xl font-bold text-emerald-600 flex items-center gap-1.5 mt-1">
-                    <HubIcon icon={CheckCircle2} size={20} />
-                    <span>Al día</span>
-                  </span>
-                  <span className="text-xs text-zinc-500 mt-0.5 block">Último refresh hace 12 min</span>
-                </div>
-              </div>
-
-              {/* Filtros rápidos de fuentes */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                <div className="flex items-center gap-1.5 overflow-x-auto">
-                  {[
-                    { id: "all", label: "Todas las fuentes (3)" },
-                    { id: "legal", label: "Normativa Legal (1)" },
-                    { id: "excel", label: "Matrices Financieras (1)" },
-                    { id: "doc", label: "Manuales y Políticas (1)" },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setSourcesFilterType(tab.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors whitespace-nowrap ${
-                        sourcesFilterType === tab.id
-                          ? "bg-zinc-900 text-white font-semibold"
-                          : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200/80"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="relative w-full sm:w-60">
-                  <input
-                    type="text"
-                    value={sourcesSearch}
-                    onChange={(e) => setSourcesSearch(e.target.value)}
-                    placeholder="Buscar archivo..."
-                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-zinc-200 bg-white focus:outline-none focus:ring-1 focus:ring-zinc-400"
-                  />
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
-                    <HubIcon icon={Search} size={14} />
-                  </span>
-                </div>
-              </div>
-
-              {/* Lista detallada de fuentes */}
-              <div className="space-y-3">
-                {/* Fuente 1: Ley */}
-                {(sourcesFilterType === "all" || sourcesFilterType === "legal") && (
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                        <HubIcon icon={Scale} size={20} />
+            {/* ===== MÓDULO 2: REPOSITORIO DE FUENTES DINÁMICO ===== */}
+            {activeNav === "fuentes" && (
+              <div className="px-6 py-6 max-w-[900px] w-full mx-auto space-y-5 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                      Repositorio de Fuentes del Proyecto
+                    </h1>
+                    <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
+                      Archivos, leyes y matrices indexadas para la recuperación vectorial del proyecto{" "}
+                      <span className="font-semibold text-zinc-800">
+                        {projects.find((p) => p.id === activeProjectId)?.name}
                       </span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-zinc-900 text-sm">D.S. N.º 007-2002-TR</span>
-                          <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-red-50 text-red-700 font-semibold border border-red-200">
-                            Norma Oficial
-                          </span>
-                        </div>
-                        <p className="text-xs text-zinc-500 mt-0.5">
-                          Texto Único Ordenado de la Ley de Jornada de Trabajo, Horario y Trabajo en Sobretiempo.
-                        </p>
-                        <div className="flex items-center gap-3 text-xs text-zinc-400 mt-2">
-                          <span>86 páginas</span>
-                          <span>•</span>
-                          <span>8,320 fragmentos vectorizados</span>
-                          <span>•</span>
-                          <span className="text-emerald-600 font-medium">Indexado</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => openInspector(1)}
-                        className="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-xs font-semibold text-zinc-700 cursor-pointer shadow-xs transition-colors"
-                      >
-                        Inspeccionar en Visor
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => showToastMessage("Re-indexando D.S. N.º 007-2002-TR...")}
-                        className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
-                        title="Re-indexar fragmentos"
-                      >
-                        <HubIcon icon={RefreshCw} size={14} />
-                      </button>
-                    </div>
+                      .
+                    </p>
                   </div>
-                )}
-
-                {/* Fuente 2: Excel */}
-                {(sourcesFilterType === "all" || sourcesFilterType === "excel") && (
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                        <HubIcon icon={FileSpreadsheet} size={20} />
-                      </span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-zinc-900 text-sm">Modelo Financiero Q3 2026.xlsx</span>
-                          <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                            Matriz Excel
-                          </span>
-                        </div>
-                        <p className="text-xs text-zinc-500 mt-0.5">
-                          Proyecciones de ingresos, costos de nómina, provisiones contingentes y cálculo de EBITDA.
-                        </p>
-                        <div className="flex items-center gap-3 text-xs text-zinc-400 mt-2">
-                          <span>14 hojas / 1,420 celdas</span>
-                          <span>•</span>
-                          <span>6,120 fragmentos vectorizados</span>
-                          <span>•</span>
-                          <span className="text-emerald-600 font-medium">Indexado</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => openInspector(2)}
-                        className="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-xs font-semibold text-zinc-700 cursor-pointer shadow-xs transition-colors"
-                      >
-                        Inspeccionar en Visor
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleExcelExport}
-                        className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
-                        title="Descargar matriz CSV"
-                      >
-                        <HubIcon icon={Download} size={14} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Fuente 3: Documento RRHH */}
-                {(sourcesFilterType === "all" || sourcesFilterType === "doc") && (
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                        <HubIcon icon={FileText} size={20} />
-                      </span>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-zinc-900 text-sm">Manual de Políticas Laborales v2.1.pdf</span>
-                          <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-700 font-semibold border border-slate-200">
-                            Manual Interno
-                          </span>
-                        </div>
-                        <p className="text-xs text-zinc-500 mt-0.5">
-                          Normas internas de registro biométrico, control de horas extras y autorizaciones de gerencia.
-                        </p>
-                        <div className="flex items-center gap-3 text-xs text-zinc-400 mt-2">
-                          <span>48 páginas</span>
-                          <span>•</span>
-                          <span>12,480 fragmentos vectorizados</span>
-                          <span>•</span>
-                          <span className="text-emerald-600 font-medium">Indexado</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => openInspector(3)}
-                        className="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-xs font-semibold text-zinc-700 cursor-pointer shadow-xs transition-colors"
-                      >
-                        Inspeccionar en Visor
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => showToastMessage("Re-indexando Manual de Políticas Laborales...")}
-                        className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
-                        title="Re-indexar fragmentos"
-                      >
-                        <HubIcon icon={RefreshCw} size={14} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ===== MÓDULO 3: HISTORIAL DE CONSULTAS ===== */}
-          {activeNav === "historial" && (
-            <div className="px-6 py-6 max-w-[900px] w-full mx-auto space-y-5 flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
-                    Historial de Consultas y Dictámenes
-                  </h1>
-                  <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
-                    Registro histórico de análisis cruzados, dictámenes generados y fuentes validadas.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => showToastMessage("Historial de consultas exportado")}
-                  className="px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 shadow-xs cursor-pointer self-start sm:self-auto"
-                >
-                  Exportar registro
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  {
-                    id: "h1",
-                    question: "¿Cuál es la contingencia laboral por horas extras no registradas y su impacto en el EBITDA del Q3?",
-                    scenario: "auditoria",
-                    tab: 2,
-                    date: "Hoy, 13:45",
-                    latency: "134 ms",
-                    sourcesCount: 3,
-                    similarity: "0.95",
-                    summary: "Contingencia de USD 48,500 reduciendo el margen EBITDA en 2.3 pp por omisión en sistema biométrico.",
-                  },
-                  {
-                    id: "h2",
-                    question: "¿Qué establece el Art. 9 del D.S. N.º 007-2002-TR sobre la inversión de la carga de la prueba en sobretiempo?",
-                    scenario: "normativa",
-                    tab: 1,
-                    date: "Ayer, 17:15",
-                    latency: "98 ms",
-                    sourcesCount: 1,
-                    similarity: "0.95",
-                    summary: "La falta de registro biométrico oficial invierte automáticamente la carga de la prueba en favor del trabajador.",
-                  },
-                  {
-                    id: "h3",
-                    question: "¿Cuál es el EBITDA proyectado en el Modelo Financiero Q3 2026 sin la provisión por horas extras?",
-                    scenario: "financiero",
-                    tab: 2,
-                    date: "14 Oct 2026, 11:20",
-                    latency: "145 ms",
-                    sourcesCount: 2,
-                    similarity: "0.92",
-                    summary: "El EBITDA sin provisión es USD 2,150,000 (18.4% margen), descendiendo a USD 2,101,500 con ajuste.",
-                  },
-                  {
-                    id: "h4",
-                    question: "¿Qué nivel de autorización exige la Sección 4.2 del Manual de Políticas Laborales para horas extras?",
-                    scenario: "procedimiento",
-                    tab: 3,
-                    date: "12 Oct 2026, 16:04",
-                    latency: "112 ms",
-                    sourcesCount: 1,
-                    similarity: "0.88",
-                    summary: "Toda provisión contingente mayor a USD 25,000 requiere dictamen vinculante del comité de auditoría.",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.id}
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs hover:border-zinc-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                  >
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <span className="font-semibold text-zinc-900 text-sm block">{item.question}</span>
-                      <p className="text-xs text-zinc-600 line-clamp-2">{item.summary}</p>
-                      <div className="flex items-center gap-3 text-[11.5px] text-zinc-400 pt-1 flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <HubIcon icon={Clock} size={12} />
-                          <span>{item.date}</span>
-                        </span>
-                        <span>•</span>
-                        <span>{item.sourcesCount} fuentes cruzadas</span>
-                        <span>•</span>
-                        <span className="font-mono text-zinc-500">Coseno: {item.similarity}</span>
-                        <span>•</span>
-                        <span className="text-emerald-600 font-mono">{item.latency}</span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQuery(item.question);
-                        setActiveScenario(item.scenario);
-                        setInspectorTab(item.tab as InspectorTab);
-                        setInspectorOpen(true);
-                        setActiveNav("nuevo");
-                        showToastMessage("Consulta cargada en el Asistente");
-                      }}
-                      style={{ backgroundColor: palette.bgSubtle, color: palette.accentCitation }}
-                      className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 cursor-pointer hover:opacity-80 transition-all"
-                    >
-                      <span>Cargar en Asistente</span>
-                      <HubIcon icon={ArrowRight} size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ===== MÓDULO UNIFICADO: CONFIGURACIÓN & PROVEEDORES IA (7) ===== */}
-          {activeNav === "config" && (
-            <div className="px-4 sm:px-6 py-6 max-w-[960px] w-full mx-auto space-y-5 flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
-                    Configuración del Sistema RAG
-                  </h1>
-                  <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
-                    Gestión de proveedores de Inteligencia Artificial, modelos fundacionales y parámetros del motor vectorial.
-                  </p>
-                </div>
-
-                {/* Sub-Tabs de Configuración */}
-                <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl self-start sm:self-auto">
                   <button
                     type="button"
-                    onClick={() => setConfigTab("providers")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
-                      configTab === "providers"
-                        ? "bg-white text-zinc-900 shadow-xs"
-                        : "text-zinc-600 hover:text-zinc-900"
-                    }`}
+                    onClick={handleUploadFolder}
+                    style={{ backgroundColor: palette.actionPrimary }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-white font-semibold text-xs shadow-xs hover:opacity-90 cursor-pointer transition-all self-start sm:self-auto"
                   >
-                    <HubIcon icon={Cpu} size={14} />
-                    <span>Proveedores de IA (7)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfigTab("engine")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
-                      configTab === "engine"
-                        ? "bg-white text-zinc-900 shadow-xs"
-                        : "text-zinc-600 hover:text-zinc-900"
-                    }`}
-                  >
-                    <HubIcon icon={Settings} size={14} />
-                    <span>Parámetros del Motor</span>
+                    <HubIcon icon={FolderPlus} size={15} />
+                    <span>+ Cargar documentos / carpeta</span>
                   </button>
                 </div>
-              </div>
 
-              {/* Sub-Tab 1: 7 Proveedores de IA */}
-              {configTab === "providers" && (
-                <div className="space-y-5 animate-in fade-in">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                      Matriz de Orquestación Multi-Modelo
+                {/* Métricas Dinámicas del Repositorio */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div
+                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                    className="p-3.5 rounded-xl border shadow-xs"
+                  >
+                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
+                      Fuentes Activas
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        aiProviders.forEach((p) => handlePingTest(p.id));
-                        showToastMessage("Comprobando latencia de todos los proveedores...");
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-semibold shadow-xs cursor-pointer transition-all"
-                    >
-                      <HubIcon icon={Zap} size={13} />
-                      <span>Test de Latencia Global</span>
-                    </button>
+                    <span className="text-2xl font-bold text-zinc-900 block mt-1">
+                      {projectSources.length} archivos
+                    </span>
+                    <span className="text-xs text-zinc-500 mt-0.5 block">100% vectorizadas y auditadas</span>
                   </div>
-
-                  {/* 4 KPIs de Infraestructura IA */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div
-                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                      className="p-3.5 rounded-xl border shadow-xs"
-                    >
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                        LLM Primario
-                      </span>
-                      <span className="text-base font-bold text-zinc-900 block mt-1 truncate">
-                        {aiProviders.find((p) => p.id === activeLlmProviderId)?.name}
-                      </span>
-                      <span className="text-[11.5px] text-blue-600 font-mono mt-0.5 block truncate">
-                        {aiProviders.find((p) => p.id === activeLlmProviderId)?.selectedModel}
-                      </span>
-                    </div>
-                    <div
-                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                      className="p-3.5 rounded-xl border shadow-xs"
-                    >
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                        Reranker de Precisión
-                      </span>
-                      <span className="text-base font-bold text-purple-700 block mt-1 truncate">
-                        {aiProviders.find((p) => p.id === activeRerankerProviderId)?.name}
-                      </span>
-                      <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
-                        rerank-v3.5 (Cross-Encoder)
-                      </span>
-                    </div>
-                    <div
-                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                      className="p-3.5 rounded-xl border shadow-xs"
-                    >
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                        Embeddings Vectoriales
-                      </span>
-                      <span className="text-base font-bold text-emerald-700 block mt-1 truncate">
-                        {aiProviders.find((p) => p.id === activeEmbeddingProviderId)?.name}
-                      </span>
-                      <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
-                        1536 dimensiones (Coseno)
-                      </span>
-                    </div>
-                    <div
-                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                      className="p-3.5 rounded-xl border shadow-xs"
-                    >
-                      <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                        Latencia Media
-                      </span>
-                      <span className="text-base font-bold text-zinc-900 block mt-1 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                        <span>~128 ms</span>
-                      </span>
-                      <span className="text-[11.5px] text-zinc-500 mt-0.5 block">
-                        Groq LPU a 42 ms récord
-                      </span>
-                    </div>
+                  <div
+                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                    className="p-3.5 rounded-xl border shadow-xs"
+                  >
+                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
+                      Total Fragmentos
+                    </span>
+                    <span className="text-2xl font-bold text-blue-600 block mt-1">
+                      {totalChunksCount.toLocaleString()} chunks
+                    </span>
+                    <span className="text-xs text-zinc-500 mt-0.5 block">{embeddingModel}</span>
                   </div>
+                  <div
+                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                    className="p-3.5 rounded-xl border shadow-xs"
+                  >
+                    <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
+                      Estado de Sincronización
+                    </span>
+                    <span className="text-2xl font-bold text-emerald-600 flex items-center gap-1.5 mt-1">
+                      <HubIcon icon={CheckCircle2} size={20} />
+                      <span>Al día</span>
+                    </span>
+                    <span className="text-xs text-zinc-500 mt-0.5 block">Sincronizado con pgvector</span>
+                  </div>
+                </div>
 
-                  {/* Tarjetas de los 7 Proveedores */}
-                  <div className="space-y-3">
-                    {aiProviders.map((prov) => {
-                      const isPrimaryLlm = prov.id === activeLlmProviderId;
-                      const isReranker = prov.id === activeRerankerProviderId;
-                      const isEmbedding = prov.id === activeEmbeddingProviderId;
+                {/* Filtros rápidos de fuentes */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-1.5 overflow-x-auto">
+                    {[
+                      { id: "all", label: `Todas las fuentes (${projectSources.length})` },
+                      { id: "legal", label: `Normativa Legal (${legalSourcesCount})` },
+                      { id: "excel", label: `Matrices Financieras (${excelSourcesCount})` },
+                      { id: "doc", label: `Manuales y Documentos (${docSourcesCount})` },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setSourcesFilterType(tab.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors whitespace-nowrap ${
+                          sourcesFilterType === tab.id
+                            ? "bg-zinc-900 text-white font-semibold"
+                            : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200/80"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="relative w-full sm:w-60">
+                    <input
+                      type="text"
+                      value={sourcesSearch}
+                      onChange={(e) => setSourcesSearch(e.target.value)}
+                      placeholder="Buscar archivo..."
+                      className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-zinc-200 bg-white focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                    />
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none">
+                      <HubIcon icon={Search} size={14} />
+                    </span>
+                  </div>
+                </div>
+
+                {/* Lista detallada dinámica de fuentes */}
+                <div className="space-y-3">
+                  {projectSources
+                    .filter((src) => sourcesFilterType === "all" || src.type === sourcesFilterType)
+                    .filter(
+                      (src) =>
+                        !sourcesSearch.trim() ||
+                        src.title.toLowerCase().includes(sourcesSearch.toLowerCase()) ||
+                        src.description.toLowerCase().includes(sourcesSearch.toLowerCase())
+                    )
+                    .map((src) => {
+                      const isReindexing = reindexingSourceId === src.id;
+                      const iconComp =
+                        src.type === "legal" ? Scale : src.type === "excel" ? FileSpreadsheet : FileText;
+                      const iconColors =
+                        src.type === "legal"
+                          ? "bg-red-100 text-red-600"
+                          : src.type === "excel"
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-slate-100 text-slate-600";
+                      const badgeColors =
+                        src.type === "legal"
+                          ? "bg-red-50 text-red-700 border-red-200"
+                          : src.type === "excel"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : "bg-slate-100 text-slate-700 border-slate-200";
 
                       return (
                         <div
-                          key={prov.id}
-                          style={{
-                            backgroundColor: palette.bgSurface,
-                            borderColor: isPrimaryLlm ? palette.accentCitation : palette.borderDefault,
-                            boxShadow: isPrimaryLlm ? `0 0 0 1px ${palette.accentCitation}40` : "none",
-                          }}
-                          className="p-4 rounded-xl border shadow-xs transition-all space-y-3"
+                          key={src.id}
+                          style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                          className="p-4 rounded-xl border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-start gap-3">
-                              <span
-                                style={{ backgroundColor: `${prov.logoColor}15`, color: prov.logoColor }}
-                                className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border border-zinc-200/80"
-                              >
-                                <HubIcon icon={Cpu} size={20} />
-                              </span>
-                              <div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-bold text-zinc-900 text-sm">{prov.name}</span>
-                                  <span className="text-xs text-zinc-400 font-mono">({prov.company})</span>
-                                  {isPrimaryLlm && (
-                                    <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-blue-100 text-blue-800 font-bold border border-blue-300 flex items-center gap-1">
-                                      <HubIcon icon={Sparkles} size={11} />
-                                      <span>LLM Primario</span>
-                                    </span>
-                                  )}
-                                  {isReranker && (
-                                    <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-purple-100 text-purple-800 font-bold border border-purple-300 flex items-center gap-1">
-                                      <HubIcon icon={Zap} size={11} />
-                                      <span>Reranker</span>
-                                    </span>
-                                  )}
-                                  {isEmbedding && (
-                                    <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1">
-                                      <HubIcon icon={CheckCircle2} size={11} />
-                                      <span>Embeddings</span>
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-xs text-zinc-500 mt-0.5">{prov.description}</p>
-                              </div>
-                            </div>
-
-                            {/* Ping en vivo */}
-                            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                              <div className="text-right">
-                                <span className="font-mono text-xs font-bold text-zinc-900 block">
-                                  {prov.latency} ms
-                                </span>
-                                <span className="text-[10.5px] text-emerald-600 block flex items-center gap-1 justify-end">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                                  <span>En línea</span>
+                          <div className="flex items-start gap-3">
+                            <span
+                              className={`w-10 h-10 rounded-lg ${iconColors} flex items-center justify-center shrink-0`}
+                            >
+                              <HubIcon icon={iconComp} size={20} />
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-zinc-900 text-sm">{src.title}</span>
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[11px] font-mono font-semibold border ${badgeColors}`}
+                                >
+                                  {src.badge}
                                 </span>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => handlePingTest(prov.id)}
-                                className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
-                                title="Probar latencia"
-                              >
-                                <HubIcon icon={RefreshCw} size={14} />
-                              </button>
+                              <p className="text-xs text-zinc-500 mt-0.5">{src.description}</p>
+                              <div className="flex items-center gap-3 text-xs text-zinc-400 mt-2 flex-wrap">
+                                <span>{src.metaPages}</span>
+                                <span>•</span>
+                                <span>{src.chunksCount.toLocaleString()} fragmentos vectorizados</span>
+                                <span>•</span>
+                                <span className="text-emerald-600 font-semibold">
+                                  {isReindexing ? "Re-indexando..." : src.statusText}
+                                </span>
+                              </div>
                             </div>
                           </div>
-
-                          {/* Controles de Configuración del Proveedor */}
-                          <div className="pt-2 border-t border-zinc-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                            <div>
-                              <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                                Modelo Activo
-                              </label>
-                              <select
-                                value={prov.selectedModel}
-                                onChange={(e) => handleModelChange(prov.id, e.target.value)}
-                                className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => openInspector(src.inspectorTab)}
+                              className="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-xs font-semibold text-zinc-700 cursor-pointer shadow-xs transition-colors"
+                            >
+                              Inspeccionar en Visor
+                            </button>
+                            {src.type === "excel" && (
+                              <button
+                                type="button"
+                                onClick={handleExcelExport}
+                                className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
+                                title="Descargar matriz CSV"
                               >
-                                {prov.models.map((m) => (
-                                  <option key={m} value={m}>
-                                    {m}
-                                  </option>
-                                ))}
-                              </select>
-                              <span className="text-[10px] text-zinc-400 mt-0.5 block">
-                                Ventana: {prov.contextWindow}
-                              </span>
-                            </div>
-
-                            <div>
-                              <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                                Credenciales (API Key)
-                              </label>
-                              <div className="relative flex items-center">
-                                <span className="absolute left-2.5 text-zinc-400">
-                                  <HubIcon icon={Key} size={12} />
-                                </span>
-                                <input
-                                  type="password"
-                                  readOnly
-                                  value={prov.apiKeyMask}
-                                  className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 font-mono text-zinc-600 text-[11px]"
-                                />
-                              </div>
-                              <span className="text-[10px] text-emerald-600 mt-0.5 block flex items-center gap-1">
-                                <HubIcon icon={ShieldCheck} size={11} />
-                                <span>Cifrado AES-256 local</span>
-                              </span>
-                            </div>
-
-                            <div className="flex flex-col justify-end gap-1.5">
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => handleSwitchPrimaryLlm(prov.id)}
-                                  disabled={isPrimaryLlm}
-                                  className={`flex-1 py-1.5 px-2 rounded-lg font-semibold text-[11.5px] cursor-pointer transition-all ${
-                                    isPrimaryLlm
-                                      ? "bg-blue-600 text-white cursor-default"
-                                      : "border border-zinc-200 hover:bg-zinc-100 text-zinc-700"
-                                  }`}
-                                >
-                                  {isPrimaryLlm ? "LLM Primario Activo" : "Hacer Primario"}
-                                </button>
-                                {(prov.id === "cohere" || prov.id === "openai") && (
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      prov.id === "cohere"
-                                        ? handleSwitchReranker("cohere")
-                                        : handleSwitchEmbedding("openai")
-                                    }
-                                    className="py-1.5 px-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-600 text-[11px] font-medium cursor-pointer"
-                                  >
-                                    {prov.id === "cohere" ? "Reranker" : "Embeddings"}
-                                  </button>
-                                )}
-                              </div>
-                            </div>
+                                <HubIcon icon={Download} size={14} />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleReindexSource(src.id)}
+                              className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
+                              title="Re-indexar fragmentos"
+                            >
+                              <HubIcon
+                                icon={RefreshCw}
+                                size={14}
+                                className={isReindexing ? "animate-spin text-blue-600" : ""}
+                              />
+                            </button>
+                            {projectSources.length > 3 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setProjectSources((prev) => prev.filter((item) => item.id !== src.id))
+                                }
+                                className="p-1.5 rounded-lg border border-zinc-200 hover:bg-red-50 hover:text-red-600 text-zinc-400 cursor-pointer transition-colors"
+                                title="Eliminar fuente"
+                              >
+                                <HubIcon icon={Trash2} size={14} />
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
                     })}
-                  </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Sub-Tab 2: Parámetros del Motor RAG */}
-              {configTab === "engine" && (
-                <div className="space-y-4 animate-in fade-in">
-                  {/* 1. Modelo de Embedding */}
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs space-y-2"
+            {/* ===== MÓDULO 3: HISTORIAL DE CONSULTAS DINÁMICO ===== */}
+            {activeNav === "historial" && (
+              <div className="px-6 py-6 max-w-[900px] w-full mx-auto space-y-5 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                      Historial de Consultas y Dictámenes
+                    </h1>
+                    <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
+                      Registro histórico de análisis cruzados, respuestas guardadas y fuentes validadas.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleExportHistoryCsv}
+                    className={`px-3.5 py-2 rounded-lg border text-xs font-semibold shadow-xs cursor-pointer self-start sm:self-auto inline-flex items-center gap-1.5 transition-all ${
+                      historyExported
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                        : "border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700"
+                    }`}
                   >
-                    <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                      Modelo de Embeddings Vectoriales
-                    </label>
-                    <select
-                      value={embeddingModel}
-                      onChange={(e) => setEmbeddingModel(e.target.value)}
-                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400 cursor-pointer"
+                    <HubIcon icon={historyExported ? Check : Download} size={14} />
+                    <span>{historyExported ? "¡CSV Descargado!" : "Exportar registro (.CSV)"}</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {historyItems.map((item) => (
+                    <div
+                      key={item.id}
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs hover:border-zinc-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                     >
-                      <option value="text-embedding-3-small">OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)</option>
-                      <option value="text-embedding-3-large">OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)</option>
-                      <option value="cohere-multilingual">Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)</option>
-                    </select>
-                    <p className="text-[11.5px] text-zinc-400">
-                      Determina la densidad del espacio latente y la precisión en búsquedas semánticas multilingües.
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <span className="font-semibold text-zinc-900 text-sm block">{item.question}</span>
+                        <p className="text-xs text-zinc-600 line-clamp-2">{item.summary}</p>
+                        <div className="flex items-center gap-3 text-[11.5px] text-zinc-400 pt-1 flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <HubIcon icon={Clock} size={12} />
+                            <span>{item.date}</span>
+                          </span>
+                          <span>•</span>
+                          <span>{item.sourcesCount} fuentes cruzadas</span>
+                          <span>•</span>
+                          <span className="font-mono text-zinc-500">Coseno: {item.similarity}</span>
+                          <span>•</span>
+                          <span className="text-emerald-600 font-mono">{item.latency}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                        {historyItems.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setHistoryItems((prev) => prev.filter((h) => h.id !== item.id))
+                            }
+                            className="p-2 rounded-lg border border-zinc-200 text-zinc-400 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+                            title="Eliminar del historial"
+                          >
+                            <HubIcon icon={Trash2} size={13} />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveScenario(item.scenario);
+                            setInspectorTab(item.tab);
+                            setInspectorOpen(true);
+                            setActiveNav("nuevo");
+                            handleSendMessage(item.question);
+                          }}
+                          style={{ backgroundColor: palette.bgSubtle, color: palette.accentCitation }}
+                          className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 cursor-pointer hover:opacity-80 transition-all"
+                        >
+                          <span>Ejecutar en Asistente</span>
+                          <HubIcon icon={ArrowRight} size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ===== MÓDULO UNIFICADO: CONFIGURACIÓN & PROVEEDORES IA (7) ===== */}
+            {activeNav === "config" && (
+              <div className="px-4 sm:px-6 py-6 max-w-[960px] w-full mx-auto space-y-5 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                      Configuración del Sistema RAG
+                    </h1>
+                    <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
+                      Gestión de proveedores de Inteligencia Artificial, modelos fundacionales y parámetros del motor vectorial.
                     </p>
                   </div>
 
-                  {/* 2. Corte de Similitud Coseno */}
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs space-y-2"
-                  >
+                  {/* Sub-Tabs de Configuración */}
+                  <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl self-start sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setConfigTab("providers")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                        configTab === "providers"
+                          ? "bg-white text-zinc-900 shadow-xs"
+                          : "text-zinc-600 hover:text-zinc-900"
+                      }`}
+                    >
+                      <HubIcon icon={Cpu} size={14} />
+                      <span>Proveedores de IA (7)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfigTab("engine")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                        configTab === "engine"
+                          ? "bg-white text-zinc-900 shadow-xs"
+                          : "text-zinc-600 hover:text-zinc-900"
+                      }`}
+                    >
+                      <HubIcon icon={Settings} size={14} />
+                      <span>Parámetros del Motor</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sub-Tab 1: 7 Proveedores de IA */}
+                {configTab === "providers" && (
+                  <div className="space-y-5 animate-in fade-in">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                        Umbral Mínimo de Similitud Coseno
-                      </label>
-                      <span className="font-mono text-sm font-bold text-blue-600">
-                        ≥ {similarityThreshold.toFixed(2)}
+                      <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                        Matriz de Orquestación Multi-Modelo
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          aiProviders.forEach((p) => handlePingTest(p.id));
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-semibold shadow-xs cursor-pointer transition-all"
+                      >
+                        <HubIcon icon={Zap} size={13} />
+                        <span>Test de Latencia Global</span>
+                      </button>
                     </div>
-                    <input
-                      type="range"
-                      min="0.60"
-                      max="0.95"
-                      step="0.05"
-                      value={similarityThreshold}
-                      onChange={(e) => setSimilarityThreshold(parseFloat(e.target.value))}
-                      className="w-full accent-blue-600 cursor-pointer"
-                    />
-                    <div className="flex justify-between text-xs text-zinc-400">
-                      <span>0.60 (Mayor cobertura de fuentes)</span>
-                      <span>0.75 (Balanceado recomendado)</span>
-                      <span>0.95 (Solo coincidencias exactas)</span>
+
+                    {/* 4 KPIs de Infraestructura IA */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div
+                        style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                        className="p-3.5 rounded-xl border shadow-xs"
+                      >
+                        <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                          LLM Primario
+                        </span>
+                        <span className="text-base font-bold text-zinc-900 block mt-1 truncate">
+                          {aiProviders.find((p) => p.id === activeLlmProviderId)?.name}
+                        </span>
+                        <span className="text-[11.5px] text-blue-600 font-mono mt-0.5 block truncate">
+                          {aiProviders.find((p) => p.id === activeLlmProviderId)?.selectedModel}
+                        </span>
+                      </div>
+                      <div
+                        style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                        className="p-3.5 rounded-xl border shadow-xs"
+                      >
+                        <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                          Reranker de Precisión
+                        </span>
+                        <span className="text-base font-bold text-purple-700 block mt-1 truncate">
+                          {aiProviders.find((p) => p.id === activeRerankerProviderId)?.name}
+                        </span>
+                        <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
+                          rerank-v3.5 (Cross-Encoder)
+                        </span>
+                      </div>
+                      <div
+                        style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                        className="p-3.5 rounded-xl border shadow-xs"
+                      >
+                        <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                          Embeddings Vectoriales
+                        </span>
+                        <span className="text-base font-bold text-emerald-700 block mt-1 truncate">
+                          {aiProviders.find((p) => p.id === activeEmbeddingProviderId)?.name}
+                        </span>
+                        <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
+                          1536 dimensiones (Coseno)
+                        </span>
+                      </div>
+                      <div
+                        style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                        className="p-3.5 rounded-xl border shadow-xs"
+                      >
+                        <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                          Latencia Media
+                        </span>
+                        <span className="text-base font-bold text-zinc-900 block mt-1 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span>~128 ms</span>
+                        </span>
+                        <span className="text-[11.5px] text-zinc-500 mt-0.5 block">
+                          Groq LPU a 42 ms récord
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Tarjetas de los 7 Proveedores */}
+                    <div className="space-y-3">
+                      {aiProviders.map((prov) => {
+                        const isPrimaryLlm = prov.id === activeLlmProviderId;
+                        const isReranker = prov.id === activeRerankerProviderId;
+                        const isEmbedding = prov.id === activeEmbeddingProviderId;
+                        const isEditingKey = editingApiKeyId === prov.id;
+
+                        return (
+                          <div
+                            key={prov.id}
+                            style={{
+                              backgroundColor: palette.bgSurface,
+                              borderColor: isPrimaryLlm ? palette.accentCitation : palette.borderDefault,
+                              boxShadow: isPrimaryLlm ? `0 0 0 1px ${palette.accentCitation}40` : "none",
+                            }}
+                            className="p-4 rounded-xl border shadow-xs transition-all space-y-3"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="flex items-start gap-3">
+                                <span
+                                  style={{ backgroundColor: `${prov.logoColor}15`, color: prov.logoColor }}
+                                  className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border border-zinc-200/80"
+                                >
+                                  <HubIcon icon={Cpu} size={20} />
+                                </span>
+                                <div>
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-bold text-zinc-900 text-sm">{prov.name}</span>
+                                    <span className="text-xs text-zinc-400 font-mono">({prov.company})</span>
+                                    {isPrimaryLlm && (
+                                      <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-blue-100 text-blue-800 font-bold border border-blue-300 flex items-center gap-1">
+                                        <HubIcon icon={Sparkles} size={11} />
+                                        <span>LLM Primario</span>
+                                      </span>
+                                    )}
+                                    {isReranker && (
+                                      <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-purple-100 text-purple-800 font-bold border border-purple-300 flex items-center gap-1">
+                                        <HubIcon icon={Zap} size={11} />
+                                        <span>Reranker</span>
+                                      </span>
+                                    )}
+                                    {isEmbedding && (
+                                      <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1">
+                                        <HubIcon icon={CheckCircle2} size={11} />
+                                        <span>Embeddings</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-zinc-500 mt-0.5">{prov.description}</p>
+                                </div>
+                              </div>
+
+                              {/* Ping en vivo */}
+                              <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                                <div className="text-right">
+                                  <span className="font-mono text-xs font-bold text-zinc-900 block">
+                                    {prov.latency} ms
+                                  </span>
+                                  <span className="text-[10.5px] text-emerald-600 block flex items-center gap-1 justify-end">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                                    <span>En línea</span>
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handlePingTest(prov.id)}
+                                  className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
+                                  title="Probar latencia"
+                                >
+                                  <HubIcon icon={RefreshCw} size={14} />
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Controles de Configuración del Proveedor */}
+                            <div className="pt-2 border-t border-zinc-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                              <div>
+                                <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                                  Modelo Activo
+                                </label>
+                                <select
+                                  value={prov.selectedModel}
+                                  onChange={(e) => handleModelChange(prov.id, e.target.value)}
+                                  className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                                >
+                                  {prov.models.map((m) => (
+                                    <option key={m} value={m}>
+                                      {m}
+                                    </option>
+                                  ))}
+                                </select>
+                                <span className="text-[10px] text-zinc-400 mt-0.5 block">
+                                  Ventana: {prov.contextWindow}
+                                </span>
+                              </div>
+
+                              <div>
+                                <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                                  Credenciales (API Key)
+                                </label>
+                                <div className="relative flex items-center gap-1">
+                                  <div className="relative flex-1 flex items-center">
+                                    <span className="absolute left-2.5 text-zinc-400">
+                                      <HubIcon icon={Key} size={12} />
+                                    </span>
+                                    <input
+                                      type={isEditingKey ? "text" : "password"}
+                                      readOnly={!isEditingKey}
+                                      value={isEditingKey ? apiKeyDraft : prov.apiKeyMask}
+                                      onChange={(e) => setApiKeyDraft(e.target.value)}
+                                      placeholder="Ingresa nueva API Key..."
+                                      className={`w-full pl-7 pr-2 py-1.5 rounded-lg border font-mono text-[11px] ${
+                                        isEditingKey
+                                          ? "border-blue-400 bg-white text-zinc-900 focus:outline-none"
+                                          : "border-zinc-200 bg-zinc-50 text-zinc-600"
+                                      }`}
+                                    />
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (isEditingKey) {
+                                        if (apiKeyDraft.trim()) {
+                                          setAiProviders((prev) =>
+                                            prev.map((p) =>
+                                              p.id === prov.id ? { ...p, apiKeyMask: apiKeyDraft.trim() } : p
+                                            )
+                                          );
+                                        }
+                                        setEditingApiKeyId(null);
+                                        setApiKeyDraft("");
+                                      } else {
+                                        setEditingApiKeyId(prov.id);
+                                        setApiKeyDraft(prov.apiKeyMask);
+                                      }
+                                    }}
+                                    className="px-2 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-[11px] font-semibold text-zinc-700 cursor-pointer shrink-0"
+                                  >
+                                    {isEditingKey ? "Guardar" : "Editar"}
+                                  </button>
+                                </div>
+                                <span className="text-[10px] text-emerald-600 mt-0.5 block flex items-center gap-1">
+                                  <HubIcon icon={ShieldCheck} size={11} />
+                                  <span>Cifrado AES-256 local</span>
+                                </span>
+                              </div>
+
+                              <div className="flex flex-col justify-end gap-1.5">
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSwitchPrimaryLlm(prov.id)}
+                                    disabled={isPrimaryLlm}
+                                    className={`flex-1 py-1.5 px-2 rounded-lg font-semibold text-[11.5px] cursor-pointer transition-all ${
+                                      isPrimaryLlm
+                                        ? "bg-blue-600 text-white cursor-default"
+                                        : "border border-zinc-200 hover:bg-zinc-100 text-zinc-700"
+                                    }`}
+                                  >
+                                    {isPrimaryLlm ? "LLM Primario Activo" : "Hacer Primario"}
+                                  </button>
+                                  {(prov.id === "cohere" || prov.id === "openai") && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        prov.id === "cohere"
+                                          ? handleSwitchReranker("cohere")
+                                          : handleSwitchEmbedding("openai")
+                                      }
+                                      className="py-1.5 px-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-600 text-[11px] font-medium cursor-pointer"
+                                    >
+                                      {prov.id === "cohere" ? "Reranker" : "Embeddings"}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
+                )}
 
-                  {/* 3. Top-K Chunks */}
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs space-y-2"
-                  >
-                    <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                      Profundidad de Recuperación (Top-K Chunks)
-                    </label>
-                    <div className="flex items-center gap-2">
-                      {[3, 5, 8, 12].map((k) => (
+                {/* Sub-Tab 2: Parámetros del Motor RAG */}
+                {configTab === "engine" && (
+                  <div className="space-y-4 animate-in fade-in">
+                    {/* 1. Modelo de Embedding */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-2"
+                    >
+                      <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Modelo de Embeddings Vectoriales
+                      </label>
+                      <select
+                        value={embeddingModel}
+                        onChange={(e) => setEmbeddingModel(e.target.value)}
+                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-zinc-200 bg-white font-medium text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400 cursor-pointer"
+                      >
+                        <option value="text-embedding-3-small">OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)</option>
+                        <option value="text-embedding-3-large">OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)</option>
+                        <option value="cohere-multilingual">Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)</option>
+                      </select>
+                      <p className="text-[11.5px] text-zinc-400">
+                        Determina la densidad del espacio latente y la precisión en búsquedas semánticas multilingües.
+                      </p>
+                    </div>
+
+                    {/* 2. Corte de Similitud Coseno */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                          Umbral Mínimo de Similitud Coseno
+                        </label>
+                        <span className="font-mono text-sm font-bold text-blue-600">
+                          ≥ {similarityThreshold.toFixed(2)}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.60"
+                        max="0.95"
+                        step="0.05"
+                        value={similarityThreshold}
+                        onChange={(e) => setSimilarityThreshold(parseFloat(e.target.value))}
+                        className="w-full accent-blue-600 cursor-pointer"
+                      />
+                      <div className="flex justify-between text-xs text-zinc-400">
+                        <span>0.60 (Mayor cobertura de fuentes)</span>
+                        <span>0.75 (Balanceado recomendado)</span>
+                        <span>0.95 (Solo coincidencias exactas)</span>
+                      </div>
+                    </div>
+
+                    {/* 3. Top-K Chunks */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-2"
+                    >
+                      <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Profundidad de Recuperación (Top-K Chunks)
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {[3, 5, 8, 12].map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            onClick={() => setTopK(k)}
+                            className={`flex-1 py-2 px-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                              topK === k
+                                ? "border-zinc-900 bg-zinc-900 text-white"
+                                : "border-zinc-200 hover:bg-zinc-50 text-zinc-700"
+                            }`}
+                          >
+                            {k} fragmentos
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[11.5px] text-zinc-400">
+                        Cantidad de fragmentos más relevantes inyectados en el contexto de generación del LLM.
+                      </p>
+                    </div>
+
+                    {/* 4. Toggles de Optimización */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-sm text-zinc-900 block">Reranker de Precisión (Cohere Cross-Encoder)</span>
+                          <span className="text-xs text-zinc-500 block">
+                            Reordena los fragmentos recuperados para reducir alucinaciones en un 42%.
+                          </span>
+                        </div>
                         <button
-                          key={k}
                           type="button"
-                          onClick={() => setTopK(k)}
-                          className={`flex-1 py-2 px-3 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
-                            topK === k
-                              ? "border-zinc-900 bg-zinc-900 text-white"
-                              : "border-zinc-200 hover:bg-zinc-50 text-zinc-700"
+                          onClick={() => setEnableReranker((v) => !v)}
+                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                            enableReranker ? "bg-blue-600" : "bg-zinc-300"
                           }`}
                         >
-                          {k} fragmentos
+                          <span
+                            className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
+                              enableReranker ? "right-1" : "left-1"
+                            }`}
+                          />
                         </button>
-                      ))}
-                    </div>
-                    <p className="text-[11.5px] text-zinc-400">
-                      Cantidad de fragmentos más relevantes inyectados en el contexto de generación del LLM.
-                    </p>
-                  </div>
-
-                  {/* 4. Toggles de Optimización */}
-                  <div
-                    style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
-                    className="p-4 rounded-xl border shadow-xs space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-bold text-sm text-zinc-900 block">Reranker de Precisión (Cohere Cross-Encoder)</span>
-                        <span className="text-xs text-zinc-500 block">
-                          Reordena los fragmentos recuperados para reducir alucinaciones en un 42%.
-                        </span>
                       </div>
+
+                      <div className="h-px bg-zinc-100" />
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-sm text-zinc-900 block">Búsqueda Híbrida (Dense Vector + BM25 Sparse)</span>
+                          <span className="text-xs text-zinc-500 block">
+                            Combina embeddings con coincidencia léxica exacta para números de ley y celdas Excel.
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setHybridSearch((v) => !v)}
+                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                            hybridSearch ? "bg-blue-600" : "bg-zinc-300"
+                          }`}
+                        >
+                          <span
+                            className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
+                              hybridSearch ? "right-1" : "left-1"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Botones de acción con confirmación inline */}
+                    <div className="flex items-center justify-end gap-3 pt-2">
                       <button
                         type="button"
-                        onClick={() => setEnableReranker((v) => !v)}
-                        className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                          enableReranker ? "bg-blue-600" : "bg-zinc-300"
-                        }`}
+                        onClick={() => {
+                          setEmbeddingModel("text-embedding-3-small");
+                          setSimilarityThreshold(0.75);
+                          setTopK(5);
+                          setEnableReranker(true);
+                          setHybridSearch(true);
+                        }}
+                        className="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 cursor-pointer transition-colors"
                       >
-                        <span
-                          className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
-                            enableReranker ? "right-1" : "left-1"
-                          }`}
-                        />
+                        Restablecer Valores
                       </button>
-                    </div>
-
-                    <div className="h-px bg-zinc-100" />
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-bold text-sm text-zinc-900 block">Búsqueda Híbrida (Dense Vector + BM25 Sparse)</span>
-                        <span className="text-xs text-zinc-500 block">
-                          Combina embeddings con coincidencia léxica exacta para números de ley y celdas Excel.
-                        </span>
-                      </div>
                       <button
                         type="button"
-                        onClick={() => setHybridSearch((v) => !v)}
-                        className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                          hybridSearch ? "bg-blue-600" : "bg-zinc-300"
-                        }`}
+                        onClick={() => {
+                          setEngineParamsSaved(true);
+                          setTimeout(() => setEngineParamsSaved(false), 2000);
+                        }}
+                        style={{
+                          backgroundColor: engineParamsSaved ? "#059669" : palette.actionPrimary,
+                        }}
+                        className="px-4 py-2 rounded-lg text-xs font-semibold text-white shadow-xs hover:opacity-90 cursor-pointer transition-all inline-flex items-center gap-1.5"
                       >
-                        <span
-                          className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
-                            hybridSearch ? "right-1" : "left-1"
-                          }`}
-                        />
+                        {engineParamsSaved && <HubIcon icon={Check} size={14} />}
+                        <span>{engineParamsSaved ? "¡Parámetros Guardados!" : "Guardar Parámetros"}</span>
                       </button>
                     </div>
                   </div>
-
-                  {/* Botones de acción */}
-                  <div className="flex items-center justify-end gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmbeddingModel("text-embedding-3-small");
-                        setSimilarityThreshold(0.75);
-                        setTopK(5);
-                        setEnableReranker(true);
-                        setHybridSearch(true);
-                        showToastMessage("Valores de fábrica restablecidos");
-                      }}
-                      className="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 cursor-pointer transition-colors"
-                    >
-                      Restablecer Valores
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => showToastMessage("Parámetros del motor guardados correctamente")}
-                      style={{ backgroundColor: palette.actionPrimary }}
-                      className="px-4 py-2 rounded-lg text-xs font-semibold text-white shadow-xs hover:opacity-90 cursor-pointer transition-colors"
-                    >
-                      Guardar Parámetros
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </main>
+                )}
+              </div>
+            )}
+          </main>
 
           {/* ===== COLUMNA 3: INSPECTOR DE FUENTES (COLAPSABLE, NO TOCA EL HEADER) ===== */}
           {inspectorOpen ? (
@@ -3257,12 +3654,16 @@ export default function CriteriosApp() {
                   <button
                     type="button"
                     onClick={handleCopyCitation}
-                    style={{ borderColor: palette.borderDefault, fontSize: 12 }}
+                    style={{
+                      borderColor: citationCopied ? "#10B981" : palette.borderDefault,
+                      fontSize: 12,
+                      color: citationCopied ? "#047857" : undefined,
+                    }}
                     className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border bg-white hover:bg-zinc-50 cursor-pointer text-zinc-700 shadow-xs transition-colors"
                     title="Copiar cita formal"
                   >
-                    <HubIcon icon={Copy} size={13} />
-                    <span>Cita</span>
+                    <HubIcon icon={citationCopied ? Check : Copy} size={13} />
+                    <span>{citationCopied ? "¡Copiado!" : "Cita"}</span>
                   </button>
                   <button
                     type="button"
@@ -3623,6 +4024,152 @@ export default function CriteriosApp() {
             </aside>
           )}
         </div>
+
+        {/* Modal de Ingesta e Indexación de Documentos y Carpetas */}
+        {showUploadModal && (
+          <div
+            style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 50 }}
+            className="fixed inset-0 flex items-center justify-center p-4 backdrop-blur-xs"
+          >
+            <div
+              style={{ borderColor: palette.borderDefault }}
+              className="bg-white rounded-2xl border max-w-xl w-full flex flex-col shadow-2xl overflow-hidden"
+            >
+              <div className="px-5 py-3.5 border-b flex items-center justify-between bg-zinc-50">
+                <div className="flex items-center gap-2">
+                  <HubIcon icon={Upload} size={18} className="text-indigo-600" />
+                  <span style={{ fontSize: 15 }} className="font-bold text-zinc-900">
+                    Cargar Documentos o Carpeta al Proyecto ({(projects.find((p) => p.id === activeProjectId) || projects[0]).name})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  className="p-1 rounded hover:bg-zinc-200 cursor-pointer text-zinc-500"
+                >
+                  <HubIcon icon={X} size={18} />
+                </button>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-4 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100/70 transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                      <HubIcon icon={FileText} size={18} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 14.5 }} className="font-bold text-indigo-950">
+                        Seleccionar Archivos de mi PC
+                      </p>
+                      <p style={{ fontSize: 12.5 }} className="text-indigo-700 mt-0.5">
+                        PDF, DOCX, XLSX, CSV o TXT
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => folderInputRef.current?.click()}
+                    className="p-4 rounded-xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/70 transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                      <HubIcon icon={FolderOpen} size={18} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 14.5 }} className="font-bold text-emerald-950">
+                        Seleccionar Carpeta Completa
+                      </p>
+                      <p style={{ fontSize: 12.5 }} className="text-emerald-700 mt-0.5">
+                        Indexa todos los documentos del directorio
+                      </p>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-zinc-100">
+                  <p style={{ fontSize: 12.5 }} className="font-bold uppercase tracking-wider text-zinc-400 mb-2.5">
+                    Indexación rápida de plantillas corporativas (1-clic)
+                  </p>
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleAddQuickTemplateSource({
+                          title: "Directiva_Operativa_Fiscalizacion_2026.pdf",
+                          type: "legal",
+                          badge: "Norma Oficial",
+                          description: "Directiva operativa de fiscalización laboral e inspección SUNAFIL 2026.",
+                          metaPages: "36 páginas",
+                          chunksCount: 186,
+                        })
+                      }
+                      className="w-full p-2.5 rounded-xl border border-zinc-200 hover:border-indigo-300 hover:bg-indigo-50/40 flex items-center justify-between transition-all cursor-pointer text-left"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <HubIcon icon={Scale} size={16} className="text-amber-600 shrink-0" />
+                        <div>
+                          <p style={{ fontSize: 14.5 }} className="font-semibold text-zinc-900">
+                            Directiva_Operativa_Fiscalizacion_2026.pdf
+                          </p>
+                          <p style={{ fontSize: 12.5 }} className="text-zinc-500">
+                            Legal y Normativo • 186 vectores pgvector
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-semibold">
+                        + Indexar
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleAddQuickTemplateSource({
+                          title: "Matriz_Criterios_Auditoria_Q3.xlsx",
+                          type: "excel",
+                          badge: "Matriz Excel",
+                          description: "Matriz consolidada de provisiones y criterios de auditoría financiera Q3.",
+                          metaPages: "4 hojas",
+                          chunksCount: 94,
+                        })
+                      }
+                      className="w-full p-2.5 rounded-xl border border-zinc-200 hover:border-indigo-300 hover:bg-indigo-50/40 flex items-center justify-between transition-all cursor-pointer text-left"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <HubIcon icon={BarChart3} size={16} className="text-emerald-600 shrink-0" />
+                        <div>
+                          <p style={{ fontSize: 14.5 }} className="font-semibold text-zinc-900">
+                            Matriz_Criterios_Auditoria_Q3.xlsx
+                          </p>
+                          <p style={{ fontSize: 12.5 }} className="text-zinc-500">
+                            Hojas de Cálculo • 94 vectores pgvector
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-semibold">
+                        + Indexar
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="px-5 py-3 border-t bg-zinc-50 flex justify-between items-center">
+                <span style={{ fontSize: 13 }} className="text-zinc-500">
+                  Fuentes actuales en proyecto: <strong className="text-zinc-900">{projectSources.length}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  className="px-4 py-1.5 rounded-lg border border-zinc-300 bg-white text-zinc-700 font-medium text-sm hover:bg-zinc-100 cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal SQL & Edge Function */}
         {showSqlModal && (
