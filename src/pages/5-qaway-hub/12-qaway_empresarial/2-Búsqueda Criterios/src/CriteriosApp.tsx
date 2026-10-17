@@ -6,7 +6,7 @@
  * - Inspector polimórfico y Workspace independientes con scroll autónomo
  * - Portabilidad Cloudflare: 100% imports relativos, cero iframes, namespace host-safe.
  * ============================================================================ */
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import type { FormEvent } from "react";
 import {
   Search,
@@ -622,6 +622,15 @@ export default function CriteriosApp() {
   const [showNewProjectModal, setShowNewProjectModal] = useState<boolean>(false);
   const [newProjectName, setNewProjectName] = useState<string>("");
   const [newProjectCategory, setNewProjectCategory] = useState<string>("Finanzas & Legal");
+  const [projectCategories, setProjectCategories] = useState<string[]>([
+    "Finanzas & Legal",
+    "Corporativo & Compliance",
+    "Operaciones",
+    "RR.HH. & Laboral",
+    "Logística & Distribución",
+  ]);
+  const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
+  const [newCategoryInput, setNewCategoryInput] = useState<string>("");
   const [showProjectDropdown, setShowProjectDropdown] = useState<boolean>(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState<boolean>(false);
   const [openProviderModelDropdownId, setOpenProviderModelDropdownId] = useState<string | null>(null);
@@ -715,23 +724,40 @@ export default function CriteriosApp() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
   const quickSearchRef = useRef<HTMLDivElement>(null);
+  const projectDropdownRef = useRef<HTMLDivElement>(null);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+  const embeddingDropdownRef = useRef<HTMLDivElement>(null);
+  const providerModelDropdownRef = useRef<HTMLDivElement>(null);
 
   const palette = THEME_CONFIG[theme];
 
   // Escuchar clics fuera y tecla Escape para cerrar menús
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setShowUserMenu(false);
       }
-      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target as Node)) {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(target)) {
         setShowFilterDropdown(false);
       }
-      if (quickSearchRef.current && !quickSearchRef.current.contains(event.target as Node)) {
+      if (quickSearchRef.current && !quickSearchRef.current.contains(target)) {
         setShowQuickSearch(false);
       }
-      if (modeDropdownRef.current && !modeDropdownRef.current.contains(event.target as Node)) {
+      if (modeDropdownRef.current && !modeDropdownRef.current.contains(target)) {
         setShowModeDropdown(false);
+      }
+      if (projectDropdownRef.current && !projectDropdownRef.current.contains(target)) {
+        setShowProjectDropdown(false);
+      }
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(target)) {
+        setShowCategoryDropdown(false);
+      }
+      if (embeddingDropdownRef.current && !embeddingDropdownRef.current.contains(target)) {
+        setShowEmbeddingDropdown(false);
+      }
+      if (providerModelDropdownRef.current && !providerModelDropdownRef.current.contains(target)) {
+        setOpenProviderModelDropdownId(null);
       }
     }
     function handleKeyDown(event: KeyboardEvent) {
@@ -784,6 +810,19 @@ export default function CriteriosApp() {
     setActiveNav("nuevo");
   }
 
+  function handleAddCategory() {
+    const trimmed = newCategoryInput.trim();
+    if (trimmed) {
+      if (!projectCategories.includes(trimmed)) {
+        setProjectCategories((prev) => [...prev, trimmed]);
+      }
+      setNewProjectCategory(trimmed);
+      setIsAddingCategory(false);
+      setNewCategoryInput("");
+      setShowCategoryDropdown(false);
+    }
+  }
+
   function handleCreateProject(e: FormEvent) {
     e.preventDefault();
     const trimmed = newProjectName.trim();
@@ -811,10 +850,74 @@ export default function CriteriosApp() {
     setActiveNav("nuevo");
   }
 
+  const currentProjectSources = useMemo(
+    () => projectSources.filter((s) => s.projectId === activeProjectId),
+    [projectSources, activeProjectId]
+  );
+
+  const activeProject = useMemo(
+    () => projects.find((p) => p.id === activeProjectId) || projects[0],
+    [projects, activeProjectId]
+  );
+
+  const currentScenarioCards: ScenarioDef[] = useMemo(() => {
+    if (activeProjectId === "auditoria-q3") {
+      return SCENARIO_CARDS;
+    }
+    const projName = activeProject?.name || "Proyecto";
+    const projCat = activeProject?.category || "General";
+    return [
+      {
+        id: "analisis-integral",
+        title: "Análisis Integral",
+        subtitle: projCat,
+        icon: Layers,
+        iconBg: "#EEF2FF",
+        iconColor: "#4F46E5",
+        query: `Realizar un análisis integral de los criterios y documentación del proyecto ${projName}.`,
+      },
+      {
+        id: "criterios-clave",
+        title: "Criterios Clave",
+        subtitle: "Normas y Reglas",
+        icon: Scale,
+        iconBg: "#FEF2F2",
+        iconColor: "#DC2626",
+        query: `¿Cuáles son los criterios y directivas fundamentales aplicables a ${projName}?`,
+      },
+      {
+        id: "revision-fuentes",
+        title: "Revisión de Fuentes",
+        subtitle: "Vectores RAG",
+        icon: FileText,
+        iconBg: "#EFF6FF",
+        iconColor: "#2563EB",
+        query: `Resumir las fuentes y documentos indexados en el espacio ${projName}.`,
+      },
+      {
+        id: "metricas-impacto",
+        title: "Impacto & Resultados",
+        subtitle: "Evaluación",
+        icon: FileSpreadsheet,
+        iconBg: "#ECFDF5",
+        iconColor: "#059669",
+        query: `¿Cuál es el balance y las contingencias identificadas en ${projName}?`,
+      },
+    ];
+  }, [activeProjectId, activeProject]);
+
+  const currentChatSessions = useMemo(
+    () =>
+      chatSessions.filter((s) =>
+        s.projectId ? s.projectId === activeProjectId : activeProjectId === "auditoria-q3"
+      ),
+    [chatSessions, activeProjectId]
+  );
+
   const quickSearchResults = headerSearch.trim()
     ? [
         ...ALL_SEARCHABLE_ITEMS,
-        ...projectSources
+        ...currentProjectSources
           .filter((ps) => !ALL_SEARCHABLE_ITEMS.some((a) => a.title === ps.title))
           .map((ps) => ({
             id: ps.id,
@@ -880,6 +983,7 @@ export default function CriteriosApp() {
       const lowerQ = q.toLowerCase().trim();
       const activeProjName = (projects.find((p) => p.id === activeProjectId) || projects[0]).name;
       const activeProvider = aiProviders.find((p) => p.id === activeLlmProviderId) || aiProviders[0];
+      const activeSources = projectSources.filter((s) => s.projectId === activeProjectId);
 
       // Detectar saludos o mensajes conversacionales cortos sin intención de búsqueda documental
       const isConversationalGreeting =
@@ -899,20 +1003,28 @@ export default function CriteriosApp() {
       let tableData;
       let turnSources: { id: number; name: string; section: string; tab: InspectorTab }[] = [];
 
-      if (isConversationalGreeting) {
-        if (lowerQ.startsWith("gracias") || lowerQ.includes("muchas gracias")) {
-          ansText = `¡Con gusto, Carlos! Quedo atento si necesitas cruzar otra norma, revisar celdas del modelo financiero o consultar algún manual en el proyecto "${activeProjName}".`;
+      if (activeSources.length === 0) {
+        if (isConversationalGreeting) {
+          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}". Actualmente este proyecto no cuenta con fuentes ni documentos indexados. Puedes cargar tus archivos (PDF, Excel, Word o carpetas completas) usando el botón "+ Carga de doc" en el panel lateral para habilitar consultas RAG con citas exactas.`;
         } else {
-          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}" (${projectSources.length} fuentes indexadas con ${activeProvider.name}). Escribe tu consulta sobre normas legales, matrices financieras o manuales internos —o carga un nuevo documento desde el panel izquierdo— y te responderé con trazabilidad exacta.`;
+          ansText = `Actualmente no existen fuentes documentales ni vectores indexados en el proyecto "${activeProjName}". Para realizar búsquedas semánticas y recibir respuestas respaldadas por evidencia oficial, por favor carga tus archivos mediante "+ Carga de doc" en el panel izquierdo.`;
+        }
+        turnSources = [];
+      } else if (isConversationalGreeting) {
+        if (lowerQ.startsWith("gracias") || lowerQ.includes("muchas gracias")) {
+          ansText = `¡Con gusto, Carlos! Quedo atento si necesitas cruzar otra consulta o revisar documentos en el proyecto "${activeProjName}".`;
+        } else {
+          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}" (${activeSources.length} fuente(s) indexada(s) con ${activeProvider.name}). Escribe tu consulta sobre normas, matrices o manuales —o carga más documentos desde el panel izquierdo— y te responderé con trazabilidad exacta.`;
         }
         turnSources = [];
       } else if (
-        lowerQ.includes("horas extras") ||
-        lowerQ.includes("ebitda") ||
-        lowerQ.includes("contingencia") ||
-        lowerQ.includes("laboral") ||
-        lowerQ.includes("q4") ||
-        lowerQ.includes("provisión")
+        activeProjectId === "auditoria-q3" &&
+        (lowerQ.includes("horas extras") ||
+          lowerQ.includes("ebitda") ||
+          lowerQ.includes("contingencia") ||
+          lowerQ.includes("laboral") ||
+          lowerQ.includes("q4") ||
+          lowerQ.includes("provisión"))
       ) {
         ansText =
           "El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes [1]. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp [2].";
@@ -926,11 +1038,12 @@ export default function CriteriosApp() {
           { id: 2, name: "Contingencias_Laborales_Q3.xlsx", section: "Hoja: Resumen_Ejecutivo • Celda E14", tab: 2 },
         ];
       } else if (
-        lowerQ.includes("artículo") ||
-        lowerQ.includes("ley") ||
-        lowerQ.includes("007") ||
-        lowerQ.includes("norma") ||
-        lowerQ.includes("15")
+        activeProjectId === "auditoria-q3" &&
+        (lowerQ.includes("artículo") ||
+          lowerQ.includes("ley") ||
+          lowerQ.includes("007") ||
+          lowerQ.includes("norma") ||
+          lowerQ.includes("15"))
       ) {
         ansText =
           "Según el D.S. N.º 007-2002-TR (TUO de la Ley de Jornada de Trabajo), los artículos 9, 10 y 15 estipulan que el sobretiempo antes de la hora de entrada o después de la salida debe ser remunerado con sobretasa legal del 25% y 35% [1]. Asimismo, el empleador debe conservar los registros de asistencia por un mínimo de 5 años.";
@@ -938,11 +1051,12 @@ export default function CriteriosApp() {
           { id: 1, name: "D.S. N.º 007-2002-TR", section: "Art. 9, 10 y 15 - Jornada y sobretiempo", tab: 1 },
         ];
       } else if (
-        lowerQ.includes("procedimiento") ||
-        lowerQ.includes("política") ||
-        lowerQ.includes("manual") ||
-        lowerQ.includes("rrhh") ||
-        lowerQ.includes("auditoría")
+        activeProjectId === "auditoria-q3" &&
+        (lowerQ.includes("procedimiento") ||
+          lowerQ.includes("política") ||
+          lowerQ.includes("manual") ||
+          lowerQ.includes("rrhh") ||
+          lowerQ.includes("auditoría"))
       ) {
         ansText =
           "La Sección 4.2 del Manual de Políticas Laborales establece que toda contingencia mayor a USD 25,000 requiere autorización del Comité de Auditoría y validación con RR.HH. [3]. Se recomienda emitir acta vinculante antes del cierre contable.";
@@ -950,16 +1064,16 @@ export default function CriteriosApp() {
           { id: 3, name: "Manual de Políticas Laborales", section: "Sección 4.2 - Control de asistencia", tab: 3 },
         ];
       } else {
+        const sourceTitles = activeSources.slice(0, 3).map((s) => s.title).join(", ");
         ansText = `Respecto a "${q}" en el proyecto "${activeProjName}": tras consultar los vectores indexados (umbral ≥ ${similarityThreshold.toFixed(
           2
-        )}) en las ${projectSources.length} fuentes activas (${projectSources
-          .slice(0, 3)
-          .map((s) => s.title)
-          .join(", ")}), los registros verificados establecen obligación de respaldo documental en el control de asistencia [1] y provisión presupuestal auditada en la matriz del periodo [2].`;
-        turnSources = [
-          { id: 1, name: projectSources[0]?.title || "D.S. N.º 007-2002-TR", section: projectSources[0]?.badge || "Norma Oficial", tab: 1 },
-          { id: 2, name: projectSources[1]?.title || "Modelo Financiero Q3 2026.xlsx", section: projectSources[1]?.badge || "Matriz Excel", tab: 2 },
-        ];
+        )}) en las fuentes activas (${sourceTitles}), la evidencia analizada confirma los lineamientos operativos y criterios aplicables según los fragmentos recuperados.`;
+        turnSources = activeSources.slice(0, 3).map((s, idx) => ({
+          id: idx + 1,
+          name: s.title,
+          section: s.badge,
+          tab: s.inspectorTab,
+        }));
       }
 
       const assistantTurn: ChatTurn = {
@@ -1010,12 +1124,12 @@ export default function CriteriosApp() {
 
   function handleScenario(id: string) {
     setActiveScenario(id);
-    const found = SCENARIO_CARDS.find((s) => s.id === id);
+    const found = currentScenarioCards.find((s) => s.id === id);
     if (found) {
       if (id === "normativa") setInspectorTab(1);
       else if (id === "financiero") setInspectorTab(2);
       else if (id === "procedimiento") setInspectorTab(3);
-      else setInspectorTab(2);
+      else setInspectorTab(1);
       setInspectorOpen(true);
       handleSendMessage(found.query);
     }
@@ -1244,10 +1358,18 @@ export default function CriteriosApp() {
     setInspectorOpen(true);
   }
 
-  const totalChunksCount = projectSources.reduce((acc, s) => acc + s.chunksCount, 0);
-  const legalSourcesCount = projectSources.filter((s) => s.type === "legal").length;
-  const excelSourcesCount = projectSources.filter((s) => s.type === "excel").length;
-  const docSourcesCount = projectSources.filter((s) => s.type === "doc").length;
+  const totalChunksCount = currentProjectSources.reduce((acc, s) => acc + s.chunksCount, 0);
+  const legalSources = currentProjectSources.filter((s) => s.type === "legal");
+  const legalSourcesCount = legalSources.length;
+  const legalChunksCount = legalSources.reduce((acc, s) => acc + s.chunksCount, 0);
+
+  const excelSources = currentProjectSources.filter((s) => s.type === "excel");
+  const excelSourcesCount = excelSources.length;
+  const excelChunksCount = excelSources.reduce((acc, s) => acc + s.chunksCount, 0);
+
+  const docSources = currentProjectSources.filter((s) => s.type === "doc");
+  const docSourcesCount = docSources.length;
+  const docChunksCount = docSources.reduce((acc, s) => acc + s.chunksCount, 0);
 
   return (
     <div className="qaway-criterios-root" style={{ backgroundColor: palette.bgPage, color: palette.textPrimary }}>
@@ -1725,7 +1847,7 @@ export default function CriteriosApp() {
                     </div>
 
                     {/* Selector de Proyecto Activo (Desplegable 100% Redondeado) */}
-                    <div className="relative">
+                    <div ref={projectDropdownRef} className="relative">
                       <button
                         type="button"
                         onClick={() => {
@@ -1769,6 +1891,14 @@ export default function CriteriosApp() {
                                 onClick={() => {
                                   setActiveProjectId(p.id);
                                   setShowProjectDropdown(false);
+                                  const targetSessions = chatSessions.filter((s) =>
+                                    s.projectId ? s.projectId === p.id : p.id === "auditoria-q3"
+                                  );
+                                  if (targetSessions.length > 0) {
+                                    setActiveSessionId(targetSessions[0].id);
+                                  } else {
+                                    handleCreateNewSession("Chat Principal", p.id);
+                                  }
                                 }}
                                 className={`w-full text-left px-2.5 py-2 rounded-xl text-[13px] flex items-center justify-between gap-2 cursor-pointer transition-colors ${
                                   isSelected
@@ -1834,7 +1964,7 @@ export default function CriteriosApp() {
                       />
 
                       {/* Desplegable Redondeado de Categoría (Reemplaza al <select> cuadrado de Windows) */}
-                      <div className="relative">
+                      <div ref={categoryDropdownRef} className="relative">
                         <button
                           type="button"
                           onClick={() => setShowCategoryDropdown((v) => !v)}
@@ -1851,13 +1981,8 @@ export default function CriteriosApp() {
                         </button>
 
                         {showCategoryDropdown && (
-                          <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-zinc-200 bg-white shadow-xl p-1.5 z-50 space-y-0.5 animate-in fade-in">
-                            {[
-                              "Finanzas & Legal",
-                              "Corporativo & Compliance",
-                              "Operaciones",
-                              "RR.HH. & Laboral",
-                            ].map((cat) => {
+                          <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-zinc-200 bg-white shadow-xl p-1.5 z-50 space-y-0.5 animate-in fade-in max-h-56 overflow-y-auto">
+                            {projectCategories.map((cat) => {
                               const isCatSelected = newProjectCategory === cat;
                               return (
                                 <button
@@ -1873,13 +1998,66 @@ export default function CriteriosApp() {
                                       : "text-zinc-700 hover:bg-zinc-100 font-medium"
                                   }`}
                                 >
-                                  <span>{cat}</span>
+                                  <span className="truncate">{cat}</span>
                                   {isCatSelected && (
                                     <HubIcon icon={Check} size={13} className="text-blue-600 shrink-0" />
                                   )}
                                 </button>
                               );
                             })}
+
+                            {/* Añadir nueva categoría dinámica */}
+                            <div className="pt-1.5 mt-1 border-t border-zinc-100">
+                              {isAddingCategory ? (
+                                <div className="p-1 space-y-1.5">
+                                  <input
+                                    type="text"
+                                    value={newCategoryInput}
+                                    onChange={(e) => setNewCategoryInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        handleAddCategory();
+                                      }
+                                    }}
+                                    placeholder="Nueva categoría..."
+                                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-blue-300 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-zinc-900"
+                                    autoFocus
+                                  />
+                                  <div className="flex items-center justify-end gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setIsAddingCategory(false);
+                                        setNewCategoryInput("");
+                                      }}
+                                      className="px-2 py-1 rounded text-[11px] text-zinc-500 hover:bg-zinc-100 cursor-pointer"
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={handleAddCategory}
+                                      className="px-2.5 py-1 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-2xs"
+                                    >
+                                      Añadir
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsAddingCategory(true);
+                                  }}
+                                  className="w-full text-left px-2.5 py-1.5 rounded-xl text-[12px] font-semibold text-blue-600 hover:bg-blue-50 flex items-center gap-1.5 cursor-pointer transition-colors"
+                                >
+                                  <HubIcon icon={Plus} size={13} />
+                                  <span>+ Añadir otra categoría...</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1985,60 +2163,80 @@ export default function CriteriosApp() {
                       </span>
                     </button>
                     <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">
-                      {chatSessions.length}
+                      {currentChatSessions.length}
                     </span>
                   </div>
 
                   {isChatsListOpen && (
                     <div className="space-y-0.5 overflow-y-auto max-h-[220px] pr-0.5 scrollbar-thin">
-                      {chatSessions.map((session) => {
-                        const isCurrent = activeNav === "nuevo" && activeSessionId === session.id;
-                        return (
-                          <div
-                            key={session.id}
-                            className={`group flex items-center justify-between px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-all ${
-                              isCurrent
-                                ? "bg-zinc-200/70 text-zinc-900 font-semibold"
-                                : "text-zinc-600 hover:bg-zinc-100"
-                            }`}
-                            onClick={() => {
-                              setActiveSessionId(session.id);
-                              setActiveNav("nuevo");
-                            }}
+                      {currentChatSessions.length === 0 ? (
+                        <div className="py-2.5 px-2 text-center text-zinc-400">
+                          <p className="text-xs">Sin conversaciones en este proyecto</p>
+                          <button
+                            type="button"
+                            onClick={() => handleCreateNewSession("Chat Principal", activeProjectId)}
+                            className="mt-1.5 text-xs text-blue-600 font-semibold hover:underline cursor-pointer"
                           >
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <HubIcon
-                                icon={MessageSquare}
-                                size={13}
-                                className={isCurrent ? "text-blue-600 shrink-0" : "text-zinc-400 shrink-0"}
-                              />
-                              <span className="truncate text-[13.5px] text-zinc-800">{session.title}</span>
+                            + Iniciar chat
+                          </button>
+                        </div>
+                      ) : (
+                        currentChatSessions.map((session) => {
+                          const isCurrent = activeNav === "nuevo" && activeSessionId === session.id;
+                          return (
+                            <div
+                              key={session.id}
+                              className={`group flex items-center justify-between px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-all ${
+                                isCurrent
+                                  ? "bg-zinc-200/70 text-zinc-900 font-semibold"
+                                  : "text-zinc-600 hover:bg-zinc-100"
+                              }`}
+                              onClick={() => {
+                                setActiveSessionId(session.id);
+                                setActiveNav("nuevo");
+                              }}
+                            >
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <HubIcon
+                                  icon={MessageSquare}
+                                  size={13}
+                                  className={isCurrent ? "text-blue-600 shrink-0" : "text-zinc-400 shrink-0"}
+                                />
+                                <span className="truncate text-[13.5px] text-zinc-800">{session.title}</span>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0 ml-1">
+                                <span className="text-[11.5px] font-mono text-zinc-400 shrink-0">
+                                  {session.date === "Hoy" ? "9m" : session.date}
+                                </span>
+                                {currentChatSessions.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const remaining = chatSessions.filter((s) => s.id !== session.id);
+                                      setChatSessions(remaining);
+                                      if (activeSessionId === session.id) {
+                                        const remainingInProject = remaining.filter((s) =>
+                                          s.projectId ? s.projectId === activeProjectId : activeProjectId === "auditoria-q3"
+                                        );
+                                        if (remainingInProject.length > 0) {
+                                          setActiveSessionId(remainingInProject[0].id);
+                                        } else {
+                                          handleCreateNewSession("Chat Principal", activeProjectId);
+                                        }
+                                      }
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 p-0.5 text-zinc-400 hover:text-red-500 rounded transition-opacity"
+                                    title="Eliminar conversación"
+                                  >
+                                    <HubIcon icon={Trash2} size={12} />
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1 shrink-0 ml-1">
-                              <span className="text-[11.5px] font-mono text-zinc-400 shrink-0">
-                                {session.date === "Hoy" ? "9m" : session.date}
-                              </span>
-                              {chatSessions.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const remaining = chatSessions.filter((s) => s.id !== session.id);
-                                    setChatSessions(remaining);
-                                    if (activeSessionId === session.id) {
-                                      setActiveSessionId(remaining[0]?.id || "");
-                                    }
-                                  }}
-                                  className="opacity-0 group-hover:opacity-100 p-0.5 text-zinc-400 hover:text-red-500 rounded transition-opacity"
-                                  title="Eliminar conversación"
-                                >
-                                  <HubIcon icon={Trash2} size={12} />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
                   )}
                 </div>
@@ -2059,42 +2257,67 @@ export default function CriteriosApp() {
                         Fuentes en proyecto
                       </p>
                       <span style={{ fontSize: 10.5 }} className="text-indigo-600 font-mono font-semibold">
-                        {projectSources.length} activas
+                        {currentProjectSources.length} activas
                       </span>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <HubIcon icon={FileText} size={14} className="text-blue-600 mt-0.5 shrink-0" />
-                      <div>
-                        <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
-                          Documentos &amp; Manuales
-                        </span>
-                        <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
-                          {docSourcesCount} fuente(s) • 12,480 fragmentos
-                        </span>
+
+                    {currentProjectSources.length === 0 ? (
+                      <div className="py-2 text-center space-y-1.5">
+                        <p style={{ fontSize: 12 }} className="text-zinc-500 font-medium">
+                          Sin fuentes cargadas en este proyecto
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setShowUploadModal(true)}
+                          className="w-full py-1.5 px-2 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                        >
+                          <HubIcon icon={Upload} size={13} />
+                          <span>+ Carga de doc</span>
+                        </button>
                       </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <HubIcon icon={Scale} size={14} className="text-red-500 mt-0.5 shrink-0" />
-                      <div>
-                        <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
-                          Leyes &amp; Normativa
-                        </span>
-                        <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
-                          {legalSourcesCount} fuente(s) • 8,320 fragmentos
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <HubIcon icon={FileSpreadsheet} size={14} className="text-emerald-600 mt-0.5 shrink-0" />
-                      <div>
-                        <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
-                          Matrices Excel / CSV
-                        </span>
-                        <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
-                          {excelSourcesCount} archivo(s) • 6,120 fragmentos
-                        </span>
-                      </div>
-                    </div>
+                    ) : (
+                      <>
+                        {docSourcesCount > 0 && (
+                          <div className="flex items-start gap-2">
+                            <HubIcon icon={FileText} size={14} className="text-blue-600 mt-0.5 shrink-0" />
+                            <div>
+                              <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
+                                Documentos &amp; Manuales
+                              </span>
+                              <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
+                                {docSourcesCount} fuente(s) • {docChunksCount.toLocaleString()} fragmentos
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {legalSourcesCount > 0 && (
+                          <div className="flex items-start gap-2">
+                            <HubIcon icon={Scale} size={14} className="text-red-500 mt-0.5 shrink-0" />
+                            <div>
+                              <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
+                                Leyes &amp; Normativa
+                              </span>
+                              <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
+                                {legalSourcesCount} fuente(s) • {legalChunksCount.toLocaleString()} fragmentos
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {excelSourcesCount > 0 && (
+                          <div className="flex items-start gap-2">
+                            <HubIcon icon={FileSpreadsheet} size={14} className="text-emerald-600 mt-0.5 shrink-0" />
+                            <div>
+                              <span style={{ fontSize: 12.5 }} className="block font-semibold leading-tight text-zinc-800">
+                                Matrices Excel / CSV
+                              </span>
+                              <span style={{ color: palette.textSecondary, fontSize: 12 }} className="block leading-tight mt-0.5">
+                                {excelSourcesCount} archivo(s) • {excelChunksCount.toLocaleString()} fragmentos
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </>
@@ -2310,7 +2533,7 @@ export default function CriteriosApp() {
 
                   {!collapseScenariosHeader && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5 animate-in fade-in">
-                      {SCENARIO_CARDS.map((c) => {
+                      {currentScenarioCards.map((c) => {
                         const isActive = activeScenario === c.id;
                         return (
                           <button
@@ -2981,7 +3204,7 @@ export default function CriteriosApp() {
                       Fuentes Activas
                     </span>
                     <span className="text-2xl font-bold text-zinc-900 block mt-1">
-                      {projectSources.length} archivos
+                      {currentProjectSources.length} archivos
                     </span>
                     <span className="text-xs text-zinc-500 mt-0.5 block">100% vectorizadas y auditadas</span>
                   </div>
@@ -3016,7 +3239,7 @@ export default function CriteriosApp() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                   <div className="flex items-center gap-1.5 overflow-x-auto">
                     {[
-                      { id: "all", label: `Todas las fuentes (${projectSources.length})` },
+                      { id: "all", label: `Todas las fuentes (${currentProjectSources.length})` },
                       { id: "legal", label: `Normativa Legal (${legalSourcesCount})` },
                       { id: "excel", label: `Matrices Financieras (${excelSourcesCount})` },
                       { id: "doc", label: `Manuales y Documentos (${docSourcesCount})` },
@@ -3051,7 +3274,30 @@ export default function CriteriosApp() {
 
                 {/* Lista detallada dinámica de fuentes */}
                 <div className="space-y-3">
-                  {projectSources
+                  {currentProjectSources.length === 0 ? (
+                    <div className="py-12 px-4 text-center rounded-2xl border border-dashed border-zinc-200 bg-white space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-400 mx-auto flex items-center justify-center">
+                        <HubIcon icon={FileText} size={24} />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-zinc-900">
+                          No hay fuentes en el proyecto "{activeProject.name}"
+                        </h3>
+                        <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
+                          Este espacio de trabajo aún no cuenta con documentos vectorizados. Carga un archivo o carpeta para activar la búsqueda semántica.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowUploadModal(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                      >
+                        <HubIcon icon={Upload} size={15} />
+                        <span>+ Cargar documentos</span>
+                      </button>
+                    </div>
+                  ) : (
+                    currentProjectSources
                     .filter((src) => sourcesFilterType === "all" || src.type === sourcesFilterType)
                     .filter(
                       (src) =>
@@ -3154,7 +3400,8 @@ export default function CriteriosApp() {
                           </div>
                         </div>
                       );
-                    })}
+                    })
+                  )}
                 </div>
               </div>
             )}
@@ -3446,7 +3693,7 @@ export default function CriteriosApp() {
                                 <label className="text-[10.5px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                                   Modelo Activo
                                 </label>
-                                <div className="relative">
+                                <div ref={openProviderModelDropdownId === prov.id ? providerModelDropdownRef : undefined} className="relative">
                                   <button
                                     type="button"
                                     onClick={() =>
@@ -3595,7 +3842,7 @@ export default function CriteriosApp() {
                       <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                         Modelo de Embeddings Vectoriales
                       </label>
-                      <div className="relative">
+                      <div ref={embeddingDropdownRef} className="relative">
                         <button
                           type="button"
                           onClick={() => setShowEmbeddingDropdown((v) => !v)}
@@ -3860,8 +4107,85 @@ export default function CriteriosApp() {
                 </div>
               </div>
 
-              {/* 3 Tabs segmentados */}
-              <div className="px-4 pt-3 flex items-center gap-2">
+              {/* 3 Tabs segmentados o Estado Vacío */}
+              {currentProjectSources.length === 0 ? (
+                <div className="p-8 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-400 mx-auto flex items-center justify-center">
+                    <HubIcon icon={FileText} size={24} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 15 }} className="font-bold text-zinc-900">
+                      Sin evidencias en este proyecto
+                    </h3>
+                    <p style={{ fontSize: 13 }} className="text-zinc-500 mt-1 max-w-xs mx-auto">
+                      El proyecto "{activeProject.name}" aún no tiene fuentes documentales cargadas. Carga un archivo para inspeccionar fragmentos y vectores.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowUploadModal(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-semibold cursor-pointer border border-indigo-200 transition-colors"
+                  >
+                    <HubIcon icon={Upload} size={14} />
+                    <span>+ Cargar documentos</span>
+                  </button>
+                </div>
+              ) : activeProjectId !== "auditoria-q3" ? (
+                <div className="p-4 space-y-4">
+                  {(() => {
+                    const activeSrc = currentProjectSources[inspectorTab - 1] || currentProjectSources[0];
+                    return (
+                      <div className="space-y-3">
+                        <div style={{ borderColor: palette.borderDefault }} className="border rounded-xl p-3.5 shadow-xs">
+                          <div className="flex items-center justify-between">
+                            <p style={{ fontSize: 15 }} className="font-bold text-zinc-900">
+                              {activeSrc.title}
+                            </p>
+                            <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                              {activeSrc.badge}
+                            </span>
+                          </div>
+                          <p style={{ color: palette.textSecondary, fontSize: 13 }} className="mt-0.5">
+                            {activeSrc.metaPages} • {activeSrc.chunksCount.toLocaleString()} vectores
+                          </p>
+                          <p style={{ fontSize: 14, lineHeight: 1.6 }} className="mt-2 text-zinc-800">
+                            "{activeSrc.description}"
+                          </p>
+                        </div>
+                        <div style={{ borderColor: palette.borderDefault }} className="border rounded-xl p-3 grid grid-cols-2 gap-2 text-sm shadow-xs">
+                          <span style={{ color: palette.textSecondary }}>Estado</span>
+                          <span className="font-medium text-emerald-700">{activeSrc.statusText}</span>
+                          <span style={{ color: palette.textSecondary }}>Colección</span>
+                          <span className="font-medium text-zinc-900">{activeProject.name}</span>
+                          <span style={{ color: palette.textSecondary }}>Dimensión</span>
+                          <span className="font-medium text-zinc-900">1536d (pgvector)</span>
+                        </div>
+                        {/* Traza Supabase Vector */}
+                        <div
+                          style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSubtle }}
+                          className="border rounded-xl p-3 space-y-1.5 text-xs shadow-xs"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-zinc-900">Traza Supabase Vector</span>
+                            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                              RLS Verificado
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1 text-[11.5px] pt-1">
+                            <span style={{ color: palette.textSecondary }}>Modelo Embedding:</span>
+                            <span className="font-mono text-zinc-800 text-right">{embeddingModel}</span>
+                            <span style={{ color: palette.textSecondary }}>Índice PG:</span>
+                            <span className="font-mono text-zinc-800 text-right">HNSW (vector_ip_ops)</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <>
+                  {/* 3 Tabs segmentados */}
+                  <div className="px-4 pt-3 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setInspectorTab(1)}
@@ -4185,7 +4509,9 @@ export default function CriteriosApp() {
                   </div>
                 )}
               </div>
-            </aside>
+            </>
+          )}
+        </aside>
           ) : (
             /* Rail colapsado del Inspector en el panel lateral derecho (abajo, dentro de la columna, no en el topbar) */
             <aside
@@ -4340,7 +4666,7 @@ export default function CriteriosApp() {
               </div>
               <div className="px-5 py-3 border-t bg-zinc-50 flex justify-between items-center">
                 <span style={{ fontSize: 13 }} className="text-zinc-500">
-                  Fuentes actuales en proyecto: <strong className="text-zinc-900">{projectSources.length}</strong>
+                  Fuentes actuales en proyecto: <strong className="text-zinc-900">{currentProjectSources.length}</strong>
                 </span>
                 <button
                   type="button"

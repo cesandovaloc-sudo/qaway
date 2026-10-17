@@ -57,6 +57,7 @@ const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/A
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
 const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
 const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
+const PreguntasFrecuentesAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAppPage'))
 // Tienda de cliente: las páginas viven en inventario y se sirven aquí, dentro
 // del Layout, para que lleven el navbar oficial de Qaway Lab.
 const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/TiendaClientePage'))
@@ -438,6 +439,39 @@ export default function AppRouter() {
         <Route
           path="hub/criterios"
           element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        {/* Banco de Casuísticas y Preguntas Frecuentes MINEDU (12-qaway_empresarial): nativo con shell oficial Hub */}
+        <Route
+          path="/hub/preguntas-frecuentes/*"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
+        />
+        <Route
+          path="/hub/preguntas-frecuentes"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
+        />
+        <Route
+          path="hub/preguntas-frecuentes/*"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
+        />
+        <Route
+          path="hub/preguntas-frecuentes"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
+        />
+        <Route
+          path="/hub/casuisticas/*"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
+        />
+        <Route
+          path="/hub/casuisticas"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
+        />
+        <Route
+          path="hub/casuisticas/*"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
+        />
+        <Route
+          path="hub/casuisticas"
+          element={renderRoute('hub', <PreguntasFrecuentesAppPage />)}
         />
         {/* Biblioteca: standalone FUERA del Layout → sin navbar, solo logo interno */}
         <Route

@@ -1,0 +1,186 @@
+import React from 'react';
+import {
+  ChevronDown,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  SlidersHorizontal,
+  CheckCircle2
+} from 'lucide-react';
+import { ScoredCasuistica } from '../types/casuistica';
+
+interface CaseAccordionProps {
+  caseItem: ScoredCasuistica;
+  isOpen: boolean;
+  onToggle: () => void;
+  isAdmin: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  tokens: string[];
+}
+
+export const highlightContent = (text: string, tokens: string[]): React.ReactNode => {
+  if (!text || !tokens || tokens.length === 0) return text;
+
+  const validTokens = tokens.filter((t) => t.length > 1);
+  if (validTokens.length === 0) return text;
+
+  const regexPattern = new RegExp(
+    `(${validTokens.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
+    'gi'
+  );
+
+  const parts = text.split(regexPattern);
+  return parts.map((part, index) => {
+    const isMatch = validTokens.some(
+      (t) => t.toLowerCase() === part.toLowerCase()
+    );
+    if (isMatch) {
+      return (
+        <mark
+          key={index}
+          className="bg-amber-200 text-amber-900 px-0.5 rounded font-semibold"
+        >
+          {part}
+        </mark>
+      );
+    }
+    return part;
+  });
+};
+
+export const CaseAccordion: React.FC<CaseAccordionProps> = ({
+  caseItem,
+  isOpen,
+  onToggle,
+  isAdmin,
+  onEdit,
+  onDelete,
+  tokens
+}) => {
+  return (
+    <article
+      id={`case-card-${caseItem.id}`}
+      className="rounded-2xl border border-slate-200/80 bg-[#f8fafc] overflow-hidden transition-all duration-200 hover:border-slate-300/80 shadow-[0_1px_3px_rgba(15,23,42,0.02)]"
+    >
+      <div className="flex items-center justify-between bg-[#f8fafc] hover:bg-[#f1f5f9]/70 transition-colors">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={isOpen}
+          className="flex-1 px-4 py-3.5 sm:px-5 sm:py-4 flex items-center justify-between gap-4 text-left focus:outline-none cursor-pointer"
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <span className="flex-shrink-0 w-9 h-8 rounded-lg bg-slate-200/75 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-300/40">
+              {caseItem.number}
+            </span>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded">
+                  {caseItem.dirCode} • {caseItem.dirName}
+                </span>
+                {caseItem.score > 0 && (
+                  <span className="inline-block text-[10px] font-bold text-amber-700 bg-amber-100/90 px-1.5 py-0.2 rounded">
+                    Relevancia: {caseItem.score}
+                  </span>
+                )}
+              </div>
+              <h3 className="text-xs sm:text-[14px] font-bold text-slate-800 leading-snug">
+                {highlightContent(caseItem.title, tokens)}
+              </h3>
+            </div>
+          </div>
+
+          <span
+            className={`flex-shrink-0 w-8 h-8 rounded-full bg-slate-200/70 text-slate-600 flex items-center justify-center transition-transform duration-200 ${
+              isOpen ? 'rotate-180 bg-slate-200 text-slate-700' : ''
+            }`}
+          >
+            <ChevronDown className="w-4 h-4" />
+          </span>
+        </button>
+
+        {isAdmin && (
+          <div className="pr-3.5 flex items-center gap-1.5 flex-shrink-0">
+            <button
+              type="button"
+              onClick={onEdit}
+              title="Modificar esta casuística"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition cursor-pointer"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              title="Eliminar este caso"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Cuerpo desplegable con las 4 secciones */}
+      {isOpen && (
+        <div className="border-t border-slate-200/70 bg-[#fcfcfd] px-4 py-5 sm:px-6 sm:py-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Sección 1: Criterio Pedagógico/Normativo (disponible para lectores de pantalla) */}
+            <div className="sr-only" aria-hidden="false">
+              <h4>CRITERIO</h4>
+              <p>{caseItem.criterioTitle}</p>
+              <p>{caseItem.criterioDesc}</p>
+            </div>
+
+            {/* Sección 2: Desarrollo / Casuística */}
+            <div className="flex items-start gap-3.5">
+              <div className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-slate-100 text-slate-500 border border-slate-200/70 flex items-center justify-center">
+                <AlertCircle className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  DESARROLLO / CASUÍSTICA
+                </p>
+                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-700 mt-1.5 font-normal">
+                  {highlightContent(caseItem.desarrollo, tokens)}
+                </p>
+              </div>
+            </div>
+
+            {/* Sección 3: Acción Sugerida */}
+            <div className="md:border-l md:border-slate-200/75 md:pl-6 flex items-start gap-3.5">
+              <div className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-slate-100 text-slate-500 border border-slate-200/70 flex items-center justify-center">
+                <SlidersHorizontal className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  ACCIÓN SUGERIDA
+                </p>
+                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-700 mt-1.5 font-normal">
+                  {highlightContent(caseItem.accion, tokens)}
+                </p>
+              </div>
+            </div>
+
+            {/* Sección 4: Solución Referencial */}
+            <div className="md:border-l md:border-slate-200/75 md:pl-6 flex items-start gap-3.5">
+              <div className="flex-shrink-0 mt-0.5 w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                  SOLUCIÓN REFERENCIAL
+                </p>
+                <p className="text-xs sm:text-[13px] leading-relaxed text-slate-800 mt-1.5 font-medium">
+                  {highlightContent(caseItem.solucion, tokens)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </article>
+  );
+};
