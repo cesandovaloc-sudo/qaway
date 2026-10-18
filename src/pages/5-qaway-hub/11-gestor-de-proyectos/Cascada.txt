@@ -1,0 +1,140 @@
+**Sí, te he entendido al 100%, y siendo totalmente honesto: en mi respuesta anterior NO lo había planteado con esa profundidad fractal.**
+
+Antes lo había tratado como una "tabla plana de monitoreo" para las UGELs, pero lo que tú necesitas (y la razón por la que tu agente se trababa) es un **Motor de Desglose de Trabajo Recursivo (WBS Fractal / Cascada N-Niveles) con Roll-up Automático de Entregables e Indicadores**.
+
+Para que confirmemos que estamos exactamente en la misma página antes de abrir el prototipo visual interactivo, aquí está la radiografía exacta de tu lógica de negocio:
+
+---
+
+### 1. Jerarquía Infinita y Recursiva (Todo nodo puede tener hijos o volverse un sub-proyecto)
+
+No existe un límite rígido de "Proyecto → Hito → Tarea". Cualquier eslabón que se vuelva complejo puede abrirse en más ramas con sus propias fechas, dependencias y responsables:
+
+* **Nivel 1 — Cartera / Programa:** Ej. *Construcción de Vivienda* (o *Dotación Nacional 2027*).
+
+
+* **Nivel 2 — Procesos / Fases (con secuencia y convergencia):** Ej. *Gasfitería* y *Electricidad* corren en paralelo; solo cuando ambos convergen y terminan, se desbloquea el proceso *Pintura* (igual que *Recepción en Almacén* y *Contrato de Transporte* deben converger para habilitar *Despacho PECOSA*).
+
+
+* **Nivel 3 — Subprocesos:** Dentro de *Pintura* → *1. Preparación de pared* → *2. Puesta de imprimante* → *3. Pintado final*.
+* **Nivel 4...N — Sub-subprocesos o Micro-procesos:** Si *Preparación de pared* en un edificio resulta muy complejo, él mismo se convierte en un proceso con sus propias etapas, hitos y cronograma.
+
+---
+
+### 2. Escalafón de Responsabilidades y "Cadena Alimenticia" de Entregables (Roll-up en Cascada)
+
+No todos hacen lo mismo ni ven el mismo reporte. Lo que para el de abajo es **ejecución**, para el de arriba es **insumo de su propio entregable**:
+
+1. Nivel Operativo / Ejecutor (El Pintor / El Especialista de UGEL o Director de I.E.):
+
+
+* **No hace reportes ejecutivos.** Él ejecuta y cumple criterios verificables en su unidad (ej. *Habitación 101 pintada*: `[✓] Acabado uniforme`, `[✓] Limpieza`, `[✓] Dentro del plazo` / o en UGEL: `[✓] Archivo CDL subido`, `[✓] Acta firmada`).
+
+
+* **Su entregable:** La habitación pintada con foto / El documento cargado.
+
+
+2. Nivel Monitor / Supervisor de Subproceso (El Maestro de Obra / El Gestor Territorial MINEDU-DRE):
+
+
+* **Qué hace:** Evalúa y valida los indicadores de sus 10 pintores (o sus 13 UGELs).
+
+
+* **Su entregable:** El **Reporte Consolidado de Cumplimiento de Pintura** (que se calcula automáticamente sumando las habitaciones validadas de sus pintores).
+
+
+3. Nivel Coordinador de Proceso / Jefe de Programa (El Ingeniero Residente / El Coordinador Macro o Director DIGERE):
+
+
+* **Qué hace:** Recibe los reportes de *Gasfitería*, *Electricidad* y *Pintura*.
+* **Su entregable:** El **Tablero Ejecutivo de Obra / Cartera** con semáforos y gráficos que se alimentan solos desde el último check que dio el supervisor del pintor.
+
+
+
+---
+
+### 3. Tareas Transversales de Seguimiento ("Tasks de Articulación") en CUALQUIER Nivel
+
+En cualquier rama del árbol (en todo el Programa, en el Proceso *Pintura*, en el Subproceso *Imprimante*, o sobre un Pintor específico), el responsable puede disparar **Tareas Operativas de Seguimiento (`Tasks`)**:
+
+* **Canales de acción:** Llamada telefónica, reunión por Zoom, mensaje de WhatsApp, oficio o visita presencial.
+
+
+* **Checklist de evidencias dentro del Task:**
+* `[✓] Solicitar envío de fotografías de avance`
+* `[✓] Solicitar envío de documento/acta firmada`
+* `[ ] Validar porcentaje de avance real`
+
+
+* **Cierre con impacto:** Mientras esos checks no estén listos, la tarea sigue viva con su fecha de alerta. En el momento en que el monitor marca el último check y **declara el cumplimiento**, ese cierre **actualiza automáticamente el porcentaje y el gráfico del Subproceso**, que a su vez sube al Proceso, y este al Programa.
+
+---
+
+### 4. Gráficos e Indicadores Dinámicos por Nivel
+
+Cada nodo (sea Programa, Proceso o Subproceso) tiene su propio **mini-reporteador visual** acorde a su nivel:
+
+* Si estás parado en **Pintura**, ves gráficos de *Habitaciones pintadas vs. observadas*, *Calidad de acabado*, *Puntualidad de cuadrillas*.
+* Si subes a **Construcción de Casa**, esos datos se transforman en *% de Avance Físico de Obra*, *Procesos bloqueados vs. liberados* y *Cumplimiento de Hitos*.
+
+---
+
+**¿Estamos hablando exactamente de este sistema vivo, jerárquico y en cascada?**
+
+Dime **"Sí, muéstralo"** y te despliego la aplicación visual interactiva (sin bloques de código sueltos) donde podrás probar tanto el ejemplo de **Construcción de la Casa (Electricidad → Pintura → Imprimante → Pintores)** como el de **MINEDU Dotación 2027 (Programa → Subproceso → UGEL → II.EE.)** funcionando bajo esta misma lógica universal.
+
+
+Exactamente: **la interfaz y las herramientas de visualización son universales (invariantes a la escala); lo único que cambia es el nodo donde estás parado (`contextNodeId`) y tu escalafón en la organización (`roleLevel`)**.
+
+No necesitas programar un módulo distinto para Cartera, otro para Procesos, otro para Subprocesos y otro para la UGEL o los pintores. Es **un único motor polimórfico** donde tus vistas ya creadas (`Lista`, `Tablero Kanban`, `Cronograma Gantt`, `Calendario`, `Reporteador / Matriz` y `Archivos`) se recalibran automáticamente según el nivel de zoom:
+
+| Dónde estás parado / Rol | Qué representa cada fila en tu `Gantt / Lista / Kanban` | Qué muestra el `Reporteador / KPIs` de ese nivel | Qué es un `Task` de seguimiento en ese nivel |
+| --- | --- | --- | --- |
+| **Nivel 1: Director de Proyecto / Programa** *(Ej. Obra Completa / Dotación Nacional 2027)*<br> | **Macro-Procesos** con sus hitos generales y convergencias *(Gasfitería + Electricidad $\rightarrow$ Pintura / Planificación $\rightarrow$ Almacenes $\rightarrow$ Despacho)*.
+
+ | Salud general del programa, ruta crítica entre procesos y % de avance consolidado (calculado automáticamente desde abajo). | Reunión de comité directivo, destrabe presupuestal o alerta a un Coordinador de Proceso. |
+| **Nivel 2: Coordinador de Proceso** *(Ej. Jefe de Pintura / Coordinador Regional DRE)*<br> | **Subprocesos secuenciales** *(Preparación de pared $\rightarrow$ Imprimante $\rightarrow$ Pintado final / Subprocesos 1.1 al 1.7 de la OM 032)*.
+
+ | Avance por subproceso, cuellos de botella por etapa y comparativa entre supervisores o regiones.
+
+ | Llamada/Zoom con el supervisor de *Imprimante* para exigir el acta de cierre de etapa. |
+| **Nivel 3: Monitor de Subproceso** *(Ej. Maestro Supervisor / Gestor Territorial MINEDU)*<br> | **Unidades Ejecutoras / Equipos** *(Cuadrilla Pintor A, B, C / Las 13 UGELs de Junín: Huancayo, Satipo, Yauli...)*.
+
+ | **Matriz Semafórica de Cumplimiento** (Habitaciones listas con calidad y limpieza / UGELs con archivos Fase 1 y 2 subidos).
+
+ | Task con checklist verificable: `[✓] Pedir foto`, `[✓] Pedir documento`, `[ ] Validar avance` antes de declarar cumplido. |
+| **Nivel 4: Operador / Ejecutor** *(Ej. Pintor / Punto Focal UGEL)*<br> | **Entregables físicos directos** *(Habitación 101, 102 / Carga de CDL o firma de PECOSA en MC SIGA)*.
+
+ | No genera reportes hacia abajo; solo marca sus checks operativos y adjunta evidencia que alimenta en tiempo real al Nivel 3. | Subir la foto de la pared terminada o el PDF de la Resolución Directoral.
+
+ |
+
+---
+
+### Cómo resolvemos esto en tu arquitectura sin tocar tus vistas actuales
+
+En lugar de crear pantallas nuevas que confundan a tu agente, introducimos **un único Selector de Contexto Jerárquico (Breadcrumb Fractal + Selector de Escalafón)** encima de tus pestañas actuales (`Lista | Tablero | Cronograma | Calendario | Reporteador | Archivos`):
+
+1. **Un solo contrato recursivo (`HierarchyNode`):**
+* Todo elemento (sea *Programa*, *Proceso*, *Subproceso* o *Unidad Operativa*) tiene la misma estructura base: `id`, `parentId`, `levelType` (`programa | proceso | subproceso | unidad_ejecutora`), `predecessorIds` (para saber qué proceso debe terminar antes de que empiece otro), `owner` (con su grado en el escalafón), `progress` (calculado del promedio de sus hijos), `deliverableCriteria` (los indicadores que debe cumplir: limpieza, puntualidad, archivo SIGA, etc.) y `trackingTasks` (las tareas de llamadas/Zoom/fotos asociadas a ese nodo).
+
+
+2. **Las mismas vistas para todos los niveles:**
+* Si el **Director** entra a `Cronograma (Gantt)`, ve las barras de *Gasfitería*, *Electricidad* y *Pintura*.
+* Si hace clic en **Pintura** (o si entra el **Encargado de Pintura**), **en ese mismo `Cronograma (Gantt)**` ahora las barras son *Preparación de pared*, *Puesta de imprimante* y *Pintura final*.
+* Si hace clic en **Puesta de imprimante** y pasa a la pestaña `Reporteador / Matriz`, ve el tablero semafórico de los pintores (o de las 13 UGELs) con sus indicadores de calidad, limpieza, fotos y tareas de seguimiento.
+
+
+
+
+3. **Roll-up en vivo (Cascada hacia arriba):**
+* Cuando el supervisor del subproceso marca como `Completado` el checklist de una tarea de seguimiento (ej. *Envío de fotografías ✓*, *Envío de documento ✓*, *Avance validado ✓*), el entregable del pintor/UGEL pasa a **100% Verde**, el **Subproceso** sube su porcentaje automáticamente, y el **Gantt del Director del Proyecto** actualiza la barra del **Proceso General** sin que nadie tenga que consolidar un Excel a mano.
+
+
+
+---
+
+### ¿Cómo quieres proceder ahora?
+
+1. **Opción A (Directo para tu Agente):** Te redacto la **Especificación Técnica Exacta (Prompt Quirúrgico)** con el modelo de datos recursivo (`HierarchyNode` + Roll-up automático + Tasks de seguimiento con checklist de evidencias) conectado a tus tipos actuales (`Project`, `Milestone`, `WorkItem`) para que tu agente ordene la casa de inmediato sin romper Fase 17.
+2. **Opción B (Prototipo interactivo):** Ajustamos cómo quieres que se vea esa barra de navegación fractal (`Programa > Proceso > Subproceso > Unidad`) cambiando en vivo entre el caso **Construcción (Electricidad/Pintura)** y **MINEDU (Dotación 2027)**.
