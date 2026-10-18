@@ -133,11 +133,9 @@ export default function ProjectWorkspacePage() {
     icon: React.ReactNode
     badge: number | null
   }> = [
-    { key: 'resumen', label: 'Resumen', icon: <LayoutDashboard size={16} />, badge: null },
     { key: 'gantt', label: 'Diagrama Gantt', icon: <GanttChart size={16} />, badge: null },
     { key: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} />, badge: null },
     { key: 'hitos', label: 'Hitos & Fases', icon: <Milestone size={16} />, badge: pendingMilestones || null },
-    { key: 'reporteador', label: 'Monitoreo Territorial', icon: <BarChart3 size={16} />, badge: 13 },
     { key: 'kanban', label: 'Kanban', icon: <KanbanSquare size={16} />, badge: workItems.length },
     { key: 'sprints', label: 'Sprints', icon: <Flame size={16} />, badge: sprintTasksCount || null },
     { key: 'docs', label: 'Wiki Docs', icon: <BookOpen size={16} />, badge: docsCount || null },

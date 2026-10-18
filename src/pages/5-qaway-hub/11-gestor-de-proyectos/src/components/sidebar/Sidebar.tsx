@@ -6,7 +6,6 @@ import {
   Settings,
   Inbox,
   AlertCircle,
-  Milestone,
   BarChart3,
   ChevronDown,
   Plus,
@@ -44,7 +43,6 @@ interface NavSection {
 export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: boolean }) {
   const [internalCollapsed] = useState(false)
   const collapsed = collapsedProp ?? internalCollapsed
-  const [isSubprocessesExpanded, setIsSubprocessesExpanded] = useState(false)
   const [isActiveSelectorOpen, setIsActiveSelectorOpen] = useState(false)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [rememberedProjectId, setRememberedProjectId] = useState<string>('proj-minedu-2027')
@@ -53,7 +51,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     setIsActiveSelectorOpen(false),
   )
 
-  const { projects, workItems, milestones } = useProjectsDataset()
+  const { projects, workItems } = useProjectsDataset()
   const { currentPersona, isGestor } = useProjectPerspective()
   const navigate = useNavigate()
 
@@ -93,9 +91,6 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   const location = useLocation()
   const searchParams = new URLSearchParams(location.search)
-  const hasHitosStatusFilter =
-    searchParams.get('tab') === 'hitos' && searchParams.has('status')
-
   // Proyecto activo por URL (/proyectos/:id) o último proyecto seleccionado en cascada
   const modulePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
   const projectIdMatch = modulePath.match(/^\/proyectos\/([^/]+)/)
@@ -106,12 +101,6 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       setRememberedProjectId(activeProjectId)
     }
   }, [activeProjectId])
-
-  useEffect(() => {
-    if (hasHitosStatusFilter) {
-      setIsSubprocessesExpanded(true)
-    }
-  }, [hasHitosStatusFilter])
 
   const scopedProjects = useTenantFilteredProjects()
 
@@ -132,49 +121,22 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     [projects, planningProjectId, scopedProjects],
   )
 
-  // Subprocesos / Hitos propios del proyecto activo en cascada
-  const activeProjectMilestones = useMemo(
-    () =>
-      milestones
-        .filter((m) => m.projectId === activeProjectObj?.id)
-        .sort((a, b) => a.phaseNumber - b.phaseNumber),
-    [milestones, activeProjectObj?.id],
-  )
-
-  const milestoneStatusGroups = useMemo(() => {
-    const pending = activeProjectMilestones.filter((m) => m.status === 'pendiente').length
-    const review = activeProjectMilestones.filter((m) => m.status === 'en_revision').length
-    const approved = activeProjectMilestones.filter((m) => m.status === 'aprobado').length
-    return [
-      {
-        status: 'pendiente',
-        label: 'Pendientes / En riesgo',
-        count: pending,
-        dotColor: 'bg-rose-500',
-      },
-      {
-        status: 'en_revision',
-        label: 'En revisión',
-        count: review,
-        dotColor: 'bg-amber-500',
-      },
-      {
-        status: 'aprobado',
-        label: 'Aprobados',
-        count: approved,
-        dotColor: 'bg-emerald-500',
-      },
-    ]
-  }, [activeProjectMilestones])
-
   const sections: NavSection[] = [
     {
       title: 'OPERACIÓN & CARTERA',
       items: [
         {
-          to: '/',
+          to: activeProjectObj ? `/proyectos/${activeProjectObj.id}` : '/',
           label: 'Resumen',
           icon: <LayoutDashboard size={18} />,
+          end: true,
+        },
+        {
+          to: '/proyectos',
+          label: 'Proyectos',
+          icon: <FolderKanban size={18} />,
+          badge: scopedProjects.length,
+          badgeVariant: 'neutral',
           end: true,
         },
         {
@@ -191,20 +153,34 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           badge: urgentCount,
           badgeVariant: 'urgent',
         },
+      ],
+    },
+    {
+      title: 'SEGUIMIENTO & CONTROL',
+      items: [
         {
-          to: '/proyectos',
-          label: 'Proyectos',
-          icon: <FolderKanban size={18} />,
-          badge: scopedProjects.length,
-          badgeVariant: 'neutral',
-          end: true,
+          to: '/monitoreo-territorial',
+          label: 'Monitoreo Territorial',
+          icon: <BarChart3 size={18} />,
+          badge: 'SIGA',
         },
       ],
     },
   ]
 
   const currentUrl = `${location.pathname}${location.search}`
-  const isHrefActive = (to: string) => getHref(to) === currentUrl
+  const isHrefActive = (to: string) => {
+    const targetHref = getHref(to)
+    if (targetHref === currentUrl) return true
+    if (activeProjectObj && to === `/proyectos/${activeProjectObj.id}`) {
+      const barePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
+      const tab = searchParams.get('tab')
+      if (barePath === '/' || (barePath === to && (!tab || tab === 'resumen'))) {
+        return true
+      }
+    }
+    return false
+  }
 
   const handleSelectProjectInCascade = (projectId: string) => {
     setRememberedProjectId(projectId)
@@ -437,100 +413,6 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
             ))}
           </div>
         ))}
-
-        {/* NIVEL 2 EN CASCADA: HITOS & FASES (Opción A: 3 semáforos) + MONITOREO TERRITORIAL */}
-        {!collapsed && activeProjectObj && (
-          <div className="space-y-1 pt-1">
-            <div className="px-3 pb-1 flex items-center justify-between gap-2 select-none">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
-                SUBPROCESOS & CAMPO
-              </span>
-            </div>
-
-            {/* Botón completo: abre la vista de Hitos en el lienzo central Y despliega los 3 estados */}
-            <NavLink
-              to={getHref(`/proyectos/${activeProjectObj.id}?tab=hitos`)}
-              onClick={() => setIsSubprocessesExpanded((prev) => !prev)}
-              aria-expanded={isSubprocessesExpanded}
-              className={() =>
-                `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                  isSubprocessesExpanded
-                    ? 'border-l-2 border-[var(--hub-brand)] bg-[var(--hub-chip)] text-[var(--hub-text)]'
-                    : ''
-                } ${
-                  isHrefActive(`/proyectos/${activeProjectObj.id}?tab=hitos`)
-                    ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
-                    : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
-                }`
-              }
-            >
-              <span className="flex-shrink-0">
-                <Milestone size={18} />
-              </span>
-              <span className="whitespace-nowrap">Hitos & Fases</span>
-              <span className="ml-auto tabular-nums text-[11.5px] px-1.5 py-0.2 rounded shrink-0 text-[var(--hub-dim)] bg-[var(--hub-chip)]">
-                {activeProjectMilestones.length}
-              </span>
-              <ChevronDown
-                size={15}
-                className={`shrink-0 text-[var(--hub-dim)] transition-transform duration-200 ml-1 ${
-                  isSubprocessesExpanded ? 'rotate-180' : ''
-                }`}
-              />
-            </NavLink>
-
-            {/* Opción A: Solo los 3 filtros semafóricos por estado (sin repetir la lista de 10 hitos) */}
-            {isSubprocessesExpanded && (
-              <div className="ml-2 pl-2.5 border-l border-[var(--hub-border)] my-1.5 space-y-1">
-                {milestoneStatusGroups.map((group) => {
-                  const targetTo = `/proyectos/${activeProjectObj.id}?tab=hitos&status=${group.status}`
-                  const isGroupActive = isHrefActive(targetTo)
-                  return (
-                    <NavLink
-                      key={group.status}
-                      to={getHref(targetTo)}
-                      className={() =>
-                        `flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-[13.5px] leading-snug transition-colors ${
-                          isGroupActive
-                            ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] font-semibold border-l-2 border-[var(--hub-brand)]'
-                            : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)] font-medium'
-                        }`
-                      }
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${group.dotColor}`} />
-                        <span className="truncate">{group.label}</span>
-                      </div>
-                      <span className="tabular-nums text-[11.5px] font-semibold text-[var(--hub-dim)] shrink-0">
-                        {group.count}
-                      </span>
-                    </NavLink>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Acceso directo al Reporteador de Monitoreo Territorial (CdD - MC SIGA / UGEL) */}
-            <NavLink
-              to={getHref(`/proyectos/${activeProjectObj.id}?tab=reporteador`)}
-              className={() =>
-                `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isHrefActive(`/proyectos/${activeProjectObj.id}?tab=reporteador`)
-                    ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
-                    : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
-                }`
-              }
-            >
-              <span className="flex-shrink-0">
-                <BarChart3 size={18} />
-              </span>
-              <span className="truncate">Monitoreo Territorial</span>
-              <span className="ml-auto text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded shrink-0 text-[var(--hub-brand)] bg-[var(--hub-brand-soft,#fbf0ec)]">
-                SIGA
-              </span>
-            </NavLink>
-          </div>
-        )}
       </nav>
 
       {/* Settings (Exacto a App Inventario) */}

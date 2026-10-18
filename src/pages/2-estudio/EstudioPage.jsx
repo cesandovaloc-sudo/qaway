@@ -32,9 +32,8 @@ import './estudio.css'
 
 const ASSET = '/assets/pages/2-estudio'
 const displayFont = {
-  fontFamily: "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif",
-  fontStretch: 'condensed',
-  fontWeight: 700,
+  fontFamily: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontWeight: 760,
 }
 
 const revealUp = {

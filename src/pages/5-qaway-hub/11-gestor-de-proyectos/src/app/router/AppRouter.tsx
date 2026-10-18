@@ -46,6 +46,7 @@ import CheckoutPage from '@/pages/CheckoutPage'
 import PurchasesPage from '@/pages/PurchasesPage'
 import SharedLinksPage from '@/pages/config/SharedLinksPage'
 import NotFoundPage from '@/pages/NotFoundPage'
+import TerritoryReporterPage from '@/pages/monitoring/TerritoryReporterPage'
 
 export default function AppRouter() {
   return (
@@ -77,6 +78,10 @@ export default function AppRouter() {
 
           {/* Bandeja de Tareas dedicada (Task Inbox): ruta estática canónica */}
           <Route path="bandeja" element={<TasksInboxPage />} />
+
+          {/* Módulo Autónomo de Seguimiento y Monitoreo Territorial (CdD - MC SIGA / UGEL) */}
+          <Route path="monitoreo-territorial" element={<TerritoryReporterPage />} />
+          <Route path="monitoreo" element={<Navigate to="/monitoreo-territorial" replace />} />
 
           {/* Productos / Inventario — lectura: cualquier autenticado */}
           <Route path="productos" element={<RequirePlanFeature feature="products"><ProductsPage /></RequirePlanFeature>} />

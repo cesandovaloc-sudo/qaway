@@ -78,8 +78,9 @@ const baseResources = [
 ]
 
 const displayFont = {
-  fontFamily: '"Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif',
+  fontFamily: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   letterSpacing: '-0.03em',
+  fontWeight: 760,
 }
 
 export default function RecursosPage() {

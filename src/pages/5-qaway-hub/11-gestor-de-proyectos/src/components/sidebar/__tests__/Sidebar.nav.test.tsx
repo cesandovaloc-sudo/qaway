@@ -41,32 +41,17 @@ function activeLabelsAt(url: string, scopedTenantId?: string): string[] {
 
 const CASES: Array<{ url: string; expected: string; tenant?: string }> = [
   { url: '/', expected: 'Resumen' },
+  { url: '/proyectos', expected: 'Proyectos' },
   { url: '/bandeja', expected: 'Bandeja' },
   { url: '/proyectos?view=criticas', expected: 'Alertas Críticas' },
-  { url: '/proyectos', expected: 'Proyectos' },
-  { url: '/proyectos/proj-minedu-2027?tab=hitos', expected: 'Hitos & Fases' },
   {
-    url: '/proyectos/proj-minedu-2027?tab=hitos&status=pendiente',
-    expected: 'Pendientes / En riesgo',
-  },
-  {
-    url: '/proyectos/proj-minedu-2027?tab=hitos&status=en_revision',
-    expected: 'En revisión',
-    tenant: 'org-minedu',
-  },
-  {
-    url: '/proyectos/proj-005?tab=hitos&status=aprobado',
-    expected: 'Aprobados',
-    tenant: 'org-pacifico',
-  },
-  {
-    url: '/proyectos/proj-minedu-2027?tab=reporteador',
+    url: '/monitoreo-territorial',
     expected: 'Monitoreo Territorial',
   },
   { url: '/config', expected: 'Configuración' },
 ]
 
-describe('Sidebar: selección activa unívoca y cascada Alternativa A', () => {
+describe('Sidebar: selección activa unívoca y separación por niveles', () => {
   for (const { url, expected, tenant } of CASES) {
     it(`solo activa "${expected}" en ${url}${tenant ? ` [${tenant}]` : ''}`, () => {
       const labels = activeLabelsAt(url, tenant)
@@ -81,21 +66,14 @@ describe('Sidebar: selección activa unívoca y cascada Alternativa A', () => {
     }
   })
 
-  it('el selector de PROYECTO ACTIVO es flotante (absolute) y el botón Hitos & Fases inicia colapsado y abre al hacer clic', () => {
-    const { getByText, container, unmount } = render(
+  it('el selector de PROYECTO ACTIVO es flotante (absolute) y no desplaza el menú', () => {
+    const { container, unmount } = render(
       <MemoryRouter initialEntries={['/proyectos/proj-minedu-2027']}>
         <TenantProvider>
           <Sidebar collapsed={false} />
         </TenantProvider>
       </MemoryRouter>,
     )
-
-    // El botón Hitos & Fases inicia colapsado y expande/abre la vista al hacer clic
-    const subprocessLink = getByText('Hitos & Fases').closest('a')
-    expect(subprocessLink).toBeTruthy()
-    expect(subprocessLink?.getAttribute('aria-expanded')).toBe('false')
-    fireEvent.click(subprocessLink!)
-    expect(subprocessLink?.getAttribute('aria-expanded')).toBe('true')
 
     // El selector superior de proyecto activo despliega un menú flotante (absolute)
     const activeSelectorBtn = container.querySelector('button[aria-expanded]')
