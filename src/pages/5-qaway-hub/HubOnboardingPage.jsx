@@ -506,19 +506,25 @@ export default function HubOnboardingPage() {
         setTenant({ ...tenant, name: form.name, features: { ...(tenant.features || {}), rubro: finalRubro, onboarding_completed: false } });
       }
       if (goNext) {
+        const isYapeMethod = pendingPaymentMethodRef.current === "yape" || pendingPaymentMethodRef.current === "yape_directo";
         const cardTokenId = pendingCardTokenRef.current || pendingCardTokenId;
-        if (!cardTokenId) throw new Error("Completa primero la autorización de pago.");
-         const activePlan = pendingPlanRef.current || chosenPlan;
-         if (pendingBillingTypeRef.current === "one_time" && pendingPaymentMethodRef.current === "card") {
-           await startOneTimePayment(newTenantId, cardTokenId, activePlan, planObjAmountRef.current, pendingCardPaymentMethodRef.current);
-         } else {
-           await startSubscription(newTenantId, cardTokenId, activePlan);
-         }
-                  pendingBillingTypeRef.current = planObj?.billingType || "recurring";
-                  pendingPaymentMethodRef.current = planObj?.paymentMethod || null;
-                  pendingCardPaymentMethodRef.current = planObj?.cardPaymentMethodId || null;
-                  planObjAmountRef.current = planObj?.price || null;
-                  next();
+        if (!cardTokenId && !isYapeMethod) throw new Error("Completa primero la autorización de pago.");
+        const activePlan = pendingPlanRef.current || chosenPlan;
+        if (isYapeMethod) {
+          // Activación directa por Yape (Operativo / Prueba 0.10 para regularización de accesos)
+          await saveApps(false, activePlan, {
+            status: "active",
+            billingType: "one_time",
+            autoRenew: false,
+            paymentMethod: pendingPaymentMethodRef.current,
+            amount: planObjAmountRef.current || 0.10,
+          }, newTenantId);
+        } else if (pendingBillingTypeRef.current === "one_time" && pendingPaymentMethodRef.current === "card") {
+          await startOneTimePayment(newTenantId, cardTokenId, activePlan, planObjAmountRef.current, pendingCardPaymentMethodRef.current);
+        } else {
+          await startSubscription(newTenantId, cardTokenId, activePlan);
+        }
+        next();
       }
     } catch (e) {
       setNote("No se pudo guardar: " + e.message);

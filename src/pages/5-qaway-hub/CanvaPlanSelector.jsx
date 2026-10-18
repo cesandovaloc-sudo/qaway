@@ -32,13 +32,19 @@ function getFormattedDateOffset(days) {
   return `${day} ${month} ${year}`;
 }
 
+export function formatPrice(val) {
+  if (typeof val !== "number") return val;
+  return val % 1 !== 0 ? val.toFixed(2) : String(val);
+}
+
 export const PLAN_CONFIGS = [
   {
     id: "basico",
     name: "Básico",
     subtitle: "Inventario y Catálogo",
     targetAudience: "Para pequeños comercios y negocios en inicio",
-    priceMonthly: 30,
+    // TEMPORAL: S/ 0.10 para pruebas reales de cobro Yape y habilitación de accesos
+    priceMonthly: 0.10,
     priceRegular: 60,
     tag: "Esencial",
   },
@@ -301,6 +307,12 @@ export default function CanvaPlanSelector({
     country: "Perú",
   });
 
+  // Estado para la tercera opción: Yape Directo BCP (Operativo)
+  const [yapeDirectoForm, setYapeDirectoForm] = useState({
+    phone: "",
+    operationNumber: "",
+  });
+
   // Temporizador regresivo para aprobación push en Yape (Imagen 3 de Canva)
   useEffect(() => {
     let timer;
@@ -415,7 +427,7 @@ export default function CanvaPlanSelector({
                         <span className="canva-plan-name">{plan.name}</span>
                         {plan.recommended && <span className="canva-badge-rec">Recomendado</span>}
                         <div className="canva-plan-pricing">
-                          <span className="canva-price">S/{plan.priceMonthly}</span>
+                          <span className="canva-price">S/{formatPrice(plan.priceMonthly)}</span>
                           <span className="canva-period">/mes</span>
                           <span className="canva-reg-price">S/{plan.priceRegular}</span>
                         </div>
@@ -467,7 +479,7 @@ export default function CanvaPlanSelector({
                       className={`th-plan ${isColSelected ? "col-highlight" : ""}`}
                     >
                       <div className="th-plan-badge">{p.name}</div>
-                      <div className="th-plan-sub">S/{p.priceMonthly}/m</div>
+                      <div className="th-plan-sub">S/{formatPrice(p.priceMonthly)}/m</div>
                     </th>
                   );
                 })}
@@ -636,7 +648,7 @@ export default function CanvaPlanSelector({
                     </div>
                     <div className="canva-freq-details">
                       <span className="canva-freq-name">Mensual</span>
-                      <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly}</span>
+                      <span className="canva-freq-cost">S/{formatPrice(selectedPlanObj.priceMonthly)}</span>
                     </div>
                   </div>
 
@@ -683,7 +695,7 @@ export default function CanvaPlanSelector({
                         <span className="canva-freq-name">1 mes de acceso prepago</span>
                         <span className="canva-offer-tag bg-blue-600">PAGO ÚNICO</span>
                       </div>
-                      <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly} · Sin suscripción recurrente</span>
+                      <span className="canva-freq-cost">S/{formatPrice(selectedPlanObj.priceMonthly)} · Sin suscripción recurrente</span>
                     </div>
                   </div>
                 </div>
@@ -1130,6 +1142,105 @@ export default function CanvaPlanSelector({
                     </div>
                   )}
                 </div>
+
+                {/* Opción 3: Yape Directo BCP (Tercera opción probada operativa) */}
+                <div className={`canva-pay-card ${paymentMethod === "yape_directo" ? "open" : ""}`}>
+                  <div
+                    className="canva-pay-header"
+                    onClick={() => setPaymentMethod((prev) => (prev === "yape_directo" ? null : "yape_directo"))}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="canva-pay-header-left">
+                      <div className={`canva-freq-circle ${paymentMethod === "yape_directo" ? "active" : ""}`}>
+                        {paymentMethod === "yape_directo" && <div className="canva-freq-dot" />}
+                      </div>
+                      <div className="canva-yape-icon-badge" style={{ background: "linear-gradient(135deg, #742284 0%, #a21caf 100%)" }}>
+                        <span>Y</span>
+                      </div>
+                      <span className="canva-pay-method-title">Yape Directo (Confirmación Inmediata)</span>
+                    </div>
+
+                    <div className="canva-yape-tag" style={{ background: "#f5f3ff", color: "#7c3aed", border: "1px solid #ddd6fe" }}>
+                      <span>Operativo · BCP</span>
+                    </div>
+                  </div>
+
+                  {paymentMethod === "yape_directo" && (
+                    <div className="canva-pay-body">
+                      {/* Box con datos oficiales de cobro */}
+                      <div style={{
+                        background: "#faf5ff",
+                        border: "1px solid #e9d5ff",
+                        borderRadius: "12px",
+                        padding: "14px 16px",
+                        marginBottom: "16px"
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: "700", color: "#6b21a8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                            Datos de Cobro Yape
+                          </span>
+                          <span style={{ fontSize: "12px", fontWeight: "800", color: "#742284", background: "#f3e8ff", padding: "2px 8px", borderRadius: "6px" }}>
+                            Monto: S/ {selectedPlanObj.priceMonthly === 0.10 ? "0.10" : selectedPlanObj.priceMonthly}
+                          </span>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "13px", color: "#374151" }}>
+                          <div>
+                            <span style={{ fontSize: "10px", color: "#6b7280", display: "block" }}>Número de Yape:</span>
+                            <strong style={{ fontSize: "14px", color: "#111827", letterSpacing: "0.5px" }}>930 323 632</strong>
+                          </div>
+                          <div>
+                            <span style={{ fontSize: "10px", color: "#6b7280", display: "block" }}>Titular de la cuenta:</span>
+                            <strong style={{ fontSize: "13px", color: "#111827" }}>Carlos Sandoval</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tu número de celular */}
+                      <div className="canva-input-group">
+                        <label className="canva-input-label">Tu número de celular Yape</label>
+                        <div className="canva-input-wrap">
+                          <span className="canva-phone-prefix">+51</span>
+                          <input
+                            type="tel"
+                            maxLength={9}
+                            placeholder="987 654 321"
+                            value={yapeDirectoForm.phone}
+                            onChange={(e) => setYapeDirectoForm({ ...yapeDirectoForm, phone: e.target.value.replace(/\D/g, "") })}
+                            className="canva-input-field canva-input-with-prefix"
+                          />
+                          <Phone size={18} className="canva-input-icon-right" />
+                        </div>
+                      </div>
+
+                      {/* Código de Operación */}
+                      <div className="canva-input-group">
+                        <label className="canva-input-label">Número de Operación o Aprobación Yape</label>
+                        <div className="canva-input-wrap">
+                          <ShieldCheck size={18} className="canva-input-icon" />
+                          <input
+                            type="text"
+                            maxLength={12}
+                            placeholder="Ej. 123456"
+                            value={yapeDirectoForm.operationNumber}
+                            onChange={(e) => setYapeDirectoForm({ ...yapeDirectoForm, operationNumber: e.target.value.trim() })}
+                            className="canva-input-field"
+                          />
+                        </div>
+                        <span style={{ fontSize: "11px", color: "#6b7280", marginTop: "4px", display: "block" }}>
+                          Lo encuentras en la confirmación de tu app Yape tras transferir los S/ {selectedPlanObj.priceMonthly === 0.10 ? "0.10" : selectedPlanObj.priceMonthly}.
+                        </span>
+                      </div>
+
+                      <div className="canva-pay-card-notice yape-notice" style={{ background: "#f0fdf4", borderColor: "#bbf7d0" }}>
+                        <Check size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                        <p style={{ color: "#166534" }}>
+                          Al ingresar tu código de operación y confirmar, tu cuenta y acceso a Inventi Pro se activarán de inmediato.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -1256,25 +1367,84 @@ export default function CanvaPlanSelector({
                   style={!paymentMethod ? { opacity: 0.6, cursor: "not-allowed", boxShadow: "none" } : {}}
                   onClick={async () => {
                     if (!paymentMethod) return;
+
+                    // Opción 2: Yape (Maqueta Push Canva existente)
                     if (paymentMethod === "yape") {
-                      setPaymentError("Yape estará disponible próximamente.");
+                      if (yapeStep === "input") {
+                        if (!yapeForm.phone || yapeForm.phone.length < 9) {
+                          setPaymentError("Por favor ingresa tu número de celular Yape (9 dígitos).");
+                          return;
+                        }
+                        setPaymentError("");
+                        setYapeStep("approval");
+                        return;
+                      }
+
+                      if (onContinue) {
+                        try {
+                          setPaymentError("");
+                          await onContinue({
+                            ...selectedPlanObj,
+                            billingType,
+                            frequency: billingType === "recurring" ? frequency : undefined,
+                            oneTimeDuration: billingType === "one_time" ? oneTimeDuration : undefined,
+                            price: billingType === "recurring" ? currentPrice : activeOneTimePrice,
+                            paymentMethod: "yape",
+                            yapeForm,
+                          });
+                        } catch (error) {
+                          setPaymentError(error?.message || "No se pudo continuar con Yape.");
+                        }
+                      }
                       return;
                     }
+
+                    // Opción 3: Yape Directo BCP (Operativo probado)
+                    if (paymentMethod === "yape_directo") {
+                      if (!yapeDirectoForm.phone || yapeDirectoForm.phone.length < 9) {
+                        setPaymentError("Ingresa tu número de celular Yape (9 dígitos).");
+                        return;
+                      }
+                      if (!yapeDirectoForm.operationNumber || yapeDirectoForm.operationNumber.trim().length < 4) {
+                        setPaymentError("Ingresa el número de operación o código de aprobación de tu app Yape.");
+                        return;
+                      }
+
+                      if (onContinue) {
+                        try {
+                          setPaymentError("");
+                          await onContinue({
+                            ...selectedPlanObj,
+                            billingType,
+                            frequency: billingType === "recurring" ? frequency : undefined,
+                            oneTimeDuration: billingType === "one_time" ? oneTimeDuration : undefined,
+                            price: billingType === "recurring" ? currentPrice : activeOneTimePrice,
+                            paymentMethod: "yape_directo",
+                            yapeDirectoForm,
+                          });
+                        } catch (error) {
+                          setPaymentError(error?.message || "No se pudo registrar el pago de Yape Directo.");
+                        }
+                      }
+                      return;
+                    }
+
+                    // Opción 1: Tarjeta de crédito o débito
                     if (onContinue) {
                       try {
                         setPaymentError("");
                         const cardToken = paymentMethod === "card" ? await createCardToken() : null;
                         await onContinue({
-                        ...selectedPlanObj,
-                        billingType,
-                        frequency: billingType === "recurring" ? frequency : undefined,
-                        oneTimeDuration: billingType === "one_time" ? oneTimeDuration : undefined,
-                        price: billingType === "recurring" ? currentPrice : activeOneTimePrice,
-                        paymentMethod,
+                          ...selectedPlanObj,
+                          billingType,
+                          frequency: billingType === "recurring" ? frequency : undefined,
+                          oneTimeDuration: billingType === "one_time" ? oneTimeDuration : undefined,
+                          price: billingType === "recurring" ? currentPrice : activeOneTimePrice,
+                          paymentMethod,
                           cardTokenId: cardToken?.id,
                           cardPaymentMethodId: cardToken?.paymentMethodId,
-                         yapeForm: undefined,
-                       });
+                          yapeForm: undefined,
+                        });
                       } catch (error) {
                         setPaymentError(error?.message || "No se pudo iniciar el pago.");
                       }
@@ -1285,10 +1455,10 @@ export default function CanvaPlanSelector({
                     "Selecciona una opción de pago"
                   ) : paymentMethod === "card" ? (
                     billingType === "recurring" ? "Obtén tu prueba gratis" : "Pagar y activar ahora"
-                  ) : yapeStep === "input" ? (
-                    "Continuar a aprobación Yape"
+                  ) : paymentMethod === "yape" ? (
+                    yapeStep === "input" ? "Continuar a aprobación Yape" : "He aprobado en mi app Yape"
                   ) : (
-                    "He aprobado en mi app Yape"
+                    `Confirmar pago Yape (S/ ${selectedPlanObj.priceMonthly === 0.10 ? "0.10" : selectedPlanObj.priceMonthly})`
                   )}
                 </button>
                 {paymentError ? <p className="canva-sub2-legal" role="alert">{paymentError}</p> : null}
