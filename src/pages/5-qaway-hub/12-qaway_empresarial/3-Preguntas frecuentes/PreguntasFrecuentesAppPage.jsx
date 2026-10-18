@@ -1,4 +1,6 @@
 import React, { Component, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
+import NotFoundPage from '@/pages/NotFoundPage';
 import PreguntasFrecuentesApp from './src/PreguntasFrecuentesApp';
 
 class ErrorBoundary extends Component {
@@ -39,6 +41,14 @@ class ErrorBoundary extends Component {
 }
 
 export default function PreguntasFrecuentesAppPage() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+
+  // Si la URL pública trae parámetros no autorizados como admin, redirige estrictamente a la pantalla oficial 404
+  if (searchParams.has('admin')) {
+    return <NotFoundPage />;
+  }
+
   return (
     <div className="qaway-casuisticas-app-page hub-shell" style={{ minHeight: '100vh', position: 'relative' }}>
       <ErrorBoundary>
@@ -55,3 +65,4 @@ export default function PreguntasFrecuentesAppPage() {
     </div>
   );
 }
+
