@@ -395,7 +395,7 @@ const workflowCardsData = [
     num: "03",
     title: "Seguimiento y alertas",
     text: "Los procesos avanzan con avisos y control.",
-    icon: CheckCircle2,
+    icon: Check,
   },
 ];
 
@@ -975,19 +975,19 @@ export default function SistemasDigitalesPage() {
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <span
-                          className="text-[26px] sm:text-[32px] font-bold uppercase tracking-tight text-[#fe6612]"
+                          className="text-[26px] sm:text-[32px] font-bold text-[#fe6612]"
                           style={displayFont}
                         >
                           {card.num}
                         </span>
                         <span className="grid h-8 w-8 place-items-center rounded-full bg-[#fe6612]/10 text-[#fe6612] border border-[#fe6612]/20">
-                          <Icon className="h-4 w-4" />
+                          <Icon size={17} strokeWidth={1.8} />
                         </span>
                       </div>
-                      <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918]">
+                      <h3 className="no-qw text-[16.5px] font-bold leading-tight text-[#191918]">
                         {card.title}
                       </h3>
-                      <p className="mt-2 text-[13px] leading-relaxed text-black/60">
+                      <p className="mt-2.5 text-[14.5px] leading-relaxed text-[#4e4d4a]">
                         {card.text}
                       </p>
                     </div>
