@@ -1,7 +1,25 @@
-import { useState, useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Layers, Sparkles } from 'lucide-react'
 import Sidebar from '@/components/sidebar/Sidebar'
 import Header from '@/components/header/Header'
+
+const BASE_PREFIXES = [
+  '/hub/proyectos',
+  '/hub/gestor-proyectos-app',
+  '/hub/inventario',
+  '/inventario',
+]
+function detectBase(pathname: string) {
+  return BASE_PREFIXES.find((prefix) => pathname.startsWith(prefix)) ?? ''
+}
+function getHref(to: string) {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
+  const basePrefix = detectBase(pathname)
+  if (!basePrefix) return to
+  if (to === '/') return basePrefix
+  return `${basePrefix}${to.startsWith('/') ? to : `/${to}`}`
+}
 
 /**
  * Uniformización con el panel principal (Hub, HubPanelPage.jsx):
@@ -18,6 +36,19 @@ import Header from '@/components/header/Header'
  */
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const lastLegacyPathRef = useRef<string>('/proyectos/proj-minedu-2027')
+
+  const barePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
+  const isCascadeView = barePath.startsWith('/cascada')
+
+  useEffect(() => {
+    if (!isCascadeView) {
+      lastLegacyPathRef.current = `${barePath}${location.search}`
+    }
+  }, [barePath, location.search, isCascadeView])
+
   const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro' | 'ejecutivo'>(() => {
     const raw = localStorage.getItem('qaway.hubTheme')
     if (raw === 'claro' || raw === 'blanco') return 'blanco'
@@ -68,6 +99,38 @@ export default function AppLayout() {
             <Outlet />
           </div>
         </main>
+      </div>
+
+      {/* SWITCHER FLOTANTE INFERIOR: Alterna en 1 clic entre Versión Actual (Fase 17) y Vista Cascada Fractal */}
+      <div
+        role="region"
+        aria-label="Selector de versión de arquitectura"
+        className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-950/95 p-1.5 shadow-2xl backdrop-blur-md"
+      >
+        <button
+          type="button"
+          onClick={() => navigate(getHref(lastLegacyPathRef.current || '/proyectos/proj-minedu-2027'))}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+            !isCascadeView
+              ? 'bg-white text-slate-950 shadow-sm'
+              : 'text-slate-300 hover:text-white'
+          }`}
+        >
+          <Layers size={14} />
+          <span>Versión Anterior (Fase 17)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(getHref('/cascada'))}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+            isCascadeView
+              ? 'bg-[#1e3a8a] text-white shadow-sm ring-1 ring-blue-400/50'
+              : 'text-slate-300 hover:text-white'
+          }`}
+        >
+          <Sparkles size={14} className={isCascadeView ? 'text-amber-300' : 'text-blue-400'} />
+          <span>Versión Actual · Cascada Fractal</span>
+        </button>
       </div>
     </div>
   )

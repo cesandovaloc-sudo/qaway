@@ -47,6 +47,7 @@ import PurchasesPage from '@/pages/PurchasesPage'
 import SharedLinksPage from '@/pages/config/SharedLinksPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import TerritoryReporterPage from '@/pages/monitoring/TerritoryReporterPage'
+import CascadeFractalPage from '@/features/cascade-fractal/CascadeFractalPage'
 
 export default function AppRouter() {
   return (
@@ -82,6 +83,9 @@ export default function AppRouter() {
           {/* Módulo Autónomo de Seguimiento y Monitoreo Territorial (CdD - MC SIGA / UGEL) */}
           <Route path="monitoreo-territorial" element={<TerritoryReporterPage />} />
           <Route path="monitoreo" element={<Navigate to="/monitoreo-territorial" replace />} />
+
+          {/* Nueva Arquitectura: Motor WBS en Cascada Fractal con Roll-up e integración 100% funcional */}
+          <Route path="cascada" element={<CascadeFractalPage />} />
 
           {/* Productos / Inventario — lectura: cualquier autenticado */}
           <Route path="productos" element={<RequirePlanFeature feature="products"><ProductsPage /></RequirePlanFeature>} />

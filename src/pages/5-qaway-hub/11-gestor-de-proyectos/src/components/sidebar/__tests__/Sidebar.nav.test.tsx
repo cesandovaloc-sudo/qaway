@@ -44,6 +44,7 @@ const CASES: Array<{ url: string; expected: string; tenant?: string }> = [
   { url: '/proyectos', expected: 'Proyectos' },
   { url: '/bandeja', expected: 'Bandeja' },
   { url: '/proyectos?view=criticas', expected: 'Alertas Críticas' },
+  { url: '/cascada', expected: 'Cascada Fractal (WBS)' },
   {
     url: '/monitoreo-territorial',
     expected: 'Monitoreo Territorial',

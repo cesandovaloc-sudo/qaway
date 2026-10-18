@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Plus,
   Check,
+  Workflow,
 } from 'lucide-react'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { useProjectsDataset, useTenantFilteredProjects } from '@/hooks/useProjects'
@@ -158,6 +159,12 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
     {
       title: 'SEGUIMIENTO & CONTROL',
       items: [
+        {
+          to: '/cascada',
+          label: 'Cascada Fractal (WBS)',
+          icon: <Workflow size={18} />,
+          badge: 'WBS',
+        },
         {
           to: '/monitoreo-territorial',
           label: 'Monitoreo Territorial',
