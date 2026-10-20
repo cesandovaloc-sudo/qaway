@@ -620,7 +620,10 @@ function DonutChart({
           strokeWidth="18"
           strokeDasharray={`${compLen} ${circumference}`}
           strokeDashoffset={0}
-        />
+          className="transition-all duration-300 hover:opacity-80 hover:stroke-[22] cursor-pointer"
+        >
+          <title>{`Completado: ${completed} (${Math.round((completed / total) * 100)}%)`}</title>
+        </circle>
         {/* En proceso (Ámbar) */}
         <circle
           cx="65"
@@ -631,7 +634,10 @@ function DonutChart({
           strokeWidth="18"
           strokeDasharray={`${progLen} ${circumference}`}
           strokeDashoffset={-compLen}
-        />
+          className="transition-all duration-300 hover:opacity-80 hover:stroke-[22] cursor-pointer"
+        >
+          <title>{`En proceso: ${inProgress} (${Math.round((inProgress / total) * 100)}%)`}</title>
+        </circle>
         {/* Pendiente (Rojo) */}
         <circle
           cx="65"
@@ -642,7 +648,10 @@ function DonutChart({
           strokeWidth="18"
           strokeDasharray={`${pendLen} ${circumference}`}
           strokeDashoffset={-(compLen + progLen)}
-        />
+          className="transition-all duration-300 hover:opacity-80 hover:stroke-[22] cursor-pointer"
+        >
+          <title>{`Pendiente: ${pending} (${Math.round((pending / total) * 100)}%)`}</title>
+        </circle>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <span className="text-2xl font-extrabold leading-none text-slate-900 tabular-nums">
@@ -662,6 +671,7 @@ interface TerritoryReporterTabProps {
 type ReporterViewMode =
   | 'matriz_ugel'
   | 'tarjetas_fase'
+  | 'tarjetas_powerbi'
   | 'comparativo_ejecutivo'
   | 'direcciones_linea'
 
@@ -1057,7 +1067,19 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
               }`}
             >
               <LayoutGrid size={14} />
-              Tarjetas por Fase
+              Tarjetas por Fase (Original)
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('tarjetas_powerbi')}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'tarjetas_powerbi'
+                  ? 'bg-white text-slate-900 shadow-xs border border-amber-300'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Sparkles size={14} className="text-amber-500" />
+              Tarjetas Semáforo (Power BI)
             </button>
             <button
               type="button"
@@ -1092,12 +1114,12 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
           ════════════════════════════════════════════════════════════════════════ */}
       {viewMode === 'matriz_ugel' && (
         <div className="space-y-4">
-          {/* 1. CINTA SEMAFÓRICA SUPERIOR (Quick-Status Strip de las 13 UGEL) */}
+          {/* 1. CINTA SEMAFÓRICA SUPERIOR (Quick-Status Strip de las 13 UGEL con mayor altura) */}
           <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xs">
             <div className="grid min-w-[980px] grid-cols-14 overflow-hidden rounded-xl">
-              <div className="flex flex-col items-center justify-center bg-slate-800 px-2 py-2.5 text-center text-white">
-                <span className="text-[11px] font-bold leading-tight">Estado por UGEL</span>
-                <span className="mt-0.5 text-[10px] text-slate-300">(Fase 1 y Fase 2)</span>
+              <div className="flex flex-col items-center justify-center bg-slate-800 px-3 py-4 min-h-[105px] text-center text-white">
+                <span className="text-xs font-bold leading-tight">Estado por UGEL</span>
+                <span className="mt-1 text-[10px] text-slate-300">(Fase 1 y Fase 2)</span>
               </div>
               {ugels.map((u) => {
                 const st = computeUgelGeneralStatus(u)
@@ -1119,21 +1141,21 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                     type="button"
                     onClick={() => handleOpenInspectUgel(u)}
                     title={`Inspeccionar UGEL ${u.name} (${u.observation})`}
-                    className={`flex flex-col items-center justify-center border-l border-white/20 px-1.5 py-2 text-center transition-colors cursor-pointer ${bgClass}`}
+                    className={`group flex flex-col items-center justify-between border-l border-white/20 px-2 py-3.5 min-h-[105px] text-center transition-all duration-200 hover:brightness-105 cursor-pointer ${bgClass}`}
                   >
-                    <span className="w-full truncate text-[10px] font-extrabold uppercase tracking-tight">
+                    <span className="w-full truncate text-[10.5px] font-extrabold uppercase tracking-tight">
                       {u.name}
                     </span>
-                    <span className="my-1 grid h-5 w-5 place-items-center rounded-full bg-white/95 shadow-2xs">
+                    <span className="my-1.5 grid h-6 w-6 place-items-center rounded-full bg-white/95 shadow-2xs transition-transform duration-200 group-hover:scale-110">
                       {st === 'completado' ? (
-                        <Check size={12} strokeWidth={3} className="text-emerald-600" />
+                        <Check size={13} strokeWidth={3} className="text-emerald-600" />
                       ) : st === 'en_proceso' ? (
-                        <Clock size={12} strokeWidth={2.6} className="text-amber-600" />
+                        <Clock size={13} strokeWidth={2.6} className="text-amber-600" />
                       ) : (
-                        <X size={12} strokeWidth={3} className="text-rose-600" />
+                        <X size={13} strokeWidth={3} className="text-rose-600" />
                       )}
                     </span>
-                    <span className="tabular-nums text-[11px] font-bold leading-none">
+                    <span className="tabular-nums text-[13px] font-black leading-none">
                       {ratioLabel}
                     </span>
                   </button>
@@ -1142,86 +1164,83 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             </div>
           </div>
 
-          {/* 2. FILA DE 5 KPIs EJECUTIVOS */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600">
+          {/* 2. FILA DE 4 KPIs EJECUTIVOS EQUILIBRADOS (Peso tipográfico y altura calibrados) */}
+          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex items-center gap-3.5 rounded-xl border border-slate-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-600">
                 <Building2 size={22} />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500">Total de UGEL</p>
-                <p className="text-2xl font-extrabold text-slate-900 tabular-nums">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de UGEL</p>
+                <p className="text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight">
                   {ugelStats.total}
                 </p>
-                <p className="text-[11px] text-slate-400">{selectedRegion}</p>
+                <p className="text-xs text-slate-500 font-medium">{selectedRegion}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+            <div className="flex items-center gap-3.5 rounded-xl border border-emerald-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
                 <CheckCircle2 size={22} />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500">UGEL que cumplen</p>
-                <p className="text-2xl font-extrabold text-emerald-600 tabular-nums">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">UGEL que cumplen</p>
+                <p className="text-3xl font-extrabold text-emerald-600 tabular-nums tracking-tight">
                   {ugelStats.completed}
                 </p>
-                <p className="text-[11px] text-slate-400 tabular-nums">
-                  {ugelStats.completedPct}% del total
+                <p className="text-xs text-slate-500 tabular-nums font-medium">
+                  <span className="font-bold text-emerald-700">{ugelStats.completedPct}%</span> del total
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-amber-50 text-amber-500">
+            <div className="flex items-center gap-3.5 rounded-xl border border-amber-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-500">
                 <Clock size={22} />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500">En proceso</p>
-                <p className="text-2xl font-extrabold text-amber-500 tabular-nums">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700">En proceso</p>
+                <p className="text-3xl font-extrabold text-amber-600 tabular-nums tracking-tight">
                   {ugelStats.inProgress}
                 </p>
-                <p className="text-[11px] text-slate-400 tabular-nums">
-                  {ugelStats.inProgressPct}% del total
+                <p className="text-xs text-slate-500 tabular-nums font-medium">
+                  <span className="font-bold text-amber-700">{ugelStats.inProgressPct}%</span> del total
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-rose-50 text-rose-600">
+            <div className="flex items-center gap-3.5 rounded-xl border border-rose-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-rose-50 text-rose-600">
                 <AlertCircle size={22} />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500">Pendientes</p>
-                <p className="text-2xl font-extrabold text-rose-600 tabular-nums">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-rose-700">Pendientes</p>
+                <p className="text-3xl font-extrabold text-rose-600 tabular-nums tracking-tight">
                   {ugelStats.pending}
                 </p>
-                <p className="text-[11px] text-slate-400 tabular-nums">
-                  {ugelStats.pendingPct}% del total
+                <p className="text-xs text-slate-500 tabular-nums font-medium">
+                  <span className="font-bold text-rose-700">{ugelStats.pendingPct}%</span> del total
                 </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600">
-                <FileText size={22} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-500">Total de archivos/subidas</p>
-                <p className="text-2xl font-extrabold text-slate-900 tabular-nums">
-                  {ugelStats.total * 2}
-                </p>
-                <p className="text-[11px] text-slate-400">Fase 1 + Fase 2</p>
               </div>
             </div>
           </div>
 
-          {/* 3. FILA DE 3 GRÁFICOS EJECUTIVOS */}
+          {/* 3. FILA DE 3 GRÁFICOS EJECUTIVOS (Alineados verticalmente con barras continuas y tooltips interactivos) */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {/* Card 1: Avance por fase */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
-              <h3 className="text-sm font-bold text-slate-900">Avance por fase (todas las UGEL)</h3>
-              <div className="mt-4 space-y-4">
+            {/* Card 1: Avance por fase (Barra Continua sin fragmentos redondeados + Tooltip con números) */}
+            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px]">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Avance por fase (todas las UGEL)</h3>
+                  <p className="text-[11px] text-slate-400">Distribución de cumplimiento en territorio</p>
+                </div>
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  Fase 1 vs 2
+                </span>
+              </div>
+
+              {/* Barras continuas unificadas alineadas al centro vertical */}
+              <div className="my-auto space-y-4 py-3">
                 {[
                   {
                     label: 'Fase 1',
@@ -1238,34 +1257,47 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                 ].map((f) => (
                   <div key={f.label} className="flex items-center gap-3">
                     <span className="w-12 text-xs font-bold text-slate-700">{f.label}</span>
-                    <div className="flex h-8 flex-1 overflow-hidden rounded-lg bg-slate-100 text-xs font-bold text-white">
+                    {/* Contenedor continuo de barra: UNA SOLA BARRA INTEGRAL */}
+                    <div className="relative flex h-9 flex-1 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                       {f.ok > 0 && (
                         <div
                           style={{ width: `${(f.ok / ugelStats.total) * 100}%` }}
-                          className="flex items-center justify-center bg-emerald-600 tabular-nums"
+                          className="group/seg relative flex h-full items-center justify-center bg-emerald-600 border-r border-white/20 transition-all duration-200 hover:brightness-110 cursor-pointer"
                         >
-                          {f.ok}
+                          <span className="text-xs font-black text-white tabular-nums select-none">{f.ok}</span>
+                          {/* Tooltip interactivo flotante moderno */}
+                          <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-0.5 text-[10.5px] font-bold text-white opacity-0 shadow-lg transition-all duration-200 group-hover/seg:opacity-100 group-hover/seg:-translate-y-1">
+                            {f.label} · Completadas: {f.ok} UGEL ({Math.round((f.ok / ugelStats.total) * 100)}%)
+                          </div>
                         </div>
                       )}
                       {f.prog > 0 && (
                         <div
                           style={{ width: `${(f.prog / ugelStats.total) * 100}%` }}
-                          className="flex items-center justify-center bg-amber-400 text-slate-900 tabular-nums"
+                          className="group/seg relative flex h-full items-center justify-center bg-amber-400 border-r border-white/20 transition-all duration-200 hover:brightness-110 cursor-pointer"
                         >
-                          {f.prog}
+                          <span className="text-xs font-black text-slate-900 tabular-nums select-none">{f.prog}</span>
+                          {/* Tooltip interactivo flotante moderno */}
+                          <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-0.5 text-[10.5px] font-bold text-white opacity-0 shadow-lg transition-all duration-200 group-hover/seg:opacity-100 group-hover/seg:-translate-y-1">
+                            {f.label} · En proceso: {f.prog} UGEL ({Math.round((f.prog / ugelStats.total) * 100)}%)
+                          </div>
                         </div>
                       )}
                       {f.pend > 0 && (
                         <div
                           style={{ width: `${(f.pend / ugelStats.total) * 100}%` }}
-                          className="flex items-center justify-center bg-rose-600 tabular-nums"
+                          className="group/seg relative flex h-full items-center justify-center bg-rose-600 transition-all duration-200 hover:brightness-110 cursor-pointer"
                         >
-                          {f.pend}
+                          <span className="text-xs font-black text-white tabular-nums select-none">{f.pend}</span>
+                          {/* Tooltip interactivo flotante moderno */}
+                          <div className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-0.5 text-[10.5px] font-bold text-white opacity-0 shadow-lg transition-all duration-200 group-hover/seg:opacity-100 group-hover/seg:-translate-y-1">
+                            {f.label} · Pendientes: {f.pend} UGEL ({Math.round((f.pend / ugelStats.total) * 100)}%)
+                          </div>
                         </div>
                       )}
                     </div>
-                    <div className="w-10 text-right leading-none">
-                      <span className="block text-sm font-extrabold text-slate-900 tabular-nums">
+                    <div className="w-12 text-right leading-none">
+                      <span className="block text-sm font-bold text-slate-800 tabular-nums">
                         {ugelStats.total}
                       </span>
                       <span className="text-[10px] text-slate-400">UGEL</span>
@@ -1273,7 +1305,8 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                   </div>
                 ))}
               </div>
-              <div className="mt-5 flex items-center gap-4 text-xs text-slate-600">
+
+              <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-xs text-slate-600">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" /> Completado
                 </span>
@@ -1286,10 +1319,19 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
               </div>
             </div>
 
-            {/* Card 2: Estado global (Donut) */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
-              <h3 className="text-sm font-bold text-slate-900">Estado global (todas las fases)</h3>
-              <div className="mt-3 flex items-center justify-center gap-6">
+            {/* Card 2: Estado global (Donut Centrado Verticalmente) */}
+            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px]">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Estado global (todas las fases)</h3>
+                  <p className="text-[11px] text-slate-400">Consolidado general de la región</p>
+                </div>
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  Total
+                </span>
+              </div>
+
+              <div className="my-auto flex items-center justify-center gap-5 py-2">
                 <DonutChart
                   completed={ugelStats.completed}
                   inProgress={ugelStats.inProgress}
@@ -1298,62 +1340,102 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                   centerSub="UGEL"
                 />
                 <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
+                  <div className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer">
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-600 shrink-0" />
                     <span className="text-slate-600">
                       Completado ({ugelStats.completed}) —{' '}
-                      <strong className="text-slate-900">{ugelStats.completedPct}%</strong>
+                      <strong className="font-bold text-slate-900">{ugelStats.completedPct}%</strong>
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                  <div className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer">
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400 shrink-0" />
                     <span className="text-slate-600">
                       En proceso ({ugelStats.inProgress}) —{' '}
-                      <strong className="text-slate-900">{ugelStats.inProgressPct}%</strong>
+                      <strong className="font-bold text-slate-900">{ugelStats.inProgressPct}%</strong>
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-rose-600" />
+                  <div className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer">
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-600 shrink-0" />
                     <span className="text-slate-600">
                       Pendiente ({ugelStats.pending}) —{' '}
-                      <strong className="text-slate-900">{ugelStats.pendingPct}%</strong>
+                      <strong className="font-bold text-slate-900">{ugelStats.pendingPct}%</strong>
                     </span>
                   </div>
                 </div>
               </div>
+
+              <p className="border-t border-slate-100 pt-3 text-center text-[10.5px] font-medium text-slate-400">
+                Pasa el mouse sobre el gráfico para ver detalle numérico
+              </p>
             </div>
 
-            {/* Card 3: Avance por dirección */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs">
-              <h3 className="text-sm font-bold text-slate-900">
-                Avance por dirección (todas las UGEL)
-              </h3>
-              <div className="mt-3 space-y-2">
+            {/* Card 3: Avance por dirección (Barras continuas unificadas + Tooltips interactivos) */}
+            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px]">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Avance por dirección (todas las UGEL)</h3>
+                  <p className="text-[11px] text-slate-400">7 Direcciones de línea pedagógicas</p>
+                </div>
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  DEI - DITEN
+                </span>
+              </div>
+
+              <div className="my-auto space-y-2.5 py-1">
                 {ugelStats.directionStats.map((d) => (
-                  <div key={d.code} className="flex items-center gap-2.5 text-xs">
-                    <span className="w-14 font-bold text-slate-700">{d.code}</span>
-                    <div className="flex h-3.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                      <div
-                        style={{ width: `${(d.ok / d.total) * 100}%` }}
-                        className="bg-emerald-600"
-                      />
-                      <div
-                        style={{ width: `${(d.prog / d.total) * 100}%` }}
-                        className="bg-amber-400"
-                      />
-                      <div
-                        style={{ width: `${(d.pend / d.total) * 100}%` }}
-                        className="bg-rose-600"
-                      />
+                  <div
+                    key={d.code}
+                    className="group/row flex items-center gap-2.5 text-xs py-0.5 px-1 rounded-md transition-colors hover:bg-slate-50"
+                  >
+                    <span className="w-13 font-bold text-slate-700 transition-colors group-hover/row:text-slate-900">
+                      {d.code}
+                    </span>
+                    {/* Barra continua sin redondeos internos */}
+                    <div className="relative flex h-3.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                      {d.ok > 0 && (
+                        <div
+                          style={{ width: `${(d.ok / d.total) * 100}%` }}
+                          className="group/seg relative h-full bg-emerald-600 border-r border-white/20 transition-all duration-200 hover:brightness-110 cursor-pointer"
+                        >
+                          <div className="pointer-events-none absolute -top-7 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-1.5 py-0.5 text-[9.5px] font-bold text-white opacity-0 shadow-lg transition-all duration-200 group-hover/seg:opacity-100 group-hover/seg:-translate-y-1">
+                            {d.code} · OK: {d.ok}/{d.total} ({Math.round((d.ok/d.total)*100)}%)
+                          </div>
+                        </div>
+                      )}
+                      {d.prog > 0 && (
+                        <div
+                          style={{ width: `${(d.prog / d.total) * 100}%` }}
+                          className="group/seg relative h-full bg-amber-400 border-r border-white/20 transition-all duration-200 hover:brightness-110 cursor-pointer"
+                        >
+                          <div className="pointer-events-none absolute -top-7 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-1.5 py-0.5 text-[9.5px] font-bold text-white opacity-0 shadow-lg transition-all duration-200 group-hover/seg:opacity-100 group-hover/seg:-translate-y-1">
+                            {d.code} · En proceso: {d.prog}/{d.total}
+                          </div>
+                        </div>
+                      )}
+                      {d.pend > 0 && (
+                        <div
+                          style={{ width: `${(d.pend / d.total) * 100}%` }}
+                          className="group/seg relative h-full bg-rose-600 transition-all duration-200 hover:brightness-110 cursor-pointer"
+                        >
+                          <div className="pointer-events-none absolute -top-7 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-1.5 py-0.5 text-[9.5px] font-bold text-white opacity-0 shadow-lg transition-all duration-200 group-hover/seg:opacity-100 group-hover/seg:-translate-y-1">
+                            {d.code} · Pendiente: {d.pend}/{d.total}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <span className="w-9 text-right font-bold text-slate-800 tabular-nums">
                       {d.pct}%
                     </span>
-                    <span className="w-9 text-right text-[11px] text-slate-400 tabular-nums">
+                    <span className="w-8 text-right text-[11px] text-slate-400 tabular-nums">
                       {d.ok}/{d.total}
                     </span>
                   </div>
                 ))}
+              </div>
+
+              <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] text-slate-400">
+                <span>7 Direcciones evaluadas</span>
+                <span className="font-semibold text-slate-600">13 UGEL Junín</span>
               </div>
             </div>
           </div>
@@ -1752,6 +1834,193 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                         <div
                           className={`h-full rounded-full ${barBg}`}
                           style={{ width: `${Math.max(12, (files / total) * 100)}%` }}
+                        />
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          VISTA 2-B: TARJETAS SEMÁFORO (INTERMEDIO · POWER BI TOUCH)
+          Conserva el alto impacto visual del semáforo con acabado corporativo:
+          - Radios moderados (12px / rounded-xl)
+          - Bordes semafóricos definidos de 1.5px
+          - Micro-badge semáforo con porcentaje e icono sutil
+          - Cifra cuantitativa tabular protagonista y micro-barra métrica de 3.5px
+          ════════════════════════════════════════════════════════════════════════ */}
+      {viewMode === 'tarjetas_powerbi' && (
+        <div className="space-y-4">
+          {[
+            {
+              phase: 1 as const,
+              title: 'Fase 1',
+              subtitle: 'Dotación & Cobertura Inicial · Región Junín',
+              ok: ugelStats.p1Completed,
+              prog: ugelStats.p1InProgress,
+              pend: ugelStats.p1Pending,
+              accentColor: '#2563eb',
+            },
+            {
+              phase: 2 as const,
+              title: 'Fase 2',
+              subtitle: 'Verificación Operativa & Cierre · Región Junín',
+              ok: ugelStats.p2Completed,
+              prog: ugelStats.p2InProgress,
+              pend: ugelStats.p2Pending,
+              accentColor: '#7c3aed',
+            },
+          ].map((block) => (
+            <div
+              key={block.title}
+              className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs"
+            >
+              {/* Cabecera estilo Tile Ejecutivo */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="h-10 w-1.5 rounded-full"
+                    style={{ backgroundColor: block.accentColor }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold tracking-tight text-slate-900">
+                        {block.title}
+                      </h3>
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                        Estado por UGEL
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500">{block.subtitle}</p>
+                  </div>
+                </div>
+
+                {/* KPIs de Cabecera con borde y semáforo corporativo */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2.5 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-1.5">
+                    <FileText size={16} className="text-slate-500" />
+                    <div className="text-left">
+                      <span className="block text-[9.5px] font-bold uppercase tracking-wider text-slate-400">
+                        Total UGEL
+                      </span>
+                      <span className="text-base font-extrabold text-slate-800 tabular-nums">
+                        {ugelStats.total}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 rounded-lg border border-emerald-300/80 bg-emerald-50/60 px-3 py-1.5">
+                    <CheckCircle2 size={16} className="text-emerald-600" />
+                    <div className="text-left">
+                      <span className="block text-[9.5px] font-bold uppercase tracking-wider text-emerald-800">
+                        Completadas
+                      </span>
+                      <span className="text-base font-extrabold text-emerald-700 tabular-nums">
+                        {block.ok}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 rounded-lg border border-amber-300/80 bg-amber-50/60 px-3 py-1.5">
+                    <Clock size={16} className="text-amber-600" />
+                    <div className="text-left">
+                      <span className="block text-[9.5px] font-bold uppercase tracking-wider text-amber-800">
+                        En proceso
+                      </span>
+                      <span className="text-base font-extrabold text-amber-700 tabular-nums">
+                        {block.prog}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 rounded-lg border border-rose-300/80 bg-rose-50/60 px-3 py-1.5">
+                    <AlertCircle size={16} className="text-rose-600" />
+                    <div className="text-left">
+                      <span className="block text-[9.5px] font-bold uppercase tracking-wider text-rose-800">
+                        Pendientes
+                      </span>
+                      <span className="text-base font-extrabold text-rose-700 tabular-nums">
+                        {block.pend}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 13 Tarjetas UGEL Semáforo Intermedio (Power BI Tile) */}
+              <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-13">
+                {ugels.map((u) => {
+                  const files = block.phase === 1 ? u.phase1Files : u.phase2Files
+                  const total = block.phase === 1 ? u.phase1Total : u.phase2Total
+                  const st = computePhaseStatus(files, total)
+                  const percent = Math.round((files / total) * 100)
+
+                  // Semáforo Intermedio: Borde nítido de alta definición + fondo sutil con contraste
+                  const cardStyles =
+                    st === 'completado'
+                      ? 'border-emerald-400/90 bg-emerald-50/40 hover:bg-emerald-50/80 hover:border-emerald-500'
+                      : st === 'en_proceso'
+                        ? 'border-amber-400/90 bg-amber-50/40 hover:bg-amber-50/80 hover:border-amber-500'
+                        : 'border-rose-400/90 bg-rose-50/40 hover:bg-rose-50/80 hover:border-rose-500'
+
+                  const meterColor =
+                    st === 'completado'
+                      ? 'bg-emerald-600'
+                      : st === 'en_proceso'
+                        ? 'bg-amber-500'
+                        : 'bg-rose-500'
+
+                  return (
+                    <button
+                      key={`pbi-${u.id}`}
+                      type="button"
+                      onClick={() => handleOpenInspectUgel(u)}
+                      className={`group flex flex-col items-center justify-between rounded-xl border-[1.5px] px-2 py-3 min-h-[110px] text-center transition-all cursor-pointer shadow-2xs hover:shadow-sm ${cardStyles}`}
+                    >
+                      {/* Nombre UGEL con legibilidad profesional */}
+                      <span className="w-full truncate text-[11px] font-bold tracking-tight text-slate-800" title={u.name}>
+                        {u.name}
+                      </span>
+
+                      {/* Micro-badge Semáforo Integrado: porcentaje + icono técnico */}
+                      <div className="my-2 flex items-center justify-center">
+                        {st === 'completado' ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-bold text-white shadow-2xs">
+                            <Check size={11} strokeWidth={3} />
+                            100%
+                          </span>
+                        ) : st === 'en_proceso' ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-2xs">
+                            <Clock size={11} strokeWidth={2.5} />
+                            {percent}%
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-rose-600 px-2 py-0.5 text-[11px] font-bold text-white shadow-2xs">
+                            <X size={11} strokeWidth={3} />
+                            0%
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Cifra Cuantitativa Protagonista */}
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-sm font-extrabold text-slate-900 tabular-nums">
+                          {files}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-400">
+                          /{total}
+                        </span>
+                      </div>
+
+                      {/* Micro-barra métrica de precisión estilo BI */}
+                      <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-200/80">
+                        <div
+                          className={`h-full rounded-full transition-all ${meterColor}`}
+                          style={{ width: `${Math.max(6, (files / total) * 100)}%` }}
                         />
                       </div>
                     </button>
