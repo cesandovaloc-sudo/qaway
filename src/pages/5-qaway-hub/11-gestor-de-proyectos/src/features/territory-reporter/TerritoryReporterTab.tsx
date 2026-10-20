@@ -977,16 +977,30 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
       <style>{`
         @media print {
           @page {
-            size: landscape;
-            margin: 8mm;
+            size: landscape !important;
+            margin: 6mm 6mm !important;
           }
-          body {
+          html, body {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            background: #ffffff !important;
+            overflow: visible !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           header, nav, aside, footer, [role="navigation"] {
             display: none !important;
+          }
+          ::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
           }
         }
       `}</style>
@@ -1164,13 +1178,13 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
           VISTA 1: MATRIZ INTEGRAL UGEL (Lámina 4: Cinta Semafórica + KPIs + Gráficos + Tabla)
           ════════════════════════════════════════════════════════════════════════ */}
       {viewMode === 'matriz_ugel' && (
-        <div className="space-y-4">
-          {/* 1. CINTA SEMAFÓRICA SUPERIOR (Quick-Status Strip de las 13 UGEL con mayor altura) */}
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xs">
-            <div className="grid min-w-[980px] grid-cols-14 overflow-hidden rounded-xl">
-              <div className="flex flex-col items-center justify-center bg-slate-800 px-3 py-4 min-h-[105px] text-center text-white">
-                <span className="text-xs font-bold leading-tight">Estado por UGEL</span>
-                <span className="mt-1 text-[10px] text-slate-300">(Fase 1 y Fase 2)</span>
+        <div className="space-y-4 print:space-y-2.5">
+          {/* 1. CINTA SEMAFÓRICA SUPERIOR (Quick-Status Strip de las 13 UGEL) */}
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xs print:overflow-visible print:border-slate-300 print:p-1">
+            <div className="grid min-w-[980px] grid-cols-14 overflow-hidden rounded-xl print:min-w-0 print:w-full">
+              <div className="flex flex-col items-center justify-center bg-slate-800 px-3 py-4 min-h-[105px] text-center text-white print:min-h-0 print:py-2 print:px-1">
+                <span className="text-xs font-bold leading-tight print:text-[9px]">Estado por UGEL</span>
+                <span className="mt-1 text-[10px] text-slate-300 print:text-[7.5px] print:mt-0.5">(F1 y F2)</span>
               </div>
               {ugels.map((u) => {
                 const st = computeUgelGeneralStatus(u)
@@ -1192,21 +1206,21 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                     type="button"
                     onClick={() => handleOpenInspectUgel(u)}
                     title={`Inspeccionar UGEL ${u.name} (${u.observation})`}
-                    className={`group flex flex-col items-center justify-between border-l border-white/20 px-2 py-3.5 min-h-[105px] text-center transition-all duration-200 hover:brightness-105 cursor-pointer ${bgClass}`}
+                    className={`group flex flex-col items-center justify-between border-l border-white/20 px-2 py-3.5 min-h-[105px] text-center transition-all duration-200 hover:brightness-105 cursor-pointer print:min-h-0 print:py-2 print:px-0.5 ${bgClass}`}
                   >
-                    <span className="w-full truncate text-[10.5px] font-extrabold uppercase tracking-tight">
+                    <span className="w-full truncate text-[10.5px] font-extrabold uppercase tracking-tight print:text-[8px]">
                       {u.name}
                     </span>
-                    <span className="my-1.5 grid h-6 w-6 place-items-center rounded-full bg-white/95 shadow-2xs transition-transform duration-200 group-hover:scale-110">
+                    <span className="my-1.5 grid h-6 w-6 place-items-center rounded-full bg-white/95 shadow-2xs transition-transform duration-200 group-hover:scale-110 print:my-0.5 print:h-4.5 print:w-4.5">
                       {st === 'completado' ? (
-                        <Check size={13} strokeWidth={3} className="text-emerald-600" />
+                        <Check size={13} strokeWidth={3} className="text-emerald-600 print:h-2.5 print:w-2.5" />
                       ) : st === 'en_proceso' ? (
-                        <Clock size={13} strokeWidth={2.6} className="text-amber-600" />
+                        <Clock size={13} strokeWidth={2.6} className="text-amber-600 print:h-2.5 print:w-2.5" />
                       ) : (
-                        <X size={13} strokeWidth={3} className="text-rose-600" />
+                        <X size={13} strokeWidth={3} className="text-rose-600 print:h-2.5 print:w-2.5" />
                       )}
                     </span>
-                    <span className="tabular-nums text-[13px] font-black leading-none">
+                    <span className="tabular-nums text-[13px] font-black leading-none print:text-[9.5px]">
                       {ratioLabel}
                     </span>
                   </button>
@@ -1215,79 +1229,79 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             </div>
           </div>
 
-          {/* 2. FILA DE 4 KPIs EJECUTIVOS EQUILIBRADOS (Peso tipográfico y altura calibrados) */}
-          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="flex items-center gap-3.5 rounded-xl border border-slate-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-600">
-                <Building2 size={22} />
+          {/* 2. FILA DE 4 KPIs EJECUTIVOS EQUILIBRADOS */}
+          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-2 lg:grid-cols-4 print:grid-cols-4 print:gap-2">
+            <div className="flex items-center gap-3.5 rounded-xl border border-slate-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs print:min-h-0 print:p-2.5 print:gap-2">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-600 print:h-8 print:w-8">
+                <Building2 size={22} className="print:h-4 print:w-4" />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total de UGEL</p>
-                <p className="text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 print:text-[8.5px]">Total de UGEL</p>
+                <p className="text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight print:text-lg">
                   {ugelStats.total}
                 </p>
-                <p className="text-xs text-slate-500 font-medium">{selectedRegion}</p>
+                <p className="text-xs text-slate-500 font-medium print:text-[9px]">{selectedRegion}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-xl border border-emerald-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
-                <CheckCircle2 size={22} />
+            <div className="flex items-center gap-3.5 rounded-xl border border-emerald-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs print:min-h-0 print:p-2.5 print:gap-2">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 print:h-8 print:w-8">
+                <CheckCircle2 size={22} className="print:h-4 print:w-4" />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">UGEL que cumplen</p>
-                <p className="text-3xl font-extrabold text-emerald-600 tabular-nums tracking-tight">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 print:text-[8.5px]">UGEL que cumplen</p>
+                <p className="text-3xl font-extrabold text-emerald-600 tabular-nums tracking-tight print:text-lg">
                   {ugelStats.completed}
                 </p>
-                <p className="text-xs text-slate-500 tabular-nums font-medium">
+                <p className="text-xs text-slate-500 tabular-nums font-medium print:text-[9px]">
                   <span className="font-bold text-emerald-700">{ugelStats.completedPct}%</span> del total
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-xl border border-amber-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-500">
-                <Clock size={22} />
+            <div className="flex items-center gap-3.5 rounded-xl border border-amber-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs print:min-h-0 print:p-2.5 print:gap-2">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-500 print:h-8 print:w-8">
+                <Clock size={22} className="print:h-4 print:w-4" />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700">En proceso</p>
-                <p className="text-3xl font-extrabold text-amber-600 tabular-nums tracking-tight">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700 print:text-[8.5px]">En proceso</p>
+                <p className="text-3xl font-extrabold text-amber-600 tabular-nums tracking-tight print:text-lg">
                   {ugelStats.inProgress}
                 </p>
-                <p className="text-xs text-slate-500 tabular-nums font-medium">
+                <p className="text-xs text-slate-500 tabular-nums font-medium print:text-[9px]">
                   <span className="font-bold text-amber-700">{ugelStats.inProgressPct}%</span> del total
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 rounded-xl border border-rose-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-rose-50 text-rose-600">
-                <AlertCircle size={22} />
+            <div className="flex items-center gap-3.5 rounded-xl border border-rose-200/80 bg-white p-4.5 shadow-2xs min-h-[96px] transition-all duration-200 hover:shadow-xs print:min-h-0 print:p-2.5 print:gap-2">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-rose-50 text-rose-600 print:h-8 print:w-8">
+                <AlertCircle size={22} className="print:h-4 print:w-4" />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-rose-700">Pendientes</p>
-                <p className="text-3xl font-extrabold text-rose-600 tabular-nums tracking-tight">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-rose-700 print:text-[8.5px]">Pendientes</p>
+                <p className="text-3xl font-extrabold text-rose-600 tabular-nums tracking-tight print:text-lg">
                   {ugelStats.pending}
                 </p>
-                <p className="text-xs text-slate-500 tabular-nums font-medium">
+                <p className="text-xs text-slate-500 tabular-nums font-medium print:text-[9px]">
                   <span className="font-bold text-rose-700">{ugelStats.pendingPct}%</span> del total
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 3. FILA DE 3 GRÁFICOS EJECUTIVOS (Alineados verticalmente con barras continuas y tooltips interactivos) */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {/* Card 1: Avance por fase (Barra Continua + Efecto hover con visualización numérica viva) */}
-            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px]">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          {/* 3. FILA DE 3 GRÁFICOS EJECUTIVOS */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 print:grid-cols-3 print:gap-2.5">
+            {/* Card 1: Avance por fase */}
+            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px] print:min-h-0 print:p-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:pb-1.5">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Avance por fase (todas las UGEL)</h3>
-                  <p className="text-[11px] text-slate-400">Distribución de cumplimiento en territorio</p>
+                  <h3 className="text-sm font-bold text-slate-900 print:text-xs">Avance por fase (todas las UGEL)</h3>
+                  <p className="text-[11px] text-slate-400 print:text-[9px]">Distribución de cumplimiento en territorio</p>
                 </div>
                 {activePhaseHover ? (
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-[10.5px] font-bold shadow-2xs transition-all duration-150 animate-in fade-in"
+                    className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-[10.5px] font-bold shadow-2xs transition-all duration-150 animate-in fade-in print:text-[8.5px]"
                     style={{
                       backgroundColor: activePhaseHover.bgColor,
                       color: activePhaseHover.textColor,
@@ -1300,14 +1314,14 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                     {activePhaseHover.text}
                   </span>
                 ) : (
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 print:text-[8px]">
                     Fase 1 vs 2
                   </span>
                 )}
               </div>
 
-              {/* Barras continuas unificadas alineadas al centro vertical con hover interactivo sin recorte */}
-              <div className="my-auto space-y-4 py-3">
+              {/* Barras continuas unificadas */}
+              <div className="my-auto space-y-4 py-3 print:space-y-2 print:py-1.5">
                 {[
                   {
                     label: 'Fase 1',
@@ -1322,11 +1336,10 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                     pend: ugelStats.p2Pending,
                   },
                 ].map((f) => (
-                  <div key={f.label} className="flex items-center gap-3">
-                    <span className="w-12 text-xs font-bold text-slate-700">{f.label}</span>
-                    {/* Contenedor relativo sin overflow-hidden para permitir tooltip flotante superior */}
+                  <div key={f.label} className="flex items-center gap-3 print:gap-1.5">
+                    <span className="w-12 text-xs font-bold text-slate-700 print:w-10 print:text-[10px]">{f.label}</span>
                     <div className="relative flex-1">
-                      <div className="flex h-9 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
+                      <div className="flex h-9 overflow-hidden rounded-lg bg-slate-100 shadow-inner print:h-6">
                         {f.ok > 0 && (
                           <div
                             style={{ width: `${(f.ok / ugelStats.total) * 100}%` }}
@@ -1341,7 +1354,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                             onMouseLeave={() => setActivePhaseHover(null)}
                             className="group/seg relative flex h-full items-center justify-center bg-emerald-600 border-r border-white/20 transition-all duration-150 hover:brightness-110 cursor-pointer"
                           >
-                            <span className="text-xs font-black text-white tabular-nums select-none transition-transform group-hover/seg:scale-110">
+                            <span className="text-xs font-black text-white tabular-nums select-none transition-transform group-hover/seg:scale-110 print:text-[10px]">
                               {f.ok}
                             </span>
                           </div>
@@ -1360,7 +1373,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                             onMouseLeave={() => setActivePhaseHover(null)}
                             className="group/seg relative flex h-full items-center justify-center bg-amber-400 border-r border-white/20 transition-all duration-150 hover:brightness-110 cursor-pointer"
                           >
-                            <span className="text-xs font-black text-slate-900 tabular-nums select-none transition-transform group-hover/seg:scale-110">
+                            <span className="text-xs font-black text-slate-900 tabular-nums select-none transition-transform group-hover/seg:scale-110 print:text-[10px]">
                               {f.prog}
                             </span>
                           </div>
@@ -1379,49 +1392,49 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                             onMouseLeave={() => setActivePhaseHover(null)}
                             className="group/seg relative flex h-full items-center justify-center bg-rose-600 transition-all duration-150 hover:brightness-110 cursor-pointer"
                           >
-                            <span className="text-xs font-black text-white tabular-nums select-none transition-transform group-hover/seg:scale-110">
+                            <span className="text-xs font-black text-white tabular-nums select-none transition-transform group-hover/seg:scale-110 print:text-[10px]">
                               {f.pend}
                             </span>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="w-12 text-right leading-none">
-                      <span className="block text-sm font-bold text-slate-800 tabular-nums">
+                    <div className="w-12 text-right leading-none print:w-9">
+                      <span className="block text-sm font-bold text-slate-800 tabular-nums print:text-xs">
                         {ugelStats.total}
                       </span>
-                      <span className="text-[10px] text-slate-400">UGEL</span>
+                      <span className="text-[10px] text-slate-400 print:text-[8px]">UGEL</span>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-xs text-slate-600">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" /> Completado
+              <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-xs text-slate-600 print:pt-1.5 print:text-[9px] print:gap-2">
+                <span className="inline-flex items-center gap-1.5 print:gap-1">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-600 print:h-2 print:w-2" /> Completado
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400" /> En proceso
+                <span className="inline-flex items-center gap-1.5 print:gap-1">
+                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400 print:h-2 print:w-2" /> En proceso
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-rose-600" /> Pendiente
+                <span className="inline-flex items-center gap-1.5 print:gap-1">
+                  <span className="h-2.5 w-2.5 rounded-full bg-rose-600 print:h-2 print:w-2" /> Pendiente
                 </span>
               </div>
             </div>
 
             {/* Card 2: Estado global (Donut Centrado Verticalmente) */}
-            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px]">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px] print:min-h-0 print:p-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:pb-1.5">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Estado global (todas las fases)</h3>
-                  <p className="text-[11px] text-slate-400">Consolidado general de la región</p>
+                  <h3 className="text-sm font-bold text-slate-900 print:text-xs">Estado global (todas las fases)</h3>
+                  <p className="text-[11px] text-slate-400 print:text-[9px]">Consolidado general de la región</p>
                 </div>
-                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 print:text-[8px]">
                   Total
                 </span>
               </div>
 
-              <div className="my-auto flex items-center justify-center gap-5 py-2">
+              <div className="my-auto flex items-center justify-center gap-5 py-2 print:gap-3 print:py-1">
                 <DonutChart
                   completed={ugelStats.completed}
                   inProgress={ugelStats.inProgress}
@@ -1429,7 +1442,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                   centerValue={ugelStats.total}
                   centerSub="UGEL"
                 />
-                <div className="space-y-2 text-xs">
+                <div className="space-y-2 text-xs print:space-y-1 print:text-[9.5px]">
                   <div
                     onMouseEnter={() =>
                       setActivePhaseHover({
@@ -1440,9 +1453,9 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                       })
                     }
                     onMouseLeave={() => setActivePhaseHover(null)}
-                    className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer"
+                    className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer print:p-0"
                   >
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-600 shrink-0" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-600 shrink-0 print:h-2 print:w-2" />
                     <span className="text-slate-600">
                       Completado ({ugelStats.completed}) —{' '}
                       <strong className="font-bold text-slate-900">{ugelStats.completedPct}%</strong>
@@ -1458,9 +1471,9 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                       })
                     }
                     onMouseLeave={() => setActivePhaseHover(null)}
-                    className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer"
+                    className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer print:p-0"
                   >
-                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400 shrink-0" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400 shrink-0 print:h-2 print:w-2" />
                     <span className="text-slate-600">
                       En proceso ({ugelStats.inProgress}) —{' '}
                       <strong className="font-bold text-slate-900">{ugelStats.inProgressPct}%</strong>
@@ -1476,9 +1489,9 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                       })
                     }
                     onMouseLeave={() => setActivePhaseHover(null)}
-                    className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer"
+                    className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-slate-50 cursor-pointer print:p-0"
                   >
-                    <span className="h-2.5 w-2.5 rounded-full bg-rose-600 shrink-0" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-600 shrink-0 print:h-2 print:w-2" />
                     <span className="text-slate-600">
                       Pendiente ({ugelStats.pending}) —{' '}
                       <strong className="font-bold text-slate-900">{ugelStats.pendingPct}%</strong>
@@ -1487,21 +1500,21 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                 </div>
               </div>
 
-              <p className="border-t border-slate-100 pt-3 text-center text-[10.5px] font-medium text-slate-400">
+              <p className="border-t border-slate-100 pt-3 text-center text-[10.5px] font-medium text-slate-400 print:hidden">
                 Pasa el mouse sobre el gráfico para ver detalle numérico
               </p>
             </div>
 
-            {/* Card 3: Avance por dirección (Barras continuas + Efecto hover con visualización numérica viva) */}
-            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px]">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            {/* Card 3: Avance por dirección */}
+            <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[275px] print:min-h-0 print:p-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:pb-1.5">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Avance por dirección (todas las UGEL)</h3>
-                  <p className="text-[11px] text-slate-400">7 Direcciones de línea pedagógicas</p>
+                  <h3 className="text-sm font-bold text-slate-900 print:text-xs">Avance por dirección (todas las UGEL)</h3>
+                  <p className="text-[11px] text-slate-400 print:text-[9px]">7 Direcciones de línea pedagógicas</p>
                 </div>
                 {activeDirHover ? (
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-[10.5px] font-bold shadow-2xs transition-all duration-150 animate-in fade-in"
+                    className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-[10.5px] font-bold shadow-2xs transition-all duration-150 animate-in fade-in print:text-[8.5px]"
                     style={{
                       backgroundColor: activeDirHover.bgColor,
                       color: activeDirHover.textColor,
@@ -1514,13 +1527,67 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                     {activeDirHover.text}
                   </span>
                 ) : (
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 print:text-[8px]">
                     DEI - DITEN
                   </span>
                 )}
               </div>
 
-              <div className="my-auto space-y-2.5 py-1">
+              <div className="my-auto space-y-2.5 py-1 print:space-y-1.5 print:py-0.5">
+                {ugelStats.directionStats.map((d) => (
+                  <div
+                    key={d.code}
+                    onMouseEnter={() =>
+                      setActiveDirHover({
+                        text: `${d.code} · ${d.ok}/${d.total} UGEL cumplen (${d.pct}%) · ${d.prog} en proceso · ${d.pend} pendientes`,
+                        bgColor: '#dcfce7',
+                        textColor: '#166534',
+                        dotColor: '#16a34a',
+                      })
+                    }
+                    onMouseLeave={() => setActiveDirHover(null)}
+                    className="group/row flex items-center gap-2.5 text-xs py-0.5 px-1 rounded-md transition-colors hover:bg-slate-50 cursor-pointer print:gap-1.5 print:py-0.5 print:px-0"
+                  >
+                    <span className="w-13 font-bold text-slate-700 transition-colors group-hover/row:text-slate-900 print:w-10 print:text-[9.5px]">
+                      {d.code}
+                    </span>
+                    {/* Barra continua con hover reactivo */}
+                    <div className="relative flex h-3.5 flex-1 overflow-hidden rounded-full bg-slate-100 print:h-2.5">
+                      {d.ok > 0 && (
+                        <div
+                          style={{ width: `${(d.ok / d.total) * 100}%` }}
+                          className="h-full bg-emerald-600 border-r border-white/20 transition-all duration-150 hover:brightness-110"
+                        />
+                      )}
+                      {d.prog > 0 && (
+                        <div
+                          style={{ width: `${(d.prog / d.total) * 100}%` }}
+                          className="h-full bg-amber-400 border-r border-white/20 transition-all duration-150 hover:brightness-110"
+                        />
+                      )}
+                      {d.pend > 0 && (
+                        <div
+                          style={{ width: `${(d.pend / d.total) * 100}%` }}
+                          className="h-full bg-rose-600 transition-all duration-150 hover:brightness-110"
+                        />
+                      )}
+                    </div>
+                    <span className="w-9 text-right font-bold text-slate-800 tabular-nums print:text-[9.5px] print:w-7">
+                      {d.pct}%
+                    </span>
+                    <span className="w-8 text-right text-[11px] text-slate-400 tabular-nums print:text-[8px] print:w-6">
+                      {d.ok}/{d.total}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] text-slate-400 print:pt-1.5 print:text-[8.5px]">
+                <span>7 Direcciones evaluadas</span>
+                <span className="font-semibold text-slate-600">13 UGEL Junín</span>
+              </div>
+            </div>
+          </div>
                 {ugelStats.directionStats.map((d) => (
                   <div
                     key={d.code}

@@ -86,26 +86,30 @@ export default function AppLayout() {
     <div
       data-mode={themeMode}
       data-palette={colorPalette}
-      className="hub-shell h-dvh bg-[var(--hub-bg)] text-[var(--hub-text)] overflow-hidden transition-colors duration-200"
+      className="hub-shell h-dvh bg-[var(--hub-bg)] text-[var(--hub-text)] overflow-hidden transition-colors duration-200 print:!h-auto print:!overflow-visible print:!bg-white"
     >
-      <Sidebar collapsed={collapsed} />
+      <div className="print:hidden">
+        <Sidebar collapsed={collapsed} />
+      </div>
       <div
-        className="flex flex-col h-dvh min-h-0 transition-all duration-300"
+        className="flex flex-col h-dvh min-h-0 transition-all duration-300 print:!ml-0 print:!h-auto print:!overflow-visible"
         style={{ marginLeft: collapsed ? 72 : 256 }}
       >
-        <Header collapsed={collapsed} onToggleSidebar={() => setCollapsed((c) => !c)} />
-        <main className="flex-1 min-h-0 overflow-y-auto transition-colors duration-200">
-          <div className="p-6 min-h-full">
+        <div className="print:hidden">
+          <Header collapsed={collapsed} onToggleSidebar={() => setCollapsed((c) => !c)} />
+        </div>
+        <main className="flex-1 min-h-0 overflow-y-auto transition-colors duration-200 print:!overflow-visible print:!h-auto print:!p-0">
+          <div className="p-6 min-h-full print:!p-0">
             <Outlet />
           </div>
         </main>
       </div>
 
-      {/* SWITCHER FLOTANTE INFERIOR: Alterna en 1 clic entre Versión Actual (Fase 17) y Vista Cascada Fractal */}
+      {/* SWITCHER FLOTANTE INFERIOR: Alterna en 1 clic entre Versión Actual (Fase 17) y Vista Cascada Fractal (Oculto en PDF/Print) */}
       <div
         role="region"
         aria-label="Selector de versión de arquitectura"
-        className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-950/95 p-1.5 shadow-2xl backdrop-blur-md"
+        className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-950/95 p-1.5 shadow-2xl backdrop-blur-md print:hidden"
       >
         <button
           type="button"
