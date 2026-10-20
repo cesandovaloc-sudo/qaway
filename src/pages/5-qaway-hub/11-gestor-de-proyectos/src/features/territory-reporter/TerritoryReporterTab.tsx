@@ -1588,60 +1588,6 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
               </div>
             </div>
           </div>
-                {ugelStats.directionStats.map((d) => (
-                  <div
-                    key={d.code}
-                    onMouseEnter={() =>
-                      setActiveDirHover({
-                        text: `${d.code} · ${d.ok}/${d.total} UGEL cumplen (${d.pct}%) · ${d.prog} en proceso · ${d.pend} pendientes`,
-                        bgColor: '#dcfce7',
-                        textColor: '#166534',
-                        dotColor: '#16a34a',
-                      })
-                    }
-                    onMouseLeave={() => setActiveDirHover(null)}
-                    className="group/row flex items-center gap-2.5 text-xs py-0.5 px-1 rounded-md transition-colors hover:bg-slate-50 cursor-pointer"
-                  >
-                    <span className="w-13 font-bold text-slate-700 transition-colors group-hover/row:text-slate-900">
-                      {d.code}
-                    </span>
-                    {/* Barra continua con hover reactivo */}
-                    <div className="relative flex h-3.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                      {d.ok > 0 && (
-                        <div
-                          style={{ width: `${(d.ok / d.total) * 100}%` }}
-                          className="h-full bg-emerald-600 border-r border-white/20 transition-all duration-150 hover:brightness-110"
-                        />
-                      )}
-                      {d.prog > 0 && (
-                        <div
-                          style={{ width: `${(d.prog / d.total) * 100}%` }}
-                          className="h-full bg-amber-400 border-r border-white/20 transition-all duration-150 hover:brightness-110"
-                        />
-                      )}
-                      {d.pend > 0 && (
-                        <div
-                          style={{ width: `${(d.pend / d.total) * 100}%` }}
-                          className="h-full bg-rose-600 transition-all duration-150 hover:brightness-110"
-                        />
-                      )}
-                    </div>
-                    <span className="w-9 text-right font-bold text-slate-800 tabular-nums">
-                      {d.pct}%
-                    </span>
-                    <span className="w-8 text-right text-[11px] text-slate-400 tabular-nums">
-                      {d.ok}/{d.total}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] text-slate-400">
-                <span>7 Direcciones evaluadas</span>
-                <span className="font-semibold text-slate-600">13 UGEL Junín</span>
-              </div>
-            </div>
-          </div>
 
           {/* 4. TABLA MATRICIAL INTERACTIVA: DETALLE POR UGEL – REGIÓN JUNÍN (Oculto en PDF ejecutivo) */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs print:hidden">
