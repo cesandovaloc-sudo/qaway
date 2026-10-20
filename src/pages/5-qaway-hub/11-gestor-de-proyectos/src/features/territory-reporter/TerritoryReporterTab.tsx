@@ -665,9 +665,42 @@ function DonutChart({
 }
 
 interface TerritoryReporterTabProps {
-  projectId: string
+  projectId?: string
   onOpenTask: (taskId: string) => void
 }
+
+const CANONICAL_TERRITORY_MILESTONES = [
+  {
+    id: 'ML-SIGA-1.6',
+    phaseNumber: 1,
+    name: '1.6 Elaboración del Cuadro de Distribución Local en el MC SIGA',
+  },
+  {
+    id: 'ML-SIGA-1.1',
+    phaseNumber: 1,
+    name: '1.1 Aprobación del Plan de Distribución Regional y Local',
+  },
+  {
+    id: 'ML-SIGA-1.2',
+    phaseNumber: 1,
+    name: '1.2 Conformación y Actualización de Comités de Gestión de Condiciones Operativas',
+  },
+  {
+    id: 'ML-SIGA-1.3',
+    phaseNumber: 1,
+    name: '1.3 Validación de la Matriz Territorial de Instituciones Educativas',
+  },
+  {
+    id: 'ML-SIGA-1.4',
+    phaseNumber: 1,
+    name: '1.4 Verificación de Códigos Modulares y Padrón SIGA',
+  },
+  {
+    id: 'ML-SIGA-1.5',
+    phaseNumber: 1,
+    name: '1.5 Configuración de Almacenes y Rutas de Distribución en MC SIGA',
+  },
+]
 
 type ReporterViewMode =
   | 'matriz_ugel'
@@ -676,35 +709,46 @@ type ReporterViewMode =
   | 'comparativo_ejecutivo'
   | 'direcciones_linea'
 
-export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporterTabProps) {
+export function TerritoryReporterTab({ projectId = 'proj-minedu-2027', onOpenTask }: TerritoryReporterTabProps) {
   const dataset = useProjectsDataset()
   const brandColor = useHubBrand()
   const [searchParams, setSearchParams] = useSearchParams()
   const milestoneParam = searchParams.get('milestone')
 
   const project = useMemo(
-    () => dataset.projects.find((p) => p.id === projectId),
+    () => dataset.projects.find((p) => p.id === (projectId || 'proj-minedu-2027')),
     [dataset.projects, projectId],
   )
 
-  const projectMilestones = useMemo(
-    () =>
-      dataset.milestones
-        .filter((m) => m.projectId === projectId)
-        .sort((a, b) => a.phaseNumber - b.phaseNumber),
-    [dataset.milestones, projectId],
-  )
+  const projectMilestones = useMemo(() => {
+    const targetProjId = projectId || 'proj-minedu-2027'
+    const fromDataset = dataset.milestones
+      .filter((m) => m.projectId === targetProjId)
+      .sort((a, b) => a.phaseNumber - b.phaseNumber)
 
-  // Por defecto se amarra al hito seleccionado en la URL, o al hito de Cuadro de Distribución SIGA (H5 / Fase 5), o al primero
+    if (fromDataset.length === 0) {
+      return CANONICAL_TERRITORY_MILESTONES
+    }
+
+    const has16 = fromDataset.some(
+      (m) => m.name.includes('1.6') || m.name.toLowerCase().includes('cuadro'),
+    )
+    if (!has16) {
+      return [CANONICAL_TERRITORY_MILESTONES[0], ...fromDataset]
+    }
+    return fromDataset
+  }, [dataset.milestones, projectId])
+
+  // Por defecto se amarra al Hito 1.6 Elaboración del Cuadro de Distribución Local en el MC SIGA
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>(() => {
     if (milestoneParam) return milestoneParam
-    const sigaMilestone = projectMilestones.find(
+    const hito16 = projectMilestones.find(
       (m) =>
-        m.name.toLowerCase().includes('siga') ||
+        m.name.includes('1.6') ||
         m.name.toLowerCase().includes('cuadro') ||
-        m.phaseNumber === 5,
+        m.name.toLowerCase().includes('siga'),
     )
-    return sigaMilestone?.id ?? projectMilestones[0]?.id ?? ''
+    return hito16?.id ?? projectMilestones[0]?.id ?? 'ML-SIGA-1.6'
   })
 
   useEffect(() => {
@@ -1006,7 +1050,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
       `}</style>
 
       {/* BARRA SUPERIOR DE AMARRE: PROYECTO ↔ SUBPROCESO/HITO ↔ REGIÓN ↔ VISTAS */}
-      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
+      <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3.5">
             <div
@@ -1015,11 +1059,8 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             />
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold tracking-wide text-slate-600">
+                <span className="text-xs font-bold tracking-wide text-slate-700">
                   CdD – MC – SIGA
-                </span>
-                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                  {project?.name ?? 'Proyecto Activo'}
                 </span>
               </div>
               <h2 className="mt-0.5 text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
@@ -1034,7 +1075,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
 
           {/* Metadatos de corte y selector de Hito/Subproceso amarrado */}
           <div className="flex flex-wrap items-center gap-2.5">
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs">
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs">
               <Calendar size={15} className="text-slate-500 shrink-0" />
               <div>
                 <div className="text-[10px] font-medium text-slate-400 leading-none">
@@ -1046,7 +1087,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs">
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs">
               <Clock size={15} className="text-slate-500 shrink-0" />
               <div>
                 <div className="text-[10px] font-medium text-slate-400 leading-none">
@@ -1066,7 +1107,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                   document.title = prevTitle
                 }, 1000)
               }}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white shadow-xs transition-all duration-150 hover:bg-slate-800 hover:shadow-sm cursor-pointer print:hidden"
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-white shadow-xs transition-all duration-150 hover:bg-slate-800 hover:shadow-sm cursor-pointer print:hidden"
               title="Descargar reporte ejecutivo en PDF (solo gráficos y corte del día)"
             >
               <Printer size={15} className="text-slate-200" />
@@ -1077,8 +1118,8 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
 
         {/* Fila de Amarre Normativo (Hito Rector) + Selector de Región + 4 Modos de Vista (Oculto en PDF) */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3.5 print:hidden">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-slate-600">Hito / Subproceso amarrado:</span>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="text-xs font-bold text-slate-600 shrink-0">Hito / Subproceso amarrado:</span>
             <select
               value={activeMilestone?.id ?? ''}
               onChange={(e) => {
@@ -1088,11 +1129,11 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
                 next.set('milestone', e.target.value)
                 setSearchParams(next, { replace: true })
               }}
-              className="h-9 max-w-xs sm:max-w-md rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-[var(--hub-brand)] cursor-pointer"
+              className="h-9 min-w-[340px] sm:min-w-[420px] max-w-xl rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-[var(--hub-brand)] cursor-pointer"
             >
               {projectMilestones.map((m) => (
                 <option key={m.id} value={m.id}>
-                  Fase {m.phaseNumber} · {m.name}
+                  {m.name}
                 </option>
               ))}
             </select>
@@ -1100,7 +1141,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             <select
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value)}
-              className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-[var(--hub-brand)] cursor-pointer"
+              className="h-9 rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 outline-none focus:border-[var(--hub-brand)] cursor-pointer"
             >
               <option value="Región Junín">Región Junín (13 UGEL)</option>
               <option value="Región Cusco">Región Cusco (14 UGEL)</option>
@@ -1108,12 +1149,12 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             </select>
           </div>
 
-          {/* Selector de las 4 Vistas de las láminas */}
-          <div className="flex flex-wrap items-center gap-1 rounded-xl bg-slate-100 p-1">
+          {/* Selector de las 4 Vistas de las láminas (Des-achatados y con redondeado refinado) */}
+          <div className="flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
             <button
               type="button"
               onClick={() => setViewMode('matriz_ugel')}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'matriz_ugel'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -1125,7 +1166,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             <button
               type="button"
               onClick={() => setViewMode('tarjetas_fase')}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'tarjetas_fase'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -1137,7 +1178,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             <button
               type="button"
               onClick={() => setViewMode('tarjetas_powerbi')}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'tarjetas_powerbi'
                   ? 'bg-white text-slate-900 shadow-xs border border-amber-300'
                   : 'text-slate-600 hover:text-slate-900'
@@ -1149,7 +1190,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             <button
               type="button"
               onClick={() => setViewMode('comparativo_ejecutivo')}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'comparativo_ejecutivo'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -1161,7 +1202,7 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
             <button
               type="button"
               onClick={() => setViewMode('direcciones_linea')}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'direcciones_linea'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -1180,8 +1221,8 @@ export function TerritoryReporterTab({ projectId, onOpenTask }: TerritoryReporte
       {viewMode === 'matriz_ugel' && (
         <div className="space-y-4 print:space-y-2.5">
           {/* 1. CINTA SEMAFÓRICA SUPERIOR (Quick-Status Strip de las 13 UGEL) */}
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xs print:overflow-visible print:border-slate-300 print:p-1">
-            <div className="grid min-w-[980px] grid-cols-14 overflow-hidden rounded-xl print:min-w-0 print:w-full">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-2xs print:overflow-visible print:border-slate-300 print:p-1">
+            <div className="grid min-w-[980px] grid-cols-14 overflow-hidden rounded-lg print:min-w-0 print:w-full">
               <div className="flex flex-col items-center justify-center bg-slate-800 px-3 py-4 min-h-[105px] text-center text-white print:min-h-0 print:py-2 print:px-1">
                 <span className="text-xs font-bold leading-tight print:text-[9px]">Estado por UGEL</span>
                 <span className="mt-1 text-[10px] text-slate-300 print:text-[7.5px] print:mt-0.5">(F1 y F2)</span>

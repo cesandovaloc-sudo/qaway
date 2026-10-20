@@ -11,7 +11,7 @@ export default function TerritoryReporterPage() {
 
   return (
     <div className="mx-auto max-w-[1800px]">
-      <TerritoryReporterTab onOpenTask={setSelectedTaskId} />
+      <TerritoryReporterTab projectId="proj-minedu-2027" onOpenTask={setSelectedTaskId} />
       <SlideOverTaskSheet
         taskId={selectedTaskId}
         onClose={() => setSelectedTaskId(null)}
