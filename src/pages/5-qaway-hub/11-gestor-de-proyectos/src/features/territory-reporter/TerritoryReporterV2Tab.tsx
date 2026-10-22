@@ -821,27 +821,24 @@ export function TerritoryReporterV2Tab({
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════════
-          1.1. TARJETA INDEPENDIENTE Y LIBRE: MATRIZ DE ETAPAS VS 13 UGEL
+          1.1. MATRIZ FLOTANTE LIMPIA (SIN CAJA NI MARCO BLANCO INNECESARIO)
           ════════════════════════════════════════════════════════════════════════ */}
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs overflow-hidden">
+      <section className="overflow-hidden rounded-2xl border border-slate-200/90 shadow-xs bg-white">
         <div className="overflow-x-auto [scrollbar-width:thin]">
           <table className="w-full min-w-[1360px] border-collapse text-center table-fixed">
             <thead>
               <tr className="border-b border-slate-200 text-xs">
-                <th className="bg-[#142d54] text-white font-black text-[15px] py-4 px-3 text-left w-44 min-w-[176px] max-w-[176px] rounded-tl-xl">
+                <th className="bg-[#142d54] text-white font-black text-[15px] py-4 px-3.5 text-left w-44 min-w-[176px] max-w-[176px]">
                   Etapa
                 </th>
-                {ugels.map((u, idx) => {
+                {ugels.map((u) => {
                   const rawName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
                   // Límite de 7-8 caracteres para evitar compresión y permitir mayor tamaño tipográfico
                   const shortName = rawName.length > 8 ? rawName.slice(0, 7) + '.' : rawName
-                  const isLast = idx === ugels.length - 1
                   return (
                     <th
                       key={u.id}
-                      className={`bg-[#f0f4f9] text-slate-900 font-black text-[15.5px] py-3.5 px-0.5 border-l border-white text-center w-[92px] min-w-[92px] max-w-[92px] truncate tracking-tight ${
-                        isLast ? 'rounded-tr-xl' : ''
-                      }`}
+                      className="bg-[#f0f4f9] text-slate-900 font-black text-[15.5px] py-3.5 px-0.5 border-l border-white text-center w-[92px] min-w-[92px] max-w-[92px] truncate tracking-tight"
                       title={u.name}
                     >
                       {shortName}
@@ -919,7 +916,7 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 3: FASE 2 (RAR OFICIAL - CORTE 26/10 · CERO ROJOS, GRIS NEUTRO EN PLAZO) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px] rounded-bl-xl">
+                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
                       3
