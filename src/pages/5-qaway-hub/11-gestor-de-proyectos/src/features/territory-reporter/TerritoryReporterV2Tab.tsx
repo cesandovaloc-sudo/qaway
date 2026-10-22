@@ -487,6 +487,57 @@ export function TerritoryReporterV2Tab({
   const [filterStatus, setFilterStatus] = useState<'Todos' | 'Completado' | 'En proceso' | 'Pendiente'>('Todos')
 
   const [inspectedUgel, setInspectedUgel] = useState<UgelMonitoringV2Row | null>(null)
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+
+  useEffect(() => {
+    if (inspectedUgel) {
+      setNewTaskTitle(`Seguimiento de subida CdD - MC SIGA en UGEL ${inspectedUgel.name}`)
+    }
+  }, [inspectedUgel])
+
+  const getTasksForUgel = (ugelName: string) => {
+    return workItems.filter((t) => {
+      const inTitle = t.title.toLowerCase().includes(ugelName.toLowerCase())
+      const inScope = t.scopeTag?.toLowerCase().includes(ugelName.toLowerCase())
+      const inDesc = t.description?.toLowerCase().includes(ugelName.toLowerCase())
+      return inTitle || inScope || inDesc
+    })
+  }
+
+  const handleCreateTaskForUgel = (ugel: UgelMonitoringV2Row, customTitle?: string) => {
+    const titleToUse =
+      (customTitle ?? newTaskTitle).trim() ||
+      `Asistencia técnica CdD - MC SIGA en UGEL ${ugel.name} (Hito 1.6)`
+
+    const genStatus = computeUgelGeneralStatusV2(ugel)
+    const created = projectsService.createWorkItem({
+      projectId: _projectId,
+      milestoneRef: 'Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA',
+      originType: 'accion_emergente',
+      taskNature: 'contingencia_operativa',
+      threatensMilestone: genStatus === 'pendiente',
+      threatNote:
+        genStatus === 'pendiente'
+          ? `UGEL ${ugel.name} en estado Pendiente (${ugel.observation})`
+          : undefined,
+      title: titleToUse,
+      description: `Tarea generada desde el Reporteador Territorial V2 para UGEL ${ugel.name} (Región Junín). Estado Fase 1: ${ugel.phase1Files}/${ugel.phase1Total}, Drive: ${ugel.driveStatus}, Fase 2: ${ugel.phase2Files}/${ugel.phase2Total}. Observación: ${ugel.observation}.`,
+      state: 'todo',
+      priority: genStatus === 'pendiente' ? 'URGENTE' : 'MEDIA',
+      assignee: {
+        name: ugel.gestorName,
+        role: 'Gestor Territorial Región Junín',
+        phone: ugel.gestorPhone,
+      },
+      storyPoints: 3,
+      followUpDate: '2026-10-26',
+      scopeTag: `UGEL ${ugel.name}`,
+    })
+    setInspectedUgel(null)
+    if (onOpenTask) {
+      onOpenTask(created.id)
+    }
+  }
 
   // Estadísticas globales de las 13 UGEL en V2
   const ugelStats = useMemo(() => {
@@ -1420,36 +1471,50 @@ export function TerritoryReporterV2Tab({
         </div>
       </section>
 
-      {/* ── MODAL / DRAWER DE INSPECCIÓN DE UGEL EN V2 ── */}
+      {/* ── SLIDE-OVER DRAWER LATERAL DERECHO DE INSPECCIÓN DE UGEL EN V2 ── */}
       {inspectedUgel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-[1px] print:hidden">
+          <div className="flex h-full w-full max-w-lg flex-col bg-white shadow-2xl animate-in slide-in-from-right duration-200">
+            {/* Cabecera del Panel */}
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
-                  Inspección Territorial 3 Etapas
+                <span className="text-[11.5px] font-bold uppercase tracking-wider text-[var(--hub-brand,#d9532f)]">
+                  Monitoreo de Campo · Región Junín
                 </span>
-                <h3 className="text-lg font-extrabold text-slate-900">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight mt-0.5">
                   UGEL {inspectedUgel.name}
                 </h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Amarrado a: Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setInspectedUgel(null)}
-                className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer transition-colors"
+                title="Cerrar panel"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
 
-            <div className="mt-4 space-y-4">
+            {/* Contenido con Scroll */}
+            <div className="flex-1 space-y-5 overflow-y-auto p-5">
+              {/* Control de las 3 Etapas para esta UGEL */}
               <div className="grid grid-cols-3 gap-2.5">
-                {/* Control Fase 1 */}
+                {/* Fase 1: MC SIGA */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <span className="block text-[10.5px] font-bold text-slate-500 uppercase">Fase 1: SIGA</span>
-                  <span className="text-xl font-black text-slate-900 tabular-nums">
-                    {inspectedUgel.phase1Files}/{inspectedUgel.phase1Total}
-                  </span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11.5px] font-bold text-slate-700">Fase 1</span>
+                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9.5px] font-bold text-emerald-800">
+                      100%
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-black text-slate-900 tabular-nums">
+                      {inspectedUgel.phase1Files}/{inspectedUgel.phase1Total}
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
@@ -1460,18 +1525,31 @@ export function TerritoryReporterV2Tab({
                           : null,
                       )
                     }}
-                    className="mt-2 w-full rounded-md border border-slate-200 bg-white py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                    className="mt-2 w-full rounded-md border border-slate-200 bg-white py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs"
                   >
-                    Actualizar
+                    Actualizar subida
                   </button>
                 </div>
 
-                {/* Control Drive */}
-                <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
-                  <span className="block text-[10.5px] font-bold text-amber-800 uppercase">Drive (22/10)</span>
-                  <span className="text-xl font-black text-amber-950 tabular-nums">
-                    {inspectedUgel.driveStatus === 'completado' ? '1/1' : inspectedUgel.driveStatus === 'en_proceso' ? 'Proceso' : '0/1'}
-                  </span>
+                {/* Drive Regional (22/10) */}
+                <div className="rounded-xl border border-amber-200/90 bg-amber-50/50 p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11.5px] font-bold text-amber-950">Drive (22/10)</span>
+                    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
+                      inspectedUgel.driveStatus === 'completado'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : inspectedUgel.driveStatus === 'en_proceso'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-rose-100 text-rose-800'
+                    }`}>
+                      {inspectedUgel.driveStatus === 'completado' ? 'OK' : inspectedUgel.driveStatus === 'en_proceso' ? 'Proceso' : 'Pend.'}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-black text-slate-900 tabular-nums">
+                      {inspectedUgel.driveStatus === 'completado' ? '1/1' : inspectedUgel.driveStatus === 'en_proceso' ? 'Proceso' : '0/1'}
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
@@ -1491,18 +1569,29 @@ export function TerritoryReporterV2Tab({
                         }
                       })
                     }}
-                    className="mt-2 w-full rounded-md border border-amber-300 bg-white py-1 text-[11px] font-bold text-amber-900 hover:bg-amber-100 cursor-pointer"
+                    className="mt-2 w-full rounded-md border border-amber-300 bg-white py-1 text-[11px] font-bold text-amber-900 hover:bg-amber-100 cursor-pointer shadow-2xs"
                   >
-                    Alternar
+                    Actualizar Drive
                   </button>
                 </div>
 
-                {/* Control Fase 2 */}
+                {/* Fase 2: RAR (26/10) */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <span className="block text-[10.5px] font-bold text-slate-500 uppercase">Fase 2: RAR</span>
-                  <span className="text-xl font-black text-slate-900 tabular-nums">
-                    {inspectedUgel.phase2Files}/{inspectedUgel.phase2Total}
-                  </span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11.5px] font-bold text-slate-700">Fase 2 (26/10)</span>
+                    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
+                      inspectedUgel.phase2Files >= inspectedUgel.phase2Total
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-slate-200 text-slate-700'
+                    }`}>
+                      {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? 'Cerrado' : 'En plazo'}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-black text-slate-900 tabular-nums">
+                      {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? '3/3' : `${inspectedUgel.phase2Files}/3`}
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
@@ -1513,46 +1602,158 @@ export function TerritoryReporterV2Tab({
                           : null,
                       )
                     }}
-                    className="mt-2 w-full rounded-md border border-slate-200 bg-white py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
+                    className="mt-2 w-full rounded-md border border-slate-200 bg-white py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs"
                   >
-                    Actualizar
+                    Actualizar RAR
                   </button>
                 </div>
               </div>
 
-              {/* Observación */}
-              <div className="rounded-xl border border-slate-200 p-3 bg-slate-50">
-                <span className="block text-xs font-bold text-slate-500">Observación territorial:</span>
-                <p className="mt-1 text-xs text-slate-700 leading-relaxed font-medium">
-                  {inspectedUgel.observation}
+              {/* Estado por Dirección Pedagógica en esta UGEL */}
+              <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+                <p className="text-xs font-bold text-slate-800">
+                  Checks por Dirección de Línea (clic para cambiar estado)
                 </p>
-              </div>
-
-              {/* Contacto Gestor */}
-              <div className="flex items-center justify-between text-xs text-slate-600 border-t border-slate-100 pt-3">
-                <div>
-                  <span className="font-bold">Gestor:</span> {inspectedUgel.gestorName}
+                <div className="mt-3 grid grid-cols-7 gap-2 text-center">
+                  {DIRECTION_CODES.map((code) => {
+                    const st = inspectedUgel.directions[code]
+                    return (
+                      <div
+                        key={code}
+                        className="flex flex-col items-center gap-1.5 rounded-lg bg-white border border-slate-200/80 p-2 shadow-2xs"
+                      >
+                        <span className="text-[10px] font-bold text-slate-600">{code}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleCycleDirectionStatus(inspectedUgel.id, code)
+                            setInspectedUgel((prev) => {
+                              if (!prev) return null
+                              const order: TerritoryStatus[] = ['completado', 'en_proceso', 'pendiente']
+                              const cur = prev.directions[code]
+                              const next = order[(order.indexOf(cur) + 1) % order.length]
+                              return {
+                                ...prev,
+                                directions: {
+                                  ...prev.directions,
+                                  [code]: next,
+                                },
+                              }
+                            })
+                          }}
+                          className={`grid h-6 w-6 place-items-center rounded-full text-white cursor-pointer shadow-2xs hover:scale-110 transition-transform ${
+                            st === 'completado'
+                              ? 'bg-emerald-600'
+                              : st === 'en_proceso'
+                                ? 'bg-amber-500'
+                                : 'bg-rose-600'
+                          }`}
+                          title={`${code}: ${st} (Clic para cambiar)`}
+                        >
+                          {st === 'completado' ? (
+                            <Check size={12} strokeWidth={3} />
+                          ) : st === 'en_proceso' ? (
+                            <Clock size={12} strokeWidth={2.4} />
+                          ) : (
+                            <X size={12} strokeWidth={3} />
+                          )}
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
-                <a
-                  href={`https://wa.me/${inspectedUgel.gestorPhone.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 font-bold text-emerald-600 hover:underline"
-                >
-                  <MessageCircle size={14} />
-                  <span>Contactar WhatsApp</span>
-                </a>
               </div>
-            </div>
 
-            <div className="mt-5 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setInspectedUgel(null)}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800 cursor-pointer"
-              >
-                Cerrar
-              </button>
+              {/* Tareas ya amarradas a esta UGEL */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-slate-800">
+                    Tareas vinculadas a UGEL {inspectedUgel.name} ({getTasksForUgel(inspectedUgel.name).length})
+                  </p>
+                  <span className="text-[11px] text-slate-500 font-medium">Bandeja operativa</span>
+                </div>
+                {getTasksForUgel(inspectedUgel.name).length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-slate-200 p-3.5 text-xs text-slate-400 text-center">
+                    Aún no hay tareas operativas creadas para esta UGEL.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {getTasksForUgel(inspectedUgel.name).map((t) => {
+                      const contact = toFollowUpContact(t)
+                      const waUrl = buildWhatsAppUrl(
+                        t.assignee.phone,
+                        buildFollowUpMessage(contact),
+                      )
+                      return (
+                        <li
+                          key={t.id}
+                          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50/70 p-2.5 text-xs"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInspectedUgel(null)
+                              if (onOpenTask) onOpenTask(t.id)
+                            }}
+                            className="min-w-0 flex-1 text-left cursor-pointer hover:opacity-80"
+                          >
+                            <p className="truncate font-bold text-slate-900">{t.title}</p>
+                            <p className="text-[11px] text-slate-500">
+                              {t.id} · {WORK_ITEM_STATE_META[t.state]?.label ?? t.state} · {t.assignee.name}
+                            </p>
+                          </button>
+                          {waUrl && (
+                            <a
+                              href={waUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-500 text-white shadow-2xs hover:bg-emerald-600 transition-colors"
+                              title={`WhatsApp a ${t.assignee.name}`}
+                            >
+                              <MessageCircle size={14} />
+                            </a>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+
+              {/* Inyectar nueva tarea amarrada a esta UGEL + Hito 1.6 */}
+              <div className="rounded-xl border border-[var(--hub-brand,#d9532f)]/30 bg-[var(--hub-brand-soft,#fbf0ec)]/50 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Zap size={15} className="text-[var(--hub-brand,#d9532f)]" />
+                  <span className="text-xs font-black text-slate-900">
+                    Inyectar Tarea de Asistencia Técnica (Bandeja + Hito)
+                  </span>
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] font-bold text-slate-700">
+                    Acción requerida para UGEL {inspectedUgel.name}
+                  </label>
+                  <input
+                    type="text"
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    placeholder={`Acción de acompañamiento en UGEL ${inspectedUgel.name}...`}
+                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[var(--hub-brand,#d9532f)] focus:ring-1 focus:ring-[var(--hub-brand,#d9532f)] shadow-2xs"
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <span className="text-[11px] text-slate-600">
+                    Responsable: <strong className="text-slate-900 font-bold">{inspectedUgel.gestorName}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCreateTaskForUgel(inspectedUgel)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--hub-brand,#d9532f)] px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:opacity-95 cursor-pointer transition-opacity"
+                  >
+                    <Plus size={14} strokeWidth={2.5} />
+                    Crear Tarea Vinculada
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
