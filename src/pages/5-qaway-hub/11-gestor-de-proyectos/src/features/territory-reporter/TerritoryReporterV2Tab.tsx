@@ -828,48 +828,50 @@ export function TerritoryReporterV2Tab({
           <table className="w-full min-w-[1360px] border-collapse text-center table-fixed">
             <thead>
               <tr className="border-b border-slate-200 text-xs">
-                <th className="bg-[#142d54] text-white font-black text-[14px] py-4 px-3 text-left w-40 min-w-[160px] max-w-[160px]">
+                <th className="bg-[#142d54] text-white font-black text-[15px] py-4 px-3 text-left w-44 min-w-[176px] max-w-[176px]">
                   Etapa
                 </th>
-                {ugels.map((u) => (
-                  <th
-                    key={u.id}
-                    className="bg-[#f0f4f9] text-slate-900 font-extrabold text-[13.5px] py-3.5 px-1 border-l border-white text-center w-[92px] min-w-[92px] max-w-[92px] truncate"
-                    title={u.name}
-                  >
-                    {u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()}
-                  </th>
-                ))}
+                {ugels.map((u) => {
+                  const rawName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
+                  // Límite de 7-8 caracteres para evitar compresión y permitir mayor tamaño tipográfico
+                  const shortName = rawName.length > 8 ? rawName.slice(0, 7) + '.' : rawName
+                  return (
+                    <th
+                      key={u.id}
+                      className="bg-[#f0f4f9] text-slate-900 font-black text-[15.5px] py-3.5 px-0.5 border-l border-white text-center w-[92px] min-w-[92px] max-w-[92px] truncate tracking-tight"
+                      title={u.name}
+                    >
+                      {shortName}
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {/* FILA 1: FASE 1 (REGISTRO MC SIGA - 100% CUMPLIDA EN TODAS LAS UGEL) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3 py-3.5 text-left border-r border-slate-100 w-40 min-w-[160px] max-w-[160px]">
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid h-8.5 w-8.5 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[13px] font-black shadow-xs">
+                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
                       1
                     </span>
                     <div className="min-w-0">
-                      <span className="block text-[15.5px] font-black text-slate-900 leading-tight">Fase 1</span>
-                      <span className="block text-[12.5px] font-semibold text-slate-600 leading-tight mt-0.5 truncate">Registro MC SIGA</span>
+                      <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 1</span>
+                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Registro MC SIGA</span>
                     </div>
                   </div>
                 </td>
                 {ugels.map((u) => {
                   return (
-                    <td key={`f1-${u.id}`} className="py-3 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
+                    <td key={`f1-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
-                        className="mx-auto flex flex-col items-center justify-center p-1 rounded-xl hover:bg-slate-100/90 transition-all cursor-pointer group"
-                        title={`Fase 1: ${u.name} · Carga inicial completada (3/3)`}
+                        className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
+                        title={`Fase 1: ${u.name} · Carga inicial completada (Clic para cambiar)`}
                       >
-                        <span className="grid h-9 w-9 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 bg-[#16a34a]">
-                          <Check size={18} strokeWidth={3} />
-                        </span>
-                        <span className="mt-1.5 text-[13px] font-black text-slate-800 tabular-nums">
-                          3/3
+                        <span className="grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 bg-[#16a34a]">
+                          <Check size={24} strokeWidth={3.2} />
                         </span>
                       </button>
                     </td>
@@ -879,35 +881,32 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 2: DRIVE (EVIDENCIA DECLARATIVA - CORTE HOY 22/10) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3 py-3.5 text-left border-r border-slate-100 w-40 min-w-[160px] max-w-[160px]">
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid h-8.5 w-8.5 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[13px] font-black shadow-xs">
+                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
                       2
                     </span>
                     <div className="min-w-0">
-                      <span className="block text-[15.5px] font-black text-slate-900 leading-tight">Drive</span>
-                      <span className="block text-[12.5px] font-semibold text-slate-600 leading-tight mt-0.5 truncate">Evidencia declarativa</span>
+                      <span className="block text-[17px] font-black text-slate-900 leading-tight">Drive</span>
+                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Evidencia declarativa</span>
                     </div>
                   </div>
                 </td>
                 {ugels.map((u) => {
                   const st = u.driveStatus
-                  const ratioText = st === 'completado' ? '1/1' : st === 'en_proceso' ? 'Proceso' : '0/1'
+                  const ratioText = st === 'completado' ? 'Completado' : st === 'en_proceso' ? 'En proceso' : 'Pendiente'
                   return (
-                    <td key={`dr-${u.id}`} className="py-3 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
+                    <td key={`dr-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
                       <button
                         type="button"
                         onClick={() => handleCycleDriveStatus(u.id)}
-                        className="mx-auto flex flex-col items-center justify-center p-1 rounded-xl hover:bg-slate-100/90 transition-all cursor-pointer group"
+                        className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
                         title={`Drive: ${u.name} · ${ratioText} (Clic para cambiar)`}
                       >
-                        <span className={`grid h-9 w-9 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
+                        <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
                           st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
                         }`}>
-                          {st === 'completado' ? <Check size={18} strokeWidth={3} /> : st === 'en_proceso' ? <Clock size={18} strokeWidth={2.8} /> : <X size={18} strokeWidth={3} />}
-                        </span>
-                        <span className="mt-1.5 text-[13px] font-black text-slate-800 tabular-nums">
-                          {ratioText}
+                          {st === 'completado' ? <Check size={24} strokeWidth={3.2} /> : st === 'en_proceso' ? <Clock size={23} strokeWidth={2.8} /> : <X size={24} strokeWidth={3.2} />}
                         </span>
                       </button>
                     </td>
@@ -917,36 +916,31 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 3: FASE 2 (RAR OFICIAL - CORTE 26/10 · CERO ROJOS, GRIS NEUTRO EN PLAZO) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3 py-3.5 text-left border-r border-slate-100 w-40 min-w-[160px] max-w-[160px]">
-                  <div className="flex items-center gap-2.5">
-                    <span className="grid h-8.5 w-8.5 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[13px] font-black shadow-xs">
+                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
                       3
                     </span>
                     <div className="min-w-0">
-                      <span className="block text-[15.5px] font-black text-slate-900 leading-tight">Fase 2</span>
-                      <span className="block text-[12.5px] font-semibold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial (26/10)</span>
+                      <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 2</span>
+                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial (26/10)</span>
                     </div>
                   </div>
                 </td>
                 {ugels.map((u) => {
                   const isDone = u.phase2Files >= u.phase2Total
                   return (
-                    <td key={`f2-${u.id}`} className="py-3 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
+                    <td key={`f2-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
-                        className="mx-auto flex flex-col items-center justify-center p-1 rounded-xl hover:bg-slate-100/90 transition-all cursor-pointer group"
-                        title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado (3/3)' : 'En plazo técnico hasta el 26/10'} (Clic para cambiar)`}
+                        className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
+                        title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado' : 'En plazo técnico hasta el 26/10'} (Clic para cambiar)`}
                       >
-                        <span className={`grid h-9 w-9 place-items-center rounded-full shadow-xs transition-transform group-hover:scale-110 ${
+                        <span className={`grid h-11 w-11 place-items-center rounded-full shadow-xs transition-transform group-hover:scale-110 ${
                           isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
                         }`}>
-                          {isDone ? <Check size={18} strokeWidth={3} /> : <Clock size={17} strokeWidth={2.6} />}
-                        </span>
-                        <span className={`mt-1.5 text-[12.5px] font-black tabular-nums ${
-                          isDone ? 'text-slate-900' : 'text-slate-600'
-                        }`}>
-                          {isDone ? '3/3' : 'En plazo'}
+                          {isDone ? <Check size={24} strokeWidth={3.2} /> : <Clock size={23} strokeWidth={2.8} />}
                         </span>
                       </button>
                     </td>
