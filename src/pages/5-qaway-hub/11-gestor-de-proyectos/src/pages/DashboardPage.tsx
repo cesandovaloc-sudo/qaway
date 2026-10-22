@@ -41,7 +41,6 @@ import {
 // ─────────────────────────────────────────────────────────────────────────
 
 const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-const BAR_COLORS = ['#c8102e', '#1d4ed8', '#0d9488', '#d97706', '#7c3aed', '#0284c7']
 const USD_PEN = 3.75 // T.C. referencial para consolidar el KPI en soles
 const DAY_MS = 86_400_000
 
@@ -86,6 +85,18 @@ function formatShortDate(value: string): string {
   const t = parseTime(value)
   if (t === null) return '—'
   return new Date(t).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })
+}
+
+function getHref(to: string): string {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
+  const basePrefix =
+    ['/hub/proyectos', '/hub/gestor-proyectos-app', '/hub/inventario', '/inventario'].find(
+      (prefix) => pathname.startsWith(prefix),
+    ) ?? ''
+  if (!basePrefix) return to.startsWith('/') ? to : `/${to}`
+  if (to === '/' || to === '') return basePrefix
+  const cleanTo = to.startsWith('/') ? to : `/${to}`
+  return `${basePrefix}${cleanTo}`
 }
 
 function initialsOf(name: string): string {
@@ -355,17 +366,6 @@ export default function DashboardPage() {
     [dataset.workItems, projectIds],
   )
 
-  const attentionProjects = useMemo(
-    () =>
-      activeProjects
-        .filter((p) => (statusOf.get(p.id) ?? 'objetivo') !== 'objetivo')
-        .sort((a, b) => {
-          const order: Record<OpStatus, number> = { bloqueado: 0, riesgo: 1, objetivo: 2 }
-          return (order[statusOf.get(a.id) ?? 'objetivo'] ?? 2) - (order[statusOf.get(b.id) ?? 'objetivo'] ?? 2)
-        })
-        .slice(0, 3),
-    [activeProjects, statusOf],
-  )
 
   const recentActivity = useMemo(
     () =>
@@ -480,91 +480,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Macro-Roadmap de cartera ── */}
-      {(view === 'resumen' || view === 'cronograma') && (
-        <section className="mb-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3.5">
-            <div>
-              <h2 className="text-sm font-bold text-zinc-900">Macro-Roadmap de cartera · {year}</h2>
-              <p className="text-[13px] text-zinc-500">Cronograma consolidado con hitos clave y línea de Hoy</p>
-            </div>
-            <span className="hidden items-center gap-2 text-[11px] font-semibold text-zinc-500 sm:flex">
-              <span className="inline-block h-2 w-2 rotate-45 bg-zinc-700" /> Hito
-              <span className="ml-2 inline-block h-2.5 w-2.5 rounded-full border-2 border-zinc-700 bg-white" /> En revisión
-            </span>
-          </div>
-          <div className="overflow-x-auto px-5 py-4">
-            <div className="min-w-[860px]">
-              {/* Eje de meses */}
-              <div className="relative mb-2 ml-[220px]">
-                <div className="grid grid-cols-12">
-                  {MONTHS_SHORT.map((m, i) => (
-                    <div
-                      key={m}
-                      className={`rounded-md py-1 text-center text-[11px] font-bold uppercase tracking-wide ${i === analysisMonth ? 'bg-zinc-900 text-white' : 'text-zinc-400'}`}
-                    >
-                      {m}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Filas por proyecto */}
-              <div className="relative">
-                {/* Línea de Hoy */}
-                <div className="pointer-events-none absolute inset-y-0 z-10" style={{ left: `calc(220px + (100% - 220px) * ${hoyPct / 100})` }}>
-                  <div className="absolute inset-y-0 -translate-x-1/2 border-l-2 border-dashed border-zinc-900/70" />
-                  <span className="absolute -top-1 -translate-x-1/2 rounded-md bg-zinc-900 px-2 py-0.5 text-[10px] font-bold text-white">Hoy</span>
-                </div>
-                <div className="space-y-2.5 pb-1">
-                  {roadmapRows.map(({ project, left, width }, i) => {
-                    const color = BAR_COLORS[i % BAR_COLORS.length]
-                    const marks = (milestonesByProject.get(project.id) ?? []).filter((m) => {
-                      const t = parseTime(m.targetDate)
-                      return t !== null && t >= yearStart && t <= yearEnd
-                    })
-                    return (
-                      <div key={project.id} className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => navigate(`proyectos/${project.id}`)}
-                          title={`Abrir ${project.name}`}
-                          className="w-[208px] shrink-0 truncate text-left text-[13px] font-semibold text-zinc-700 hover:text-zinc-900"
-                        >
-                          {project.name}
-                        </button>
-                        <div className="relative h-9 flex-1 rounded-lg bg-zinc-50">
-                          <div
-                            className="absolute top-1/2 h-[14px] -translate-y-1/2 rounded-full opacity-90"
-                            style={{ left: `${left}%`, width: `${width}%`, backgroundColor: color }}
-                            title={`${project.name}: ${formatShortDate(project.startDate)} → ${formatShortDate(project.targetDate)}`}
-                          />
-                          {marks.map((m) => (
-                            <span
-                              key={m.id}
-                              title={`${m.name} · ${formatShortDate(m.targetDate)}`}
-                              className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 ${
-                                m.status === 'aprobado'
-                                  ? 'inline-block h-2.5 w-2.5 rotate-45 bg-zinc-900 ring-2 ring-white'
-                                  : 'inline-block h-2.5 w-2.5 rounded-full border-2 border-zinc-900 bg-white'
-                              }`}
-                              style={{ left: `${pctOf(parseTime(m.targetDate) ?? yearStart)}%` }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })}
-                  {roadmapRows.length === 0 && (
-                    <p className="py-8 text-center text-sm font-medium text-zinc-500">Sin proyectos en el roadmap.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Tira ejecutiva de 4 KPIs ── */}
+      {/* ── Tira ejecutiva de 4 KPIs (debajo del filtro principal) ── */}
       {(view === 'resumen' || view === 'presupuesto') && (
         <section className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
@@ -603,6 +519,174 @@ export default function DashboardPage() {
               <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${Math.min(100, budget.pct)}%` }} />
             </div>
             <p className="mt-1.5 text-[11px] font-semibold text-zinc-500">de {formatCurrency(budget.allocated, 'PEN')} ({budget.pct}%)</p>
+          </div>
+        </section>
+      )}
+
+      {/* ── Diagrama Gantt General · Macro-Roadmap de cartera (Estilo Gantt oficial) ── */}
+      {(view === 'resumen' || view === 'cronograma') && (
+        <section className="mb-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-4">
+            <div>
+              <h2 className="flex flex-wrap items-center gap-2 text-sm font-bold text-zinc-900">
+                <CalendarDays size={16} className="text-zinc-500" />
+                <span>Diagrama Gantt General</span>
+                <span className="text-zinc-300">·</span>
+                <span>Macro-Roadmap de cartera · {year}</span>
+                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-600">
+                  {activeProjects.length} proyectos
+                </span>
+              </h2>
+              <p className="text-xs text-zinc-500">
+                Cronograma consolidado de proyectos estratégicos · Hitos clave y línea de Hoy
+              </p>
+            </div>
+            <div className="hidden sm:flex flex-wrap items-center gap-4 text-[11px] font-semibold text-zinc-500">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2.5 w-6 rounded-md bg-zinc-800" /> Normal
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2.5 w-6 rounded-md bg-amber-500" /> Alerta
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2.5 w-6 rounded-md bg-rose-500" /> Crítico
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-2.5 w-2.5 rotate-45 bg-zinc-900 ring-2 ring-white" /> Hito clave
+              </span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <div className="min-w-[860px]">
+              {/* Eje de escala temporal por meses */}
+              <div className="flex border-b border-zinc-100 bg-zinc-50/60">
+                <div className="w-[260px] shrink-0 px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  Proyecto
+                </div>
+                <div className="relative flex-1 grid grid-cols-12 py-2">
+                  {MONTHS_SHORT.map((m, i) => (
+                    <div
+                      key={m}
+                      className={`text-center text-[11px] font-bold uppercase tracking-wide ${
+                        i === analysisMonth ? 'text-zinc-900 font-extrabold' : 'text-zinc-400'
+                      }`}
+                    >
+                      {m}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Filas del Gantt */}
+              <div className="relative">
+                {/* Línea de Hoy */}
+                <div
+                  className="pointer-events-none absolute inset-y-0 z-10"
+                  style={{ left: `calc(260px + (100% - 260px) * ${hoyPct / 100})` }}
+                >
+                  <div className="absolute inset-y-0 -translate-x-1/2 border-l-2 border-dashed border-sky-500/80" />
+                  <span className="absolute -top-1 -translate-x-1/2 rounded-md bg-sky-600 px-1.5 py-0.5 text-[9.5px] font-bold text-white shadow-xs">
+                    Hoy
+                  </span>
+                </div>
+
+                <div className="divide-y divide-zinc-50">
+                  {roadmapRows.map(({ project, left, width }) => {
+                    const status = statusOf.get(project.id) ?? 'objetivo'
+                    const barColor =
+                      status === 'bloqueado'
+                        ? 'bg-rose-500'
+                        : status === 'riesgo'
+                          ? 'bg-amber-500'
+                          : 'bg-zinc-800'
+                    const marks = (milestonesByProject.get(project.id) ?? []).filter((m) => {
+                      const t = parseTime(m.targetDate)
+                      return t !== null && t >= yearStart && t <= yearEnd
+                    })
+
+                    return (
+                      <div
+                        key={project.id}
+                        className="flex items-center hover:bg-zinc-50/60 transition-colors"
+                      >
+                        {/* Columna de Proyecto */}
+                        <div className="w-[260px] shrink-0 px-5 py-3">
+                          <button
+                            type="button"
+                            onClick={() => navigate(getHref(`proyectos/${project.id}`))}
+                            title={`Abrir ${project.name}`}
+                            className="block w-full text-left group"
+                          >
+                            <p className="truncate text-[13px] font-bold text-zinc-800 group-hover:text-zinc-950">
+                              {project.name}
+                            </p>
+                            <p className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-zinc-400">
+                              <span>{project.code}</span>
+                              <span>·</span>
+                              <span className="font-semibold text-zinc-600">{project.progress}% avance</span>
+                            </p>
+                          </button>
+                        </div>
+
+                        {/* Columna Timeline */}
+                        <div className="relative h-11 flex-1">
+                          {/* Grid vertical de meses sutil */}
+                          <div className="absolute inset-0 grid grid-cols-12 pointer-events-none">
+                            {MONTHS_SHORT.map((m, idx) => (
+                              <div
+                                key={m}
+                                className={`border-r border-zinc-100/60 h-full ${
+                                  idx === analysisMonth ? 'bg-zinc-50/40' : ''
+                                }`}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Barra Gantt del Proyecto */}
+                          <div
+                            className={`absolute top-1/2 h-5 -translate-y-1/2 rounded-md ${barColor} shadow-2xs transition-all overflow-hidden`}
+                            style={{ left: `${left}%`, width: `${width}%` }}
+                            title={`${project.name}: ${formatShortDate(project.startDate)} → ${formatShortDate(project.targetDate)} (${project.progress}%)`}
+                          >
+                            {/* Avance real en porcentaje */}
+                            <div
+                              className="h-full bg-white/25 rounded-md"
+                              style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
+                            />
+                          </div>
+
+                          {/* Marcadores de Hitos */}
+                          {marks.map((m) => {
+                            const mTime = parseTime(m.targetDate) ?? yearStart
+                            const mPct = pctOf(mTime)
+                            const isApproved = m.status === 'aprobado'
+                            return (
+                              <span
+                                key={m.id}
+                                title={`${m.name} · ${formatShortDate(m.targetDate)} (${isApproved ? 'Aprobado' : 'Pendiente'})`}
+                                className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer ${
+                                  isApproved
+                                    ? 'inline-block h-3 w-3 rotate-45 bg-zinc-900 ring-2 ring-white shadow-xs'
+                                    : 'inline-block h-2.5 w-2.5 rounded-full border-2 border-zinc-800 bg-white shadow-xs'
+                                }`}
+                                style={{ left: `${mPct}%` }}
+                              />
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  {roadmapRows.length === 0 && (
+                    <p className="py-10 text-center text-sm font-medium text-zinc-400">
+                      Sin proyectos en el cronograma consolidado.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -695,13 +779,7 @@ export default function DashboardPage() {
             criticalTasks={criticalTasks}
             projectNameOf={projectNameOf}
             analysisLabel={analysisLabel}
-            onOpenProject={(id, tab) => navigate(tab ? `proyectos/${id}?tab=${tab}` : `proyectos/${id}`)}
-          />
-          <AttentionCard
-            attentionProjects={attentionProjects}
-            statusOf={statusOf}
-            nextMilestoneOf={nextMilestoneOf}
-            onOpen={(id) => navigate(`proyectos/${id}`)}
+            onOpenProject={(id, tab) => navigate(tab ? getHref(`proyectos/${id}?tab=${tab}`) : getHref(`proyectos/${id}`))}
           />
           <ActivityCard recentActivity={recentActivity} />
         </aside>
@@ -1067,48 +1145,6 @@ function AgendaCard({
   )
 }
 
-// ── Proyectos en atención ──
-function AttentionCard({
-  attentionProjects,
-  statusOf,
-  nextMilestoneOf,
-  onOpen,
-}: {
-  attentionProjects: Project[]
-  statusOf: Map<string, OpStatus>
-  nextMilestoneOf: (projectId: string) => { id: string; name: string; targetDate: string; status: string } | undefined
-  onOpen: (id: string) => void
-}) {
-  return (
-    <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-      <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
-        <h3 className="text-sm font-bold text-zinc-900">Proyectos en atención ({attentionProjects.length})</h3>
-        <AlertTriangle size={16} className="text-amber-600" />
-      </div>
-      <ul className="divide-y divide-zinc-50">
-        {attentionProjects.map((p) => {
-          const next = nextMilestoneOf(p.id)
-          return (
-            <li key={p.id}>
-              <button type="button" onClick={() => onOpen(p.id)} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-zinc-50">
-                <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_META[statusOf.get(p.id) ?? 'riesgo'].dot}`} />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-zinc-900">{p.name}</span>
-                  <span className="block truncate text-[11px] text-zinc-400">
-                    {next ? `${next.name} · ${formatShortDate(next.targetDate)}` : 'Sin hito próximo'}
-                  </span>
-                </span>
-              </button>
-            </li>
-          )
-        })}
-        {attentionProjects.length === 0 && (
-          <li className="px-4 py-6 text-center text-[13px] text-zinc-400">Cartera sin proyectos en atención.</li>
-        )}
-      </ul>
-    </section>
-  )
-}
 
 // ── Actividad reciente ──
 function ActivityCard({ recentActivity }: { recentActivity: WorkItem[] }) {

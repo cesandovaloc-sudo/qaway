@@ -151,7 +151,7 @@ describe('DashboardPage — Resumen ejecutivo de cartera', () => {
 
     fireEvent.click(screen.getByText('Todos'))
     expect(within(screen.getByTestId('portfolio-table')).getByText('MINEDU Dotación 2027')).toBeDefined()
-    expect(screen.getByText('Proyectos en atención (1)')).toBeDefined()
+    expect(screen.queryByText(/Proyectos en atención/)).toBeNull()
     expect(screen.getByText('Actividad reciente')).toBeDefined()
   })
 })
