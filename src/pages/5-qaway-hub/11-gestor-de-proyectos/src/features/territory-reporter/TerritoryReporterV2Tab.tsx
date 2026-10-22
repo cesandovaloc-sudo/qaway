@@ -459,12 +459,32 @@ function computePhaseStatus(files: number, total: number): TerritoryStatus {
 }
 
 function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row): TerritoryStatus {
-  const p1 = computePhaseStatus(row.phase1Files, row.phase1Total)
-  const dr = row.driveStatus
-  const p2 = computePhaseStatus(row.phase2Files, row.phase2Total)
+  const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[row.id] || DIRECTION_CODES
+  const totalDirs = applicableDirs.length || 7
+  let okCount = 0
+  let progCount = 0
 
-  if (p1 === 'completado' && dr === 'completado' && p2 === 'completado') return 'completado'
-  if (p1 === 'pendiente' && dr === 'pendiente' && p2 === 'pendiente') return 'pendiente'
+  for (const code of applicableDirs) {
+    const st = row.directions[code] || 'pendiente'
+    if (st === 'completado') okCount++
+    else if (st === 'en_proceso') progCount++
+  }
+
+  // Porcentaje efectivo ponderado en direcciones pedagógicas
+  const effectiveScore = okCount + progCount * 0.5
+  const dirPct = Math.round((effectiveScore / totalDirs) * 100)
+
+  // 1. Más de 70% en direcciones y evidencia en Drive completada -> Completado (verde)
+  if (dirPct >= 70 && row.driveStatus === 'completado') {
+    return 'completado'
+  }
+
+  // 2. Menos de 30% en direcciones -> Pendiente (rojo)
+  if (dirPct < 30) {
+    return 'pendiente'
+  }
+
+  // 3. De 30% hasta 70% en proceso (o si tiene >=70% pero Drive aún no está completado) -> En proceso (ámbar)
   return 'en_proceso'
 }
 
