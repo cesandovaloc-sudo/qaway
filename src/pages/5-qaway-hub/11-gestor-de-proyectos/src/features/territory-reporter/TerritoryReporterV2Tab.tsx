@@ -28,6 +28,7 @@ import { useHubBrand } from '@/hooks/useHubBrand'
 import { projectsService } from '@/services/projectsService'
 import { WORK_ITEM_STATE_META, type WorkItem, type WorkItemPriority } from '@/types/project.types'
 import { buildFollowUpMessage, buildWhatsAppUrl, toFollowUpContact } from '@/utils/followUp'
+import { territoryMonitoringService } from './territoryMonitoringService'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TerritoryReporterV2Tab.tsx — Matriz Ejecutiva Institucional (3 ETAPAS)
@@ -474,6 +475,29 @@ export function TerritoryReporterV2Tab({
     return INITIAL_JUNIN_UGELS_V2
   })
 
+  // Sincronización inicial y reactiva desde Supabase (Fuente de verdad definitiva)
+  useEffect(() => {
+    let isMounted = true
+    territoryMonitoringService
+      .fetchJuninUgels()
+      .then((remoteUgels) => {
+        if (isMounted && remoteUgels.length > 0) {
+          setUgels(remoteUgels)
+          try {
+            localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(remoteUgels))
+          } catch {
+            // ignore
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('[TerritoryV2] Usando fallback local por:', err)
+      })
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(ugels))
@@ -664,20 +688,25 @@ export function TerritoryReporterV2Tab({
     setUgels((prev) =>
       prev.map((u) => {
         if (u.id !== ugelId) return u
+        let updated: UgelMonitoringV2Row
         if (phase === 1) {
           const nextFiles = (u.phase1Files + 1) % (u.phase1Total + 1)
-          return {
+          updated = {
             ...u,
             phase1Files: nextFiles,
             phase1Date: nextFiles > 0 ? 'Actualizado hoy' : 'Sin carga',
           }
+        } else {
+          const nextFiles = (u.phase2Files + 1) % (u.phase2Total + 1)
+          updated = {
+            ...u,
+            phase2Files: nextFiles,
+            phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'Sin carga',
+          }
         }
-        const nextFiles = (u.phase2Files + 1) % (u.phase2Total + 1)
-        return {
-          ...u,
-          phase2Files: nextFiles,
-          phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'Sin carga',
-        }
+        // Persistir a Supabase
+        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        return updated
       }),
     )
   }
@@ -693,7 +722,7 @@ export function TerritoryReporterV2Tab({
             : u.driveStatus === 'pendiente'
               ? 'en_proceso'
               : 'completado'
-        return {
+        const updated: UgelMonitoringV2Row = {
           ...u,
           driveStatus: nextStatus,
           driveFiles: nextStatus === 'completado' ? 1 : 0,
@@ -704,6 +733,9 @@ export function TerritoryReporterV2Tab({
                 ? 'En proceso'
                 : 'Sin evidencia',
         }
+        // Persistir a Supabase
+        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        return updated
       }),
     )
   }
@@ -716,13 +748,16 @@ export function TerritoryReporterV2Tab({
         if (u.id !== ugelId) return u
         const current = u.directions[code]
         const next = order[(order.indexOf(current) + 1) % order.length]
-        return {
+        const updated: UgelMonitoringV2Row = {
           ...u,
           directions: {
             ...u.directions,
             [code]: next,
           },
         }
+        // Persistir a Supabase
+        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        return updated
       }),
     )
   }
@@ -734,10 +769,13 @@ export function TerritoryReporterV2Tab({
     setUgels((prev) =>
       prev.map((u) => {
         if (u.id !== ugelId) return u
-        return {
+        const updated = {
           ...u,
           [field]: newDate,
         }
+        // Persistir a Supabase
+        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        return updated
       }),
     )
     setEditingDateTarget(null)
