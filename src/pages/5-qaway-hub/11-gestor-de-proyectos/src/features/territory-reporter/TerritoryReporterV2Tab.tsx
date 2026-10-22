@@ -489,6 +489,15 @@ export function TerritoryReporterV2Tab({
   const [inspectedUgel, setInspectedUgel] = useState<UgelMonitoringV2Row | null>(null)
   const [newTaskTitle, setNewTaskTitle] = useState('')
 
+  // Estado para el selector/desplegable de edición de fechas
+  const [editingDateTarget, setEditingDateTarget] = useState<{
+    ugelId: string
+    field: 'phase1Date' | 'phase2Date' | 'driveDate'
+    fieldLabel: string
+    currentValue: string
+  } | null>(null)
+  const [customDateInput, setCustomDateInput] = useState('')
+
   useEffect(() => {
     if (inspectedUgel) {
       setNewTaskTitle(`Seguimiento de subida CdD - MC SIGA en UGEL ${inspectedUgel.name}`)
@@ -716,6 +725,23 @@ export function TerritoryReporterV2Tab({
         }
       }),
     )
+  }
+
+  // Guardar fecha modificada desde el desplegable
+  const handleSaveDate = (newDate: string) => {
+    if (!editingDateTarget) return
+    const { ugelId, field } = editingDateTarget
+    setUgels((prev) =>
+      prev.map((u) => {
+        if (u.id !== ugelId) return u
+        return {
+          ...u,
+          [field]: newDate,
+        }
+      }),
+    )
+    setEditingDateTarget(null)
+    setCustomDateInput('')
   }
 
   return (
@@ -1247,47 +1273,48 @@ export function TerritoryReporterV2Tab({
 
         {/* Tabla responsive con todas las celdas cliqueables */}
         <div className="overflow-x-auto [scrollbar-width:thin]">
-          <table className="w-full min-w-[1080px] border-collapse text-left text-xs">
+          <table className="w-full min-w-[1120px] border-collapse text-left text-[13px]">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-100/90 text-[11px] font-bold text-slate-700">
-                <th rowSpan={2} className="px-2.5 py-2 text-center w-10">
+              <tr className="border-b border-slate-200 bg-slate-100/90 text-[12px] font-black text-slate-700">
+                <th rowSpan={2} className="px-3 py-3 text-center w-12 text-[12px]">
                   N°
                 </th>
-                <th rowSpan={2} className="px-3 py-2 w-36">
+                <th rowSpan={2} className="px-3.5 py-3 w-40 text-[13px] text-slate-900">
                   UGEL
                 </th>
                 {/* BLOQUE FASE 1 */}
-                <th colSpan={2} className="border-x border-slate-200 px-3 py-1.5 text-center bg-blue-50/70 text-blue-900">
+                <th colSpan={2} className="border-x border-slate-200 px-3 py-2 text-center bg-blue-50/80 text-blue-950 font-black">
                   Fase 1 (MC SIGA Carga Inicial)
                 </th>
-                {/* BLOQUE DRIVE */}
-                <th colSpan={3} className="border-r border-slate-200 px-3 py-1.5 text-center bg-amber-50/80 text-amber-950">
-                  Drive Regional (Declarativo 22/10)
-                </th>
                 {/* BLOQUE FASE 2 */}
-                <th colSpan={2} className="border-r border-slate-200 px-3 py-1.5 text-center bg-indigo-50/70 text-indigo-950">
+                <th colSpan={2} className="border-r border-slate-200 px-3 py-2 text-center bg-indigo-50/80 text-indigo-950 font-black">
                   Fase 2 (Oficial RAR 26/10)
                 </th>
-                <th rowSpan={2} className="px-3 py-2 text-center w-28">
-                  Estado general
+                {/* BLOQUE DRIVE REGIONAL */}
+                <th colSpan={2} className="border-r border-slate-200 px-3 py-2 text-center bg-amber-50/90 text-amber-950 font-black">
+                  Drive Regional (Declarativo 22/10)
                 </th>
-                <th colSpan={7} className="border-x border-slate-200 px-2 py-1.5 text-center">
+                {/* BLOQUE DIRECCIONES */}
+                <th colSpan={7} className="border-r border-slate-200 px-2 py-2 text-center bg-slate-50 font-bold text-slate-700">
                   Direcciones (clic para alternar)
                 </th>
-                <th rowSpan={2} className="px-3 py-2 text-right w-24">
+                {/* BLOQUE ESTADO GENERAL */}
+                <th rowSpan={2} className="px-3 py-3 text-center w-32 font-black text-slate-800">
+                  Estado general
+                </th>
+                <th rowSpan={2} className="px-3.5 py-3 text-right w-24">
                   Acción
                 </th>
               </tr>
-              <tr className="border-b border-slate-200 bg-slate-50 text-[10.5px] font-bold text-slate-500">
-                <th className="border-l border-slate-200 px-2 py-1 text-center">Estado</th>
-                <th className="border-r border-slate-200 px-2 py-1">Fecha registro</th>
-                <th className="px-2 py-1 text-center">Drive</th>
-                <th className="px-2 py-1">Fecha entrega</th>
-                <th className="border-r border-slate-200 px-1.5 py-1 text-center">Excel</th>
-                <th className="px-2 py-1 text-center">RAR</th>
-                <th className="border-r border-slate-200 px-2 py-1">Fecha límite</th>
+              <tr className="border-b border-slate-200 bg-slate-50/90 text-[11.5px] font-bold text-slate-600">
+                <th className="border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
+                <th className="border-r border-slate-200 px-2.5 py-1.5">Fecha registro</th>
+                <th className="px-2.5 py-1.5 text-center">RAR</th>
+                <th className="border-r border-slate-200 px-2.5 py-1.5">Fecha límite</th>
+                <th className="px-2.5 py-1.5 text-center">Drive</th>
+                <th className="border-r border-slate-200 px-2.5 py-1.5">Fecha entrega</th>
                 {DIRECTION_CODES.map((code) => (
-                  <th key={code} className="px-1.5 py-1 text-center">
+                  <th key={code} className="px-1.5 py-1.5 text-center">
                     {code}
                   </th>
                 ))}
@@ -1308,98 +1335,119 @@ export function TerritoryReporterV2Tab({
 
                 return (
                   <tr key={u.id} className={`transition-colors ${rowTint}`}>
-                    <td className="px-2.5 py-2.5 text-center font-semibold text-slate-500 tabular-nums">
+                    <td className="px-3 py-3 text-center font-bold text-slate-500 tabular-nums text-[12.5px]">
                       {u.number}
                     </td>
-                    <td className="px-3 py-2.5 font-extrabold text-slate-900">
+                    <td className="px-3.5 py-3 font-black text-slate-900">
                       <button
                         type="button"
                         onClick={() => setInspectedUgel(u)}
-                        className="hover:underline cursor-pointer text-left font-extrabold text-blue-900"
+                        className="hover:underline cursor-pointer text-left font-black text-blue-950 text-[13.5px] tracking-tight"
                       >
                         {u.name}
                       </button>
                     </td>
 
-                    {/* FASE 1: SOLO ESTADO Y FECHA */}
-                    <td className="border-l border-slate-100 px-2 py-2.5 text-center">
+                    {/* FASE 1: ESTADO Y FECHA */}
+                    <td className="border-l border-slate-100 px-2.5 py-3 text-center">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
-                        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-blue-100/60 transition-colors cursor-pointer text-left"
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-blue-100/60 transition-colors cursor-pointer text-left"
                       >
-                        <span className="grid h-4 w-4 place-items-center rounded-full text-white bg-[#16a34a]">
-                          <Check size={10} strokeWidth={3} />
+                        <span className="grid h-4.5 w-4.5 place-items-center rounded-full text-white bg-[#16a34a]">
+                          <Check size={11} strokeWidth={3} />
                         </span>
-                        <span className="font-bold capitalize text-slate-800">Completado</span>
+                        <span className="font-extrabold text-[12.5px] capitalize text-slate-800">Completado</span>
                       </button>
                     </td>
-                    <td className="border-r border-slate-100 px-2 py-2.5 text-[11px] text-slate-500 tabular-nums">
-                      {u.phase1Date}
-                    </td>
-
-                    {/* DRIVE: DRIVE, FECHA Y ARCHIVO EXCEL */}
-                    <td className="px-2 py-2.5 text-center">
+                    <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
                       <button
                         type="button"
-                        onClick={() => handleCycleDriveStatus(u.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-amber-100/60 transition-colors cursor-pointer text-left"
+                        onClick={() =>
+                          setEditingDateTarget({
+                            ugelId: u.id,
+                            field: 'phase1Date',
+                            fieldLabel: `Fase 1 (MC SIGA) · UGEL ${u.name}`,
+                            currentValue: u.phase1Date,
+                          })
+                        }
+                        className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
+                        title="Clic para cambiar fecha"
                       >
-                        <span className={`grid h-4 w-4 place-items-center rounded-full text-white ${
-                          u.driveStatus === 'completado' ? 'bg-[#16a34a]' : u.driveStatus === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
-                        }`}>
-                          {u.driveStatus === 'completado' ? <Check size={10} strokeWidth={3} /> : u.driveStatus === 'en_proceso' ? <Clock size={10} strokeWidth={2.6} /> : <X size={10} strokeWidth={3} />}
-                        </span>
-                        <span className="font-bold capitalize">{u.driveStatus.replace('_', ' ')}</span>
-                      </button>
-                    </td>
-                    <td className="px-2 py-2.5 text-[11px] text-slate-500 tabular-nums">
-                      {u.driveDate}
-                    </td>
-                    <td className="border-r border-slate-100 px-1.5 py-2.5 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleCycleDriveStatus(u.id)}
-                        className={`rounded-md px-2 py-1 font-bold text-xs tabular-nums cursor-pointer transition-colors ${
-                          u.driveStatus === 'completado'
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
-                            : u.driveStatus === 'en_proceso'
-                              ? 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200'
-                              : 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200'
-                        }`}
-                      >
-                        {u.driveStatus === 'completado' ? '1/1' : u.driveStatus === 'en_proceso' ? 'Proceso' : '0/1'}
+                        <Calendar size={12} className="text-slate-400 shrink-0" />
+                        <span>{u.phase1Date}</span>
                       </button>
                     </td>
 
-                    {/* FASE 2: SOLO ESTADO RAR Y FECHA */}
-                    <td className="px-2 py-2.5 text-center">
+                    {/* FASE 2: ESTADO RAR Y FECHA */}
+                    <td className="px-2.5 py-3 text-center">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
-                        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-indigo-100/60 transition-colors cursor-pointer text-left"
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-indigo-100/60 transition-colors cursor-pointer text-left"
                       >
-                        <span className={`grid h-4 w-4 place-items-center rounded-full text-white ${
+                        <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
                           isP2Done ? 'bg-[#16a34a]' : 'bg-slate-400'
                         }`}>
-                          {isP2Done ? <Check size={10} strokeWidth={3} /> : <Clock size={10} strokeWidth={2.4} />}
+                          {isP2Done ? <Check size={11} strokeWidth={3} /> : <Clock size={11} strokeWidth={2.4} />}
                         </span>
-                        <span className={`font-bold capitalize ${isP2Done ? 'text-slate-900' : 'text-slate-600'}`}>
+                        <span className={`font-extrabold text-[12.5px] capitalize ${isP2Done ? 'text-slate-900' : 'text-slate-600'}`}>
                           {isP2Done ? 'Completado' : 'En plazo'}
                         </span>
                       </button>
                     </td>
-                    <td className="border-r border-slate-100 px-2 py-2.5 text-[11px] text-slate-500 tabular-nums">
-                      {u.phase2Date}
+                    <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingDateTarget({
+                            ugelId: u.id,
+                            field: 'phase2Date',
+                            fieldLabel: `Fase 2 (Oficial RAR) · UGEL ${u.name}`,
+                            currentValue: u.phase2Date,
+                          })
+                        }
+                        className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
+                        title="Clic para cambiar fecha"
+                      >
+                        <Calendar size={12} className="text-slate-400 shrink-0" />
+                        <span>{u.phase2Date}</span>
+                      </button>
                     </td>
 
-                    {/* ESTADO GENERAL */}
-                    <td className="px-3 py-2.5 text-center">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
-                        genStatus === 'completado' ? 'bg-emerald-100 text-emerald-800' : genStatus === 'en_proceso' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
-                      }`}>
-                        {genStatus === 'completado' ? 'Completado' : genStatus === 'en_proceso' ? 'En proceso' : 'Pendiente'}
-                      </span>
+                    {/* DRIVE REGIONAL (JUNTO A DIRECCIONES): ESTADO Y FECHA ENTREGA */}
+                    <td className="px-2.5 py-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleCycleDriveStatus(u.id)}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-amber-100/60 transition-colors cursor-pointer text-left"
+                      >
+                        <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
+                          u.driveStatus === 'completado' ? 'bg-[#16a34a]' : u.driveStatus === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
+                        }`}>
+                          {u.driveStatus === 'completado' ? <Check size={11} strokeWidth={3} /> : u.driveStatus === 'en_proceso' ? <Clock size={11} strokeWidth={2.6} /> : <X size={11} strokeWidth={3} />}
+                        </span>
+                        <span className="font-extrabold text-[12.5px] capitalize text-slate-800">{u.driveStatus.replace('_', ' ')}</span>
+                      </button>
+                    </td>
+                    <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingDateTarget({
+                            ugelId: u.id,
+                            field: 'driveDate',
+                            fieldLabel: `Drive Regional (Declarativo) · UGEL ${u.name}`,
+                            currentValue: u.driveDate,
+                          })
+                        }
+                        className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
+                        title="Clic para cambiar fecha"
+                      >
+                        <Calendar size={12} className="text-slate-400 shrink-0" />
+                        <span>{u.driveDate}</span>
+                      </button>
                     </td>
 
                     {/* DIRECCIONES */}
@@ -1412,7 +1460,7 @@ export function TerritoryReporterV2Tab({
                             ? 'bg-[#f59e0b] ring-2 ring-amber-200'
                             : 'bg-[#dc2626] ring-2 ring-rose-200'
                       return (
-                        <td key={code} className="px-1.5 py-2.5 text-center">
+                        <td key={code} className="px-1.5 py-3 text-center">
                           <button
                             type="button"
                             onClick={() => handleCycleDirectionStatus(u.id, code)}
@@ -1425,12 +1473,21 @@ export function TerritoryReporterV2Tab({
                       )
                     })}
 
+                    {/* ESTADO GENERAL */}
+                    <td className="border-l border-slate-100 px-3 py-3 text-center">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-extrabold ${
+                        genStatus === 'completado' ? 'bg-emerald-100 text-emerald-800' : genStatus === 'en_proceso' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                      }`}>
+                        {genStatus === 'completado' ? 'Completado' : genStatus === 'en_proceso' ? 'En proceso' : 'Pendiente'}
+                      </span>
+                    </td>
+
                     {/* ACCIÓN DETALLE */}
-                    <td className="px-3 py-2.5 text-right">
+                    <td className="px-3.5 py-3 text-right">
                       <button
                         type="button"
                         onClick={() => setInspectedUgel(u)}
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs"
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-extrabold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs"
                       >
                         Detalle
                       </button>
@@ -1750,6 +1807,96 @@ export function TerritoryReporterV2Tab({
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL / POPOVER DESPLEGABLE PARA MODIFICAR FECHAS DE CONTROL ── */}
+      {editingDateTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 print:hidden animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                  <Calendar size={18} />
+                </span>
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 leading-tight">
+                    Modificar Fecha de Seguimiento
+                  </h4>
+                  <p className="text-[11.5px] font-semibold text-slate-500 mt-0.5">
+                    {editingDateTarget.fieldLabel}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingDateTarget(null)}
+                className="grid h-7 w-7 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Presets rápidos */}
+            <div>
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                Accesos rápidos
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {[
+                  'Hoy (22/10/2026)',
+                  'Corte Drive (22/10/2026)',
+                  'Cierre RAR (26/10/2026)',
+                  'En plazo hasta 26/10',
+                  'En proceso',
+                  '15/10/2026 12:00',
+                ].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => handleSaveDate(preset)}
+                    className="truncate rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-left font-bold text-slate-700 hover:border-blue-500 hover:bg-blue-50/60 hover:text-blue-900 transition-all cursor-pointer shadow-2xs"
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Input personalizado */}
+            <div className="space-y-1.5 pt-1">
+              <label className="block text-[11.5px] font-bold text-slate-700">
+                O escribe una fecha personalizada:
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Ej: 22/10/2026 18:30 ó En plazo"
+                  defaultValue={editingDateTarget.currentValue}
+                  onChange={(e) => setCustomDateInput(e.target.value)}
+                  className="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-2xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSaveDate(customDateInput || editingDateTarget.currentValue)}
+                  className="h-10 rounded-xl bg-blue-600 px-4 text-xs font-black text-white hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
+                >
+                  Guardar
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Valor actual: <strong className="text-slate-600">{editingDateTarget.currentValue}</strong></span>
+              <button
+                type="button"
+                onClick={() => setEditingDateTarget(null)}
+                className="font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
