@@ -1315,24 +1315,39 @@ export function TerritoryReporterV2Tab({
           </div>
 
           <div className="my-auto space-y-2.5 py-3">
-            {ugelStats.directionStats.map((d) => (
-              <div key={d.code} className="flex items-center gap-2.5 text-xs">
-                <span className="w-13 font-black text-slate-800 text-[12.5px]">{d.code}</span>
-                <div className="relative flex-1">
-                  <div className="flex h-4 overflow-hidden rounded-full bg-slate-100 shadow-inner">
-                    <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
-                    <div style={{ width: `${(d.prog / d.total) * 100}%` }} className="bg-amber-400" />
-                    <div style={{ width: `${(d.pend / d.total) * 100}%` }} className="bg-rose-600" />
+            {ugelStats.directionStats.map((d) => {
+              const status = d.pct >= 70 ? 'completado' : d.pct >= 30 ? 'en_proceso' : 'pendiente'
+              const badgeStyle =
+                status === 'completado'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : status === 'en_proceso'
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-rose-100 text-rose-800'
+              const badgeLabel =
+                status === 'completado' ? 'Completado' : status === 'en_proceso' ? 'En proceso' : 'Pendiente'
+
+              return (
+                <div key={d.code} className="flex items-center gap-2 text-xs">
+                  <span className="w-12 shrink-0 font-black text-slate-800 text-[12px]">{d.code}</span>
+                  <div className="relative flex-1">
+                    <div className="flex h-3.5 overflow-hidden rounded-full bg-slate-100 shadow-inner">
+                      <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
+                      <div style={{ width: `${(d.prog / d.total) * 100}%` }} className="bg-amber-400" />
+                      <div style={{ width: `${(d.pend / d.total) * 100}%` }} className="bg-rose-600" />
+                    </div>
                   </div>
+                  <span className="w-8.5 shrink-0 text-right font-black text-slate-900 tabular-nums text-[12px]">
+                    {d.pct}%
+                  </span>
+                  <span className="w-7.5 shrink-0 text-right text-[10.5px] font-semibold text-slate-400 tabular-nums">
+                    {d.ok}/{d.total}
+                  </span>
+                  <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[9.5px] font-black ${badgeStyle}`}>
+                    {badgeLabel}
+                  </span>
                 </div>
-                <span className="w-11 text-right font-black text-slate-900 tabular-nums text-[12.5px]">
-                  {d.pct}%
-                </span>
-                <span className="text-[11px] font-semibold text-slate-400 tabular-nums">
-                  {d.ok}/{d.total}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px] text-slate-500 font-bold">
