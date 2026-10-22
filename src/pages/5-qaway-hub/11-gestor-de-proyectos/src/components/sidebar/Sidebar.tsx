@@ -135,17 +135,29 @@ export default function Sidebar({
 
   const sections: NavSection[] = [
     {
-      title: 'OPERACIÓN & CARTERA',
+      title: 'OPERACIÓN TERRITORIAL (ACTIVO)',
+      items: [
+        {
+          to: '/monitoreo-v2',
+          label: 'Reporteador Territorial (Hito 1.6)',
+          icon: <BarChart3 size={18} />,
+          badge: 'ACTIVO',
+          badgeVariant: 'urgent',
+        },
+      ],
+    },
+    {
+      title: 'MÓDULOS EN ESPERA',
       items: [
         {
           to: '/',
-          label: 'Resumen',
+          label: 'Resumen General',
           icon: <LayoutDashboard size={18} />,
           end: true,
         },
         {
           to: '/proyectos',
-          label: 'Proyectos',
+          label: 'Proyectos & Hitos',
           icon: <FolderKanban size={18} />,
           badge: scopedProjects.length,
           badgeVariant: 'neutral',
@@ -165,11 +177,6 @@ export default function Sidebar({
           badge: urgentCount,
           badgeVariant: 'urgent',
         },
-      ],
-    },
-    {
-      title: 'SEGUIMIENTO & CONTROL',
-      items: [
         {
           to: '/cascada',
           label: 'Cascada Fractal (WBS)',
@@ -178,15 +185,9 @@ export default function Sidebar({
         },
         {
           to: '/monitoreo-territorial',
-          label: 'Monitoreo Territorial',
+          label: 'Monitoreo Territorial v1',
           icon: <BarChart3 size={18} />,
-          badge: 'SIGA',
-        },
-        {
-          to: '/monitoreo-v2',
-          label: 'Monitoreo Territorial v2',
-          icon: <BarChart3 size={18} />,
-          badge: '3 FASES',
+          badge: 'v1',
         },
       ],
     },
@@ -285,105 +286,146 @@ export default function Sidebar({
         </Link>
       </div>
 
-      {/* NIVEL 1 EN CASCADA: PROYECTO ACTIVO (Flotante, no empuja el menú) + NUEVO PROYECTO */}
+      {/* NIVEL 1 EN CASCADA: CARTERA / PROGRAMA / PROYECTO (Exacto a la captura de usuario) */}
       {!collapsed && (
         <div className="px-3 pt-3 pb-2.5 border-b border-[var(--hub-border)] space-y-2 shrink-0">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
-              PROYECTO ACTIVO
-            </span>
-            {activeProjectObj && (
-              <span className="text-[11.5px] font-bold tabular-nums text-[var(--hub-brand)]">
-                {activeProjectObj.progress}%
+          {/* Header de Cartera y Programa */}
+          <div className="space-y-1 px-1">
+            <div className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 text-[10.5px] font-black text-purple-700 dark:text-purple-300">
+                N1 • CARTERA
               </span>
-            )}
+              <span className="text-[11px] font-bold text-slate-500 truncate">
+                Materiales Educativos
+              </span>
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium truncate">
+              Prog: <strong className="text-slate-700">Monitoreo Territorial BIAE</strong>
+            </div>
           </div>
 
-          {/* Selector desplegable FLOTANTE del Proyecto en Función */}
+          {/* Selector desplegable FLOTANTE: Intercambio Rápido de Cartera / Proyecto */}
           <div ref={selectorRef} className="relative">
             <button
               type="button"
               onClick={() => setIsActiveSelectorOpen((prev) => !prev)}
               aria-expanded={isActiveSelectorOpen}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] hover:bg-[var(--hub-chip)] text-left transition-colors cursor-pointer shadow-2xs"
-              title={activeProjectObj?.name ?? 'Seleccionar proyecto'}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-gradient-to-r from-purple-50/50 to-indigo-50/30 dark:from-purple-950/20 dark:to-indigo-950/20 hover:border-purple-300 text-left transition-all cursor-pointer shadow-2xs group"
+              title="MINEDU Dotación 2027 - DRE Junín (13 UGEL)"
             >
-              <div className="flex items-start gap-2 min-w-0">
-                <span
-                  className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
-                    activeProjectObj?.health === 'optimo'
-                      ? 'bg-emerald-500'
-                      : activeProjectObj?.health === 'atencion'
-                        ? 'bg-amber-500'
-                        : 'bg-rose-500'
-                  }`}
-                />
-                <div className="min-w-0">
-                  <div className="text-[13.5px] font-semibold text-[var(--hub-text)] line-clamp-2 leading-snug">
-                    {activeProjectObj?.name ?? 'Seleccionar proyecto'}
-                  </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-purple-700 dark:text-purple-400">
+                  <span>OM-00032-2026</span>
+                </div>
+                <div className="text-[13px] font-black text-slate-900 dark:text-slate-100 truncate mt-0.5">
+                  Distribución ME dotación 2027
                 </div>
               </div>
-              <ChevronDown
-                size={15}
-                className={`shrink-0 text-[var(--hub-dim)] transition-transform duration-200 ${
-                  isActiveSelectorOpen ? 'rotate-180' : ''
-                }`}
-              />
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="rounded-md bg-purple-200/70 dark:bg-purple-900/60 px-1.5 py-0.5 text-[11px] font-black tabular-nums text-purple-900 dark:text-purple-200">
+                  48%
+                </span>
+                <ChevronDown
+                  size={15}
+                  className={`text-slate-400 group-hover:text-purple-600 transition-transform duration-200 ${
+                    isActiveSelectorOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </div>
             </button>
 
             {isActiveSelectorOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-surface,#ffffff)] p-1.5 shadow-xl space-y-0.5 max-h-64 overflow-y-auto z-50">
-                {scopedProjects.map((proj) => {
-                  const isSelected = proj.id === activeProjectObj?.id
-                  return (
-                    <button
-                      key={proj.id}
-                      type="button"
-                      onClick={() => handleSelectProjectInCascade(proj.id)}
-                      className={`w-full flex items-start gap-2 px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer ${
-                        isSelected
-                          ? 'bg-[var(--hub-chip)] text-[var(--hub-text)]'
-                          : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-chip)] hover:text-[var(--hub-text)]'
-                      }`}
-                    >
-                      <span
-                        className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
-                          proj.health === 'optimo'
-                            ? 'bg-emerald-500'
-                            : proj.health === 'atencion'
-                              ? 'bg-amber-500'
-                              : 'bg-rose-500'
-                        }`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[13.5px] font-medium leading-snug line-clamp-2">
-                          {proj.name}
-                        </div>
-                        <div className="text-[11.5px] text-[var(--hub-dim)] tabular-nums mt-0.5">
-                          {proj.progress}% de avance
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <Check size={14} className="shrink-0 text-[var(--hub-brand)] mt-1" />
-                      )}
-                    </button>
-                  )
-                })}
+              <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121620] p-2 shadow-2xl space-y-1 max-h-80 overflow-y-auto z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <span>INTERCAMBIO RÁPIDO DE CARTERA (N1)</span>
+                </div>
+
+                {/* Proyecto 1: Dotación 2027 */}
+                <button
+                  type="button"
+                  onClick={() => setIsActiveSelectorOpen(false)}
+                  className="w-full flex items-center justify-between gap-2 p-2.5 rounded-xl bg-purple-50/80 dark:bg-purple-950/40 text-left border border-purple-200 dark:border-purple-800/60 transition-all cursor-pointer"
+                >
+                  <div className="min-w-0">
+                    <span className="block text-[10px] font-black text-purple-600 dark:text-purple-400">
+                      OM-00032-2026
+                    </span>
+                    <span className="block text-[12.5px] font-bold text-slate-900 dark:text-slate-100 truncate mt-0.5">
+                      Distribución ME dotación 2027
+                    </span>
+                  </div>
+                  <span className="rounded-md bg-purple-200/80 dark:bg-purple-900/70 px-1.5 py-0.5 text-[11px] font-black text-purple-900 dark:text-purple-200 tabular-nums">
+                    48%
+                  </span>
+                </button>
+
+                {/* Proyecto 2: Redistribución 2027 */}
+                <button
+                  type="button"
+                  onClick={() => setIsActiveSelectorOpen(false)}
+                  className="w-full flex items-center justify-between gap-2 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 text-left transition-all cursor-pointer"
+                >
+                  <div className="min-w-0">
+                    <span className="block text-[10px] font-black text-slate-500">
+                      OM-00050-2026
+                    </span>
+                    <span className="block text-[12.5px] font-bold text-slate-700 dark:text-slate-300 truncate mt-0.5">
+                      Redistribución de ME dot 2027
+                    </span>
+                  </div>
+                  <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[11px] font-black text-slate-700 dark:text-slate-300 tabular-nums">
+                    35%
+                  </span>
+                </button>
+
+                {/* Proyecto 3: Referencia de Infraestructura */}
+                <button
+                  type="button"
+                  onClick={() => setIsActiveSelectorOpen(false)}
+                  className="w-full flex items-center justify-between gap-2 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 text-left transition-all cursor-pointer"
+                >
+                  <div className="min-w-0">
+                    <span className="block text-[10px] font-black text-slate-500">
+                      PRY-CASA-01
+                    </span>
+                    <span className="block text-[12.5px] font-bold text-slate-700 dark:text-slate-300 truncate mt-0.5">
+                      Construcción Integral de Residencia Familiar
+                    </span>
+                  </div>
+                  <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[11px] font-black text-slate-700 dark:text-slate-300 tabular-nums">
+                    96%
+                  </span>
+                </button>
+
+                {/* Botón dentro del desplegable: + Crear Nueva Cartera / Proyecto (N1) */}
+                <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsActiveSelectorOpen(false)
+                      setIsCreateProjectOpen(true)
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[12.5px] font-bold shadow-xs transition-all cursor-pointer"
+                  >
+                    <Plus size={15} strokeWidth={2.8} />
+                    <span>+ Crear Nueva Cartera / Proyecto (N1)</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Botón directo en cascada: + Nuevo Proyecto */}
-          <button
-            type="button"
-            onClick={() => setIsCreateProjectOpen(true)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-[var(--hub-brand)]/35 bg-[var(--hub-brand-soft,#fbf0ec)] hover:opacity-95 text-[13px] font-bold text-[var(--hub-brand)] transition-all cursor-pointer"
-          >
-            <Plus size={15} strokeWidth={2.4} />
-            <span>Nuevo Proyecto</span>
-          </button>
+          {/* N3 • SUBPROCESO ASOCIADO AL HITO ACTUAL (Tal como en la imagen) */}
+          <div className="flex items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/20 px-2.5 py-1.5 text-[11px]">
+            <span className="font-black text-emerald-800 dark:text-emerald-400 shrink-0">
+              N3 • SUBPROCESO:
+            </span>
+            <span className="font-semibold text-emerald-900 dark:text-emerald-300 truncate" title="1.6 Elaboración del CDL en MC SIGA (22/10)">
+              1.6 Elaboración del CDL en MC SIGA
+            </span>
+          </div>
         </div>
+      )}
       )}
 
       {/* Nav (Espaciado canónico App Inventario: py-3 px-3) */}

@@ -28,6 +28,7 @@ import { useHubBrand } from '@/hooks/useHubBrand'
 import { projectsService } from '@/services/projectsService'
 import { WORK_ITEM_STATE_META, type WorkItem, type WorkItemPriority } from '@/types/project.types'
 import { buildFollowUpMessage, buildWhatsAppUrl, toFollowUpContact } from '@/utils/followUp'
+import { useProjectPerspective } from '../../context/ProjectPerspectiveContext'
 import { territoryMonitoringService } from './territoryMonitoringService'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -524,6 +525,11 @@ export function TerritoryReporterV2Tab({
 }) {
   const brand = useHubBrand()
   const { workItems } = useProjectsDataset()
+  const { perspective, currentPersona, setPerspective, isCoordinador, isGestor, isSuperAdmin } = useProjectPerspective()
+  const [selectedMacrorregion, setSelectedMacrorregion] = useState('Centro')
+  const [selectedRegion, setSelectedRegion] = useState('Región Junín (13 UGEL)')
+  const [selectedGestorFilter, setSelectedGestorFilter] = useState('todos')
+  const [selectedUgelFilter, setSelectedUgelFilter] = useState('todas')
 
   const [ugels, setUgels] = useState<UgelMonitoringV2Row[]>(() => {
     try {
@@ -757,6 +763,12 @@ export function TerritoryReporterV2Tab({
 
   const filteredUgels = useMemo(() => {
     return ugels.filter((u) => {
+      if (selectedUgelFilter !== 'todas' && u.id !== selectedUgelFilter) {
+        return false
+      }
+      if (selectedGestorFilter !== 'todos' && u.gestorName !== selectedGestorFilter) {
+        return false
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase()
         const matchName = u.name.toLowerCase().includes(q)
@@ -780,7 +792,7 @@ export function TerritoryReporterV2Tab({
 
       return true
     })
-  }, [ugels, searchQuery, filterStatus, filterDirection])
+  }, [ugels, searchQuery, filterStatus, filterDirection, selectedUgelFilter, selectedGestorFilter])
 
   // Alternador binario en Fase 1 y Fase 2 (2 opciones: o cumplen o no)
   const handleCycleUgelFiles = (ugelId: string, phase: 1 | 2) => {
@@ -897,24 +909,136 @@ export function TerritoryReporterV2Tab({
   return (
     <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-['DM_Sans',sans-serif] text-slate-800 antialiased">
       {/* ════════════════════════════════════════════════════════════════════════
-          1. CABECERA INSTITUCIONAL + BANNER HITO 1.6
+          1. CABECERA INSTITUCIONAL + CASCADA TERRITORIAL Y GOBERNANZA DE ROLES
           ════════════════════════════════════════════════════════════════════════ */}
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
-          <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
-            DISTRIBUCIÓN DE MATERIALES EDUCATIVOS | DOTACIÓN 2027 | SEGUIMIENTO REGIONAL
-          </span>
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-4">
+        {/* Fila 1: Línea institucional y Switcher de Rol */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
+            <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
+              DISTRIBUCIÓN DE MATERIALES EDUCATIVOS | DOTACIÓN 2027 | SEGUIMIENTO REGIONAL
+            </span>
+          </div>
+
+          {/* Switcher de Rol / Perspectiva */}
+          <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1 text-[11px] font-bold">
+            <span className="text-slate-400 px-1.5 uppercase tracking-wider text-[9.5px]">Nivel Rol:</span>
+            <button
+              type="button"
+              onClick={() => setPerspective('coordinador')}
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                isCoordinador || isSuperAdmin
+                  ? 'bg-blue-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Coordinador PMO
+            </button>
+            <button
+              type="button"
+              onClick={() => setPerspective('gestor')}
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                isGestor
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Gestor Territorial
+            </button>
+          </div>
         </div>
-        <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
-          Estado de avance
-        </h2>
-        <p className="text-[13.5px] font-semibold text-slate-600 mt-0.5">
-          Región Junín · 13 UGEL (Orden Alfabético)
-        </p>
+
+        {/* Título y subtítulo */}
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            Estado de avance
+          </h2>
+          <p className="text-[13.5px] font-semibold text-slate-600 mt-0.5">
+            {selectedRegion} · 13 UGEL (Orden Alfabético)
+          </p>
+        </div>
+
+        {/* CASCADA TERRITORIAL EN BARRA SUPERIOR DE CONTEXTO */}
+        <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/80 p-3 text-xs">
+          {/* N1: Macrorregión */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10.5px] font-black uppercase text-slate-400">Macrorregión:</span>
+            <select
+              value={selectedMacrorregion}
+              onChange={(e) => setSelectedMacrorregion(e.target.value)}
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
+            >
+              <option value="Centro">Centro (Junín, Pasco, Huánuco)</option>
+              <option value="Norte">Norte (Piura, La Libertad, Lambayeque)</option>
+              <option value="Sur">Sur (Cusco, Arequipa, Puno)</option>
+              <option value="Oriente">Oriente (Loreto, San Martín, Ucayali)</option>
+            </select>
+          </div>
+
+          <span className="text-slate-300">/</span>
+
+          {/* N2: Sede / Región (DRE) */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10.5px] font-black uppercase text-slate-400">Sede / Región:</span>
+            <select
+              value={selectedRegion}
+              onChange={(e) => setSelectedRegion(e.target.value)}
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
+            >
+              <option value="Región Junín (13 UGEL)">DRE Junín (13 UGEL)</option>
+              <option value="Región Cusco (14 UGEL)">DRE Cusco (14 UGEL)</option>
+              <option value="Lima Provincias (9 UGEL)">Lima Provincias (9 UGEL)</option>
+            </select>
+          </div>
+
+          <span className="text-slate-300">/</span>
+
+          {/* N3: Gestor Territorial según Rol */}
+          {isCoordinador || isSuperAdmin ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-black uppercase text-slate-400">Gestor Territorial:</span>
+              <select
+                value={selectedGestorFilter}
+                onChange={(e) => setSelectedGestorFilter(e.target.value)}
+                className="rounded-lg border border-blue-200 bg-blue-50/70 px-2 py-1 text-xs font-bold text-blue-950 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
+              >
+                <option value="todos">Todos los Gestores (Supervisión Total)</option>
+                <option value="Carlos Sandoval">Carlos Sandoval (Gestor Junín)</option>
+                <option value="Gestor Selva Central">Gestor Selva Central (Pangoa, Río Ene)</option>
+              </select>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-black uppercase text-slate-400">Gestor de Campo:</span>
+              <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-900">
+                {currentPersona.name} ({currentPersona.title})
+              </span>
+            </div>
+          )}
+
+          <span className="text-slate-300">/</span>
+
+          {/* N4: Filtro de UGEL */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10.5px] font-black uppercase text-slate-400">Filtro UGEL:</span>
+            <select
+              value={selectedUgelFilter}
+              onChange={(e) => setSelectedUgelFilter(e.target.value)}
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
+            >
+              <option value="todas">Todas las 13 UGEL</option>
+              {ugels.map((u) => (
+                <option key={u.id} value={u.id}>
+                  UGEL {u.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         {/* Banner Institucional de Hito 1.6 */}
-        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5">
           <span className="inline-flex items-center gap-1 rounded-md bg-[#1055b8] px-2.5 py-0.5 text-[11.5px] font-black text-white">
             HITO 1.6
           </span>
