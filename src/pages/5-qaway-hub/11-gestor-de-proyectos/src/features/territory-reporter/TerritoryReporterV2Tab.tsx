@@ -824,17 +824,16 @@ export function TerritoryReporterV2Tab({
     )
   }
 
-  // Ciclador de Direcciones Pedagógicas
+  // Ciclador de Direcciones Pedagógicas: Binario (Verde / Rojo sin estado intermedio)
   const handleCycleDirectionStatus = (ugelId: string, code: DirectionCode) => {
     const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[ugelId] || []
     if (!applicableDirs.includes(code)) return // No aplica a esta UGEL
 
-    const order: TerritoryStatus[] = ['completado', 'en_proceso', 'pendiente']
     setUgels((prev) =>
       prev.map((u) => {
         if (u.id !== ugelId) return u
         const current = u.directions[code] || 'pendiente'
-        const next = order[(order.indexOf(current) + 1) % order.length]
+        const next: TerritoryStatus = current === 'completado' ? 'pendiente' : 'completado'
         const nextDirections = {
           ...u.directions,
           [code]: next,
@@ -1826,9 +1825,8 @@ export function TerritoryReporterV2Tab({
                             handleCycleDirectionStatus(inspectedUgel.id, code)
                             setInspectedUgel((prev) => {
                               if (!prev) return null
-                              const order: TerritoryStatus[] = ['completado', 'en_proceso', 'pendiente']
                               const cur = prev.directions[code] || 'pendiente'
-                              const next = order[(order.indexOf(cur) + 1) % order.length]
+                              const next: TerritoryStatus = cur === 'completado' ? 'pendiente' : 'completado'
                               return {
                                 ...prev,
                                 directions: {
