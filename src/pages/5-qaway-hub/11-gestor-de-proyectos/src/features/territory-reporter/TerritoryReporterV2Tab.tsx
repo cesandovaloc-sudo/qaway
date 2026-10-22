@@ -1397,49 +1397,49 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* Tabla responsive con todas las celdas cliqueables */}
-        <div className="overflow-x-auto [scrollbar-width:thin]">
+        {/* Tabla responsive con todas las celdas cliqueables y encabezado sticky */}
+        <div className="overflow-auto max-h-[75vh] [scrollbar-width:thin] relative">
           <table className="w-full min-w-[1120px] border-collapse text-left text-[13px]">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-100/90 text-[12px] font-black text-slate-700">
-                <th rowSpan={2} className="px-3 py-3 text-center w-12 text-[12px]">
+            <thead className="sticky top-0 z-20 shadow-xs">
+              <tr className="border-b border-slate-200 text-[12px] font-black text-slate-700">
+                <th rowSpan={2} className="sticky top-0 z-20 bg-slate-100 px-3 py-3 text-center w-12 text-[12px]">
                   N°
                 </th>
-                <th rowSpan={2} className="px-3.5 py-3 w-40 text-[13px] text-slate-900">
+                <th rowSpan={2} className="sticky top-0 z-20 bg-slate-100 px-3.5 py-3 w-40 text-[13px] text-slate-900">
                   UGEL
                 </th>
                 {/* BLOQUE FASE 1 */}
-                <th className="border-x border-slate-200 px-3 py-2 text-center bg-blue-50/80 text-blue-950 font-black">
+                <th className="sticky top-0 z-20 border-x border-slate-200 px-3 py-2 text-center bg-blue-50 text-blue-950 font-black">
                   Fase 1 (MC SIGA Carga Inicial)
                 </th>
                 {/* BLOQUE FASE 2 */}
-                <th className="border-r border-slate-200 px-3 py-2 text-center bg-indigo-50/80 text-indigo-950 font-black">
+                <th className="sticky top-0 z-20 border-r border-slate-200 px-3 py-2 text-center bg-indigo-50 text-indigo-950 font-black">
                   Fase 2 (Oficial RAR)
                 </th>
                 {/* BLOQUE UNIFICADO: DIRECCIONES Y EVIDENCIA DRIVE */}
-                <th colSpan={DIRECTION_CODES.length + 2} className="border-r border-slate-200 px-3 py-2 text-center bg-amber-50/90 text-amber-950 font-black">
+                <th colSpan={DIRECTION_CODES.length + 2} className="sticky top-0 z-20 border-r border-slate-200 px-3 py-2 text-center bg-amber-50 text-amber-950 font-black">
                   Direcciones y Evidencia Drive Regional (Declarativo 22/10)
                 </th>
                 {/* BLOQUE ESTADO GENERAL */}
-                <th rowSpan={2} className="px-3 py-3 text-center w-32 font-black text-slate-800">
+                <th rowSpan={2} className="sticky top-0 z-20 bg-slate-100 px-3 py-3 text-center w-32 font-black text-slate-800">
                   Estado general
                 </th>
-                <th rowSpan={2} className="px-3.5 py-3 text-right w-24">
+                <th rowSpan={2} className="sticky top-0 z-20 bg-slate-100 px-3.5 py-3 text-right w-24">
                   Acción
                 </th>
               </tr>
-              <tr className="border-b border-slate-200 bg-slate-50/90 text-[11.5px] font-bold text-slate-600">
-                <th className="border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
-                <th className="border-r border-slate-200 px-2.5 py-1.5 text-center">RAR</th>
+              <tr className="border-b border-slate-200 text-[11.5px] font-bold text-slate-600">
+                <th className="sticky top-[37px] z-20 bg-blue-50/95 border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
+                <th className="sticky top-[37px] z-20 bg-indigo-50/95 border-r border-slate-200 px-2.5 py-1.5 text-center">RAR</th>
                 {/* 1°: Las 7 Direcciones Pedagógicas */}
                 {DIRECTION_CODES.map((code) => (
-                  <th key={code} className="px-1.5 py-1.5 text-center truncate max-w-[55px]" title={code}>
+                  <th key={code} className="sticky top-[37px] z-20 bg-amber-50/95 px-1.5 py-1.5 text-center truncate max-w-[55px]" title={code}>
                     {code}
                   </th>
                 ))}
                 {/* 2°: Luego Estado y Fecha entrega */}
-                <th className="border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
-                <th className="border-r border-slate-200 px-2.5 py-1.5 text-center">Fecha entrega</th>
+                <th className="sticky top-[37px] z-20 bg-amber-50/95 border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
+                <th className="sticky top-[37px] z-20 bg-amber-50/95 border-r border-slate-200 px-2.5 py-1.5 text-center">Fecha entrega</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
