@@ -41,7 +41,17 @@ interface NavSection {
 //    + acceso directo al Reporteador de Monitoreo Territorial (CdD - SIGA).
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: boolean }) {
+interface SidebarProps {
+  collapsed?: boolean
+  width?: number
+  onStartResize?: (e: React.MouseEvent) => void
+}
+
+export default function Sidebar({
+  collapsed: collapsedProp,
+  width,
+  onStartResize,
+}: SidebarProps) {
   const [internalCollapsed] = useState(false)
   const collapsed = collapsedProp ?? internalCollapsed
   const [isActiveSelectorOpen, setIsActiveSelectorOpen] = useState(false)
@@ -211,10 +221,22 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   return (
     <aside
-      className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-all duration-300 ${
-        collapsed ? 'w-[72px] overflow-visible' : 'w-64 overflow-hidden'
-      } [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
+      style={{ width: width ? `${width}px` : undefined }}
+      className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-[width] duration-150 ${
+        collapsed ? 'w-[72px] overflow-visible' : width ? 'overflow-hidden' : 'w-64 overflow-hidden'
+      } [scrollbar-width:none] [&::-webkit-scrollbar]:hidden group/sidebar`}
     >
+      {/* Resizer handle (Manillar arrastrable) */}
+      {!collapsed && onStartResize && (
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Arrastrar para redimensionar barra lateral"
+          onMouseDown={onStartResize}
+          className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize z-50 hover:bg-[var(--hub-brand,#d9532f)]/60 transition-colors group-hover/sidebar:opacity-100 opacity-0 active:bg-[var(--hub-brand,#d9532f)]"
+          title="Arrastra para ajustar el ancho del panel izquierdo"
+        />
+      )}
       {/* Logo Gestor Pro (Tamaño canónico de App Inventario: 30x30 y 20px) — Todo el logo actúa como inicio */}
       <div className="flex items-center px-4 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
         <Link

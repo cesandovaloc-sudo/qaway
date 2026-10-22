@@ -36,6 +36,19 @@ function getHref(to: string) {
  */
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('qaway.sidebarWidth')
+      if (saved) {
+        const val = Number(saved)
+        if (val >= 180 && val <= 400) return val
+      }
+    } catch {
+      // ignore
+    }
+    return 256
+  })
+  const isResizingRef = useRef(false)
   const location = useLocation()
   const navigate = useNavigate()
   const lastLegacyPathRef = useRef<string>('/proyectos/proj-minedu-2027')
@@ -83,6 +96,43 @@ export default function AppLayout() {
     }
   }, [])
 
+  // Control de arrastre / redimensionamiento dinámico del Sidebar
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingRef.current) return
+      // Limitar entre 190px y 400px
+      const newWidth = Math.min(Math.max(e.clientX, 190), 400)
+      setSidebarWidth(newWidth)
+    }
+
+    const handleMouseUp = () => {
+      if (isResizingRef.current) {
+        isResizingRef.current = false
+        document.body.style.cursor = ''
+        document.body.style.userSelect = ''
+        try {
+          localStorage.setItem('qaway.sidebarWidth', String(sidebarWidth))
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [sidebarWidth])
+
+  const handleStartResize = (e: React.MouseEvent) => {
+    e.preventDefault()
+    isResizingRef.current = true
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+  }
+
   return (
     <div
       data-mode={themeMode}
@@ -90,11 +140,15 @@ export default function AppLayout() {
       className="hub-shell h-dvh bg-[var(--hub-bg)] text-[var(--hub-text)] overflow-hidden transition-colors duration-200 print:!h-auto print:!overflow-visible print:!bg-white"
     >
       <div className="print:hidden">
-        <Sidebar collapsed={collapsed} />
+        <Sidebar
+          collapsed={collapsed}
+          width={collapsed ? 72 : sidebarWidth}
+          onStartResize={handleStartResize}
+        />
       </div>
       <div
-        className="flex flex-col h-dvh min-h-0 transition-all duration-300 print:!ml-0 print:!h-auto print:!overflow-visible"
-        style={{ marginLeft: collapsed ? 72 : 256 }}
+        className="flex flex-col h-dvh min-h-0 transition-[margin] duration-150 print:!ml-0 print:!h-auto print:!overflow-visible"
+        style={{ marginLeft: collapsed ? 72 : sidebarWidth }}
       >
         <div className="print:hidden">
           <Header collapsed={collapsed} onToggleSidebar={() => setCollapsed((c) => !c)} />
