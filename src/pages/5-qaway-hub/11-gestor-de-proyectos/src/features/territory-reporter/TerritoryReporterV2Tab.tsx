@@ -458,7 +458,12 @@ function computePhaseStatus(files: number, total: number): TerritoryStatus {
   return 'pendiente'
 }
 
-function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row): TerritoryStatus {
+export function computeUgelDirectionStatus(row: UgelMonitoringV2Row): {
+  pct: number
+  status: TerritoryStatus
+  okCount: number
+  totalDirs: number
+} {
   const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[row.id] || DIRECTION_CODES
   const totalDirs = applicableDirs.length || 7
   let okCount = 0
@@ -470,22 +475,27 @@ function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row): TerritoryStatus {
     else if (st === 'en_proceso') progCount++
   }
 
-  // Porcentaje efectivo ponderado en direcciones pedagógicas
+  // Ponderación de avance efectivo
   const effectiveScore = okCount + progCount * 0.5
-  const dirPct = Math.round((effectiveScore / totalDirs) * 100)
+  const pct = totalDirs > 0 ? Math.round((effectiveScore / totalDirs) * 100) : 0
 
-  // 1. Más de 70% en direcciones y evidencia en Drive completada -> Completado (verde)
-  if (dirPct >= 70 && row.driveStatus === 'completado') {
-    return 'completado'
+  let status: TerritoryStatus = 'pendiente'
+  // Si completa todas las direcciones o supera el 70% -> Completado
+  if (okCount === totalDirs || pct >= 70) {
+    status = 'completado'
+  } else if (pct >= 30) {
+    // Si sube por ejemplo 4 de 7 (~60%, entre 30% y <100%) -> En proceso
+    status = 'en_proceso'
+  } else {
+    // Menos del 30% -> Pendiente
+    status = 'pendiente'
   }
 
-  // 2. Menos de 30% en direcciones -> Pendiente (rojo)
-  if (dirPct < 30) {
-    return 'pendiente'
-  }
+  return { pct, status, okCount, totalDirs }
+}
 
-  // 3. De 30% hasta 70% en proceso (o si tiene >=70% pero Drive aún no está completado) -> En proceso (ámbar)
-  return 'en_proceso'
+function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row): TerritoryStatus {
+  return computeUgelDirectionStatus(row).status
 }
 
 export function TerritoryReporterV2Tab({
@@ -670,8 +680,9 @@ export function TerritoryReporterV2Tab({
       else if (s1 === 'en_proceso') p1InProgress++
       else p1Pending++
 
-      if (u.driveStatus === 'completado') driveCompleted++
-      else if (u.driveStatus === 'en_proceso') driveInProgress++
+      const dirStatus = computeUgelDirectionStatus(u).status
+      if (dirStatus === 'completado') driveCompleted++
+      else if (dirStatus === 'en_proceso') driveInProgress++
       else drivePending++
 
       const isP2Done = u.phase2Files >= u.phase2Total
@@ -824,12 +835,19 @@ export function TerritoryReporterV2Tab({
         if (u.id !== ugelId) return u
         const current = u.directions[code] || 'pendiente'
         const next = order[(order.indexOf(current) + 1) % order.length]
+        const nextDirections = {
+          ...u.directions,
+          [code]: next,
+        }
+        const { status: nextDriveStatus } = computeUgelDirectionStatus({
+          ...u,
+          directions: nextDirections,
+        })
         const updated: UgelMonitoringV2Row = {
           ...u,
-          directions: {
-            ...u.directions,
-            [code]: next,
-          },
+          directions: nextDirections,
+          driveStatus: nextDriveStatus,
+          driveFiles: nextDriveStatus === 'completado' ? 1 : 0,
         }
         // Persistir a Supabase
         territoryMonitoringService.updateUgel(updated).catch(console.error)
@@ -971,22 +989,21 @@ export function TerritoryReporterV2Tab({
                   </div>
                 </td>
                 {ugels.map((u) => {
-                  const st = u.driveStatus
+                  const dirInfo = computeUgelDirectionStatus(u)
+                  const st = dirInfo.status
                   const ratioText = st === 'completado' ? 'Completado' : st === 'en_proceso' ? 'En proceso' : 'Pendiente'
                   return (
                     <td key={`dr-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
-                      <button
-                        type="button"
-                        onClick={() => handleCycleDriveStatus(u.id)}
-                        className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
-                        title={`Drive: ${u.name} · ${ratioText} (Clic para cambiar)`}
+                      <div
+                        className="mx-auto flex items-center justify-center p-1"
+                        title={`Drive: ${u.name} · ${ratioText} (${dirInfo.pct}% de direcciones)`}
                       >
-                        <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
+                        <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs ${
                           st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
                         }`}>
                           {st === 'completado' ? <Check size={24} strokeWidth={3.2} /> : st === 'en_proceso' ? <Clock size={23} strokeWidth={2.8} /> : <X size={24} strokeWidth={3.2} />}
                         </span>
-                      </button>
+                      </div>
                     </td>
                   )
                 })}
@@ -1400,13 +1417,9 @@ export function TerritoryReporterV2Tab({
                 <th className="border-r border-slate-200 px-3 py-2 text-center bg-indigo-50/80 text-indigo-950 font-black">
                   Fase 2 (Oficial RAR)
                 </th>
-                {/* BLOQUE DRIVE REGIONAL */}
-                <th colSpan={2} className="border-r border-slate-200 px-3 py-2 text-center bg-amber-50/90 text-amber-950 font-black">
-                  Drive Regional (Declarativo 22/10)
-                </th>
-                {/* BLOQUE DIRECCIONES (7 LÍNEAS PEDAGÓGICAS) */}
-                <th colSpan={DIRECTION_CODES.length} className="border-r border-slate-200 px-2 py-2 text-center bg-slate-50 font-bold text-slate-700">
-                  Direcciones (clic para alternar)
+                {/* BLOQUE UNIFICADO: DIRECCIONES Y EVIDENCIA DRIVE */}
+                <th colSpan={DIRECTION_CODES.length + 2} className="border-r border-slate-200 px-3 py-2 text-center bg-amber-50/90 text-amber-950 font-black">
+                  Direcciones y Evidencia Drive Regional (Declarativo 22/10)
                 </th>
                 {/* BLOQUE ESTADO GENERAL */}
                 <th rowSpan={2} className="px-3 py-3 text-center w-32 font-black text-slate-800">
@@ -1419,20 +1432,22 @@ export function TerritoryReporterV2Tab({
               <tr className="border-b border-slate-200 bg-slate-50/90 text-[11.5px] font-bold text-slate-600">
                 <th className="border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
                 <th className="border-r border-slate-200 px-2.5 py-1.5 text-center">RAR</th>
-                <th className="px-2.5 py-1.5 text-center">Drive</th>
-                <th className="border-r border-slate-200 px-2.5 py-1.5">Fecha entrega</th>
+                {/* 1°: Las 7 Direcciones Pedagógicas */}
                 {DIRECTION_CODES.map((code) => (
                   <th key={code} className="px-1.5 py-1.5 text-center truncate max-w-[55px]" title={code}>
                     {code}
                   </th>
                 ))}
+                {/* 2°: Luego Estado y Fecha entrega */}
+                <th className="border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
+                <th className="border-r border-slate-200 px-2.5 py-1.5 text-center">Fecha entrega</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredUgels.map((u) => {
-                const p1Status = computePhaseStatus(u.phase1Files, u.phase1Total)
                 const isP2Done = u.phase2Files >= u.phase2Total
-                const genStatus = computeUgelGeneralStatusV2(u)
+                const computedDir = computeUgelDirectionStatus(u)
+                const genStatus = computedDir.status
 
                 const rowTint =
                   genStatus === 'pendiente'
@@ -1490,44 +1505,7 @@ export function TerritoryReporterV2Tab({
                       </button>
                     </td>
 
-                    {/* DRIVE REGIONAL (JUNTO A DIRECCIONES): ESTADO Y FECHA ENTREGA */}
-                    <td className="px-2.5 py-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleCycleDriveStatus(u.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-amber-100/60 transition-colors cursor-pointer text-left"
-                      >
-                        <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
-                          u.driveStatus === 'completado' ? 'bg-[#16a34a]' : u.driveStatus === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
-                        }`}>
-                          {u.driveStatus === 'completado' ? <Check size={11} strokeWidth={3} /> : u.driveStatus === 'en_proceso' ? <Clock size={11} strokeWidth={2.6} /> : <X size={11} strokeWidth={3} />}
-                        </span>
-                        <span className="font-extrabold text-[12.5px] capitalize text-slate-800">{u.driveStatus.replace('_', ' ')}</span>
-                      </button>
-                    </td>
-                    <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const parsed = parseDriveDateTime(u.driveDate)
-                          setDrivePickerDate(parsed.date)
-                          setDrivePickerTime(parsed.time)
-                          setDrivePickerStatus(u.driveStatus)
-                          setEditingDriveDateTarget({
-                            ugelId: u.id,
-                            ugelName: u.name,
-                            currentDate: u.driveDate,
-                          })
-                        }}
-                        className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
-                        title="Clic para registrar fecha y hora de entrega en Drive"
-                      >
-                        <Calendar size={12} className="text-slate-400 shrink-0" />
-                        <span>{u.driveDate}</span>
-                      </button>
-                    </td>
-
-                    {/* DIRECCIONES OFICIALES (DEI..DIGESE) */}
+                    {/* 1°: DIRECCIONES OFICIALES (DEI..DISER) */}
                     {DIRECTION_CODES.map((code) => {
                       const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[u.id] || []
                       const applies = applicableDirs.includes(code)
@@ -1562,6 +1540,64 @@ export function TerritoryReporterV2Tab({
                         </td>
                       )
                     })}
+
+                    {/* 2°: ESTADO CALCULADO AUTOMÁTICAMENTE SEGÚN GRADO DE AVANCE DE DIRECCIONES */}
+                    <td className="border-l border-slate-100 px-2.5 py-3 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-left ${
+                          computedDir.status === 'completado'
+                            ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
+                            : computedDir.status === 'en_proceso'
+                              ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                              : 'bg-rose-100 text-rose-900 border border-rose-200'
+                        }`}
+                        title={`Avance de Direcciones: ${computedDir.pct}% (${computedDir.okCount}/${computedDir.totalDirs})`}
+                      >
+                        <span
+                          className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
+                            computedDir.status === 'completado'
+                              ? 'bg-[#16a34a]'
+                              : computedDir.status === 'en_proceso'
+                                ? 'bg-[#f59e0b]'
+                                : 'bg-[#dc2626]'
+                          }`}
+                        >
+                          {computedDir.status === 'completado' ? (
+                            <Check size={11} strokeWidth={3} />
+                          ) : computedDir.status === 'en_proceso' ? (
+                            <Clock size={11} strokeWidth={2.6} />
+                          ) : (
+                            <X size={11} strokeWidth={3} />
+                          )}
+                        </span>
+                        <span className="font-extrabold text-[12.5px] capitalize">
+                          {computedDir.status.replace('_', ' ')}
+                        </span>
+                      </span>
+                    </td>
+
+                    {/* 3°: FECHA ENTREGA EN DRIVE (INTERACTIVA CON POP-UP) */}
+                    <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const parsed = parseDriveDateTime(u.driveDate)
+                          setDrivePickerDate(parsed.date)
+                          setDrivePickerTime(parsed.time)
+                          setDrivePickerStatus(computedDir.status)
+                          setEditingDriveDateTarget({
+                            ugelId: u.id,
+                            ugelName: u.name,
+                            currentDate: u.driveDate,
+                          })
+                        }}
+                        className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
+                        title="Clic para registrar fecha y hora de entrega en Drive"
+                      >
+                        <Calendar size={12} className="text-slate-400 shrink-0" />
+                        <span>{u.driveDate}</span>
+                      </button>
+                    </td>
 
                     {/* ESTADO GENERAL */}
                     <td className="border-l border-slate-100 px-3 py-3 text-center">
