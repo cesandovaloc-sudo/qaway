@@ -426,7 +426,6 @@ export default function Sidebar({
           </div>
         </div>
       )}
-      )}
 
       {/* Nav (Espaciado canónico App Inventario: py-3 px-3) */}
       <nav className="flex-1 min-h-0 overflow-y-auto py-3 px-3 space-y-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
