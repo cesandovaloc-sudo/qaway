@@ -785,60 +785,63 @@ export function TerritoryReporterV2Tab({
   return (
     <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-['DM_Sans',sans-serif] text-slate-800 antialiased">
       {/* ════════════════════════════════════════════════════════════════════════
-          1. CABECERA INSTITUCIONAL + MATRIZ DE AVANCE POR UGEL (3 ETAPAS)
-          Diseño limpio, neutro y de alta legibilidad estilo infografía ejecutiva
+          1. CABECERA INSTITUCIONAL + BANNER HITO 1.6
           ════════════════════════════════════════════════════════════════════════ */}
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-4">
-        {/* Cabecera oficial: Kicker | Título | Subtítulo | Hito 1.6 */}
-        <div className="border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-2">
-            <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
-            <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
-              DISTRIBUCIÓN DE MATERIALES EDUCATIVOS | DOTACIÓN 2027 | SEGUIMIENTO REGIONAL
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
-            Estado de avance
-          </h2>
-          <p className="text-[13.5px] font-semibold text-slate-600 mt-0.5">
-            Región Junín · 13 UGEL (Orden Alfabético)
-          </p>
-
-          {/* Banner Institucional de Hito 1.6 */}
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5">
-            <span className="inline-flex items-center gap-1 rounded-md bg-[#1055b8] px-2.5 py-0.5 text-[11.5px] font-black text-white">
-              HITO 1.6
-            </span>
-            <span className="text-[13.5px] font-bold text-slate-900">
-              Elaboración del Cuadro de Distribución Local en el MC SIGA
-            </span>
-            <span className="hidden sm:inline text-slate-300">|</span>
-            <span className="text-[12.5px] font-medium text-slate-600">
-              Evidencia preliminar Drive: <strong className="text-slate-900 font-bold">Corte 22/10/2026</strong> (Declarativo)
-            </span>
-            <span className="hidden sm:inline text-slate-300">·</span>
-            <span className="text-[12.5px] font-medium text-slate-600">
-              Cierre oficial RAR: <strong className="text-slate-900 font-bold">Hasta 26/10/2026</strong> (Formal)
-            </span>
-          </div>
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
+          <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
+            DISTRIBUCIÓN DE MATERIALES EDUCATIVOS | DOTACIÓN 2027 | SEGUIMIENTO REGIONAL
+          </span>
         </div>
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
+          Estado de avance
+        </h2>
+        <p className="text-[13.5px] font-semibold text-slate-600 mt-0.5">
+          Región Junín · 13 UGEL (Orden Alfabético)
+        </p>
 
-        {/* Matriz Ejecutiva Limpia: Etapa (1, 2, 3) vs 13 UGEL con Ancho Estrictamente Idéntico */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200 [scrollbar-width:thin]">
+        {/* Banner Institucional de Hito 1.6 */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5">
+          <span className="inline-flex items-center gap-1 rounded-md bg-[#1055b8] px-2.5 py-0.5 text-[11.5px] font-black text-white">
+            HITO 1.6
+          </span>
+          <span className="text-[13.5px] font-bold text-slate-900">
+            Elaboración del Cuadro de Distribución Local en el MC SIGA
+          </span>
+          <span className="hidden sm:inline text-slate-300">|</span>
+          <span className="text-[12.5px] font-medium text-slate-600">
+            Evidencia preliminar Drive: <strong className="text-slate-900 font-bold">Corte 22/10/2026</strong> (Declarativo)
+          </span>
+          <span className="hidden sm:inline text-slate-300">·</span>
+          <span className="text-[12.5px] font-medium text-slate-600">
+            Cierre oficial RAR: <strong className="text-slate-900 font-bold">Hasta 26/10/2026</strong> (Formal)
+          </span>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          1.1. TARJETA INDEPENDIENTE Y LIBRE: MATRIZ DE ETAPAS VS 13 UGEL
+          ════════════════════════════════════════════════════════════════════════ */}
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto [scrollbar-width:thin]">
           <table className="w-full min-w-[1360px] border-collapse text-center table-fixed">
             <thead>
               <tr className="border-b border-slate-200 text-xs">
-                <th className="bg-[#142d54] text-white font-black text-[15px] py-4 px-3 text-left w-44 min-w-[176px] max-w-[176px]">
+                <th className="bg-[#142d54] text-white font-black text-[15px] py-4 px-3 text-left w-44 min-w-[176px] max-w-[176px] rounded-tl-xl">
                   Etapa
                 </th>
-                {ugels.map((u) => {
+                {ugels.map((u, idx) => {
                   const rawName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
                   // Límite de 7-8 caracteres para evitar compresión y permitir mayor tamaño tipográfico
                   const shortName = rawName.length > 8 ? rawName.slice(0, 7) + '.' : rawName
+                  const isLast = idx === ugels.length - 1
                   return (
                     <th
                       key={u.id}
-                      className="bg-[#f0f4f9] text-slate-900 font-black text-[15.5px] py-3.5 px-0.5 border-l border-white text-center w-[92px] min-w-[92px] max-w-[92px] truncate tracking-tight"
+                      className={`bg-[#f0f4f9] text-slate-900 font-black text-[15.5px] py-3.5 px-0.5 border-l border-white text-center w-[92px] min-w-[92px] max-w-[92px] truncate tracking-tight ${
+                        isLast ? 'rounded-tr-xl' : ''
+                      }`}
                       title={u.name}
                     >
                       {shortName}
@@ -916,7 +919,7 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 3: FASE 2 (RAR OFICIAL - CORTE 26/10 · CERO ROJOS, GRIS NEUTRO EN PLAZO) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px] rounded-bl-xl">
                   <div className="flex items-center gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
                       3
