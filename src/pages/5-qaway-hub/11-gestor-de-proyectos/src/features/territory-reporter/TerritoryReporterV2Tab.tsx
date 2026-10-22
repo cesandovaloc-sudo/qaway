@@ -30,10 +30,10 @@ import { WORK_ITEM_STATE_META, type WorkItem, type WorkItemPriority } from '@/ty
 import { buildFollowUpMessage, buildWhatsAppUrl, toFollowUpContact } from '@/utils/followUp'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TerritoryReporterV2Tab.tsx — Reporteador Territorial V2 (3 FILAS / 3 FASES)
-// Fase 1: Carga inicial MC SIGA MINEDU
-// Fase Intermedia: Evidencia Drive Regional (Declarativo — Corte 22/10/2026)
-// Fase 2: Cierre Oficial RAR MC SIGA MINEDU (Formal — Corte 26/10/2026)
+// TerritoryReporterV2Tab.tsx — Reporteador Territorial V2 (3 FILAS SEPARADAS)
+// Fila 1: Fase 1 - Carga Inicial MC SIGA MINEDU
+// Fila 2: Fase Intermedia - Evidencias Drive Regional (Declarativo — Corte 22/10/2026)
+// Fila 3: Fase 2 - Cierre Oficial RAR MC SIGA MINEDU (Formal — Corte 26/10/2026)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type TerritoryStatus = 'completado' | 'en_proceso' | 'pendiente'
@@ -54,17 +54,16 @@ export interface UgelMonitoringV2Row {
   id: string
   number: number
   name: string
-  // Fase 1: Carga Inicial MC SIGA
+  // Fila 1: Fase 1 - Carga Inicial MC SIGA
   phase1Files: number // 0..3
   phase1Total: number
   phase1Date: string
-  // Fase Intermedia: Drive Regional (Declarativo — Corte 22/10/2026)
+  // Fila 2: Fase Intermedia - Drive Regional (Declarativo — Corte 22/10/2026)
   driveStatus: TerritoryStatus
   driveFiles: number // 0..1
   driveTotal: number
   driveDate: string
-  driveUrl?: string
-  // Fase 2: Cierre Oficial RAR (Corte 26/10/2026)
+  // Fila 3: Fase 2 - Cierre Oficial RAR (Corte 26/10/2026)
   phase2Files: number // 0..3
   phase2Total: number
   phase2Date: string
@@ -448,67 +447,6 @@ function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row): TerritoryStatus {
   return 'en_proceso'
 }
 
-function computeUgelCompletedCount(row: UgelMonitoringV2Row): number {
-  let count = 0
-  if (row.phase1Files >= row.phase1Total) count++
-  if (row.driveStatus === 'completado') count++
-  if (row.phase2Files >= row.phase2Total) count++
-  return count
-}
-
-function StatusBadge({ status }: { status: TerritoryStatus }) {
-  if (status === 'completado') {
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100/90 px-3 py-1 text-xs font-bold text-emerald-800">
-        Completado
-      </span>
-    )
-  }
-  if (status === 'en_proceso') {
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/90 px-3 py-1 text-xs font-bold text-amber-800">
-        En proceso
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-100/90 px-3 py-1 text-xs font-bold text-rose-800">
-      Pendiente
-    </span>
-  )
-}
-
-function StatusIconLabel({ status }: { status: TerritoryStatus }) {
-  if (status === 'completado') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-        <span className="grid h-4 w-4 place-items-center rounded-full bg-emerald-600 text-white">
-          <Check size={10} strokeWidth={3} />
-        </span>
-        Completado
-      </span>
-    )
-  }
-  if (status === 'en_proceso') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700">
-        <span className="grid h-4 w-4 place-items-center rounded-full bg-amber-500 text-white">
-          <Clock size={10} strokeWidth={2.6} />
-        </span>
-        En proceso
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700">
-      <span className="grid h-4 w-4 place-items-center rounded-full bg-rose-600 text-white">
-        <X size={10} strokeWidth={3} />
-      </span>
-      Pendiente
-    </span>
-  )
-}
-
 export function TerritoryReporterV2Tab({
   projectId: _projectId,
   onOpenTask,
@@ -518,7 +456,6 @@ export function TerritoryReporterV2Tab({
 }) {
   const brand = useHubBrand()
   const { workItems } = useProjectsDataset()
-  const [searchParams, setSearchParams] = useSearchParams()
 
   const [ugels, setUgels] = useState<UgelMonitoringV2Row[]>(() => {
     try {
@@ -539,23 +476,8 @@ export function TerritoryReporterV2Tab({
   }, [ugels])
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterPhase, setFilterPhase] = useState<'Todas' | 'Fase 1' | 'Drive' | 'Fase 2'>('Todas')
   const [filterDirection, setFilterDirection] = useState<'Todas' | DirectionCode>('Todas')
   const [filterStatus, setFilterStatus] = useState<'Todos' | 'Completado' | 'En proceso' | 'Pendiente'>('Todos')
-
-  const [activePhaseHover, setActivePhaseHover] = useState<{
-    text: string
-    bgColor: string
-    textColor: string
-    dotColor: string
-  } | null>(null)
-
-  const [activeDonutHover, setActiveDonutHover] = useState<{
-    title: string
-    count: number
-    percentage: number
-    color: string
-  } | null>(null)
 
   const [inspectedUgel, setInspectedUgel] = useState<UgelMonitoringV2Row | null>(null)
 
@@ -671,7 +593,7 @@ export function TerritoryReporterV2Tab({
     })
   }, [ugels, searchQuery, filterStatus, filterDirection])
 
-  // Ciclador de archivos en Fase 1 y Fase 2
+  // Ciclador de archivos en Fase 1 y Fase 2 (0 -> 1 -> 2 -> 3 -> 0)
   const handleCycleUgelFiles = (ugelId: string, phase: 1 | 2) => {
     setUgels((prev) =>
       prev.map((u) => {
@@ -694,7 +616,7 @@ export function TerritoryReporterV2Tab({
     )
   }
 
-  // Ciclador de estado Drive Regional
+  // Ciclador de estado Drive Regional ('pendiente' -> 'en_proceso' -> 'completado')
   const handleCycleDriveStatus = (ugelId: string) => {
     setUgels((prev) =>
       prev.map((u) => {
@@ -709,24 +631,39 @@ export function TerritoryReporterV2Tab({
           ...u,
           driveStatus: nextStatus,
           driveFiles: nextStatus === 'completado' ? 1 : 0,
-          driveDate: nextStatus === 'completado' ? 'Evidencia cargada (22/10)' : nextStatus === 'en_proceso' ? 'En preparación' : 'Sin evidencia',
+          driveDate:
+            nextStatus === 'completado'
+              ? 'Evidencia cargada'
+              : nextStatus === 'en_proceso'
+                ? 'En preparación'
+                : 'Sin evidencia',
         }
       }),
     )
   }
 
-  const getTasksForUgel = (ugelName: string): WorkItem[] => {
-    const q = ugelName.trim().toLowerCase()
-    return workItems.filter(
-      (item) =>
-        item.title.toLowerCase().includes(q) ||
-        (item.description && item.description.toLowerCase().includes(q)),
+  // Ciclador de Direcciones Pedagógicas (DEI .. DITEN)
+  const handleCycleDirectionStatus = (ugelId: string, code: DirectionCode) => {
+    const order: TerritoryStatus[] = ['completado', 'en_proceso', 'pendiente']
+    setUgels((prev) =>
+      prev.map((u) => {
+        if (u.id !== ugelId) return u
+        const current = u.directions[code]
+        const next = order[(order.indexOf(current) + 1) % order.length]
+        return {
+          ...u,
+          directions: {
+            ...u.directions,
+            [code]: next,
+          },
+        }
+      }),
     )
   }
 
   return (
-    <div className="space-y-6 pb-20 print:space-y-3 print:pb-0 font-sans text-slate-800">
-      {/* ── ALERTA OFICIAL MINEDU / DRE: 3 FASES DE CONTROL ── */}
+    <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-sans text-slate-800">
+      {/* ── BANNER INFORMATIVO MINEDU / DRE: 3 FASES ── */}
       <section className="rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-white p-5 shadow-sm print:hidden">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-3.5">
@@ -736,7 +673,7 @@ export function TerritoryReporterV2Tab({
             <div>
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-blue-600 px-2 py-0.5 text-[10.5px] font-black uppercase tracking-wider text-white">
-                  Procedimiento Oficial 3 Fases
+                  3 FILAS DE SEGUIMIENTO TERRITORIAL
                 </span>
                 <span className="text-xs font-bold text-slate-500">Hito 1.6: MC SIGA MINEDU</span>
               </div>
@@ -744,7 +681,8 @@ export function TerritoryReporterV2Tab({
                 Monitoreo Territorial V2: Carga Inicial, Evidencia Drive y Cierre Oficial RAR
               </h2>
               <p className="mt-1 text-xs text-slate-600 leading-relaxed max-w-4xl">
-                <strong>Importante:</strong> El envío al <strong>DRIVE regional</strong> es preliminar y declarativo (Corte: <strong>22/10/2026</strong>) para facilitar el seguimiento de la DRE. El <strong>cierre oficial</strong> se ejecuta en el MC SIGA MINEDU con la generación y remisión del archivo <strong>RAR de la FASE 2</strong> al Residente SIGA (Corte: <strong>26/10/2026</strong>).
+                Haz clic directamente en cualquier celda de la cinta superior o en la tabla inferior para cambiar el estado en tiempo real. 
+                El envío de evidencias al <strong>DRIVE</strong> (Corte: <strong>22/10/2026</strong>) es declarativo para facilitar el seguimiento de la DRE. El <strong>cierre oficial</strong> se ejecuta en el MC SIGA con archivo <strong>RAR de la FASE 2</strong> al Residente SIGA (Corte: <strong>26/10/2026</strong>).
               </p>
             </div>
           </div>
@@ -771,62 +709,171 @@ export function TerritoryReporterV2Tab({
         </div>
       </section>
 
-      {/* ── 1. CINTA SUPERIOR: ESTADO POR UGEL (3 FASES: F1 · DRIVE · F2) ── */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
-        <div className="flex flex-col lg:flex-row lg:items-stretch">
-          {/* Header lateral de la cinta */}
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-900 px-4 py-3 text-white lg:w-44 lg:flex-col lg:items-start lg:justify-center lg:border-r lg:border-b-0 lg:p-4 shrink-0">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Control Junín</p>
-              <h3 className="text-sm font-extrabold text-white">Estado por UGEL</h3>
-              <p className="text-[10px] font-semibold text-emerald-400">(F1 · Drive · F2)</p>
-            </div>
-            <span className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold text-white">
-              13 UGEL
-            </span>
+      {/* ════════════════════════════════════════════════════════════════════════
+          1. CINTA SUPERIOR: 3 FILAS SEPARADAS, UNA DEBAJO DE OTRA
+          Fila 1: Fase 1 (Carga Inicial MC SIGA)
+          Fila 2: Fase Intermedia (Drive Regional - Corte 22/10/2026)
+          Fila 3: Fase 2 (Cierre Oficial RAR - Corte 26/10/2026)
+          ════════════════════════════════════════════════════════════════════════ */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-blue-600" />
+            <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-800">
+              Estado por UGEL — 3 Filas Separadas de Control Territorial
+            </h3>
           </div>
+          <span className="text-[11px] font-semibold text-slate-500">
+            (Haz clic en cualquier pastilla para alternar el estado en campo)
+          </span>
+        </div>
 
-          {/* Grid de las 13 UGEL en base 3 */}
-          <div className="grid flex-1 grid-cols-2 divide-x divide-y divide-slate-100 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-13 lg:divide-y-0">
+        {/* FILA 1: FASE 1 (CARGA INICIAL MC SIGA) */}
+        <div className="overflow-x-auto rounded-xl border border-blue-200 bg-white p-1.5 shadow-2xs">
+          <div className="grid min-w-[1050px] grid-cols-14 overflow-hidden rounded-lg">
+            {/* Header Fila 1 */}
+            <div className="flex flex-col items-center justify-center bg-blue-900 px-3 py-3 min-h-[92px] text-center text-white shrink-0">
+              <span className="rounded bg-blue-700 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-blue-100">
+                Fila 1
+              </span>
+              <span className="mt-1 text-xs font-extrabold leading-tight">Fase 1: MC SIGA</span>
+              <span className="mt-0.5 text-[10px] text-blue-200 font-medium">Carga Inicial</span>
+            </div>
+
+            {/* 13 UGEL Fila 1 */}
             {ugels.map((u) => {
-              const compCount = computeUgelCompletedCount(u)
-              const isAllOk = compCount === 3
-              const isZero = compCount === 0
-
-              const badgeColor = isAllOk
-                ? 'bg-emerald-600 text-white'
-                : isZero
-                  ? 'bg-rose-600 text-white'
-                  : 'bg-amber-400 text-slate-950'
+              const st = computePhaseStatus(u.phase1Files, u.phase1Total)
+              const bgClass =
+                st === 'completado'
+                  ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  : st === 'en_proceso'
+                    ? 'bg-amber-400 text-slate-900 hover:bg-amber-500'
+                    : 'bg-rose-600 text-white hover:bg-rose-700'
 
               return (
                 <button
-                  key={u.id}
+                  key={`f1-${u.id}`}
                   type="button"
-                  onClick={() => setInspectedUgel(u)}
-                  className={`flex flex-col items-center justify-center p-3 text-center transition-all hover:brightness-105 cursor-pointer ${
-                    isAllOk
-                      ? 'bg-emerald-600 text-white'
-                      : isZero
-                        ? 'bg-rose-600 text-white'
-                        : 'bg-amber-400 text-slate-900'
-                  }`}
-                  title={`${u.name}: ${compCount} de 3 fases completadas (Clic para inspeccionar)`}
+                  onClick={() => handleCycleUgelFiles(u.id, 1)}
+                  title={`Fase 1: ${u.name} — ${u.phase1Files}/${u.phase1Total} archivos (Clic para ciclar)`}
+                  className={`group flex flex-col items-center justify-between border-l border-white/20 px-1.5 py-2.5 min-h-[92px] text-center transition-all duration-150 hover:brightness-105 cursor-pointer ${bgClass}`}
                 >
-                  <span className="text-[10.5px] font-black uppercase tracking-tight truncate max-w-full">
+                  <span className="w-full truncate text-[10px] font-black uppercase tracking-tight">
                     {u.name}
                   </span>
-                  <div className="my-1.5 grid h-6 w-6 place-items-center rounded-full bg-white/20 backdrop-blur-xs">
-                    {isAllOk ? (
-                      <Check size={14} strokeWidth={3} className="text-white" />
-                    ) : isZero ? (
-                      <X size={14} strokeWidth={3} className="text-white" />
+                  <span className="my-1 grid h-5 w-5 place-items-center rounded-full bg-white/95 shadow-2xs transition-transform group-hover:scale-110">
+                    {st === 'completado' ? (
+                      <Check size={12} strokeWidth={3} className="text-emerald-600" />
+                    ) : st === 'en_proceso' ? (
+                      <Clock size={12} strokeWidth={2.6} className="text-amber-600" />
                     ) : (
-                      <Clock size={14} strokeWidth={2.6} className="text-slate-900" />
+                      <X size={12} strokeWidth={3} className="text-rose-600" />
                     )}
-                  </div>
-                  <span className="text-xs font-black tracking-tight tabular-nums">
-                    {compCount}/3
+                  </span>
+                  <span className="tabular-nums text-xs font-black leading-none">
+                    {u.phase1Files}/{u.phase1Total}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* FILA 2: FASE INTERMEDIA (DRIVE REGIONAL - CORTE 22/10/2026) */}
+        <div className="overflow-x-auto rounded-xl border border-amber-300 bg-white p-1.5 shadow-2xs">
+          <div className="grid min-w-[1050px] grid-cols-14 overflow-hidden rounded-lg">
+            {/* Header Fila 2 */}
+            <div className="flex flex-col items-center justify-center bg-amber-900 px-3 py-3 min-h-[92px] text-center text-white shrink-0">
+              <span className="rounded bg-amber-700 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-100">
+                Fila 2
+              </span>
+              <span className="mt-1 text-xs font-extrabold leading-tight">Drive Regional</span>
+              <span className="mt-0.5 text-[10px] text-amber-200 font-medium">Excel · Corte 22/10</span>
+            </div>
+
+            {/* 13 UGEL Fila 2 */}
+            {ugels.map((u) => {
+              const st = u.driveStatus
+              const bgClass =
+                st === 'completado'
+                  ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  : st === 'en_proceso'
+                    ? 'bg-amber-400 text-slate-900 hover:bg-amber-500'
+                    : 'bg-rose-600 text-white hover:bg-rose-700'
+
+              return (
+                <button
+                  key={`dr-${u.id}`}
+                  type="button"
+                  onClick={() => handleCycleDriveStatus(u.id)}
+                  title={`Drive Regional: ${u.name} — ${u.driveStatus} (Clic para cambiar)`}
+                  className={`group flex flex-col items-center justify-between border-l border-white/20 px-1.5 py-2.5 min-h-[92px] text-center transition-all duration-150 hover:brightness-105 cursor-pointer ${bgClass}`}
+                >
+                  <span className="w-full truncate text-[10px] font-black uppercase tracking-tight">
+                    {u.name}
+                  </span>
+                  <span className="my-1 grid h-5 w-5 place-items-center rounded-full bg-white/95 shadow-2xs transition-transform group-hover:scale-110">
+                    {st === 'completado' ? (
+                      <Check size={12} strokeWidth={3} className="text-emerald-600" />
+                    ) : st === 'en_proceso' ? (
+                      <Clock size={12} strokeWidth={2.6} className="text-amber-600" />
+                    ) : (
+                      <X size={12} strokeWidth={3} className="text-rose-600" />
+                    )}
+                  </span>
+                  <span className="text-[10.5px] font-black leading-none">
+                    {st === 'completado' ? '1/1 Excel' : st === 'en_proceso' ? 'Proceso' : '0/1'}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* FILA 3: FASE 2 (CIERRE OFICIAL RAR MC SIGA - CORTE 26/10/2026) */}
+        <div className="overflow-x-auto rounded-xl border border-indigo-200 bg-white p-1.5 shadow-2xs">
+          <div className="grid min-w-[1050px] grid-cols-14 overflow-hidden rounded-lg">
+            {/* Header Fila 3 */}
+            <div className="flex flex-col items-center justify-center bg-indigo-950 px-3 py-3 min-h-[92px] text-center text-white shrink-0">
+              <span className="rounded bg-indigo-800 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-indigo-100">
+                Fila 3
+              </span>
+              <span className="mt-1 text-xs font-extrabold leading-tight">Fase 2: Oficial RAR</span>
+              <span className="mt-0.5 text-[10px] text-indigo-200 font-medium">MC SIGA · Corte 26/10</span>
+            </div>
+
+            {/* 13 UGEL Fila 3 */}
+            {ugels.map((u) => {
+              const st = computePhaseStatus(u.phase2Files, u.phase2Total)
+              const bgClass =
+                st === 'completado'
+                  ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  : st === 'en_proceso'
+                    ? 'bg-amber-400 text-slate-900 hover:bg-amber-500'
+                    : 'bg-rose-600 text-white hover:bg-rose-700'
+
+              return (
+                <button
+                  key={`f2-${u.id}`}
+                  type="button"
+                  onClick={() => handleCycleUgelFiles(u.id, 2)}
+                  title={`Fase 2 RAR: ${u.name} — ${u.phase2Files}/${u.phase2Total} archivos (Clic para ciclar)`}
+                  className={`group flex flex-col items-center justify-between border-l border-white/20 px-1.5 py-2.5 min-h-[92px] text-center transition-all duration-150 hover:brightness-105 cursor-pointer ${bgClass}`}
+                >
+                  <span className="w-full truncate text-[10px] font-black uppercase tracking-tight">
+                    {u.name}
+                  </span>
+                  <span className="my-1 grid h-5 w-5 place-items-center rounded-full bg-white/95 shadow-2xs transition-transform group-hover:scale-110">
+                    {st === 'completado' ? (
+                      <Check size={12} strokeWidth={3} className="text-emerald-600" />
+                    ) : st === 'en_proceso' ? (
+                      <Clock size={12} strokeWidth={2.6} className="text-amber-600" />
+                    ) : (
+                      <X size={12} strokeWidth={3} className="text-rose-600" />
+                    )}
+                  </span>
+                  <span className="tabular-nums text-xs font-black leading-none">
+                    {u.phase2Files}/{u.phase2Total}
                   </span>
                 </button>
               )
@@ -890,40 +937,21 @@ export function TerritoryReporterV2Tab({
         </div>
       </section>
 
-      {/* ── 3. FILA DE 3 GRÁFICOS EJECUTIVOS (CARD 1: 3 FILAS DE AVANCE) ── */}
+      {/* ── 3. FILA DE 3 GRÁFICOS EJECUTIVOS ── */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 print:grid-cols-3 print:gap-2.5">
-        {/* Card 1: Avance por fase (3 FILAS: Fase 1 · Drive Regional · Fase 2) */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px] print:min-h-0 print:p-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:pb-1.5">
+        {/* Card 1: Avance por fase (3 FILAS) */}
+        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 print:text-xs">Avance por fase (todas las UGEL)</h3>
-              <p className="text-[11px] text-slate-400 print:text-[9px]">
-                Carga inicial, Drive declarativo y Cierre RAR
-              </p>
+              <h3 className="text-sm font-bold text-slate-900">Avance por fase (todas las UGEL)</h3>
+              <p className="text-[11px] text-slate-400">Distribución de cumplimiento en territorio</p>
             </div>
-            {activePhaseHover ? (
-              <span
-                className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-0.5 text-[10.5px] font-bold shadow-2xs transition-all duration-150 animate-in fade-in print:text-[8.5px]"
-                style={{
-                  backgroundColor: activePhaseHover.bgColor,
-                  color: activePhaseHover.textColor,
-                }}
-              >
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ backgroundColor: activePhaseHover.dotColor }}
-                />
-                {activePhaseHover.text}
-              </span>
-            ) : (
-              <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-extrabold text-blue-700 print:text-[8px]">
-                3 Fases de Control
-              </span>
-            )}
+            <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-extrabold text-blue-700">
+              3 Fases de Control
+            </span>
           </div>
 
-          {/* LAS 3 FILAS DE BARRAS CONTINUAS */}
-          <div className="my-auto space-y-3.5 py-3 print:space-y-1.5 print:py-1">
+          <div className="my-auto space-y-3.5 py-3">
             {[
               {
                 label: 'Fase 1',
@@ -947,92 +975,54 @@ export function TerritoryReporterV2Tab({
                 pend: ugelStats.p2Pending,
               },
             ].map((f) => (
-              <div key={f.label} className="flex items-center gap-3 print:gap-1.5">
-                <div className="w-16 shrink-0 text-left print:w-14">
-                  <span className="block text-xs font-extrabold text-slate-800 leading-none print:text-[10px]">
+              <div key={f.label} className="flex items-center gap-3">
+                <div className="w-16 shrink-0 text-left">
+                  <span className="block text-xs font-extrabold text-slate-800 leading-none">
                     {f.label}
                   </span>
-                  <span className="block text-[9.5px] font-semibold text-slate-400 leading-tight print:text-[8px]">
+                  <span className="block text-[9.5px] font-semibold text-slate-400 leading-tight">
                     {f.sublabel}
                   </span>
                 </div>
 
                 <div className="relative flex-1">
-                  <div className="flex h-8 overflow-hidden rounded-lg bg-slate-100 shadow-inner print:h-6">
+                  <div className="flex h-8 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                     {f.ok > 0 && (
                       <div
                         style={{ width: `${(f.ok / ugelStats.total) * 100}%` }}
-                        onMouseEnter={() =>
-                          setActivePhaseHover({
-                            text: `${f.label} · Cumplen: ${f.ok} UGEL (${Math.round((f.ok / ugelStats.total) * 100)}%)`,
-                            bgColor: '#dcfce7',
-                            textColor: '#166534',
-                            dotColor: '#16a34a',
-                          })
-                        }
-                        onMouseLeave={() => setActivePhaseHover(null)}
-                        className="group/seg relative flex h-full items-center justify-center bg-emerald-600 border-r border-white/20 transition-all duration-150 hover:brightness-110 cursor-pointer"
+                        className="flex h-full items-center justify-center bg-emerald-600 border-r border-white/20"
                       >
-                        <span className="text-xs font-black text-white tabular-nums select-none transition-transform group-hover/seg:scale-110 print:text-[10px]">
-                          {f.ok}
-                        </span>
+                        <span className="text-xs font-black text-white tabular-nums">{f.ok}</span>
                       </div>
                     )}
                     {f.prog > 0 && (
                       <div
                         style={{ width: `${(f.prog / ugelStats.total) * 100}%` }}
-                        onMouseEnter={() =>
-                          setActivePhaseHover({
-                            text: `${f.label} · En proceso: ${f.prog} UGEL (${Math.round((f.prog / ugelStats.total) * 100)}%)`,
-                            bgColor: '#fef3c7',
-                            textColor: '#92400e',
-                            dotColor: '#d97706',
-                          })
-                        }
-                        onMouseLeave={() => setActivePhaseHover(null)}
-                        className="group/seg relative flex h-full items-center justify-center bg-amber-400 border-r border-white/20 transition-all duration-150 hover:brightness-110 cursor-pointer"
+                        className="flex h-full items-center justify-center bg-amber-400 border-r border-white/20"
                       >
-                        <span className="text-xs font-black text-slate-900 tabular-nums select-none transition-transform group-hover/seg:scale-110 print:text-[10px]">
-                          {f.prog}
-                        </span>
+                        <span className="text-xs font-black text-slate-900 tabular-nums">{f.prog}</span>
                       </div>
                     )}
                     {f.pend > 0 && (
                       <div
                         style={{ width: `${(f.pend / ugelStats.total) * 100}%` }}
-                        onMouseEnter={() =>
-                          setActivePhaseHover({
-                            text: `${f.label} · Pendiente: ${f.pend} UGEL (${Math.round((f.pend / ugelStats.total) * 100)}%)`,
-                            bgColor: '#ffe4e6',
-                            textColor: '#9f1239',
-                            dotColor: '#e11d48',
-                          })
-                        }
-                        onMouseLeave={() => setActivePhaseHover(null)}
-                        className="group/seg relative flex h-full items-center justify-center bg-rose-600 transition-all duration-150 hover:brightness-110 cursor-pointer"
+                        className="flex h-full items-center justify-center bg-rose-600"
                       >
-                        <span className="text-xs font-black text-white tabular-nums select-none transition-transform group-hover/seg:scale-110 print:text-[10px]">
-                          {f.pend}
-                        </span>
+                        <span className="text-xs font-black text-white tabular-nums">{f.pend}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="w-10 text-right print:w-8">
-                  <span className="text-xs font-black text-slate-900 tabular-nums print:text-[10px]">
-                    13
-                  </span>
-                  <span className="block text-[8px] font-bold text-slate-400 uppercase leading-none">
-                    UGEL
-                  </span>
+                <div className="w-10 text-right">
+                  <span className="text-xs font-black text-slate-900 tabular-nums">13</span>
+                  <span className="block text-[8px] font-bold text-slate-400 uppercase leading-none">UGEL</span>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Leyenda inferior */}
-          <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-500 print:pt-1.5 print:text-[9px]">
+          <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-500">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
               <span>Completado</span>
@@ -1048,14 +1038,14 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* Card 2: Estado global (Donut Chart) */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px] print:min-h-0 print:p-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:pb-1.5">
+        {/* Card 2: Estado global */}
+        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 print:text-xs">Estado global (3 fases)</h3>
-              <p className="text-[11px] text-slate-400 print:text-[9px]">Consolidado regional en territorio</p>
+              <h3 className="text-sm font-bold text-slate-900">Estado global (3 fases)</h3>
+              <p className="text-[11px] text-slate-400">Consolidado regional en territorio</p>
             </div>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 print:text-[8px]">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
               Total
             </span>
           </div>
@@ -1064,7 +1054,6 @@ export function TerritoryReporterV2Tab({
             <div className="relative flex items-center justify-center">
               <svg width="130" height="130" viewBox="0 0 130 130" className="-rotate-90">
                 <circle cx="65" cy="65" r="50" fill="transparent" stroke="#f1f5f9" strokeWidth="18" />
-                {/* Completados */}
                 <circle
                   cx="65"
                   cy="65"
@@ -1075,7 +1064,6 @@ export function TerritoryReporterV2Tab({
                   strokeDasharray={`${(ugelStats.completed / ugelStats.total) * 314.16} 314.16`}
                   strokeDashoffset="0"
                 />
-                {/* En proceso */}
                 <circle
                   cx="65"
                   cy="65"
@@ -1086,7 +1074,6 @@ export function TerritoryReporterV2Tab({
                   strokeDasharray={`${(ugelStats.inProgress / ugelStats.total) * 314.16} 314.16`}
                   strokeDashoffset={`-${(ugelStats.completed / ugelStats.total) * 314.16}`}
                 />
-                {/* Pendientes */}
                 <circle
                   cx="65"
                   cy="65"
@@ -1128,18 +1115,18 @@ export function TerritoryReporterV2Tab({
           </div>
 
           <div className="text-center border-t border-slate-100 pt-2 text-[10px] text-slate-400">
-            Pasa el mouse sobre el gráfico para ver detalle numérico
+            Resumen porcentual de cumplimiento
           </div>
         </div>
 
         {/* Card 3: Avance por dirección pedagógica */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px] print:min-h-0 print:p-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:pb-1.5">
+        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 print:text-xs">Avance por dirección (todas las UGEL)</h3>
-              <p className="text-[11px] text-slate-400 print:text-[9px]">7 Direcciones de línea pedagógicas</p>
+              <h3 className="text-sm font-bold text-slate-900">Avance por dirección (todas las UGEL)</h3>
+              <p className="text-[11px] text-slate-400">7 Direcciones de línea pedagógicas</p>
             </div>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 print:text-[8px]">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
               DEI - DITEN
             </span>
           </div>
@@ -1147,7 +1134,7 @@ export function TerritoryReporterV2Tab({
           <div className="my-auto space-y-2 py-2">
             {ugelStats.directionStats.map((d) => (
               <div key={d.code} className="flex items-center gap-2 text-xs">
-                <span className="w-12 font-bold text-slate-700 print:w-10 text-[11px]">{d.code}</span>
+                <span className="w-12 font-bold text-slate-700 text-[11px]">{d.code}</span>
                 <div className="relative flex-1">
                   <div className="flex h-3.5 overflow-hidden rounded-full bg-slate-100 shadow-inner">
                     <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
@@ -1172,50 +1159,53 @@ export function TerritoryReporterV2Tab({
         </div>
       </section>
 
-      {/* ── 4. CUADRO DE MANDO INFERIOR: DETALLE POR UGEL (3 BLOQUES DE FASE) ── */}
-      <section className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden">
-        {/* Cabecera del Cuadro de Mando Inferior */}
+      {/* ════════════════════════════════════════════════════════════════════════
+          4. TABLERO INFERIOR (100% INTERACTIVO Y CLIQUEABLE)
+          Cada estado, botón y círculo de dirección responde a clics directos
+          ════════════════════════════════════════════════════════════════════════ */}
+      <section className="rounded-2xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden mb-16">
+        {/* Cabecera del Tablero Inferior */}
         <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50/70 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-blue-600" />
+              <span className="h-2.5 w-2.5 rounded-full bg-blue-600 animate-pulse" />
               <h3 className="text-base font-extrabold text-slate-900">
-                Detalle por UGEL – Región Junín (Monitoreo V2 · 3 Fases)
+                Tablero de Control por UGEL – Región Junín (3 Fases)
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Estado de subida por fase, evidencia Drive (Corte 22/10), cierre RAR (Corte 26/10) y direcciones pedagógicas.
+              Haz clic directamente en cualquier celda de <strong>Fase 1</strong>, <strong>Drive</strong>, <strong>Fase 2</strong> o en los <strong>puntos de direcciones</strong> para actualizar los datos al instante.
             </p>
           </div>
 
-          {/* Filtros superiores de la tabla */}
+          {/* Filtros superiores */}
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative">
               <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Buscar UGEL..."
+                placeholder="Buscar UGEL u observación..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 w-44 rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:border-blue-500"
+                className="h-8 w-48 rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:border-blue-500"
               />
             </div>
 
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none"
+              className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none cursor-pointer"
             >
               <option value="Todos">Todos los estados</option>
-              <option value="Completado">Completados</option>
-              <option value="En proceso">En proceso</option>
-              <option value="Pendiente">Pendientes</option>
+              <option value="Completado">Solo Completados</option>
+              <option value="En proceso">Solo En proceso</option>
+              <option value="Pendiente">Solo Pendientes</option>
             </select>
 
             <select
               value={filterDirection}
               onChange={(e) => setFilterDirection(e.target.value as any)}
-              className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none"
+              className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none cursor-pointer"
             >
               <option value="Todas">Todas las direcciones</option>
               {DIRECTION_CODES.map((d) => (
@@ -1227,9 +1217,9 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* Tabla responsive con las 3 fases claramente delimitadas */}
+        {/* Tabla responsive con todas las celdas cliqueables */}
         <div className="overflow-x-auto [scrollbar-width:thin]">
-          <table className="w-full min-w-[1300px] border-collapse text-left text-xs">
+          <table className="w-full min-w-[1340px] border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-100/90 text-[11px] font-bold text-slate-700">
                 <th rowSpan={2} className="px-2.5 py-2 text-center w-10">
@@ -1239,22 +1229,22 @@ export function TerritoryReporterV2Tab({
                   UGEL
                 </th>
                 {/* BLOQUE FASE 1 */}
-                <th colSpan={3} className="border-x border-slate-200 px-3 py-1.5 text-center bg-blue-50/50 text-blue-900">
-                  Fase 1 (MC SIGA)
+                <th colSpan={3} className="border-x border-slate-200 px-3 py-1.5 text-center bg-blue-50/70 text-blue-900">
+                  Fase 1 (MC SIGA Carga Inicial)
                 </th>
                 {/* BLOQUE FASE INTERMEDIA DRIVE */}
-                <th colSpan={3} className="border-r border-slate-200 px-3 py-1.5 text-center bg-amber-50/60 text-amber-900">
+                <th colSpan={3} className="border-r border-slate-200 px-3 py-1.5 text-center bg-amber-50/80 text-amber-950">
                   Drive Regional (Declarativo 22/10)
                 </th>
                 {/* BLOQUE FASE 2 CIERRE RAR */}
-                <th colSpan={3} className="border-r border-slate-200 px-3 py-1.5 text-center bg-indigo-50/50 text-indigo-900">
-                  Fase 2 (Cierre RAR 26/10)
+                <th colSpan={3} className="border-r border-slate-200 px-3 py-1.5 text-center bg-indigo-50/70 text-indigo-950">
+                  Fase 2 (Oficial RAR 26/10)
                 </th>
                 <th rowSpan={2} className="px-3 py-2 text-center w-28">
                   Estado general
                 </th>
                 <th colSpan={7} className="border-x border-slate-200 px-2 py-1.5 text-center">
-                  Direcciones (DEI - DITEN)
+                  Direcciones (clic para alternar)
                 </th>
                 <th rowSpan={2} className="px-3 py-2 w-52">
                   Observaciones
@@ -1265,17 +1255,17 @@ export function TerritoryReporterV2Tab({
               </tr>
               <tr className="border-b border-slate-200 bg-slate-50 text-[10px] font-bold text-slate-500">
                 {/* Subcolumnas Fase 1 */}
-                <th className="border-l border-slate-200 px-2 py-1">Estado</th>
+                <th className="border-l border-slate-200 px-2 py-1 text-center">Estado (clic)</th>
                 <th className="px-2 py-1">Fecha</th>
                 <th className="border-r border-slate-200 px-1.5 py-1 text-center">Archivos</th>
                 {/* Subcolumnas Drive */}
-                <th className="px-2 py-1">Estado Drive</th>
+                <th className="px-2 py-1 text-center">Drive (clic)</th>
                 <th className="px-2 py-1">Fecha entrega</th>
                 <th className="border-r border-slate-200 px-1.5 py-1 text-center">Excel</th>
                 {/* Subcolumnas Fase 2 */}
-                <th className="px-2 py-1">Estado RAR</th>
+                <th className="px-2 py-1 text-center">RAR (clic)</th>
                 <th className="px-2 py-1">Fecha cierre</th>
-                <th className="border-r border-slate-200 px-1.5 py-1 text-center">RAR</th>
+                <th className="border-r border-slate-200 px-1.5 py-1 text-center">Archivos</th>
                 {/* Direcciones */}
                 {DIRECTION_CODES.map((code) => (
                   <th key={code} className="px-1.5 py-1 text-center">
@@ -1306,15 +1296,27 @@ export function TerritoryReporterV2Tab({
                       <button
                         type="button"
                         onClick={() => setInspectedUgel(u)}
-                        className="hover:underline cursor-pointer text-left"
+                        className="hover:underline cursor-pointer text-left font-extrabold text-blue-900"
                       >
                         {u.name}
                       </button>
                     </td>
 
-                    {/* BLOQUE FASE 1 */}
-                    <td className="border-l border-slate-100 px-2 py-2.5">
-                      <StatusIconLabel status={p1Status} />
+                    {/* BLOQUE FASE 1 (CLIQUEABLE) */}
+                    <td className="border-l border-slate-100 px-2 py-2.5 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleCycleUgelFiles(u.id, 1)}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-blue-100/60 transition-colors cursor-pointer text-left"
+                        title="Clic para cambiar estado de Fase 1"
+                      >
+                        <span className={`grid h-4 w-4 place-items-center rounded-full text-white ${
+                          p1Status === 'completado' ? 'bg-emerald-600' : p1Status === 'en_proceso' ? 'bg-amber-500' : 'bg-rose-600'
+                        }`}>
+                          {p1Status === 'completado' ? <Check size={10} strokeWidth={3} /> : p1Status === 'en_proceso' ? <Clock size={10} strokeWidth={2.6} /> : <X size={10} strokeWidth={3} />}
+                        </span>
+                        <span className="font-bold capitalize">{p1Status.replace('_', ' ')}</span>
+                      </button>
                     </td>
                     <td className="px-2 py-2.5 text-[11px] text-slate-500 tabular-nums">
                       {u.phase1Date}
@@ -1323,16 +1325,28 @@ export function TerritoryReporterV2Tab({
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
-                        title="Clic para actualizar archivos Fase 1"
-                        className="rounded bg-slate-100 px-1.5 py-0.5 font-bold text-slate-700 hover:bg-slate-200 tabular-nums cursor-pointer"
+                        title="Clic para ciclar archivos Fase 1 (0 -> 1 -> 2 -> 3)"
+                        className="rounded-md bg-blue-50 border border-blue-200 px-2 py-1 font-bold text-blue-800 hover:bg-blue-100 tabular-nums cursor-pointer transition-colors"
                       >
                         {u.phase1Files}/{u.phase1Total}
                       </button>
                     </td>
 
-                    {/* BLOQUE DRIVE REGIONAL (INTERMEDIA) */}
-                    <td className="px-2 py-2.5">
-                      <StatusIconLabel status={u.driveStatus} />
+                    {/* BLOQUE DRIVE REGIONAL (CLIQUEABLE) */}
+                    <td className="px-2 py-2.5 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleCycleDriveStatus(u.id)}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-amber-100/60 transition-colors cursor-pointer text-left"
+                        title="Clic para cambiar estado de entrega en Drive"
+                      >
+                        <span className={`grid h-4 w-4 place-items-center rounded-full text-white ${
+                          u.driveStatus === 'completado' ? 'bg-emerald-600' : u.driveStatus === 'en_proceso' ? 'bg-amber-500' : 'bg-rose-600'
+                        }`}>
+                          {u.driveStatus === 'completado' ? <Check size={10} strokeWidth={3} /> : u.driveStatus === 'en_proceso' ? <Clock size={10} strokeWidth={2.6} /> : <X size={10} strokeWidth={3} />}
+                        </span>
+                        <span className="font-bold capitalize">{u.driveStatus.replace('_', ' ')}</span>
+                      </button>
                     </td>
                     <td className="px-2 py-2.5 text-[11px] text-slate-500 tabular-nums">
                       {u.driveDate}
@@ -1341,22 +1355,34 @@ export function TerritoryReporterV2Tab({
                       <button
                         type="button"
                         onClick={() => handleCycleDriveStatus(u.id)}
-                        title="Clic para alternar estado de entrega en Drive"
-                        className={`rounded px-2 py-0.5 font-bold text-xs tabular-nums cursor-pointer ${
+                        title="Clic para alternar evidencia en Drive"
+                        className={`rounded-md px-2 py-1 font-bold text-xs tabular-nums cursor-pointer transition-colors ${
                           u.driveStatus === 'completado'
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
                             : u.driveStatus === 'en_proceso'
-                              ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-                              : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200'
+                              : 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200'
                         }`}
                       >
                         {u.driveStatus === 'completado' ? '1/1 Excel' : '0/1'}
                       </button>
                     </td>
 
-                    {/* BLOQUE FASE 2 (CIERRE RAR) */}
-                    <td className="px-2 py-2.5">
-                      <StatusIconLabel status={p2Status} />
+                    {/* BLOQUE FASE 2 (CLIQUEABLE) */}
+                    <td className="px-2 py-2.5 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleCycleUgelFiles(u.id, 2)}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-indigo-100/60 transition-colors cursor-pointer text-left"
+                        title="Clic para cambiar estado de Fase 2 RAR"
+                      >
+                        <span className={`grid h-4 w-4 place-items-center rounded-full text-white ${
+                          p2Status === 'completado' ? 'bg-emerald-600' : p2Status === 'en_proceso' ? 'bg-amber-500' : 'bg-rose-600'
+                        }`}>
+                          {p2Status === 'completado' ? <Check size={10} strokeWidth={3} /> : p2Status === 'en_proceso' ? <Clock size={10} strokeWidth={2.6} /> : <X size={10} strokeWidth={3} />}
+                        </span>
+                        <span className="font-bold capitalize">{p2Status.replace('_', ' ')}</span>
+                      </button>
                     </td>
                     <td className="px-2 py-2.5 text-[11px] text-slate-500 tabular-nums">
                       {u.phase2Date}
@@ -1365,8 +1391,8 @@ export function TerritoryReporterV2Tab({
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
-                        title="Clic para actualizar archivos RAR Fase 2"
-                        className="rounded bg-slate-100 px-1.5 py-0.5 font-bold text-slate-700 hover:bg-slate-200 tabular-nums cursor-pointer"
+                        title="Clic para ciclar archivos RAR Fase 2 (0 -> 1 -> 2 -> 3)"
+                        className="rounded-md bg-indigo-50 border border-indigo-200 px-2 py-1 font-bold text-indigo-800 hover:bg-indigo-100 tabular-nums cursor-pointer transition-colors"
                       >
                         {u.phase2Files}/{u.phase2Total}
                       </button>
@@ -1374,24 +1400,32 @@ export function TerritoryReporterV2Tab({
 
                     {/* ESTADO GENERAL */}
                     <td className="px-3 py-2.5 text-center">
-                      <StatusBadge status={genStatus} />
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
+                        genStatus === 'completado' ? 'bg-emerald-100 text-emerald-800' : genStatus === 'en_proceso' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                      }`}>
+                        {genStatus === 'completado' ? 'Completado' : genStatus === 'en_proceso' ? 'En proceso' : 'Pendiente'}
+                      </span>
                     </td>
 
-                    {/* DIRECCIONES PEDAGÓGICAS */}
+                    {/* 7 DIRECCIONES (CLIQUEABLES PARA CAMBIAR CADA PUNTO) */}
                     {DIRECTION_CODES.map((code) => {
                       const st = u.directions[code]
                       const color =
                         st === 'completado'
-                          ? 'bg-emerald-600'
+                          ? 'bg-emerald-600 ring-2 ring-emerald-300'
                           : st === 'en_proceso'
-                            ? 'bg-amber-400'
-                            : 'bg-rose-600'
+                            ? 'bg-amber-400 ring-2 ring-amber-200'
+                            : 'bg-rose-600 ring-2 ring-rose-200'
                       return (
                         <td key={code} className="px-1.5 py-2.5 text-center">
-                          <span
-                            className={`inline-block h-3.5 w-3.5 rounded-full ${color}`}
-                            title={`${code}: ${st}`}
-                          />
+                          <button
+                            type="button"
+                            onClick={() => handleCycleDirectionStatus(u.id, code)}
+                            title={`${u.name} · ${code}: ${st} (Clic para cambiar estado)`}
+                            className="p-1 rounded-full hover:bg-slate-200/60 transition-transform active:scale-90 cursor-pointer"
+                          >
+                            <span className={`inline-block h-3.5 w-3.5 rounded-full ${color}`} />
+                          </button>
                         </td>
                       )
                     })}
@@ -1401,7 +1435,7 @@ export function TerritoryReporterV2Tab({
                       {u.observation}
                     </td>
 
-                    {/* ACCIÓN */}
+                    {/* ACCIÓN DETALLE */}
                     <td className="px-3 py-2.5 text-right">
                       <button
                         type="button"
