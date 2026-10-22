@@ -39,17 +39,43 @@ import { territoryMonitoringService } from './territoryMonitoringService'
 
 export type TerritoryStatus = 'completado' | 'en_proceso' | 'pendiente'
 
-export type DirectionCode = 'DEI' | 'DEBA' | 'DISER' | 'DIGEBR' | 'DIGEDD' | 'DIFOID' | 'DITEN'
+export type DirectionCode =
+  | 'DEI'
+  | 'DEP'
+  | 'DES'
+  | 'DEBA'
+  | 'DEBE'
+  | 'DEIB'
+  | 'DISER'
+  | 'DIGESE (SEHO)'
 
 export const DIRECTION_CODES: DirectionCode[] = [
   'DEI',
+  'DEP',
+  'DES',
   'DEBA',
+  'DEBE',
+  'DEIB',
   'DISER',
-  'DIGEBR',
-  'DIGEDD',
-  'DIFOID',
-  'DITEN',
+  'DIGESE (SEHO)',
 ]
+
+// Mapeo oficial de Direcciones aplicables por UGEL (MINEDU - Dotación 2027)
+export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
+  'ugel-chanchamayo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-chupaca': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-concepcion': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-huancayo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DIGESE (SEHO)', 'DISER'],
+  'ugel-jauja': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-junin': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-pangoa': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-pichanaqui': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-rio-ene-mantaro': ['DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-rio-tambo': ['DEBA', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-satipo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-tarma': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'ugel-yauli': ['DEBA', 'DEBE', 'DEI', 'DEP', 'DES', 'DISER'],
+}
 
 export interface UgelMonitoringV2Row {
   id: string
@@ -64,18 +90,18 @@ export interface UgelMonitoringV2Row {
   driveFiles: number // 0..1
   driveTotal: number
   driveDate: string
-  // Etapa 3: Fase 2 - RAR oficial (Corte 26/10/2026)
+  // Etapa 3: Fase 2 - RAR oficial
   phase2Files: number // 0..3
   phase2Total: number
   phase2Date: string
-  // Direcciones pedagógicas
-  directions: Record<DirectionCode, TerritoryStatus>
+  // Direcciones pedagógicas (Solo aplican las asignadas oficialmente)
+  directions: Partial<Record<DirectionCode, TerritoryStatus>>
   observation: string
   gestorName: string
   gestorPhone: string
 }
 
-const STORAGE_KEY_V2 = 'qaway_territory_reporter_v2_fase1_green_f2_neutral'
+const STORAGE_KEY_V2 = 'qaway_territory_reporter_v2_fase1_green_f2_neutral_dirs_v3'
 export const REGIONAL_DRIVE_URL = 'https://drive.google.com/drive/folders/1QawayLab_Regional_Junin_Evidencias'
 
 const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
@@ -94,13 +120,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: '15/10/2026 10:15',
     directions: {
-      DEI: 'completado',
       DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
       DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
     },
     observation: 'Culminación completa certificada en las 3 etapas.',
     gestorName: 'Carlos Sandoval',
@@ -121,13 +147,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: '14/10/2026 16:45',
     directions: {
-      DEI: 'completado',
       DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
       DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
     },
     observation: 'Evidencia en Drive OK. Cierre oficial notificado al Residente SIGA.',
     gestorName: 'Carlos Sandoval',
@@ -148,13 +174,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: '13/10/2026 15:10',
     directions: {
-      DEI: 'completado',
       DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
       DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
     },
     observation: 'Validado con acta de AGP y archivo RAR enviado.',
     gestorName: 'Carlos Sandoval',
@@ -175,13 +201,14 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
+      DEBA: 'pendiente',
+      DEBE: 'pendiente',
       DEI: 'completado',
-      DEBA: 'completado',
-      DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
+      DEIB: 'pendiente',
+      DEP: 'pendiente',
+      DES: 'pendiente',
+      'DIGESE (SEHO)': 'pendiente',
+      DISER: 'pendiente',
     },
     observation: 'Fase 1 completada; pendiente subida de evidencia en Drive. Cierre oficial en plazo.',
     gestorName: 'Carlos Sandoval',
@@ -202,13 +229,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: '14/10/2026 17:20',
     directions: {
-      DEI: 'completado',
       DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
       DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
     },
     observation: 'Culminación completa de las 3 etapas.',
     gestorName: 'Carlos Sandoval',
@@ -229,13 +256,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
+      DEBA: 'pendiente',
+      DEBE: 'pendiente',
       DEI: 'completado',
-      DEBA: 'en_proceso',
+      DEIB: 'pendiente',
+      DEP: 'pendiente',
+      DES: 'pendiente',
       DISER: 'pendiente',
-      DIGEBR: 'completado',
-      DIGEDD: 'pendiente',
-      DIFOID: 'pendiente',
-      DITEN: 'en_proceso',
     },
     observation: 'Fase 1 OK; pendiente evidencia en Drive (corte 22/10). RAR oficial en plazo.',
     gestorName: 'Carlos Sandoval',
@@ -256,13 +283,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
+      DEBA: 'completado',
+      DEBE: 'completado',
       DEI: 'completado',
-      DEBA: 'en_proceso',
-      DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'completado',
     },
     observation: 'Fase 1 y Drive OK. Consolidando generación de RAR en MC SIGA hasta el 26/10.',
     gestorName: 'Carlos Sandoval',
@@ -283,13 +310,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
+      DEBA: 'completado',
+      DEBE: 'completado',
       DEI: 'completado',
-      DEBA: 'en_proceso',
-      DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'completado',
     },
     observation: 'Fase 1 y Drive OK; procesando cierre oficial en MC SIGA hasta el 26/10.',
     gestorName: 'Carlos Sandoval',
@@ -310,13 +337,11 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
-      DEI: 'en_proceso',
-      DEBA: 'en_proceso',
-      DISER: 'pendiente',
-      DIGEBR: 'en_proceso',
-      DIGEDD: 'pendiente',
-      DIFOID: 'pendiente',
-      DITEN: 'en_proceso',
+      DEI: 'completado',
+      DEIB: 'en_proceso',
+      DEP: 'completado',
+      DES: 'en_proceso',
+      DISER: 'en_proceso',
     },
     observation: 'Fase 1 OK. Subida a Drive en proceso (22/10). Cierre oficial en plazo regular.',
     gestorName: 'Carlos Sandoval',
@@ -337,13 +362,12 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: '15/10/2026 18:00',
     directions: {
-      DEI: 'completado',
       DEBA: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
       DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
     },
     observation: 'Culminación completa de las 3 fases.',
     gestorName: 'Carlos Sandoval',
@@ -364,13 +388,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
+      DEBA: 'completado',
+      DEBE: 'completado',
       DEI: 'completado',
-      DEBA: 'en_proceso',
-      DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'completado',
     },
     observation: 'Drive cargado oportunamente (21/10); elaboración de RAR en plazo oficial.',
     gestorName: 'Carlos Sandoval',
@@ -391,13 +415,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
+      DEBA: 'completado',
+      DEBE: 'completado',
       DEI: 'completado',
-      DEBA: 'en_proceso',
-      DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'completado',
     },
     observation: 'Excel en Drive OK; procesando cierre oficial RAR en MC SIGA hasta 26/10.',
     gestorName: 'Carlos Sandoval',
@@ -418,13 +442,12 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
-      DEI: 'completado',
       DEBA: 'en_proceso',
+      DEBE: 'en_proceso',
+      DEI: 'completado',
+      DEP: 'completado',
+      DES: 'en_proceso',
       DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
     },
     observation: 'Fase 1 OK. Subida a Drive en proceso; cierre oficial RAR en plazo.',
     gestorName: 'Carlos Sandoval',
@@ -619,7 +642,11 @@ export function TerritoryReporterV2Tab({
       let ok = 0
       let prog = 0
       let pend = 0
+      let applicableCount = 0
       for (const u of ugels) {
+        const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[u.id] || []
+        if (!applicableDirs.includes(code)) continue // NO aplica: no entra al total ni perjudica el análisis
+        applicableCount++
         const st = u.directions[code]
         if (st === 'completado') ok++
         else if (st === 'en_proceso') prog++
@@ -630,8 +657,8 @@ export function TerritoryReporterV2Tab({
         ok,
         prog,
         pend,
-        total,
-        pct: Math.round((ok / total) * 100),
+        total: applicableCount,
+        pct: applicableCount > 0 ? Math.round((ok / applicableCount) * 100) : 100,
       }
     })
 
@@ -740,13 +767,16 @@ export function TerritoryReporterV2Tab({
     )
   }
 
-  // Ciclador de Direcciones Pedagógicas (DEI .. DITEN)
+  // Ciclador de Direcciones Pedagógicas
   const handleCycleDirectionStatus = (ugelId: string, code: DirectionCode) => {
+    const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[ugelId] || []
+    if (!applicableDirs.includes(code)) return // No aplica a esta UGEL
+
     const order: TerritoryStatus[] = ['completado', 'en_proceso', 'pendiente']
     setUgels((prev) =>
       prev.map((u) => {
         if (u.id !== ugelId) return u
-        const current = u.directions[code]
+        const current = u.directions[code] || 'pendiente'
         const next = order[(order.indexOf(current) + 1) % order.length]
         const updated: UgelMonitoringV2Row = {
           ...u,
@@ -1484,7 +1514,20 @@ export function TerritoryReporterV2Tab({
 
                     {/* DIRECCIONES */}
                     {DIRECTION_CODES.map((code) => {
+                      const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[u.id] || []
+                      const applies = applicableDirs.includes(code)
                       const st = u.directions[code]
+
+                      if (!applies) {
+                        return (
+                          <td key={code} className="px-1.5 py-3 text-center" title={`No aplica ${code} para ${u.name}`}>
+                            <span className="inline-block text-[11px] font-black text-slate-300 select-none">
+                              —
+                            </span>
+                          </td>
+                        )
+                      }
+
                       const color =
                         st === 'completado'
                           ? 'bg-[#16a34a] ring-2 ring-emerald-300'
@@ -1697,17 +1740,20 @@ export function TerritoryReporterV2Tab({
               {/* Estado por Dirección Pedagógica en esta UGEL */}
               <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
                 <p className="text-xs font-bold text-slate-800">
-                  Checks por Dirección de Línea (clic para cambiar estado)
+                  Checks por Dirección que aplican a UGEL {inspectedUgel.name} (clic para alternar)
                 </p>
-                <div className="mt-3 grid grid-cols-7 gap-2 text-center">
-                  {DIRECTION_CODES.map((code) => {
-                    const st = inspectedUgel.directions[code]
+                <div className="mt-3 grid grid-cols-4 sm:grid-cols-7 gap-2 text-center">
+                  {DIRECTION_CODES.filter((code) => {
+                    const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[inspectedUgel.id] || []
+                    return applicableDirs.includes(code)
+                  }).map((code) => {
+                    const st = inspectedUgel.directions[code] || 'pendiente'
                     return (
                       <div
                         key={code}
                         className="flex flex-col items-center gap-1.5 rounded-lg bg-white border border-slate-200/80 p-2 shadow-2xs"
                       >
-                        <span className="text-[10px] font-bold text-slate-600">{code}</span>
+                        <span className="text-[10px] font-bold text-slate-600 truncate max-w-[50px]">{code}</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -1715,7 +1761,7 @@ export function TerritoryReporterV2Tab({
                             setInspectedUgel((prev) => {
                               if (!prev) return null
                               const order: TerritoryStatus[] = ['completado', 'en_proceso', 'pendiente']
-                              const cur = prev.directions[code]
+                              const cur = prev.directions[code] || 'pendiente'
                               const next = order[(order.indexOf(cur) + 1) % order.length]
                               return {
                                 ...prev,

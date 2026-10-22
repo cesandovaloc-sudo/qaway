@@ -17,7 +17,7 @@ export interface TerritoryUgelDbRecord {
   drive_files: number
   drive_total: number
   drive_date: string
-  directions: Record<DirectionCode, TerritoryStatus>
+  directions: Record<string, TerritoryStatus>
   observation: string
   gestor_name: string
   gestor_phone: string
@@ -40,15 +40,7 @@ function mapDbToUgelRow(r: TerritoryUgelDbRecord): UgelMonitoringV2Row {
     driveFiles: r.drive_files,
     driveTotal: r.drive_total,
     driveDate: r.drive_date,
-    directions: r.directions || {
-      DEI: 'pendiente',
-      DEBA: 'pendiente',
-      DISER: 'pendiente',
-      DIGEBR: 'pendiente',
-      DIGEDD: 'pendiente',
-      DIFOID: 'pendiente',
-      DITEN: 'pendiente',
-    },
+    directions: (r.directions || {}) as Record<DirectionCode, TerritoryStatus>,
     observation: r.observation || '',
     gestorName: r.gestor_name || 'Carlos Sandoval',
     gestorPhone: r.gestor_phone || '+51964112233',
