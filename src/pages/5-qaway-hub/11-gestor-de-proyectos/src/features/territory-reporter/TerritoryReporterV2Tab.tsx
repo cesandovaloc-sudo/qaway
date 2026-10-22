@@ -1028,18 +1028,18 @@ export function TerritoryReporterV2Tab({
       {/* ── 3. FILA DE 3 GRÁFICOS EJECUTIVOS ── */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 print:grid-cols-3 print:gap-2.5">
         {/* Card 1: Avance por fase (3 FILAS) */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
-              <h3 className="text-[15px] font-bold text-slate-900">Avance de 3 Fases por UGEL</h3>
-              <p className="text-[12px] text-slate-500">Distribución de las 13 UGEL en Fase 1, Drive y Fase 2</p>
+              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Avance de 3 Fases por UGEL</h3>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Distribución de las 13 UGEL en Fase 1, Drive y Fase 2</p>
             </div>
-            <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10.5px] font-extrabold text-blue-700">
+            <span className="rounded-md bg-blue-100 px-2.5 py-1 text-[11px] font-black text-blue-700 shrink-0">
               3 Fases de Control
             </span>
           </div>
 
-          <div className="my-auto space-y-3.5 py-3">
+          <div className="my-auto space-y-4 py-4">
             {[
               {
                 label: 'Fase 1',
@@ -1064,17 +1064,17 @@ export function TerritoryReporterV2Tab({
               },
             ].map((f) => (
               <div key={f.label} className="flex items-center gap-3">
-                <div className="w-18 shrink-0 text-left">
-                  <span className="block text-[13px] font-bold text-slate-900 leading-none">
+                <div className="w-20 shrink-0 text-left">
+                  <span className="block text-[13.5px] font-black text-slate-900 leading-none">
                     {f.label}
                   </span>
-                  <span className="block text-[11px] font-medium text-slate-500 leading-tight mt-0.5">
+                  <span className="block text-[11.5px] font-semibold text-slate-500 leading-tight mt-1">
                     {f.sublabel}
                   </span>
                 </div>
 
                 <div className="relative flex-1">
-                  <div className="flex h-8 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
+                  <div className="flex h-9 overflow-hidden rounded-xl bg-slate-100 shadow-inner">
                     {f.ok > 0 && (
                       <div
                         style={{ width: `${(f.ok / ugelStats.total) * 100}%` }}
@@ -1110,7 +1110,7 @@ export function TerritoryReporterV2Tab({
             ))}
           </div>
 
-          <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-[11.5px] font-semibold text-slate-500">
+          <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-[12px] font-bold text-slate-500">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
               <span>Completado</span>
@@ -1127,50 +1127,50 @@ export function TerritoryReporterV2Tab({
         </div>
 
         {/* Card 2: Estado global */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
-              <h3 className="text-[15px] font-bold text-slate-900">Consolidado Global de 3 Fases</h3>
-              <p className="text-[12px] text-slate-500">Cumplimiento regional integrado de las 13 UGEL</p>
+              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Consolidado Global de 3 Fases</h3>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Cumplimiento regional integrado de las 13 UGEL</p>
             </div>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 shrink-0">
               Total 3 Fases
             </span>
           </div>
 
-          <div className="my-auto flex items-center justify-center gap-6 py-2">
+          <div className="my-auto flex items-center justify-center gap-6 py-3">
             <div className="relative flex items-center justify-center">
-              <svg width="130" height="130" viewBox="0 0 130 130" className="-rotate-90">
-                <circle cx="65" cy="65" r="50" fill="transparent" stroke="#f1f5f9" strokeWidth="18" />
+              <svg width="136" height="136" viewBox="0 0 136 136" className="-rotate-90">
+                <circle cx="68" cy="68" r="52" fill="transparent" stroke="#f1f5f9" strokeWidth="18" />
                 <circle
-                  cx="65"
-                  cy="65"
-                  r="50"
+                  cx="68"
+                  cy="68"
+                  r="52"
                   fill="transparent"
                   stroke="#16a34a"
                   strokeWidth="18"
-                  strokeDasharray={`${(ugelStats.completed / ugelStats.total) * 314.16} 314.16`}
+                  strokeDasharray={`${(ugelStats.completed / ugelStats.total) * 326.72} 326.72`}
                   strokeDashoffset="0"
                 />
                 <circle
-                  cx="65"
-                  cy="65"
-                  r="50"
+                  cx="68"
+                  cy="68"
+                  r="52"
                   fill="transparent"
                   stroke="#fbbf24"
                   strokeWidth="18"
-                  strokeDasharray={`${(ugelStats.inProgress / ugelStats.total) * 314.16} 314.16`}
-                  strokeDashoffset={`-${(ugelStats.completed / ugelStats.total) * 314.16}`}
+                  strokeDasharray={`${(ugelStats.inProgress / ugelStats.total) * 326.72} 326.72`}
+                  strokeDashoffset={`-${(ugelStats.completed / ugelStats.total) * 326.72}`}
                 />
                 <circle
-                  cx="65"
-                  cy="65"
-                  r="50"
+                  cx="68"
+                  cy="68"
+                  r="52"
                   fill="transparent"
                   stroke="#dc2626"
                   strokeWidth="18"
-                  strokeDasharray={`${(ugelStats.pending / ugelStats.total) * 314.16} 314.16`}
-                  strokeDashoffset={`-${((ugelStats.completed + ugelStats.inProgress) / ugelStats.total) * 314.16}`}
+                  strokeDasharray={`${(ugelStats.pending / ugelStats.total) * 326.72} 326.72`}
+                  strokeDashoffset={`-${((ugelStats.completed + ugelStats.inProgress) / ugelStats.total) * 326.72}`}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -1183,64 +1183,64 @@ export function TerritoryReporterV2Tab({
               </div>
             </div>
 
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2.5 text-xs">
               <div className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-emerald-600" />
-                <span className="font-semibold text-slate-700">Completado ({ugelStats.completed})</span>
-                <span className="text-slate-400 font-bold">— {ugelStats.completedPct}%</span>
+                <span className="font-bold text-slate-800 text-[12.5px]">Completado ({ugelStats.completed})</span>
+                <span className="text-slate-500 font-bold">— {ugelStats.completedPct}%</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-amber-400" />
-                <span className="font-semibold text-slate-700">En proceso ({ugelStats.inProgress})</span>
-                <span className="text-slate-400 font-bold">— {ugelStats.inProgressPct}%</span>
+                <span className="font-bold text-slate-800 text-[12.5px]">En proceso ({ugelStats.inProgress})</span>
+                <span className="text-slate-500 font-bold">— {ugelStats.inProgressPct}%</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-rose-600" />
-                <span className="font-semibold text-slate-700">Pendiente ({ugelStats.pending})</span>
-                <span className="text-slate-400 font-bold">— {ugelStats.pendingPct}%</span>
+                <span className="font-bold text-slate-800 text-[12.5px]">Pendiente ({ugelStats.pending})</span>
+                <span className="text-slate-500 font-bold">— {ugelStats.pendingPct}%</span>
               </div>
             </div>
           </div>
 
-          <div className="text-center border-t border-slate-100 pt-2 text-[11px] text-slate-400">
+          <div className="text-center border-t border-slate-100 pt-2.5 text-[11.5px] font-semibold text-slate-400">
             Resumen porcentual de cumplimiento
           </div>
         </div>
 
-        {/* Card 3: Avance por dirección pedagógica */}
-        <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        {/* Card 3: Avance por dirección pedagógica (Con más altura y aire vertical) */}
+        <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
-              <h3 className="text-[15px] font-bold text-slate-900">Avance por Direcciones en 3 Fases</h3>
-              <p className="text-[12px] text-slate-500">Progreso de las 7 líneas pedagógicas en las 3 fases</p>
+              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Avance por Direcciones en 3 Fases</h3>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Progreso de las 7 líneas pedagógicas en las 3 fases</p>
             </div>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 shrink-0">
               Líneas · 3 Fases
             </span>
           </div>
 
-          <div className="my-auto space-y-2 py-2">
+          <div className="my-auto space-y-2.5 py-3">
             {ugelStats.directionStats.map((d) => (
-              <div key={d.code} className="flex items-center gap-2 text-xs">
-                <span className="w-12 font-bold text-slate-700 text-[12px]">{d.code}</span>
+              <div key={d.code} className="flex items-center gap-2.5 text-xs">
+                <span className="w-13 font-black text-slate-800 text-[12.5px]">{d.code}</span>
                 <div className="relative flex-1">
-                  <div className="flex h-3.5 overflow-hidden rounded-full bg-slate-100 shadow-inner">
+                  <div className="flex h-4 overflow-hidden rounded-full bg-slate-100 shadow-inner">
                     <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
                     <div style={{ width: `${(d.prog / d.total) * 100}%` }} className="bg-amber-400" />
                     <div style={{ width: `${(d.pend / d.total) * 100}%` }} className="bg-rose-600" />
                   </div>
                 </div>
-                <span className="w-10 text-right font-black text-slate-900 tabular-nums text-[12px]">
+                <span className="w-11 text-right font-black text-slate-900 tabular-nums text-[12.5px]">
                   {d.pct}%
                 </span>
-                <span className="text-[10.5px] text-slate-400 tabular-nums">
+                <span className="text-[11px] font-semibold text-slate-400 tabular-nums">
                   {d.ok}/{d.total}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-[11.5px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px] text-slate-500 font-bold">
             <span>7 Direcciones evaluadas</span>
             <span>13 UGEL Junín</span>
           </div>
