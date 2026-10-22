@@ -549,73 +549,11 @@ export default function Header({
           ) : null}
         </div>
 
-        {/* Conmutador de Perspectiva / Rol (Minimalista estilo Linear / Raycast) */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={togglePerspective}
-            className="flex items-center gap-2 h-9 px-2.5 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-xs font-medium focus:outline-none focus:ring-1 focus:ring-zinc-400/40 cursor-pointer transition-colors"
-            title={`Perspectiva: ${displayedPersona.title}`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
-            <span className="text-zinc-400 font-normal">Rol:</span>
-            <span className="font-semibold max-w-32 truncate">{displayedPersona.tag}</span>
-            <ChevronDown
-              size={12}
-              className={`text-[var(--hub-dim)] transition-transform duration-150 ${
-                isPerspectiveOpen ? 'rotate-180 text-[var(--hub-text)]' : ''
-              }`}
-            />
-          </button>
-
-          {isPerspectiveOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setIsPerspectiveOpen(false)}
-                aria-label="Cerrar selector de perspectiva"
-              />
-              <div className="hub-chrome absolute left-0 top-[calc(100%+6px)] w-72 max-h-80 overflow-y-auto rounded-xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-lg z-[100] overflow-hidden text-left text-[var(--hub-text)] animate-in fade-in-50 zoom-in-95">
-                <div className="px-3 py-2 border-b border-[var(--hub-border-soft)]">
-                  <p className="text-[10px] font-semibold text-[var(--hub-dim)] uppercase tracking-wider">
-                    Perspectiva de Trabajo
-                  </p>
-                </div>
-
-                <div className="p-1.5 space-y-0.5">
-                  {availableRoles.map((roleKey) => {
-                    const p = PROJECT_PERSONAS[roleKey]
-                    const isSelected = perspective === roleKey
-                    return (
-                      <button
-                        key={roleKey}
-                        type="button"
-                        onClick={() => {
-                          setPerspective(roleKey)
-                          setIsPerspectiveOpen(false)
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
-                          isSelected
-                            ? 'bg-[var(--hub-hover)] font-semibold text-[var(--hub-text)]'
-                            : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-chip)] hover:text-[var(--hub-text)]'
-                        }`}
-                      >
-                        <div className="min-w-0 pr-2">
-                          <p className="font-medium text-[var(--hub-text)] truncate">{p.title}</p>
-                          <p className="text-[10.5px] text-[var(--hub-dim)] truncate mt-0.5">
-                            {p.scope}
-                          </p>
-                        </div>
-                        {isSelected && (
-                          <Check size={13} className="text-[var(--hub-brand)] shrink-0" />
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </>
-          )}
+        {/* Rol Fijo en Encabezado: Gestor de Materiales */}
+        <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/80 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-200 text-xs font-bold shadow-2xs select-none" title="Vista de Gestor de Materiales Educativos">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+          <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">Rol:</span>
+          <span className="font-black text-[12px] tracking-tight">Gestor de Materiales</span>
         </div>
       </div>
 

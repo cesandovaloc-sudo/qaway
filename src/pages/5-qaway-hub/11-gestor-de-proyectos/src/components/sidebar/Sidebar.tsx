@@ -138,6 +138,12 @@ export default function Sidebar({
       title: 'OPERACIÓN TERRITORIAL (ACTIVO)',
       items: [
         {
+          to: '/',
+          label: 'Resumen General',
+          icon: <LayoutDashboard size={18} />,
+          end: true,
+        },
+        {
           to: '/monitoreo-v2',
           label: 'Reporteador Territorial (Hito 1.6)',
           icon: <BarChart3 size={18} />,
@@ -149,12 +155,6 @@ export default function Sidebar({
     {
       title: 'MÓDULOS EN ESPERA',
       items: [
-        {
-          to: '/',
-          label: 'Resumen General',
-          icon: <LayoutDashboard size={18} />,
-          end: true,
-        },
         {
           to: '/proyectos',
           label: 'Proyectos & Hitos',

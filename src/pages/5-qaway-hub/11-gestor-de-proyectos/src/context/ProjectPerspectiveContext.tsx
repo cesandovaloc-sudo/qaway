@@ -75,9 +75,9 @@ export function ProjectPerspectiveProvider({ children }: { children: ReactNode }
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved === 'coordinador' || saved === 'gestor' || saved === 'admin') return saved
-      return 'super_admin'
+      return 'gestor'
     } catch {
-      return 'super_admin'
+      return 'gestor'
     }
   })
 
