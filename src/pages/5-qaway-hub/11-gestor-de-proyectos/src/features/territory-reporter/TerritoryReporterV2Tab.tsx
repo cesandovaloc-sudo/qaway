@@ -480,14 +480,14 @@ export function computeUgelDirectionStatus(row: UgelMonitoringV2Row): {
   const pct = totalDirs > 0 ? Math.round((effectiveScore / totalDirs) * 100) : 0
 
   let status: TerritoryStatus = 'pendiente'
-  // Si completa todas las direcciones o supera el 70% -> Completado
-  if (okCount === totalDirs || pct >= 70) {
+  // 1. COMPLETADO: Solo y exclusivamente si todas las direcciones aplicables (7 de 7) están 100% completadas
+  if (okCount === totalDirs && totalDirs > 0) {
     status = 'completado'
-  } else if (pct >= 30) {
-    // Si sube por ejemplo 4 de 7 (~60%, entre 30% y <100%) -> En proceso
+  } else if (okCount > 0 || progCount > 0) {
+    // 2. EN PROCESO: Si falta aunque sea 1 dirección (de 1 a 6 listas, o en proceso)
     status = 'en_proceso'
   } else {
-    // Menos del 30% -> Pendiente
+    // 3. PENDIENTE: Si no tiene ninguna dirección completada (0 listas)
     status = 'pendiente'
   }
 
