@@ -821,10 +821,10 @@ export function TerritoryReporterV2Tab({
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════════
-          1.1. MATRIZ FLOTANTE LIMPIA (SIN CAJA NI MARCO BLANCO INNECESARIO)
+          1.1. TARJETA INDEPENDIENTE CON CONTENEDOR BLANCO ELEGANTE
           ════════════════════════════════════════════════════════════════════════ */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200/90 shadow-xs bg-white">
-        <div className="overflow-x-auto [scrollbar-width:thin]">
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 [scrollbar-width:thin]">
           <table className="w-full min-w-[1360px] border-collapse text-center table-fixed">
             <thead>
               <tr className="border-b border-slate-200 text-xs">
