@@ -47,7 +47,6 @@ export type DirectionCode =
   | 'DEBE'
   | 'DEIB'
   | 'DISER'
-  | 'DIGESE (SEHO)'
 
 export const DIRECTION_CODES: DirectionCode[] = [
   'DEI',
@@ -57,7 +56,6 @@ export const DIRECTION_CODES: DirectionCode[] = [
   'DEBE',
   'DEIB',
   'DISER',
-  'DIGESE (SEHO)',
 ]
 
 // Mapeo oficial de Direcciones aplicables por UGEL (MINEDU - Dotación 2027)
@@ -65,7 +63,7 @@ export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
   'ugel-chanchamayo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-chupaca': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-concepcion': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
-  'ugel-huancayo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DIGESE (SEHO)', 'DISER'],
+  'ugel-huancayo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-jauja': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-junin': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-pangoa': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
@@ -207,7 +205,6 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DEIB: 'pendiente',
       DEP: 'pendiente',
       DES: 'pendiente',
-      'DIGESE (SEHO)': 'pendiente',
       DISER: 'pendiente',
     },
     observation: 'Fase 1 completada; pendiente subida de evidencia en Drive. Cierre oficial en plazo.',
@@ -536,14 +533,43 @@ export function TerritoryReporterV2Tab({
   const [inspectedUgel, setInspectedUgel] = useState<UgelMonitoringV2Row | null>(null)
   const [newTaskTitle, setNewTaskTitle] = useState('')
 
-  // Estado para el selector/desplegable de edición de fechas
-  const [editingDateTarget, setEditingDateTarget] = useState<{
+  // Estado para el modal de fecha y hora de entrega en Drive
+  const [editingDriveDateTarget, setEditingDriveDateTarget] = useState<{
     ugelId: string
-    field: 'phase1Date' | 'phase2Date' | 'driveDate'
-    fieldLabel: string
-    currentValue: string
+    ugelName: string
+    currentDate: string
   } | null>(null)
-  const [customDateInput, setCustomDateInput] = useState('')
+  const [drivePickerDate, setDrivePickerDate] = useState('')
+  const [drivePickerTime, setDrivePickerTime] = useState('')
+  const [drivePickerStatus, setDrivePickerStatus] = useState<TerritoryStatus>('completado')
+
+  const parseDriveDateTime = (str: string): { date: string; time: string } => {
+    const now = new Date()
+    const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+    if (!str || str.toLowerCase().includes('sin') || str.toLowerCase().includes('proceso')) {
+      return { date: todayIso, time: nowTime }
+    }
+    const parts = str.trim().split(' ')
+    if (parts.length >= 1) {
+      const dParts = parts[0].split('/')
+      if (dParts.length === 3) {
+        const isoDate = `${dParts[2]}-${dParts[1].padStart(2, '0')}-${dParts[0].padStart(2, '0')}`
+        const isoTime = parts[1] || '12:00'
+        return { date: isoDate, time: isoTime }
+      }
+    }
+    return { date: todayIso, time: nowTime }
+  }
+
+  const formatDriveDateTime = (dateIso: string, timeIso: string): string => {
+    if (!dateIso) return 'Sin evidencia'
+    const parts = dateIso.split('-')
+    if (parts.length !== 3) return 'Sin evidencia'
+    const [y, m, d] = parts
+    return `${d}/${m}/${y} ${timeIso || '12:00'}`
+  }
 
   useEffect(() => {
     if (inspectedUgel) {
@@ -792,24 +818,26 @@ export function TerritoryReporterV2Tab({
     )
   }
 
-  // Guardar fecha modificada desde el desplegable
-  const handleSaveDate = (newDate: string) => {
-    if (!editingDateTarget) return
-    const { ugelId, field } = editingDateTarget
+  // Guardar fecha y hora de entrega en Drive
+  const handleSaveDriveDelivery = (newDateTime: string, newStatus?: TerritoryStatus) => {
+    if (!editingDriveDateTarget) return
+    const { ugelId } = editingDriveDateTarget
     setUgels((prev) =>
       prev.map((u) => {
         if (u.id !== ugelId) return u
-        const updated = {
+        const st = newStatus || (newDateTime && newDateTime !== 'Sin evidencia' ? 'completado' : u.driveStatus)
+        const updated: UgelMonitoringV2Row = {
           ...u,
-          [field]: newDate,
+          driveDate: newDateTime,
+          driveStatus: st,
+          driveFiles: st === 'completado' ? 1 : 0,
         }
         // Persistir a Supabase
         territoryMonitoringService.updateUgel(updated).catch(console.error)
         return updated
       }),
     )
-    setEditingDateTarget(null)
-    setCustomDateInput('')
+    setEditingDriveDateTarget(null)
   }
 
   return (
@@ -1345,19 +1373,19 @@ export function TerritoryReporterV2Tab({
                   UGEL
                 </th>
                 {/* BLOQUE FASE 1 */}
-                <th colSpan={2} className="border-x border-slate-200 px-3 py-2 text-center bg-blue-50/80 text-blue-950 font-black">
+                <th className="border-x border-slate-200 px-3 py-2 text-center bg-blue-50/80 text-blue-950 font-black">
                   Fase 1 (MC SIGA Carga Inicial)
                 </th>
                 {/* BLOQUE FASE 2 */}
-                <th colSpan={2} className="border-r border-slate-200 px-3 py-2 text-center bg-indigo-50/80 text-indigo-950 font-black">
+                <th className="border-r border-slate-200 px-3 py-2 text-center bg-indigo-50/80 text-indigo-950 font-black">
                   Fase 2 (Oficial RAR)
                 </th>
                 {/* BLOQUE DRIVE REGIONAL */}
                 <th colSpan={2} className="border-r border-slate-200 px-3 py-2 text-center bg-amber-50/90 text-amber-950 font-black">
                   Drive Regional (Declarativo 22/10)
                 </th>
-                {/* BLOQUE DIRECCIONES */}
-                <th colSpan={7} className="border-r border-slate-200 px-2 py-2 text-center bg-slate-50 font-bold text-slate-700">
+                {/* BLOQUE DIRECCIONES (7 LÍNEAS PEDAGÓGICAS) */}
+                <th colSpan={DIRECTION_CODES.length} className="border-r border-slate-200 px-2 py-2 text-center bg-slate-50 font-bold text-slate-700">
                   Direcciones (clic para alternar)
                 </th>
                 {/* BLOQUE ESTADO GENERAL */}
@@ -1370,13 +1398,11 @@ export function TerritoryReporterV2Tab({
               </tr>
               <tr className="border-b border-slate-200 bg-slate-50/90 text-[11.5px] font-bold text-slate-600">
                 <th className="border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
-                <th className="border-r border-slate-200 px-2.5 py-1.5">Fecha registro</th>
-                <th className="px-2.5 py-1.5 text-center">RAR</th>
-                <th className="border-r border-slate-200 px-2.5 py-1.5">Fecha límite</th>
+                <th className="border-r border-slate-200 px-2.5 py-1.5 text-center">RAR</th>
                 <th className="px-2.5 py-1.5 text-center">Drive</th>
                 <th className="border-r border-slate-200 px-2.5 py-1.5">Fecha entrega</th>
                 {DIRECTION_CODES.map((code) => (
-                  <th key={code} className="px-1.5 py-1.5 text-center">
+                  <th key={code} className="px-1.5 py-1.5 text-center truncate max-w-[55px]" title={code}>
                     {code}
                   </th>
                 ))}
@@ -1410,12 +1436,13 @@ export function TerritoryReporterV2Tab({
                       </button>
                     </td>
 
-                    {/* FASE 1: ESTADO Y FECHA */}
+                    {/* FASE 1: SOLO ESTADO (FECHA OCULTA, VISIBLE EN DETALLE DERECHO) */}
                     <td className="border-l border-slate-100 px-2.5 py-3 text-center">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
                         className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-blue-100/60 transition-colors cursor-pointer text-left"
+                        title="Fase 1: Completado al 100% (Ver fecha en detalle)"
                       >
                         <span className="grid h-4.5 w-4.5 place-items-center rounded-full text-white bg-[#16a34a]">
                           <Check size={11} strokeWidth={3} />
@@ -1423,31 +1450,14 @@ export function TerritoryReporterV2Tab({
                         <span className="font-extrabold text-[12.5px] capitalize text-slate-800">Completado</span>
                       </button>
                     </td>
-                    <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEditingDateTarget({
-                            ugelId: u.id,
-                            field: 'phase1Date',
-                            fieldLabel: `Fase 1 (MC SIGA) · UGEL ${u.name}`,
-                            currentValue: u.phase1Date,
-                          })
-                        }
-                        className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
-                        title="Clic para cambiar fecha"
-                      >
-                        <Calendar size={12} className="text-slate-400 shrink-0" />
-                        <span>{u.phase1Date}</span>
-                      </button>
-                    </td>
 
-                    {/* FASE 2: ESTADO RAR Y FECHA */}
-                    <td className="px-2.5 py-3 text-center">
+                    {/* FASE 2: SOLO ESTADO RAR (FECHA LÍMITE OCULTA, VISIBLE EN DETALLE DERECHO) */}
+                    <td className="border-r border-slate-100 px-2.5 py-3 text-center">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
                         className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-indigo-100/60 transition-colors cursor-pointer text-left"
+                        title="Fase 2 RAR: Ver fecha en detalle"
                       >
                         <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
                           isP2Done ? 'bg-[#16a34a]' : 'bg-slate-400'
@@ -1457,24 +1467,6 @@ export function TerritoryReporterV2Tab({
                         <span className={`font-extrabold text-[12.5px] capitalize ${isP2Done ? 'text-slate-900' : 'text-slate-600'}`}>
                           {isP2Done ? 'Completado' : 'En plazo'}
                         </span>
-                      </button>
-                    </td>
-                    <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEditingDateTarget({
-                            ugelId: u.id,
-                            field: 'phase2Date',
-                            fieldLabel: `Fase 2 (Oficial RAR) · UGEL ${u.name}`,
-                            currentValue: u.phase2Date,
-                          })
-                        }
-                        className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
-                        title="Clic para cambiar fecha"
-                      >
-                        <Calendar size={12} className="text-slate-400 shrink-0" />
-                        <span>{u.phase2Date}</span>
                       </button>
                     </td>
 
@@ -1496,23 +1488,26 @@ export function TerritoryReporterV2Tab({
                     <td className="border-r border-slate-100 px-2.5 py-3 text-[12px] text-slate-600 font-medium tabular-nums">
                       <button
                         type="button"
-                        onClick={() =>
-                          setEditingDateTarget({
+                        onClick={() => {
+                          const parsed = parseDriveDateTime(u.driveDate)
+                          setDrivePickerDate(parsed.date)
+                          setDrivePickerTime(parsed.time)
+                          setDrivePickerStatus(u.driveStatus)
+                          setEditingDriveDateTarget({
                             ugelId: u.id,
-                            field: 'driveDate',
-                            fieldLabel: `Drive Regional (Declarativo) · UGEL ${u.name}`,
-                            currentValue: u.driveDate,
+                            ugelName: u.name,
+                            currentDate: u.driveDate,
                           })
-                        }
+                        }}
                         className="hover:text-blue-600 hover:underline cursor-pointer flex items-center gap-1 text-left"
-                        title="Clic para cambiar fecha"
+                        title="Clic para registrar fecha y hora de entrega en Drive"
                       >
                         <Calendar size={12} className="text-slate-400 shrink-0" />
                         <span>{u.driveDate}</span>
                       </button>
                     </td>
 
-                    {/* DIRECCIONES */}
+                    {/* DIRECCIONES OFICIALES (DEI..DIGESE) */}
                     {DIRECTION_CODES.map((code) => {
                       const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[u.id] || []
                       const applies = applicableDirs.includes(code)
@@ -1607,17 +1602,22 @@ export function TerritoryReporterV2Tab({
               {/* Control de las 3 Etapas para esta UGEL */}
               <div className="grid grid-cols-3 gap-2.5">
                 {/* Fase 1: MC SIGA */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11.5px] font-bold text-slate-700">Fase 1</span>
-                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9.5px] font-bold text-emerald-800">
-                      100%
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xl font-black text-slate-900 tabular-nums">
-                      {inspectedUgel.phase1Files}/{inspectedUgel.phase1Total}
-                    </span>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11.5px] font-bold text-slate-700">Fase 1</span>
+                      <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9.5px] font-bold text-emerald-800">
+                        100% OK
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xl font-black text-slate-900 tabular-nums">
+                        {inspectedUgel.phase1Files}/{inspectedUgel.phase1Total}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-semibold mt-1">
+                      Fecha: <strong className="text-slate-700">{inspectedUgel.phase1Date}</strong>
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -1636,23 +1636,28 @@ export function TerritoryReporterV2Tab({
                 </div>
 
                 {/* Drive Regional (22/10) */}
-                <div className="rounded-xl border border-amber-200/90 bg-amber-50/50 p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11.5px] font-bold text-amber-950">Drive (22/10)</span>
-                    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
-                      inspectedUgel.driveStatus === 'completado'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : inspectedUgel.driveStatus === 'en_proceso'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-rose-100 text-rose-800'
-                    }`}>
-                      {inspectedUgel.driveStatus === 'completado' ? 'OK' : inspectedUgel.driveStatus === 'en_proceso' ? 'Proceso' : 'Pend.'}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xl font-black text-slate-900 tabular-nums">
-                      {inspectedUgel.driveStatus === 'completado' ? '1/1' : inspectedUgel.driveStatus === 'en_proceso' ? 'Proceso' : '0/1'}
-                    </span>
+                <div className="rounded-xl border border-amber-200/90 bg-amber-50/50 p-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11.5px] font-bold text-amber-950">Drive (22/10)</span>
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
+                        inspectedUgel.driveStatus === 'completado'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : inspectedUgel.driveStatus === 'en_proceso'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-rose-100 text-rose-800'
+                      }`}>
+                        {inspectedUgel.driveStatus === 'completado' ? 'OK' : inspectedUgel.driveStatus === 'en_proceso' ? 'Proceso' : 'Pend.'}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xl font-black text-slate-900 tabular-nums">
+                        {inspectedUgel.driveStatus === 'completado' ? '1/1' : inspectedUgel.driveStatus === 'en_proceso' ? 'Proceso' : '0/1'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-semibold mt-1">
+                      Fecha: <strong className="text-slate-700">{inspectedUgel.driveDate}</strong>
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -1680,21 +1685,26 @@ export function TerritoryReporterV2Tab({
                 </div>
 
                 {/* Fase 2: RAR Oficial */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11.5px] font-bold text-slate-700">Fase 2 (RAR Oficial)</span>
-                    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
-                      inspectedUgel.phase2Files >= inspectedUgel.phase2Total
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-slate-200 text-slate-700'
-                    }`}>
-                      {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? 'Cerrado' : 'En plazo'}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xl font-black text-slate-900 tabular-nums">
-                      {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? '3/3' : `${inspectedUgel.phase2Files}/3`}
-                    </span>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11.5px] font-bold text-slate-700">Fase 2 (RAR Oficial)</span>
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
+                        inspectedUgel.phase2Files >= inspectedUgel.phase2Total
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? 'Cerrado' : 'En plazo'}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xl font-black text-slate-900 tabular-nums">
+                        {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? '3/3' : `${inspectedUgel.phase2Files}/3`}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-semibold mt-1">
+                      Fecha: <strong className="text-slate-700">{inspectedUgel.phase2Date}</strong>
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -1890,90 +1900,182 @@ export function TerritoryReporterV2Tab({
         </div>
       )}
 
-      {/* ── MODAL / POPOVER DESPLEGABLE PARA MODIFICAR FECHAS DE CONTROL ── */}
-      {editingDateTarget && (
+      {/* ── MODAL / POPOVER ÁGIL PARA REGISTRAR FECHA Y HORA EN DRIVE REGIONAL ── */}
+      {editingDriveDateTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 print:hidden animate-in fade-in duration-150">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-4">
+            {/* Cabecera */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="grid h-8 w-8 place-items-center rounded-xl bg-blue-50 text-blue-600">
-                  <Calendar size={18} />
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-amber-50 text-amber-700">
+                  <Calendar size={19} />
                 </span>
                 <div>
                   <h4 className="text-sm font-black text-slate-900 leading-tight">
-                    Modificar Fecha de Seguimiento
+                    Entrega en Drive Regional (22/10)
                   </h4>
-                  <p className="text-[11.5px] font-semibold text-slate-500 mt-0.5">
-                    {editingDateTarget.fieldLabel}
+                  <p className="text-[12px] font-bold text-slate-500 mt-0.5">
+                    UGEL {editingDriveDateTarget.ugelName}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setEditingDateTarget(null)}
+                onClick={() => setEditingDriveDateTarget(null)}
                 className="grid h-7 w-7 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+                title="Cerrar"
               >
                 <X size={16} />
               </button>
             </div>
 
-            {/* Presets rápidos */}
+            {/* Accesos rápidos inmediatos para registro súper rápido */}
             <div>
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Accesos rápidos
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                Registro rápido con un clic
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {[
-                  'Hoy (22/10/2026)',
-                  'Corte Drive (22/10/2026)',
-                  'Cierre RAR (26/10/2026)',
-                  'En plazo hasta 26/10',
-                  'En proceso',
-                  '15/10/2026 12:00',
-                ].map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => handleSaveDate(preset)}
-                    className="truncate rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-left font-bold text-slate-700 hover:border-blue-500 hover:bg-blue-50/60 hover:text-blue-900 transition-all cursor-pointer shadow-2xs"
-                  >
-                    {preset}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Input personalizado */}
-            <div className="space-y-1.5 pt-1">
-              <label className="block text-[11.5px] font-bold text-slate-700">
-                O escribe una fecha personalizada:
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Ej: 22/10/2026 18:30 ó En plazo"
-                  defaultValue={editingDateTarget.currentValue}
-                  onChange={(e) => setCustomDateInput(e.target.value)}
-                  className="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-2xs"
-                />
                 <button
                   type="button"
-                  onClick={() => handleSaveDate(customDateInput || editingDateTarget.currentValue)}
-                  className="h-10 rounded-xl bg-blue-600 px-4 text-xs font-black text-white hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
+                  onClick={() => {
+                    const now = new Date()
+                    const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+                    const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+                    setDrivePickerDate(todayIso)
+                    setDrivePickerTime(nowTime)
+                    setDrivePickerStatus('completado')
+                  }}
+                  className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2 text-left font-bold text-amber-950 hover:bg-amber-100/80 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
                 >
-                  Guardar
+                  <Clock size={13} className="text-amber-600 shrink-0" />
+                  <span>Ahora mismo</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDrivePickerDate('2026-10-22')
+                    setDrivePickerTime('18:00')
+                    setDrivePickerStatus('completado')
+                  }}
+                  className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-left font-bold text-slate-700 hover:bg-slate-100 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                >
+                  <Calendar size={13} className="text-blue-600 shrink-0" />
+                  <span>Hoy corte 18:00</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSaveDriveDelivery('En proceso', 'en_proceso')
+                  }}
+                  className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-left font-bold text-slate-700 hover:bg-slate-100 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                >
+                  <Clock size={13} className="text-amber-500 shrink-0" />
+                  <span>En proceso</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSaveDriveDelivery('Sin evidencia', 'pendiente')
+                  }}
+                  className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-left font-bold text-rose-700 hover:bg-rose-50 transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                >
+                  <X size={13} className="text-rose-500 shrink-0" />
+                  <span>Sin evidencia</span>
                 </button>
               </div>
             </div>
 
-            <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-[11px] text-slate-400">
-              <span>Valor actual: <strong className="text-slate-600">{editingDateTarget.currentValue}</strong></span>
+            {/* Selectores de Fecha y Hora nativos */}
+            <div className="space-y-3 rounded-xl border border-slate-200/90 bg-slate-50/60 p-3.5">
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Seleccionar Fecha y Hora
+              </span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    Fecha de entrega
+                  </label>
+                  <input
+                    type="date"
+                    value={drivePickerDate}
+                    onChange={(e) => setDrivePickerDate(e.target.value)}
+                    className="h-9.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-200 shadow-2xs cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                    Hora (24h)
+                  </label>
+                  <input
+                    type="time"
+                    value={drivePickerTime}
+                    onChange={(e) => setDrivePickerTime(e.target.value)}
+                    className="h-9.5 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-200 shadow-2xs cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Selector de estado */}
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  Estado en Drive
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(
+                    [
+                      { id: 'completado', label: 'Completado', color: 'bg-[#16a34a] text-white' },
+                      { id: 'en_proceso', label: 'En proceso', color: 'bg-[#f59e0b] text-white' },
+                      { id: 'pendiente', label: 'Pendiente', color: 'bg-[#dc2626] text-white' },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setDrivePickerStatus(opt.id)}
+                      className={`rounded-lg py-1.5 text-center text-[11.5px] font-bold transition-all cursor-pointer ${
+                        drivePickerStatus === opt.id
+                          ? `${opt.color} shadow-xs scale-102`
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Resumen previo */}
+            <div className="flex items-center justify-between text-[11.5px] text-slate-500 px-1">
+              <span>
+                Actual: <strong className="text-slate-700">{editingDriveDateTarget.currentDate}</strong>
+              </span>
+              <span className="font-semibold text-slate-600">
+                Nuevo: <strong className="text-amber-800">{formatDriveDateTime(drivePickerDate, drivePickerTime)}</strong>
+              </span>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
               <button
                 type="button"
-                onClick={() => setEditingDateTarget(null)}
-                className="font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
+                onClick={() => setEditingDriveDateTarget(null)}
+                className="rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const formatted = formatDriveDateTime(drivePickerDate, drivePickerTime)
+                  handleSaveDriveDelivery(formatted, drivePickerStatus)
+                }}
+                className="rounded-xl bg-[#1055b8] px-5 py-2 text-xs font-black text-white hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
+              >
+                Guardar Fecha y Hora
               </button>
             </div>
           </div>
