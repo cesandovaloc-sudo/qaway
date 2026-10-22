@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { FolderKanban } from "lucide-react";
 import { HubIcon } from "@/components/ui/icons";
 import {
   Globe,
@@ -40,6 +41,13 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const APPS = [
+    {
+      name: "Gestor de Proyectos",
+      desc: "Suite P6, Scrum y Monitoreo Territorial",
+      path: "/hub/proyectos",
+      icon: FolderKanban,
+      badge: "Pro"
+    },
     {
       name: "CRM Comercial & Leads",
       desc: "Gestión de oportunidades y pipeline",

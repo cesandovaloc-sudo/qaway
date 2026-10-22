@@ -75,6 +75,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   const BASE_PREFIXES = [
     '/hub/proyectos',
+    '/hub/gestor-proyectos',
     '/hub/gestor-proyectos-app',
     '/hub/inventario',
     '/inventario',
@@ -127,7 +128,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       title: 'OPERACIÓN & CARTERA',
       items: [
         {
-          to: activeProjectObj ? `/proyectos/${activeProjectObj.id}` : '/',
+          to: '/',
           label: 'Resumen',
           icon: <LayoutDashboard size={18} />,
           end: true,
@@ -179,8 +180,11 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   const isHrefActive = (to: string) => {
     const targetHref = getHref(to)
     if (targetHref === currentUrl) return true
+    const barePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
+    if (to === '/' && (barePath === '/' || barePath === '')) {
+      return true
+    }
     if (activeProjectObj && to === `/proyectos/${activeProjectObj.id}`) {
-      const barePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
       const tab = searchParams.get('tab')
       if (barePath === '/' || (barePath === to && (!tab || tab === 'resumen'))) {
         return true
@@ -205,16 +209,16 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         collapsed ? 'w-[72px] overflow-visible' : 'w-64 overflow-hidden'
       } [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
     >
-      {/* Logo Gestor Pro (Tamaño canónico de App Inventario: 30x30 y 20px) */}
-      <div className="flex items-center gap-3 px-4 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
+      {/* Logo Gestor Pro (Tamaño canónico de App Inventario: 30x30 y 20px) — Todo el logo actúa como inicio */}
+      <div className="flex items-center px-4 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
         <Link
           to={getHref('/')}
-          aria-label="Ir al inicio (Dashboard de Cartera)"
-          title="Ir al inicio (Dashboard de Cartera)"
-          className="shrink-0 rounded-md outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-brand/40"
+          aria-label="Ir al inicio (Resumen General de Cartera)"
+          title="Ir al inicio (Resumen General de Cartera)"
+          className="flex items-center gap-3 w-full rounded-md outline-none transition-transform hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand/40 group cursor-pointer"
         >
           <div
-            className="w-[30px] h-[30px] flex-shrink-0 relative"
+            className="w-[30px] h-[30px] flex-shrink-0 relative transition-transform group-hover:scale-105"
             style={{
               background:
                 'linear-gradient(135deg, var(--hub-brand-hover, #c44523), var(--hub-brand, #d9532f))',
@@ -229,28 +233,28 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               }}
             />
           </div>
-        </Link>
-        {!collapsed && (
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-1.5 leading-none">
-              <span className="text-[20px] font-bold tracking-[-0.7px] text-[var(--hub-text)]">
-                Gestor
-              </span>
-              <span
-                className="text-[11px] font-semibold rounded-[6px] px-[7px] py-[3px] leading-none"
-                style={{
-                  backgroundColor: 'var(--hub-brand-soft, #fbf0ec)',
-                  color: 'var(--hub-brand, #d9532f)',
-                }}
-              >
-                Pro
+          {!collapsed && (
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="text-[20px] font-bold tracking-[-0.7px] text-[var(--hub-text)] group-hover:text-[var(--hub-brand)] transition-colors">
+                  Gestor
+                </span>
+                <span
+                  className="text-[11px] font-semibold rounded-[6px] px-[7px] py-[3px] leading-none"
+                  style={{
+                    backgroundColor: 'var(--hub-brand-soft, #fbf0ec)',
+                    color: 'var(--hub-brand, #d9532f)',
+                  }}
+                >
+                  Pro
+                </span>
+              </div>
+              <span className="text-[11px] text-[var(--hub-dim)] mt-[3px] leading-none whitespace-nowrap">
+                Proyectos Universales · P6 · Scrum
               </span>
             </div>
-            <span className="text-[11px] text-[var(--hub-dim)] mt-[3px] leading-none whitespace-nowrap">
-              Proyectos Universales · P6 · Scrum
-            </span>
-          </div>
-        )}
+          )}
+        </Link>
       </div>
 
       {/* NIVEL 1 EN CASCADA: PROYECTO ACTIVO (Flotante, no empuja el menú) + NUEVO PROYECTO */}

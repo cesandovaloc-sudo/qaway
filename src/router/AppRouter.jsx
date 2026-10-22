@@ -587,7 +587,11 @@ export default function AppRouter() {
           />
           <Route
             path="hub/gestor-proyectos"
-            element={renderRoute('hub', <ProtectedRoute><GestorProyectosHubPage /></ProtectedRoute>)}
+            element={<Navigate to="/hub/proyectos" replace />}
+          />
+          <Route
+            path="/hub/gestor-proyectos"
+            element={<Navigate to="/hub/proyectos" replace />}
           />
           <Route
             path="hub/gestor-proyectos/:serviceType/:projectSlug"
