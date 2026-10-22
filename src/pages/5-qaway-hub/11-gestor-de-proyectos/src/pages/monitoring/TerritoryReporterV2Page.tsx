@@ -11,7 +11,7 @@ export default function TerritoryReporterV2Page() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
 
   return (
-    <div className="mx-auto max-w-[1800px]">
+    <div className="mx-auto max-w-[1800px] font-['DM_Sans',sans-serif]">
       <TerritoryReporterV2Tab projectId="proj-minedu-2027" onOpenTask={setSelectedTaskId} />
       <SlideOverTaskSheet
         taskId={selectedTaskId}

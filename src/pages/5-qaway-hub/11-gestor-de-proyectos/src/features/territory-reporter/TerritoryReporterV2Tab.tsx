@@ -74,24 +74,24 @@ export interface UgelMonitoringV2Row {
   gestorPhone: string
 }
 
-const STORAGE_KEY_V2 = 'qaway_territory_reporter_v2'
+const STORAGE_KEY_V2 = 'qaway_territory_reporter_v2_junin13'
 export const REGIONAL_DRIVE_URL = 'https://drive.google.com/drive/folders/1QawayLab_Regional_Junin_Evidencias'
 
 const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
   {
-    id: 'ugel-huancayo',
+    id: 'ugel-chanchamayo',
     number: 1,
-    name: 'HUANCAYO',
+    name: 'CHANCHAMAYO',
     phase1Files: 3,
     phase1Total: 3,
-    phase1Date: '13/10/2026 10:15',
-    driveStatus: 'pendiente',
-    driveFiles: 0,
+    phase1Date: '14/10/2026 15:30',
+    driveStatus: 'completado',
+    driveFiles: 1,
     driveTotal: 1,
-    driveDate: 'Sin evidencia',
-    phase2Files: 0,
+    driveDate: '22/10/2026 07:30',
+    phase2Files: 3,
     phase2Total: 3,
-    phase2Date: 'Sin carga',
+    phase2Date: '15/10/2026 10:15',
     directions: {
       DEI: 'completado',
       DEBA: 'completado',
@@ -101,13 +101,40 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'completado',
       DITEN: 'completado',
     },
-    observation: 'Fase 1 completada; pendiente subida de evidencia en Drive y archivo RAR.',
+    observation: 'Culminación completa certificada en las 3 etapas.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'ugel-chupaca',
+    number: 2,
+    name: 'CHUPACA',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '14/10/2026 11:00',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 09:45',
+    phase2Files: 3,
+    phase2Total: 3,
+    phase2Date: '14/10/2026 16:45',
+    directions: {
+      DEI: 'completado',
+      DEBA: 'completado',
+      DISER: 'completado',
+      DIGEBR: 'completado',
+      DIGEDD: 'completado',
+      DIFOID: 'completado',
+      DITEN: 'completado',
+    },
+    observation: 'Evidencia en Drive OK. Cierre oficial notificado al Residente SIGA.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
   {
     id: 'ugel-concepcion',
-    number: 2,
+    number: 3,
     name: 'CONCEPCIÓN',
     phase1Files: 3,
     phase1Total: 3,
@@ -133,19 +160,19 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     gestorPhone: '+51964112233',
   },
   {
-    id: 'ugel-chupaca',
-    number: 3,
-    name: 'CHUPACA',
+    id: 'ugel-huancayo',
+    number: 4,
+    name: 'HUANCAYO',
     phase1Files: 3,
     phase1Total: 3,
-    phase1Date: '14/10/2026 11:00',
-    driveStatus: 'completado',
-    driveFiles: 1,
+    phase1Date: '13/10/2026 10:15',
+    driveStatus: 'pendiente',
+    driveFiles: 0,
     driveTotal: 1,
-    driveDate: '22/10/2026 09:45',
-    phase2Files: 3,
+    driveDate: 'Sin evidencia',
+    phase2Files: 0,
     phase2Total: 3,
-    phase2Date: '14/10/2026 16:45',
+    phase2Date: 'Sin carga',
     directions: {
       DEI: 'completado',
       DEBA: 'completado',
@@ -155,13 +182,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'completado',
       DITEN: 'completado',
     },
-    observation: 'Evidencia en Drive OK. Cierre oficial notificado al Residente.',
+    observation: 'Fase 1 completada; pendiente subida de evidencia en Drive y archivo RAR.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
   {
     id: 'ugel-jauja',
-    number: 4,
+    number: 5,
     name: 'JAUJA',
     phase1Files: 3,
     phase1Total: 3,
@@ -187,8 +214,170 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     gestorPhone: '+51964112233',
   },
   {
+    id: 'ugel-junin',
+    number: 6,
+    name: 'JUNÍN',
+    phase1Files: 0,
+    phase1Total: 3,
+    phase1Date: 'Sin carga',
+    driveStatus: 'pendiente',
+    driveFiles: 0,
+    driveTotal: 1,
+    driveDate: 'Sin evidencia',
+    phase2Files: 0,
+    phase2Total: 3,
+    phase2Date: 'Sin carga',
+    directions: {
+      DEI: 'pendiente',
+      DEBA: 'pendiente',
+      DISER: 'pendiente',
+      DIGEBR: 'pendiente',
+      DIGEDD: 'pendiente',
+      DIFOID: 'pendiente',
+      DITEN: 'pendiente',
+    },
+    observation: 'Alerta crítica: sin avance en SIGA ni evidencias en Drive.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'ugel-pangoa',
+    number: 7,
+    name: 'PANGOA',
+    phase1Files: 2,
+    phase1Total: 3,
+    phase1Date: '16/10/2026 10:20',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 08:40',
+    phase2Files: 1,
+    phase2Total: 3,
+    phase2Date: 'En proceso',
+    directions: {
+      DEI: 'completado',
+      DEBA: 'en_proceso',
+      DISER: 'en_proceso',
+      DIGEBR: 'completado',
+      DIGEDD: 'en_proceso',
+      DIFOID: 'en_proceso',
+      DITEN: 'completado',
+    },
+    observation: 'Evidencia en Drive OK. Consolidando generación de RAR en MC SIGA.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'ugel-pichanaqui',
+    number: 8,
+    name: 'PICHANAQUI',
+    phase1Files: 2,
+    phase1Total: 3,
+    phase1Date: '16/10/2026 17:10',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 09:10',
+    phase2Files: 1,
+    phase2Total: 3,
+    phase2Date: 'En proceso',
+    directions: {
+      DEI: 'completado',
+      DEBA: 'en_proceso',
+      DISER: 'en_proceso',
+      DIGEBR: 'completado',
+      DIGEDD: 'en_proceso',
+      DIFOID: 'en_proceso',
+      DITEN: 'completado',
+    },
+    observation: 'Evidencia en Drive OK; culminando cierre en MC SIGA.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'ugel-rio-ene-mantaro',
+    number: 9,
+    name: 'RÍO ENE MANTARO',
+    phase1Files: 1,
+    phase1Total: 3,
+    phase1Date: '17/10/2026 11:30',
+    driveStatus: 'en_proceso',
+    driveFiles: 0,
+    driveTotal: 1,
+    driveDate: 'En proceso',
+    phase2Files: 0,
+    phase2Total: 3,
+    phase2Date: 'Sin carga',
+    directions: {
+      DEI: 'en_proceso',
+      DEBA: 'en_proceso',
+      DISER: 'pendiente',
+      DIGEBR: 'en_proceso',
+      DIGEDD: 'pendiente',
+      DIFOID: 'pendiente',
+      DITEN: 'en_proceso',
+    },
+    observation: 'Acompañamiento territorial en marcha para agilizar subida a Drive.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'ugel-rio-tambo',
+    number: 10,
+    name: 'RÍO TAMBO',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '15/10/2026 11:20',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '21/10/2026 15:40',
+    phase2Files: 3,
+    phase2Total: 3,
+    phase2Date: '15/10/2026 18:00',
+    directions: {
+      DEI: 'completado',
+      DEBA: 'completado',
+      DISER: 'completado',
+      DIGEBR: 'completado',
+      DIGEDD: 'completado',
+      DIFOID: 'completado',
+      DITEN: 'completado',
+    },
+    observation: 'Culminación completa de las 3 fases.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'ugel-satipo',
+    number: 11,
+    name: 'SATIPO',
+    phase1Files: 2,
+    phase1Total: 3,
+    phase1Date: '16/10/2026 12:40',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '21/10/2026 19:00',
+    phase2Files: 1,
+    phase2Total: 3,
+    phase2Date: 'En proceso',
+    directions: {
+      DEI: 'completado',
+      DEBA: 'en_proceso',
+      DISER: 'en_proceso',
+      DIGEBR: 'completado',
+      DIGEDD: 'en_proceso',
+      DIFOID: 'en_proceso',
+      DITEN: 'completado',
+    },
+    observation: 'Drive cargado oportunamente (21/10); culminando RAR oficial.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
     id: 'ugel-tarma',
-    number: 5,
+    number: 12,
     name: 'TARMA',
     phase1Files: 2,
     phase1Total: 3,
@@ -215,7 +404,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
   },
   {
     id: 'ugel-yauli',
-    number: 6,
+    number: 13,
     name: 'YAULI',
     phase1Files: 2,
     phase1Total: 3,
@@ -237,195 +426,6 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DITEN: 'completado',
     },
     observation: 'En proceso de subida en Drive y MC SIGA.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'ugel-junin',
-    number: 7,
-    name: 'JUNÍN',
-    phase1Files: 0,
-    phase1Total: 3,
-    phase1Date: 'Sin carga',
-    driveStatus: 'pendiente',
-    driveFiles: 0,
-    driveTotal: 1,
-    driveDate: 'Sin evidencia',
-    phase2Files: 0,
-    phase2Total: 3,
-    phase2Date: 'Sin carga',
-    directions: {
-      DEI: 'pendiente',
-      DEBA: 'pendiente',
-      DISER: 'pendiente',
-      DIGEBR: 'pendiente',
-      DIGEDD: 'pendiente',
-      DIFOID: 'pendiente',
-      DITEN: 'pendiente',
-    },
-    observation: 'Alerta crítica: sin avance en SIGA ni evidencias en Drive.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'ugel-satipo',
-    number: 8,
-    name: 'SATIPO',
-    phase1Files: 2,
-    phase1Total: 3,
-    phase1Date: '16/10/2026 12:40',
-    driveStatus: 'completado',
-    driveFiles: 1,
-    driveTotal: 1,
-    driveDate: '21/10/2026 19:00',
-    phase2Files: 1,
-    phase2Total: 3,
-    phase2Date: 'En proceso',
-    directions: {
-      DEI: 'completado',
-      DEBA: 'en_proceso',
-      DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
-    },
-    observation: 'Drive cargado oportunamente (21/10); culminando RAR oficial.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'ugel-chanchamayo',
-    number: 9,
-    name: 'CHANCHAMAYO',
-    phase1Files: 3,
-    phase1Total: 3,
-    phase1Date: '14/10/2026 15:30',
-    driveStatus: 'completado',
-    driveFiles: 1,
-    driveTotal: 1,
-    driveDate: '22/10/2026 07:30',
-    phase2Files: 3,
-    phase2Total: 3,
-    phase2Date: '15/10/2026 10:15',
-    directions: {
-      DEI: 'completado',
-      DEBA: 'completado',
-      DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
-    },
-    observation: 'Culminación completa certificada.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'ugel-chupingo',
-    number: 10,
-    name: 'CHUPINGO',
-    phase1Files: 0,
-    phase1Total: 3,
-    phase1Date: 'Sin carga',
-    driveStatus: 'pendiente',
-    driveFiles: 0,
-    driveTotal: 1,
-    driveDate: 'Sin evidencia',
-    phase2Files: 0,
-    phase2Total: 3,
-    phase2Date: 'Sin carga',
-    directions: {
-      DEI: 'pendiente',
-      DEBA: 'pendiente',
-      DISER: 'pendiente',
-      DIGEBR: 'pendiente',
-      DIGEDD: 'pendiente',
-      DIFOID: 'pendiente',
-      DITEN: 'pendiente',
-    },
-    observation: 'Sin reporte en MC SIGA ni Drive regional.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'ugel-pichanaqui',
-    number: 11,
-    name: 'PICHANAQUI',
-    phase1Files: 2,
-    phase1Total: 3,
-    phase1Date: '16/10/2026 17:10',
-    driveStatus: 'completado',
-    driveFiles: 1,
-    driveTotal: 1,
-    driveDate: '22/10/2026 09:10',
-    phase2Files: 1,
-    phase2Total: 3,
-    phase2Date: 'En proceso',
-    directions: {
-      DEI: 'completado',
-      DEBA: 'en_proceso',
-      DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
-    },
-    observation: 'Evidencia en Drive OK; culminando cierre en MC SIGA.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'ugel-rio-tambo',
-    number: 12,
-    name: 'RÍO TAMBO',
-    phase1Files: 3,
-    phase1Total: 3,
-    phase1Date: '15/10/2026 11:20',
-    driveStatus: 'completado',
-    driveFiles: 1,
-    driveTotal: 1,
-    driveDate: '21/10/2026 15:40',
-    phase2Files: 3,
-    phase2Total: 3,
-    phase2Date: '15/10/2026 18:00',
-    directions: {
-      DEI: 'completado',
-      DEBA: 'completado',
-      DISER: 'completado',
-      DIGEBR: 'completado',
-      DIGEDD: 'completado',
-      DIFOID: 'completado',
-      DITEN: 'completado',
-    },
-    observation: 'Culminación completa de las 3 fases.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'ugel-vitoc',
-    number: 13,
-    name: 'VITOC',
-    phase1Files: 2,
-    phase1Total: 3,
-    phase1Date: '16/10/2026 09:00',
-    driveStatus: 'en_proceso',
-    driveFiles: 0,
-    driveTotal: 1,
-    driveDate: 'En proceso',
-    phase2Files: 1,
-    phase2Total: 3,
-    phase2Date: 'En proceso',
-    directions: {
-      DEI: 'completado',
-      DEBA: 'en_proceso',
-      DISER: 'en_proceso',
-      DIGEBR: 'completado',
-      DIGEDD: 'en_proceso',
-      DIFOID: 'en_proceso',
-      DITEN: 'completado',
-    },
-    observation: 'Validando Excel para carga en Drive antes de corte 22/10.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -662,26 +662,26 @@ export function TerritoryReporterV2Tab({
   }
 
   return (
-    <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-sans text-slate-800">
+    <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-['DM_Sans',sans-serif] text-slate-800 antialiased">
       {/* ════════════════════════════════════════════════════════════════════════
           1. CABECERA INSTITUCIONAL MINEDU + MATRIZ DE AVANCE POR UGEL (3 ETAPAS)
           Diseño limpio, neutro y de alta legibilidad estilo infografía ejecutiva
           ════════════════════════════════════════════════════════════════════════ */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs space-y-4">
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-4">
         {/* Cabecera oficial: Seguimiento Regional | Dotación 2027 */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-500">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 SEGUIMIENTO REGIONAL | DOTACIÓN 2027
               </span>
             </div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
               Estado de avance por UGEL
             </h2>
-            <p className="text-xs font-semibold text-slate-500 mt-0.5">
-              Región Junín · 13 UGEL
+            <p className="text-xs font-medium text-slate-500 mt-0.5">
+              Región Junín · 13 UGEL (Orden Alfabético)
             </p>
           </div>
 
@@ -692,23 +692,24 @@ export function TerritoryReporterV2Tab({
             </div>
             <div className="text-left leading-tight">
               <span className="block text-xs font-black text-slate-900 tracking-tight">Ministerio</span>
-              <span className="block text-[11px] font-semibold text-slate-600">de Educación</span>
+              <span className="block text-[11px] font-medium text-slate-600">de Educación</span>
             </div>
           </div>
         </div>
 
-        {/* Matriz Ejecutiva Limpia: Etapa (1, 2, 3) vs 13 UGEL */}
+        {/* Matriz Ejecutiva Limpia: Etapa (1, 2, 3) vs 13 UGEL con Ancho Estrictamente Idéntico */}
         <div className="overflow-x-auto rounded-xl border border-slate-200 [scrollbar-width:thin]">
-          <table className="w-full min-w-[1100px] border-collapse text-center">
+          <table className="w-full min-w-[1240px] border-collapse text-center table-fixed">
             <thead>
               <tr className="border-b border-slate-200 text-xs">
-                <th className="bg-[#142d54] text-white font-bold py-3 px-4 text-center w-48">
+                <th className="bg-[#142d54] text-white font-bold py-3 px-3 text-left w-44 min-w-[176px] max-w-[176px]">
                   Etapa
                 </th>
                 {ugels.map((u) => (
                   <th
                     key={u.id}
-                    className="bg-[#f0f4f9] text-slate-800 font-extrabold text-[11.5px] py-3 px-2 border-l border-white text-center"
+                    className="bg-[#f0f4f9] text-slate-800 font-extrabold text-[11px] py-2.5 px-1 border-l border-white text-center w-[82px] min-w-[82px] max-w-[82px] truncate"
+                    title={u.name}
                   >
                     {u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()}
                   </th>
@@ -718,7 +719,7 @@ export function TerritoryReporterV2Tab({
             <tbody className="divide-y divide-slate-100 bg-white">
               {/* FILA 1: FASE 1 (REGISTRO MC SIGA) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-4 py-3 text-left border-r border-slate-100">
+                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-2.5">
                     <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black">
                       1
@@ -732,7 +733,7 @@ export function TerritoryReporterV2Tab({
                 {ugels.map((u) => {
                   const st = computePhaseStatus(u.phase1Files, u.phase1Total)
                   return (
-                    <td key={`f1-${u.id}`} className="py-2.5 px-1.5 text-center border-l border-slate-100">
+                    <td key={`f1-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
@@ -755,7 +756,7 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 2: DRIVE (EVIDENCIA DECLARATIVA) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-4 py-3 text-left border-r border-slate-100">
+                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-2.5">
                     <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black">
                       2
@@ -770,7 +771,7 @@ export function TerritoryReporterV2Tab({
                   const st = u.driveStatus
                   const ratioText = st === 'completado' ? '1/1' : st === 'en_proceso' ? 'Proceso' : '0/1'
                   return (
-                    <td key={`dr-${u.id}`} className="py-2.5 px-1.5 text-center border-l border-slate-100">
+                    <td key={`dr-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
                       <button
                         type="button"
                         onClick={() => handleCycleDriveStatus(u.id)}
@@ -793,7 +794,7 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 3: FASE 2 (RAR OFICIAL) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-4 py-3 text-left border-r border-slate-100">
+                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-2.5">
                     <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black">
                       3
@@ -807,7 +808,7 @@ export function TerritoryReporterV2Tab({
                 {ugels.map((u) => {
                   const st = computePhaseStatus(u.phase2Files, u.phase2Total)
                   return (
-                    <td key={`f2-${u.id}`} className="py-2.5 px-1.5 text-center border-l border-slate-100">
+                    <td key={`f2-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
