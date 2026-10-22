@@ -172,6 +172,12 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           icon: <BarChart3 size={18} />,
           badge: 'SIGA',
         },
+        {
+          to: '/monitoreo-v2',
+          label: 'Monitoreo Territorial v2',
+          icon: <BarChart3 size={18} />,
+          badge: '3 FASES',
+        },
       ],
     },
   ]
