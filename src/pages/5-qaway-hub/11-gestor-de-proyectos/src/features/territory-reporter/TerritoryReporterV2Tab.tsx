@@ -460,7 +460,14 @@ export function TerritoryReporterV2Tab({
   const [ugels, setUgels] = useState<UgelMonitoringV2Row[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_V2)
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
+        const hasInvalid = parsed.some((u) => u.name === 'CHUPINGO' || u.name === 'VITOC')
+        const allPhase1Done = parsed.every((u) => u.phase1Files === 3)
+        if (!hasInvalid && parsed.length === 13 && allPhase1Done) {
+          return parsed
+        }
+      }
     } catch {
       // ignore
     }
@@ -671,31 +678,31 @@ export function TerritoryReporterV2Tab({
         <div className="border-b border-slate-100 pb-4">
           <div className="flex items-center gap-2">
             <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
               DISTRIBUCIÓN DE MATERIALES EDUCATIVOS | DOTACIÓN 2027 | SEGUIMIENTO REGIONAL
             </span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
             Estado de avance
           </h2>
-          <p className="text-xs font-semibold text-slate-600 mt-0.5">
-            Región Junín
+          <p className="text-[13.5px] font-semibold text-slate-600 mt-0.5">
+            Región Junín · 13 UGEL (Orden Alfabético)
           </p>
 
           {/* Banner Institucional de Hito 1.6 */}
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2">
-            <span className="inline-flex items-center gap-1 rounded-md bg-[#1055b8] px-2 py-0.5 text-xs font-black text-white">
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5">
+            <span className="inline-flex items-center gap-1 rounded-md bg-[#1055b8] px-2.5 py-0.5 text-[11.5px] font-black text-white">
               HITO 1.6
             </span>
-            <span className="text-xs font-bold text-slate-900">
+            <span className="text-[13.5px] font-bold text-slate-900">
               Elaboración del Cuadro de Distribución Local en el MC SIGA
             </span>
             <span className="hidden sm:inline text-slate-300">|</span>
-            <span className="text-[11px] font-medium text-slate-600">
+            <span className="text-[12.5px] font-medium text-slate-600">
               Evidencia preliminar Drive: <strong className="text-slate-900 font-bold">Corte 22/10/2026</strong> (Declarativo)
             </span>
             <span className="hidden sm:inline text-slate-300">·</span>
-            <span className="text-[11px] font-medium text-slate-600">
+            <span className="text-[12.5px] font-medium text-slate-600">
               Cierre oficial RAR: <strong className="text-slate-900 font-bold">Hasta 26/10/2026</strong> (Formal)
             </span>
           </div>
@@ -703,16 +710,16 @@ export function TerritoryReporterV2Tab({
 
         {/* Matriz Ejecutiva Limpia: Etapa (1, 2, 3) vs 13 UGEL con Ancho Estrictamente Idéntico */}
         <div className="overflow-x-auto rounded-xl border border-slate-200 [scrollbar-width:thin]">
-          <table className="w-full min-w-[1240px] border-collapse text-center table-fixed">
+          <table className="w-full min-w-[1340px] border-collapse text-center table-fixed">
             <thead>
               <tr className="border-b border-slate-200 text-xs">
-                <th className="bg-[#142d54] text-white font-bold py-3 px-3 text-left w-44 min-w-[176px] max-w-[176px]">
+                <th className="bg-[#142d54] text-white font-black text-[13.5px] py-3.5 px-3.5 text-left w-48 min-w-[192px] max-w-[192px]">
                   Etapa
                 </th>
                 {ugels.map((u) => (
                   <th
                     key={u.id}
-                    className="bg-[#f0f4f9] text-slate-800 font-extrabold text-[11px] py-2.5 px-1 border-l border-white text-center w-[82px] min-w-[82px] max-w-[82px] truncate"
+                    className="bg-[#f0f4f9] text-slate-800 font-bold text-[12.5px] py-3 px-1 border-l border-white text-center w-[88px] min-w-[88px] max-w-[88px] truncate"
                     title={u.name}
                   >
                     {u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()}
@@ -723,30 +730,30 @@ export function TerritoryReporterV2Tab({
             <tbody className="divide-y divide-slate-100 bg-white">
               {/* FILA 1: FASE 1 (REGISTRO MC SIGA - 100% CUMPLIDA EN TODAS LAS UGEL) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-48 min-w-[192px] max-w-[192px]">
                   <div className="flex items-center gap-2.5">
-                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black">
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black shadow-2xs">
                       1
                     </span>
                     <div>
-                      <span className="block text-xs font-extrabold text-slate-900 leading-tight">Fase 1</span>
-                      <span className="block text-[10.5px] font-medium text-slate-500 leading-tight">Registro MC SIGA</span>
+                      <span className="block text-[14px] font-extrabold text-slate-900 leading-tight">Fase 1</span>
+                      <span className="block text-[12px] font-medium text-slate-600 leading-tight mt-0.5">Registro MC SIGA</span>
                     </div>
                   </div>
                 </td>
                 {ugels.map((u) => {
                   return (
-                    <td key={`f1-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
+                    <td key={`f1-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[88px] min-w-[88px] max-w-[88px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
                         className="mx-auto flex flex-col items-center justify-center p-1 rounded-lg hover:bg-slate-100/80 transition-all cursor-pointer group"
                         title={`Fase 1: ${u.name} · Carga inicial completada (3/3)`}
                       >
-                        <span className="grid h-6 w-6 place-items-center rounded-full text-white shadow-2xs transition-transform group-hover:scale-110 bg-[#16a34a]">
-                          <Check size={13} strokeWidth={3} />
+                        <span className="grid h-7 w-7 place-items-center rounded-full text-white shadow-2xs transition-transform group-hover:scale-110 bg-[#16a34a]">
+                          <Check size={14} strokeWidth={3} />
                         </span>
-                        <span className="mt-1 text-[11px] font-extrabold text-slate-800 tabular-nums">
+                        <span className="mt-1 text-[12px] font-extrabold text-slate-800 tabular-nums">
                           3/3
                         </span>
                       </button>
@@ -757,14 +764,14 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 2: DRIVE (EVIDENCIA DECLARATIVA - CORTE HOY 22/10) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-48 min-w-[192px] max-w-[192px]">
                   <div className="flex items-center gap-2.5">
-                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black">
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black shadow-2xs">
                       2
                     </span>
                     <div>
-                      <span className="block text-xs font-extrabold text-slate-900 leading-tight">Drive</span>
-                      <span className="block text-[10.5px] font-medium text-slate-500 leading-tight">Evidencia declarativa</span>
+                      <span className="block text-[14px] font-extrabold text-slate-900 leading-tight">Drive</span>
+                      <span className="block text-[12px] font-medium text-slate-600 leading-tight mt-0.5">Evidencia declarativa</span>
                     </div>
                   </div>
                 </td>
@@ -772,19 +779,19 @@ export function TerritoryReporterV2Tab({
                   const st = u.driveStatus
                   const ratioText = st === 'completado' ? '1/1' : st === 'en_proceso' ? 'Proceso' : '0/1'
                   return (
-                    <td key={`dr-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
+                    <td key={`dr-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[88px] min-w-[88px] max-w-[88px]">
                       <button
                         type="button"
                         onClick={() => handleCycleDriveStatus(u.id)}
                         className="mx-auto flex flex-col items-center justify-center p-1 rounded-lg hover:bg-slate-100/80 transition-all cursor-pointer group"
                         title={`Drive: ${u.name} · ${ratioText} (Clic para cambiar)`}
                       >
-                        <span className={`grid h-6 w-6 place-items-center rounded-full text-white shadow-2xs transition-transform group-hover:scale-110 ${
+                        <span className={`grid h-7 w-7 place-items-center rounded-full text-white shadow-2xs transition-transform group-hover:scale-110 ${
                           st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
                         }`}>
-                          {st === 'completado' ? <Check size={13} strokeWidth={3} /> : st === 'en_proceso' ? <Clock size={13} strokeWidth={2.6} /> : <X size={13} strokeWidth={3} />}
+                          {st === 'completado' ? <Check size={14} strokeWidth={3} /> : st === 'en_proceso' ? <Clock size={14} strokeWidth={2.6} /> : <X size={14} strokeWidth={3} />}
                         </span>
-                        <span className="mt-1 text-[11px] font-extrabold text-slate-800 tabular-nums">
+                        <span className="mt-1 text-[12px] font-extrabold text-slate-800 tabular-nums">
                           {ratioText}
                         </span>
                       </button>
@@ -795,34 +802,34 @@ export function TerritoryReporterV2Tab({
 
               {/* FILA 3: FASE 2 (RAR OFICIAL - CORTE 26/10 · CERO ROJOS, GRIS NEUTRO EN PLAZO) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-48 min-w-[192px] max-w-[192px]">
                   <div className="flex items-center gap-2.5">
-                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black">
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-xs font-black shadow-2xs">
                       3
                     </span>
                     <div>
-                      <span className="block text-xs font-extrabold text-slate-900 leading-tight">Fase 2</span>
-                      <span className="block text-[10.5px] font-medium text-slate-500 leading-tight">RAR oficial (26/10)</span>
+                      <span className="block text-[14px] font-extrabold text-slate-900 leading-tight">Fase 2</span>
+                      <span className="block text-[12px] font-medium text-slate-600 leading-tight mt-0.5">RAR oficial (26/10)</span>
                     </div>
                   </div>
                 </td>
                 {ugels.map((u) => {
                   const isDone = u.phase2Files >= u.phase2Total
                   return (
-                    <td key={`f2-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
+                    <td key={`f2-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[88px] min-w-[88px] max-w-[88px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
                         className="mx-auto flex flex-col items-center justify-center p-1 rounded-lg hover:bg-slate-100/80 transition-all cursor-pointer group"
                         title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado (3/3)' : 'En plazo técnico hasta el 26/10'} (Clic para cambiar)`}
                       >
-                        <span className={`grid h-6 w-6 place-items-center rounded-full shadow-2xs transition-transform group-hover:scale-110 ${
+                        <span className={`grid h-7 w-7 place-items-center rounded-full shadow-2xs transition-transform group-hover:scale-110 ${
                           isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
                         }`}>
-                          {isDone ? <Check size={13} strokeWidth={3} /> : <Clock size={12} strokeWidth={2.4} />}
+                          {isDone ? <Check size={14} strokeWidth={3} /> : <Clock size={13} strokeWidth={2.4} />}
                         </span>
-                        <span className={`mt-1 text-[10.5px] font-bold tabular-nums ${
-                          isDone ? 'text-slate-800 font-extrabold' : 'text-slate-500'
+                        <span className={`mt-1 text-[11.5px] font-extrabold tabular-nums ${
+                          isDone ? 'text-slate-900' : 'text-slate-600'
                         }`}>
                           {isDone ? '3/3' : 'En plazo'}
                         </span>
@@ -846,10 +853,10 @@ export function TerritoryReporterV2Tab({
             <Building2 size={22} />
           </div>
           <div>
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400">TOTAL DE UGEL</span>
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-400">TOTAL DE UGEL</span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.total}</span>
-              <span className="text-xs font-semibold text-slate-500">Región Junín</span>
+              <span className="text-[13px] font-semibold text-slate-500">Región Junín</span>
             </div>
           </div>
         </div>
@@ -862,12 +869,12 @@ export function TerritoryReporterV2Tab({
             </span>
           </div>
           <div>
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-emerald-800">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-emerald-800">
               UGEL QUE COMPLETAN LAS 3 ETAPAS
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.completed}</span>
-              <span className="text-xs font-bold text-slate-500">{ugelStats.completedPct}% del total</span>
+              <span className="text-[13px] font-bold text-slate-500">{ugelStats.completedPct}% del total</span>
             </div>
           </div>
         </div>
@@ -880,12 +887,12 @@ export function TerritoryReporterV2Tab({
             </span>
           </div>
           <div>
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-amber-800">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-amber-800">
               UGEL EN PROCESO
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.inProgress}</span>
-              <span className="text-xs font-bold text-slate-500">{ugelStats.inProgressPct}% del total</span>
+              <span className="text-[13px] font-bold text-slate-500">{ugelStats.inProgressPct}% del total</span>
             </div>
           </div>
         </div>
@@ -898,12 +905,12 @@ export function TerritoryReporterV2Tab({
             </span>
           </div>
           <div>
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-rose-800">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-rose-800">
               UGEL PENDIENTES
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.pending}</span>
-              <span className="text-xs font-bold text-slate-500">{ugelStats.pendingPct}% del total</span>
+              <span className="text-[13px] font-bold text-slate-500">{ugelStats.pendingPct}% del total</span>
             </div>
           </div>
         </div>
@@ -915,10 +922,10 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Avance de 3 Fases por UGEL</h3>
-              <p className="text-[11px] text-slate-400">Distribución de las 13 UGEL en Fase 1, Drive y Fase 2</p>
+              <h3 className="text-[15px] font-bold text-slate-900">Avance de 3 Fases por UGEL</h3>
+              <p className="text-[12px] text-slate-500">Distribución de las 13 UGEL en Fase 1, Drive y Fase 2</p>
             </div>
-            <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-extrabold text-blue-700">
+            <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10.5px] font-extrabold text-blue-700">
               3 Fases de Control
             </span>
           </div>
@@ -948,11 +955,11 @@ export function TerritoryReporterV2Tab({
               },
             ].map((f) => (
               <div key={f.label} className="flex items-center gap-3">
-                <div className="w-16 shrink-0 text-left">
-                  <span className="block text-xs font-extrabold text-slate-800 leading-none">
+                <div className="w-18 shrink-0 text-left">
+                  <span className="block text-[13px] font-bold text-slate-900 leading-none">
                     {f.label}
                   </span>
-                  <span className="block text-[9.5px] font-semibold text-slate-400 leading-tight">
+                  <span className="block text-[11px] font-medium text-slate-500 leading-tight mt-0.5">
                     {f.sublabel}
                   </span>
                 </div>
@@ -988,13 +995,13 @@ export function TerritoryReporterV2Tab({
 
                 <div className="w-10 text-right">
                   <span className="text-xs font-black text-slate-900 tabular-nums">13</span>
-                  <span className="block text-[8px] font-bold text-slate-400 uppercase leading-none">UGEL</span>
+                  <span className="block text-[8.5px] font-bold text-slate-400 uppercase leading-none">UGEL</span>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-500">
+          <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-[11.5px] font-semibold text-slate-500">
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
               <span>Completado</span>
@@ -1014,10 +1021,10 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Consolidado Global de 3 Fases</h3>
-              <p className="text-[11px] text-slate-400">Cumplimiento regional integrado de las 13 UGEL</p>
+              <h3 className="text-[15px] font-bold text-slate-900">Consolidado Global de 3 Fases</h3>
+              <p className="text-[12px] text-slate-500">Cumplimiento regional integrado de las 13 UGEL</p>
             </div>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-600">
               Total 3 Fases
             </span>
           </div>
@@ -1061,7 +1068,7 @@ export function TerritoryReporterV2Tab({
                 <span className="text-2xl font-black text-slate-900 leading-none tabular-nums">
                   {ugelStats.total}
                 </span>
-                <span className="text-[10px] font-bold uppercase text-slate-400 leading-tight">
+                <span className="text-[10.5px] font-bold uppercase text-slate-400 leading-tight">
                   UGEL
                 </span>
               </div>
@@ -1086,7 +1093,7 @@ export function TerritoryReporterV2Tab({
             </div>
           </div>
 
-          <div className="text-center border-t border-slate-100 pt-2 text-[10px] text-slate-400">
+          <div className="text-center border-t border-slate-100 pt-2 text-[11px] text-slate-400">
             Resumen porcentual de cumplimiento
           </div>
         </div>
@@ -1095,10 +1102,10 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Avance por Direcciones en 3 Fases</h3>
-              <p className="text-[11px] text-slate-400">Progreso de las 7 líneas pedagógicas en las 3 fases</p>
+              <h3 className="text-[15px] font-bold text-slate-900">Avance por Direcciones en 3 Fases</h3>
+              <p className="text-[12px] text-slate-500">Progreso de las 7 líneas pedagógicas en las 3 fases</p>
             </div>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-semibold text-slate-600">
               Líneas · 3 Fases
             </span>
           </div>
@@ -1106,7 +1113,7 @@ export function TerritoryReporterV2Tab({
           <div className="my-auto space-y-2 py-2">
             {ugelStats.directionStats.map((d) => (
               <div key={d.code} className="flex items-center gap-2 text-xs">
-                <span className="w-12 font-bold text-slate-700 text-[11px]">{d.code}</span>
+                <span className="w-12 font-bold text-slate-700 text-[12px]">{d.code}</span>
                 <div className="relative flex-1">
                   <div className="flex h-3.5 overflow-hidden rounded-full bg-slate-100 shadow-inner">
                     <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
@@ -1114,17 +1121,17 @@ export function TerritoryReporterV2Tab({
                     <div style={{ width: `${(d.pend / d.total) * 100}%` }} className="bg-rose-600" />
                   </div>
                 </div>
-                <span className="w-10 text-right font-black text-slate-900 tabular-nums text-[11px]">
+                <span className="w-10 text-right font-black text-slate-900 tabular-nums text-[12px]">
                   {d.pct}%
                 </span>
-                <span className="text-[10px] text-slate-400 tabular-nums">
+                <span className="text-[10.5px] text-slate-400 tabular-nums">
                   {d.ok}/{d.total}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-[10.5px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-[11.5px] text-slate-500 font-semibold">
             <span>7 Direcciones evaluadas</span>
             <span>13 UGEL Junín</span>
           </div>
