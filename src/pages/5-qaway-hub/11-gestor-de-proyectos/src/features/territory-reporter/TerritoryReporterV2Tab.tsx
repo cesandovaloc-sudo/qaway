@@ -909,123 +909,73 @@ export function TerritoryReporterV2Tab({
   return (
     <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-['DM_Sans',sans-serif] text-slate-800 antialiased">
       {/* ════════════════════════════════════════════════════════════════════════
-          1. CABECERA INSTITUCIONAL + CASCADA TERRITORIAL Y GOBERNANZA DE ROLES
+          1. CABECERA INSTITUCIONAL + FILTROS EN ESCALA DE GRISES Y BLANCOS
           ════════════════════════════════════════════════════════════════════════ */}
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-4">
-        {/* Fila 1: Línea institucional y Switcher de Rol */}
+      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-3.5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
-            <span className="text-[12px] font-bold uppercase tracking-wider text-slate-500">
-              DISTRIBUCIÓN DE MATERIALES EDUCATIVOS | DOTACIÓN 2027 | SEGUIMIENTO REGIONAL
-            </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="h-1 w-6 bg-[#dc2626] rounded-full" />
+              <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-500">
+                DISTRIBUCIÓN DE MATERIALES EDUCATIVOS · DOTACIÓN 2027
+              </span>
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
+              Reporte regional de cumplimiento
+            </h2>
+            <p className="text-[13px] font-semibold text-slate-600 mt-0.5">
+              DRE Junín – Elaboración del CDL en MC SIGA (Actividad 1.6)
+            </p>
           </div>
 
-          {/* Switcher de Rol / Perspectiva */}
-          <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1 text-[11px] font-bold">
-            <span className="text-slate-400 px-1.5 uppercase tracking-wider text-[9.5px]">Nivel Rol:</span>
-            <button
-              type="button"
-              onClick={() => setPerspective('coordinador')}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                isCoordinador || isSuperAdmin
-                  ? 'bg-blue-600 text-white shadow-xs font-black'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Coordinador PMO
-            </button>
-            <button
-              type="button"
-              onClick={() => setPerspective('gestor')}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                isGestor
-                  ? 'bg-emerald-600 text-white shadow-xs font-black'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Gestor Territorial
-            </button>
+          <div className="text-right text-[11px] text-slate-400 font-medium">
+            <span>Última actualización: </span>
+            <strong className="text-slate-700 font-bold">22 oct. 2026</strong>
           </div>
         </div>
 
-        {/* Título y subtítulo */}
-        <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-            Estado de avance
-          </h2>
-          <p className="text-[13.5px] font-semibold text-slate-600 mt-0.5">
-            {selectedRegion} · 13 UGEL (Orden Alfabético)
-          </p>
-        </div>
-
-        {/* CASCADA TERRITORIAL EN BARRA SUPERIOR DE CONTEXTO */}
-        <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/80 p-3 text-xs">
+        {/* BARRA DE FILTROS SOBRIA (ESCALA DE GRISES Y BLANCOS - ESTILO LÁMINA OFICIAL) */}
+        <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/70 p-2.5 text-xs">
           {/* N1: Macrorregión */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-black uppercase text-slate-400">Macrorregión:</span>
+            <span className="text-[10.5px] font-bold text-slate-500">Macrorregión:</span>
             <select
               value={selectedMacrorregion}
               onChange={(e) => setSelectedMacrorregion(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
             >
               <option value="Centro">Centro (Junín, Pasco, Huánuco)</option>
-              <option value="Norte">Norte (Piura, La Libertad, Lambayeque)</option>
-              <option value="Sur">Sur (Cusco, Arequipa, Puno)</option>
-              <option value="Oriente">Oriente (Loreto, San Martín, Ucayali)</option>
+              <option value="Norte">Norte</option>
+              <option value="Sur">Sur</option>
+              <option value="Oriente">Oriente</option>
             </select>
           </div>
 
           <span className="text-slate-300">/</span>
 
-          {/* N2: Sede / Región (DRE) */}
+          {/* N2: Región */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-black uppercase text-slate-400">Sede / Región:</span>
+            <span className="text-[10.5px] font-bold text-slate-500">Región:</span>
             <select
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
             >
-              <option value="Región Junín (13 UGEL)">DRE Junín (13 UGEL)</option>
-              <option value="Región Cusco (14 UGEL)">DRE Cusco (14 UGEL)</option>
+              <option value="Región Junín (13 UGEL)">Junín (13 UGEL)</option>
+              <option value="Región Cusco (14 UGEL)">Cusco (14 UGEL)</option>
               <option value="Lima Provincias (9 UGEL)">Lima Provincias (9 UGEL)</option>
             </select>
           </div>
 
           <span className="text-slate-300">/</span>
 
-          {/* N3: Gestor Territorial según Rol */}
-          {isCoordinador || isSuperAdmin ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10.5px] font-black uppercase text-slate-400">Gestor Territorial:</span>
-              <select
-                value={selectedGestorFilter}
-                onChange={(e) => setSelectedGestorFilter(e.target.value)}
-                className="rounded-lg border border-blue-200 bg-blue-50/70 px-2 py-1 text-xs font-bold text-blue-950 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
-              >
-                <option value="todos">Todos los Gestores (Supervisión Total)</option>
-                <option value="Carlos Sandoval">Carlos Sandoval (Gestor Junín)</option>
-                <option value="Gestor Selva Central">Gestor Selva Central (Pangoa, Río Ene)</option>
-              </select>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10.5px] font-black uppercase text-slate-400">Gestor de Campo:</span>
-              <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-900">
-                {currentPersona.name} ({currentPersona.title})
-              </span>
-            </div>
-          )}
-
-          <span className="text-slate-300">/</span>
-
-          {/* N4: Filtro de UGEL */}
+          {/* N3: UGEL */}
           <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-black uppercase text-slate-400">Filtro UGEL:</span>
+            <span className="text-[10.5px] font-bold text-slate-500">UGEL:</span>
             <select
               value={selectedUgelFilter}
               onChange={(e) => setSelectedUgelFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-blue-600"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
             >
               <option value="todas">Todas las 13 UGEL</option>
               {ugels.map((u) => (
@@ -1035,23 +985,33 @@ export function TerritoryReporterV2Tab({
               ))}
             </select>
           </div>
+
+          <span className="text-slate-300">/</span>
+
+          {/* N4: Gestor asignado */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10.5px] font-bold text-slate-500">Gestor de Campo:</span>
+            <span className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 shadow-2xs">
+              Carlos Sandoval (Gestor de Materiales)
+            </span>
+          </div>
         </div>
 
-        {/* Banner Institucional de Hito 1.6 */}
-        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5">
-          <span className="inline-flex items-center gap-1 rounded-md bg-[#1055b8] px-2.5 py-0.5 text-[11.5px] font-black text-white">
+        {/* Hito 1.6 Banner sutil */}
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-100/70 border border-slate-200/80 px-3 py-2 text-[12px]">
+          <span className="inline-flex items-center rounded-md bg-slate-900 px-2 py-0.5 text-[11px] font-black text-white">
             HITO 1.6
           </span>
-          <span className="text-[13.5px] font-bold text-slate-900">
+          <span className="font-bold text-slate-800">
             Elaboración del Cuadro de Distribución Local en el MC SIGA
           </span>
           <span className="hidden sm:inline text-slate-300">|</span>
-          <span className="text-[12.5px] font-medium text-slate-600">
-            Evidencia preliminar Drive: <strong className="text-slate-900 font-bold">Corte 22/10/2026</strong> (Declarativo)
+          <span className="text-slate-600 font-medium text-[11.5px]">
+            Drive preliminar: <strong className="text-slate-900">Corte 22/10/2026</strong>
           </span>
           <span className="hidden sm:inline text-slate-300">·</span>
-          <span className="text-[12.5px] font-medium text-slate-600">
-            Cierre oficial RAR: <strong className="text-slate-900 font-bold">Hasta 26/10/2026</strong> (Formal)
+          <span className="text-slate-600 font-medium text-[11.5px]">
+            Cierre RAR: <strong className="text-slate-900">Hasta 26/10/2026</strong>
           </span>
         </div>
       </section>

@@ -549,11 +549,11 @@ export default function Header({
           ) : null}
         </div>
 
-        {/* Rol Fijo en Encabezado: Gestor de Materiales */}
-        <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/80 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-200 text-xs font-bold shadow-2xs select-none" title="Vista de Gestor de Materiales Educativos">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-          <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">Rol:</span>
-          <span className="font-black text-[12px] tracking-tight">Gestor de Materiales</span>
+        {/* Rol Fijo en Encabezado: Gestor de Materiales (Estilo neutro institucional) */}
+        <div className="flex items-center gap-2 h-9 px-2.5 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-text)] text-xs font-medium select-none" title="Vista de Gestor de Materiales Educativos">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
+          <span className="text-[var(--hub-dim)]">Rol:</span>
+          <span className="font-semibold">Gestor de Materiales</span>
         </div>
       </div>
 
