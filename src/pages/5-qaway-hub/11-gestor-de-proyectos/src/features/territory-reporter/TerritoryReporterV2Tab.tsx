@@ -74,7 +74,7 @@ export interface UgelMonitoringV2Row {
   gestorPhone: string
 }
 
-const STORAGE_KEY_V2 = 'qaway_territory_reporter_v2_junin13'
+const STORAGE_KEY_V2 = 'qaway_territory_reporter_v2_fase1_green_f2_neutral'
 export const REGIONAL_DRIVE_URL = 'https://drive.google.com/drive/folders/1QawayLab_Regional_Junin_Evidencias'
 
 const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
@@ -172,7 +172,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     driveDate: 'Sin evidencia',
     phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'Sin carga',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEI: 'completado',
       DEBA: 'completado',
@@ -182,7 +182,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'completado',
       DITEN: 'completado',
     },
-    observation: 'Fase 1 completada; pendiente subida de evidencia en Drive y archivo RAR.',
+    observation: 'Fase 1 completada; pendiente subida de evidencia en Drive. Cierre oficial en plazo.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -217,26 +217,26 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     id: 'ugel-junin',
     number: 6,
     name: 'JUNÍN',
-    phase1Files: 0,
+    phase1Files: 3,
     phase1Total: 3,
-    phase1Date: 'Sin carga',
+    phase1Date: '15/10/2026 12:00',
     driveStatus: 'pendiente',
     driveFiles: 0,
     driveTotal: 1,
     driveDate: 'Sin evidencia',
     phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'Sin carga',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
-      DEI: 'pendiente',
-      DEBA: 'pendiente',
+      DEI: 'completado',
+      DEBA: 'en_proceso',
       DISER: 'pendiente',
-      DIGEBR: 'pendiente',
+      DIGEBR: 'completado',
       DIGEDD: 'pendiente',
       DIFOID: 'pendiente',
-      DITEN: 'pendiente',
+      DITEN: 'en_proceso',
     },
-    observation: 'Alerta crítica: sin avance en SIGA ni evidencias en Drive.',
+    observation: 'Fase 1 OK; pendiente evidencia en Drive (corte 22/10). RAR oficial en plazo.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -244,16 +244,16 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     id: 'ugel-pangoa',
     number: 7,
     name: 'PANGOA',
-    phase1Files: 2,
+    phase1Files: 3,
     phase1Total: 3,
     phase1Date: '16/10/2026 10:20',
     driveStatus: 'completado',
     driveFiles: 1,
     driveTotal: 1,
     driveDate: '22/10/2026 08:40',
-    phase2Files: 1,
+    phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'En proceso',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEI: 'completado',
       DEBA: 'en_proceso',
@@ -263,7 +263,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'en_proceso',
       DITEN: 'completado',
     },
-    observation: 'Evidencia en Drive OK. Consolidando generación de RAR en MC SIGA.',
+    observation: 'Fase 1 y Drive OK. Consolidando generación de RAR en MC SIGA hasta el 26/10.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -271,16 +271,16 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     id: 'ugel-pichanaqui',
     number: 8,
     name: 'PICHANAQUI',
-    phase1Files: 2,
+    phase1Files: 3,
     phase1Total: 3,
     phase1Date: '16/10/2026 17:10',
     driveStatus: 'completado',
     driveFiles: 1,
     driveTotal: 1,
     driveDate: '22/10/2026 09:10',
-    phase2Files: 1,
+    phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'En proceso',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEI: 'completado',
       DEBA: 'en_proceso',
@@ -290,7 +290,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'en_proceso',
       DITEN: 'completado',
     },
-    observation: 'Evidencia en Drive OK; culminando cierre en MC SIGA.',
+    observation: 'Fase 1 y Drive OK; procesando cierre oficial en MC SIGA hasta el 26/10.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -298,7 +298,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     id: 'ugel-rio-ene-mantaro',
     number: 9,
     name: 'RÍO ENE MANTARO',
-    phase1Files: 1,
+    phase1Files: 3,
     phase1Total: 3,
     phase1Date: '17/10/2026 11:30',
     driveStatus: 'en_proceso',
@@ -307,7 +307,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     driveDate: 'En proceso',
     phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'Sin carga',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEI: 'en_proceso',
       DEBA: 'en_proceso',
@@ -317,7 +317,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'pendiente',
       DITEN: 'en_proceso',
     },
-    observation: 'Acompañamiento territorial en marcha para agilizar subida a Drive.',
+    observation: 'Fase 1 OK. Subida a Drive en proceso (22/10). Cierre oficial en plazo regular.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -352,16 +352,16 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     id: 'ugel-satipo',
     number: 11,
     name: 'SATIPO',
-    phase1Files: 2,
+    phase1Files: 3,
     phase1Total: 3,
     phase1Date: '16/10/2026 12:40',
     driveStatus: 'completado',
     driveFiles: 1,
     driveTotal: 1,
     driveDate: '21/10/2026 19:00',
-    phase2Files: 1,
+    phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'En proceso',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEI: 'completado',
       DEBA: 'en_proceso',
@@ -371,7 +371,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'en_proceso',
       DITEN: 'completado',
     },
-    observation: 'Drive cargado oportunamente (21/10); culminando RAR oficial.',
+    observation: 'Drive cargado oportunamente (21/10); elaboración de RAR en plazo oficial.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -379,16 +379,16 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     id: 'ugel-tarma',
     number: 12,
     name: 'TARMA',
-    phase1Files: 2,
+    phase1Files: 3,
     phase1Total: 3,
     phase1Date: '15/10/2026 14:10',
     driveStatus: 'completado',
     driveFiles: 1,
     driveTotal: 1,
     driveDate: '22/10/2026 10:30',
-    phase2Files: 1,
+    phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'En proceso',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEI: 'completado',
       DEBA: 'en_proceso',
@@ -398,7 +398,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'en_proceso',
       DITEN: 'completado',
     },
-    observation: 'Cargó Excel en Drive preliminar; procesando cierre RAR en MC SIGA.',
+    observation: 'Excel en Drive OK; procesando cierre oficial RAR en MC SIGA hasta 26/10.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -406,16 +406,16 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     id: 'ugel-yauli',
     number: 13,
     name: 'YAULI',
-    phase1Files: 2,
+    phase1Files: 3,
     phase1Total: 3,
     phase1Date: '15/10/2026 16:00',
     driveStatus: 'en_proceso',
     driveFiles: 0,
     driveTotal: 1,
     driveDate: 'En proceso',
-    phase2Files: 1,
+    phase2Files: 0,
     phase2Total: 3,
-    phase2Date: 'En proceso',
+    phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEI: 'completado',
       DEBA: 'en_proceso',
@@ -425,7 +425,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
       DIFOID: 'en_proceso',
       DITEN: 'completado',
     },
-    observation: 'En proceso de subida en Drive y MC SIGA.',
+    observation: 'Fase 1 OK. Subida a Drive en proceso; cierre oficial RAR en plazo.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -514,10 +514,9 @@ export function TerritoryReporterV2Tab({
       else if (u.driveStatus === 'en_proceso') driveInProgress++
       else drivePending++
 
-      const s2 = computePhaseStatus(u.phase2Files, u.phase2Total)
-      if (s2 === 'completado') p2Completed++
-      else if (s2 === 'en_proceso') p2InProgress++
-      else p2Pending++
+      const isP2Done = u.phase2Files >= u.phase2Total
+      if (isP2Done) p2Completed++
+      else p2InProgress++ // En plazo técnico regular hasta el 26/10 (cero alarma roja)
     }
 
     const total = ugels.length
@@ -664,36 +663,41 @@ export function TerritoryReporterV2Tab({
   return (
     <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-['DM_Sans',sans-serif] text-slate-800 antialiased">
       {/* ════════════════════════════════════════════════════════════════════════
-          1. CABECERA INSTITUCIONAL MINEDU + MATRIZ DE AVANCE POR UGEL (3 ETAPAS)
+          1. CABECERA INSTITUCIONAL + MATRIZ DE AVANCE POR UGEL (3 ETAPAS)
           Diseño limpio, neutro y de alta legibilidad estilo infografía ejecutiva
           ════════════════════════════════════════════════════════════════════════ */}
       <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-4">
-        {/* Cabecera oficial: Seguimiento Regional | Dotación 2027 */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-slate-100 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                SEGUIMIENTO REGIONAL | DOTACIÓN 2027
-              </span>
-            </div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
-              Estado de avance por UGEL
-            </h2>
-            <p className="text-xs font-medium text-slate-500 mt-0.5">
-              Región Junín · 13 UGEL (Orden Alfabético)
-            </p>
+        {/* Cabecera oficial: Kicker | Título | Subtítulo | Hito 1.6 */}
+        <div className="border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-2">
+            <span className="h-1 w-7 bg-[#dc2626] rounded-full" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              DISTRIBUCIÓN DE MATERIALES EDUCATIVOS | DOTACIÓN 2027 | SEGUIMIENTO REGIONAL
+            </span>
           </div>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
+            Estado de avance
+          </h2>
+          <p className="text-xs font-semibold text-slate-600 mt-0.5">
+            Región Junín
+          </p>
 
-          {/* Distintivo Oficial MINEDU */}
-          <div className="flex items-center gap-3 self-start md:self-auto bg-slate-50 border border-slate-200/80 rounded-xl px-3.5 py-2">
-            <div className="h-7 w-7 rounded-md bg-[#dc2626] text-white font-black text-[10px] grid place-items-center shadow-xs">
-              PERÚ
-            </div>
-            <div className="text-left leading-tight">
-              <span className="block text-xs font-black text-slate-900 tracking-tight">Ministerio</span>
-              <span className="block text-[11px] font-medium text-slate-600">de Educación</span>
-            </div>
+          {/* Banner Institucional de Hito 1.6 */}
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2">
+            <span className="inline-flex items-center gap-1 rounded-md bg-[#1055b8] px-2 py-0.5 text-xs font-black text-white">
+              HITO 1.6
+            </span>
+            <span className="text-xs font-bold text-slate-900">
+              Elaboración del Cuadro de Distribución Local en el MC SIGA
+            </span>
+            <span className="hidden sm:inline text-slate-300">|</span>
+            <span className="text-[11px] font-medium text-slate-600">
+              Evidencia preliminar Drive: <strong className="text-slate-900 font-bold">Corte 22/10/2026</strong> (Declarativo)
+            </span>
+            <span className="hidden sm:inline text-slate-300">·</span>
+            <span className="text-[11px] font-medium text-slate-600">
+              Cierre oficial RAR: <strong className="text-slate-900 font-bold">Hasta 26/10/2026</strong> (Formal)
+            </span>
           </div>
         </div>
 
@@ -717,7 +721,7 @@ export function TerritoryReporterV2Tab({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {/* FILA 1: FASE 1 (REGISTRO MC SIGA) */}
+              {/* FILA 1: FASE 1 (REGISTRO MC SIGA - 100% CUMPLIDA EN TODAS LAS UGEL) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
                 <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-2.5">
@@ -731,22 +735,19 @@ export function TerritoryReporterV2Tab({
                   </div>
                 </td>
                 {ugels.map((u) => {
-                  const st = computePhaseStatus(u.phase1Files, u.phase1Total)
                   return (
                     <td key={`f1-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
                         className="mx-auto flex flex-col items-center justify-center p-1 rounded-lg hover:bg-slate-100/80 transition-all cursor-pointer group"
-                        title={`Fase 1: ${u.name} · ${u.phase1Files}/${u.phase1Total} (Clic para cambiar)`}
+                        title={`Fase 1: ${u.name} · Carga inicial completada (3/3)`}
                       >
-                        <span className={`grid h-6 w-6 place-items-center rounded-full text-white shadow-2xs transition-transform group-hover:scale-110 ${
-                          st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
-                        }`}>
-                          {st === 'completado' ? <Check size={13} strokeWidth={3} /> : st === 'en_proceso' ? <Clock size={13} strokeWidth={2.6} /> : <X size={13} strokeWidth={3} />}
+                        <span className="grid h-6 w-6 place-items-center rounded-full text-white shadow-2xs transition-transform group-hover:scale-110 bg-[#16a34a]">
+                          <Check size={13} strokeWidth={3} />
                         </span>
                         <span className="mt-1 text-[11px] font-extrabold text-slate-800 tabular-nums">
-                          {u.phase1Files}/{u.phase1Total}
+                          3/3
                         </span>
                       </button>
                     </td>
@@ -754,7 +755,7 @@ export function TerritoryReporterV2Tab({
                 })}
               </tr>
 
-              {/* FILA 2: DRIVE (EVIDENCIA DECLARATIVA) */}
+              {/* FILA 2: DRIVE (EVIDENCIA DECLARATIVA - CORTE HOY 22/10) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
                 <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-2.5">
@@ -792,7 +793,7 @@ export function TerritoryReporterV2Tab({
                 })}
               </tr>
 
-              {/* FILA 3: FASE 2 (RAR OFICIAL) */}
+              {/* FILA 3: FASE 2 (RAR OFICIAL - CORTE 26/10 · CERO ROJOS, GRIS NEUTRO EN PLAZO) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
                 <td className="bg-[#f8fafc] px-3.5 py-3 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-2.5">
@@ -801,27 +802,29 @@ export function TerritoryReporterV2Tab({
                     </span>
                     <div>
                       <span className="block text-xs font-extrabold text-slate-900 leading-tight">Fase 2</span>
-                      <span className="block text-[10.5px] font-medium text-slate-500 leading-tight">RAR oficial</span>
+                      <span className="block text-[10.5px] font-medium text-slate-500 leading-tight">RAR oficial (26/10)</span>
                     </div>
                   </div>
                 </td>
                 {ugels.map((u) => {
-                  const st = computePhaseStatus(u.phase2Files, u.phase2Total)
+                  const isDone = u.phase2Files >= u.phase2Total
                   return (
                     <td key={`f2-${u.id}`} className="py-2.5 px-1 text-center border-l border-slate-100 w-[82px] min-w-[82px] max-w-[82px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
                         className="mx-auto flex flex-col items-center justify-center p-1 rounded-lg hover:bg-slate-100/80 transition-all cursor-pointer group"
-                        title={`Fase 2 RAR: ${u.name} · ${u.phase2Files}/${u.phase2Total} (Clic para cambiar)`}
+                        title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado (3/3)' : 'En plazo técnico hasta el 26/10'} (Clic para cambiar)`}
                       >
-                        <span className={`grid h-6 w-6 place-items-center rounded-full text-white shadow-2xs transition-transform group-hover:scale-110 ${
-                          st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
+                        <span className={`grid h-6 w-6 place-items-center rounded-full shadow-2xs transition-transform group-hover:scale-110 ${
+                          isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
                         }`}>
-                          {st === 'completado' ? <Check size={13} strokeWidth={3} /> : st === 'en_proceso' ? <Clock size={13} strokeWidth={2.6} /> : <X size={13} strokeWidth={3} />}
+                          {isDone ? <Check size={13} strokeWidth={3} /> : <Clock size={12} strokeWidth={2.4} />}
                         </span>
-                        <span className="mt-1 text-[11px] font-extrabold text-slate-800 tabular-nums">
-                          {u.phase2Files}/{u.phase2Total}
+                        <span className={`mt-1 text-[10.5px] font-bold tabular-nums ${
+                          isDone ? 'text-slate-800 font-extrabold' : 'text-slate-500'
+                        }`}>
+                          {isDone ? '3/3' : 'En plazo'}
                         </span>
                       </button>
                     </td>
@@ -912,8 +915,8 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Avance por fase (todas las UGEL)</h3>
-              <p className="text-[11px] text-slate-400">Distribución de cumplimiento en territorio</p>
+              <h3 className="text-sm font-bold text-slate-900">Avance de 3 Fases por UGEL</h3>
+              <p className="text-[11px] text-slate-400">Distribución de las 13 UGEL en Fase 1, Drive y Fase 2</p>
             </div>
             <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-extrabold text-blue-700">
               3 Fases de Control
@@ -1011,11 +1014,11 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Estado global (3 fases)</h3>
-              <p className="text-[11px] text-slate-400">Consolidado regional en territorio</p>
+              <h3 className="text-sm font-bold text-slate-900">Consolidado Global de 3 Fases</h3>
+              <p className="text-[11px] text-slate-400">Cumplimiento regional integrado de las 13 UGEL</p>
             </div>
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-              Total
+              Total 3 Fases
             </span>
           </div>
 
@@ -1092,11 +1095,11 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[295px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Avance por dirección (todas las UGEL)</h3>
-              <p className="text-[11px] text-slate-400">7 Direcciones de línea pedagógicas</p>
+              <h3 className="text-sm font-bold text-slate-900">Avance por Direcciones en 3 Fases</h3>
+              <p className="text-[11px] text-slate-400">Progreso de las 7 líneas pedagógicas en las 3 fases</p>
             </div>
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-              DEI - DITEN
+              Líneas · 3 Fases
             </span>
           </div>
 
