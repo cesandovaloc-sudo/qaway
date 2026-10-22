@@ -914,7 +914,7 @@ export function TerritoryReporterV2Tab({
                 })}
               </tr>
 
-              {/* FILA 3: FASE 2 (RAR OFICIAL - CORTE 26/10 · CERO ROJOS, GRIS NEUTRO EN PLAZO) */}
+              {/* FILA 3: FASE 2 (RAR OFICIAL) */}
               <tr className="hover:bg-slate-50/70 transition-colors">
                 <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
                   <div className="flex items-center gap-3">
@@ -923,7 +923,7 @@ export function TerritoryReporterV2Tab({
                     </span>
                     <div className="min-w-0">
                       <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 2</span>
-                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial (26/10)</span>
+                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial</span>
                     </div>
                   </div>
                 </td>
@@ -935,7 +935,7 @@ export function TerritoryReporterV2Tab({
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
                         className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
-                        title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado' : 'En plazo técnico hasta el 26/10'} (Clic para cambiar)`}
+                        title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado' : 'En plazo técnico'} (Clic para cambiar)`}
                       >
                         <span className={`grid h-11 w-11 place-items-center rounded-full shadow-xs transition-transform group-hover:scale-110 ${
                           isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
@@ -1057,7 +1057,7 @@ export function TerritoryReporterV2Tab({
               },
               {
                 label: 'Fase 2',
-                sublabel: 'RAR 26/10',
+                sublabel: 'RAR Oficial',
                 ok: ugelStats.p2Completed,
                 prog: ugelStats.p2InProgress,
                 pend: ugelStats.p2Pending,
@@ -1320,7 +1320,7 @@ export function TerritoryReporterV2Tab({
                 </th>
                 {/* BLOQUE FASE 2 */}
                 <th colSpan={2} className="border-r border-slate-200 px-3 py-2 text-center bg-indigo-50/80 text-indigo-950 font-black">
-                  Fase 2 (Oficial RAR 26/10)
+                  Fase 2 (Oficial RAR)
                 </th>
                 {/* BLOQUE DRIVE REGIONAL */}
                 <th colSpan={2} className="border-r border-slate-200 px-3 py-2 text-center bg-amber-50/90 text-amber-950 font-black">
@@ -1636,10 +1636,10 @@ export function TerritoryReporterV2Tab({
                   </button>
                 </div>
 
-                {/* Fase 2: RAR (26/10) */}
+                {/* Fase 2: RAR Oficial */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11.5px] font-bold text-slate-700">Fase 2 (26/10)</span>
+                    <span className="text-[11.5px] font-bold text-slate-700">Fase 2 (RAR Oficial)</span>
                     <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
                       inspectedUgel.phase2Files >= inspectedUgel.phase2Total
                         ? 'bg-emerald-100 text-emerald-800'
