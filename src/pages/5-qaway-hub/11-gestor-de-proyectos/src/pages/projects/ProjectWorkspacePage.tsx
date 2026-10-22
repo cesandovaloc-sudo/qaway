@@ -133,6 +133,7 @@ export default function ProjectWorkspacePage() {
     icon: React.ReactNode
     badge: number | null
   }> = [
+    { key: 'resumen', label: 'Resumen', icon: <LayoutDashboard size={16} />, badge: null },
     { key: 'gantt', label: 'Diagrama Gantt', icon: <GanttChart size={16} />, badge: null },
     { key: 'calendar', label: 'Calendario', icon: <CalendarDays size={16} />, badge: null },
     { key: 'hitos', label: 'Hitos & Fases', icon: <Milestone size={16} />, badge: pendingMilestones || null },

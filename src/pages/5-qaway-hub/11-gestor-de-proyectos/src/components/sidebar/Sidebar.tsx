@@ -144,6 +144,11 @@ export default function Sidebar({
           end: true,
         },
         {
+          to: activeProjectObj ? `/proyectos/${activeProjectObj.id}` : '/proyectos',
+          label: 'Resumen del Proyecto',
+          icon: <FolderKanban size={18} />,
+        },
+        {
           to: '/monitoreo-v2',
           label: 'Reporteador Territorial',
           icon: <BarChart3 size={18} />,
@@ -201,23 +206,23 @@ export default function Sidebar({
     if (to === '/' && (barePath === '/' || barePath === '')) {
       return true
     }
-    if (activeProjectObj && to === `/proyectos/${activeProjectObj.id}`) {
-      const tab = searchParams.get('tab')
-      if (barePath === '/' || (barePath === to && (!tab || tab === 'resumen'))) {
-        return true
-      }
+    if (to.startsWith('/proyectos/') && barePath.startsWith('/proyectos/')) {
+      return true
     }
-    return false
+    return barePath === to
   }
 
   const handleSelectProjectInCascade = (projectId: string) => {
     setRememberedProjectId(projectId)
     setIsActiveSelectorOpen(false)
-    const currentTab = new URLSearchParams(location.search).get('tab')
-    const target = currentTab
-      ? `/proyectos/${projectId}?tab=${currentTab}`
-      : `/proyectos/${projectId}`
-    navigate(getHref(target))
+    const barePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
+    if (barePath.startsWith('/proyectos/')) {
+      const currentTab = searchParams.get('tab')
+      const target = currentTab
+        ? `/proyectos/${projectId}?tab=${currentTab}`
+        : `/proyectos/${projectId}`
+      navigate(getHref(target))
+    }
   }
 
   return (
