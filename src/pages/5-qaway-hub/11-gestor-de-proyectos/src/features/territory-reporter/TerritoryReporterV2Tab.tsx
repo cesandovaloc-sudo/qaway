@@ -495,7 +495,24 @@ export function computeUgelDirectionStatus(row: UgelMonitoringV2Row): {
 }
 
 function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row): TerritoryStatus {
-  return computeUgelDirectionStatus(row).status
+  const isP1Done = row.phase1Files >= row.phase1Total
+  const isP2Done = row.phase2Files >= row.phase2Total
+  const dirStatus = computeUgelDirectionStatus(row).status
+
+  // 1. Completado: Completa las 3 etapas al 100% (Fase 1 + Drive regional + Fase 2)
+  if (isP1Done && dirStatus === 'completado' && isP2Done) {
+    return 'completado'
+  }
+
+  // 2. En proceso:
+  // - Si Drive tiene avance parcial ('en_proceso')
+  // - O si Drive está completado pero le falta cerrar Fase 1 o Fase 2
+  if (dirStatus === 'en_proceso' || (dirStatus === 'completado' && (!isP1Done || !isP2Done))) {
+    return 'en_proceso'
+  }
+
+  // 3. Pendiente: 0% en Drive y evaluación pendiente
+  return 'pendiente'
 }
 
 export function TerritoryReporterV2Tab({
@@ -514,8 +531,7 @@ export function TerritoryReporterV2Tab({
       if (saved) {
         const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
         const hasInvalid = parsed.some((u) => u.name === 'CHUPINGO' || u.name === 'VITOC')
-        const allPhase1Done = parsed.every((u) => u.phase1Files === 3)
-        if (!hasInvalid && parsed.length === 13 && allPhase1Done) {
+        if (!hasInvalid && parsed.length === 13) {
           return parsed
         }
       }
@@ -675,9 +691,8 @@ export function TerritoryReporterV2Tab({
       else if (gen === 'en_proceso') inProgress++
       else pending++
 
-      const s1 = computePhaseStatus(u.phase1Files, u.phase1Total)
-      if (s1 === 'completado') p1Completed++
-      else if (s1 === 'en_proceso') p1InProgress++
+      const isP1Done = u.phase1Files >= u.phase1Total
+      if (isP1Done) p1Completed++
       else p1Pending++
 
       const dirStatus = computeUgelDirectionStatus(u).status
@@ -767,25 +782,27 @@ export function TerritoryReporterV2Tab({
     })
   }, [ugels, searchQuery, filterStatus, filterDirection])
 
-  // Ciclador de archivos en Fase 1 y Fase 2 (0 -> 1 -> 2 -> 3 -> 0)
+  // Alternador binario en Fase 1 y Fase 2 (2 opciones: o cumplen o no)
   const handleCycleUgelFiles = (ugelId: string, phase: 1 | 2) => {
     setUgels((prev) =>
       prev.map((u) => {
         if (u.id !== ugelId) return u
         let updated: UgelMonitoringV2Row
         if (phase === 1) {
-          const nextFiles = (u.phase1Files + 1) % (u.phase1Total + 1)
+          const isDone = u.phase1Files >= u.phase1Total
+          const nextFiles = isDone ? 0 : u.phase1Total
           updated = {
             ...u,
             phase1Files: nextFiles,
             phase1Date: nextFiles > 0 ? 'Actualizado hoy' : 'Sin carga',
           }
         } else {
-          const nextFiles = (u.phase2Files + 1) % (u.phase2Total + 1)
+          const isDone = u.phase2Files >= u.phase2Total
+          const nextFiles = isDone ? 0 : u.phase2Total
           updated = {
             ...u,
             phase2Files: nextFiles,
-            phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'Sin carga',
+            phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'En plazo técnico',
           }
         }
         // Persistir a Supabase
@@ -957,16 +974,19 @@ export function TerritoryReporterV2Tab({
                   </div>
                 </td>
                 {ugels.map((u) => {
+                  const isDone = u.phase1Files >= u.phase1Total
                   return (
                     <td key={`f1-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
                         className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
-                        title={`Fase 1: ${u.name} · Carga inicial completada (Clic para cambiar)`}
+                        title={`Fase 1: ${u.name} · ${isDone ? 'Carga inicial completada' : 'Pendiente de carga'} (Clic para alternar)`}
                       >
-                        <span className="grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 bg-[#16a34a]">
-                          <Check size={24} strokeWidth={3.2} />
+                        <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
+                          isDone ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                        }`}>
+                          {isDone ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
                         </span>
                       </button>
                     </td>
@@ -1444,9 +1464,10 @@ export function TerritoryReporterV2Tab({
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredUgels.map((u) => {
+                const isP1Done = u.phase1Files >= u.phase1Total
                 const isP2Done = u.phase2Files >= u.phase2Total
                 const computedDir = computeUgelDirectionStatus(u)
-                const genStatus = computedDir.status
+                const genStatus = computeUgelGeneralStatusV2(u)
 
                 const rowTint =
                   genStatus === 'pendiente'
@@ -1476,12 +1497,16 @@ export function TerritoryReporterV2Tab({
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
                         className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-blue-100/60 transition-colors cursor-pointer text-left"
-                        title="Fase 1: Completado al 100% (Ver fecha en detalle)"
+                        title={`Fase 1: ${isP1Done ? 'Completado' : 'Pendiente'} (Clic para alternar)`}
                       >
-                        <span className="grid h-4.5 w-4.5 place-items-center rounded-full text-white bg-[#16a34a]">
-                          <Check size={11} strokeWidth={3} />
+                        <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
+                          isP1Done ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                        }`}>
+                          {isP1Done ? <Check size={11} strokeWidth={3} /> : <X size={11} strokeWidth={3} />}
                         </span>
-                        <span className="font-extrabold text-[12.5px] capitalize text-slate-800">Completado</span>
+                        <span className={`font-extrabold text-[12.5px] capitalize ${isP1Done ? 'text-slate-800' : 'text-rose-700'}`}>
+                          {isP1Done ? 'Completado' : 'Pendiente'}
+                        </span>
                       </button>
                     </td>
 
@@ -1491,7 +1516,7 @@ export function TerritoryReporterV2Tab({
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
                         className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 hover:bg-indigo-100/60 transition-colors cursor-pointer text-left"
-                        title="Fase 2 RAR: Ver fecha en detalle"
+                        title={`Fase 2 RAR: ${isP2Done ? 'Completado' : 'En plazo'} (Clic para alternar)`}
                       >
                         <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
                           isP2Done ? 'bg-[#16a34a]' : 'bg-slate-400'
@@ -1661,13 +1686,17 @@ export function TerritoryReporterV2Tab({
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[11.5px] font-bold text-slate-700">Fase 1</span>
-                      <span className="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9.5px] font-bold text-emerald-800">
-                        100% OK
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9.5px] font-bold ${
+                        inspectedUgel.phase1Files >= inspectedUgel.phase1Total
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-rose-100 text-rose-800'
+                      }`}>
+                        {inspectedUgel.phase1Files >= inspectedUgel.phase1Total ? '100% OK' : 'Pendiente'}
                       </span>
                     </div>
                     <div className="flex items-baseline justify-between">
                       <span className="text-xl font-black text-slate-900 tabular-nums">
-                        {inspectedUgel.phase1Files}/{inspectedUgel.phase1Total}
+                        {inspectedUgel.phase1Files >= inspectedUgel.phase1Total ? '3/3' : '0/3'}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 font-semibold mt-1">
@@ -1678,15 +1707,20 @@ export function TerritoryReporterV2Tab({
                     type="button"
                     onClick={() => {
                       handleCycleUgelFiles(inspectedUgel.id, 1)
-                      setInspectedUgel((prev) =>
-                        prev
-                          ? { ...prev, phase1Files: (prev.phase1Files + 1) % (prev.phase1Total + 1) }
-                          : null,
-                      )
+                      setInspectedUgel((prev) => {
+                        if (!prev) return null
+                        const isDone = prev.phase1Files >= prev.phase1Total
+                        const nextFiles = isDone ? 0 : prev.phase1Total
+                        return {
+                          ...prev,
+                          phase1Files: nextFiles,
+                          phase1Date: nextFiles > 0 ? 'Actualizado hoy' : 'Sin carga',
+                        }
+                      })
                     }}
                     className="mt-2 w-full rounded-md border border-slate-200 bg-white py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs"
                   >
-                    Actualizar subida
+                    Alternar estado
                   </button>
                 </div>
 
@@ -1754,7 +1788,7 @@ export function TerritoryReporterV2Tab({
                     </div>
                     <div className="flex items-baseline justify-between">
                       <span className="text-xl font-black text-slate-900 tabular-nums">
-                        {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? '3/3' : `${inspectedUgel.phase2Files}/3`}
+                        {inspectedUgel.phase2Files >= inspectedUgel.phase2Total ? '3/3' : '0/3'}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 font-semibold mt-1">
@@ -1765,15 +1799,20 @@ export function TerritoryReporterV2Tab({
                     type="button"
                     onClick={() => {
                       handleCycleUgelFiles(inspectedUgel.id, 2)
-                      setInspectedUgel((prev) =>
-                        prev
-                          ? { ...prev, phase2Files: (prev.phase2Files + 1) % (prev.phase2Total + 1) }
-                          : null,
-                      )
+                      setInspectedUgel((prev) => {
+                        if (!prev) return null
+                        const isDone = prev.phase2Files >= prev.phase2Total
+                        const nextFiles = isDone ? 0 : prev.phase2Total
+                        return {
+                          ...prev,
+                          phase2Files: nextFiles,
+                          phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'En plazo técnico',
+                        }
+                      })
                     }}
                     className="mt-2 w-full rounded-md border border-slate-200 bg-white py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer shadow-2xs"
                   >
-                    Actualizar RAR
+                    Alternar RAR
                   </button>
                 </div>
               </div>
