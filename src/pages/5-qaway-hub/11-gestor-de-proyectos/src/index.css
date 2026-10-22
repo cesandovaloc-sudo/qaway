@@ -27,8 +27,8 @@
   --color-warm-dark: #dcd9cf;
 
   /* ── Typography ── */
-  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: "DM Sans", "Space Grotesk", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
   /* ── Spacing ── */
