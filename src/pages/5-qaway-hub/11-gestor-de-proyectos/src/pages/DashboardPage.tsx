@@ -593,168 +593,134 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ── Diagrama Gantt General · Macro-Roadmap de cartera (Estilo Gantt oficial) ── */}
+      {/* ── Línea de tiempo · Macro-Roadmap de cartera (Estilo exacto a la referencia) ── */}
       {(view === 'resumen' || view === 'cronograma') && (
-        <section className="mb-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-4">
-            <div>
-              <h2 className="flex flex-wrap items-center gap-2 text-sm font-bold text-zinc-900">
-                <CalendarDays size={16} className="text-zinc-500" />
-                <span>Diagrama Gantt General</span>
-                <span className="text-zinc-300">·</span>
-                <span>Macro-Roadmap de cartera · {year}</span>
-                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-600">
-                  {activeProjects.length} proyectos
-                </span>
-              </h2>
-              <p className="text-xs text-zinc-500">
-                Cronograma consolidado de proyectos estratégicos · Hitos clave y línea de Hoy
-              </p>
-            </div>
-            <div className="hidden sm:flex flex-wrap items-center gap-4 text-[11px] font-semibold text-zinc-500">
+        <section className="mb-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+          {/* Header con título y leyenda */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-100">
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <span>Línea de tiempo · Fases principales</span>
+              <span className="text-slate-300">·</span>
+              <span className="text-slate-500 font-semibold text-xs">
+                Macro-Roadmap de cartera · {year}
+              </span>
+            </h2>
+
+            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-6 rounded-md bg-zinc-800" /> Normal
+                <span className="h-2 w-2 rounded-full bg-emerald-500" /> En plazo
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-6 rounded-md bg-amber-500" /> Alerta
+                <span className="h-2 w-2 rounded-full bg-amber-500" /> En riesgo
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-6 rounded-md bg-rose-500" /> Crítico
+                <span className="h-2 w-2 rounded-full bg-rose-500" /> Retrasado
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="inline-block h-2.5 w-2.5 rotate-45 bg-zinc-900 ring-2 ring-white" /> Hito clave
+                <span className="h-2.5 w-2.5 rotate-45 bg-slate-900" /> Hito
               </span>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <div className="min-w-[860px]">
-              {/* Eje de escala temporal por meses */}
-              <div className="flex border-b border-zinc-100 bg-zinc-50/60">
-                <div className="w-[260px] shrink-0 px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  Proyecto
-                </div>
-                <div className="relative flex-1 grid grid-cols-12 py-2">
+          <div className="overflow-x-auto pt-4">
+            <div className="min-w-[840px]">
+              {/* Eje de escala temporal con meses y ticks */}
+              <div className="flex items-end mb-3">
+                <div className="w-[230px] shrink-0" />
+                <div className="relative flex-1 grid grid-cols-12 text-center">
+                  {/* Línea de Hoy con píldora superior y guía punteada */}
+                  <div
+                    className="pointer-events-none absolute -top-1 bottom-0 z-20"
+                    style={{ left: `${hoyPct}%` }}
+                  >
+                    <span className="absolute -top-3.5 -translate-x-1/2 rounded-md bg-sky-500 px-2 py-0.5 text-[9.5px] font-bold text-white shadow-xs">
+                      Hoy
+                    </span>
+                    <div className="absolute top-2.5 bottom-[-2000px] max-h-[800px] -translate-x-1/2 border-l border-dashed border-sky-400/80" />
+                  </div>
+
                   {MONTHS_SHORT.map((m, i) => (
-                    <div
-                      key={m}
-                      className={`text-center text-[11px] font-bold uppercase tracking-wide ${
-                        i === analysisMonth ? 'text-zinc-900 font-extrabold' : 'text-zinc-400'
-                      }`}
-                    >
-                      {m}
+                    <div key={m} className="flex flex-col items-center">
+                      <span
+                        className={`text-[11px] font-bold uppercase tracking-wider ${
+                          i === analysisMonth ? 'text-slate-900 font-extrabold' : 'text-slate-400'
+                        }`}
+                      >
+                        {m}
+                      </span>
+                      <span className="h-1.5 w-px bg-slate-200 mt-1" />
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Filas del Gantt */}
-              <div className="relative">
-                {/* Línea de Hoy */}
-                <div
-                  className="pointer-events-none absolute inset-y-0 z-10"
-                  style={{ left: `calc(260px + (100% - 260px) * ${hoyPct / 100})` }}
-                >
-                  <div className="absolute inset-y-0 -translate-x-1/2 border-l-2 border-dashed border-sky-500/80" />
-                  <span className="absolute -top-1 -translate-x-1/2 rounded-md bg-sky-600 px-1.5 py-0.5 text-[9.5px] font-bold text-white shadow-xs">
-                    Hoy
-                  </span>
-                </div>
+              {/* Filas del Roadmap */}
+              <div className="space-y-3.5 relative">
+                {roadmapRows.map(({ project, left, width }) => {
+                  const status = statusOf.get(project.id) ?? 'objetivo'
+                  const barColor =
+                    status === 'bloqueado'
+                      ? 'bg-rose-500'
+                      : status === 'riesgo'
+                        ? 'bg-amber-500'
+                        : 'bg-emerald-500'
+                  const marks = (milestonesByProject.get(project.id) ?? []).filter((m) => {
+                    const t = parseTime(m.targetDate)
+                    return t !== null && t >= yearStart && t <= yearEnd
+                  })
 
-                <div className="divide-y divide-zinc-50">
-                  {roadmapRows.map(({ project, left, width }) => {
-                    const status = statusOf.get(project.id) ?? 'objetivo'
-                    const barColor =
-                      status === 'bloqueado'
-                        ? 'bg-rose-500'
-                        : status === 'riesgo'
-                          ? 'bg-amber-500'
-                          : 'bg-zinc-800'
-                    const marks = (milestonesByProject.get(project.id) ?? []).filter((m) => {
-                      const t = parseTime(m.targetDate)
-                      return t !== null && t >= yearStart && t <= yearEnd
-                    })
-
-                    return (
-                      <div
-                        key={project.id}
-                        className="flex items-center hover:bg-zinc-50/60 transition-colors"
-                      >
-                        {/* Columna de Proyecto */}
-                        <div className="w-[260px] shrink-0 px-5 py-3">
-                          <button
-                            type="button"
-                            onClick={() => navigate(getHref(`proyectos/${project.id}`))}
-                            title={`Abrir ${project.name}`}
-                            className="block w-full text-left group"
-                          >
-                            <p className="truncate text-[13px] font-bold text-zinc-800 group-hover:text-zinc-950">
-                              {project.name}
-                            </p>
-                            <p className="mt-0.5 flex items-center gap-1.5 font-mono text-[10.5px] text-zinc-400">
-                              <span>{project.code}</span>
-                              <span>·</span>
-                              <span className="font-semibold text-zinc-600">{project.progress}% avance</span>
-                            </p>
-                          </button>
-                        </div>
-
-                        {/* Columna Timeline */}
-                        <div className="relative h-11 flex-1">
-                          {/* Grid vertical de meses sutil */}
-                          <div className="absolute inset-0 grid grid-cols-12 pointer-events-none">
-                            {MONTHS_SHORT.map((m, idx) => (
-                              <div
-                                key={m}
-                                className={`border-r border-zinc-100/60 h-full ${
-                                  idx === analysisMonth ? 'bg-zinc-50/40' : ''
-                                }`}
-                              />
-                            ))}
-                          </div>
-
-                          {/* Barra Gantt del Proyecto */}
-                          <div
-                            className={`absolute top-1/2 h-5 -translate-y-1/2 rounded-md ${barColor} shadow-2xs transition-all overflow-hidden`}
-                            style={{ left: `${left}%`, width: `${width}%` }}
-                            title={`${project.name}: ${formatShortDate(project.startDate)} → ${formatShortDate(project.targetDate)} (${project.progress}%)`}
-                          >
-                            {/* Avance real en porcentaje */}
-                            <div
-                              className="h-full bg-white/25 rounded-md"
-                              style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }}
-                            />
-                          </div>
-
-                          {/* Marcadores de Hitos */}
-                          {marks.map((m) => {
-                            const mTime = parseTime(m.targetDate) ?? yearStart
-                            const mPct = pctOf(mTime)
-                            const isApproved = m.status === 'aprobado'
-                            return (
-                              <span
-                                key={m.id}
-                                title={`${m.name} · ${formatShortDate(m.targetDate)} (${isApproved ? 'Aprobado' : 'Pendiente'})`}
-                                className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer ${
-                                  isApproved
-                                    ? 'inline-block h-3 w-3 rotate-45 bg-zinc-900 ring-2 ring-white shadow-xs'
-                                    : 'inline-block h-2.5 w-2.5 rounded-full border-2 border-zinc-800 bg-white shadow-xs'
-                                }`}
-                                style={{ left: `${mPct}%` }}
-                              />
-                            )
-                          })}
-                        </div>
+                  return (
+                    <div key={project.id} className="flex items-center gap-3 group">
+                      {/* Nombre y % de avance */}
+                      <div className="w-[230px] shrink-0 flex items-center justify-between pr-3">
+                        <button
+                          type="button"
+                          onClick={() => navigate(getHref(`proyectos/${project.id}`))}
+                          title={`Abrir ${project.name}`}
+                          className="text-left text-[13px] font-bold text-slate-800 group-hover:text-slate-950 truncate max-w-[175px]"
+                        >
+                          {project.name}
+                        </button>
+                        <span className="font-mono text-xs font-bold text-slate-700 ml-2 shrink-0">
+                          {project.progress}%
+                        </span>
                       </div>
-                    )
-                  })}
 
-                  {roadmapRows.length === 0 && (
-                    <p className="py-10 text-center text-sm font-medium text-zinc-400">
-                      Sin proyectos en el cronograma consolidado.
-                    </p>
-                  )}
-                </div>
+                      {/* Timeline track: fondo gris redondeado + barra activa + hitos */}
+                      <div className="relative flex-1 h-7 flex items-center">
+                        {/* Pista gris redondeada de fondo */}
+                        <div className="w-full h-3 rounded-full bg-slate-100" />
+
+                        {/* Barra activa con extremos redondeados */}
+                        <div
+                          className={`absolute h-3 rounded-full ${barColor} shadow-2xs transition-all`}
+                          style={{ left: `${left}%`, width: `${width}%` }}
+                          title={`${project.name}: ${formatShortDate(project.startDate)} → ${formatShortDate(project.targetDate)} (${project.progress}%)`}
+                        />
+
+                        {/* Marcadores de Hitos */}
+                        {marks.map((m) => {
+                          const mTime = parseTime(m.targetDate) ?? yearStart
+                          const mPct = pctOf(mTime)
+                          return (
+                            <span
+                              key={m.id}
+                              title={`${m.name} · ${formatShortDate(m.targetDate)}`}
+                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer h-2.5 w-2.5 rotate-45 bg-slate-900 ring-2 ring-white shadow-xs"
+                              style={{ left: `${mPct}%` }}
+                            />
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+
+                {roadmapRows.length === 0 && (
+                  <p className="py-10 text-center text-sm font-medium text-slate-400">
+                    Sin proyectos en el cronograma consolidado.
+                  </p>
+                )}
               </div>
             </div>
           </div>
