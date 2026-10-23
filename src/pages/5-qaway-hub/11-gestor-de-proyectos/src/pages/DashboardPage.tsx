@@ -636,7 +636,7 @@ export default function DashboardPage() {
                 <span className="h-2 w-2 rounded-full bg-rose-500" /> Retrasado
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rotate-45 bg-slate-900" /> Hito
+                <span className="h-2.5 w-2.5 rotate-45 bg-indigo-600" /> Hito
               </span>
             </div>
           </div>
@@ -725,7 +725,7 @@ export default function DashboardPage() {
                             <span
                               key={nextMilestone.id}
                               title={`Próximo hito: ${nextMilestone.name} · ${formatShortDate(nextMilestone.targetDate)}`}
-                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer h-2.5 w-2.5 rotate-45 bg-slate-900 ring-2 ring-white shadow-xs"
+                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer h-2.5 w-2.5 rotate-45 bg-indigo-600 ring-2 ring-white shadow-xs"
                               style={{ left: `${mPct}%` }}
                             />
                           )
@@ -808,36 +808,35 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ── Contenido principal + lateral ── */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <PortfolioTable
-            projects={view === 'riesgos' ? activeProjects.filter((p) => (statusOf.get(p.id) ?? 'objetivo') !== 'objetivo') : [...activeProjects].sort((a, b) => {
-              const order: Record<OpStatus, number> = { bloqueado: 0, riesgo: 1, objetivo: 2 }
-              return (order[statusOf.get(a.id) ?? 'objetivo'] ?? 2) - (order[statusOf.get(b.id) ?? 'objetivo'] ?? 2)
-            })}
-            statusOf={statusOf}
-            milestonesByProject={milestonesByProject}
-            itemsByProject={itemsByProject}
-            nextMilestoneOf={nextMilestoneOf}
-            hoyIdx={hoyIdx}
-            now={now}
-            onOpen={(id) => navigate(`proyectos/${id}`)}
-            showRiskBanner={view === 'riesgos'}
-          />
-        </div>
+      {/* ── Fila 2: Tarjeta de cartera completa (En riesgo, bloqueado, en objetivo, tabla y curva S) ── */}
+      <div className="mb-4">
+        <PortfolioTable
+          projects={view === 'riesgos' ? activeProjects.filter((p) => (statusOf.get(p.id) ?? 'objetivo') !== 'objetivo') : [...activeProjects].sort((a, b) => {
+            const order: Record<OpStatus, number> = { bloqueado: 0, riesgo: 1, objetivo: 2 }
+            return (order[statusOf.get(a.id) ?? 'objetivo'] ?? 2) - (order[statusOf.get(b.id) ?? 'objetivo'] ?? 2)
+          })}
+          statusOf={statusOf}
+          milestonesByProject={milestonesByProject}
+          itemsByProject={itemsByProject}
+          nextMilestoneOf={nextMilestoneOf}
+          hoyIdx={hoyIdx}
+          now={now}
+          onOpen={(id) => navigate(getHref(`proyectos/${id}`))}
+          showRiskBanner={view === 'riesgos'}
+        />
+      </div>
 
-        <aside className="space-y-4">
-          <AgendaCard
-            todayMilestones={todayMilestones}
-            monthMilestones={monthMilestones}
-            criticalTasks={criticalTasks}
-            projectNameOf={projectNameOf}
-            analysisLabel={analysisLabel}
-            onOpenProject={(id, tab) => navigate(tab ? getHref(`proyectos/${id}?tab=${tab}`) : getHref(`proyectos/${id}`))}
-          />
-          <ActivityCard recentActivity={recentActivity} />
-        </aside>
+      {/* ── Fila 3: Dos tarjetas en una sola fila (Hoy / Agenda + Actividad reciente) ── */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <AgendaCard
+          todayMilestones={todayMilestones}
+          monthMilestones={monthMilestones}
+          criticalTasks={criticalTasks}
+          projectNameOf={projectNameOf}
+          analysisLabel={analysisLabel}
+          onOpenProject={(id, tab) => navigate(tab ? getHref(`proyectos/${id}?tab=${tab}`) : getHref(`proyectos/${id}`))}
+        />
+        <ActivityCard recentActivity={recentActivity} />
       </div>
 
       <CreateProjectModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
