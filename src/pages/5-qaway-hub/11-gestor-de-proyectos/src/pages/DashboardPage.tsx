@@ -454,22 +454,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Pestañas de vista + mes de análisis + filtros */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1 rounded-xl border border-zinc-200 bg-white p-1">
-          {VIEW_TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setView(t.key)}
-              className={`h-9 rounded-lg px-3.5 text-sm font-medium transition-colors ${
-                view === t.key ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      {/* Mes de análisis + filtros */}
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
         <div className="ml-auto flex items-center gap-2">
           <div className="flex items-center gap-1 rounded-xl border border-zinc-200 bg-white px-2 py-1">
             <button type="button" onClick={() => stepMonth(-1)} aria-label="Mes anterior" className="grid h-8 w-8 place-items-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
@@ -636,7 +622,7 @@ export default function DashboardPage() {
                 <span className="h-2 w-2 rounded-full bg-rose-500" /> Retrasado
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rotate-45 bg-indigo-600" /> Hito
+                <span className="h-2.5 w-2.5 rotate-45 bg-white border-2 border-zinc-700 shadow-xs" /> Hito
               </span>
             </div>
           </div>
@@ -737,7 +723,7 @@ export default function DashboardPage() {
                             <span
                               key={nextMilestone.id}
                               title={`Próximo hito: ${nextMilestone.name} · ${formatShortDate(nextMilestone.targetDate)}`}
-                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer h-2.5 w-2.5 rotate-45 bg-indigo-600 ring-2 ring-white shadow-xs"
+                              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer h-2.5 w-2.5 rotate-45 bg-white border-2 border-zinc-700 ring-1 ring-white/80 shadow-xs"
                               style={{ left: `${mPct}%` }}
                             />
                           )
@@ -918,31 +904,17 @@ function PortfolioTable({
           <AlertTriangle size={15} /> Vista: proyectos que requieren atención
         </div>
       )}
-      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-100 px-5 py-3">
-        {pills.map((pill) => (
-          <button
-            key={pill.key}
-            type="button"
-            onClick={() => setFilter(pill.key)}
-            className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors ${
-              filter === pill.key
-                ? 'border-zinc-900 bg-zinc-900 text-white font-semibold'
-                : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
-            }`}
-          >
-            {pill.label}
-            <span className={`rounded-md px-1.5 py-0.5 font-mono text-[11px] font-bold ${filter === pill.key ? 'bg-white/20' : 'bg-zinc-100 text-zinc-600'}`}>
-              {pill.count}
-            </span>
-          </button>
-        ))}
-        <div className="relative ml-auto min-w-[200px] flex-1 sm:max-w-[240px]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3">
+        <h3 className="text-sm font-bold text-zinc-900">
+          Proyectos en cartera
+        </h3>
+        <div className="relative min-w-[200px] flex-1 sm:max-w-[260px]">
           <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar proyecto…"
-            className="h-9 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-800 outline-none placeholder:text-zinc-400 focus:border-brand"
+            className="h-9 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-800 outline-none placeholder:text-zinc-400 focus:border-zinc-400"
           />
         </div>
       </div>
@@ -979,10 +951,10 @@ function PortfolioTable({
                     }}
                     tabIndex={0}
                     title={expanded ? 'Contraer desglose' : `Clic para desplegar desglose de ${p.name}`}
-                    className={`group cursor-pointer border-b transition-all outline-none select-none ${
+                    className={`group cursor-pointer border-b-2 border-white transition-all outline-none select-none ${
                       expanded
-                        ? 'bg-zinc-100/75 dark:bg-zinc-900/40 border-b-transparent border-l-4 border-l-zinc-900 dark:border-l-zinc-100'
-                        : 'border-b-zinc-100 hover:bg-zinc-50/80 border-l-4 border-l-transparent'
+                        ? 'bg-zinc-200/90 dark:bg-zinc-800/80 border-l-4 border-l-zinc-900 dark:border-l-zinc-100'
+                        : 'bg-zinc-100/80 dark:bg-zinc-900/40 hover:bg-zinc-200/70 border-l-4 border-l-transparent'
                     }`}
                   >
                     <td className="px-5 py-3.5">
@@ -991,7 +963,7 @@ function PortfolioTable({
                           className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border transition-all duration-200 ${
                             expanded
                               ? 'rotate-180 border-zinc-900 bg-zinc-900 text-white shadow-2xs'
-                              : 'border-zinc-200 bg-zinc-100 text-zinc-600 shadow-2xs group-hover:border-zinc-300 group-hover:bg-zinc-200 group-hover:text-zinc-950'
+                              : 'border-zinc-300 bg-white text-zinc-700 shadow-2xs group-hover:bg-zinc-100 group-hover:text-zinc-950'
                           }`}
                         >
                           <ChevronDown size={14} strokeWidth={2.5} />
@@ -1040,7 +1012,7 @@ function PortfolioTable({
                     <td className="px-5 py-3"><StatusBadge status={status} /></td>
                   </tr>
                   {expanded && (
-                    <tr key={`${p.id}-detail`} className="border-b border-zinc-200 bg-zinc-50/80 dark:bg-zinc-900/20 border-l-4 border-l-zinc-900 dark:border-l-zinc-100">
+                    <tr key={`${p.id}-detail`} className="border-b-2 border-white bg-zinc-100/90 dark:bg-zinc-900/50 border-l-4 border-l-zinc-900 dark:border-l-zinc-100">
                       <td colSpan={6} className="px-5 py-4">
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                           <div className="rounded-xl border border-zinc-200 bg-white p-4">

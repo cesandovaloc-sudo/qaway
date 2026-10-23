@@ -106,12 +106,9 @@ describe('DashboardPage — Resumen ejecutivo de cartera', () => {
     })
   })
 
-  it('renderiza cabecera, vistas, roadmap con Hoy y los 4 KPIs', () => {
+  it('renderiza cabecera, roadmap con Hoy y los 4 KPIs ejecutivos', () => {
     renderPage()
     expect(screen.getByText('Cartera de Proyectos')).toBeDefined()
-    for (const tab of ['Resumen', 'Cronograma', 'Hitos', 'Riesgos', 'Presupuesto']) {
-      expect(screen.getAllByText(tab).length).toBeGreaterThanOrEqual(1)
-    }
     expect(screen.getByText('Macro-Roadmap de cartera · ' + YEAR)).toBeDefined()
     expect(screen.getAllByText('Hoy').length).toBeGreaterThanOrEqual(2)
     expect(screen.getByText('Proyectos activos')).toBeDefined()
@@ -130,8 +127,8 @@ describe('DashboardPage — Resumen ejecutivo de cartera', () => {
     renderPage()
     const table = within(screen.getByTestId('portfolio-table'))
     expect(table.getByText('MINEDU Dotación 2027')).toBeDefined()
-    expect(screen.getAllByText('En riesgo').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getAllByText('En objetivo').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('En riesgo').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('En objetivo').length).toBeGreaterThanOrEqual(1)
     expect(table.getByText('Validación UGEL')).toBeDefined()
 
     fireEvent.click(table.getByText('MINEDU Dotación 2027'))
@@ -141,17 +138,16 @@ describe('DashboardPage — Resumen ejecutivo de cartera', () => {
     expect(screen.getByText('Aprobación del plan de trabajo')).toBeDefined()
   })
 
-  it('filtra por píldoras y muestra agenda lateral', () => {
+  it('busca proyectos por texto y muestra agenda lateral', () => {
     renderPage()
-    fireEvent.click(screen.getAllByText('En objetivo')[0])
+    const searchInput = screen.getByPlaceholderText('Buscar proyecto…')
+    fireEvent.change(searchInput, { target: { value: 'Plataforma' } })
     const table = within(screen.getByTestId('portfolio-table'))
-    // La tabla filtra; el roadmap conserva la visión completa de cartera
     expect(table.queryByText('MINEDU Dotación 2027')).toBeNull()
     expect(table.getByText('Plataforma Qaway Lab')).toBeDefined()
 
-    fireEvent.click(screen.getByText('Todos'))
+    fireEvent.change(searchInput, { target: { value: '' } })
     expect(within(screen.getByTestId('portfolio-table')).getByText('MINEDU Dotación 2027')).toBeDefined()
-    expect(screen.queryByText(/Proyectos en atención/)).toBeNull()
     expect(screen.getByText('Actividad reciente')).toBeDefined()
   })
 })
