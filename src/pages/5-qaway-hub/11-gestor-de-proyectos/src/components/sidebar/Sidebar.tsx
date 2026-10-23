@@ -155,6 +155,13 @@ export default function Sidebar({
           badge: 'ACTIVO',
           badgeVariant: 'urgent',
         },
+        {
+          to: '/monitoreo-fase-2',
+          label: 'Reporteador Fase 2',
+          icon: <BarChart3 size={18} />,
+          badge: 'PASCO/JUNÍN',
+          badgeVariant: 'neutral',
+        },
       ],
     },
     {

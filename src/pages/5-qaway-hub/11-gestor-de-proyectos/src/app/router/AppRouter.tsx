@@ -48,6 +48,7 @@ import SharedLinksPage from '@/pages/config/SharedLinksPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import TerritoryReporterPage from '@/pages/monitoring/TerritoryReporterPage'
 import TerritoryReporterV2Page from '@/pages/monitoring/TerritoryReporterV2Page'
+import TerritoryReporterPhase2Page from '@/pages/monitoring/TerritoryReporterPhase2Page'
 import CascadeFractalPage from '@/features/cascade-fractal/CascadeFractalPage'
 
 export default function AppRouter() {
@@ -87,6 +88,8 @@ export default function AppRouter() {
           {/* Módulo Autónomo V2: 3 Fases (Carga Inicial · Drive Regional 22/10 · Cierre RAR 26/10) */}
           <Route path="monitoreo-v2" element={<TerritoryReporterV2Page />} />
           <Route path="monitoreo-territorial-v2" element={<TerritoryReporterV2Page />} />
+          {/* Módulo Autónomo Fase 2: Exclusivo Cierre RAR (Región Junín y Región Pasco) */}
+          <Route path="monitoreo-fase-2" element={<TerritoryReporterPhase2Page />} />
 
           {/* Nueva Arquitectura: Motor WBS en Cascada Fractal con Roll-up e integración 100% funcional */}
           <Route path="cascada" element={<CascadeFractalPage />} />
