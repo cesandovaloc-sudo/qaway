@@ -48,8 +48,10 @@ export type DirectionCode =
   | 'DEBE'
   | 'DEIB'
   | 'DISER'
+  | 'DEBEDSAR'
+  | 'DIGESE (SEHO)'
 
-export const DIRECTION_CODES: DirectionCode[] = [
+export const JUNIN_DIRECTION_CODES: DirectionCode[] = [
   'DEI',
   'DEP',
   'DES',
@@ -59,8 +61,23 @@ export const DIRECTION_CODES: DirectionCode[] = [
   'DISER',
 ]
 
+export const PASCO_DIRECTION_CODES: DirectionCode[] = [
+  'DEI',
+  'DEP',
+  'DES',
+  'DEBA',
+  'DEBE',
+  'DEIB',
+  'DISER',
+  'DEBEDSAR',
+  'DIGESE (SEHO)',
+]
+
+export const DIRECTION_CODES: DirectionCode[] = JUNIN_DIRECTION_CODES
+
 // Mapeo oficial de Direcciones aplicables por UGEL (MINEDU - Dotación 2027)
 export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
+  // Región Junín (13 UGEL)
   'ugel-chanchamayo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-chupaca': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-concepcion': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
@@ -74,13 +91,13 @@ export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
   'ugel-satipo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-tarma': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-yauli': ['DEBA', 'DEBE', 'DEI', 'DEP', 'DES', 'DISER'],
-  // Región Pasco (DRE Pasco + 5 UGEL)
-  'pasco-dre-pasco': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  // Región Pasco (DRE Pasco, COAR Pasco + 4 UGEL)
+  'pasco-dre-pasco': ['DEBE', 'DEI', 'DEIB', 'DEP'],
+  'pasco-coar-pasco': ['DEBEDSAR'],
   'pasco-ugel-oxapampa': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
-  'pasco-ugel-daniel-alcides-carrion': ['DEBA', 'DEBE', 'DEI', 'DEP', 'DES', 'DISER'],
-  'pasco-ugel-pasco': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
-  'pasco-ugel-puerto-bermudez': ['DEBA', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
-  'pasco-ugel-rio-ene-mantaro': ['DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-daniel-alcides-carrion': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-pasco': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DIGESE (SEHO)', 'DISER'],
+  'pasco-ugel-puerto-bermudez': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
 }
 
 export interface UgelMonitoringV2Row {
@@ -460,7 +477,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
   },
 ]
 
-export const STORAGE_KEY_PASCO_V2 = 'qaway_territory_reporter_v2_pasco_v1'
+export const STORAGE_KEY_PASCO_V2 = 'qaway_territory_reporter_v2_pasco_v2'
 
 export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   {
@@ -478,21 +495,39 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: '16/10/2026 14:00',
     directions: {
-      DEBA: 'completado',
       DEBE: 'completado',
       DEI: 'completado',
       DEIB: 'completado',
       DEP: 'completado',
-      DES: 'completado',
-      DISER: 'completado',
     },
     observation: 'Validación regional consolidada DRE Pasco.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
   {
-    id: 'pasco-ugel-oxapampa',
+    id: 'pasco-coar-pasco',
     number: 2,
+    name: 'COAR PASCO',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '15/10/2026 10:00',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 08:30',
+    phase2Files: 3,
+    phase2Total: 3,
+    phase2Date: '16/10/2026 12:00',
+    directions: {
+      DEBEDSAR: 'completado',
+    },
+    observation: 'Validación COAR Pasco completada conforme.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'pasco-ugel-oxapampa',
+    number: 3,
     name: 'OXAPAMPA',
     phase1Files: 3,
     phase1Total: 3,
@@ -519,7 +554,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   },
   {
     id: 'pasco-ugel-daniel-alcides-carrion',
-    number: 3,
+    number: 4,
     name: 'DANIEL ALCIDES CARRIÓN',
     phase1Files: 3,
     phase1Total: 3,
@@ -535,6 +570,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
       DEBA: 'en_proceso',
       DEBE: 'pendiente',
       DEI: 'en_proceso',
+      DEIB: 'pendiente',
       DEP: 'completado',
       DES: 'en_proceso',
       DISER: 'pendiente',
@@ -545,7 +581,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   },
   {
     id: 'pasco-ugel-pasco',
-    number: 4,
+    number: 5,
     name: 'PASCO',
     phase1Files: 3,
     phase1Total: 3,
@@ -564,6 +600,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
       DEIB: 'pendiente',
       DEP: 'completado',
       DES: 'completado',
+      'DIGESE (SEHO)': 'completado',
       DISER: 'pendiente',
     },
     observation: 'Fase 1 y Drive OK. Cierre RAR en plazo.',
@@ -572,7 +609,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   },
   {
     id: 'pasco-ugel-puerto-bermudez',
-    number: 5,
+    number: 6,
     name: 'PUERTO BERMÚDEZ',
     phase1Files: 3,
     phase1Total: 3,
@@ -585,39 +622,15 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
-      DEBA: 'pendiente',
+      DEBA: 'en_proceso',
+      DEBE: 'pendiente',
       DEI: 'en_proceso',
       DEIB: 'pendiente',
       DEP: 'completado',
-      DES: 'pendiente',
+      DES: 'en_proceso',
       DISER: 'pendiente',
     },
     observation: 'Avance en zona selva Oxapampa. Cierre RAR en coordinación.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
-    id: 'pasco-ugel-rio-ene-mantaro',
-    number: 6,
-    name: 'RÍO ENE MANTARO',
-    phase1Files: 3,
-    phase1Total: 3,
-    phase1Date: '17/10/2026 14:00',
-    driveStatus: 'pendiente',
-    driveFiles: 0,
-    driveTotal: 1,
-    driveDate: 'Sin evidencia',
-    phase2Files: 0,
-    phase2Total: 3,
-    phase2Date: 'En plazo hasta 26/10',
-    directions: {
-      DEI: 'pendiente',
-      DEIB: 'pendiente',
-      DEP: 'pendiente',
-      DES: 'pendiente',
-      DISER: 'pendiente',
-    },
-    observation: 'Seguimiento especial territorial en zona VRAEM/Frontera.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
@@ -735,6 +748,7 @@ export function TerritoryReporterV2Tab({
   })
 
   const ugels = isPasco ? pascoUgels : juninUgels
+  const activeDirectionCodes = isPasco ? PASCO_DIRECTION_CODES : JUNIN_DIRECTION_CODES
 
   const setUgels = (updater: React.SetStateAction<UgelMonitoringV2Row[]>) => {
     if (isPasco) {
@@ -921,29 +935,31 @@ export function TerritoryReporterV2Tab({
     const inProgressPct = Math.round((inProgress / total) * 100)
     const pendingPct = Math.max(0, 100 - completedPct - inProgressPct)
 
-    const directionStats = DIRECTION_CODES.map((code) => {
-      let ok = 0
-      let prog = 0
-      let pend = 0
-      let applicableCount = 0
-      for (const u of ugels) {
-        const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[u.id] || []
-        if (!applicableDirs.includes(code)) continue // NO aplica: no entra al total ni perjudica el análisis
-        applicableCount++
-        const st = u.directions[code]
-        if (st === 'completado') ok++
-        else if (st === 'en_proceso') prog++
-        else pend++
-      }
-      return {
-        code,
-        ok,
-        prog,
-        pend,
-        total: applicableCount,
-        pct: applicableCount > 0 ? Math.round((ok / applicableCount) * 100) : 100,
-      }
-    })
+    const directionStats = activeDirectionCodes
+      .map((code) => {
+        let ok = 0
+        let prog = 0
+        let pend = 0
+        let applicableCount = 0
+        for (const u of ugels) {
+          const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[u.id] || []
+          if (!applicableDirs.includes(code)) continue // NO aplica: no entra al total ni perjudica el análisis
+          applicableCount++
+          const st = u.directions[code]
+          if (st === 'completado') ok++
+          else if (st === 'en_proceso') prog++
+          else pend++
+        }
+        return {
+          code,
+          ok,
+          prog,
+          pend,
+          total: applicableCount,
+          pct: applicableCount > 0 ? Math.round((ok / applicableCount) * 100) : 100,
+        }
+      })
+      .filter((d) => d.total > 0)
 
     return {
       total,
@@ -1247,7 +1263,12 @@ export function TerritoryReporterV2Tab({
                 {ugels.map((u) => {
                   const rawName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
                   // Límite de caracteres para evitar compresión y permitir legibilidad
-                  const shortName = rawName.length > 9 ? rawName.slice(0, 8) + '.' : rawName
+                  let shortName = rawName
+                  if (u.name === 'DANIEL ALCIDES CARRIÓN') shortName = 'Daniel a.'
+                  else if (u.name === 'PUERTO BERMÚDEZ') shortName = 'Puerto b.'
+                  else if (u.name === 'COAR PASCO') shortName = 'Coar pasco'
+                  else if (u.name === 'DRE PASCO') shortName = 'Dre pasco'
+                  else if (rawName.length > 9) shortName = rawName.slice(0, 8) + '.'
                   return (
                     <th
                       key={u.id}
@@ -1656,7 +1677,7 @@ export function TerritoryReporterV2Tab({
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px] text-slate-500 font-bold">
-            <span>7 Direcciones evaluadas</span>
+            <span>{activeDirectionCodes.filter((c) => ugels.some((u) => (UGEL_APPLICABLE_DIRECTIONS[u.id] || []).includes(c))).length} Direcciones evaluadas</span>
             <span>{ugelStats.total} {isPasco ? 'unidades Pasco' : 'UGEL Junín'}</span>
           </div>
         </div>
@@ -1709,7 +1730,7 @@ export function TerritoryReporterV2Tab({
               className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 outline-none cursor-pointer"
             >
               <option value="Todas">Todas las direcciones</option>
-              {DIRECTION_CODES.map((d) => (
+              {activeDirectionCodes.map((d) => (
                 <option key={d} value={d}>
                   {d}
                 </option>
@@ -1738,7 +1759,7 @@ export function TerritoryReporterV2Tab({
                   Fase 2 (Oficial RAR)
                 </th>
                 {/* BLOQUE UNIFICADO: DIRECCIONES Y EVIDENCIA DRIVE */}
-                <th colSpan={DIRECTION_CODES.length + 2} className="sticky top-0 z-20 border-r border-slate-200 px-3 py-2 text-center bg-amber-50 text-amber-950 font-black">
+                <th colSpan={activeDirectionCodes.length + 2} className="sticky top-0 z-20 border-r border-slate-200 px-3 py-2 text-center bg-amber-50 text-amber-950 font-black">
                   Direcciones y Evidencia Drive Regional (Declarativo 22/10)
                 </th>
                 {/* BLOQUE ESTADO GENERAL */}
@@ -1752,9 +1773,9 @@ export function TerritoryReporterV2Tab({
               <tr className="border-b border-slate-200 text-[11.5px] font-bold text-slate-600">
                 <th className="sticky top-[37px] z-20 bg-blue-50/95 border-l border-slate-200 px-2.5 py-1.5 text-center">Estado</th>
                 <th className="sticky top-[37px] z-20 bg-indigo-50/95 border-r border-slate-200 px-2.5 py-1.5 text-center">RAR</th>
-                {/* 1°: Las 7 Direcciones Pedagógicas */}
-                {DIRECTION_CODES.map((code) => (
-                  <th key={code} className="sticky top-[37px] z-20 bg-amber-50/95 px-1.5 py-1.5 text-center truncate max-w-[55px]" title={code}>
+                {/* 1°: Las Direcciones Pedagógicas */}
+                {activeDirectionCodes.map((code) => (
+                  <th key={code} className="sticky top-[37px] z-20 bg-amber-50/95 px-1.5 py-1.5 text-center truncate max-w-[65px]" title={code}>
                     {code}
                   </th>
                 ))}
@@ -1830,8 +1851,8 @@ export function TerritoryReporterV2Tab({
                       </button>
                     </td>
 
-                    {/* 1°: DIRECCIONES OFICIALES (DEI..DISER) */}
-                    {DIRECTION_CODES.map((code) => {
+                    {/* 1°: DIRECCIONES OFICIALES */}
+                    {activeDirectionCodes.map((code) => {
                       const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[u.id] || []
                       const applies = applicableDirs.includes(code)
                       const st = u.directions[code]
@@ -2145,10 +2166,10 @@ export function TerritoryReporterV2Tab({
               {/* Estado por Dirección Pedagógica en esta UGEL */}
               <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
                 <p className="text-xs font-bold text-slate-800">
-                  Checks por Dirección que aplican a UGEL {inspectedUgel.name} (clic para alternar)
+                  Checks por Dirección que aplican a {inspectedUgel.name.startsWith('DRE') || inspectedUgel.name.startsWith('COAR') ? inspectedUgel.name : `UGEL ${inspectedUgel.name}`} (clic para alternar)
                 </p>
                 <div className="mt-3 grid grid-cols-4 sm:grid-cols-7 gap-2 text-center">
-                  {DIRECTION_CODES.filter((code) => {
+                  {activeDirectionCodes.filter((code) => {
                     const applicableDirs = UGEL_APPLICABLE_DIRECTIONS[inspectedUgel.id] || []
                     return applicableDirs.includes(code)
                   }).map((code) => {
