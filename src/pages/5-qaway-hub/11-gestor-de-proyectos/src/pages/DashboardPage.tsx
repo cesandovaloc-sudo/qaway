@@ -641,13 +641,13 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="w-full pt-4">
+          <div className="relative w-full pt-4 overflow-hidden">
             <div className="w-full">
               {/* Eje de escala temporal con 6 meses (horizonte de ejecución real) */}
               <div className="flex items-end mb-4">
                 <div className="w-[240px] sm:w-[260px] shrink-0" />
                 <div className="relative flex-1 grid grid-cols-6 text-center">
-                  {/* Línea de Hoy con píldora superior y guía punteada */}
+                  {/* Píldora superior de Hoy */}
                   {hoyPct >= 0 && hoyPct <= 100 && (
                     <div
                       className="pointer-events-none absolute -top-1 bottom-0 z-20"
@@ -656,7 +656,6 @@ export default function DashboardPage() {
                       <span className="absolute -top-3.5 -translate-x-1/2 rounded-md bg-sky-500 px-2 py-0.5 text-[9.5px] font-bold text-white shadow-xs">
                         Hoy
                       </span>
-                      <div className="absolute top-2.5 bottom-[-2000px] max-h-[800px] -translate-x-1/2 border-l border-dashed border-sky-400" />
                     </div>
                   )}
 
@@ -675,8 +674,21 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Filas del Roadmap */}
+              {/* Filas del Roadmap con guía punteada de Hoy confinada estrictamente a la sección */}
               <div className="space-y-4 relative">
+                {hoyPct >= 0 && hoyPct <= 100 && (
+                  <div
+                    className="pointer-events-none absolute top-0 bottom-0 z-0 flex w-full"
+                  >
+                    <div className="w-[240px] sm:w-[260px] shrink-0" />
+                    <div className="relative flex-1 h-full">
+                      <div
+                        className="absolute top-0 bottom-0 -translate-x-1/2 border-l border-dashed border-sky-400/90"
+                        style={{ left: `${hoyPct}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
                 {roadmapRows.map(({ project, left, width }) => {
                   const status = statusOf.get(project.id) ?? 'objetivo'
                   const barColor =
@@ -969,24 +981,24 @@ function PortfolioTable({
                     title={expanded ? 'Contraer desglose' : `Clic para desplegar desglose de ${p.name}`}
                     className={`group cursor-pointer border-b transition-all outline-none select-none ${
                       expanded
-                        ? 'bg-blue-50/80 dark:bg-blue-950/20 border-b-transparent border-l-4 border-l-blue-600'
-                        : 'border-b-zinc-100 hover:bg-slate-50/80 border-l-4 border-l-transparent'
+                        ? 'bg-zinc-100/75 dark:bg-zinc-900/40 border-b-transparent border-l-4 border-l-zinc-900 dark:border-l-zinc-100'
+                        : 'border-b-zinc-100 hover:bg-zinc-50/80 border-l-4 border-l-transparent'
                     }`}
                   >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <span
-                          className={`grid h-6 w-6 shrink-0 place-items-center rounded-md transition-all duration-200 ${
+                          className={`grid h-6 w-6 shrink-0 place-items-center rounded-md border transition-all duration-200 ${
                             expanded
-                              ? 'rotate-180 bg-blue-600 text-white shadow-xs'
-                              : 'bg-zinc-100 text-zinc-500 group-hover:bg-blue-100 group-hover:text-blue-700'
+                              ? 'rotate-180 border-zinc-900 bg-zinc-900 text-white shadow-2xs'
+                              : 'border-zinc-200 bg-zinc-100 text-zinc-600 shadow-2xs group-hover:border-zinc-300 group-hover:bg-zinc-200 group-hover:text-zinc-950'
                           }`}
                         >
                           <ChevronDown size={14} strokeWidth={2.5} />
                         </span>
                         <div className="min-w-0">
                           <p className={`text-sm font-bold transition-colors ${
-                            expanded ? 'text-blue-950 font-extrabold' : 'text-zinc-900 group-hover:text-blue-900'
+                            expanded ? 'text-zinc-950 font-extrabold' : 'text-zinc-900 group-hover:text-zinc-950'
                           }`}>
                             {p.name}
                           </p>
@@ -1028,7 +1040,7 @@ function PortfolioTable({
                     <td className="px-5 py-3"><StatusBadge status={status} /></td>
                   </tr>
                   {expanded && (
-                    <tr key={`${p.id}-detail`} className="border-b border-zinc-200/90 bg-blue-50/40 dark:bg-blue-950/10 border-l-4 border-l-blue-600">
+                    <tr key={`${p.id}-detail`} className="border-b border-zinc-200 bg-zinc-50/80 dark:bg-zinc-900/20 border-l-4 border-l-zinc-900 dark:border-l-zinc-100">
                       <td colSpan={6} className="px-5 py-4">
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                           <div className="rounded-xl border border-zinc-200 bg-white p-4">
@@ -1204,13 +1216,6 @@ function AgendaCard({
             )}
           </ul>
         )}
-        <button
-          type="button"
-          onClick={() => onOpenProject(monthMilestones[0]?.projectId ?? todayMilestones[0]?.projectId ?? criticalTasks[0]?.projectId ?? '', 'calendar')}
-          className="mt-2 inline-flex items-center gap-1 px-2 py-1 text-[13px] font-semibold text-zinc-700 hover:text-zinc-900"
-        >
-          Ver calendario completo <ArrowRight size={13} />
-        </button>
       </div>
     </section>
   )
