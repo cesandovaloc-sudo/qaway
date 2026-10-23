@@ -1290,13 +1290,20 @@ export function TerritoryReporterV2Tab({
                   Etapa
                 </th>
                 {ugels.map((u) => {
-                  const rawName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
-                  // Límite de caracteres para evitar compresión y permitir legibilidad
-                  let shortName = rawName
-                  if (u.name === 'DANIEL ALCIDES CARRIÓN') shortName = 'Daniel a.'
-                  else if (u.name === 'PUERTO BERMÚDEZ') shortName = 'Puerto b.'
-                  else if (u.name === 'DRE PASCO') shortName = 'Dre pasco'
-                  else if (rawName.length > 9) shortName = rawName.slice(0, 8) + '.'
+                  let shortName = u.name
+                  if (u.name === 'DRE PASCO') {
+                    shortName = 'DRE Pasco'
+                  } else if (u.name === 'DANIEL ALCIDES CARRIÓN') {
+                    shortName = 'Daniel A. Carrión'
+                  } else if (u.name === 'PUERTO BERMÚDEZ') {
+                    shortName = 'Puerto Bermúdez'
+                  } else if (u.name === 'RÍO ENE MANTARO') {
+                    shortName = 'Río Ene'
+                  } else if (u.name === 'RÍO TAMBO') {
+                    shortName = 'Río Tambo'
+                  } else {
+                    shortName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
+                  }
                   return (
                     <th
                       key={u.id}
