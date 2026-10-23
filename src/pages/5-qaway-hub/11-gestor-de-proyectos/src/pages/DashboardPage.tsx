@@ -697,7 +697,7 @@ export default function DashboardPage() {
                         >
                           {project.name}
                         </button>
-                        <span className="font-mono text-xs sm:text-[13px] font-bold text-slate-700 tabular-nums">
+                        <span className="text-xs sm:text-[13px] font-bold text-slate-700 tabular-nums">
                           {project.progress}%
                         </span>
                       </div>
@@ -791,7 +791,7 @@ export default function DashboardPage() {
                 <div key={p.id}>
                   <div className="mb-1 flex items-center justify-between gap-3 text-xs">
                     <span className="truncate font-semibold text-zinc-700">{p.name}</span>
-                    <span className="shrink-0 font-mono font-bold text-zinc-700">{pct}%</span>
+                    <span className="shrink-0 text-xs font-bold tabular-nums text-zinc-700">{pct}%</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
                     <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${Math.min(100, Math.max(2, pct))}%` }} />
@@ -988,13 +988,13 @@ function PortfolioTable({
                         <div className="h-1.5 w-[90px] overflow-hidden rounded-full bg-zinc-100">
                           <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${Math.min(100, Math.max(0, p.progress))}%` }} />
                         </div>
-                        <span className="font-mono text-[12px] font-bold text-zinc-700">{p.progress}%</span>
+                        <span className="text-[12px] font-bold tabular-nums text-zinc-700">{p.progress}%</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="flex items-center gap-1.5" title={`Desvío: ${dev > 0 ? `+${dev}` : dev} días`}>
                         <Spark values={[0, p.progress / 2, p.progress]} stroke={dev > 0 ? '#dc2626' : '#059669'} />
-                        <span className={`font-mono text-[11px] font-bold ${dev > 0 ? 'text-red-700' : dev < 0 ? 'text-emerald-700' : 'text-zinc-400'}`}>
+                        <span className={`text-[11px] font-bold tabular-nums ${dev > 0 ? 'text-red-700' : dev < 0 ? 'text-emerald-700' : 'text-zinc-400'}`}>
                           {dev > 0 ? `+${dev}d` : `${dev}d`}
                         </span>
                       </span>
@@ -1038,9 +1038,9 @@ function PortfolioTable({
                           </div>
                           <div className="rounded-xl border border-zinc-200 bg-white p-4">
                             <h4 className="text-xs font-bold uppercase tracking-wide text-zinc-500">Presupuesto y equipo</h4>
-                            <p className="mt-2.5 font-mono text-sm font-bold text-zinc-900">
+                            <p className="mt-2.5 text-sm font-bold tabular-nums text-zinc-900">
                               {formatCurrency(p.budget.spent, p.budget.currency)}
-                              <span className="font-sans font-medium text-zinc-400"> de {formatCurrency(p.budget.allocated, p.budget.currency)} ({budgetPct}%)</span>
+                              <span className="font-medium text-zinc-500"> de {formatCurrency(p.budget.allocated, p.budget.currency)} ({budgetPct}%)</span>
                             </p>
                             <div className="mt-2 h-2 overflow-hidden rounded-full bg-zinc-100">
                               <div className="h-full rounded-full bg-brand" style={{ width: `${Math.min(100, Math.max(2, budgetPct))}%` }} />
@@ -1133,7 +1133,7 @@ function AgendaCard({
             {todayMilestones.slice(0, 5).map((m, i) => (
               <li key={m.id}>
                 <button type="button" onClick={() => onOpenProject(m.projectId, 'hitos')} className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-zinc-50">
-                  <span className="w-11 shrink-0 font-mono text-[12px] font-bold text-zinc-500">{times[i % times.length]}</span>
+                  <span className="w-11 shrink-0 text-[12px] font-bold tabular-nums text-zinc-500">{times[i % times.length]}</span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-zinc-900">{m.name}</span>
                     <span className="block truncate text-[11px] text-zinc-400">{projectNameOf(m.projectId)} · Hito</span>

@@ -29,7 +29,7 @@
   /* ── Typography ── */
   --font-display: "DM Sans", "Space Grotesk", system-ui, sans-serif;
   --font-body: "DM Sans", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-mono: "DM Sans", system-ui, sans-serif;
 
   /* ── Spacing ── */
   --spacing-sidebar: 260px;
