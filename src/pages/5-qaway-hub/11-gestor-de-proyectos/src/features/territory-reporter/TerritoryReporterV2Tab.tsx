@@ -93,11 +93,11 @@ export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
   'ugel-yauli': ['DEBA', 'DEBE', 'DEI', 'DEP', 'DES', 'DISER'],
   // Región Pasco (DRE Pasco, COAR Pasco + 4 UGEL)
   'pasco-dre-pasco': ['DEBE', 'DEI', 'DEIB', 'DEP'],
-  'pasco-coar-pasco': ['DEBEDSAR'],
   'pasco-ugel-oxapampa': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'pasco-ugel-daniel-alcides-carrion': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'pasco-ugel-pasco': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DIGESE (SEHO)', 'DISER'],
   'pasco-ugel-puerto-bermudez': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-coar-pasco': ['DEBEDSAR'],
 }
 
 export interface UgelMonitoringV2Row {
@@ -477,7 +477,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
   },
 ]
 
-export const STORAGE_KEY_PASCO_V2 = 'qaway_territory_reporter_v2_pasco_v2'
+export const STORAGE_KEY_PASCO_V3 = 'qaway_territory_reporter_v2_pasco_v3'
 
 export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   {
@@ -505,29 +505,8 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     gestorPhone: '+51964112233',
   },
   {
-    id: 'pasco-coar-pasco',
-    number: 2,
-    name: 'COAR PASCO',
-    phase1Files: 3,
-    phase1Total: 3,
-    phase1Date: '15/10/2026 10:00',
-    driveStatus: 'completado',
-    driveFiles: 1,
-    driveTotal: 1,
-    driveDate: '22/10/2026 08:30',
-    phase2Files: 3,
-    phase2Total: 3,
-    phase2Date: '16/10/2026 12:00',
-    directions: {
-      DEBEDSAR: 'completado',
-    },
-    observation: 'Validación COAR Pasco completada conforme.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
     id: 'pasco-ugel-oxapampa',
-    number: 3,
+    number: 2,
     name: 'OXAPAMPA',
     phase1Files: 3,
     phase1Total: 3,
@@ -554,12 +533,12 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   },
   {
     id: 'pasco-ugel-daniel-alcides-carrion',
-    number: 4,
+    number: 3,
     name: 'DANIEL ALCIDES CARRIÓN',
     phase1Files: 3,
     phase1Total: 3,
     phase1Date: '16/10/2026 09:40',
-    driveStatus: 'en_proceso',
+    driveStatus: 'completado',
     driveFiles: 1,
     driveTotal: 1,
     driveDate: '22/10/2026 12:30',
@@ -567,21 +546,21 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
-      DEBA: 'en_proceso',
-      DEBE: 'pendiente',
-      DEI: 'en_proceso',
-      DEIB: 'pendiente',
+      DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
       DEP: 'completado',
-      DES: 'en_proceso',
-      DISER: 'pendiente',
+      DES: 'completado',
+      DISER: 'completado',
     },
-    observation: 'Fase 1 OK; Drive en revisión. Fase 2 en plazo regular.',
+    observation: 'Fase 1 y Drive 100% completados. Fase 2 en plazo regular.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
   {
     id: 'pasco-ugel-pasco',
-    number: 5,
+    number: 4,
     name: 'PASCO',
     phase1Files: 3,
     phase1Total: 3,
@@ -595,13 +574,13 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Date: 'En plazo hasta 26/10',
     directions: {
       DEBA: 'completado',
-      DEBE: 'pendiente',
+      DEBE: 'completado',
       DEI: 'completado',
-      DEIB: 'pendiente',
+      DEIB: 'completado',
       DEP: 'completado',
       DES: 'completado',
       'DIGESE (SEHO)': 'completado',
-      DISER: 'pendiente',
+      DISER: 'completado',
     },
     observation: 'Fase 1 y Drive OK. Cierre RAR en plazo.',
     gestorName: 'Carlos Sandoval',
@@ -609,12 +588,12 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   },
   {
     id: 'pasco-ugel-puerto-bermudez',
-    number: 6,
+    number: 5,
     name: 'PUERTO BERMÚDEZ',
     phase1Files: 3,
     phase1Total: 3,
     phase1Date: '17/10/2026 10:10',
-    driveStatus: 'en_proceso',
+    driveStatus: 'completado',
     driveFiles: 1,
     driveTotal: 1,
     driveDate: '22/10/2026 15:45',
@@ -622,19 +601,70 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     phase2Total: 3,
     phase2Date: 'En plazo hasta 26/10',
     directions: {
-      DEBA: 'en_proceso',
-      DEBE: 'pendiente',
-      DEI: 'en_proceso',
-      DEIB: 'pendiente',
+      DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
       DEP: 'completado',
-      DES: 'en_proceso',
-      DISER: 'pendiente',
+      DES: 'completado',
+      DISER: 'completado',
     },
     observation: 'Avance en zona selva Oxapampa. Cierre RAR en coordinación.',
     gestorName: 'Carlos Sandoval',
     gestorPhone: '+51964112233',
   },
+  {
+    id: 'pasco-coar-pasco',
+    number: 6,
+    name: 'COAR PASCO',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '15/10/2026 10:00',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 08:30',
+    phase2Files: 0,
+    phase2Total: 3,
+    phase2Date: 'En plazo hasta 26/10',
+    directions: {
+      DEBEDSAR: 'completado',
+    },
+    observation: 'Validación COAR Pasco completada conforme.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
 ]
+
+export function sanitizePascoUgels(list: UgelMonitoringV2Row[]): UgelMonitoringV2Row[] {
+  const expectedIds = INITIAL_PASCO_UGELS_V2.map((u) => u.id)
+  const hasInvalid = list.some((u) => !expectedIds.includes(u.id) || u.id.includes('rio-ene') || u.name.includes('RIO') || u.name.includes('RÍO'))
+  const hasMissing = expectedIds.some((id) => !list.some((u) => u.id === id))
+
+  if (hasInvalid || hasMissing || list.length !== INITIAL_PASCO_UGELS_V2.length) {
+    const listMap = new Map(list.map((u) => [u.id, u]))
+    return INITIAL_PASCO_UGELS_V2.map((canon) => {
+      const existing = listMap.get(canon.id)
+      if (!existing) return canon
+      return {
+        ...canon,
+        phase1Files: existing.phase1Files,
+        phase1Date: existing.phase1Date,
+        driveStatus: existing.driveStatus,
+        driveFiles: existing.driveFiles,
+        driveDate: existing.driveDate,
+        phase2Files: existing.phase2Files,
+        phase2Date: existing.phase2Date,
+        directions: {
+          ...canon.directions,
+          ...existing.directions,
+        },
+        observation: existing.observation || canon.observation,
+      }
+    })
+  }
+  return list
+}
 
 function computePhaseStatus(files: number, total: number): TerritoryStatus {
   if (files >= total) return 'completado'
@@ -734,18 +764,39 @@ export function TerritoryReporterV2Tab({
 
   const [pascoUgels, setPascoUgels] = useState<UgelMonitoringV2Row[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_PASCO_V2)
+      // Limpiar claves corruptas anteriores
+      localStorage.removeItem('qaway_territory_reporter_v2_pasco_v1')
+      localStorage.removeItem('qaway_territory_reporter_v2_pasco_v2')
+      const saved = localStorage.getItem(STORAGE_KEY_PASCO_V3)
       if (saved) {
         const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
-        if (parsed.length === 6) {
-          return parsed
-        }
+        return sanitizePascoUgels(parsed)
       }
     } catch {
       // ignore
     }
     return INITIAL_PASCO_UGELS_V2
   })
+
+  // Purga reactiva inmediata en caso de Fast Refresh / HMR
+  useEffect(() => {
+    const isCorrupt =
+      pascoUgels.some((u) => u.id.includes('rio-ene') || u.name.includes('RIO') || u.name.includes('RÍO')) ||
+      !pascoUgels.some((u) => u.id === 'pasco-coar-pasco') ||
+      pascoUgels.length !== INITIAL_PASCO_UGELS_V2.length
+
+    if (isCorrupt) {
+      const cleaned = sanitizePascoUgels(pascoUgels)
+      setPascoUgels(cleaned)
+      try {
+        localStorage.setItem(STORAGE_KEY_PASCO_V3, JSON.stringify(cleaned))
+        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v1')
+        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v2')
+      } catch {
+        // ignore
+      }
+    }
+  }, [pascoUgels])
 
   const ugels = isPasco ? pascoUgels : juninUgels
   const activeDirectionCodes = isPasco ? PASCO_DIRECTION_CODES : JUNIN_DIRECTION_CODES
@@ -791,7 +842,7 @@ export function TerritoryReporterV2Tab({
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_PASCO_V2, JSON.stringify(pascoUgels))
+      localStorage.setItem(STORAGE_KEY_PASCO_V3, JSON.stringify(pascoUgels))
     } catch {
       // ignore
     }
@@ -1648,7 +1699,7 @@ export function TerritoryReporterV2Tab({
           <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
               <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Avance por Direcciones en 3 Fases</h3>
-              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Progreso de las 7 líneas pedagógicas en las 3 fases</p>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Progreso de las {ugelStats.directionStats.length} líneas pedagógicas en las 3 fases</p>
             </div>
             <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 shrink-0">
               Líneas · 3 Fases
@@ -1677,7 +1728,7 @@ export function TerritoryReporterV2Tab({
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px] text-slate-500 font-bold">
-            <span>{activeDirectionCodes.filter((c) => ugels.some((u) => (UGEL_APPLICABLE_DIRECTIONS[u.id] || []).includes(c))).length} Direcciones evaluadas</span>
+            <span>{ugelStats.directionStats.length} Direcciones evaluadas</span>
             <span>{ugelStats.total} {isPasco ? 'unidades Pasco' : 'UGEL Junín'}</span>
           </div>
         </div>
