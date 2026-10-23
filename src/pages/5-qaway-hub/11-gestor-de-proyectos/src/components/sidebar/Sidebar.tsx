@@ -162,6 +162,13 @@ export default function Sidebar({
           badge: 'PASCO/JUNÍN',
           badgeVariant: 'neutral',
         },
+        {
+          to: '/resumen-regional',
+          label: 'Resumen Regional',
+          icon: <LayoutDashboard size={18} />,
+          badge: 'MODELO',
+          badgeVariant: 'neutral',
+        },
       ],
     },
     {

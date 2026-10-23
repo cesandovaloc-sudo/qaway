@@ -49,6 +49,7 @@ import NotFoundPage from '@/pages/NotFoundPage'
 import TerritoryReporterPage from '@/pages/monitoring/TerritoryReporterPage'
 import TerritoryReporterV2Page from '@/pages/monitoring/TerritoryReporterV2Page'
 import TerritoryReporterPhase2Page from '@/pages/monitoring/TerritoryReporterPhase2Page'
+import HubProResumenPage from '@/pages/monitoring/HubProResumenPage'
 import CascadeFractalPage from '@/features/cascade-fractal/CascadeFractalPage'
 
 export default function AppRouter() {
@@ -90,6 +91,8 @@ export default function AppRouter() {
           <Route path="monitoreo-territorial-v2" element={<TerritoryReporterV2Page />} />
           {/* Módulo Autónomo Fase 2: Exclusivo Cierre RAR (Región Junín y Región Pasco) */}
           <Route path="monitoreo-fase-2" element={<TerritoryReporterPhase2Page />} />
+          {/* Módulo Autónomo de Resumen Regional HubPro (Modelo Visual) */}
+          <Route path="resumen-regional" element={<HubProResumenPage />} />
 
           {/* Nueva Arquitectura: Motor WBS en Cascada Fractal con Roll-up e integración 100% funcional */}
           <Route path="cascada" element={<CascadeFractalPage />} />
