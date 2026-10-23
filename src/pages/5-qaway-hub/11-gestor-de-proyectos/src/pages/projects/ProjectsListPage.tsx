@@ -5,19 +5,16 @@ import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { useTenantFilteredProjects } from '@/hooks/useProjects'
 import {
   PROJECT_HEALTH_META,
-  PROJECT_METHODOLOGY_META,
   PROJECT_STATUS_META,
-  type ProjectMethodology,
   type ProjectStatus,
 } from '@/types/project.types'
 
 // ─────────────────────────────────────────────────────────────────────────
 // ProjectsListPage.tsx — Directorio de Proyectos (Task 3.2)
-// Tabla interactiva estilo 10-inventario con filtros por metodología/estado
+// Tabla interactiva estilo 10-inventario con filtros por salud operativa/estado
 // y buscador en tiempo real sobre el store reactivo.
 // ─────────────────────────────────────────────────────────────────────────
 
-type MethodologyFilter = 'todas' | ProjectMethodology
 type StatusFilter = 'todos' | ProjectStatus
 
 const selectClass =
@@ -42,7 +39,7 @@ export default function ProjectsListPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
-  const [methodology, setMethodology] = useState<MethodologyFilter>('todas')
+  const [health, setHealth] = useState<'todos' | 'optimo' | 'atencion' | 'critico'>('todos')
   const [status, setStatus] = useState<StatusFilter>('todos')
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
@@ -54,7 +51,7 @@ export default function ProjectsListPage() {
     const term = search.trim().toLowerCase()
     return projects.filter((project) => {
       const matchesRisk = !riskOnly || project.health !== 'optimo'
-      const matchesMethodology = methodology === 'todas' || project.methodology === methodology
+      const matchesHealth = health === 'todos' || project.health === health
       const matchesStatus = status === 'todos' || project.status === status
       const matchesSearch =
         !term ||
@@ -62,9 +59,9 @@ export default function ProjectsListPage() {
         project.name.toLowerCase().includes(term) ||
         project.client.toLowerCase().includes(term) ||
         project.manager.toLowerCase().includes(term)
-      return matchesRisk && matchesMethodology && matchesStatus && matchesSearch
+      return matchesRisk && matchesHealth && matchesStatus && matchesSearch
     })
-  }, [projects, search, methodology, status, riskOnly])
+  }, [projects, search, health, status, riskOnly])
 
   return (
     <div className="mx-auto max-w-[1800px]">
@@ -128,17 +125,15 @@ export default function ProjectsListPage() {
         <div className="relative">
           <Filter size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <select
-            value={methodology}
-            onChange={(event) => setMethodology(event.target.value as MethodologyFilter)}
-            aria-label="Filtrar por metodología"
+            value={health}
+            onChange={(event) => setHealth(event.target.value as 'todos' | 'optimo' | 'atencion' | 'critico')}
+            aria-label="Filtrar por salud operativa"
             className={selectClass}
           >
-            <option value="todas">Todas las metodologías</option>
-            {(Object.keys(PROJECT_METHODOLOGY_META) as ProjectMethodology[]).map((key) => (
-              <option key={key} value={key}>
-                {PROJECT_METHODOLOGY_META[key].label}
-              </option>
-            ))}
+            <option value="todos">Toda salud operativa</option>
+            <option value="optimo">En objetivo (Óptimo)</option>
+            <option value="atencion">En atención (Riesgo)</option>
+            <option value="critico">Crítico (Bloqueado)</option>
           </select>
           <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400" />
         </div>
@@ -174,7 +169,7 @@ export default function ProjectsListPage() {
               <th className="px-5 py-3">Código</th>
               <th className="px-5 py-3">Proyecto</th>
               <th className="px-5 py-3">Cliente</th>
-              <th className="px-5 py-3">Metodología</th>
+              <th className="px-5 py-3">Categoría</th>
               <th className="px-5 py-3">Responsable</th>
               <th className="px-5 py-3 w-[190px]">Avance</th>
               <th className="px-5 py-3">Fechas</th>
@@ -184,7 +179,6 @@ export default function ProjectsListPage() {
           </thead>
           <tbody>
             {filtered.map((project) => {
-              const methodologyMeta = PROJECT_METHODOLOGY_META[project.methodology]
               const statusMeta = PROJECT_STATUS_META[project.status]
               const healthMeta = PROJECT_HEALTH_META[project.health]
               return (
@@ -212,10 +206,8 @@ export default function ProjectsListPage() {
                   </td>
                   <td className="px-5 py-3.5 text-[13px] text-zinc-600">{project.client}</td>
                   <td className="px-5 py-3.5">
-                    <span
-                      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${methodologyMeta.badgeClass}`}
-                    >
-                      {methodologyMeta.short}
+                    <span className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-zinc-700">
+                      {project.category}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-[13px] text-zinc-600">{project.manager}</td>

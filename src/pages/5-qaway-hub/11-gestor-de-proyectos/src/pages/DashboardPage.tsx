@@ -24,9 +24,7 @@ import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { useProjectsDataset, useTenantFilteredProjects } from '@/hooks/useProjects'
 import { projectsService } from '@/services/projectsService'
 import {
-  PROJECT_METHODOLOGY_META,
   type Project,
-  type ProjectMethodology,
   type WorkItem,
 } from '@/types/project.types'
 
@@ -224,13 +222,27 @@ export default function DashboardPage() {
   const year = today.getFullYear()
   const currentMonth = today.getMonth()
   const [analysisMonth, setAnalysisMonth] = useState(currentMonth)
-  const [methodFilter, setMethodFilter] = useState<'todas' | ProjectMethodology>('todas')
+  const [healthFilter, setHealthFilter] = useState<'todos' | 'optimo' | 'atencion' | 'critico'>('todos')
+  const [entityFilter, setEntityFilter] = useState<string>('todas')
+  const [managerFilter, setManagerFilter] = useState<string>('todos')
   const [showFilters, setShowFilters] = useState(false)
 
-  const projects = useMemo(
-    () => (methodFilter === 'todas' ? allProjects : allProjects.filter((p) => p.methodology === methodFilter)),
-    [allProjects, methodFilter],
-  )
+  const availableEntities = useMemo(() => {
+    return Array.from(new Set(allProjects.map((p) => p.client).filter(Boolean)))
+  }, [allProjects])
+
+  const availableManagers = useMemo(() => {
+    return Array.from(new Set(allProjects.map((p) => p.manager).filter(Boolean)))
+  }, [allProjects])
+
+  const projects = useMemo(() => {
+    return allProjects.filter((p) => {
+      const matchHealth = healthFilter === 'todos' || p.health === healthFilter
+      const matchEntity = entityFilter === 'todas' || p.client === entityFilter
+      const matchManager = managerFilter === 'todos' || p.manager === managerFilter
+      return matchHealth && matchEntity && matchManager
+    })
+  }, [allProjects, healthFilter, entityFilter, managerFilter])
   const projectIds = useMemo(() => new Set(projects.map((p) => p.id)), [projects])
 
   const itemsByProject = useMemo(() => {
@@ -463,20 +475,78 @@ export default function DashboardPage() {
       </div>
 
       {showFilters && (
-        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3">
-          <label className="text-xs font-semibold text-zinc-500" htmlFor="resumen-method">Metodología</label>
-          <select
-            id="resumen-method"
-            value={methodFilter}
-            onChange={(e) => setMethodFilter(e.target.value as 'todas' | ProjectMethodology)}
-            className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 outline-none focus:border-brand"
-          >
-            <option value="todas">Todas las metodologías</option>
-            {(Object.keys(PROJECT_METHODOLOGY_META) as ProjectMethodology[]).map((m) => (
-              <option key={m} value={m}>{PROJECT_METHODOLOGY_META[m].label}</option>
-            ))}
-          </select>
-          <span className="text-xs font-medium text-zinc-400">{projects.length} proyectos en el alcance</span>
+        <div className="mb-4 flex flex-wrap items-center gap-4 rounded-xl border border-zinc-200 bg-white p-3.5 shadow-2xs">
+          {/* Filtro por Salud Operativa */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-zinc-500" htmlFor="filter-health">
+              Salud operativa:
+            </label>
+            <select
+              id="filter-health"
+              value={healthFilter}
+              onChange={(e) => setHealthFilter(e.target.value as 'todos' | 'optimo' | 'atencion' | 'critico')}
+              className="h-9 rounded-lg border border-zinc-200 bg-zinc-50/60 px-3 text-xs font-bold text-zinc-800 outline-none focus:border-zinc-400 cursor-pointer"
+            >
+              <option value="todos">Todos los estados</option>
+              <option value="optimo">En objetivo (Óptimo)</option>
+              <option value="atencion">En atención (Riesgo)</option>
+              <option value="critico">Crítico (Bloqueado)</option>
+            </select>
+          </div>
+
+          {/* Filtro por Entidad / Sede Territorial */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-zinc-500" htmlFor="filter-entity">
+              Entidad / Sede:
+            </label>
+            <select
+              id="filter-entity"
+              value={entityFilter}
+              onChange={(e) => setEntityFilter(e.target.value)}
+              className="h-9 rounded-lg border border-zinc-200 bg-zinc-50/60 px-3 text-xs font-bold text-zinc-800 outline-none focus:border-zinc-400 cursor-pointer max-w-[240px]"
+            >
+              <option value="todas">Todas las entidades</option>
+              {availableEntities.map((ent) => (
+                <option key={ent} value={ent}>{ent}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro por Gestor / Responsable */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-semibold text-zinc-500" htmlFor="filter-manager">
+              Responsable:
+            </label>
+            <select
+              id="filter-manager"
+              value={managerFilter}
+              onChange={(e) => setManagerFilter(e.target.value)}
+              className="h-9 rounded-lg border border-zinc-200 bg-zinc-50/60 px-3 text-xs font-bold text-zinc-800 outline-none focus:border-zinc-400 cursor-pointer max-w-[240px]"
+            >
+              <option value="todos">Todos los responsables</option>
+              {availableManagers.map((mgr) => (
+                <option key={mgr} value={mgr}>{mgr}</option>
+              ))}
+            </select>
+          </div>
+
+          {(healthFilter !== 'todos' || entityFilter !== 'todas' || managerFilter !== 'todos') && (
+            <button
+              type="button"
+              onClick={() => {
+                setHealthFilter('todos')
+                setEntityFilter('todas')
+                setManagerFilter('todos')
+              }}
+              className="text-xs font-bold text-zinc-600 hover:text-zinc-950 underline cursor-pointer"
+            >
+              Limpiar filtros
+            </button>
+          )}
+
+          <span className="ml-auto text-xs font-medium text-zinc-400">
+            {projects.length} de {allProjects.length} proyectos en el alcance
+          </span>
         </div>
       )}
 
@@ -886,7 +956,7 @@ function PortfolioTable({
           <thead>
             <tr className="border-b border-zinc-100 text-[11px] font-bold uppercase tracking-wider text-zinc-500">
               <th className="px-5 py-2.5">Proyecto</th>
-              <th className="px-4 py-2.5">Metodología</th>
+              <th className="px-4 py-2.5">Responsable</th>
               <th className="px-4 py-2.5">Avance</th>
               <th className="px-4 py-2.5">Cronograma</th>
               <th className="px-4 py-2.5">Próximo hito</th>
@@ -896,7 +966,6 @@ function PortfolioTable({
           <tbody>
             {rows.map((p) => {
               const status = statusOf.get(p.id) ?? 'objetivo'
-              const meta = PROJECT_METHODOLOGY_META[p.methodology]
               const next = nextMilestoneOf(p.id)
               const dev = Math.round(deviationDaysOf(p, now))
               const expanded = expandedId === p.id
@@ -924,8 +993,8 @@ function PortfolioTable({
                       <p className="mt-0.5 truncate text-[11px] text-zinc-400">{p.client}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${meta.badgeClass}`}>
-                        {meta.short}
+                      <span className="text-xs font-semibold text-zinc-700 truncate block max-w-[170px]" title={p.manager}>
+                        {p.manager}
                       </span>
                     </td>
                     <td className="px-4 py-3">
