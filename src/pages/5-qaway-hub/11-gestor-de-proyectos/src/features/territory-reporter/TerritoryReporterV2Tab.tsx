@@ -74,6 +74,13 @@ export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
   'ugel-satipo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-tarma': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-yauli': ['DEBA', 'DEBE', 'DEI', 'DEP', 'DES', 'DISER'],
+  // Región Pasco (DRE Pasco + 5 UGEL)
+  'pasco-dre-pasco': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-oxapampa': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-daniel-alcides-carrion': ['DEBA', 'DEBE', 'DEI', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-pasco': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-puerto-bermudez': ['DEBA', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-rio-ene-mantaro': ['DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
 }
 
 export interface UgelMonitoringV2Row {
@@ -453,6 +460,169 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
   },
 ]
 
+export const STORAGE_KEY_PASCO_V2 = 'qaway_territory_reporter_v2_pasco_v1'
+
+export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
+  {
+    id: 'pasco-dre-pasco',
+    number: 1,
+    name: 'DRE PASCO',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '15/10/2026 11:30',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 09:00',
+    phase2Files: 3,
+    phase2Total: 3,
+    phase2Date: '16/10/2026 14:00',
+    directions: {
+      DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'completado',
+    },
+    observation: 'Validación regional consolidada DRE Pasco.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'pasco-ugel-oxapampa',
+    number: 2,
+    name: 'OXAPAMPA',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '15/10/2026 14:20',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 10:15',
+    phase2Files: 3,
+    phase2Total: 3,
+    phase2Date: '18/10/2026 14:20',
+    directions: {
+      DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'completado',
+    },
+    observation: 'Fase 1, Drive y Fase 2 completadas conforme.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'pasco-ugel-daniel-alcides-carrion',
+    number: 3,
+    name: 'DANIEL ALCIDES CARRIÓN',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '16/10/2026 09:40',
+    driveStatus: 'en_proceso',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 12:30',
+    phase2Files: 0,
+    phase2Total: 3,
+    phase2Date: 'En plazo hasta 26/10',
+    directions: {
+      DEBA: 'en_proceso',
+      DEBE: 'pendiente',
+      DEI: 'en_proceso',
+      DEP: 'completado',
+      DES: 'en_proceso',
+      DISER: 'pendiente',
+    },
+    observation: 'Fase 1 OK; Drive en revisión. Fase 2 en plazo regular.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'pasco-ugel-pasco',
+    number: 4,
+    name: 'PASCO',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '16/10/2026 15:00',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 11:00',
+    phase2Files: 0,
+    phase2Total: 3,
+    phase2Date: 'En plazo hasta 26/10',
+    directions: {
+      DEBA: 'completado',
+      DEBE: 'pendiente',
+      DEI: 'completado',
+      DEIB: 'pendiente',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'pendiente',
+    },
+    observation: 'Fase 1 y Drive OK. Cierre RAR en plazo.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'pasco-ugel-puerto-bermudez',
+    number: 5,
+    name: 'PUERTO BERMÚDEZ',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '17/10/2026 10:10',
+    driveStatus: 'en_proceso',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 15:45',
+    phase2Files: 0,
+    phase2Total: 3,
+    phase2Date: 'En plazo hasta 26/10',
+    directions: {
+      DEBA: 'pendiente',
+      DEI: 'en_proceso',
+      DEIB: 'pendiente',
+      DEP: 'completado',
+      DES: 'pendiente',
+      DISER: 'pendiente',
+    },
+    observation: 'Avance en zona selva Oxapampa. Cierre RAR en coordinación.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
+    id: 'pasco-ugel-rio-ene-mantaro',
+    number: 6,
+    name: 'RÍO ENE MANTARO',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '17/10/2026 14:00',
+    driveStatus: 'pendiente',
+    driveFiles: 0,
+    driveTotal: 1,
+    driveDate: 'Sin evidencia',
+    phase2Files: 0,
+    phase2Total: 3,
+    phase2Date: 'En plazo hasta 26/10',
+    directions: {
+      DEI: 'pendiente',
+      DEIB: 'pendiente',
+      DEP: 'pendiente',
+      DES: 'pendiente',
+      DISER: 'pendiente',
+    },
+    observation: 'Seguimiento especial territorial en zona VRAEM/Frontera.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+]
+
 function computePhaseStatus(files: number, total: number): TerritoryStatus {
   if (files >= total) return 'completado'
   if (files > 0) return 'en_proceso'
@@ -531,7 +701,9 @@ export function TerritoryReporterV2Tab({
   const [selectedGestorFilter, setSelectedGestorFilter] = useState('todos')
   const [selectedUgelFilter, setSelectedUgelFilter] = useState('todas')
 
-  const [ugels, setUgels] = useState<UgelMonitoringV2Row[]>(() => {
+  const isPasco = selectedRegion.includes('Pasco')
+
+  const [juninUgels, setJuninUgels] = useState<UgelMonitoringV2Row[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_V2)
       if (saved) {
@@ -547,14 +719,39 @@ export function TerritoryReporterV2Tab({
     return INITIAL_JUNIN_UGELS_V2
   })
 
-  // Sincronización inicial y reactiva desde Supabase (Fuente de verdad definitiva)
+  const [pascoUgels, setPascoUgels] = useState<UgelMonitoringV2Row[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PASCO_V2)
+      if (saved) {
+        const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
+        if (parsed.length === 6) {
+          return parsed
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return INITIAL_PASCO_UGELS_V2
+  })
+
+  const ugels = isPasco ? pascoUgels : juninUgels
+
+  const setUgels = (updater: React.SetStateAction<UgelMonitoringV2Row[]>) => {
+    if (isPasco) {
+      setPascoUgels(updater)
+    } else {
+      setJuninUgels(updater)
+    }
+  }
+
+  // Sincronización inicial y reactiva desde Supabase (Fuente de verdad definitiva para Junín)
   useEffect(() => {
     let isMounted = true
     territoryMonitoringService
       .fetchJuninUgels()
       .then((remoteUgels) => {
         if (isMounted && remoteUgels.length > 0) {
-          setUgels(remoteUgels)
+          setJuninUgels(remoteUgels)
           try {
             localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(remoteUgels))
           } catch {
@@ -572,11 +769,19 @@ export function TerritoryReporterV2Tab({
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(ugels))
+      localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(juninUgels))
     } catch {
       // ignore
     }
-  }, [ugels])
+  }, [juninUgels])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_PASCO_V2, JSON.stringify(pascoUgels))
+    } catch {
+      // ignore
+    }
+  }, [pascoUgels])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterDirection, setFilterDirection] = useState<'Todas' | DirectionCode>('Todas')
@@ -817,8 +1022,10 @@ export function TerritoryReporterV2Tab({
             phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'En plazo técnico',
           }
         }
-        // Persistir a Supabase
-        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        // Persistir a Supabase solo para Junín (Pasco usa almacenamiento local aislado)
+        if (!isPasco) {
+          territoryMonitoringService.updateUgel(updated).catch(console.error)
+        }
         return updated
       }),
     )
@@ -846,8 +1053,10 @@ export function TerritoryReporterV2Tab({
                 ? 'En proceso'
                 : 'Sin evidencia',
         }
-        // Persistir a Supabase
-        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        // Persistir a Supabase solo para Junín
+        if (!isPasco) {
+          territoryMonitoringService.updateUgel(updated).catch(console.error)
+        }
         return updated
       }),
     )
@@ -877,8 +1086,10 @@ export function TerritoryReporterV2Tab({
           driveStatus: nextDriveStatus,
           driveFiles: nextDriveStatus === 'completado' ? 1 : 0,
         }
-        // Persistir a Supabase
-        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        // Persistir a Supabase solo para Junín
+        if (!isPasco) {
+          territoryMonitoringService.updateUgel(updated).catch(console.error)
+        }
         return updated
       }),
     )
@@ -898,8 +1109,10 @@ export function TerritoryReporterV2Tab({
           driveStatus: st,
           driveFiles: st === 'completado' ? 1 : 0,
         }
-        // Persistir a Supabase
-        territoryMonitoringService.updateUgel(updated).catch(console.error)
+        // Persistir a Supabase solo para Junín
+        if (!isPasco) {
+          territoryMonitoringService.updateUgel(updated).catch(console.error)
+        }
         return updated
       }),
     )
@@ -924,7 +1137,7 @@ export function TerritoryReporterV2Tab({
               Reporte regional de cumplimiento
             </h2>
             <p className="text-[13px] font-semibold text-slate-600 mt-0.5">
-              DRE Junín – Elaboración del CDL en MC SIGA (Actividad 1.6)
+              DRE {isPasco ? 'Pasco' : 'Junín'} – Elaboración del CDL en MC SIGA (Actividad 1.6)
             </p>
           </div>
 
@@ -958,10 +1171,14 @@ export function TerritoryReporterV2Tab({
             <span className="text-[10.5px] font-bold text-slate-500">Región:</span>
             <select
               value={selectedRegion}
-              onChange={(e) => setSelectedRegion(e.target.value)}
+              onChange={(e) => {
+                setSelectedRegion(e.target.value)
+                setSelectedUgelFilter('todas')
+              }}
               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
             >
               <option value="Región Junín (13 UGEL)">Junín (13 UGEL)</option>
+              <option value="Región Pasco (6 UGEL)">Pasco (6 UGEL)</option>
               <option value="Región Cusco (14 UGEL)">Cusco (14 UGEL)</option>
               <option value="Lima Provincias (9 UGEL)">Lima Provincias (9 UGEL)</option>
             </select>
@@ -977,10 +1194,10 @@ export function TerritoryReporterV2Tab({
               onChange={(e) => setSelectedUgelFilter(e.target.value)}
               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
             >
-              <option value="todas">Todas las 13 UGEL</option>
+              <option value="todas">Todas las {ugels.length} {isPasco ? 'unidades' : 'UGEL'} ({isPasco ? 'Pasco' : 'Junín'})</option>
               {ugels.map((u) => (
                 <option key={u.id} value={u.id}>
-                  UGEL {u.name}
+                  {u.name.startsWith('DRE') ? u.name : `UGEL ${u.name}`}
                 </option>
               ))}
             </select>
@@ -1021,7 +1238,7 @@ export function TerritoryReporterV2Tab({
           ════════════════════════════════════════════════════════════════════════ */}
       <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs">
         <div className="overflow-x-auto rounded-xl border border-slate-200 [scrollbar-width:thin]">
-          <table className="w-full min-w-[1360px] border-collapse text-center table-fixed">
+          <table className={`w-full ${ugels.length <= 6 ? 'min-w-[780px]' : 'min-w-[1360px]'} border-collapse text-center table-fixed`}>
             <thead>
               <tr className="border-b border-slate-200 text-xs">
                 <th className="bg-[#142d54] text-white font-black text-[15px] py-4 px-3.5 text-left w-44 min-w-[176px] max-w-[176px]">
@@ -1029,12 +1246,12 @@ export function TerritoryReporterV2Tab({
                 </th>
                 {ugels.map((u) => {
                   const rawName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
-                  // Límite de 7-8 caracteres para evitar compresión y permitir mayor tamaño tipográfico
-                  const shortName = rawName.length > 8 ? rawName.slice(0, 7) + '.' : rawName
+                  // Límite de caracteres para evitar compresión y permitir legibilidad
+                  const shortName = rawName.length > 9 ? rawName.slice(0, 8) + '.' : rawName
                   return (
                     <th
                       key={u.id}
-                      className="bg-[#f0f4f9] text-slate-900 font-black text-[15.5px] py-3.5 px-0.5 border-l border-white text-center w-[92px] min-w-[92px] max-w-[92px] truncate tracking-tight"
+                      className={`bg-[#f0f4f9] text-slate-900 font-black text-[15.5px] py-3.5 px-0.5 border-l border-white text-center ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'} truncate tracking-tight`}
                       title={u.name}
                     >
                       {shortName}
@@ -1060,7 +1277,7 @@ export function TerritoryReporterV2Tab({
                 {ugels.map((u) => {
                   const isDone = u.phase1Files >= u.phase1Total
                   return (
-                    <td key={`f1-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
+                    <td key={`f1-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 1)}
@@ -1096,7 +1313,7 @@ export function TerritoryReporterV2Tab({
                   const st = dirInfo.status
                   const ratioText = st === 'completado' ? 'Completado' : st === 'en_proceso' ? 'En proceso' : 'Pendiente'
                   return (
-                    <td key={`dr-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
+                    <td key={`dr-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
                       <div
                         className="mx-auto flex items-center justify-center p-1"
                         title={`Drive: ${u.name} · ${ratioText} (${dirInfo.pct}% de direcciones)`}
@@ -1128,7 +1345,7 @@ export function TerritoryReporterV2Tab({
                 {ugels.map((u) => {
                   const isDone = u.phase2Files >= u.phase2Total
                   return (
-                    <td key={`f2-${u.id}`} className="py-3.5 px-1 text-center border-l border-slate-100 w-[92px] min-w-[92px] max-w-[92px]">
+                    <td key={`f2-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
                       <button
                         type="button"
                         onClick={() => handleCycleUgelFiles(u.id, 2)}
@@ -1160,10 +1377,10 @@ export function TerritoryReporterV2Tab({
             <Building2 size={22} />
           </div>
           <div>
-            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-400">TOTAL DE UGEL</span>
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-400">TOTAL DE {isPasco ? 'UNIDADES' : 'UGEL'}</span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.total}</span>
-              <span className="text-[13px] font-semibold text-slate-500">Región Junín</span>
+              <span className="text-[13px] font-semibold text-slate-500">Región {isPasco ? 'Pasco' : 'Junín'}</span>
             </div>
           </div>
         </div>
@@ -1229,8 +1446,8 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
-              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Avance de 3 Fases por UGEL</h3>
-              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Distribución de las 13 UGEL en Fase 1, Drive y Fase 2</p>
+              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Avance de 3 Fases por {isPasco ? 'Unidad' : 'UGEL'}</h3>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Distribución de las {ugelStats.total} {isPasco ? 'unidades' : 'UGEL'} en Fase 1, Drive y Fase 2</p>
             </div>
             <span className="rounded-md bg-blue-100 px-2.5 py-1 text-[11px] font-black text-blue-700 shrink-0">
               3 Fases de Control
@@ -1301,7 +1518,7 @@ export function TerritoryReporterV2Tab({
                 </div>
 
                 <div className="w-10 text-right">
-                  <span className="text-xs font-black text-slate-900 tabular-nums">13</span>
+                  <span className="text-xs font-black text-slate-900 tabular-nums">{ugelStats.total}</span>
                   <span className="block text-[8.5px] font-bold text-slate-400 uppercase leading-none">UGEL</span>
                 </div>
               </div>
@@ -1329,7 +1546,7 @@ export function TerritoryReporterV2Tab({
           <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
               <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Consolidado Global de 3 Fases</h3>
-              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Cumplimiento regional integrado de las 13 UGEL</p>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Cumplimiento regional integrado de las {ugelStats.total} {isPasco ? 'unidades' : 'UGEL'}</p>
             </div>
             <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 shrink-0">
               Total 3 Fases
@@ -1376,7 +1593,7 @@ export function TerritoryReporterV2Tab({
                   {ugelStats.total}
                 </span>
                 <span className="text-[10.5px] font-bold uppercase text-slate-400 leading-tight">
-                  UGEL
+                  {isPasco ? 'UNIDADES' : 'UGEL'}
                 </span>
               </div>
             </div>
@@ -1440,7 +1657,7 @@ export function TerritoryReporterV2Tab({
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px] text-slate-500 font-bold">
             <span>7 Direcciones evaluadas</span>
-            <span>13 UGEL Junín</span>
+            <span>{ugelStats.total} {isPasco ? 'unidades Pasco' : 'UGEL Junín'}</span>
           </div>
         </div>
       </section>
@@ -1454,7 +1671,7 @@ export function TerritoryReporterV2Tab({
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-blue-600 animate-pulse" />
               <h3 className="text-base font-extrabold text-slate-900">
-                Tablero de Control por UGEL – Región Junín (3 Etapas)
+                Tablero de Control por UGEL – Región {isPasco ? 'Pasco' : 'Junín'} (3 Etapas)
               </h3>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
