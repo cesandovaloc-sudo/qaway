@@ -641,11 +641,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto pt-4">
-            <div className="min-w-[880px]">
+          <div className="w-full pt-4">
+            <div className="w-full">
               {/* Eje de escala temporal con 6 meses (horizonte de ejecución real) */}
               <div className="flex items-end mb-4">
-                <div className="w-[300px] shrink-0" />
+                <div className="w-[240px] sm:w-[260px] shrink-0" />
                 <div className="relative flex-1 grid grid-cols-6 text-center">
                   {/* Línea de Hoy con píldora superior y guía punteada */}
                   {hoyPct >= 0 && hoyPct <= 100 && (
@@ -688,18 +688,18 @@ export default function DashboardPage() {
                   const nextMilestone = nextMilestoneOf(project.id)
 
                   return (
-                    <div key={project.id} className="flex items-center gap-4 group">
-                      {/* Nombre y % de avance (ancho holgado, sin truncamiento brusco) */}
-                      <div className="w-[300px] shrink-0 flex items-center justify-between pr-4">
+                    <div key={project.id} className="flex items-center gap-3 sm:gap-4 group">
+                      {/* Nombre y % de avance */}
+                      <div className="w-[240px] sm:w-[260px] shrink-0 flex items-center justify-between pr-3">
                         <button
                           type="button"
                           onClick={() => navigate(getHref(`proyectos/${project.id}`))}
                           title={`Abrir ${project.name}`}
-                          className="text-left text-[13.5px] font-bold text-slate-800 group-hover:text-slate-950 truncate max-w-[240px]"
+                          className="text-left text-[13px] sm:text-[13.5px] font-bold text-slate-800 group-hover:text-slate-950 truncate max-w-[180px] sm:max-w-[200px]"
                         >
                           {project.name}
                         </button>
-                        <span className="font-mono text-[13px] font-bold text-slate-700 tabular-nums">
+                        <span className="font-mono text-xs sm:text-[13px] font-bold text-slate-700 tabular-nums">
                           {project.progress}%
                         </span>
                       </div>
@@ -966,15 +966,33 @@ function PortfolioTable({
                       if (e.key === 'Enter' || e.key === ' ') setExpandedId(expanded ? null : p.id)
                     }}
                     tabIndex={0}
-                    title={expanded ? 'Contraer detalle' : `Desplegar detalle de ${p.name}`}
-                    className={`cursor-pointer border-b border-zinc-50 transition-colors outline-none hover:bg-zinc-50/70 focus-visible:ring-2 focus-visible:ring-brand/40 ${expanded ? 'bg-zinc-50/70' : ''}`}
+                    title={expanded ? 'Contraer desglose' : `Clic para desplegar desglose de ${p.name}`}
+                    className={`group cursor-pointer border-b transition-all outline-none select-none ${
+                      expanded
+                        ? 'bg-blue-50/80 dark:bg-blue-950/20 border-b-transparent border-l-4 border-l-blue-600'
+                        : 'border-b-zinc-100 hover:bg-slate-50/80 border-l-4 border-l-transparent'
+                    }`}
                   >
-                    <td className="px-5 py-3">
-                      <p className="flex items-center gap-1.5 text-sm font-bold text-zinc-900">
-                        {p.name}
-                        <ChevronDown size={14} className={`shrink-0 text-zinc-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-                      </p>
-                      <p className="mt-0.5 truncate text-[11px] text-zinc-400">{p.client}</p>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`grid h-6 w-6 shrink-0 place-items-center rounded-md transition-all duration-200 ${
+                            expanded
+                              ? 'rotate-180 bg-blue-600 text-white shadow-xs'
+                              : 'bg-zinc-100 text-zinc-500 group-hover:bg-blue-100 group-hover:text-blue-700'
+                          }`}
+                        >
+                          <ChevronDown size={14} strokeWidth={2.5} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className={`text-sm font-bold transition-colors ${
+                            expanded ? 'text-blue-950 font-extrabold' : 'text-zinc-900 group-hover:text-blue-900'
+                          }`}>
+                            {p.name}
+                          </p>
+                          <p className="mt-0.5 truncate text-[11px] text-zinc-400">{p.client}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-semibold text-zinc-700 truncate block max-w-[170px]" title={p.manager}>
@@ -1010,7 +1028,7 @@ function PortfolioTable({
                     <td className="px-5 py-3"><StatusBadge status={status} /></td>
                   </tr>
                   {expanded && (
-                    <tr key={`${p.id}-detail`} className="border-b border-zinc-100 bg-zinc-50/60">
+                    <tr key={`${p.id}-detail`} className="border-b border-zinc-200/90 bg-blue-50/40 dark:bg-blue-950/10 border-l-4 border-l-blue-600">
                       <td colSpan={6} className="px-5 py-4">
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                           <div className="rounded-xl border border-zinc-200 bg-white p-4">
