@@ -308,10 +308,30 @@ export default function DashboardPage() {
     return { allocated: Math.round(allocated), spent: Math.round(spent), pct: allocated > 0 ? Math.round((spent / allocated) * 100) : 0 }
   }, [projects])
 
-  // ── Roadmap: ventana Ene–Dic del año en curso ──
-  const yearStart = useMemo(() => new Date(year, 0, 1).getTime(), [year])
-  const yearEnd = useMemo(() => new Date(year, 11, 31, 23, 59, 59).getTime(), [year])
-  const pctOf = (t: number) => Math.min(100, Math.max(0, ((t - yearStart) / (yearEnd - yearStart)) * 100))
+  // ── Roadmap: ventana operativa dinámica de 6 meses (idéntico a la referencia visual) ──
+  const timelineMonths = useMemo(() => {
+    const list = []
+    // Ventana de 6 meses: 1 mes previo al de análisis y 5 hacia adelante
+    const baseDate = new Date(year, analysisMonth - 1, 1)
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1)
+      const label = d.toLocaleDateString('es-PE', { month: 'short' }).replace('.', '').toUpperCase()
+      list.push({
+        label,
+        month: d.getMonth(),
+        year: d.getFullYear(),
+        startMs: new Date(d.getFullYear(), d.getMonth(), 1).getTime(),
+        endMs: new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59).getTime(),
+      })
+    }
+    return list
+  }, [year, analysisMonth])
+
+  const windowStart = timelineMonths[0].startMs
+  const windowEnd = timelineMonths[timelineMonths.length - 1].endMs
+  const windowDuration = Math.max(1, windowEnd - windowStart)
+
+  const pctOf = (t: number) => Math.min(100, Math.max(0, ((t - windowStart) / windowDuration) * 100))
   const hoyPct = pctOf(now)
   const hoyIdx = Math.min(11, Math.max(0, currentMonth))
 
@@ -319,16 +339,15 @@ export default function DashboardPage() {
     () =>
       [...activeProjects]
         .sort((a, b) => a.targetDate.localeCompare(b.targetDate))
-        .slice(0, 6)
         .map((p) => {
-          const s = parseTime(p.startDate) ?? yearStart
-          const e = parseTime(p.targetDate) ?? yearEnd
-          const left = Math.min(100, pctOf(Math.max(s, yearStart)))
-          const right = Math.max(left + 1.5, Math.min(100, pctOf(Math.min(e, yearEnd + 1))))
-          return { project: p, left, width: Math.max(1.5, right - left) }
+          const s = parseTime(p.startDate) ?? windowStart
+          const e = parseTime(p.targetDate) ?? windowEnd
+          const left = Math.min(100, Math.max(0, pctOf(s)))
+          const right = Math.min(100, Math.max(left + 3, pctOf(e)))
+          return { project: p, left, width: Math.max(4, right - left) }
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeProjects, yearStart, yearEnd],
+    [activeProjects, windowStart, windowEnd],
   )
 
   const nextMilestoneOf = (projectId: string) => {
@@ -623,39 +642,41 @@ export default function DashboardPage() {
           </div>
 
           <div className="overflow-x-auto pt-4">
-            <div className="min-w-[840px]">
-              {/* Eje de escala temporal con meses y ticks */}
-              <div className="flex items-end mb-3">
-                <div className="w-[230px] shrink-0" />
-                <div className="relative flex-1 grid grid-cols-12 text-center">
+            <div className="min-w-[880px]">
+              {/* Eje de escala temporal con 6 meses (horizonte de ejecución real) */}
+              <div className="flex items-end mb-4">
+                <div className="w-[300px] shrink-0" />
+                <div className="relative flex-1 grid grid-cols-6 text-center">
                   {/* Línea de Hoy con píldora superior y guía punteada */}
-                  <div
-                    className="pointer-events-none absolute -top-1 bottom-0 z-20"
-                    style={{ left: `${hoyPct}%` }}
-                  >
-                    <span className="absolute -top-3.5 -translate-x-1/2 rounded-md bg-sky-500 px-2 py-0.5 text-[9.5px] font-bold text-white shadow-xs">
-                      Hoy
-                    </span>
-                    <div className="absolute top-2.5 bottom-[-2000px] max-h-[800px] -translate-x-1/2 border-l border-dashed border-sky-400/80" />
-                  </div>
+                  {hoyPct >= 0 && hoyPct <= 100 && (
+                    <div
+                      className="pointer-events-none absolute -top-1 bottom-0 z-20"
+                      style={{ left: `${hoyPct}%` }}
+                    >
+                      <span className="absolute -top-3.5 -translate-x-1/2 rounded-md bg-sky-500 px-2 py-0.5 text-[9.5px] font-bold text-white shadow-xs">
+                        Hoy
+                      </span>
+                      <div className="absolute top-2.5 bottom-[-2000px] max-h-[800px] -translate-x-1/2 border-l border-dashed border-sky-400" />
+                    </div>
+                  )}
 
-                  {MONTHS_SHORT.map((m, i) => (
-                    <div key={m} className="flex flex-col items-center">
+                  {timelineMonths.map((m) => (
+                    <div key={`${m.label}-${m.year}`} className="flex flex-col items-center">
                       <span
                         className={`text-[11px] font-bold uppercase tracking-wider ${
-                          i === analysisMonth ? 'text-slate-900 font-extrabold' : 'text-slate-400'
+                          m.month === analysisMonth ? 'text-slate-900 font-extrabold' : 'text-slate-400'
                         }`}
                       >
-                        {m}
+                        {m.label}
                       </span>
-                      <span className="h-1.5 w-px bg-slate-200 mt-1" />
+                      <span className="h-2 w-px bg-slate-200 mt-1.5" />
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Filas del Roadmap */}
-              <div className="space-y-3.5 relative">
+              <div className="space-y-4 relative">
                 {roadmapRows.map(({ project, left, width }) => {
                   const status = statusOf.get(project.id) ?? 'objetivo'
                   const barColor =
@@ -664,53 +685,51 @@ export default function DashboardPage() {
                       : status === 'riesgo'
                         ? 'bg-amber-500'
                         : 'bg-emerald-500'
-                  const marks = (milestonesByProject.get(project.id) ?? []).filter((m) => {
-                    const t = parseTime(m.targetDate)
-                    return t !== null && t >= yearStart && t <= yearEnd
-                  })
+                  const nextMilestone = nextMilestoneOf(project.id)
 
                   return (
-                    <div key={project.id} className="flex items-center gap-3 group">
-                      {/* Nombre y % de avance */}
-                      <div className="w-[230px] shrink-0 flex items-center justify-between pr-3">
+                    <div key={project.id} className="flex items-center gap-4 group">
+                      {/* Nombre y % de avance (ancho holgado, sin truncamiento brusco) */}
+                      <div className="w-[300px] shrink-0 flex items-center justify-between pr-4">
                         <button
                           type="button"
                           onClick={() => navigate(getHref(`proyectos/${project.id}`))}
                           title={`Abrir ${project.name}`}
-                          className="text-left text-[13px] font-bold text-slate-800 group-hover:text-slate-950 truncate max-w-[175px]"
+                          className="text-left text-[13.5px] font-bold text-slate-800 group-hover:text-slate-950 truncate max-w-[240px]"
                         >
                           {project.name}
                         </button>
-                        <span className="font-mono text-xs font-bold text-slate-700 ml-2 shrink-0">
+                        <span className="font-mono text-[13px] font-bold text-slate-700 tabular-nums">
                           {project.progress}%
                         </span>
                       </div>
 
-                      {/* Timeline track: fondo gris redondeado + barra activa + hitos */}
-                      <div className="relative flex-1 h-7 flex items-center">
+                      {/* Timeline track: fondo gris redondeado + barra activa tipo cápsula */}
+                      <div className="relative flex-1 h-8 flex items-center">
                         {/* Pista gris redondeada de fondo */}
-                        <div className="w-full h-3 rounded-full bg-slate-100" />
+                        <div className="w-full h-4 rounded-full bg-slate-100" />
 
-                        {/* Barra activa con extremos redondeados */}
+                        {/* Barra activa con extremos redondeados (cápsula sólida) */}
                         <div
-                          className={`absolute h-3 rounded-full ${barColor} shadow-2xs transition-all`}
+                          className={`absolute h-4 rounded-full ${barColor} shadow-2xs transition-all`}
                           style={{ left: `${left}%`, width: `${width}%` }}
                           title={`${project.name}: ${formatShortDate(project.startDate)} → ${formatShortDate(project.targetDate)} (${project.progress}%)`}
                         />
 
-                        {/* Marcadores de Hitos */}
-                        {marks.map((m) => {
-                          const mTime = parseTime(m.targetDate) ?? yearStart
+                        {/* Único Hito clave próximo (sin sobrecarga ni collar de diamantes) */}
+                        {nextMilestone && (() => {
+                          const mTime = parseTime(nextMilestone.targetDate)
+                          if (!mTime || mTime < windowStart || mTime > windowEnd) return null
                           const mPct = pctOf(mTime)
                           return (
                             <span
-                              key={m.id}
-                              title={`${m.name} · ${formatShortDate(m.targetDate)}`}
+                              key={nextMilestone.id}
+                              title={`Próximo hito: ${nextMilestone.name} · ${formatShortDate(nextMilestone.targetDate)}`}
                               className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer h-2.5 w-2.5 rotate-45 bg-slate-900 ring-2 ring-white shadow-xs"
                               style={{ left: `${mPct}%` }}
                             />
                           )
-                        })}
+                        })()}
                       </div>
                     </div>
                   )
