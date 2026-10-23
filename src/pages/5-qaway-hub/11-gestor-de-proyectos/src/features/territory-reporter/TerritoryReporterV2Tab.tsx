@@ -90,10 +90,10 @@ export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
   'ugel-satipo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-tarma': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'ugel-yauli': ['DEBA', 'DEBE', 'DEI', 'DEP', 'DES', 'DISER'],
-  // Región Pasco (DRE Pasco + 4 UGEL)
+  // Región Pasco (DRE Pasco + 4 UGEL ordenadas alfabéticamente)
   'pasco-dre-pasco': ['DEBE', 'DEI', 'DEIB', 'DEP'],
-  'pasco-ugel-oxapampa': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'pasco-ugel-daniel-alcides-carrion': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
+  'pasco-ugel-oxapampa': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
   'pasco-ugel-pasco': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DIGESE (SEHO)', 'DISER'],
   'pasco-ugel-puerto-bermudez': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
 }
@@ -475,13 +475,13 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
   },
 ]
 
-export const STORAGE_KEY_PASCO_V4 = 'qaway_territory_reporter_v2_pasco_v4'
+export const STORAGE_KEY_PASCO_V6 = 'qaway_territory_reporter_v2_pasco_v6'
 
 export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   {
     id: 'pasco-dre-pasco',
     number: 1,
-    name: 'DRE PASCO',
+    name: 'DRE Pasco',
     phase1Files: 3,
     phase1Total: 3,
     phase1Date: '15/10/2026 11:30',
@@ -503,36 +503,9 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     gestorPhone: '+51964112233',
   },
   {
-    id: 'pasco-ugel-oxapampa',
-    number: 2,
-    name: 'OXAPAMPA',
-    phase1Files: 3,
-    phase1Total: 3,
-    phase1Date: '15/10/2026 14:20',
-    driveStatus: 'completado',
-    driveFiles: 1,
-    driveTotal: 1,
-    driveDate: '22/10/2026 10:15',
-    phase2Files: 3,
-    phase2Total: 3,
-    phase2Date: '18/10/2026 14:20',
-    directions: {
-      DEBA: 'completado',
-      DEBE: 'completado',
-      DEI: 'completado',
-      DEIB: 'completado',
-      DEP: 'completado',
-      DES: 'completado',
-      DISER: 'completado',
-    },
-    observation: 'Fase 1, Drive y Fase 2 completadas conforme.',
-    gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
-  },
-  {
     id: 'pasco-ugel-daniel-alcides-carrion',
-    number: 3,
-    name: 'DANIEL ALCIDES CARRIÓN',
+    number: 2,
+    name: 'Daniel A. Carrión',
     phase1Files: 3,
     phase1Total: 3,
     phase1Date: '16/10/2026 09:40',
@@ -557,9 +530,36 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     gestorPhone: '+51964112233',
   },
   {
+    id: 'pasco-ugel-oxapampa',
+    number: 3,
+    name: 'Oxapampa',
+    phase1Files: 3,
+    phase1Total: 3,
+    phase1Date: '15/10/2026 14:20',
+    driveStatus: 'completado',
+    driveFiles: 1,
+    driveTotal: 1,
+    driveDate: '22/10/2026 10:15',
+    phase2Files: 3,
+    phase2Total: 3,
+    phase2Date: '18/10/2026 14:20',
+    directions: {
+      DEBA: 'completado',
+      DEBE: 'completado',
+      DEI: 'completado',
+      DEIB: 'completado',
+      DEP: 'completado',
+      DES: 'completado',
+      DISER: 'completado',
+    },
+    observation: 'Fase 1, Drive y Fase 2 completadas conforme.',
+    gestorName: 'Carlos Sandoval',
+    gestorPhone: '+51964112233',
+  },
+  {
     id: 'pasco-ugel-pasco',
     number: 4,
-    name: 'PASCO',
+    name: 'Pasco',
     phase1Files: 3,
     phase1Total: 3,
     phase1Date: '16/10/2026 15:00',
@@ -587,7 +587,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   {
     id: 'pasco-ugel-puerto-bermudez',
     number: 5,
-    name: 'PUERTO BERMÚDEZ',
+    name: 'Puerto Bermúdez',
     phase1Files: 3,
     phase1Total: 3,
     phase1Date: '17/10/2026 10:10',
@@ -613,18 +613,32 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
   },
 ]
 
+export function formatUgelDisplayName(name: string): string {
+  const upper = name.trim().toUpperCase()
+  if (upper === 'DRE PASCO') return 'DRE Pasco'
+  if (upper === 'DANIEL ALCIDES CARRIÓN' || upper === 'DANIEL A. CARRIÓN') return 'Daniel A. Carrión'
+  if (upper === 'PUERTO BERMÚDEZ' || upper === 'PUERTO BERMUDEZ') return 'Puerto Bermúdez'
+  if (upper === 'RÍO ENE MANTARO' || upper === 'RIO ENE MANTARO') return 'Río Ene'
+  if (upper === 'RÍO TAMBO' || upper === 'RIO TAMBO') return 'Río Tambo'
+  if (upper === 'OXAPAMPA') return 'Oxapampa'
+  if (upper === 'PASCO') return 'Pasco'
+  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+}
+
 export function sanitizePascoUgels(list: UgelMonitoringV2Row[]): UgelMonitoringV2Row[] {
   const expectedIds = INITIAL_PASCO_UGELS_V2.map((u) => u.id)
-  const hasInvalid = list.some((u) => !expectedIds.includes(u.id) || u.id.includes('rio-ene') || u.id.includes('coar') || u.name.includes('COAR'))
+  const isOrderDifferent = list.some((u, idx) => u.id !== expectedIds[idx])
+  const hasInvalid = list.some((u) => !expectedIds.includes(u.id) || u.id.includes('rio-ene') || u.id.includes('coar') || u.name.toUpperCase().includes('COAR'))
   const hasMissing = expectedIds.some((id) => !list.some((u) => u.id === id))
 
-  if (hasInvalid || hasMissing || list.length !== INITIAL_PASCO_UGELS_V2.length) {
+  if (hasInvalid || hasMissing || isOrderDifferent || list.length !== INITIAL_PASCO_UGELS_V2.length) {
     const listMap = new Map(list.map((u) => [u.id, u]))
     return INITIAL_PASCO_UGELS_V2.map((canon) => {
       const existing = listMap.get(canon.id)
       if (!existing) return canon
       return {
         ...canon,
+        name: canon.name,
         phase1Files: existing.phase1Files,
         phase1Date: existing.phase1Date,
         driveStatus: existing.driveStatus,
@@ -640,7 +654,10 @@ export function sanitizePascoUgels(list: UgelMonitoringV2Row[]): UgelMonitoringV
       }
     })
   }
-  return list
+  return list.map((item, idx) => ({
+    ...item,
+    name: INITIAL_PASCO_UGELS_V2[idx]?.name || item.name,
+  }))
 }
 
 function computePhaseStatus(files: number, total: number): TerritoryStatus {
@@ -745,7 +762,9 @@ export function TerritoryReporterV2Tab({
       localStorage.removeItem('qaway_territory_reporter_v2_pasco_v1')
       localStorage.removeItem('qaway_territory_reporter_v2_pasco_v2')
       localStorage.removeItem('qaway_territory_reporter_v2_pasco_v3')
-      const saved = localStorage.getItem(STORAGE_KEY_PASCO_V4)
+      localStorage.removeItem('qaway_territory_reporter_v2_pasco_v4')
+      localStorage.removeItem('qaway_territory_reporter_v2_pasco_v5')
+      const saved = localStorage.getItem(STORAGE_KEY_PASCO_V6)
       if (saved) {
         const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
         return sanitizePascoUgels(parsed)
@@ -758,18 +777,23 @@ export function TerritoryReporterV2Tab({
 
   // Purga reactiva inmediata en caso de Fast Refresh / HMR
   useEffect(() => {
+    const expectedIds = INITIAL_PASCO_UGELS_V2.map((u) => u.id)
     const isCorrupt =
-      pascoUgels.some((u) => u.id.includes('rio-ene') || u.id.includes('coar') || u.name.includes('COAR')) ||
-      pascoUgels.length !== INITIAL_PASCO_UGELS_V2.length
+      pascoUgels.some((u) => u.id.includes('rio-ene') || u.id.includes('coar') || u.name.toUpperCase().includes('COAR')) ||
+      pascoUgels.length !== INITIAL_PASCO_UGELS_V2.length ||
+      pascoUgels.some((u, idx) => u.id !== expectedIds[idx]) ||
+      pascoUgels.some((u, idx) => u.name !== INITIAL_PASCO_UGELS_V2[idx]?.name)
 
     if (isCorrupt) {
       const cleaned = sanitizePascoUgels(pascoUgels)
       setPascoUgels(cleaned)
       try {
-        localStorage.setItem(STORAGE_KEY_PASCO_V4, JSON.stringify(cleaned))
+        localStorage.setItem(STORAGE_KEY_PASCO_V6, JSON.stringify(cleaned))
         localStorage.removeItem('qaway_territory_reporter_v2_pasco_v1')
         localStorage.removeItem('qaway_territory_reporter_v2_pasco_v2')
         localStorage.removeItem('qaway_territory_reporter_v2_pasco_v3')
+        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v4')
+        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v5')
       } catch {
         // ignore
       }
@@ -820,7 +844,7 @@ export function TerritoryReporterV2Tab({
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_PASCO_V4, JSON.stringify(pascoUgels))
+      localStorage.setItem(STORAGE_KEY_PASCO_V6, JSON.stringify(pascoUgels))
     } catch {
       // ignore
     }
@@ -1240,11 +1264,14 @@ export function TerritoryReporterV2Tab({
               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
             >
               <option value="todas">Todas las {ugels.length} {isPasco ? 'unidades' : 'UGEL'} ({isPasco ? 'Pasco' : 'Junín'})</option>
-              {ugels.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name.startsWith('DRE') ? u.name : `UGEL ${u.name}`}
-                </option>
-              ))}
+              {ugels.map((u) => {
+                const displayName = formatUgelDisplayName(u.name)
+                return (
+                  <option key={u.id} value={u.id}>
+                    {displayName.startsWith('DRE') ? displayName : `UGEL ${displayName}`}
+                  </option>
+                )
+              })}
             </select>
           </div>
 
@@ -1290,20 +1317,7 @@ export function TerritoryReporterV2Tab({
                   Etapa
                 </th>
                 {ugels.map((u) => {
-                  let shortName = u.name
-                  if (u.name === 'DRE PASCO') {
-                    shortName = 'DRE Pasco'
-                  } else if (u.name === 'DANIEL ALCIDES CARRIÓN') {
-                    shortName = 'Daniel A. Carrión'
-                  } else if (u.name === 'PUERTO BERMÚDEZ') {
-                    shortName = 'Puerto Bermúdez'
-                  } else if (u.name === 'RÍO ENE MANTARO') {
-                    shortName = 'Río Ene'
-                  } else if (u.name === 'RÍO TAMBO') {
-                    shortName = 'Río Tambo'
-                  } else {
-                    shortName = u.name.charAt(0).toUpperCase() + u.name.slice(1).toLowerCase()
-                  }
+                  const shortName = formatUgelDisplayName(u.name)
                   return (
                     <th
                       key={u.id}
@@ -1844,7 +1858,7 @@ export function TerritoryReporterV2Tab({
                         onClick={() => setInspectedUgel(u)}
                         className="hover:underline cursor-pointer text-left font-black text-blue-950 text-[13.5px] tracking-tight"
                       >
-                        {u.name}
+                        {formatUgelDisplayName(u.name)}
                       </button>
                     </td>
 
@@ -2015,10 +2029,12 @@ export function TerritoryReporterV2Tab({
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
               <div>
                 <span className="text-[11.5px] font-bold uppercase tracking-wider text-[var(--hub-brand,#d9532f)]">
-                  Monitoreo de Campo · Región Junín
+                  Monitoreo de Campo · Región {isPasco ? 'Pasco' : 'Junín'}
                 </span>
                 <h3 className="text-xl font-black text-slate-900 tracking-tight mt-0.5">
-                  UGEL {inspectedUgel.name}
+                  {formatUgelDisplayName(inspectedUgel.name).startsWith('DRE')
+                    ? formatUgelDisplayName(inspectedUgel.name)
+                    : `UGEL ${formatUgelDisplayName(inspectedUgel.name)}`}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
                   Amarrado a: Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA
@@ -2201,7 +2217,7 @@ export function TerritoryReporterV2Tab({
               {/* Estado por Dirección Pedagógica en esta UGEL */}
               <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
                 <p className="text-xs font-bold text-slate-800">
-                  Checks por Dirección que aplican a {inspectedUgel.name.startsWith('DRE') ? inspectedUgel.name : `UGEL ${inspectedUgel.name}`} (clic para alternar)
+                  Checks por Dirección que aplican a {formatUgelDisplayName(inspectedUgel.name).startsWith('DRE') ? formatUgelDisplayName(inspectedUgel.name) : `UGEL ${formatUgelDisplayName(inspectedUgel.name)}`} (clic para alternar)
                 </p>
                 <div className="mt-3 grid grid-cols-4 sm:grid-cols-7 gap-2 text-center">
                   {activeDirectionCodes.filter((code) => {
@@ -2259,7 +2275,7 @@ export function TerritoryReporterV2Tab({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-bold text-slate-800">
-                    Tareas vinculadas a UGEL {inspectedUgel.name} ({getTasksForUgel(inspectedUgel.name).length})
+                    Tareas vinculadas a {formatUgelDisplayName(inspectedUgel.name).startsWith('DRE') ? formatUgelDisplayName(inspectedUgel.name) : `UGEL ${formatUgelDisplayName(inspectedUgel.name)}`} ({getTasksForUgel(inspectedUgel.name).length})
                   </p>
                   <span className="text-[11px] text-slate-500 font-medium">Bandeja operativa</span>
                 </div>
@@ -2321,13 +2337,13 @@ export function TerritoryReporterV2Tab({
                 </div>
                 <div>
                   <label className="mb-1 block text-[11px] font-bold text-slate-700">
-                    Acción requerida para UGEL {inspectedUgel.name}
+                    Acción requerida para {formatUgelDisplayName(inspectedUgel.name).startsWith('DRE') ? formatUgelDisplayName(inspectedUgel.name) : `UGEL ${formatUgelDisplayName(inspectedUgel.name)}`}
                   </label>
                   <input
                     type="text"
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
-                    placeholder={`Acción de acompañamiento en UGEL ${inspectedUgel.name}...`}
+                    placeholder={`Acción de acompañamiento en ${formatUgelDisplayName(inspectedUgel.name)}...`}
                     className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-900 outline-none focus:border-[var(--hub-brand,#d9532f)] focus:ring-1 focus:ring-[var(--hub-brand,#d9532f)] shadow-2xs"
                   />
                 </div>
