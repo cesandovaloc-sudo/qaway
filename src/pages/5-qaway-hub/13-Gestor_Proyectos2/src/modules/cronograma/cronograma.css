@@ -3,3 +3,107 @@
 @media(max-width:1250px){.qc-v1 .sidebar{width:172px;flex-basis:172px}.qc-v1 .workspace{padding-left:16px;padding-right:16px}.qc-v1 .topbar{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;gap:9px}.qc-v1 .project-select{min-width:190px}.qc-v1 .updated{display:none}.qc-v1 .metric-grid{gap:8px}.qc-v1 .metric{padding:10px}.qc-v1 .gantt-layout,.qc-v1 .structure-layout{grid-template-columns:minmax(0,1fr) 260px}.qc-v1 .gantt-head,.qc-v1 .gantt-row{grid-template-columns:430px minmax(700px,1fr)}.qc-v1 .fixed-cols{grid-template-columns:minmax(145px,1fr) 83px 70px 70px 62px}.qc-v1 .gantt-legend{gap:9px}.qc-v1 .gantt-legend .legend-note{display:none}.qc-v1 .module-tabs{gap:15px}}
 @media(max-width:980px){.qc-v1 .sidebar{width:60px;flex-basis:60px}.qc-v1 .brand{padding:0;justify-content:center}.qc-v1 .brand>div:last-child,.qc-v1 .nav-item:not(.active){font-size:0}.qc-v1 .nav-item{justify-content:center;padding:0}.qc-v1 .nav-item.active{font-size:0}.qc-v1 .nav-item.active svg{flex-shrink:0}.qc-v1 .nav-item .count{display:none}.qc-v1 .side-project{display:none}.qc-v1 .gantt-layout,.qc-v1 .structure-layout{grid-template-columns:1fr}.qc-v1 .detail-panel{max-height:none}.qc-v1 .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.qc-v1 .unit-grid,.qc-v1 .milestone-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.qc-v1 .project-select{min-width:unset}.qc-v1 .project-select b{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.qc-v1 .profile small,.qc-v1 .profile>svg{display:none}.qc-v1 .profile b{max-width:95px;overflow:hidden;text-overflow:ellipsis}.qc-v1 .structure-dates{width:135px}}
 @media(max-width:650px){.qc-v1 .sidebar{display:none}.qc-v1 .workspace{padding:0 12px}.qc-v1 .topbar{margin:0 -12px;padding:0 12px;height:54px;gap:6px}.qc-v1 .project-select{padding:7px;max-width:40px;overflow:hidden;border-color:transparent;background:transparent}.qc-v1 .project-select b,.qc-v1 .project-select svg:last-child{display:none}.qc-v1 .global-search{height:32px}.qc-v1 .global-search kbd{display:none}.qc-v1 .profile{gap:4px;padding:0}.qc-v1 .profile b{display:none}.qc-v1 .page-head{align-items:flex-start;flex-direction:column;padding:13px 0}.qc-v1 .page-head h1{font-size:22px}.qc-v1 .head-actions{width:100%;justify-content:flex-start}.qc-v1 .metric-grid{gap:8px}.qc-v1 .metric{padding:10px;gap:8px}.qc-v1 .metric-icon{width:31px;height:31px}.qc-v1 .metric strong{font-size:20px}.qc-v1 .module-tabs{gap:16px}.qc-v1 .filters{gap:8px}.qc-v1 .filters label{flex:1 1 29%;min-width:0}.qc-v1 .filter-title{width:100%;height:20px}.qc-v1 .view-toolbar{align-items:flex-start}.qc-v1 .view-context{min-width:0}.qc-v1 .view-actions{gap:3px}.qc-v1 .view-actions .scale-select{width:86px}.qc-v1 .gantt-legend{height:auto;min-height:40px;padding:9px;gap:9px}.qc-v1 .gantt-scroll{max-height:unset;min-height:400px}.qc-v1 .gantt-footer{font-size:8px}.qc-v1 .unit-grid,.qc-v1 .milestone-grid,.qc-v1 .tracking-grid{grid-template-columns:1fr}.qc-v1 .unit-intro,.qc-v1 .section-intro{align-items:flex-start}.qc-v1 .structure-row{gap:5px}.qc-v1 .structure-progress{width:52px}.qc-v1 .structure-row .status-pill{display:none}.qc-v1 .structure-dates{width:auto;font-size:8px}.qc-v1 .structure-name b{font-size:10px}.qc-v1 .form-grid{grid-template-columns:1fr}.qc-v1 .modal{padding:16px}.qc-v1 .page-footer{flex-direction:column}.qc-v1 .detail-dates b{font-size:9px}}
+
+/* ============ QAWAY V4 · CAPA DE UNIFICACIÓN VISUAL — módulo CRONOGRAMA (aditiva; DOM intacto) ============ */
+/* Canvas + jerarquía tipográfica unificada (h1 23/700 · h2 17.5/600 · h3 15-15.5/600 · contenido 14-14.5 · metadatos 12-12.5) */
+.qc-v1{background:var(--bg-canvas);color:var(--text-body);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+/* Encabezados */
+.qc-v1 .topbar{background:var(--bg-surface);border-bottom:1px solid var(--border-light)}
+.qc-v1 .page-head h1{font-size:23px;font-weight:700;color:var(--text-main)}
+.qc-v1 .page-head p{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .section-intro h2,.qc-v1 .unit-intro h2{font-size:17.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .section-intro p,.qc-v1 .unit-intro p{font-size:12.5px;color:var(--text-muted)}
+/* Tarjetas métricas */
+.qc-v1 .metric{background:var(--bg-surface);border:1px solid var(--border-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
+.qc-v1 .metric>span{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .metric strong{font-size:24px;font-weight:700;color:var(--text-main)}
+.qc-v1 .metric strong small{font-size:12.5px;font-weight:500;color:var(--text-muted)}
+.qc-v1 .metric-track{background:var(--border-light)}
+.qc-v1 .metric-caption{font-size:12px;color:var(--text-muted)}
+/* Superficies flotantes */
+.qc-v1 .gantt-card,.qc-v1 .detail-panel,.qc-v1 .structure-list,.qc-v1 .unit-card,.qc-v1 .milestone-card,.qc-v1 .tracking-card,.qc-v1 .matrix-view{background:var(--bg-surface);border:1px solid var(--border-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
+/* Pills semáforo (4/10 · 9999px · 12px/600 · dot 7px) */
+.qc-v1 .status-pill{padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:600;line-height:1.4}
+.qc-v1 .status-pill i{width:7px;height:7px}
+.qc-v1 .status-pill.good{color:var(--status-green-text);background:var(--status-green-bg)}
+.qc-v1 .status-pill.blue{color:var(--project-blue-text);background:var(--project-blue-bg)}
+.qc-v1 .status-pill.warning{color:var(--status-yellow-text);background:var(--status-yellow-bg)}
+.qc-v1 .status-pill.bad{color:var(--status-red-text);background:var(--status-red-bg)}
+.qc-v1 .status-pill.muted{color:var(--status-gray-text);background:var(--status-gray-bg)}
+/* Leyenda del Gantt */
+.qc-v1 .legend-dot.green{background:var(--status-green-dot)}
+.qc-v1 .legend-dot.blue{background:var(--project-blue-bar)}
+.qc-v1 .legend-dot.yellow{background:var(--status-yellow-dot)}
+.qc-v1 .legend-dot.red{background:var(--status-red-dot)}
+.qc-v1 .legend-dot.gray{background:var(--status-gray-dot)}
+.qc-v1 .gantt-legend>span{font-size:12px;color:var(--text-muted)}
+.qc-v1 .gantt-legend .legend-note{font-size:12px;color:var(--text-muted)}
+/* Gantt: cabecera, filas y barras (track gris #e2e8f0, relleno del semáforo) */
+.qc-v1 .gantt-head{background:var(--bg-surface-subtle);border-bottom:1px solid var(--border-light)}
+.qc-v1 .gantt-head .fixed-cols{color:var(--text-muted);font-size:12px;font-weight:600}
+.qc-v1 .gantt-row{border-bottom:1px solid var(--border-light)}
+.qc-v1 .gantt-row .fixed-cols{border-right:1px solid var(--border-light)}
+.qc-v1 .name-text{font-size:14px;color:var(--text-body)}
+.qc-v1 .gantt-row .name-cell:has(.kind-icon.proyecto) .name-text,.qc-v1 .gantt-row .name-cell:has(.kind-icon.proceso) .name-text,.qc-v1 .gantt-row .name-cell:has(.kind-icon.subproceso) .name-text{font-weight:600;color:var(--text-main)}
+.qc-v1 .gantt-bar{background:var(--status-gray-bg);box-shadow:inset 0 0 0 1px var(--border-light)}
+.qc-v1 .gantt-bar>span{background:var(--status-gray-bar)}
+.qc-v1 .gantt-bar.good{background:var(--status-green-bg)}
+.qc-v1 .gantt-bar.good>span{background:var(--status-green-bar)}
+.qc-v1 .gantt-bar.blue{background:var(--project-blue-bg)}
+.qc-v1 .gantt-bar.blue>span{background:var(--project-blue-bar)}
+.qc-v1 .gantt-bar.warning{background:var(--status-yellow-bg)}
+.qc-v1 .gantt-bar.warning>span{background:var(--status-yellow-bar)}
+.qc-v1 .gantt-bar.bad{background:var(--status-red-bg)}
+.qc-v1 .gantt-bar.bad>span{background:var(--status-red-bar)}
+.qc-v1 .bar-percent{font-size:12px;font-weight:600;color:var(--text-muted)}
+.qc-v1 .gantt-footer{font-size:12px;color:var(--text-muted)}
+/* Barras de progreso internas (pills de avance por estado) */
+.qc-v1 .metric-track i.good,.qc-v1 .big-progress i.good{background:var(--status-green-bar)}
+.qc-v1 .metric-track i.blue,.qc-v1 .big-progress i.blue{background:var(--project-blue-bar)}
+.qc-v1 .metric-track i.warning,.qc-v1 .big-progress i.warning{background:var(--status-yellow-bar)}
+.qc-v1 .metric-track i.bad,.qc-v1 .big-progress i.bad{background:var(--status-red-bar)}
+.qc-v1 .metric-track i.muted,.qc-v1 .big-progress i.muted{background:var(--status-gray-bar)}
+.qc-v1 .big-progress{background:var(--border-light)}
+/* Botón y línea "Hoy" — azul violáceo sutil */
+.qc-v1 button.btn.secondary.today{background:var(--today-violet);border-color:var(--today-violet);color:#fff}
+.qc-v1 .today-line-key{border-left-color:var(--today-violet)}
+/* Panel de detalle */
+.qc-v1 .detail-kind{font-size:12px;font-weight:600;color:var(--text-muted)}
+.qc-v1 .detail-top h2{font-size:17.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .detail-tabs button{font-size:12.5px;font-weight:600;color:var(--text-muted)}
+.qc-v1 .detail-label span{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .detail-label b{font-size:15.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .detail-dates{border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
+.qc-v1 .detail-dates>div+div{border-left:1px solid var(--border-light)}
+.qc-v1 .detail-dates span{font-size:12px;color:var(--text-muted)}
+.qc-v1 .detail-dates b{font-size:14.5px;font-weight:500;color:var(--text-body)}
+.qc-v1 .detail-section{border-bottom:1px solid var(--border-light)}
+.qc-v1 .detail-section h3{font-size:15px;font-weight:600;color:var(--text-main)}
+.qc-v1 .detail-section h3 span{font-size:12px;color:var(--text-muted)}
+.qc-v1 .owner-row b{font-size:14.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .owner-row small{font-size:12px;color:var(--text-muted)}
+/* Estructura / unidades / hitos / matriz */
+.qc-v1 .structure-name b{font-size:15px;font-weight:600;color:var(--text-main)}
+.qc-v1 .structure-name small{font-size:12px;color:var(--text-muted)}
+.qc-v1 .structure-progress b{font-size:14.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .structure-dates{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .unit-card h3{font-size:15px;font-weight:600;color:var(--text-main)}
+.qc-v1 .unit-progress-label span{font-size:12px;color:var(--text-muted)}
+.qc-v1 .unit-progress-label b{font-size:15.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .unit-card-foot{border-top:1px solid var(--border-light);font-size:12px;color:var(--text-muted)}
+.qc-v1 .milestone-card h3{font-size:15px;font-weight:600;color:var(--text-main)}
+.qc-v1 .milestone-card>p{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .milestone-symbol.good{color:var(--status-green-bar);background:var(--status-green-bg)}
+.qc-v1 .milestone-symbol.blue{color:var(--project-blue-bar);background:var(--project-blue-bg)}
+.qc-v1 .milestone-symbol.warning{color:var(--status-yellow-bar);background:var(--status-yellow-bg)}
+.qc-v1 .milestone-symbol.bad{color:var(--status-red-bar);background:var(--status-red-bg)}
+.qc-v1 .milestone-symbol.muted{color:var(--status-gray-bar);background:var(--status-gray-bg)}
+.qc-v1 .tracking-card-head{font-size:14px;font-weight:600;color:var(--text-main)}
+.qc-v1 .matrix-view th{font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-surface-subtle);border-bottom:1px solid var(--border-light)}
+.qc-v1 .matrix-view td{font-size:14px;color:var(--text-body);border-bottom:1px solid var(--border-light)}
+.qc-v1 .matrix-view td b{font-weight:600;color:var(--text-main)}
+.qc-v1 .table-progress b{font-size:14.5px;font-weight:600;color:var(--text-main)}
+/* Controles y etiquetas */
+.qc-v1 .filters select,.qc-v1 .scale-select,.qc-v1 .status-editor{font-size:14px;color:var(--text-body);border-color:var(--border-light)}
+.qc-v1 .info-tag{background:var(--bg-surface-subtle);border:1px solid var(--border-light);border-radius:9999px;font-size:12px;font-weight:600;color:var(--text-muted)}
+.qc-v1 .filter-title b{font-size:12.5px;color:var(--text-muted)}

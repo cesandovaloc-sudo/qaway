@@ -1,9 +1,45 @@
-/* Estilos globales del layout base consolidado (shell maestro).
-   - Tailwind se mantiene global igual que en el proyecto Reuniones original.
-   - El CSS de cada módulo vive scopiado junto a su vista (modules/*). */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-.qm-root{min-height:100vh;display:flex;align-items:stretch}
+/* ==== Tokens corporativos · Estándar Qaway Lab v4.0 — dirección visual aprobada 2026-10-26 ==== */
+/* Canvas claro con matiz gris-azulado, superficies blancas flotantes (Power BI / Trello), semáforo vibrante. */
+:root {
+  /* Fondo general del Canvas */
+  --bg-canvas: #f4f7fb;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f8fafc;
+
+  /* Escala de grises sofisticada (Slate moderno) */
+  --text-main: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  --border-card: #e9eef5;
+
+  /* Semáforo de cumplimiento vibrante */
+  --status-green-bar: #10b981;  --status-green-bg: #ecfdf5;  --status-green-text: #065f46;  --status-green-dot: #059669;
+  --status-yellow-bar: #f59e0b; --status-yellow-bg: #fef3c7; --status-yellow-text: #92400e; --status-yellow-dot: #d97706;
+  --status-red-bar: #ef4444;    --status-red-bg: #fee2e2;    --status-red-text: #991b1b;    --status-red-dot: #dc2626;
+  --status-gray-bar: #94a3b8;   --status-gray-bg: #f1f5f9;   --status-gray-text: #475569;   --status-gray-dot: #64748b;
+
+  /* Azul corporativo de proyecto (Gantt macro / hito activo) */
+  --project-blue-bar: #3b82f6;
+  --project-blue-bg: #eff6ff;
+  --project-blue-text: #1d4ed8;
+
+  /* Marcador "Hoy" — azul violáceo sutil (família heredada del cronograma original) */
+  --today-violet: #6254ec;
+  --today-violet-bg: #f0edff;
+  --today-violet-text: #4a40c9;
+
+  /* Sombra flotante direccional (Power BI / Trello) */
+  --shadow-card: 0 2px 4px -1px rgba(15, 23, 42, 0.04), 2px 6px 16px -2px rgba(15, 23, 42, 0.07);
+  --shadow-card-hover: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 3px 10px 22px -3px rgba(15, 23, 42, 0.10);
+  --radius-card: 10px;
+}
+
+/* Layout base consolidado (shell maestro, Sidebar + Canvas keep-alive) */
+.qm-root{min-height:100vh;display:flex;align-items:stretch;background:var(--bg-canvas)}
 .qm-side{flex-shrink:0}
 .qm-canvas{flex:1;min-width:0;display:block}
 .qm-pane{display:none}
