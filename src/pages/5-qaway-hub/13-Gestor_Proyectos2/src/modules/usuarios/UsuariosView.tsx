@@ -1,0 +1,586 @@
+// @ts-nocheck
+import React, { useMemo, useState, useEffect } from 'react';
+import './usuarios.css';
+import {
+  Bell, BriefcaseBusiness, Building2, Check, ChevronDown, ChevronLeft, ChevronRight,
+  CircleHelp, ContactRound, Copy, Download, History, Mail, MapPin, MoreVertical,
+  Phone, Plus, RefreshCw, Search, ShieldCheck, SlidersHorizontal, UserRound,
+  UserRoundCheck, UserRoundX, Users, Wrench, X, Clock3
+} from 'lucide-react';
+
+export type UserBinds = { notify: (m: string) => void };
+
+type UserType = 'Equipo interno' | 'Gestor' | 'Coordinador' | 'Equipo UGEL';
+type UserStatus = 'Activo' | 'Pendiente' | 'Inactivo';
+
+type Person = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  type: UserType;
+  org: string;
+  status: UserStatus;
+  lastAccess: string;
+  phone: string;
+  area: string;
+  location: string;
+  initials: string;
+  avatar?: string;
+  assignments: number;
+};
+
+const initialPeople: Person[] = [
+  { id: 1, name: 'María Jara', email: 'm.jara@minedu.gob.pe', role: 'Directora de Programa', type: 'Equipo interno', org: 'Dirección de Programa', status: 'Activo', lastAccess: '26 oct. 2026 · 10:24', phone: '+51 987 654 321', area: 'Dirección de Programa', location: 'Lima, Perú', initials: 'MJ', assignments: 4, avatar: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=100&h=100&fit=crop&crop=faces' },
+  { id: 2, name: 'Carlos Mendoza', email: 'c.mendoza@minedu.gob.pe', role: 'Coordinador Territorial', type: 'Coordinador', org: 'DRE Junín', status: 'Activo', lastAccess: '26 oct. 2026 · 09:12', phone: '+51 964 234 567', area: 'Coordinación territorial', location: 'Huancayo, Junín', initials: 'CM', assignments: 8 },
+  { id: 3, name: 'Lucía Flores', email: 'l.flores@minedu.gob.pe', role: 'Especialista SIGA', type: 'Gestor', org: 'DRE Junín', status: 'Activo', lastAccess: '25 oct. 2026 · 16:45', phone: '+51 955 123 456', area: 'Distribución de materiales', location: 'Huancayo, Junín', initials: 'LF', assignments: 6, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces' },
+  { id: 4, name: 'Juan Pérez', email: 'j.perez@ugelchanchamayo.gob.pe', role: 'Responsable de Logística', type: 'Equipo UGEL', org: 'UGEL Chanchamayo', status: 'Pendiente', lastAccess: '—', phone: '+51 945 123 890', area: 'Logística y almacén', location: 'Chanchamayo, Junín', initials: 'JP', assignments: 2 },
+  { id: 5, name: 'Ana Torres', email: 'a.torres@ugeljauja.gob.pe', role: 'Especialista de Materiales', type: 'Equipo UGEL', org: 'UGEL Jauja', status: 'Activo', lastAccess: '25 oct. 2026 · 14:30', phone: '+51 966 789 012', area: 'Materiales educativos', location: 'Jauja, Junín', initials: 'AT', assignments: 3, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=faces' },
+  { id: 6, name: 'Luis Ramírez', email: 'l.ramirez@minedu.gob.pe', role: 'Analista de Seguimiento', type: 'Equipo interno', org: 'Unidad de Seguimiento', status: 'Inactivo', lastAccess: '15 oct. 2026 · 09:12', phone: '+51 981 456 123', area: 'Seguimiento de campo', location: 'Lima, Perú', initials: 'LR', assignments: 1 },
+  { id: 7, name: 'Sofía Huamán', email: 's.huaman@ugelconcepcion.gob.pe', role: 'Coordinadora Pedagógica', type: 'Equipo UGEL', org: 'UGEL Concepción', status: 'Activo', lastAccess: '24 oct. 2026 · 11:08', phone: '+51 974 567 890', area: 'Gestión pedagógica', location: 'Concepción, Junín', initials: 'SH', assignments: 5, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces' },
+  { id: 8, name: 'Diego Castro', email: 'd.castro@minedu.gob.pe', role: 'Especialista de Datos MC SIGA', type: 'Gestor', org: 'Unidad de Información', status: 'Pendiente', lastAccess: '—', phone: '+51 989 234 567', area: 'Información y datos', location: 'Lima, Perú', initials: 'DC', assignments: 2 },
+  { id: 9, name: 'Elena Rojas', email: 'e.rojas@ugelsatipo.gob.pe', role: 'Responsable de Almacén', type: 'Equipo UGEL', org: 'UGEL Satipo', status: 'Activo', lastAccess: '24 oct. 2026 · 15:42', phone: '+51 982 654 789', area: 'Almacén central', location: 'Satipo, Junín', initials: 'ER', assignments: 3 },
+  { id: 10, name: 'Miguel Salazar', email: 'm.salazar@minedu.gob.pe', role: 'Gestor de Proyecto', type: 'Gestor', org: 'Equipo de implementación', status: 'Activo', lastAccess: '23 oct. 2026 · 09:20', phone: '+51 976 543 210', area: 'Gestión de proyectos', location: 'Lima, Perú', initials: 'MS', assignments: 7 },
+  { id: 11, name: 'Patricia León', email: 'p.leon@ugeltarma.gob.pe', role: 'Especialista de Distribución', type: 'Equipo UGEL', org: 'UGEL Tarma', status: 'Inactivo', lastAccess: '10 oct. 2026 · 12:11', phone: '+51 963 456 789', area: 'Distribución local', location: 'Tarma, Junín', initials: 'PL', assignments: 1 },
+  { id: 12, name: 'Roberto Vega', email: 'r.vega@minedu.gob.pe', role: 'Coordinador Operativo DRE', type: 'Coordinador', org: 'DRE Junín', status: 'Activo', lastAccess: '26 oct. 2026 · 08:41', phone: '+51 956 234 567', area: 'Operaciones de campo', location: 'Huancayo, Junín', initials: 'RV', assignments: 4 }
+];
+
+const typeClass: Record<UserType, string> = {
+  'Equipo interno': 'internal',
+  'Gestor': 'manager',
+  'Coordinador': 'coordinator',
+  'Equipo UGEL': 'ugel',
+};
+
+const statusClass: Record<UserStatus, string> = {
+  'Activo': 'active',
+  'Pendiente': 'pending',
+  'Inactivo': 'inactive',
+};
+
+const tabs: { label: string; type?: UserType }[] = [
+  { label: 'Todos' },
+  { label: 'Equipo interno', type: 'Equipo interno' },
+  { label: 'Gestores', type: 'Gestor' },
+  { label: 'Coordinadores', type: 'Coordinador' },
+  { label: 'Equipo UGEL', type: 'Equipo UGEL' },
+];
+
+export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds) => void }) {
+  const [people, setPeople] = useState<Person[]>(initialPeople);
+  const [selectedId, setSelectedId] = useState<number | null>(1);
+  const [activeTab, setActiveTab] = useState('Todos');
+  const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('Todos');
+  const [statusFilter, setStatusFilter] = useState('Todos');
+  const [orgFilter, setOrgFilter] = useState('Todas');
+  const [showFilters, setShowFilters] = useState(false);
+  const [drawerTab, setDrawerTab] = useState('Información');
+  const [showCreate, setShowCreate] = useState(false);
+  const [showMenu, setShowMenu] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [notice, setNotice] = useState('');
+
+  const notify = (message: string) => {
+    setNotice(message);
+    window.setTimeout(() => setNotice(''), 2800);
+  };
+
+  useEffect(() => {
+    onActions?.({ notify });
+  }, [onActions]);
+
+  const selected = people.find((p) => p.id === selectedId) ?? null;
+  const organizations = useMemo(() => Array.from(new Set(people.map((p) => p.org))).sort(), [people]);
+
+  const filtered = useMemo(
+    () =>
+      people.filter((p) => {
+        const tabType = tabs.find((t) => t.label === activeTab)?.type;
+        const matchesTab = !tabType || p.type === tabType;
+        const matchesQuery = `${p.name} ${p.email} ${p.role} ${p.org}`.toLowerCase().includes(query.toLowerCase());
+        return (
+          matchesTab &&
+          matchesQuery &&
+          (typeFilter === 'Todos' || p.type === typeFilter) &&
+          (statusFilter === 'Todos' || p.status === statusFilter) &&
+          (orgFilter === 'Todas' || p.org === orgFilter)
+        );
+      }),
+    [people, activeTab, query, typeFilter, statusFilter, orgFilter]
+  );
+
+  const pageSize = 8;
+  const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const shown = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  const count = (s?: UserStatus) => people.filter((p) => !s || p.status === s).length;
+  const countType = (t?: UserType) => people.filter((p) => !t || p.type === t).length;
+
+  const clearFilters = () => {
+    setQuery('');
+    setTypeFilter('Todos');
+    setStatusFilter('Todos');
+    setOrgFilter('Todas');
+    setActiveTab('Todos');
+    setPage(1);
+  };
+
+  const updatePerson = (id: number, patch: Partial<Person>) =>
+    setPeople((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+
+  const exportCsv = () => {
+    const csv = [
+      ['Nombre', 'Correo', 'Cargo', 'Tipo', 'DRE / UGEL / Área', 'Estado', 'Último acceso', 'Teléfono'],
+      ...filtered.map((p) => [p.name, p.email, p.role, p.type, p.org, p.status, p.lastAccess, p.phone]),
+    ]
+      .map((row) => row.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(','))
+      .join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'directorio-equipo-minedu.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    notify('Directorio exportado en CSV');
+  };
+
+  const sendEmail = (p: Person) => {
+    window.location.href = `mailto:${p.email}?subject=${encodeURIComponent('Coordinación de actividades · Dotación 2027')}`;
+  };
+
+  const sendWhatsApp = (p: Person) => {
+    const phone = p.phone.replace(/\D/g, '');
+    window.open(`https://wa.me/${phone}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const deactivate = (p: Person) => {
+    updatePerson(p.id, { status: p.status === 'Inactivo' ? 'Activo' : 'Inactivo' });
+    notify(`Estado actualizado para ${p.name}: ${p.status === 'Inactivo' ? 'Activo' : 'Inactivo'}`);
+  };
+
+  return (
+    <div className="usr-v1">
+      {/* Topbar unificada del Canvas */}
+      <header className="topbar">
+        <div>
+          Proyecto <ChevronRight size={13} /> <b>MINEDU · Dotación 2027</b> <ChevronRight size={13} /> <b>Equipo y Usuarios</b>
+        </div>
+        <div className="top-actions">
+          <button className="iconbtn" onClick={() => notify('Directorio vinculado al marco operativo MINEDU / DRE Junín.')}>
+            <ShieldCheck size={18} />
+          </button>
+          <button className="iconbtn" onClick={() => notify('Sin alertas de acceso en esta demostración.')}>
+            <Bell size={18} />
+          </button>
+          <div className="avatar">CM</div>
+        </div>
+      </header>
+
+      <section className="page">
+        {/* Cabecera */}
+        <div className="page-heading">
+          <div className="heading-copy">
+            <div className="eyebrow"><Users size={14} /> DIRECTORIO DEL PROYECTO</div>
+            <h1>Gestión de equipo y usuarios</h1>
+            <p>Directorio institucional de coordinadores, especialistas SIGA y responsables de las 13 UGEL de Junín.</p>
+          </div>
+          <div className="heading-buttons">
+            <button className="button secondary" onClick={exportCsv}>
+              <Download size={15} /> Exportar CSV
+            </button>
+            <button className="button primary" onClick={() => setShowCreate(true)}>
+              <Plus size={16} /> Agregar usuario
+            </button>
+          </div>
+        </div>
+
+        {/* Métricas estilo Power BI / Trello */}
+        <section className="metrics">
+          <article className="metric blue">
+            <span className="metric-icon blue"><Users size={22} /></span>
+            <div className="metric-copy">
+              <b>{String(people.length)}</b>
+              <strong>Usuarios registrados</strong>
+              <small>Directorio del proyecto</small>
+            </div>
+          </article>
+          <article className="metric green">
+            <span className="metric-icon green"><UserRoundCheck size={22} /></span>
+            <div className="metric-copy">
+              <b>{String(count('Activo'))}</b>
+              <strong>Activos</strong>
+              <small>{Math.round((count('Activo') / Math.max(1, people.length)) * 100)}% del total</small>
+            </div>
+          </article>
+          <article className="metric amber">
+            <span className="metric-icon amber"><Clock3 size={22} /></span>
+            <div className="metric-copy">
+              <b>{String(count('Pendiente'))}</b>
+              <strong>Pendientes de activación</strong>
+              <small>Requieren seguimiento</small>
+            </div>
+          </article>
+          <article className="metric red">
+            <span className="metric-icon red"><UserRoundX size={22} /></span>
+            <div className="metric-copy">
+              <b>{String(count('Inactivo'))}</b>
+              <strong>Inactivos</strong>
+              <small>Sin acceso habilitado</small>
+            </div>
+          </article>
+        </section>
+
+        {/* Directorio de Usuarios */}
+        <div className="directory">
+          <div className="tabbar">
+            {tabs.map((t) => (
+              <button
+                key={t.label}
+                className={activeTab === t.label ? 'tab active' : 'tab'}
+                onClick={() => { setActiveTab(t.label); setPage(1); }}
+              >
+                {t.label}
+                <span>{t.type ? countType(t.type) : people.length}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="filters">
+            <label className="search-field">
+              <Search size={16} />
+              <input
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+                placeholder="Buscar por nombre, correo o cargo..."
+              />
+              {query && <button onClick={() => setQuery('')}><X size={14} /></button>}
+            </label>
+
+            <label className="select-field">
+              <small>Tipo de usuario</small>
+              <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}>
+                <option>Todos</option>
+                {(['Equipo interno', 'Gestor', 'Coordinador', 'Equipo UGEL'] as UserType[]).map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} />
+            </label>
+
+            <label className="select-field">
+              <small>Estado</small>
+              <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
+                <option>Todos</option>
+                <option>Activo</option>
+                <option>Pendiente</option>
+                <option>Inactivo</option>
+              </select>
+              <ChevronDown size={14} />
+            </label>
+
+            <label className="select-field">
+              <small>DRE / UGEL / Área</small>
+              <select value={orgFilter} onChange={(e) => { setOrgFilter(e.target.value); setPage(1); }}>
+                <option>Todas</option>
+                {organizations.map((o) => (
+                  <option key={o}>{o}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} />
+            </label>
+
+            <button className="button secondary" onClick={clearFilters}>
+              <RefreshCw size={14} /> Limpiar
+            </button>
+          </div>
+
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ width: '40px', paddingLeft: '20px' }}>
+                    <input type="checkbox" aria-label="Seleccionar todos" />
+                  </th>
+                  <th>Usuario</th>
+                  <th>Cargo / rol</th>
+                  <th>Tipo de usuario</th>
+                  <th>DRE / UGEL / Área</th>
+                  <th>Estado</th>
+                  <th>Último acceso</th>
+                  <th style={{ textAlign: 'center' }}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shown.map((p) => (
+                  <tr
+                    key={p.id}
+                    className={selectedId === p.id ? 'selected-row' : ''}
+                    onClick={() => setSelectedId(p.id)}
+                  >
+                    <td style={{ paddingLeft: '20px' }} onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" aria-label={`Seleccionar ${p.name}`} />
+                    </td>
+                    <td>
+                      <div className="user-cell">
+                        <span className="avatar">
+                          {p.avatar ? <img src={p.avatar} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : <span>{p.initials}</span>}
+                        </span>
+                        <div>
+                          <b>{p.name}</b>
+                          <small>{p.email}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span>{p.role}</span></td>
+                    <td><span className={`type-badge ${typeClass[p.type]}`}>{p.type}</span></td>
+                    <td><span>{p.org}</span></td>
+                    <td><span className={`status-badge ${statusClass[p.status]}`}><i />{p.status}</span></td>
+                    <td><span style={{ fontSize: '13px', color: '#64748b' }}>{p.lastAccess}</span></td>
+                    <td className="row-actions" onClick={(e) => e.stopPropagation()}>
+                      <button className="action-icon" title={`Enviar correo a ${p.name}`} onClick={() => sendEmail(p)}>
+                        <Mail size={16} />
+                      </button>
+                      <button className="action-icon whatsapp" title={`WhatsApp con ${p.name}`} onClick={() => sendWhatsApp(p)}>
+                        <Phone size={16} />
+                      </button>
+                      <div className="menu-anchor">
+                        <button className="action-icon" onClick={() => setShowMenu(showMenu === p.id ? null : p.id)}>
+                          <MoreVertical size={16} />
+                        </button>
+                        {showMenu === p.id && (
+                          <div className="row-menu">
+                            <button onClick={() => { setSelectedId(p.id); setDrawerTab('Información'); setShowMenu(null); }}>
+                              <UserRound size={14} /> Ver ficha
+                            </button>
+                            <button onClick={() => { setShowCreate(true); setShowMenu(null); }}>
+                              <Wrench size={14} /> Editar
+                            </button>
+                            <button onClick={() => { navigator.clipboard?.writeText(p.email); notify('Correo copiado'); setShowMenu(null); }}>
+                              <Copy size={14} /> Copiar correo
+                            </button>
+                            <button className="danger-text" onClick={() => { deactivate(p); setShowMenu(null); }}>
+                              <UserRoundX size={14} /> {p.status === 'Inactivo' ? 'Activar' : 'Desactivar'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {shown.length === 0 && (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
+                      No se encontraron usuarios con los filtros aplicados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="table-footer">
+            <span>
+              Mostrando {filtered.length ? (page - 1) * pageSize + 1 : 0}–{Math.min(page * pageSize, filtered.length)} de {filtered.length} usuarios
+            </span>
+            <div className="pagination">
+              <button disabled={page === 1} onClick={() => setPage((v) => Math.max(1, v - 1))}>
+                <ChevronLeft size={16} />
+              </button>
+              {Array.from({ length: pages }, (_, i) => (
+                <button key={i} className={page === i + 1 ? 'current' : ''} onClick={() => setPage(i + 1)}>
+                  {i + 1}
+                </button>
+              ))}
+              <button disabled={page === pages} onClick={() => setPage((v) => Math.min(pages, v + 1))}>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Drawer Lateral de Detalle */}
+      {selected && (
+        <aside className="detail-panel">
+          <div className="detail-head">
+            <button className="close-panel" onClick={() => setSelectedId(null)}>
+              <X size={18} />
+            </button>
+            <div className="profile-head" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <span className="avatar large">
+                {selected.avatar ? <img src={selected.avatar} alt="" /> : <span>{selected.initials}</span>}
+              </span>
+              <div className="profile-title">
+                <h2>{selected.name}</h2>
+                <a href={`mailto:${selected.email}`} style={{ color: '#2563eb', fontSize: '13px' }}>{selected.email}</a>
+                <div style={{ marginTop: '4px' }}>
+                  <span className={`status-badge ${statusClass[selected.status]}`}><i />{selected.status}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="detail-tabs">
+            {['Información', `Asignaciones (${selected.assignments})`, 'Historial'].map((t) => (
+              <button key={t} className={drawerTab === t ? 'active' : ''} onClick={() => setDrawerTab(t)}>
+                {t}
+              </button>
+            ))}
+          </div>
+
+          <div className="detail-content">
+            {drawerTab === 'Información' ? (
+              <>
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0 12px', marginBottom: '16px' }}>
+                  <div className="info-row"><BriefcaseBusiness size={14} /><span className="info-label">Cargo</span><span className="info-value">{selected.role}</span></div>
+                  <div className="info-row"><ContactRound size={14} /><span className="info-label">Tipo</span><span className="info-value"><span className={`type-badge ${typeClass[selected.type]}`}>{selected.type}</span></span></div>
+                  <div className="info-row"><Building2 size={14} /><span className="info-label">Entidad</span><span className="info-value">{selected.org}</span></div>
+                  <div className="info-row"><History size={14} /><span className="info-label">Último acceso</span><span className="info-value">{selected.lastAccess}</span></div>
+                  <div className="info-row"><Phone size={14} /><span className="info-label">Teléfono</span><span className="info-value">{selected.phone}</span></div>
+                  <div className="info-row"><MapPin size={14} /><span className="info-label">Sede</span><span className="info-value">{selected.location}</span></div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                  <button className="button secondary" style={{ width: '100%' }} onClick={() => sendEmail(selected)}>
+                    <Mail size={14} /> Correo
+                  </button>
+                  <button className="button secondary" style={{ width: '100%' }} onClick={() => sendWhatsApp(selected)}>
+                    <Phone size={14} /> WhatsApp
+                  </button>
+                </div>
+
+                <button
+                  className="button secondary"
+                  style={{ width: '100%', borderColor: selected.status === 'Inactivo' ? '#86efac' : '#fca5a5', color: selected.status === 'Inactivo' ? '#15803d' : '#b91c1c' }}
+                  onClick={() => deactivate(selected)}
+                >
+                  {selected.status === 'Inactivo' ? <UserRoundCheck size={15} /> : <UserRoundX size={15} />}
+                  {selected.status === 'Inactivo' ? 'Habilitar usuario' : 'Desactivar usuario'}
+                </button>
+              </>
+            ) : drawerTab.startsWith('Asignaciones') ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 4px' }}>Hitos y tareas vinculadas</h3>
+                {Array.from({ length: selected.assignments }, (_, i) => (
+                  <div key={i} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', background: '#f8fafc' }}>
+                    <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
+                      {['MINEDU · Dotación 2027', 'Hito 1.6 · Elaboración del CDL', 'Seguimiento regional Junín', 'Validación de entregables'][i % 4]}
+                    </b>
+                    <small style={{ color: '#64748b' }}>{i % 2 === 0 ? 'Responsable principal' : 'Colaborador técnico'}</small>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 4px' }}>Bitácora de actividad</h3>
+                <div style={{ fontSize: '13px', color: '#64748b', padding: '10px', background: '#f8fafc', borderRadius: '8px' }}>
+                  <b style={{ color: '#0f172a', display: 'block' }}>Perfil sincronizado</b>
+                  <span>Última validación de credenciales registrada.</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+      )}
+
+      {/* Modal Agregar Usuario */}
+      {showCreate && (
+        <div className="modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCreate(false); }}>
+          <form
+            className="create-modal"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const name = formData.get('name') as string;
+              const email = formData.get('email') as string;
+              const role = formData.get('role') as string;
+              const type = formData.get('type') as UserType;
+              const org = formData.get('org') as string;
+              const phone = formData.get('phone') as string;
+
+              const initials = name.trim().split(/\s+/).slice(0, 2).map((n) => n[0]).join('').toUpperCase();
+              setPeople((prev) => [
+                {
+                  id: Math.max(0, ...prev.map((p) => p.id)) + 1,
+                  name: name.trim(),
+                  email: email.trim(),
+                  role: role.trim(),
+                  type,
+                  org: org.trim() || 'DRE Junín',
+                  status: 'Activo',
+                  lastAccess: '—',
+                  phone: phone.trim() || '+51 900 000 000',
+                  area: 'Operaciones',
+                  location: 'Junín, Perú',
+                  initials,
+                  assignments: 1,
+                },
+                ...prev,
+              ]);
+              setShowCreate(false);
+              notify('Usuario añadido al directorio del proyecto');
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#0f172a' }}>Agregar usuario al directorio</h2>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>Registra personal interno o especialistas de las UGEL.</p>
+              </div>
+              <button type="button" className="action-icon" onClick={() => setShowCreate(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="form-grid">
+              <label className="form-field wide">
+                <span>Nombre completo *</span>
+                <input name="name" required placeholder="Ej. Carlos Valdivia" />
+              </label>
+              <label className="form-field">
+                <span>Correo institucional *</span>
+                <input name="email" type="email" required placeholder="c.valdivia@minedu.gob.pe" />
+              </label>
+              <label className="form-field">
+                <span>Teléfono / WhatsApp</span>
+                <input name="phone" placeholder="+51 964 000 111" />
+              </label>
+              <label className="form-field">
+                <span>Cargo o rol *</span>
+                <input name="role" required placeholder="Ej. Especialista de Distribución" />
+              </label>
+              <label className="form-field">
+                <span>Tipo de usuario</span>
+                <select name="type">
+                  <option>Equipo interno</option>
+                  <option>Gestor</option>
+                  <option>Coordinador</option>
+                  <option>Equipo UGEL</option>
+                </select>
+              </label>
+              <label className="form-field">
+                <span>DRE / UGEL / Entidad</span>
+                <input name="org" defaultValue="DRE Junín" placeholder="Ej. UGEL Huancayo" />
+              </label>
+            </div>
+
+            <div className="modal-actions">
+              <button type="button" className="button secondary" onClick={() => setShowCreate(false)}>
+                Cancelar
+              </button>
+              <button type="submit" className="button primary">
+                <Plus size={15} /> Guardar usuario
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {notice && (
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#0f172a', color: '#ffffff', padding: '12px 18px', borderRadius: '8px', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(0,0,0,0.2)' }}>
+          <Check size={16} className="text-green-400" />
+          <span>{notice}</span>
+        </div>
+      )}
+    </div>
+  );
+}

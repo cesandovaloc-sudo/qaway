@@ -1,5 +1,5 @@
 // Tipos compartidos del shell maestro.
-export type ModuleKey = 'tareas' | 'cronograma' | 'reuniones' | 'reportes';
+export type ModuleKey = 'tareas' | 'cronograma' | 'reuniones' | 'reportes' | 'usuarios';
 
 // Conteo semilla del módulo Tareas (paridad con `initial` del módulo: 7 tareas).
 // El valor vivo se actualiza desde TareasView vía onTasksCount en cuanto monta.

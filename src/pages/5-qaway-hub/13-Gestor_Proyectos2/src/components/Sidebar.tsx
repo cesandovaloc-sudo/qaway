@@ -4,7 +4,7 @@
 // de la sección PROYECTO (Cronograma / Tareas / Reuniones) conmutan el canvas.
 // Ninguna sección, clase, texto, espaciado ni icono nuevo.
 import type { ModuleKey } from '../types';
-import { Activity, BarChart3, CalendarDays, CheckSquare, ChevronDown, FileText, Flag, FolderKanban, LayoutDashboard, MoreHorizontal, Users } from 'lucide-react';
+import { Activity, BarChart3, CalendarDays, CheckSquare, ChevronDown, FileText, Flag, FolderKanban, LayoutDashboard, MoreHorizontal, UserRound, Users } from 'lucide-react';
 
 const espacioItems = [
   [LayoutDashboard, 'Resumen'],
@@ -83,6 +83,10 @@ export default function Sidebar({ active, onModule, tasksCount, notifyActive, se
       <button className={active === 'reportes' ? 'side-link active' : 'side-link'} onClick={() => onModule('reportes')}>
         <BarChart3 size={17} />
         <span>Reportes</span>
+      </button>
+      <button className={active === 'usuarios' ? 'side-link active' : 'side-link'} onClick={() => onModule('usuarios')}>
+        <UserRound size={17} />
+        <span>Equipo</span>
       </button>
       <button className="side-link" onClick={() => notifyActive('Actas y acuerdos se integrará con Reuniones.')}>
         <FileText size={17} />

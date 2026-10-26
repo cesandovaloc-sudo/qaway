@@ -10,13 +10,14 @@ import TareasView from './modules/tareas/TareasView';
 import CronogramaView from './modules/cronograma/CronogramaView';
 import ReunionesView from './modules/reuniones/ReunionesView';
 import ReporteadorView from './modules/reporteador/ReporteadorView';
+import UsuariosView from './modules/usuarios/UsuariosView';
 
 type Binds = { notify: (m: string) => void; setView?: (v: string) => void };
 
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY);
-    if (saved === 'tareas' || saved === 'cronograma' || saved === 'reuniones' || saved === 'reportes') return saved;
+    if (saved === 'tareas' || saved === 'cronograma' || saved === 'reuniones' || saved === 'reportes' || saved === 'usuarios') return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
     return 'tareas';
@@ -78,6 +79,9 @@ function App() {
         </div>
         <div className={active === 'reportes' ? 'rep-v1 qm-pane-active' : 'rep-v1 qm-pane'}>
           <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
+        </div>
+        <div className={active === 'usuarios' ? 'usr-v1 qm-pane-active' : 'usr-v1 qm-pane'}>
+          <UsuariosView onActions={(h) => { binds.current['usuarios'] = h; }} />
         </div>
       </main>
     </div>
