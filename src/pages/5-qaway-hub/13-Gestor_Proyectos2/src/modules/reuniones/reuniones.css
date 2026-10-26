@@ -8,32 +8,32 @@
 
 /* ============ QAWAY V4 · CAPA DE UNIFICACIÓN VISUAL — módulo REUNIONES (aditiva; DOM intacto) ============ */
 /* Cambio de familia tipográfica a Inter (unificación de los 3 módulos) + tokens corporativos */
-.rm-v1{background:var(--bg-canvas);color:var(--text-body);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.rm-v1{background:var(--bg-canvas);color:var(--text-body);font-family:var(--font-sans)}
 /* Encabezados */
 .rm-v1 .topbar{background:var(--bg-surface);border-bottom:1px solid var(--border-light)}
-.rm-v1 .page-heading h1{font-size:23px;font-weight:700;color:var(--text-main)}
-.rm-v1 .page-subtitle{font-size:12.5px;color:var(--text-muted)}
-.rm-v1 .panel-head h2{font-size:17px;font-weight:600;color:var(--text-main)}
-.rm-v1 .panel-head p{font-size:12.5px;color:var(--text-muted)}
+.rm-v1 .page-heading h1{font-size:var(--fs-h1);font-weight:700;color:var(--text-main)}
+.rm-v1 .page-subtitle{font-size:var(--fs-meta);color:var(--text-muted)}
+.rm-v1 .panel-head h2{font-size:var(--fs-h2);font-weight:600;color:var(--text-main)}
+.rm-v1 .panel-head p{font-size:var(--fs-meta);color:var(--text-muted)}
 /* Tarjetas métricas flotantes */
 .rm-v1 .metric-card{background:var(--bg-surface);border:1px solid var(--border-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card);min-height:132px;padding-bottom:34px}
-.rm-v1 .metric-main>span{font-size:12.5px;font-weight:600;color:var(--text-muted)}
+.rm-v1 .metric-main>span{font-size:var(--fs-meta);font-weight:600;color:var(--text-muted)}
 .rm-v1 .metric-main>div{display:block}
-.rm-v1 .metric-main strong{font-size:24px;font-weight:700;color:var(--text-main);display:block}
-.rm-v1 .metric-main small{font-size:12px;color:var(--text-muted);display:block;margin-top:5px}
-.rm-v1 .metric-foot{left:16px;right:auto;bottom:14px;font-size:12px;color:var(--text-muted)}
+.rm-v1 .metric-main strong{font-size:var(--fs-metric);font-weight:700;color:var(--text-main);display:block}
+.rm-v1 .metric-main small{font-size:var(--fs-meta-sm);color:var(--text-muted);display:block;margin-top:5px}
+.rm-v1 .metric-foot{left:16px;right:auto;bottom:14px;font-size:var(--fs-meta-sm);color:var(--text-muted)}
 .rm-v1 .metric-foot.blue-text{color:var(--project-blue-text)}
 .rm-v1 .metric-foot.orange-text{color:var(--status-yellow-text)}
-.rm-v1 .metric-link{bottom:12px;right:14px;font-size:12.5px;color:var(--project-blue-text)}
+.rm-v1 .metric-link{bottom:12px;right:14px;font-size:var(--fs-meta);color:var(--project-blue-text)}
 /* Paneles y tablas */
 .rm-v1 .panel{background:var(--bg-surface);border:1px solid var(--border-card);box-shadow:var(--shadow-card)}
-.rm-v1 .meetings-table th{font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-surface-subtle);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
-.rm-v1 .meetings-table td{font-size:14px;color:var(--text-body);border-bottom:1px solid var(--border-light)}
-.rm-v1 .meetings-table td>small{font-size:12px;color:var(--text-muted)}
-.rm-v1 .table-title b{font-size:14.5px;font-weight:600;color:var(--text-main)}
-.rm-v1 .table-title small{font-size:12px;color:var(--text-muted)}
+.rm-v1 .meetings-table th{font-size:var(--fs-meta-sm);font-weight:600;color:var(--text-muted);background:var(--bg-surface-subtle);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
+.rm-v1 .meetings-table td{font-size:var(--fs-body-sm);color:var(--text-body);border-bottom:1px solid var(--border-light)}
+.rm-v1 .meetings-table td>small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.rm-v1 .table-title b{font-size:var(--fs-body);font-weight:600;color:var(--text-main)}
+.rm-v1 .table-title small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 /* Pills semáforo (4/10 · 9999px · 12px/600 · dot 7px) */
-.rm-v1 .status-pill,.rm-v1 .act-pill{border-radius:9999px;padding:4px 10px;font-size:12px;font-weight:600;gap:6px}
+.rm-v1 .status-pill,.rm-v1 .act-pill{border-radius:9999px;padding:4px 10px;font-size:var(--fs-meta-sm);font-weight:600;gap:6px}
 .rm-v1 .status-pill:before,.rm-v1 .act-pill:before{width:7px;height:7px}
 .rm-v1 .status-pill.scheduled{color:var(--project-blue-text);background:var(--project-blue-bg)}
 .rm-v1 .status-pill.prep{color:var(--status-yellow-text);background:var(--status-yellow-bg)}
@@ -48,38 +48,68 @@
 .rm-v1 .today-dot{background:var(--today-violet)}
 /* Agenda próxima */
 .rm-v1 .upcoming-item{background:var(--bg-surface);border:1px solid var(--border-light)}
-.rm-v1 .upcoming-title-row strong{font-size:15px;font-weight:600;color:var(--text-main)}
-.rm-v1 .upcoming-info p{font-size:12.5px;color:var(--text-muted)}
-.rm-v1 .upcoming-info small{font-size:12px;color:var(--text-muted)}
-.rm-v1 .empty-state{font-size:12.5px;color:var(--text-muted)}
-.rm-v1 .subtle-tag{background:var(--bg-surface-subtle);font-size:12px;color:var(--text-muted)}
+.rm-v1 .upcoming-title-row strong{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.rm-v1 .upcoming-info p{font-size:var(--fs-meta);color:var(--text-muted)}
+.rm-v1 .upcoming-info small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.rm-v1 .empty-state{font-size:var(--fs-meta);color:var(--text-muted)}
+.rm-v1 .subtle-tag{background:var(--bg-surface-subtle);font-size:var(--fs-meta-sm);color:var(--text-muted)}
 /* Drawer de detalle */
 .rm-v1 .detail-drawer{background:var(--bg-surface)}
-.rm-v1 .drawer-header h2{font-family:"Inter","Segoe UI",Roboto,sans-serif;font-size:18px;font-weight:600;color:var(--text-main)}
-.rm-v1 .drawer-kicker{font-size:12px;font-weight:600;color:var(--text-muted)}
-.rm-v1 .detail-section h3{font-size:15px;font-weight:600;color:var(--text-main)}
-.rm-v1 .detail-line span{font-size:12.5px;color:var(--text-muted)}
-.rm-v1 .detail-line b{font-size:14.5px;color:var(--text-main)}
-.rm-v1 .detail-copy{font-size:14px;line-height:1.6;color:var(--text-body)}
-.rm-v1 .count-chip{font-size:12px}
+.rm-v1 .drawer-header h2{font-family:var(--font-sans);font-size:var(--fs-h2);font-weight:600;color:var(--text-main)}
+.rm-v1 .drawer-kicker{font-size:var(--fs-meta-sm);font-weight:600;color:var(--text-muted)}
+.rm-v1 .detail-section h3{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.rm-v1 .detail-line span{font-size:var(--fs-meta);color:var(--text-muted)}
+.rm-v1 .detail-line b{font-size:var(--fs-body);color:var(--text-main)}
+.rm-v1 .detail-copy{font-size:var(--fs-body-sm);line-height:1.6;color:var(--text-body)}
+.rm-v1 .count-chip{font-size:var(--fs-meta-sm)}
 /* Modales y formularios */
 .rm-v1 .meeting-modal,.rm-v1 .act-modal{background:var(--bg-surface);border-radius:var(--radius-card)}
-.rm-v1 .modal-header h2{font-family:"Inter","Segoe UI",Roboto,sans-serif;font-size:18px;font-weight:600;color:var(--text-main)}
-.rm-v1 .modal-header p{font-size:12.5px;color:var(--text-muted)}
-.rm-v1 .field>span{font-size:12.5px;font-weight:600;color:var(--text-muted)}
-.rm-v1 .field input,.rm-v1 .field select,.rm-v1 .field textarea{font-size:14px;color:var(--text-main);border-color:var(--border-light)}
+.rm-v1 .modal-header h2{font-family:var(--font-sans);font-size:var(--fs-h2);font-weight:600;color:var(--text-main)}
+.rm-v1 .modal-header p{font-size:var(--fs-meta);color:var(--text-muted)}
+.rm-v1 .field>span{font-size:var(--fs-meta);font-weight:600;color:var(--text-muted)}
+.rm-v1 .field input,.rm-v1 .field select,.rm-v1 .field textarea{font-size:var(--fs-body-sm);color:var(--text-main);border-color:var(--border-light)}
 .rm-v1 .field input::placeholder,.rm-v1 .field textarea::placeholder{color:var(--text-muted)}
-.rm-v1 .field-help{font-size:12px;color:var(--text-muted)}
-.rm-v1 .modal-footer>span{font-size:12px;color:var(--text-muted)}
-.rm-v1 .modality-option b{font-size:14px;font-weight:600;color:var(--text-main)}
-.rm-v1 .modality-option small{font-size:12px;color:var(--text-muted)}
+.rm-v1 .field-help{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.rm-v1 .modal-footer>span{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.rm-v1 .modality-option b{font-size:var(--fs-body-sm);font-weight:600;color:var(--text-main)}
+.rm-v1 .modality-option small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 .rm-v1 .act-modal-context{background:var(--bg-surface-subtle);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
-.rm-v1 .act-modal-context b{font-size:14px;font-weight:600;color:var(--text-main)}
-.rm-v1 .act-modal-context span{font-size:12px;color:var(--text-muted)}
-.rm-v1 .act-row-main>b{font-size:15px;font-weight:600;color:var(--text-main)}
-.rm-v1 .act-row-main>small{font-size:12px;color:var(--text-muted)}
+.rm-v1 .act-modal-context b{font-size:var(--fs-body-sm);font-weight:600;color:var(--text-main)}
+.rm-v1 .act-modal-context span{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.rm-v1 .act-row-main>b{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.rm-v1 .act-row-main>small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 /* Filtros */
-.rm-v1 .filters-row select{font-size:14px;color:var(--text-body);border-color:var(--border-light)}
-.rm-v1 .search-wrap input{font-size:14px;color:var(--text-body)}
-.rm-v1 .itinerary-summary span,.rm-v1 .acts-summary span{font-size:12px;color:var(--text-muted)}
+.rm-v1 .filters-row select{font-size:var(--fs-body-sm);color:var(--text-body);border-color:var(--border-light)}
+.rm-v1 .search-wrap input{font-size:var(--fs-body-sm);color:var(--text-body)}
+.rm-v1 .itinerary-summary span,.rm-v1 .acts-summary span{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 .rm-v1 .itinerary-summary b,.rm-v1 .acts-summary b{font-weight:700;color:var(--text-main)}
+
+/* ============ QAWAY V4 · NORMALIZACIÓN DE ESCALA (auditoría de huérfanos computados 2026-10-26) ============ */
+/* Pills de estado: los selectores anidados del vendido (0,3,0) vencían la capa base → !important escopieado */
+.rm-v1 .status-pill,.rm-v1 .act-pill{font-size:var(--fs-meta-sm)!important}
+/* Topbar y perfil */
+.rm-v1 .topbar span,.rm-v1 .topbar b{font-size:var(--fs-meta)}
+.rm-v1 .topbar .icon-button i{font-size:var(--fs-meta-sm);font-style:normal}
+.rm-v1 .top-profile b{font-size:var(--fs-meta)}
+.rm-v1 .top-profile small{font-size:var(--fs-meta-sm)}
+/* Cabeceras y contadores */
+.rm-v1 .eyebrow-sep{font-size:var(--fs-meta-sm)}
+.rm-v1 .tab-count{font-size:var(--fs-meta-sm);font-weight:600}
+.rm-v1 .reset-filters{font-size:var(--fs-meta)}
+.rm-v1 .button.compact{font-size:var(--fs-meta)}
+/* Calendario */
+.rm-v1 .weekday,.rm-v1 .day-num{font-size:var(--fs-meta-sm)}
+.rm-v1 .day-events span{font-size:var(--fs-meta-sm)}
+.rm-v1 .calendar-panel b{font-size:var(--fs-meta)}
+/* Pie */
+.rm-v1 .page-footer span{font-size:var(--fs-meta-sm)}
+/* Rebeldes por cadena exacta (auditoría 18:36) */
+.rm-v1 .date-tile span{font-size:var(--fs-meta-sm)}
+.rm-v1 .page-footer button{font-size:var(--fs-meta-sm)}
+/* Selects filtro sin recorte */
+.rm-v1 .filters-row select{min-width:200px}
+.rm-v1 .filters-row select{max-width:none}
+.rm-v1 .filters-row select{min-width:216px}
+.rm-v1 .filters-row .search-wrap input{min-width:104px}
+.rm-v1 .filters-row .search-wrap{min-width:120px}
+.rm-v1 .filters-row .search-wrap input{width:100%;min-width:0}

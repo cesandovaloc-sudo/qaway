@@ -53,7 +53,7 @@ export default function Sidebar({ active, onModule, tasksCount, notifyActive, se
       <div className="side-label space">PROYECTO ACTIVO</div>
       <div className="project">
         <i /> <div>
-          <b>Dotación 2027</b>
+          <b>MINEDU · Dotación 2027</b>
           <small>Seguimiento regional</small>
         </div>
         <ChevronDown size={15} />

@@ -6,24 +6,24 @@
 
 /* ============ QAWAY V4 · CAPA DE UNIFICACIÓN VISUAL — módulo CRONOGRAMA (aditiva; DOM intacto) ============ */
 /* Canvas + jerarquía tipográfica unificada (h1 23/700 · h2 17.5/600 · h3 15-15.5/600 · contenido 14-14.5 · metadatos 12-12.5) */
-.qc-v1{background:var(--bg-canvas);color:var(--text-body);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.qc-v1{background:var(--bg-canvas);color:var(--text-body);font-family:var(--font-sans)}
 /* Encabezados */
 .qc-v1 .topbar{background:var(--bg-surface);border-bottom:1px solid var(--border-light)}
-.qc-v1 .page-head h1{font-size:23px;font-weight:700;color:var(--text-main)}
-.qc-v1 .page-head p{font-size:12.5px;color:var(--text-muted)}
-.qc-v1 .section-intro h2,.qc-v1 .unit-intro h2{font-size:17.5px;font-weight:600;color:var(--text-main)}
-.qc-v1 .section-intro p,.qc-v1 .unit-intro p{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .page-head h1{font-size:var(--fs-h1);font-weight:700;color:var(--text-main)}
+.qc-v1 .page-head p{font-size:var(--fs-meta);color:var(--text-muted)}
+.qc-v1 .section-intro h2,.qc-v1 .unit-intro h2{font-size:var(--fs-h2);font-weight:600;color:var(--text-main)}
+.qc-v1 .section-intro p,.qc-v1 .unit-intro p{font-size:var(--fs-meta);color:var(--text-muted)}
 /* Tarjetas métricas */
 .qc-v1 .metric{background:var(--bg-surface);border:1px solid var(--border-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
-.qc-v1 .metric>span{font-size:12.5px;color:var(--text-muted)}
-.qc-v1 .metric strong{font-size:24px;font-weight:700;color:var(--text-main)}
-.qc-v1 .metric strong small{font-size:12.5px;font-weight:500;color:var(--text-muted)}
+.qc-v1 .metric>span{font-size:var(--fs-meta);color:var(--text-muted)}
+.qc-v1 .metric strong{font-size:var(--fs-metric);font-weight:700;color:var(--text-main)}
+.qc-v1 .metric strong small{font-size:var(--fs-meta);font-weight:500;color:var(--text-muted)}
 .qc-v1 .metric-track{background:var(--border-light)}
-.qc-v1 .metric-caption{font-size:12px;color:var(--text-muted)}
+.qc-v1 .metric-caption{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 /* Superficies flotantes */
 .qc-v1 .gantt-card,.qc-v1 .detail-panel,.qc-v1 .structure-list,.qc-v1 .unit-card,.qc-v1 .milestone-card,.qc-v1 .tracking-card,.qc-v1 .matrix-view{background:var(--bg-surface);border:1px solid var(--border-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
 /* Pills semáforo (4/10 · 9999px · 12px/600 · dot 7px) */
-.qc-v1 .status-pill{padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:600;line-height:1.4}
+.qc-v1 .status-pill{padding:4px 10px;border-radius:9999px;font-size:var(--fs-meta-sm);font-weight:600;line-height:1.4}
 .qc-v1 .status-pill i{width:7px;height:7px}
 .qc-v1 .status-pill.good{color:var(--status-green-text);background:var(--status-green-bg)}
 .qc-v1 .status-pill.blue{color:var(--project-blue-text);background:var(--project-blue-bg)}
@@ -36,14 +36,14 @@
 .qc-v1 .legend-dot.yellow{background:var(--status-yellow-dot)}
 .qc-v1 .legend-dot.red{background:var(--status-red-dot)}
 .qc-v1 .legend-dot.gray{background:var(--status-gray-dot)}
-.qc-v1 .gantt-legend>span{font-size:12px;color:var(--text-muted)}
-.qc-v1 .gantt-legend .legend-note{font-size:12px;color:var(--text-muted)}
+.qc-v1 .gantt-legend>span{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.qc-v1 .gantt-legend .legend-note{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 /* Gantt: cabecera, filas y barras (track gris #e2e8f0, relleno del semáforo) */
 .qc-v1 .gantt-head{background:var(--bg-surface-subtle);border-bottom:1px solid var(--border-light)}
-.qc-v1 .gantt-head .fixed-cols{color:var(--text-muted);font-size:12px;font-weight:600}
+.qc-v1 .gantt-head .fixed-cols{color:var(--text-muted);font-size:var(--fs-meta-sm);font-weight:600}
 .qc-v1 .gantt-row{border-bottom:1px solid var(--border-light)}
 .qc-v1 .gantt-row .fixed-cols{border-right:1px solid var(--border-light)}
-.qc-v1 .name-text{font-size:14px;color:var(--text-body)}
+.qc-v1 .name-text{font-size:var(--fs-body-sm);color:var(--text-body)}
 .qc-v1 .gantt-row .name-cell:has(.kind-icon.proyecto) .name-text,.qc-v1 .gantt-row .name-cell:has(.kind-icon.proceso) .name-text,.qc-v1 .gantt-row .name-cell:has(.kind-icon.subproceso) .name-text{font-weight:600;color:var(--text-main)}
 .qc-v1 .gantt-bar{background:var(--status-gray-bg);box-shadow:inset 0 0 0 1px var(--border-light)}
 .qc-v1 .gantt-bar>span{background:var(--status-gray-bar)}
@@ -55,8 +55,8 @@
 .qc-v1 .gantt-bar.warning>span{background:var(--status-yellow-bar)}
 .qc-v1 .gantt-bar.bad{background:var(--status-red-bg)}
 .qc-v1 .gantt-bar.bad>span{background:var(--status-red-bar)}
-.qc-v1 .bar-percent{font-size:12px;font-weight:600;color:var(--text-muted)}
-.qc-v1 .gantt-footer{font-size:12px;color:var(--text-muted)}
+.qc-v1 .bar-percent{font-size:var(--fs-meta-sm);font-weight:600;color:var(--text-muted)}
+.qc-v1 .gantt-footer{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 /* Barras de progreso internas (pills de avance por estado) */
 .qc-v1 .metric-track i.good,.qc-v1 .big-progress i.good{background:var(--status-green-bar)}
 .qc-v1 .metric-track i.blue,.qc-v1 .big-progress i.blue{background:var(--project-blue-bar)}
@@ -68,42 +68,83 @@
 .qc-v1 button.btn.secondary.today{background:var(--today-violet);border-color:var(--today-violet);color:#fff}
 .qc-v1 .today-line-key{border-left-color:var(--today-violet)}
 /* Panel de detalle */
-.qc-v1 .detail-kind{font-size:12px;font-weight:600;color:var(--text-muted)}
-.qc-v1 .detail-top h2{font-size:17.5px;font-weight:600;color:var(--text-main)}
-.qc-v1 .detail-tabs button{font-size:12.5px;font-weight:600;color:var(--text-muted)}
-.qc-v1 .detail-label span{font-size:12.5px;color:var(--text-muted)}
-.qc-v1 .detail-label b{font-size:15.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .detail-kind{font-size:var(--fs-meta-sm);font-weight:600;color:var(--text-muted)}
+.qc-v1 .detail-top h2{font-size:var(--fs-h2);font-weight:600;color:var(--text-main)}
+.qc-v1 .detail-tabs button{font-size:var(--fs-meta);font-weight:600;color:var(--text-muted)}
+.qc-v1 .detail-label span{font-size:var(--fs-meta);color:var(--text-muted)}
+.qc-v1 .detail-label b{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
 .qc-v1 .detail-dates{border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
 .qc-v1 .detail-dates>div+div{border-left:1px solid var(--border-light)}
-.qc-v1 .detail-dates span{font-size:12px;color:var(--text-muted)}
-.qc-v1 .detail-dates b{font-size:14.5px;font-weight:500;color:var(--text-body)}
+.qc-v1 .detail-dates span{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.qc-v1 .detail-dates b{font-size:var(--fs-body);font-weight:500;color:var(--text-body)}
 .qc-v1 .detail-section{border-bottom:1px solid var(--border-light)}
-.qc-v1 .detail-section h3{font-size:15px;font-weight:600;color:var(--text-main)}
-.qc-v1 .detail-section h3 span{font-size:12px;color:var(--text-muted)}
-.qc-v1 .owner-row b{font-size:14.5px;font-weight:600;color:var(--text-main)}
-.qc-v1 .owner-row small{font-size:12px;color:var(--text-muted)}
+.qc-v1 .detail-section h3{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.qc-v1 .detail-section h3 span{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.qc-v1 .owner-row b{font-size:var(--fs-body);font-weight:600;color:var(--text-main)}
+.qc-v1 .owner-row small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
 /* Estructura / unidades / hitos / matriz */
-.qc-v1 .structure-name b{font-size:15px;font-weight:600;color:var(--text-main)}
-.qc-v1 .structure-name small{font-size:12px;color:var(--text-muted)}
-.qc-v1 .structure-progress b{font-size:14.5px;font-weight:600;color:var(--text-main)}
-.qc-v1 .structure-dates{font-size:12.5px;color:var(--text-muted)}
-.qc-v1 .unit-card h3{font-size:15px;font-weight:600;color:var(--text-main)}
-.qc-v1 .unit-progress-label span{font-size:12px;color:var(--text-muted)}
-.qc-v1 .unit-progress-label b{font-size:15.5px;font-weight:600;color:var(--text-main)}
-.qc-v1 .unit-card-foot{border-top:1px solid var(--border-light);font-size:12px;color:var(--text-muted)}
-.qc-v1 .milestone-card h3{font-size:15px;font-weight:600;color:var(--text-main)}
-.qc-v1 .milestone-card>p{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .structure-name b{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.qc-v1 .structure-name small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.qc-v1 .structure-progress b{font-size:var(--fs-body);font-weight:600;color:var(--text-main)}
+.qc-v1 .structure-dates{font-size:var(--fs-meta);color:var(--text-muted)}
+.qc-v1 .unit-card h3{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.qc-v1 .unit-progress-label span{font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.qc-v1 .unit-progress-label b{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.qc-v1 .unit-card-foot{border-top:1px solid var(--border-light);font-size:var(--fs-meta-sm);color:var(--text-muted)}
+.qc-v1 .milestone-card h3{font-size:var(--fs-h3);font-weight:600;color:var(--text-main)}
+.qc-v1 .milestone-card>p{font-size:var(--fs-meta);color:var(--text-muted)}
 .qc-v1 .milestone-symbol.good{color:var(--status-green-bar);background:var(--status-green-bg)}
 .qc-v1 .milestone-symbol.blue{color:var(--project-blue-bar);background:var(--project-blue-bg)}
 .qc-v1 .milestone-symbol.warning{color:var(--status-yellow-bar);background:var(--status-yellow-bg)}
 .qc-v1 .milestone-symbol.bad{color:var(--status-red-bar);background:var(--status-red-bg)}
 .qc-v1 .milestone-symbol.muted{color:var(--status-gray-bar);background:var(--status-gray-bg)}
-.qc-v1 .tracking-card-head{font-size:14px;font-weight:600;color:var(--text-main)}
-.qc-v1 .matrix-view th{font-size:12px;font-weight:600;color:var(--text-muted);background:var(--bg-surface-subtle);border-bottom:1px solid var(--border-light)}
-.qc-v1 .matrix-view td{font-size:14px;color:var(--text-body);border-bottom:1px solid var(--border-light)}
+.qc-v1 .tracking-card-head{font-size:var(--fs-body-sm);font-weight:600;color:var(--text-main)}
+.qc-v1 .matrix-view th{font-size:var(--fs-meta-sm);font-weight:600;color:var(--text-muted);background:var(--bg-surface-subtle);border-bottom:1px solid var(--border-light)}
+.qc-v1 .matrix-view td{font-size:var(--fs-body-sm);color:var(--text-body);border-bottom:1px solid var(--border-light)}
 .qc-v1 .matrix-view td b{font-weight:600;color:var(--text-main)}
-.qc-v1 .table-progress b{font-size:14.5px;font-weight:600;color:var(--text-main)}
+.qc-v1 .table-progress b{font-size:var(--fs-body);font-weight:600;color:var(--text-main)}
 /* Controles y etiquetas */
-.qc-v1 .filters select,.qc-v1 .scale-select,.qc-v1 .status-editor{font-size:14px;color:var(--text-body);border-color:var(--border-light)}
-.qc-v1 .info-tag{background:var(--bg-surface-subtle);border:1px solid var(--border-light);border-radius:9999px;font-size:12px;font-weight:600;color:var(--text-muted)}
-.qc-v1 .filter-title b{font-size:12.5px;color:var(--text-muted)}
+.qc-v1 .filters select,.qc-v1 .scale-select,.qc-v1 .status-editor{font-size:var(--fs-body-sm);color:var(--text-body);border-color:var(--border-light)}
+.qc-v1 .info-tag{background:var(--bg-surface-subtle);border:1px solid var(--border-light);border-radius:9999px;font-size:var(--fs-meta-sm);font-weight:600;color:var(--text-muted)}
+.qc-v1 .filter-title b{font-size:var(--fs-meta);color:var(--text-muted)}
+
+/* ============ QAWAY V4 · NORMALIZACIÓN DE ESCALA (auditoría de huérfanos computados 2026-10-26) ============ */
+/* Topbar y chrome */
+.qc-v1 .topbar span,.qc-v1 .topbar b{font-size:var(--fs-meta)}
+.qc-v1 .topbar kbd{font-size:var(--fs-meta-sm)}
+.qc-v1 .topbar .icon-button i{font-size:var(--fs-meta-sm);font-style:normal}
+.qc-v1 .eyebrow{font-size:var(--fs-meta-sm);letter-spacing:.8px}
+.qc-v1 .updated span{font-size:var(--fs-meta-sm)}
+.qc-v1 .updated b{font-size:var(--fs-meta)}
+.qc-v1 button.btn.secondary.today{font-size:var(--fs-meta)}
+/* Métricas y filtros */
+.qc-v1 .metric>div>span{font-size:var(--fs-meta);font-weight:600}
+.qc-v1 .filters label>span,.qc-v1 .filters>div span{font-size:var(--fs-meta)}
+.qc-v1 .filter-reset{font-size:var(--fs-meta)}
+.qc-v1 .tab-count{font-size:var(--fs-meta-sm);font-weight:600}
+/* Gantt: fechas/duración/ticks son metadatos → 12px */
+.qc-v1 .gantt-head .month b,.qc-v1 .gantt-head .ticks span{font-size:var(--fs-meta-sm)}
+.qc-v1 .date-cell,.qc-v1 .duration-cell{font-size:var(--fs-meta-sm)}
+/* Panel de detalle */
+.qc-v1 .description-box{font-size:var(--fs-body-sm)}
+.qc-v1 .task-progress-list span{font-size:var(--fs-meta)}
+.qc-v1 .task-progress-list b{font-size:var(--fs-body-sm)}
+.qc-v1 .task-check span{font-size:var(--fs-meta)}
+.qc-v1 .demo-note{font-size:var(--fs-meta-sm)}
+.qc-v1 .page-footer span{font-size:var(--fs-meta-sm)}
+/* Refuerzo de rebeldes de especificidad (auditoría 18:35) */
+.qc-v1 .topbar span,.qc-v1 .topbar b{font-size:var(--fs-meta)!important}
+.qc-v1 .topbar small{font-size:var(--fs-meta-sm)}
+.qc-v1 .filters span{font-size:var(--fs-meta)!important}
+/* Rebeldes por cadena exacta (auditoría 18:36) */
+.qc-v1 .breadcrumb span,.qc-v1 .breadcrumb b{font-size:var(--fs-meta)}
+.qc-v1 .view-context span{font-size:var(--fs-meta)}
+.qc-v1 .deliverable span{font-size:var(--fs-meta)}
+/* Selects filtro sin recorte */
+.qc-v1 .filters label select{min-width:190px}
+.qc-v1 .filters label select{max-width:none}
+/* Ajuste de Layout: filtros en-wrap + Nombres-de-Gantt con elipsis */
+.qualizer-guard{display:none}
+.qc-v1 .filters{flex-wrap:wrap;row-gap:8px}
+.qc-v1 .name-cell span.name-text{text-overflow:ellipsis}/* label-min-filtros: el label contenedor era el que recortaba */
+.qc-v1 .filters label{min-width:190px;max-width:280px}
