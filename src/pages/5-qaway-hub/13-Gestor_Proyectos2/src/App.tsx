@@ -7,6 +7,7 @@ import type { ModuleKey, UserRole } from './types';
 import { MODULE_STORAGE_KEY, TAREAS_SEED_COUNT, USER_ROLE_STORAGE_KEY } from './types';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
+import CreateProjectModal from './components/CreateProjectModal';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 import CronogramaView from './modules/cronograma/CronogramaView';
@@ -18,6 +19,31 @@ import HitosView from './modules/hitos/HitosView';
 import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
 
 type Binds = { notify: (m: string) => void; setView?: (v: string) => void };
+
+export interface ProjectItem {
+  id: string;
+  code: string;
+  name: string;
+  region: string;
+  subtext?: string;
+}
+
+const DEFAULT_PROJECTS: ProjectItem[] = [
+  {
+    id: 'p1',
+    code: 'PRJ-MIN-2027-01',
+    name: 'MINEDU · Dotación 2027',
+    region: 'DRE Junín (9 UGEL)',
+    subtext: 'Seguimiento regional',
+  },
+  {
+    id: 'p2',
+    code: 'PRJ-MIN-2027-02',
+    name: 'MINEDU · Conectividad Rural 2027',
+    region: 'DRE Cusco (14 UGEL)',
+    subtext: 'Infraestructura digital',
+  },
+];
 
 const readStoredModule = (): ModuleKey => {
   try {
@@ -55,6 +81,19 @@ function App() {
   const [cronogramaPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial'>(() =>
     readStoredRole() === 'coordinador' ? 'maestro' : 'territorial'
   );
+
+  const [projects, setProjects] = useState<ProjectItem[]>(() => {
+    try {
+      const stored = localStorage.getItem('qaway-gp-projects-v1');
+      if (stored) return JSON.parse(stored);
+    } catch {
+      /* fallback */
+    }
+    return DEFAULT_PROJECTS;
+  });
+  const [activeProjectId, setActiveProjectId] = useState<string>('p1');
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
 
   useEffect(() => {
@@ -73,17 +112,44 @@ function App() {
     }
   }, [userRole]);
 
-  const toggleRole = () => {
-    setUserRole((prev) => {
-      const next: UserRole = prev === 'gestor' ? 'coordinador' : 'gestor';
-      setCronogramaPerspective(next === 'coordinador' ? 'maestro' : 'territorial');
-      notifyActive(
-        next === 'coordinador'
-          ? 'Modo: Carlos Mendoza (Coordinador General - Control Maestro de Cronograma)'
-          : 'Modo: María Salazar (Gestora Territorial - Monitoreo de UGEL)'
-      );
-      return next;
-    });
+  useEffect(() => {
+    try {
+      localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(projects));
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }, [projects]);
+
+  const handleChangeRole = (next: UserRole) => {
+    setUserRole(next);
+    setCronogramaPerspective(next === 'coordinador' ? 'maestro' : 'territorial');
+    notifyActive(
+      next === 'coordinador'
+        ? 'Perspectiva: Carlos Mendoza (Coordinador General - Control de Proyectos y Gantt)'
+        : 'Perspectiva: María Salazar (Gestora Territorial - Monitoreo Operativo)'
+    );
+  };
+
+  const handleCreateProject = (newProj: {
+    id: string;
+    code: string;
+    name: string;
+    region: string;
+    entidad: string;
+    metodologia: string;
+  }) => {
+    const item: ProjectItem = {
+      id: newProj.id,
+      code: newProj.code,
+      name: newProj.name,
+      region: newProj.region,
+      subtext: newProj.entidad,
+    };
+    setProjects((prev) => [item, ...prev]);
+    setActiveProjectId(item.id);
+    setActive('cronograma');
+    setCronogramaPerspective('maestro');
+    notifyActive(`Proyecto regional "${item.name}" creado con éxito. Cronograma maestro listo para configurar.`);
   };
 
   const notifyActive = (m: string) => {
@@ -93,6 +159,7 @@ function App() {
   const setTasksView = (v: string) => {
     binds.current['tareas']?.setView?.(v);
   };
+
   return (
     <div className="qm-root">
       <div className="qm-side qt-v2">
@@ -102,18 +169,27 @@ function App() {
           tasksCount={tasksCount}
           notifyActive={notifyActive}
           setTasksView={setTasksView}
+          userRole={userRole}
+          projects={projects}
+          activeProjectId={activeProjectId}
+          onSelectProject={setActiveProjectId}
+          onOpenCreateProject={() => setIsCreateProjectOpen(true)}
         />
       </div>
       <div className="qm-main-container">
         <Topbar
           activeModule={active}
           userRole={userRole}
-          onToggleRole={toggleRole}
+          onChangeRole={handleChangeRole}
           notify={notifyActive}
         />
         <main className="qm-canvas">
           <div className={active === 'resumen' ? 'res-v1 qm-pane-active' : 'res-v1 qm-pane'}>
-            <ResumenProyectoView onActions={(h) => { binds.current['resumen'] = h; }} />
+            <ResumenProyectoView
+              userRole={userRole}
+              onOpenCreateProject={() => setIsCreateProjectOpen(true)}
+              onActions={(h) => { binds.current['resumen'] = h; }}
+            />
           </div>
           <div className={active === 'tareas' ? 'qt-v2 qm-pane-active' : 'qt-v2 qm-pane'}>
             <TareasView
@@ -162,6 +238,13 @@ function App() {
           </div>
         </main>
       </div>
+
+      {/* Modal para Crear Nuevo Proyecto Regional (Exclusivo Coordinador) */}
+      <CreateProjectModal
+        isOpen={isCreateProjectOpen}
+        onClose={() => setIsCreateProjectOpen(false)}
+        onCreate={handleCreateProject}
+      />
     </div>
   );
 }

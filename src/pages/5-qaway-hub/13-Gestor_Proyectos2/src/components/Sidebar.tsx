@@ -1,18 +1,29 @@
 // Sidebar único y persistente de "Qaway Gestor de Proyectos".
 // Optimizado para altura 100vh sin scroll y con Configuración en la base.
-import type { ModuleKey } from '../types';
+import React, { useState, useRef, useEffect } from 'react';
+import type { ModuleKey, UserRole } from '../types';
 import {
   BarChart3,
   CalendarDays,
+  Check,
   CheckSquare,
   ChevronDown,
   FileText,
   Flag,
   LayoutDashboard,
+  Plus,
   Settings,
   UserRound,
   Users
 } from 'lucide-react';
+
+export interface ProjectSummary {
+  id: string;
+  code: string;
+  name: string;
+  region: string;
+  subtext?: string;
+}
 
 type SidebarProps = {
   active: ModuleKey;
@@ -20,6 +31,11 @@ type SidebarProps = {
   tasksCount: number;
   notifyActive: (m: string) => void;
   setTasksView?: (v: string) => void;
+  userRole: UserRole;
+  projects?: ProjectSummary[];
+  activeProjectId?: string;
+  onSelectProject?: (id: string) => void;
+  onOpenCreateProject?: () => void;
 };
 
 export default function Sidebar({
@@ -27,7 +43,30 @@ export default function Sidebar({
   onModule,
   tasksCount,
   notifyActive,
+  userRole,
+  projects = [
+    { id: 'p1', code: 'PRJ-MIN-2027-01', name: 'MINEDU · Dotación 2027', region: 'DRE Junín (9 UGEL)', subtext: 'Seguimiento regional' },
+    { id: 'p2', code: 'PRJ-MIN-2027-02', name: 'MINEDU · Conectividad Rural 2027', region: 'DRE Cusco (14 UGEL)', subtext: 'Infraestructura digital' },
+  ],
+  activeProjectId = 'p1',
+  onSelectProject,
+  onOpenCreateProject,
 }: SidebarProps) {
+  const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
+  const projectDropdownRef = useRef<HTMLDivElement>(null);
+
+  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (projectDropdownRef.current && !projectDropdownRef.current.contains(e.target as Node)) {
+        setIsProjectMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -38,14 +77,168 @@ export default function Sidebar({
         </div>
       </div>
 
-      <div className="side-label">PROYECTO ACTIVO</div>
-      <div className="project">
-        <i />
-        <div>
-          <b>MINEDU · Dotación 2027</b>
-          <small>Seguimiento regional</small>
+      {/* Sección Proyecto Activo */}
+      <div style={{ position: 'relative' }} ref={projectDropdownRef}>
+        <div className="side-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>PROYECTO ACTIVO</span>
+          {userRole === 'coordinador' && (
+            <span style={{ fontSize: '8.5px', color: '#93c5fd', fontWeight: 600 }}>COORDINADOR</span>
+          )}
         </div>
-        <ChevronDown size={15} />
+
+        <div
+          className="project"
+          onClick={() => setIsProjectMenuOpen((prev) => !prev)}
+          style={{ cursor: 'pointer', marginBottom: userRole === 'coordinador' ? '8px' : '19px' }}
+          title="Clic para seleccionar proyecto regional"
+        >
+          <i style={{ background: userRole === 'coordinador' ? '#60a5fa' : '#7388e2' }} />
+          <div>
+            <b>{activeProject?.name || 'MINEDU · Dotación 2027'}</b>
+            <small>{activeProject?.region || activeProject?.subtext || 'Seguimiento regional'}</small>
+          </div>
+          <ChevronDown
+            size={15}
+            style={{
+              transform: isProjectMenuOpen ? 'rotate(180deg)' : 'none',
+              transition: 'transform 0.2s',
+            }}
+          />
+        </div>
+
+        {/* Desplegable de selección de proyectos */}
+        {isProjectMenuOpen && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              zIndex: 100,
+              background: '#19283b',
+              border: '1px solid #35465a',
+              borderRadius: '8px',
+              padding: '8px',
+              boxShadow: '0 12px 30px rgba(0, 0, 0, 0.45)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+            }}
+          >
+            <div style={{ fontSize: '9px', fontWeight: 700, color: '#8f9fb2', padding: '2px 6px', letterSpacing: '0.8px' }}>
+              PROYECTOS REGIONALES
+            </div>
+            {projects.map((p) => {
+              const isSelected = p.id === activeProjectId;
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => {
+                    onSelectProject?.(p.id);
+                    setIsProjectMenuOpen(false);
+                    notifyActive(`Proyecto activo cambiado a: ${p.name}`);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '7px 8px',
+                    borderRadius: '6px',
+                    background: isSelected ? '#26384d' : 'transparent',
+                    cursor: 'pointer',
+                    border: isSelected ? '1px solid #3c519e' : '1px solid transparent',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: isSelected ? '#60a5fa' : '#64748b',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <b
+                      style={{
+                        display: 'block',
+                        fontSize: '11px',
+                        color: '#ffffff',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {p.name}
+                    </b>
+                    <small style={{ display: 'block', fontSize: '9.5px', color: '#94a3b8' }}>
+                      {p.region}
+                    </small>
+                  </div>
+                  {isSelected && <Check size={12} color="#60a5fa" />}
+                </div>
+              );
+            })}
+
+            {/* Acción de creación en el desplegable (Exclusivo Coordinador) */}
+            {userRole === 'coordinador' && (
+              <button
+                onClick={() => {
+                  setIsProjectMenuOpen(false);
+                  onOpenCreateProject?.();
+                }}
+                style={{
+                  marginTop: '6px',
+                  padding: '7px 10px',
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 650,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s ease',
+                }}
+              >
+                <Plus size={13} />
+                <span>+ Crear nuevo proyecto regional</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Botón directo en la barra lateral para crear proyecto (Exclusivo Coordinador) */}
+        {userRole === 'coordinador' && (
+          <button
+            onClick={onOpenCreateProject}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '7px 10px',
+              background: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '11.5px',
+              fontWeight: 650,
+              cursor: 'pointer',
+              marginBottom: '16px',
+              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)',
+              transition: 'all 0.15s ease',
+            }}
+            title="Crear un nuevo proyecto regional desde cero (Exclusivo Coordinador General)"
+          >
+            <Plus size={14} />
+            <span>+ Crear nuevo proyecto</span>
+          </button>
+        )}
       </div>
 
       <div className="side-label">PROYECTO</div>
@@ -115,10 +308,10 @@ export default function Sidebar({
       </button>
 
       {/* Espacio flexible para empujar la configuración al fondo */}
-      <div style={{ flex: 1, minHeight: '20px' }} />
+      <div style={{ flex: 1, minHeight: '15px' }} />
 
       {/* Configuración en la base del sidebar */}
-      <div style={{ borderTop: '1px solid #35465a', paddingTop: '12px' }}>
+      <div style={{ borderTop: '1px solid #35465a', paddingTop: '10px' }}>
         <button
           className="side-link"
           style={{ width: '100%', marginBottom: 0 }}

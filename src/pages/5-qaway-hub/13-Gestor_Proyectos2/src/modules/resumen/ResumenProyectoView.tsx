@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import './resumen.css';
 import {
   Activity, AlertTriangle, ArrowRight, Bell, Building2, Calendar, Check,
-  ChevronDown, ChevronRight, Download, FileText, Filter, RefreshCw, Search,
+  ChevronDown, ChevronRight, Download, FileText, Filter, Plus, RefreshCw, Search,
   ShieldCheck, SlidersHorizontal, Users, X
 } from 'lucide-react';
 
@@ -36,7 +36,15 @@ const PHASES = [
   { nombre: 'DEI — Validación Nivel Inicial', avance: 23, inicio: 34, fin: 66, estado: 'red' },
 ];
 
-export default function ResumenProyectoView({ onActions }: { onActions?: (h: any) => void }) {
+export default function ResumenProyectoView({
+  onActions,
+  userRole = 'gestor',
+  onOpenCreateProject,
+}: {
+  onActions?: (h: any) => void;
+  userRole?: 'gestor' | 'coordinador';
+  onOpenCreateProject?: () => void;
+}) {
   const [fase, setFase] = useState('Todas');
   const [ugel, setUgel] = useState('Todas');
   const [periodo, setPeriodo] = useState('01/10/2026 – 15/10/2026');
@@ -88,6 +96,70 @@ export default function ResumenProyectoView({ onActions }: { onActions?: (h: any
       </header>
 
       <div className="content">
+        {userRole === 'coordinador' && (
+          <div
+            style={{
+              background: '#0f172a',
+              color: '#ffffff',
+              borderRadius: '10px',
+              padding: '16px 20px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.08)',
+              border: '1px solid #1e293b',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    letterSpacing: '0.8px',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  VISTA DE COORDINACIÓN GENERAL
+                </span>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Carlos Mendoza</span>
+              </div>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
+                Gobernanza Multirregional y Creación de Proyectos
+              </h3>
+              <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#94a3b8' }}>
+                Como Coordinador General puedes crear nuevos proyectos para otras DRE/UGEL y subir su cronograma maestro desde cero.
+              </p>
+            </div>
+            <button
+              onClick={onOpenCreateProject}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '10px 18px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)',
+              }}
+            >
+              <Plus size={16} />
+              <span>+ Crear nuevo proyecto regional</span>
+            </button>
+          </div>
+        )}
+
         <div className="page-heading">
           <div>
             <div className="eyebrow">DRE JUNÍN <span>•</span> DOTACIÓN 2027</div>
