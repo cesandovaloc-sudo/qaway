@@ -3,12 +3,13 @@
 // Keep-alive: los canvas permanecen montados (display:none en el inactivo) para
 // preservar estado de UI/filtros/drawer y eliminar el parpadeo al alternar.
 import { useEffect, useRef, useState } from 'react';
-import type { ModuleKey } from './types';
-import { MODULE_STORAGE_KEY, TAREAS_SEED_COUNT } from './types';
+import type { ModuleKey, UserRole } from './types';
+import { MODULE_STORAGE_KEY, TAREAS_SEED_COUNT, USER_ROLE_STORAGE_KEY } from './types';
 import Sidebar from './components/Sidebar';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 import CronogramaView from './modules/cronograma/CronogramaView';
+import CronogramaGanttView from './modules/cronograma-gantt/CronogramaGanttView';
 import ReunionesView from './modules/reuniones/ReunionesView';
 import ReporteadorView from './modules/reporteador/ReporteadorView';
 import UsuariosView from './modules/usuarios/UsuariosView';
@@ -37,9 +38,22 @@ const seedTasksCount = (): number => {
   }
 };
 
+const readStoredRole = (): UserRole => {
+  try {
+    const saved = localStorage.getItem(USER_ROLE_STORAGE_KEY);
+    return saved === 'coordinador' ? 'coordinador' : 'gestor';
+  } catch {
+    return 'gestor';
+  }
+};
+
 function App() {
   const [active, setActive] = useState<ModuleKey>(readStoredModule);
   const [tasksCount, setTasksCount] = useState<number>(seedTasksCount);
+  const [userRole, setUserRole] = useState<UserRole>(readStoredRole);
+  const [cronogramaPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial'>(() =>
+    readStoredRole() === 'coordinador' ? 'maestro' : 'territorial'
+  );
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
 
   useEffect(() => {
@@ -49,6 +63,27 @@ function App() {
       /* almacenamiento no disponible */
     }
   }, [active]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(USER_ROLE_STORAGE_KEY, userRole);
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }, [userRole]);
+
+  const toggleRole = () => {
+    setUserRole((prev) => {
+      const next: UserRole = prev === 'gestor' ? 'coordinador' : 'gestor';
+      setCronogramaPerspective(next === 'coordinador' ? 'maestro' : 'territorial');
+      notifyActive(
+        next === 'coordinador'
+          ? 'Modo: Carlos Mendoza (Coordinador General - Control Maestro de Cronograma)'
+          : 'Modo: María Salazar (Gestora Territorial - Monitoreo de UGEL)'
+      );
+      return next;
+    });
+  };
 
   const notifyActive = (m: string) => {
     binds.current[active]?.notify(m);
@@ -66,6 +101,8 @@ function App() {
           tasksCount={tasksCount}
           notifyActive={notifyActive}
           setTasksView={setTasksView}
+          userRole={userRole}
+          onToggleRole={toggleRole}
         />
       </div>
       <main className="qm-canvas">
@@ -78,8 +115,29 @@ function App() {
             onActions={(h) => { binds.current['tareas'] = h; }}
           />
         </div>
-        <div className={active === 'cronograma' ? 'qc-v1 qm-pane-active' : 'qc-v1 qm-pane'}>
-          <CronogramaView onActions={(h) => { binds.current['cronograma'] = h; }} />
+        <div
+          className={
+            active === 'cronograma' && cronogramaPerspective === 'maestro'
+              ? 'gantt-v2 qm-pane-active'
+              : 'gantt-v2 qm-pane'
+          }
+        >
+          <CronogramaGanttView
+            onSwitchPerspective={setCronogramaPerspective}
+            onActions={(h) => { binds.current['cronograma'] = h; }}
+          />
+        </div>
+        <div
+          className={
+            active === 'cronograma' && cronogramaPerspective === 'territorial'
+              ? 'qc-v1 qm-pane-active'
+              : 'qc-v1 qm-pane'
+          }
+        >
+          <CronogramaView
+            onSwitchPerspective={setCronogramaPerspective}
+            onActions={(h) => { binds.current['cronograma'] = h; }}
+          />
         </div>
         <div className={active === 'hitos' ? 'hit-v1 qm-pane-active' : 'hit-v1 qm-pane'}>
           <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />

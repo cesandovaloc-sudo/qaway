@@ -35,7 +35,13 @@ const statusClass=(s:Status)=>({'Cumple':'good','En curso':'blue','En proceso':'
 const kindIcon=(k:Kind)=>({'Proyecto':FolderKanban,'Proceso':GitBranch,'Subproceso':ListTree,'Fase':Milestone,'Hito':Flag,'Actividad':ListChecks}[k]);
 const fmt=(s:string)=>new Date(s+'T12:00:00').toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'});
 const dateDiff=(a:string,b:string)=>Math.max(1,Math.round((new Date(b).getTime()-new Date(a).getTime())/86400000)+1);
-function App({ onActions }: { onActions?: (h: { notify: (m: string) => void }) => void }) {
+function App({
+  onActions,
+  onSwitchPerspective,
+}: {
+  onActions?: (h: { notify: (m: string) => void }) => void;
+  onSwitchPerspective?: (p: 'maestro' | 'territorial') => void;
+}) {
  const [items,setItems]=useState<Item[]>(seed); const [tab,setTab]=useState<string>('Gantt'); const [selected,setSelected]=useState('a5'); const [region,setRegion]=useState('Junín'); const [unit,setUnit]=useState('Todas las unidades'); const [kind,setKind]=useState('Todos los niveles'); const [status,setStatus]=useState('Todos los estados'); const [phase,setPhase]=useState('Todas las fases'); const [query,setQuery]=useState(''); const [scale,setScale]=useState('Meses'); const [offset,setOffset]=useState(0); const [showPanel,setShowPanel]=useState(true); const [expanded,setExpanded]=useState<Set<string>>(new Set(['p','proc1','sub1','f1','f2','f3','proc2'])); const [modal,setModal]=useState(false); const [toast,setToast]=useState(''); const [draft,setDraft]=useState({name:'',kind:'Actividad' as Kind,parent:'sub1',start:'2026-12-01',end:'2026-12-10',unit:'Todas las unidades',owner:'',description:'',deliverable:''});
  const chosen=items.find(x=>x.id===selected)||items[0];
  const filtered=useMemo(()=>items.filter(x=>{const okUnit=unit==='Todas las unidades'||x.unit===unit||x.unit==='Regional'||x.unit==='Junín'||x.unit==='Todas las UGEL';return okUnit&&(kind==='Todos los niveles'||x.kind===kind)&&(status==='Todos los estados'||x.status===status)&&(phase==='Todas las fases'||x.phase===phase)&&(!query||x.name.toLowerCase().includes(query.toLowerCase())||x.owner.toLowerCase().includes(query.toLowerCase()));}),[items,unit,kind,status,phase,query]);
@@ -52,7 +58,22 @@ function App({ onActions }: { onActions?: (h: { notify: (m: string) => void }) =
  useEffect(() => { onActions?.({ notify: (m) => notify(m) }); }, [onActions]);
  return <div className="app-shell">
   
-  <main className="workspace"><header className="topbar"><div className="project-select"><FolderKanban size={16}/><b>MINEDU · Dotación 2027</b><ChevronDown size={15}/></div><div className="global-search"><Search size={16}/><input placeholder="Buscar proyectos, UGEL, tareas..." value={query} onChange={e=>setQuery(e.target.value)}/><kbd>⌘ K</kbd></div><button className="icon-button" aria-label="Notificaciones"><Bell size={18}/><i className="notify-dot">3</i></button><button className="icon-button" aria-label="Ayuda"><CircleHelp size={19}/></button><div className="profile"><div className="avatar">CM</div><div><b>Carlos Mendoza</b><small>Gestor del Proyecto</small></div><ChevronDown size={14}/></div></header>
+  <main className="workspace">
+   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '8px 16px', margin: '14px 28px 0', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
+     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#166534', background: '#dcfce7', padding: '4px 10px', borderRadius: '6px' }}>
+       <Check size={16} />
+       <span>MODO GESTOR: Seguimiento y Cumplimiento Territorial</span>
+     </div>
+     <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+       <button style={{ border: 'none', background: 'transparent', padding: '6px 12px', fontSize: '12px', fontWeight: 600, color: '#64748b', borderRadius: '6px', cursor: 'pointer' }} onClick={() => onSwitchPerspective?.('maestro')}>
+         🏛️ Plan Maestro (Gantt Coordinador)
+       </button>
+       <button style={{ border: 'none', background: '#ffffff', padding: '6px 12px', fontSize: '12px', fontWeight: 700, color: '#0f172a', borderRadius: '6px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+         🗺️ Seguimiento Territorial (Gestor)
+       </button>
+     </div>
+   </div>
+   <header className="topbar"><div className="project-select"><FolderKanban size={16}/><b>MINEDU · Dotación 2027</b><ChevronDown size={15}/></div><div className="global-search"><Search size={16}/><input placeholder="Buscar proyectos, UGEL, tareas..." value={query} onChange={e=>setQuery(e.target.value)}/><kbd>⌘ K</kbd></div><button className="icon-button" aria-label="Notificaciones"><Bell size={18}/><i className="notify-dot">3</i></button><button className="icon-button" aria-label="Ayuda"><CircleHelp size={19}/></button><div className="profile"><div className="avatar">CM</div><div><b>Carlos Mendoza</b><small>Gestor del Proyecto</small></div><ChevronDown size={14}/></div></header>
   <div className="breadcrumb"><span>Cartera de proyectos</span><ChevronRight/><span>MINEDU · Dotación 2027</span><ChevronRight/><b>Cronograma del proyecto</b></div>
   <section className="page-head"><div><div className="eyebrow">PLANIFICACIÓN Y EJECUCIÓN</div><h1>Cronograma del proyecto</h1><p>MINEDU · Dotación 2027 <span>·</span> Planificación, seguimiento territorial y avance por unidad ejecutora en MC SIGA</p></div><div className="head-actions"><div className="updated"><span>Última actualización</span><b>25 oct. 2026 · 16:40</b></div><button className="btn secondary" onClick={exportCsv}><Download size={16}/>Exportar reporte territorial</button><button className="btn primary" onClick={()=>setModal(true)}><Plus size={17}/>Nuevo elemento</button></div></section>
   <div className="metric-grid"><div className="metric"><div className="metric-icon blue-bg"><FolderKanban size={19}/></div><div><span>Avance general</span><strong>28%</strong><div className="metric-track"><i className="fill-blue" style={{width:'28%'}}/></div><div className="metric-caption">Respecto a la meta regional</div></div></div><div className="metric"><div className="metric-icon green-bg"><Check size={20}/></div><div><span>Actividades cumplidas</span><strong>{stats.done}<small> / {stats.total}</small></strong><div className="metric-track"><i className="fill-green" style={{width:`${stats.done/Math.max(1,stats.total)*100}%`}}/></div></div></div><div className="metric"><div className="metric-icon yellow-bg"><Clock3 size={19}/></div><div><span>Requieren atención</span><strong>{stats.attention}</strong><div className="metric-caption">En proceso o No cumple</div></div></div><div className="metric"><div className="metric-icon gray-bg"><ListChecks size={19}/></div><div><span>Tareas pendientes</span><strong>{stats.pending}</strong><div className="metric-caption">En actividades del proyecto</div></div></div></div>

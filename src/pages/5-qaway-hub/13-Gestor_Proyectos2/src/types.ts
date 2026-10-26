@@ -6,3 +6,6 @@ export type ModuleKey = 'resumen' | 'cronograma' | 'tareas' | 'hitos' | 'reunion
 export const TAREAS_SEED_COUNT = 7;
 
 export const MODULE_STORAGE_KEY = 'qaway-gp-module-v1';
+
+export type UserRole = 'gestor' | 'coordinador';
+export const USER_ROLE_STORAGE_KEY = 'qaway-gp-user-role-v1';

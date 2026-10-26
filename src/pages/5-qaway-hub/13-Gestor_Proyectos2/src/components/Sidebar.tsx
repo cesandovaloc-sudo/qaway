@@ -3,7 +3,7 @@
 // Únicas alteraciones, autorizadas por el usuario: los tres botones ya existentes
 // de la sección PROYECTO (Cronograma / Tareas / Reuniones) conmutan el canvas.
 // Ninguna sección, clase, texto, espaciado ni icono nuevo.
-import type { ModuleKey } from '../types';
+import type { ModuleKey, UserRole } from '../types';
 import { Activity, BarChart3, CalendarDays, CheckSquare, ChevronDown, FileText, Flag, FolderKanban, LayoutDashboard, MoreHorizontal, UserRound, Users } from 'lucide-react';
 
 const espacioItems = [
@@ -20,9 +20,19 @@ type SidebarProps = {
   tasksCount: number;
   notifyActive: (m: string) => void;
   setTasksView: (v: string) => void;
+  userRole?: UserRole;
+  onToggleRole?: () => void;
 };
 
-export default function Sidebar({ active, onModule, tasksCount, notifyActive, setTasksView }: SidebarProps) {
+export default function Sidebar({
+  active,
+  onModule,
+  tasksCount,
+  notifyActive,
+  setTasksView,
+  userRole = 'gestor',
+  onToggleRole,
+}: SidebarProps) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -92,11 +102,18 @@ export default function Sidebar({ active, onModule, tasksCount, notifyActive, se
         <FileText size={17} />
         <span>Actas y acuerdos</span>
       </button>
-      <div className="profile">
-        <div className="avatar dark">MS</div>
+      <div
+        className="profile"
+        onClick={onToggleRole}
+        style={{ cursor: 'pointer', userSelect: 'none' }}
+        title="Clic para alternar rol: Gestora Territorial ↔ Coordinador General"
+      >
+        <div className="avatar dark">
+          {userRole === 'coordinador' ? 'CM' : 'MS'}
+        </div>
         <div>
-          <b>María Salazar</b>
-          <small>Gestora · Demostración</small>
+          <b>{userRole === 'coordinador' ? 'Carlos Mendoza' : 'María Salazar'}</b>
+          <small>{userRole === 'coordinador' ? 'Coordinador General' : 'Gestora · Demostración'}</small>
         </div>
         <MoreHorizontal size={18} />
       </div>
