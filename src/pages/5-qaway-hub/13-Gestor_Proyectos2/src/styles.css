@@ -44,8 +44,136 @@
 }
 
 /* Layout base consolidado (shell maestro, Sidebar + Canvas keep-alive) */
-.qm-root{min-height:100vh;display:flex;align-items:stretch;background:var(--bg-canvas)}
-.qm-side{flex-shrink:0}
-.qm-canvas{flex:1;min-width:0;display:block}
-.qm-pane{display:none}
-.qm-pane-active{display:block;min-width:0}
+.qm-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-canvas);
+}
+.qm-side {
+  flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: hidden;
+  z-index: 30;
+}
+.qt-v2 .sidebar {
+  height: 100vh !important;
+  overflow-y: hidden !important;
+}
+.qm-main-container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.qm-canvas {
+  flex: 1;
+  min-width: 0;
+  display: block;
+}
+.qm-pane {
+  display: none;
+}
+.qm-pane-active {
+  display: block;
+  min-width: 0;
+}
+
+/* Topbar Unificado y Persistente del Shell Maestro */
+.qm-topbar {
+  height: 58px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  color: var(--text-muted);
+  font-size: var(--fs-meta);
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+.qm-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.qm-topbar-left span {
+  color: var(--text-muted);
+}
+.qm-topbar-left b {
+  color: var(--text-main);
+  font-weight: 700;
+}
+.qm-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.qm-topbar-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-light);
+  background: #ffffff;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.qm-topbar-btn:hover {
+  background: #f8fafc;
+  color: var(--text-main);
+  border-color: #cbd5e1;
+}
+.qm-topbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  background: #ffffff;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+.qm-topbar-profile:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+.qm-topbar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.qm-topbar-profile-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.qm-topbar-profile-info b {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.qm-topbar-profile-info small {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Ocultar topbars internas redundantes de los submódulos */
+.qm-canvas .topbar {
+  display: none !important;
+}

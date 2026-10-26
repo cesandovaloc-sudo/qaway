@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ModuleKey, UserRole } from './types';
 import { MODULE_STORAGE_KEY, TAREAS_SEED_COUNT, USER_ROLE_STORAGE_KEY } from './types';
 import Sidebar from './components/Sidebar';
+import Topbar from './components/Topbar';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 import CronogramaView from './modules/cronograma/CronogramaView';
@@ -101,60 +102,66 @@ function App() {
           tasksCount={tasksCount}
           notifyActive={notifyActive}
           setTasksView={setTasksView}
-          userRole={userRole}
-          onToggleRole={toggleRole}
         />
       </div>
-      <main className="qm-canvas">
-        <div className={active === 'resumen' ? 'res-v1 qm-pane-active' : 'res-v1 qm-pane'}>
-          <ResumenProyectoView onActions={(h) => { binds.current['resumen'] = h; }} />
-        </div>
-        <div className={active === 'tareas' ? 'qt-v2 qm-pane-active' : 'qt-v2 qm-pane'}>
-          <TareasView
-            onTasksCount={setTasksCount}
-            onActions={(h) => { binds.current['tareas'] = h; }}
-          />
-        </div>
-        <div
-          className={
-            active === 'cronograma' && cronogramaPerspective === 'maestro'
-              ? 'gantt-v2 qm-pane-active'
-              : 'gantt-v2 qm-pane'
-          }
-        >
-          <CronogramaGanttView
-            onSwitchPerspective={setCronogramaPerspective}
-            onActions={(h) => { binds.current['cronograma'] = h; }}
-          />
-        </div>
-        <div
-          className={
-            active === 'cronograma' && cronogramaPerspective === 'territorial'
-              ? 'qc-v1 qm-pane-active'
-              : 'qc-v1 qm-pane'
-          }
-        >
-          <CronogramaView
-            onSwitchPerspective={setCronogramaPerspective}
-            onActions={(h) => { binds.current['cronograma'] = h; }}
-          />
-        </div>
-        <div className={active === 'hitos' ? 'hit-v1 qm-pane-active' : 'hit-v1 qm-pane'}>
-          <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
-        </div>
-        <div className={active === 'reuniones' ? 'rm-v1 qm-pane-active' : 'rm-v1 qm-pane'}>
-          <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
-        </div>
-        <div className={active === 'reportes' ? 'rep-v1 qm-pane-active' : 'rep-v1 qm-pane'}>
-          <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
-        </div>
-        <div className={active === 'usuarios' ? 'usr-v1 qm-pane-active' : 'usr-v1 qm-pane'}>
-          <UsuariosView onActions={(h) => { binds.current['usuarios'] = h; }} />
-        </div>
-        <div className={active === 'actas' ? 'act-v1 qm-pane-active' : 'act-v1 qm-pane'}>
-          <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
-        </div>
-      </main>
+      <div className="qm-main-container">
+        <Topbar
+          activeModule={active}
+          userRole={userRole}
+          onToggleRole={toggleRole}
+          notify={notifyActive}
+        />
+        <main className="qm-canvas">
+          <div className={active === 'resumen' ? 'res-v1 qm-pane-active' : 'res-v1 qm-pane'}>
+            <ResumenProyectoView onActions={(h) => { binds.current['resumen'] = h; }} />
+          </div>
+          <div className={active === 'tareas' ? 'qt-v2 qm-pane-active' : 'qt-v2 qm-pane'}>
+            <TareasView
+              onTasksCount={setTasksCount}
+              onActions={(h) => { binds.current['tareas'] = h; }}
+            />
+          </div>
+          <div
+            className={
+              active === 'cronograma' && cronogramaPerspective === 'maestro'
+                ? 'gantt-v2 qm-pane-active'
+                : 'gantt-v2 qm-pane'
+            }
+          >
+            <CronogramaGanttView
+              onSwitchPerspective={setCronogramaPerspective}
+              onActions={(h) => { binds.current['cronograma'] = h; }}
+            />
+          </div>
+          <div
+            className={
+              active === 'cronograma' && cronogramaPerspective === 'territorial'
+                ? 'qc-v1 qm-pane-active'
+                : 'qc-v1 qm-pane'
+            }
+          >
+            <CronogramaView
+              onSwitchPerspective={setCronogramaPerspective}
+              onActions={(h) => { binds.current['cronograma'] = h; }}
+            />
+          </div>
+          <div className={active === 'hitos' ? 'hit-v1 qm-pane-active' : 'hit-v1 qm-pane'}>
+            <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
+          </div>
+          <div className={active === 'reuniones' ? 'rm-v1 qm-pane-active' : 'rm-v1 qm-pane'}>
+            <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
+          </div>
+          <div className={active === 'reportes' ? 'rep-v1 qm-pane-active' : 'rep-v1 qm-pane'}>
+            <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
+          </div>
+          <div className={active === 'usuarios' ? 'usr-v1 qm-pane-active' : 'usr-v1 qm-pane'}>
+            <UsuariosView onActions={(h) => { binds.current['usuarios'] = h; }} />
+          </div>
+          <div className={active === 'actas' ? 'act-v1 qm-pane-active' : 'act-v1 qm-pane'}>
+            <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

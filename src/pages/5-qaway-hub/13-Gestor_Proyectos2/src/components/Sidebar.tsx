@@ -1,27 +1,25 @@
 // Sidebar único y persistente de "Qaway Gestor de Proyectos".
-// Markup copiado 1:1 del sidebar del módulo Tareas (ver código vendido original).
-// Únicas alteraciones, autorizadas por el usuario: los tres botones ya existentes
-// de la sección PROYECTO (Cronograma / Tareas / Reuniones) conmutan el canvas.
-// Ninguna sección, clase, texto, espaciado ni icono nuevo.
-import type { ModuleKey, UserRole } from '../types';
-import { Activity, BarChart3, CalendarDays, CheckSquare, ChevronDown, FileText, Flag, FolderKanban, LayoutDashboard, MoreHorizontal, UserRound, Users } from 'lucide-react';
-
-const espacioItems = [
-  [LayoutDashboard, 'Resumen'],
-  [FolderKanban, 'Proyectos'],
-  [CheckSquare, 'Mis tareas'],
-  [CalendarDays, 'Reuniones'],
-  [FileText, 'Documentos'],
-] as const;
+// Optimizado para altura 100vh sin scroll y con Configuración en la base.
+import type { ModuleKey } from '../types';
+import {
+  BarChart3,
+  CalendarDays,
+  CheckSquare,
+  ChevronDown,
+  FileText,
+  Flag,
+  LayoutDashboard,
+  Settings,
+  UserRound,
+  Users
+} from 'lucide-react';
 
 type SidebarProps = {
   active: ModuleKey;
   onModule: (k: ModuleKey) => void;
   tasksCount: number;
   notifyActive: (m: string) => void;
-  setTasksView: (v: string) => void;
-  userRole?: UserRole;
-  onToggleRole?: () => void;
+  setTasksView?: (v: string) => void;
 };
 
 export default function Sidebar({
@@ -29,9 +27,6 @@ export default function Sidebar({
   onModule,
   tasksCount,
   notifyActive,
-  setTasksView,
-  userRole = 'gestor',
-  onToggleRole,
 }: SidebarProps) {
   return (
     <aside className="sidebar">
@@ -42,80 +37,96 @@ export default function Sidebar({
           <small>GESTOR DE PROYECTOS</small>
         </div>
       </div>
-      <div className="side-label">ESPACIO DE TRABAJO</div>
-      {espacioItems.map(([Icon, label]: any) => (
-        <button
-          className="side-link"
-          key={label}
-          onClick={() => {
-            if (label === 'Mis tareas') {
-              onModule('tareas');
-              setTasksView('Mis tareas');
-            } else {
-              notifyActive(`${label}: se conectará en la siguiente fase`);
-            }
-          }}
-        >
-          <Icon size={17} />
-          <span>{label}</span>
-        </button>
-      ))}
-      <div className="side-label space">PROYECTO ACTIVO</div>
+
+      <div className="side-label">PROYECTO ACTIVO</div>
       <div className="project">
-        <i /> <div>
+        <i />
+        <div>
           <b>MINEDU · Dotación 2027</b>
           <small>Seguimiento regional</small>
         </div>
         <ChevronDown size={15} />
       </div>
+
       <div className="side-label">PROYECTO</div>
-      <button className={active === 'resumen' ? 'side-link active' : 'side-link'} onClick={() => onModule('resumen')}>
-        <Activity size={17} />
+      <button
+        className={active === 'resumen' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('resumen')}
+      >
+        <LayoutDashboard size={17} />
         <span>Resumen del proyecto</span>
       </button>
-      <button className={active === 'cronograma' ? 'side-link active' : 'side-link'} onClick={() => onModule('cronograma')}>
+
+      <button
+        className={active === 'cronograma' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('cronograma')}
+      >
         <CalendarDays size={17} />
         <span>Cronograma</span>
       </button>
-      <button className={active === 'tareas' ? 'side-link active' : 'side-link'} onClick={() => onModule('tareas')}>
+
+      <button
+        className={active === 'tareas' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('tareas')}
+      >
         <CheckSquare size={17} />
         <span>Tareas</span>
         <em>{tasksCount}</em>
       </button>
-      <button className={active === 'hitos' ? 'side-link active' : 'side-link'} onClick={() => onModule('hitos')}>
+
+      <button
+        className={active === 'hitos' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('hitos')}
+      >
         <Flag size={17} />
         <span>Hitos</span>
       </button>
-      <button className={active === 'reuniones' ? 'side-link active' : 'side-link'} onClick={() => onModule('reuniones')}>
+
+      <button
+        className={active === 'reuniones' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('reuniones')}
+      >
         <Users size={17} />
         <span>Reuniones</span>
       </button>
-      <button className={active === 'reportes' ? 'side-link active' : 'side-link'} onClick={() => onModule('reportes')}>
+
+      <button
+        className={active === 'reportes' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('reportes')}
+      >
         <BarChart3 size={17} />
         <span>Reportes</span>
       </button>
-      <button className={active === 'usuarios' ? 'side-link active' : 'side-link'} onClick={() => onModule('usuarios')}>
+
+      <button
+        className={active === 'usuarios' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('usuarios')}
+      >
         <UserRound size={17} />
         <span>Equipo</span>
       </button>
-      <button className={active === 'actas' ? 'side-link active' : 'side-link'} onClick={() => onModule('actas')}>
+
+      <button
+        className={active === 'actas' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('actas')}
+      >
         <FileText size={17} />
         <span>Actas y acuerdos</span>
       </button>
-      <div
-        className="profile"
-        onClick={onToggleRole}
-        style={{ cursor: 'pointer', userSelect: 'none' }}
-        title="Clic para alternar rol: Gestora Territorial ↔ Coordinador General"
-      >
-        <div className="avatar dark">
-          {userRole === 'coordinador' ? 'CM' : 'MS'}
-        </div>
-        <div>
-          <b>{userRole === 'coordinador' ? 'Carlos Mendoza' : 'María Salazar'}</b>
-          <small>{userRole === 'coordinador' ? 'Coordinador General' : 'Gestora · Demostración'}</small>
-        </div>
-        <MoreHorizontal size={18} />
+
+      {/* Espacio flexible para empujar la configuración al fondo */}
+      <div style={{ flex: 1, minHeight: '20px' }} />
+
+      {/* Configuración en la base del sidebar */}
+      <div style={{ borderTop: '1px solid #35465a', paddingTop: '12px' }}>
+        <button
+          className="side-link"
+          style={{ width: '100%', marginBottom: 0 }}
+          onClick={() => notifyActive('Configuración del proyecto y parámetros institucionales')}
+        >
+          <Settings size={17} />
+          <span>Configuración</span>
+        </button>
       </div>
     </aside>
   );
