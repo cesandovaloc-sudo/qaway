@@ -1,0 +1,549 @@
+/* Scope aislado para el módulo de Actas y Acuerdos */
+.act-v1 {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f4f7fb;
+  color: #1e293b;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.act-v1 * {
+  box-sizing: border-box;
+}
+
+.act-workspace {
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: 24px 32px 60px;
+}
+
+/* Header */
+.act-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.act-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #0284c7;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.act-eyebrow-line {
+  width: 18px;
+  height: 2px;
+  background: #0284c7;
+  border-radius: 2px;
+}
+
+.act-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.act-subtitle {
+  font-size: 14.5px;
+  color: #64748b;
+  margin: 6px 0 0;
+}
+
+.act-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Pestañas de Navegación del Módulo */
+.act-nav-tabs {
+  display: flex;
+  gap: 6px;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 22px;
+  width: fit-content;
+}
+
+.act-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.act-tab-btn:hover {
+  color: #1e293b;
+}
+
+.act-tab-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+/* Tarjetas KPI Flotantes */
+.act-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.act-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.act-kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.act-kpi-icon.blue { background: #e0f2fe; color: #0284c7; }
+.act-kpi-icon.green { background: #dcfce7; color: #16a34a; }
+.act-kpi-icon.amber { background: #fef3c7; color: #d97706; }
+.act-kpi-icon.rose { background: #ffe4e6; color: #e11d48; }
+
+.act-kpi-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.act-kpi-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.act-kpi-label {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Barra de Filtros y Búsqueda */
+.act-filter-bar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.act-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 14px;
+  flex: 1;
+  min-width: 260px;
+  max-width: 400px;
+}
+
+.act-search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #1e293b;
+  width: 100%;
+}
+
+.act-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.act-filter-select {
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 13px;
+  color: #334155;
+  outline: none;
+  font-weight: 600;
+}
+
+.act-pill {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  border-radius: 6px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.act-pill:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.act-pill.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+/* Tabla de Acuerdos Flotante (Power BI / Trello) */
+.act-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  overflow: hidden;
+}
+
+.act-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.act-table th {
+  background: #f8fafc;
+  padding: 14px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0;
+  text-transform: uppercase;
+}
+
+.act-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.act-table tr:hover td {
+  background: #f8fafc;
+}
+
+.act-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.act-status-pill:hover {
+  transform: scale(1.04);
+}
+
+.act-status-pill.cumplido {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.act-status-pill.proceso {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.act-status-pill.pendiente {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Botones genéricos */
+.act-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.act-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.act-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.act-btn-primary:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+/* Formulario Generador de Actas */
+.act-form-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+.act-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.act-panel-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+.act-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.act-panel-body {
+  padding: 22px;
+}
+
+.act-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.act-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.act-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.act-field input,
+.act-field select,
+.act-field textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.act-field input:focus,
+.act-field select:focus,
+.act-field textarea:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+}
+
+.act-dynamic-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.act-dynamic-row input,
+.act-dynamic-row textarea {
+  flex: 1;
+}
+
+.act-btn-icon-del {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #fee2e2;
+  background: #fff5f5;
+  color: #dc2626;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.act-btn-icon-del:hover {
+  background: #fee2e2;
+}
+
+/* Sidebar Resumen Lateral */
+.act-summary-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.act-summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+}
+
+.act-summary-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.act-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+.act-check-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+}
+
+.act-check-dot.ready {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.act-check-dot.waiting {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+/* Toast Notice */
+.act-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 1024px) {
+  .act-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .act-form-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .act-workspace {
+    padding: 16px 14px 40px;
+  }
+  .act-kpis {
+    grid-template-columns: 1fr;
+  }
+  .act-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .act-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

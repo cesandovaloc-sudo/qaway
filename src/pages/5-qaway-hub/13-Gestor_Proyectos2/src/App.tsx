@@ -6,18 +6,22 @@ import { useEffect, useRef, useState } from 'react';
 import type { ModuleKey } from './types';
 import { MODULE_STORAGE_KEY, TAREAS_SEED_COUNT } from './types';
 import Sidebar from './components/Sidebar';
+import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 import CronogramaView from './modules/cronograma/CronogramaView';
 import ReunionesView from './modules/reuniones/ReunionesView';
 import ReporteadorView from './modules/reporteador/ReporteadorView';
 import UsuariosView from './modules/usuarios/UsuariosView';
+import HitosView from './modules/hitos/HitosView';
+import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
 
 type Binds = { notify: (m: string) => void; setView?: (v: string) => void };
 
 const readStoredModule = (): ModuleKey => {
   try {
-    const saved = localStorage.getItem(MODULE_STORAGE_KEY);
-    if (saved === 'tareas' || saved === 'cronograma' || saved === 'reuniones' || saved === 'reportes' || saved === 'usuarios') return saved;
+    const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas'];
+    if (validModules.includes(saved)) return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
     return 'tareas';
@@ -65,6 +69,9 @@ function App() {
         />
       </div>
       <main className="qm-canvas">
+        <div className={active === 'resumen' ? 'res-v1 qm-pane-active' : 'res-v1 qm-pane'}>
+          <ResumenProyectoView onActions={(h) => { binds.current['resumen'] = h; }} />
+        </div>
         <div className={active === 'tareas' ? 'qt-v2 qm-pane-active' : 'qt-v2 qm-pane'}>
           <TareasView
             onTasksCount={setTasksCount}
@@ -74,6 +81,9 @@ function App() {
         <div className={active === 'cronograma' ? 'qc-v1 qm-pane-active' : 'qc-v1 qm-pane'}>
           <CronogramaView onActions={(h) => { binds.current['cronograma'] = h; }} />
         </div>
+        <div className={active === 'hitos' ? 'hit-v1 qm-pane-active' : 'hit-v1 qm-pane'}>
+          <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
+        </div>
         <div className={active === 'reuniones' ? 'rm-v1 qm-pane-active' : 'rm-v1 qm-pane'}>
           <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
         </div>
@@ -82,6 +92,9 @@ function App() {
         </div>
         <div className={active === 'usuarios' ? 'usr-v1 qm-pane-active' : 'usr-v1 qm-pane'}>
           <UsuariosView onActions={(h) => { binds.current['usuarios'] = h; }} />
+        </div>
+        <div className={active === 'actas' ? 'act-v1 qm-pane-active' : 'act-v1 qm-pane'}>
+          <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
         </div>
       </main>
     </div>

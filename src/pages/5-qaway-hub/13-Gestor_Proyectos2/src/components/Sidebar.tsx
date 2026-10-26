@@ -59,7 +59,7 @@ export default function Sidebar({ active, onModule, tasksCount, notifyActive, se
         <ChevronDown size={15} />
       </div>
       <div className="side-label">PROYECTO</div>
-      <button className="side-link">
+      <button className={active === 'resumen' ? 'side-link active' : 'side-link'} onClick={() => onModule('resumen')}>
         <Activity size={17} />
         <span>Resumen del proyecto</span>
       </button>
@@ -72,7 +72,7 @@ export default function Sidebar({ active, onModule, tasksCount, notifyActive, se
         <span>Tareas</span>
         <em>{tasksCount}</em>
       </button>
-      <button className="side-link" onClick={() => notifyActive('Hitos se conectará al cronograma del proyecto.')}>
+      <button className={active === 'hitos' ? 'side-link active' : 'side-link'} onClick={() => onModule('hitos')}>
         <Flag size={17} />
         <span>Hitos</span>
       </button>
@@ -88,7 +88,7 @@ export default function Sidebar({ active, onModule, tasksCount, notifyActive, se
         <UserRound size={17} />
         <span>Equipo</span>
       </button>
-      <button className="side-link" onClick={() => notifyActive('Actas y acuerdos se integrará con Reuniones.')}>
+      <button className={active === 'actas' ? 'side-link active' : 'side-link'} onClick={() => onModule('actas')}>
         <FileText size={17} />
         <span>Actas y acuerdos</span>
       </button>
