@@ -56,6 +56,8 @@ const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/A
 // PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
 const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
+// Gestor de Proyectos 2 · Módulo Tareas v2 (qaway-tareas-v2-completo)
+const TareasV2AppPage = lazy(() => import('@/pages/5-qaway-hub/13-Gestor_Proyectos2/TareasV2AppPage'))
 const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
 const PreguntasFrecuentesAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAppPage'))
 const PreguntasFrecuentesAdminAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAdminAppPage'))
@@ -423,6 +425,23 @@ export default function AppRouter() {
         <Route
           path="hub/gestor-proyectos-app/*"
           element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+        />
+        {/* Gestor de Proyectos 2 · Módulo Tareas v2 (13-Gestor_Proyectos2/qaway-tareas-v2-completo): standalone acoplado al Hub */}
+        <Route
+          path="/hub/tareas/*"
+          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="/hub/tareas"
+          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/tareas/*"
+          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/tareas"
+          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
         />
         {/* Búsqueda de Criterios RAG (12-qaway_empresarial): nativo con shell oficial Hub */}
         <Route

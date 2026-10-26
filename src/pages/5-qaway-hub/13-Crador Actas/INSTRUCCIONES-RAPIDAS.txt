@@ -1,0 +1,11 @@
+ACTAS INSTITUCIONALES - INSTRUCCIONES RAPIDAS
+
+1. Requisitos: Node.js 22 LTS y Python 3.
+2. Ejecuta INSTALAR-Y-EJECUTAR-WINDOWS.bat una sola vez.
+3. Cuando termine, ejecuta INICIAR-APP-WINDOWS.bat.
+4. Abre http://localhost:5173 en tu navegador.
+5. Carga o pega una transcripción/resumen, revisa los datos, agrega las fotos y descarga el Word.
+
+La clave de IA es opcional. Para habilitarla, abre el archivo .env y coloca tu clave en OPENAI_API_KEY=. No compartas ese archivo.
+
+La exportación Word usa el archivo maestro incluido en public/ACTA-DE-REUNION-REFERENCIA.docx. Revisa siempre el documento final antes de registrarlo oficialmente.

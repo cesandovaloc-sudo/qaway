@@ -74,6 +74,7 @@ const ROUTES = [
   { icon: FileImage, title: 'Optimizador de Imagenes WebP', description: 'Herramienta interactiva para comprimir y convertir imagenes PNG y JPG a WebP.', path: '/hub/optimizador-webp', access: 'free', badge: 'Gratis', category: 'Herramientas', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-inventario.png', published: false },
   { icon: Instagram, title: 'Descargador & Extractor de Instagram', description: 'Extractor y descargador multimedia de publicaciones.', path: '/hub/descargador-ig', access: 'free', badge: 'Borrador', category: 'Herramientas', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-creador.png', published: false },
   { icon: FolderKanban, title: 'Gestor de Proyectos (Suite)', description: 'Suite de gestión territorial, metodologías P6 y Scrum con monitoreo en tiempo real.', path: '/hub/proyectos', access: 'pro', badge: 'Pro', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: true, app: 'proyectos' },
+  { icon: FolderKanban, title: 'Gestor de Proyectos 2 · Tareas', description: 'Modulo de tareas: kanban, hitos, checklist, consultas y trazabilidad del proyecto.', path: '/hub/tareas', access: 'pro', badge: 'Nuevo', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: true, app: 'tareas' },
   { icon: PenSquare, title: 'Editor de Blog', description: 'Plataforma editorial para crear, estructurar y publicar articulos.', path: '/hub/blog-editor', access: 'pro', badge: 'Listo', category: 'Herramientas', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/hub-portada.webp', published: true, app: 'blog' },
   { icon: Calendar, title: 'Consola WABA + CRM', description: 'Panel ejecutivo para campana: integracion WhatsApp API.', path: '/hub/waba-crm', access: 'pro', badge: 'Destacado', category: 'Panel de control', pillar: 'IA', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agentes.png', published: false },
   { icon: MessageSquare, title: 'Consola CRM Comercial', description: 'Bandeja multiagente de WhatsApp, atribucion en tiempo real.', path: '/hub/crm', access: 'pro', badge: 'Nuevo', category: 'Panel de control', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-crm.jpg', published: true, app: 'crm' },
@@ -1941,6 +1942,7 @@ const WORKER_APP_ROUTES = {
   inventario: '/hub/inventario',
   agenda: '/hub/agenda',
   blog: '/hub/blog-editor',
+  tareas: '/hub/tareas',
 }
 
 function appWorkerRoute(slug) {
