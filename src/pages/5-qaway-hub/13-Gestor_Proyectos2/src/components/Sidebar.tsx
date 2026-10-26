@@ -1,6 +1,6 @@
 // Sidebar único y persistente de "Qaway Gestor de Proyectos".
 // Optimizado para altura 100vh sin scroll y con Configuración en la base.
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ModuleKey, UserRole } from '../types';
 import {
   BarChart3,
@@ -57,6 +57,12 @@ export default function Sidebar({
 
   const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
 
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort((a, b) =>
+      a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+    );
+  }, [projects]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (projectDropdownRef.current && !projectDropdownRef.current.contains(e.target as Node)) {
@@ -89,7 +95,7 @@ export default function Sidebar({
         <div
           className="project"
           onClick={() => setIsProjectMenuOpen((prev) => !prev)}
-          style={{ cursor: 'pointer', marginBottom: userRole === 'coordinador' ? '8px' : '19px' }}
+          style={{ cursor: 'pointer', marginBottom: '19px' }}
           title="Clic para seleccionar proyecto regional"
         >
           <i style={{ background: userRole === 'coordinador' ? '#60a5fa' : '#7388e2' }} />
@@ -128,7 +134,7 @@ export default function Sidebar({
             <div style={{ fontSize: '9px', fontWeight: 700, color: '#8f9fb2', padding: '2px 6px', letterSpacing: '0.8px' }}>
               PROYECTOS REGIONALES
             </div>
-            {projects.map((p) => {
+            {sortedProjects.map((p) => {
               const isSelected = p.id === activeProjectId;
               return (
                 <div
@@ -180,7 +186,7 @@ export default function Sidebar({
               );
             })}
 
-            {/* Acción de creación en el desplegable (Exclusivo Coordinador) */}
+            {/* Acción de creación al final del desplegable (Exclusivo Coordinador) */}
             {userRole === 'coordinador' && (
               <button
                 onClick={() => {
@@ -205,39 +211,10 @@ export default function Sidebar({
                 }}
               >
                 <Plus size={13} />
-                <span>+ Crear nuevo proyecto regional</span>
+                <span>Crear nuevo proyecto</span>
               </button>
             )}
           </div>
-        )}
-
-        {/* Botón directo en la barra lateral para crear proyecto (Exclusivo Coordinador) */}
-        {userRole === 'coordinador' && (
-          <button
-            onClick={onOpenCreateProject}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '7px 10px',
-              background: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '11.5px',
-              fontWeight: 650,
-              cursor: 'pointer',
-              marginBottom: '16px',
-              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)',
-              transition: 'all 0.15s ease',
-            }}
-            title="Crear un nuevo proyecto regional desde cero (Exclusivo Coordinador General)"
-          >
-            <Plus size={14} />
-            <span>+ Crear nuevo proyecto</span>
-          </button>
         )}
       </div>
 
