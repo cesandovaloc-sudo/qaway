@@ -736,18 +736,42 @@ const ALL_SEARCHABLE_ITEMS: QuickSearchResult[] = [
 export default function CriteriosApp() {
   const [theme, setTheme] = useState<RagThemeId>("rag-neutral");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
-  const [projects, setProjects] = useState<ProjectWorkspace[]>(DEFAULT_PROJECTS);
-  const [activeProjectId, setActiveProjectId] = useState<string>("auditoria-q3");
+  const [projects, setProjects] = useState<ProjectWorkspace[]>(() => {
+    try {
+      const local = localStorage.getItem("qaway_rag_projects");
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return DEFAULT_PROJECTS;
+  });
+  const [activeProjectId, setActiveProjectId] = useState<string>(() => {
+    try {
+      const local = localStorage.getItem("qaway_rag_active_project_id");
+      if (local && local.trim()) return local.trim();
+    } catch {}
+    return "auditoria-q3";
+  });
   const [showNewProjectModal, setShowNewProjectModal] = useState<boolean>(false);
   const [newProjectName, setNewProjectName] = useState<string>("");
   const [newProjectCategory, setNewProjectCategory] = useState<string>("Finanzas & Legal");
-  const [projectCategories, setProjectCategories] = useState<string[]>([
-    "Finanzas & Legal",
-    "Corporativo & Compliance",
-    "Operaciones",
-    "RR.HH. & Laboral",
-    "Logística & Distribución",
-  ]);
+  const [projectCategories, setProjectCategories] = useState<string[]>(() => {
+    try {
+      const local = localStorage.getItem("qaway_rag_project_categories");
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [
+      "Finanzas & Legal",
+      "Corporativo & Compliance",
+      "Operaciones",
+      "RR.HH. & Laboral",
+      "Logística & Distribución",
+    ];
+  });
   const [isAddingCategory, setIsAddingCategory] = useState<boolean>(false);
   const [newCategoryInput, setNewCategoryInput] = useState<string>("");
   const [showProjectDropdown, setShowProjectDropdown] = useState<boolean>(false);
@@ -857,9 +881,24 @@ export default function CriteriosApp() {
   // Historial dinámico de consultas
   const [historyItems, setHistoryItems] = useState<HistoryRecordItem[]>(INITIAL_HISTORY_ITEMS);
 
-  // Sesiones de Chat (cada sesión guarda sus propios turnos)
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>(DEFAULT_CHAT_SESSIONS);
-  const [activeSessionId, setActiveSessionId] = useState<string>("session-1");
+  // Sesiones de Chat (cada sesión guarda sus propios turnos con persistencia dual)
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => {
+    try {
+      const local = localStorage.getItem("qaway_rag_chat_sessions");
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return DEFAULT_CHAT_SESSIONS;
+  });
+  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
+    try {
+      const local = localStorage.getItem("qaway_rag_active_session_id");
+      if (local && local.trim()) return local.trim();
+    } catch {}
+    return "session-1";
+  });
   const [isChatsListOpen, setIsChatsListOpen] = useState<boolean>(true);
 
   // Capacidades avanzadas del chat
@@ -1018,7 +1057,38 @@ export default function CriteriosApp() {
     };
   }, []);
 
-  // Verificación de conexión y esquema a Supabase al inicializar
+  // Persistencia dual reactiva: guardado inmediato local (inmune a F5)
+  useEffect(() => {
+    try {
+      localStorage.setItem("qaway_rag_projects", JSON.stringify(projects));
+    } catch {}
+  }, [projects]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("qaway_rag_active_project_id", activeProjectId);
+    } catch {}
+  }, [activeProjectId]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("qaway_rag_project_categories", JSON.stringify(projectCategories));
+    } catch {}
+  }, [projectCategories]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("qaway_rag_chat_sessions", JSON.stringify(chatSessions));
+    } catch {}
+  }, [chatSessions]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("qaway_rag_active_session_id", activeSessionId);
+    } catch {}
+  }, [activeSessionId]);
+
+  // Verificación de conexión y sincronización con Supabase al inicializar
   useEffect(() => {
     testSupabaseConnection().then((res) => {
       setSupabaseStatus(res);
@@ -1028,6 +1098,19 @@ export default function CriteriosApp() {
       setCustomDbUrl(conf.url);
       setCustomDbKey(conf.anonKey);
     }
+    // Hidratar proyectos remotos de Supabase si existen
+    fetchProjectsFromSupabase().then((remoteProjects) => {
+      if (remoteProjects && remoteProjects.length > 0) {
+        setProjects((prev) => {
+          const map = new Map();
+          remoteProjects.forEach((p) => map.set(p.id, p));
+          prev.forEach((p) => {
+            if (!map.has(p.id)) map.set(p.id, p);
+          });
+          return Array.from(map.values());
+        });
+      }
+    }).catch(() => {});
   }, []);
 
   // Hidratación: documentos realmente indexados (IndexedDB) del proyecto activo
@@ -1173,6 +1256,13 @@ export default function CriteriosApp() {
     setShowNewProjectModal(false);
     setShowCategoryDropdown(false);
     handleCreateNewSession(`Chat: ${trimmed}`, newId);
+    // Sincronizar proyecto a Supabase (dual)
+    syncProjectToSupabase({
+      id: newProj.id,
+      name: newProj.name,
+      category: newProj.category,
+      badge: "Activo",
+    });
   }
 
   function handleResetHome() {
@@ -4883,13 +4973,15 @@ export default function CriteriosApp() {
                                     <input
                                       type={isEditingKey ? "text" : "password"}
                                       readOnly={!isEditingKey}
-                                      value={isEditingKey ? apiKeyDraft : prov.apiKeyMask}
+                                      value={isEditingKey ? apiKeyDraft : (prov.apiKeyMask || "")}
                                       onChange={(e) => setApiKeyDraft(e.target.value)}
-                                      placeholder="Ingresa nueva API Key..."
+                                      placeholder={isEditingKey ? "Pega tu API Key..." : "Sin clave configurada"}
                                       className={`w-full pl-7 pr-2 py-1.5 rounded-lg border font-mono text-[11px] ${
                                         isEditingKey
                                           ? "border-blue-400 bg-white text-zinc-900 focus:outline-none"
-                                          : "border-zinc-200 bg-zinc-50 text-zinc-600"
+                                          : prov.apiKeyMask
+                                          ? "border-zinc-200 bg-zinc-50 text-zinc-600"
+                                          : "border-zinc-200 bg-zinc-50/50 text-zinc-400 placeholder:text-zinc-400"
                                       }`}
                                     />
                                   </div>
@@ -4918,7 +5010,7 @@ export default function CriteriosApp() {
                                         if (prov.id === "google") {
                                           setApiKeyDraft(getStoredGeminiApiKey() || "");
                                         } else {
-                                          setApiKeyDraft(prov.apiKeyMask);
+                                          setApiKeyDraft(prov.apiKeyMask || "");
                                         }
                                       }
                                     }}
@@ -4927,9 +5019,9 @@ export default function CriteriosApp() {
                                     {isEditingKey ? "Guardar" : "Editar"}
                                   </button>
                                 </div>
-                                <span className="text-[10px] text-emerald-600 mt-0.5 block flex items-center gap-1">
-                                  <HubIcon icon={ShieldCheck} size={11} />
-                                  <span>Cifrado AES-256 local</span>
+                                <span className={`text-[10px] mt-0.5 block flex items-center gap-1 ${prov.apiKeyMask ? "text-emerald-600" : "text-zinc-400"}`}>
+                                  <HubIcon icon={prov.apiKeyMask ? ShieldCheck : Key} size={11} />
+                                  <span>{prov.apiKeyMask ? "Cifrado AES-256 local" : "Sin configurar"}</span>
                                 </span>
                               </div>
 
