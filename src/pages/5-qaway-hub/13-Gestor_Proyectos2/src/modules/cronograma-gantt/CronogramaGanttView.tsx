@@ -303,6 +303,40 @@ const STATUS_CLASS: Record<Status, string> = {
    como señal de retrocompatibilidad para datos persistidos previos. */
 const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
+const REGION_OPTIONS = [
+  { value: 'Todas', label: 'Todas las regiones' },
+  { value: 'Junín', label: 'Junín' },
+  { value: 'Loreto', label: 'Loreto' },
+  { value: 'Huancavelica', label: 'Huancavelica' },
+  { value: 'Cusco', label: 'Cusco' },
+  { value: 'Pasco', label: 'Pasco' },
+];
+
+const GESTOR_OPTIONS = [
+  { value: 'Todos', label: 'Todos los gestores' },
+  { value: 'María Salazar', label: 'María Salazar (Junín)' },
+  { value: 'Carlos Mendoza', label: 'Carlos Mendoza (Centro)' },
+  { value: 'Lucía Ramos', label: 'Lucía Ramos (Loreto)' },
+  { value: 'Javier Ruiz', label: 'Javier Ruiz (Transporte)' },
+];
+
+const TYPE_OPTIONS = [
+  { value: 'Todos', label: 'Todos los tipos' },
+  { value: 'Hitos', label: 'Solo Hitos' },
+  { value: 'Subprocesos', label: 'Solo Subprocesos' },
+];
+
+const PROJECT_MONTHS = [
+  { label: 'Sep 2026', start: '2026-09-01', end: '2026-09-30' },
+  { label: 'Oct 2026', start: '2026-10-01', end: '2026-10-31' },
+  { label: 'Nov 2026', start: '2026-11-01', end: '2026-11-30' },
+  { label: 'Dic 2026', start: '2026-12-01', end: '2026-12-31' },
+  { label: 'Ene 2027', start: '2027-01-01', end: '2027-01-31' },
+  { label: 'Feb 2027', start: '2027-02-01', end: '2027-02-28' },
+  { label: 'Mar 2027', start: '2027-03-01', end: '2027-03-31' },
+  { label: 'Abr 2027', start: '2027-04-01', end: '2027-04-30' },
+];
+
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
@@ -461,7 +495,13 @@ export default function CronogramaGanttView({
   const [pickedFile, setPickedFile] = useState('');
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
-  const [datePopOpen, setDatePopOpen] = useState(false);
+  
+  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | null;
+  const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
+  const toggleMenu = (key: FilterMenuKey) => {
+    setActiveMenu((cur) => (cur === key ? null : key));
+  };
+  const closeMenus = () => setActiveMenu(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -625,8 +665,8 @@ export default function CronogramaGanttView({
       if (!t.closest('.cell-editor, .col-resizer, .editable, .cell-pop')) {
         setEdit(null);
       }
-      if (!t.closest('.date-range-wrap')) {
-        setDatePopOpen(false);
+      if (!t.closest('.filter-dropdown-wrap')) {
+        setActiveMenu(null);
       }
     };
     document.addEventListener('mousedown', onDoc);
@@ -638,7 +678,7 @@ export default function CronogramaGanttView({
       if (e.key === 'Escape') {
         setNewMenu(false);
         setEdit(null);
-        setDatePopOpen(false);
+        setActiveMenu(null);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -951,101 +991,188 @@ export default function CronogramaGanttView({
               )}
             </label>
 
-            {/* Macro-filtro Región */}
-            <label
-              className="select"
-              onClick={(e) => {
-                const sel = (e.currentTarget as HTMLElement).querySelector('select');
-                if (sel && typeof sel.showPicker === 'function') {
-                  try { sel.showPicker(); } catch {}
-                }
-              }}
-            >
-              <small>Región / Macro</small>
-              <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)}>
-                <option value="Todas">Todas las regiones</option>
-                <option value="Junín">Junín</option>
-                <option value="Loreto">Loreto</option>
-                <option value="Huancavelica">Huancavelica</option>
-                <option value="Cusco">Cusco</option>
-                <option value="Pasco">Pasco</option>
-              </select>
-              <ChevronDown size={14} />
-            </label>
-
-            {/* Macro-filtro Gestor */}
-            <label
-              className="select"
-              onClick={(e) => {
-                const sel = (e.currentTarget as HTMLElement).querySelector('select');
-                if (sel && typeof sel.showPicker === 'function') {
-                  try { sel.showPicker(); } catch {}
-                }
-              }}
-            >
-              <small>Gestor Territorial</small>
-              <select value={gestorFilter} onChange={(e) => setGestorFilter(e.target.value)}>
-                <option value="Todos">Todos los gestores</option>
-                <option value="María Salazar">María Salazar (Junín)</option>
-                <option value="Carlos Mendoza">Carlos Mendoza (Centro)</option>
-                <option value="Lucía Ramos">Lucía Ramos (Loreto)</option>
-                <option value="Javier Ruiz">Javier Ruiz (Transporte)</option>
-              </select>
-              <ChevronDown size={14} />
-            </label>
-
-            <label
-              className="select"
-              onClick={(e) => {
-                const sel = (e.currentTarget as HTMLElement).querySelector('select');
-                if (sel && typeof sel.showPicker === 'function') {
-                  try { sel.showPicker(); } catch {}
-                }
-              }}
-            >
-              <small>Estado</small>
-              <select value={stateFilter} onChange={(e) => setStateFilter(e.target.value)}>
-                {['Todos', ...STATUS_OPTIONS].map((x) => (
-                  <option key={x}>{x}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} />
-            </label>
-
-            <label
-              className="select"
-              onClick={(e) => {
-                const sel = (e.currentTarget as HTMLElement).querySelector('select');
-                if (sel && typeof sel.showPicker === 'function') {
-                  try { sel.showPicker(); } catch {}
-                }
-              }}
-            >
-              <small>Tipo</small>
-              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                {['Todos', 'Hitos', 'Subprocesos'].map((x) => (
-                  <option key={x}>{x}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} />
-            </label>
-
-            {/* Rango de Fechas Operativo con Popover Redondeado Moderno */}
-            <div className="date-range-wrap">
+            {/* Macro-filtro Región (Custom Popover 12px) */}
+            <div className="filter-dropdown-wrap">
               <button
                 type="button"
-                className={`date-range-btn ${datePopOpen ? 'active' : ''} ${
+                className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
+                  regionFilter !== 'Todas' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('region')}
+              >
+                <div className="filter-card-copy">
+                  <small>Región / Macro</small>
+                  <span>{regionFilter === 'Todas' ? 'Todas las regiones' : regionFilter}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'region' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                  <div className="filter-popover-title">Filtrar por Región</div>
+                  <div className="filter-popover-list">
+                    {REGION_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`filter-item-btn ${regionFilter === opt.value ? 'selected' : ''}`}
+                        onClick={() => {
+                          setRegionFilter(opt.value);
+                          closeMenus();
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        {regionFilter === opt.value && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Macro-filtro Gestor (Custom Popover 12px) */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'gestor' ? 'active' : ''} ${
+                  gestorFilter !== 'Todos' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('gestor')}
+              >
+                <div className="filter-card-copy">
+                  <small>Gestor Territorial</small>
+                  <span>{gestorFilter === 'Todos' ? 'Todos los gestores' : gestorFilter}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'gestor' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                  <div className="filter-popover-title">Gestor Asignado</div>
+                  <div className="filter-popover-list">
+                    {GESTOR_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`filter-item-btn ${gestorFilter === opt.value ? 'selected' : ''}`}
+                        onClick={() => {
+                          setGestorFilter(opt.value);
+                          closeMenus();
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        {gestorFilter === opt.value && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Macro-filtro Estado (Custom Popover 12px) */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
+                  stateFilter !== 'Todos' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('state')}
+              >
+                <div className="filter-card-copy">
+                  <small>Estado</small>
+                  <span>{stateFilter === 'Todos' ? 'Todos los estados' : stateFilter}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'state' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                  <div className="filter-popover-title">Estado del Cronograma</div>
+                  <div className="filter-popover-list">
+                    <button
+                      type="button"
+                      className={`filter-item-btn ${stateFilter === 'Todos' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setStateFilter('Todos');
+                        closeMenus();
+                      }}
+                    >
+                      <span>Todos los estados</span>
+                      {stateFilter === 'Todos' && <Check size={14} className="item-check" />}
+                    </button>
+                    {STATUS_OPTIONS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className={`filter-item-btn ${stateFilter === s ? 'selected' : ''}`}
+                        onClick={() => {
+                          setStateFilter(s);
+                          closeMenus();
+                        }}
+                      >
+                        <span className={'status ' + STATUS_CLASS[s]}>{s}</span>
+                        {stateFilter === s && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Macro-filtro Tipo (Custom Popover 12px) */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'type' ? 'active' : ''} ${
+                  typeFilter !== 'Todos' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('type')}
+              >
+                <div className="filter-card-copy">
+                  <small>Tipo</small>
+                  <span>{typeFilter === 'Todos' ? 'Todos los tipos' : typeFilter}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'type' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                  <div className="filter-popover-title">Jerarquía de Actividad</div>
+                  <div className="filter-popover-list">
+                    {TYPE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`filter-item-btn ${typeFilter === opt.value ? 'selected' : ''}`}
+                        onClick={() => {
+                          setTypeFilter(opt.value);
+                          closeMenus();
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        {typeFilter === opt.value && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Rango de Fechas Operativo con Popover Redondeado Moderno (Cero calendarios nativos rectos) */}
+            <div className="filter-dropdown-wrap date-range-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn date-range-btn ${activeMenu === 'dates' ? 'active' : ''} ${
                   rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX ? 'filtered' : ''
                 }`}
-                onClick={() => setDatePopOpen((v) => !v)}
+                onClick={() => toggleMenu('dates')}
                 title="Filtrar por rango de fechas oficial"
               >
                 <CalendarDays size={15} className="dr-icon" />
-                <span className="dr-text">{formatDateRange(rangeFrom, rangeTo)}</span>
-                <ChevronDown size={14} className="dr-chevron" />
+                <div className="filter-card-copy">
+                  <small>Rango de Fechas</small>
+                  <span>{formatDateRange(rangeFrom, rangeTo)}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
               </button>
 
-              {datePopOpen && (
+              {activeMenu === 'dates' && (
                 <div className="date-range-popover" onClick={(e) => e.stopPropagation()}>
                   <div className="dr-pop-header">
                     <div className="dr-pop-title">
@@ -1055,13 +1182,14 @@ export default function CronogramaGanttView({
                     <button
                       type="button"
                       className="dr-close"
-                      onClick={() => setDatePopOpen(false)}
+                      onClick={closeMenus}
                       title="Cerrar selector"
                     >
                       <X size={14} />
                     </button>
                   </div>
 
+                  <div className="dr-section-label">Accesos Rápidos</div>
                   <div className="dr-presets">
                     <button
                       type="button"
@@ -1105,27 +1233,31 @@ export default function CronogramaGanttView({
                     </button>
                   </div>
 
-                  <div className="dr-inputs">
-                    <label>
-                      <span>Desde</span>
-                      <input
-                        type="date"
-                        value={rangeFrom}
-                        min={RANGE_MIN}
-                        max={rangeTo}
-                        onChange={(e) => setRangeFrom(e.target.value)}
-                      />
-                    </label>
-                    <label>
-                      <span>Hasta</span>
-                      <input
-                        type="date"
-                        value={rangeTo}
-                        min={rangeFrom}
-                        max={RANGE_MAX}
-                        onChange={(e) => setRangeTo(e.target.value)}
-                      />
-                    </label>
+                  <div className="dr-section-label">Meses Oficiales (MINEDU 2026-2027)</div>
+                  <div className="dr-months-grid">
+                    {PROJECT_MONTHS.map((m) => {
+                      const isSelected = rangeFrom <= m.end && rangeTo >= m.start;
+                      const isExact = rangeFrom === m.start && rangeTo === m.end;
+                      return (
+                        <button
+                          key={m.label}
+                          type="button"
+                          className={`dr-month-pill ${isExact ? 'exact' : isSelected ? 'in-range' : ''}`}
+                          onClick={() => {
+                            setRangeFrom(m.start);
+                            setRangeTo(m.end);
+                          }}
+                          title={`Seleccionar mes ${m.label}`}
+                        >
+                          {m.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="dr-active-summary">
+                    <span>Período activo:</span>
+                    <b>{formatDateRange(rangeFrom, rangeTo)}</b>
                   </div>
 
                   <div className="dr-footer">
@@ -1142,7 +1274,7 @@ export default function CronogramaGanttView({
                     <button
                       type="button"
                       className="dr-apply"
-                      onClick={() => setDatePopOpen(false)}
+                      onClick={closeMenus}
                     >
                       Aplicar Rango
                     </button>
@@ -1220,6 +1352,7 @@ export default function CronogramaGanttView({
                 setRangeFrom(DEFAULT_RANGE.from);
                 setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
+                closeMenus();
               }}
             >
               <RefreshCw size={14} />
