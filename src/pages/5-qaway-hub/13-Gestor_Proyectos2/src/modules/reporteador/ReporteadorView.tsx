@@ -7,7 +7,7 @@ import {
   LayoutDashboard, ListChecks, MoreHorizontal, Search, ShieldCheck, Users, X
 } from 'lucide-react';
 import {
-  Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis
+  Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 
 export type ReportBinds = { notify: (m: string) => void; setView?: (v: string) => void };
@@ -412,8 +412,21 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
                       <CartesianGrid stroke="#e2e8f0" vertical={false} strokeDasharray="3 4" />
                       <XAxis dataKey="id" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                       <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                      <Tooltip formatter={(v) => `${v}%`} />
-                      <Bar dataKey="v" radius={[5, 5, 0, 0]} fill="#2563eb" />
+                      <Tooltip
+                        formatter={(v) => [`${v}%`, 'Cumplimiento']}
+                        cursor={{ fill: 'rgba(37, 99, 235, 0.08)', radius: 4 }}
+                        contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                      />
+                      <Bar
+                        dataKey="v"
+                        radius={[5, 5, 0, 0]}
+                        fill="#2563eb"
+                        isAnimationActive={true}
+                        animationBegin={150}
+                        animationDuration={1200}
+                        animationEasing="ease-out"
+                        activeBar={{ fill: '#1d4ed8', stroke: '#1e40af', strokeWidth: 1.5 }}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -425,10 +438,37 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
                   <p>Distribución porcentual actual.</p>
                 </div>
                 <div className="donut-row">
-                  <div className="donut">
-                    <div>
-                      <b>06</b>
-                      <small>hitos</small>
+                  <div className="donut" style={{ position: 'relative', width: '136px', height: '136px', background: 'transparent' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Tooltip
+                          formatter={(v: any, name: any) => [`${v} hitos (${Math.round((Number(v) / 6) * 100)}%)`, name]}
+                          contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                        />
+                        <Pie
+                          data={[
+                            { name: 'Cumplidos', value: 1, color: '#10b981' },
+                            { name: 'En proceso', value: 3, color: '#f59e0b' },
+                            { name: 'Pendientes', value: 2, color: '#ef4444' },
+                          ]}
+                          innerRadius={42}
+                          outerRadius={65}
+                          paddingAngle={3}
+                          dataKey="value"
+                          isAnimationActive={true}
+                          animationBegin={200}
+                          animationDuration={1300}
+                          animationEasing="ease-out"
+                        >
+                          <Cell fill="#10b981" />
+                          <Cell fill="#f59e0b" />
+                          <Cell fill="#ef4444" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                      <b style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>06</b>
+                      <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>hitos</small>
                     </div>
                   </div>
                   <div className="donut-legend">
@@ -462,8 +502,23 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
                       <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 4" vertical={false} />
                       <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                       <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                      <Tooltip formatter={(v) => `${v}%`} />
-                      <Line dataKey="v" name="Avance" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 4, fill: '#2563eb' }} />
+                      <Tooltip
+                        formatter={(v) => [`${v}%`, 'Avance']}
+                        cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '3 3' }}
+                        contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                      />
+                      <Line
+                        dataKey="v"
+                        name="Avance"
+                        stroke="#2563eb"
+                        strokeWidth={2.5}
+                        dot={{ r: 4, fill: '#2563eb' }}
+                        isAnimationActive={true}
+                        animationBegin={250}
+                        animationDuration={1300}
+                        animationEasing="ease-out"
+                        activeDot={{ r: 6.5, stroke: '#2563eb', strokeWidth: 2.5, fill: '#ffffff' }}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

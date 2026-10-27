@@ -11,8 +11,70 @@
 .qt-v2 .topbar{background:var(--bg-surface);border-bottom:1px solid var(--border-light);color:var(--text-muted);font-size:var(--fs-meta)}
 .qt-v2 .topbar b{color:var(--text-main)}
 /* Tarjetas métricas flotantes */
-.qt-v2 .metric{background:var(--bg-surface);border:1px solid var(--border-card);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
-.qt-v2 .metric:hover{border-color:#c7d2e3;box-shadow:var(--shadow-card-hover)}
+@keyframes qtMetricEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.qt-v2 .metric{
+  background:var(--bg-surface);
+  border:1px solid var(--border-card);
+  border-radius:var(--radius-card);
+  box-shadow:var(--shadow-card);
+  cursor: pointer;
+  will-change: transform, box-shadow;
+  animation: qtMetricEntrance 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s;
+}
+
+.qt-v2 .metric:nth-child(1) { animation-delay: 0.04s; }
+.qt-v2 .metric:nth-child(2) { animation-delay: 0.08s; }
+.qt-v2 .metric:nth-child(3) { animation-delay: 0.12s; }
+.qt-v2 .metric:nth-child(4) { animation-delay: 0.16s; }
+
+.qt-v2 .metric:hover{
+  transform: translateY(-4px) scale(1.015);
+}
+
+.qt-v2 .metric:nth-child(1):hover {
+  box-shadow: 0 12px 28px -4px rgba(37, 99, 235, 0.25), 0 4px 12px rgba(37, 99, 235, 0.12);
+  border-color: #bfdbfe;
+}
+
+.qt-v2 .metric:nth-child(2):hover {
+  box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(16, 185, 129, 0.12);
+  border-color: #bbf7d0;
+}
+
+.qt-v2 .metric:nth-child(3):hover {
+  box-shadow: 0 12px 28px -4px rgba(245, 158, 11, 0.25), 0 4px 12px rgba(245, 158, 11, 0.12);
+  border-color: #fde68a;
+}
+
+.qt-v2 .metric:nth-child(4):hover {
+  box-shadow: 0 12px 28px -4px rgba(239, 68, 68, 0.25), 0 4px 12px rgba(239, 68, 68, 0.12);
+  border-color: #fecaca;
+}
+
+.qt-v2 .metric:active {
+  transform: translateY(-1px) scale(0.995);
+  transition-duration: 0.1s;
+}
+
+.qt-v2 .metric svg {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.qt-v2 .metric:hover svg {
+  transform: scale(1.15) rotate(2deg);
+}
+
 .qt-v2 .metric>div{font-size:var(--fs-meta);color:var(--text-muted)}
 .qt-v2 .metric strong{font-size:var(--fs-metric);font-weight:700;color:var(--text-main)}
 .qt-v2 .metric small{font-size:var(--fs-meta-sm);color:var(--text-muted)}
