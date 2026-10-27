@@ -24,6 +24,7 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  RotateCcw,
   Save,
   Search,
   ShieldCheck,
@@ -306,7 +307,7 @@ const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
 const DEFAULT_COLS: Record<ColKey, number> = { name: 380, start: 95, end: 95, duration: 85, progress: 120, status: 105 };
-const MIN_COLS: Record<ColKey, number> = { name: 280, start: 80, end: 80, duration: 70, progress: 90, status: 90 };
+const MIN_COLS: Record<ColKey, number> = { name: 180, start: 70, end: 70, duration: 60, progress: 75, status: 75 };
 
 const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
@@ -337,11 +338,12 @@ const calcPosition = (s: string) =>
 
 const calcWidth = (a: string, b: string) => (getDays(a, b) / TOTAL_SPAN_DAYS) * 100;
 
-/* Línea "Hoy" dinámica: fecha real del sistema, acotada al cronograma oficial. */
+/* Línea "Hoy" dinámica: fecha real del sistema o 2026-10-27 si el reloj está fuera del marco oficial. */
 const TODAY_ISO = (() => {
   const n = new Date();
   const iso = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
-  return iso < RANGE_MIN ? RANGE_MIN : iso > RANGE_MAX ? RANGE_MAX : iso;
+  if (iso >= RANGE_MIN && iso <= RANGE_MAX) return iso;
+  return '2026-10-27';
 })();
 
 /* Segmentación del eje temporal según escala (Día / Semana / Mes / Trimestre).
@@ -422,7 +424,8 @@ export default function CronogramaGanttView({
   });
 
   const [selectedId, setSelectedId] = useState<string | null>('h1');
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [history, setHistory] = useState<Item[][]>([]);
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -461,12 +464,49 @@ export default function CronogramaGanttView({
     onActions?.({ notify: (m: string) => notify(m) });
   }, [onActions]);
 
-  /* ---------- Redimensionamiento de columnas ---------- */
+  /* ---------- Historial de Deshacer (Undo / Retroceder) ---------- */
+  const commitChange = (nextOrUpdater: Item[] | ((prev: Item[]) => Item[])) => {
+    setItems((prev) => {
+      const next = typeof nextOrUpdater === 'function' ? nextOrUpdater(prev) : nextOrUpdater;
+      if (JSON.stringify(prev) !== JSON.stringify(next)) {
+        setHistory((h) => [prev, ...h].slice(0, 30));
+      }
+      return next;
+    });
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) {
+      notify('No hay cambios previos para deshacer');
+      return;
+    }
+    const [previous, ...rest] = history;
+    setItems(previous);
+    setHistory(rest);
+    notify('Cambio deshecho con éxito');
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        const target = e.target as HTMLElement | null;
+        const isEditingInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+        if (!isEditingInput) {
+          e.preventDefault();
+          handleUndo();
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [history]);
+
+  /* ---------- Redimensionamiento de columnas (Agrandar y Disminuir) ---------- */
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       const d = dragRef.current;
       if (!d) return;
-      const w = Math.max(MIN_COLS[d.key], d.startW + (e.clientX - d.startX));
+      const w = Math.max(MIN_COLS[d.key], Math.min(800, d.startW + (e.clientX - d.startX)));
       setColWidths((c) => ({ ...c, [d.key]: w }));
     };
     const onUp = () => {
@@ -528,9 +568,9 @@ export default function CronogramaGanttView({
   const toggleEdit = (x: Item, field: EditField) =>
     setEdit((cur) => (cur && cur.id === x.id && cur.field === field ? null : { id: x.id, field }));
 
-  /* ---------- Mutaciones de datos (retroalimentan Duración y barras) ---------- */
+  /* ---------- Mutaciones de datos (retroalimentan Duración, barras e Historial) ---------- */
   const update = (id: string, p: Partial<Item>) => {
-    setItems((old) => old.map((x) => (x.id === id ? { ...x, ...p } : x)));
+    commitChange((old) => old.map((x) => (x.id === id ? { ...x, ...p } : x)));
   };
 
   const setStart = (x: Item, v: string) => {
@@ -620,7 +660,7 @@ export default function CronogramaGanttView({
       gestor: 'Carlos Mendoza',
     };
 
-    setItems((old) =>
+    commitChange((old) =>
       kind === 'subproceso' && item.parentId
         ? old.flatMap((x) => (x.id === item.parentId ? [x, item] : [x]))
         : [...old, item]
@@ -660,7 +700,7 @@ export default function CronogramaGanttView({
 
   const deleteItem = () => {
     if (!selected || !confirm(`¿Eliminar “${selected.name}”?`)) return;
-    setItems((old) => old.filter((x) => x.id !== selected.id && x.parentId !== selected.id));
+    commitChange((old) => old.filter((x) => x.id !== selected.id && x.parentId !== selected.id));
     setSelectedId(null);
     setPanelOpen(false);
     notify('Elemento eliminado del cronograma maestro');
@@ -901,6 +941,22 @@ export default function CronogramaGanttView({
             </div>
 
             <button
+              className="btn secondary undo-btn"
+              style={{ minHeight: '38px', padding: '0 12px' }}
+              disabled={history.length === 0}
+              onClick={handleUndo}
+              title={
+                history.length > 0
+                  ? `Deshacer último cambio (Ctrl+Z) · ${history.length} en historial`
+                  : 'No hay cambios para deshacer'
+              }
+            >
+              <RotateCcw size={14} />
+              <span>Deshacer</span>
+              {history.length > 0 && <span className="undo-badge">{history.length}</span>}
+            </button>
+
+            <button
               className="btn secondary"
               style={{ minHeight: '38px', padding: '0 10px' }}
               onClick={() => {
@@ -978,6 +1034,10 @@ export default function CronogramaGanttView({
                   onClick={() => {
                     setSelectedId(x.id);
                   }}
+                  onDoubleClick={() => {
+                    setSelectedId(x.id);
+                    setPanelOpen(true);
+                  }}
                 >
                   <div className="name-cell">
                     {x.kind === 'hito' ? (
@@ -1017,7 +1077,7 @@ export default function CronogramaGanttView({
                     ) : (
                       <span
                         className="name"
-                        title={`${x.name} — clic para editar`}
+                        title="Clic para editar nombre · Doble clic para detalle"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedId(x.id);
@@ -1027,17 +1087,6 @@ export default function CronogramaGanttView({
                         {x.name}
                       </span>
                     )}
-                    <button
-                      className="name-pencil"
-                      title="Editar nombre"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedId(x.id);
-                        toggleEdit(x, 'name');
-                      }}
-                    >
-                      <Pencil size={14} />
-                    </button>
                   </div>
 
                   <div
@@ -1226,19 +1275,6 @@ export default function CronogramaGanttView({
                       {x.kind === 'hito' ? '◆' : ''}
                     </div>
                   </div>
-
-                  {/* Acceso dedicado al Panel de Detalle (desvinculado del clic general) */}
-                  <button
-                    className="detail-btn"
-                    title="Ver detalle / Info"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedId(x.id);
-                      setPanelOpen(true);
-                    }}
-                  >
-                    <PanelRightOpen size={16} />
-                  </button>
                 </div>
               ))}
 
@@ -1260,6 +1296,15 @@ export default function CronogramaGanttView({
               Mostrando {shown.length ? 1 : 0}–{shown.length} de {items.length} registros oficiales
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button
+                className="btn secondary"
+                style={{ minHeight: '32px', fontSize: '12px' }}
+                onClick={() => setPanelOpen((v) => !v)}
+                title="Abrir o cerrar panel de detalles del elemento seleccionado"
+              >
+                <PanelRightOpen size={14} />
+                <span>{panelOpen ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
+              </button>
               <button
                 className="btn secondary"
                 style={{ minHeight: '32px', fontSize: '12px' }}
