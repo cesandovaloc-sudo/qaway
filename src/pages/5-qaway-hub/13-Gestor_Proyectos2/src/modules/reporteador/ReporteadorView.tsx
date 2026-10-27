@@ -192,12 +192,94 @@ const historyHito = [
 
 const colorFor = (s: string) => (s === 'Cumple' || s === 'done' ? 'green' : s === 'En proceso' || s === 'work' ? 'amber' : 'slate');
 
+function RoundedDropdown({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: (string | { value: string; label: string })[];
+  onChange: (val: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  const normalizedOptions = options.map((opt) =>
+    typeof opt === 'string' ? { value: opt, label: opt } : opt
+  );
+
+  const currentOption = normalizedOptions.find((o) => o.value === value) || normalizedOptions[0];
+
+  return (
+    <div
+      className="filter-card rounded-dropdown-wrap"
+      ref={dropdownRef}
+      style={{ position: 'relative', zIndex: isOpen ? 60 : 1 }}
+    >
+      <span className="dropdown-label-title">{label}</span>
+      <button
+        type="button"
+        className="rounded-dropdown-trigger"
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
+      >
+        <span className="dropdown-trigger-text">{currentOption ? currentOption.label : value}</span>
+        <ChevronDown
+          size={14}
+          className="dropdown-chevron"
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="rounded-dropdown-menu">
+          {normalizedOptions.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <div
+                key={opt.value}
+                className={`rounded-dropdown-item ${isSelected ? 'selected' : ''}`}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+              >
+                <span>{opt.label}</span>
+                {isSelected && <Check size={14} className="dropdown-item-check" />}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ReporteadorView({ onActions }: { onActions?: (h: ReportBinds) => void }) {
   const [viewMode, setViewMode] = useState<'overview' | 'hito'>('overview');
   const [selectedHitoId, setSelectedHitoId] = useState<string>('1.6');
   const [milestones] = useState<Milestone[]>(initialMilestones);
   const [expanded, setExpanded] = useState<string[]>(['1.6', '1.6.1', '1.6.2']);
   const [search, setSearch] = useState('');
+  const [regionFilter, setRegionFilter] = useState('Región Junín (13 UGEL)');
+  const [scopeFilter, setScopeFilter] = useState('Región Junín (13 UGEL)');
   const [statusFilter, setStatusFilter] = useState('Todos');
   const [typeFilter, setTypeFilter] = useState('Todos');
   const [detail, setDetail] = useState<Milestone | Sub | null>(null);
@@ -318,32 +400,30 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
 
             {/* Barra de Filtros */}
             <div className="filters">
-              <label>
-                <span>Región</span>
-                <select defaultValue="Junín">
-                  <option>Región Junín (13 UGEL)</option>
-                  <option>Todas las regiones</option>
-                </select>
-              </label>
-              <label>
-                <span>Estado del hito</span>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option>Todos</option>
-                  <option>Cumple</option>
-                  <option>En proceso</option>
-                  <option>Pendiente</option>
-                </select>
-              </label>
-              <label>
-                <span>Tipo de presentación</span>
-                <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                  <option>Todos</option>
-                  <option>Línea de tiempo</option>
-                  <option>Matriz de entregables</option>
-                  <option>Registro de cantidades</option>
-                  <option>Resumen ejecutivo</option>
-                </select>
-              </label>
+              <RoundedDropdown
+                label="Región"
+                value={regionFilter}
+                options={['Región Junín (13 UGEL)', 'Todas las regiones']}
+                onChange={setRegionFilter}
+              />
+              <RoundedDropdown
+                label="Estado del hito"
+                value={statusFilter}
+                options={['Todos', 'Cumple', 'En proceso', 'Pendiente']}
+                onChange={setStatusFilter}
+              />
+              <RoundedDropdown
+                label="Tipo de presentación"
+                value={typeFilter}
+                options={[
+                  'Todos',
+                  'Línea de tiempo',
+                  'Matriz de entregables',
+                  'Registro de cantidades',
+                  'Resumen ejecutivo',
+                ]}
+                onChange={setTypeFilter}
+              />
               <div className="updated">
                 <CalendarDays size={18} />
                 <div>
@@ -674,23 +754,18 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
 
             {/* Selector rápido de hito */}
             <div className="report-toolbar">
-              <label>
-                <span>Hito en consulta</span>
-                <select value={selectedHitoId} onChange={(e) => setSelectedHitoId(e.target.value)}>
-                  {milestones.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.id} · {m.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <span>Ámbito de reporte</span>
-                <select defaultValue="Junín">
-                  <option>Región Junín (13 UGEL)</option>
-                  <option>Filtrar por sede provincial</option>
-                </select>
-              </label>
+              <RoundedDropdown
+                label="Hito en consulta"
+                value={selectedHitoId}
+                options={milestones.map((m) => ({ value: m.id, label: `${m.id} · ${m.name}` }))}
+                onChange={setSelectedHitoId}
+              />
+              <RoundedDropdown
+                label="Ámbito de reporte"
+                value={scopeFilter}
+                options={['Región Junín (13 UGEL)', 'Filtrar por sede provincial']}
+                onChange={setScopeFilter}
+              />
               <div className="updated">
                 <CalendarDays size={18} />
                 <div>
