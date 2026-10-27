@@ -1240,3 +1240,276 @@
     align-items: flex-start;
   }
 }
+
+/* =========================================================
+   INTERACTIVIDAD GANTT MAESTRO (aditivo — candado visual)
+   ========================================================= */
+
+/* --- B) Viewport Inteligente: scroll interno contenido --- */
+.gantt-v2 .gantt-scroll {
+  max-height: calc(100vh - 360px);
+}
+
+.gantt-v2 .table-head > div:not(.timeline-head) {
+  position: relative;
+}
+
+/* --- A) Manillares de redimensionado de columnas --- */
+.gantt-v2 .col-resizer {
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  right: -3px;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+}
+
+.gantt-v2 .col-resizer::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 2px;
+  width: 2px;
+  border-radius: 2px;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.gantt-v2 .col-resizer:hover::before,
+body.gantt-resizing .gantt-v2 .col-resizer:hover::before {
+  background: #0066ff;
+}
+
+body.gantt-resizing {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+/* --- D) Escalas temporales densas: etiquetas compactas --- */
+.gantt-v2 .timeline-head[data-density="fine"] .months span {
+  font-size: 9px;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  padding: 0 1px;
+}
+
+/* --- Celda Nombre: flexión + lápiz de edición en hover --- */
+.gantt-v2 .name-cell .name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gantt-v2 .name-pencil {
+  opacity: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.gantt-v2 .row:hover .name-pencil,
+.gantt-v2 .row.selected .name-pencil {
+  opacity: 1;
+}
+
+.gantt-v2 .name-pencil:hover {
+  color: #0066ff;
+  background: #e6f4ff;
+}
+
+/* --- E) Afinidad de celdas editables (Inicio/Fin/Duración/Avance/Estado) --- */
+.gantt-v2 .row > div.editable {
+  cursor: pointer;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+
+.gantt-v2 .row > div.editable:hover {
+  background: #f1f5f9;
+  box-shadow: inset 0 0 0 1px #cbd5e1;
+}
+
+.gantt-v2 .progress,
+.gantt-v2 .status-cell {
+  position: relative;
+  min-width: 0;
+}
+
+/* --- E) Editores inline en celda --- */
+.gantt-v2 .cell-input {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #93c5fd;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+}
+
+.gantt-v2 .name-edit {
+  width: min(340px, 100%);
+  flex: 0 1 auto;
+  min-width: 120px;
+}
+
+.gantt-v2 .num-edit {
+  width: 76px;
+  min-width: 0;
+}
+
+.gantt-v2 .date-edit {
+  width: 100%;
+  max-width: 150px;
+  padding: 0 4px;
+  font-size: 11.5px;
+}
+
+.gantt-v2 .editable input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+/* --- E) Popovers de celda (Avance / Estado) --- */
+.gantt-v2 .cell-pop {
+  position: absolute;
+  z-index: 40;
+  top: calc(50% + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.14);
+  padding: 8px;
+}
+
+.gantt-v2 .progress-pop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 176px;
+}
+
+.gantt-v2 .progress-pop input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: #0066ff;
+}
+
+.gantt-v2 .progress-pop b {
+  font-size: 12px;
+  color: #0f172a;
+  min-width: 34px;
+  text-align: right;
+}
+
+.gantt-v2 .status-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 138px;
+}
+
+.gantt-v2 .status-pop button {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gantt-v2 .status-pop button:hover {
+  background: #f1f5f9;
+}
+
+.gantt-v2 .status-pop button.cur {
+  background: #e6f4ff;
+}
+
+/* --- E) Botón dedicado "Ver Detalle / Info" por fila --- */
+.gantt-v2 .detail-btn {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.gantt-v2 .row:hover .detail-btn,
+.gantt-v2 .detail-btn:focus-visible {
+  opacity: 1;
+}
+
+.gantt-v2 .detail-btn:hover {
+  color: #0066ff;
+  border-color: #93c5fd;
+  background: #f0f7ff;
+}
+
+/* --- D) Selector de Rango de Fechas operativo --- */
+.gantt-v2 .date-range {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding: 0 10px;
+}
+
+.gantt-v2 .date-range input[type="date"] {
+  width: 104px;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.gantt-v2 .date-range input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.gantt-v2 .date-range .dr-sep {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+/* --- Movilidad: en pantallas angostas se recupera el scroll natural --- */
+@media (max-width: 900px) {
+  .gantt-v2 .gantt-scroll {
+    max-height: none;
+  }
+
+  .gantt-v2 .detail-btn {
+    opacity: 1;
+  }
+}

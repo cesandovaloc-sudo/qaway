@@ -19,7 +19,9 @@ import {
   Layers3,
   MapPin,
   MoreHorizontal,
+  PanelRightOpen,
   Paperclip,
+  Pencil,
   Plus,
   RefreshCw,
   Save,
@@ -33,8 +35,10 @@ import {
   X
 } from 'lucide-react';
 
-type Status = 'Completado' | 'En proceso' | 'Pendiente' | 'Con retraso';
+type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
+type ColKey = 'name' | 'start' | 'end' | 'duration' | 'progress' | 'status';
+type EditField = ColKey;
 
 interface Item {
   id: string;
@@ -286,11 +290,23 @@ const MONTHS = [
 ];
 
 const STATUS_CLASS: Record<Status, string> = {
+  'Cumple': 'complete',
   'Completado': 'complete',
+  'En curso': 'progress',
   'En proceso': 'progress',
   'Pendiente': 'pending',
   'Con retraso': 'late',
 };
+
+/* Semáforo oficial de 5 estados (tablero operativo). 'Completado' se mantiene
+   como señal de retrocompatibilidad para datos persistidos previos. */
+const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
+
+const RANGE_MIN = '2026-09-01';
+const RANGE_MAX = '2027-04-30';
+
+const DEFAULT_COLS: Record<ColKey, number> = { name: 380, start: 95, end: 95, duration: 85, progress: 120, status: 105 };
+const MIN_COLS: Record<ColKey, number> = { name: 280, start: 80, end: 80, duration: 70, progress: 90, status: 90 };
 
 const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
@@ -300,6 +316,19 @@ const formatDate = (s: string) =>
 const getDays = (a: string, b: string) =>
   Math.max(1, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000) + 1);
 
+const monthDays = (iso: string) => {
+  const y = Number(iso.slice(0, 4));
+  const m = Number(iso.slice(5, 7));
+  return new Date(y, m, 0).getDate();
+};
+
+/* Nuevo fin = inicio + (días - 1). El mediodía evita desfases de zona horaria. */
+const shiftDays = (iso: string, delta: number) => {
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + delta);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 const START_TIMESTAMP = new Date('2026-09-01T12:00:00').getTime();
 const TOTAL_SPAN_DAYS = getDays('2026-09-01', '2027-04-30');
 
@@ -307,6 +336,58 @@ const calcPosition = (s: string) =>
   (((new Date(s + 'T12:00:00').getTime() - START_TIMESTAMP) / 86400000) / TOTAL_SPAN_DAYS) * 100;
 
 const calcWidth = (a: string, b: string) => (getDays(a, b) / TOTAL_SPAN_DAYS) * 100;
+
+/* Línea "Hoy" dinámica: fecha real del sistema, acotada al cronograma oficial. */
+const TODAY_ISO = (() => {
+  const n = new Date();
+  const iso = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  return iso < RANGE_MIN ? RANGE_MIN : iso > RANGE_MAX ? RANGE_MAX : iso;
+})();
+
+/* Segmentación del eje temporal según escala (Día / Semana / Mes / Trimestre).
+   Los pesos "fr" derivan de días reales, por lo que las barras (%) y la línea
+   "Hoy" quedan sempre alineadas con la cuadrícula. */
+const buildSegments = (zoom: string) => {
+  const segs: { label: string; days: number; key: string }[] = [];
+
+  if (zoom === 'Día') {
+    for (let i = 0; i < TOTAL_SPAN_DAYS; i++) {
+      const d = new Date(START_TIMESTAMP + i * 86400000);
+      const dom = d.getDate();
+      segs.push({ label: dom === 1 || dom === 11 || dom === 21 ? String(dom) : '', days: 1, key: `d${i}` });
+    }
+    return segs;
+  }
+
+  if (zoom === 'Semana') {
+    let i = 0;
+    while (i < TOTAL_SPAN_DAYS) {
+      const d = new Date(START_TIMESTAMP + i * 86400000);
+      const dow = (d.getDay() + 6) % 7; /* lunes = 0 */
+      const take = Math.min(dow === 0 ? 7 : 7 - dow, TOTAL_SPAN_DAYS - i);
+      segs.push({ label: `S${segs.length + 1}`, days: take, key: `w${segs.length}` });
+      i += take;
+    }
+    return segs;
+  }
+
+  if (zoom === 'Trimestre') {
+    const quarters: Record<string, { label: string; days: number }> = {};
+    const order: string[] = [];
+    MONTHS.forEach((m) => {
+      const q = `${Math.ceil(Number(m.start.slice(5, 7)) / 3)}-${Number(m.start.slice(2, 4))}`;
+      if (!quarters[q]) {
+        quarters[q] = { label: `T${q.split('-')[0]}-${q.split('-')[1]}`, days: 0 };
+        order.push(q);
+      }
+      quarters[q].days += monthDays(m.start);
+    });
+    return order.map((q, i) => ({ ...quarters[q], key: `q${i}` }));
+  }
+
+  /* Escala por defecto: Mes */
+  return MONTHS.map((m, i) => ({ label: m.label, days: monthDays(m.start), key: `m${i}` }));
+};
 
 export default function CronogramaGanttView({
   onActions,
@@ -324,6 +405,22 @@ export default function CronogramaGanttView({
     }
   });
 
+  const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v1') || 'null');
+      if (saved && typeof saved === 'object') {
+        const merged: Record<ColKey, number> = { ...DEFAULT_COLS };
+        (Object.keys(DEFAULT_COLS) as ColKey[]).forEach((k) => {
+          if (typeof saved[k] === 'number' && saved[k] >= MIN_COLS[k]) merged[k] = saved[k];
+        });
+        return merged;
+      }
+    } catch {
+      /* almacenamiento no disponible */
+    }
+    return { ...DEFAULT_COLS };
+  });
+
   const [selectedId, setSelectedId] = useState<string | null>('h1');
   const [panelOpen, setPanelOpen] = useState(true);
   const [tab, setTab] = useState('Todos');
@@ -332,14 +429,20 @@ export default function CronogramaGanttView({
   const [typeFilter, setTypeFilter] = useState('Todos');
   const [regionFilter, setRegionFilter] = useState('Todas');
   const [gestorFilter, setGestorFilter] = useState('Todos');
+  const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
+  const [rangeTo, setRangeTo] = useState(RANGE_MAX);
   const [zoom, setZoom] = useState('Mes');
   const [newMenu, setNewMenu] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [attachment, setAttachment] = useState('OFICIO_MULTIPLE_00032-2026-MINEDU_Dotacion2027.pdf');
   const [pickedFile, setPickedFile] = useState('');
   const [toast, setToast] = useState('');
+  const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const colRef = useRef(colWidths);
+  const dragRef = useRef<{ key: ColKey; startX: number; startW: number } | null>(null);
+  colRef.current = colWidths;
 
   useEffect(() => {
     try {
@@ -358,38 +461,144 @@ export default function CronogramaGanttView({
     onActions?.({ notify: (m: string) => notify(m) });
   }, [onActions]);
 
+  /* ---------- Redimensionamiento de columnas ---------- */
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const d = dragRef.current;
+      if (!d) return;
+      const w = Math.max(MIN_COLS[d.key], d.startW + (e.clientX - d.startX));
+      setColWidths((c) => ({ ...c, [d.key]: w }));
+    };
+    const onUp = () => {
+      if (!dragRef.current) return;
+      dragRef.current = null;
+      document.body.classList.remove('gantt-resizing');
+      try {
+        localStorage.setItem('qaway-gantt-cols-v1', JSON.stringify(colRef.current));
+      } catch {
+        /* almacenamiento no disponible */
+      }
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.classList.remove('gantt-resizing');
+    };
+  }, []);
+
+  const startResize = (e: React.MouseEvent, key: ColKey) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragRef.current = { key, startX: e.clientX, startW: colRef.current[key] };
+    document.body.classList.add('gantt-resizing');
+  };
+
+  const fixedWidth = useMemo(() => (Object.keys(colWidths) as ColKey[]).reduce((a, k) => a + colWidths[k], 0), [colWidths]);
+
+  const gridCols = useMemo(
+    () =>
+      `${colWidths.name}px ${colWidths.start}px ${colWidths.end}px ${colWidths.duration}px ${colWidths.progress}px ${colWidths.status}px minmax(360px, 1fr)`,
+    [colWidths]
+  );
+
+  /* ---------- Editor en celda: cierre global (clic externo / Escape) ---------- */
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      if (t.closest && t.closest('.cell-editor, .col-resizer')) return;
+      setEdit(null);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setEdit(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const closeEdit = () => setEdit(null);
+  const isEditing = (x: Item, field: EditField) => !!edit && edit.id === x.id && edit.field === field;
+  const toggleEdit = (x: Item, field: EditField) =>
+    setEdit((cur) => (cur && cur.id === x.id && cur.field === field ? null : { id: x.id, field }));
+
+  /* ---------- Mutaciones de datos (retroalimentan Duración y barras) ---------- */
+  const update = (id: string, p: Partial<Item>) => {
+    setItems((old) => old.map((x) => (x.id === id ? { ...x, ...p } : x)));
+  };
+
+  const setStart = (x: Item, v: string) => {
+    if (!v) return;
+    update(x.id, v > x.end ? { start: v, end: v } : { start: v });
+  };
+
+  const setEnd = (x: Item, v: string) => {
+    if (!v) return;
+    update(x.id, v < x.start ? { start: v, end: v } : { end: v });
+  };
+
+  const setDuration = (x: Item, raw: string) => {
+    const d = Math.max(1, Math.min(365, parseInt(raw || '1', 10) || 1));
+    update(x.id, { end: shiftDays(x.start, d - 1) });
+  };
+
+  const setProgress = (x: Item, v: number) =>
+    update(x.id, {
+      progress: v,
+      status: v >= 100 ? 'Cumple' : v === 0 ? 'Pendiente' : 'En proceso',
+    });
+
   const selected = items.find((x) => x.id === selectedId);
   const hitos = items.filter((x) => x.kind === 'hito');
   const subs = items.filter((x) => x.kind === 'subproceso');
-  const inprog = items.filter((x) => x.status === 'En proceso').length;
+  const inprog = items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length;
   const late = items.filter((x) => x.status === 'Con retraso').length;
-  const complete = items.filter((x) => x.status === 'Completado').length;
+  const complete = items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length;
   const overall = Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length);
+
+  /* Rango predeterminado del botón Limpiar */
+  const DEFAULT_RANGE = { from: RANGE_MIN, to: RANGE_MAX };
 
   const shown = useMemo(() => {
     return items.filter((x) => {
       const parent = items.find((p) => p.id === x.parentId);
       const matchSearch = `${x.code} ${x.name}`.toLowerCase().includes(search.toLowerCase());
-      const matchState = stateFilter === 'Todos' || x.status === stateFilter;
+      const matchState =
+        stateFilter === 'Todos' ||
+        x.status === stateFilter ||
+        (stateFilter === 'Cumple' && x.status === 'Completado');
       const matchType =
         typeFilter === 'Todos' || (typeFilter === 'Hitos' ? x.kind === 'hito' : x.kind === 'subproceso');
       const matchTab =
         tab === 'Todos' ||
         (tab === 'Hitos' && x.kind === 'hito') ||
         (tab === 'Subprocesos' && x.kind === 'subproceso') ||
+        (tab === 'Completados' && (x.status === 'Completado' || x.status === 'Cumple')) ||
         x.status === tab;
       const matchRegion =
         regionFilter === 'Todas' || x.region === 'Todas las Regiones' || x.region === regionFilter;
       const matchGestor = gestorFilter === 'Todos' || x.gestor === gestorFilter;
+      /* Rango de fechas: solapamiento del ítem con el período consultado */
+      const matchRange = x.start <= rangeTo && x.end >= rangeFrom;
       const notCollapsed = !parent || parent.expanded !== false;
 
-      return matchSearch && matchState && matchType && matchTab && matchRegion && matchGestor && notCollapsed;
+      return (
+        matchSearch && matchState && matchType && matchTab && matchRegion && matchGestor && matchRange && notCollapsed
+      );
     });
-  }, [items, search, stateFilter, typeFilter, tab, regionFilter, gestorFilter]);
+  }, [items, search, stateFilter, typeFilter, tab, regionFilter, gestorFilter, rangeFrom, rangeTo]);
 
-  const update = (id: string, p: Partial<Item>) => {
-    setItems((old) => old.map((x) => (x.id === id ? { ...x, ...p } : x)));
-  };
+  const segments = useMemo(() => buildSegments(zoom), [zoom]);
+  const segCols = useMemo(() => segments.map((s) => `${s.days}fr`).join(' '), [segments]);
+  const yearCols = useMemo(() => ['2026', '2027'].map((y, i) => `${getDays(i === 0 ? RANGE_MIN : '2027-01-01', i === 0 ? '2026-12-31' : RANGE_MAX)}fr`).join(' '), []);
+  const todayPos = calcPosition(TODAY_ISO);
+  const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
   const add = (kind: Kind) => {
     const id = 'new-' + Date.now();
@@ -640,7 +849,7 @@ export default function CronogramaGanttView({
             <label className="select">
               <small>Estado</small>
               <select value={stateFilter} onChange={(e) => setStateFilter(e.target.value)}>
-                {['Todos', 'Completado', 'En proceso', 'Pendiente', 'Con retraso'].map((x) => (
+                {['Todos', ...STATUS_OPTIONS].map((x) => (
                   <option key={x}>{x}</option>
                 ))}
               </select>
@@ -657,9 +866,26 @@ export default function CronogramaGanttView({
               <ChevronDown size={14} />
             </label>
 
-            <div className="date-range">
-              <CalendarDays size={15} />
-              <span>01 sep. 2026 – 30 abr. 2027</span>
+            {/* Rango de Fechas Operativo */}
+            <div className="date-range" title="Acota las actividades entre dos fechas">
+              <CalendarDays size={15} className="dr-icon" />
+              <input
+                className="cell-editor"
+                type="date"
+                value={rangeFrom}
+                min={RANGE_MIN}
+                max={rangeTo}
+                onChange={(e) => setRangeFrom(e.target.value)}
+              />
+              <span className="dr-sep">–</span>
+              <input
+                className="cell-editor"
+                type="date"
+                value={rangeTo}
+                min={rangeFrom}
+                max={RANGE_MAX}
+                onChange={(e) => setRangeTo(e.target.value)}
+              />
             </div>
 
             <div className="zoom">
@@ -683,6 +909,8 @@ export default function CronogramaGanttView({
                 setTypeFilter('Todos');
                 setRegionFilter('Todas');
                 setGestorFilter('Todos');
+                setRangeFrom(DEFAULT_RANGE.from);
+                setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
               }}
             >
@@ -693,9 +921,9 @@ export default function CronogramaGanttView({
 
           {/* Tabla Gantt con Timeline */}
           <div className="gantt-scroll">
-            <div className="gantt">
+            <div className="gantt" style={{ '--fixed': `${fixedWidth}px` } as React.CSSProperties}>
               {/* Cabecera de la Tabla */}
-              <div className="table-head">
+              <div className="table-head" style={{ gridTemplateColumns: gridCols }}>
                 <div className="name-head">
                   <input
                     type="checkbox"
@@ -704,20 +932,36 @@ export default function CronogramaGanttView({
                     }
                   />
                   <span>Hito Rector / Subproceso Oficial</span>
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'name')} />
                 </div>
-                <div>Inicio</div>
-                <div>Fin</div>
-                <div>Duración</div>
-                <div>Avance</div>
-                <div>Estado</div>
-                <div className="timeline-head">
-                  <div className="years">
+                <div>
+                  Inicio
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
+                </div>
+                <div>
+                  Fin
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
+                </div>
+                <div>
+                  Duración
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
+                </div>
+                <div>
+                  Avance
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
+                </div>
+                <div>
+                  Estado
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
+                </div>
+                <div className="timeline-head" data-density={denseZoom ? 'fine' : 'normal'}>
+                  <div className="years" style={{ gridTemplateColumns: yearCols }}>
                     <span>2026</span>
                     <span>2027</span>
                   </div>
-                  <div className="months">
-                    {MONTHS.map((m) => (
-                      <span key={m.label}>{m.label}</span>
+                  <div className="months" style={{ gridTemplateColumns: segCols }}>
+                    {segments.map((s) => (
+                      <span key={s.key}>{s.label}</span>
                     ))}
                   </div>
                 </div>
@@ -730,9 +974,9 @@ export default function CronogramaGanttView({
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
                     selectedId === x.id ? 'selected' : ''
                   }`}
+                  style={{ gridTemplateColumns: gridCols }}
                   onClick={() => {
                     setSelectedId(x.id);
-                    setPanelOpen(true);
                   }}
                 >
                   <div className="name-cell">
@@ -755,37 +999,221 @@ export default function CronogramaGanttView({
                       <FileText size={15} className="file" />
                     )}
                     <b className="code">{x.code}</b>
-                    <span className="name" title={x.name}>
-                      {x.name}
-                    </span>
-                  </div>
-                  <div className="date">{formatDate(x.start)}</div>
-                  <div className="date">{formatDate(x.end)}</div>
-                  <div className="duration">{getDays(x.start, x.end)} días</div>
-                  <div className="progress">
-                    <span>
-                      <i
-                        className={
-                          x.progress === 100
-                            ? 'green'
-                            : x.status === 'En proceso'
-                            ? 'blue'
-                            : x.status === 'Con retraso'
-                            ? 'red'
-                            : 'gray'
-                        }
-                        style={{ width: `${x.progress}%` }}
+                    {isEditing(x, 'name') ? (
+                      <input
+                        className="cell-editor cell-input name-edit"
+                        autoFocus
+                        onFocus={(e) => e.currentTarget.select()}
+                        defaultValue={x.name}
+                        onBlur={(e) => {
+                          update(x.id, { name: e.target.value.trim() || x.name });
+                          closeEdit();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.currentTarget.blur();
+                          if (e.key === 'Escape') closeEdit();
+                        }}
                       />
-                    </span>
-                    <b>{x.progress}%</b>
+                    ) : (
+                      <span
+                        className="name"
+                        title={`${x.name} — clic para editar`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedId(x.id);
+                          toggleEdit(x, 'name');
+                        }}
+                      >
+                        {x.name}
+                      </span>
+                    )}
+                    <button
+                      className="name-pencil"
+                      title="Editar nombre"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedId(x.id);
+                        toggleEdit(x, 'name');
+                      }}
+                    >
+                      <Pencil size={14} />
+                    </button>
                   </div>
-                  <div>
-                    <span className={'status ' + STATUS_CLASS[x.status]}>{x.status}</span>
+
+                  <div
+                    className="date editable"
+                    title="Clic para cambiar la fecha de inicio"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleEdit(x, 'start');
+                    }}
+                  >
+                    {isEditing(x, 'start') ? (
+                      <input
+                        className="cell-editor cell-input date-edit"
+                        type="date"
+                        autoFocus
+                        value={x.start}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={(e) => {
+                          try {
+                            (e.target as HTMLInputElement).showPicker?.();
+                          } catch {
+                            /* navegador sin soporte */
+                          }
+                        }}
+                        onChange={(e) => setStart(x, e.target.value)}
+                        onBlur={closeEdit}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.currentTarget.blur();
+                          if (e.key === 'Escape') closeEdit();
+                        }}
+                      />
+                    ) : (
+                      formatDate(x.start)
+                    )}
                   </div>
+
+                  <div
+                    className="date editable"
+                    title="Clic para cambiar la fecha de fin"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleEdit(x, 'end');
+                    }}
+                  >
+                    {isEditing(x, 'end') ? (
+                      <input
+                        className="cell-editor cell-input date-edit"
+                        type="date"
+                        autoFocus
+                        value={x.end}
+                        min={x.start}
+                        onClick={(e) => e.stopPropagation()}
+                        onFocus={(e) => {
+                          try {
+                            (e.target as HTMLInputElement).showPicker?.();
+                          } catch {
+                            /* navegador sin soporte */
+                          }
+                        }}
+                        onChange={(e) => setEnd(x, e.target.value)}
+                        onBlur={closeEdit}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.currentTarget.blur();
+                          if (e.key === 'Escape') closeEdit();
+                        }}
+                      />
+                    ) : (
+                      formatDate(x.end)
+                    )}
+                  </div>
+
+                  <div
+                    className="duration editable"
+                    title="Editar días: recalcula la fecha de fin"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleEdit(x, 'duration');
+                    }}
+                  >
+                    {isEditing(x, 'duration') ? (
+                      <input
+                        className="cell-editor cell-input num-edit"
+                        type="number"
+                        min={1}
+                        max={365}
+                        autoFocus
+                        defaultValue={getDays(x.start, x.end)}
+                        onClick={(e) => e.stopPropagation()}
+                        onBlur={(e) => {
+                          setDuration(x, e.target.value);
+                          closeEdit();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.currentTarget.blur();
+                          if (e.key === 'Escape') closeEdit();
+                        }}
+                      />
+                    ) : (
+                      `${getDays(x.start, x.end)} días`
+                    )}
+                  </div>
+
+                  <div
+                    className="progress editable"
+                    title="Clic para ajustar el avance (0–100%)"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleEdit(x, 'progress');
+                    }}
+                  >
+                    {isEditing(x, 'progress') ? (
+                      <div className="cell-editor cell-pop progress-pop">
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          step={5}
+                          value={x.progress}
+                          onChange={(e) => setProgress(x, +e.target.value)}
+                        />
+                        <b>{x.progress}%</b>
+                      </div>
+                    ) : (
+                      <>
+                        <span>
+                          <i
+                            className={
+                              x.progress === 100
+                                ? 'green'
+                                : x.status === 'Con retraso'
+                                ? 'red'
+                                : x.status === 'Pendiente'
+                                ? 'gray'
+                                : 'blue'
+                            }
+                            style={{ width: `${x.progress}%` }}
+                          />
+                        </span>
+                        <b>{x.progress}%</b>
+                      </>
+                    )}
+                  </div>
+
+                  <div
+                    className="status-cell editable"
+                    title="Clic para cambiar el estado"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleEdit(x, 'status');
+                    }}
+                  >
+                    {isEditing(x, 'status') ? (
+                      <div className="cell-editor cell-pop status-pop">
+                        {STATUS_OPTIONS.map((s) => (
+                          <button
+                            key={s}
+                            className={s === x.status ? 'cur' : ''}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              update(x.id, { status: s });
+                              closeEdit();
+                            }}
+                          >
+                            <span className={'status ' + STATUS_CLASS[s]}>{s}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className={'status ' + STATUS_CLASS[x.status]}>{x.status}</span>
+                    )}
+                  </div>
+
                   <div className="timeline">
-                    <div className="month-grid">
-                      {MONTHS.map((m) => (
-                        <span key={m.label} />
+                    <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
+                      {segments.map((s) => (
+                        <span key={s.key} />
                       ))}
                     </div>
                     <div
@@ -798,14 +1226,27 @@ export default function CronogramaGanttView({
                       {x.kind === 'hito' ? '◆' : ''}
                     </div>
                   </div>
+
+                  {/* Acceso dedicado al Panel de Detalle (desvinculado del clic general) */}
+                  <button
+                    className="detail-btn"
+                    title="Ver detalle / Info"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedId(x.id);
+                      setPanelOpen(true);
+                    }}
+                  >
+                    <PanelRightOpen size={16} />
+                  </button>
                 </div>
               ))}
 
-              {/* Indicador de "Hoy" */}
+              {/* Indicador dinámico de "Hoy" */}
               <div
                 className="today"
                 style={{
-                  left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition('2026-10-26') / 100})`,
+                  left: `calc(var(--fixed) + (100% - var(--fixed)) * ${todayPos / 100})`,
                 }}
               >
                 <span>Hoy</span>
@@ -893,7 +1334,7 @@ export default function CronogramaGanttView({
                   <input
                     type="date"
                     value={selected.start}
-                    onChange={(e) => update(selected.id, { start: e.target.value })}
+                    onChange={(e) => setStart(selected, e.target.value)}
                   />
                 </label>
                 <label className="field">
@@ -902,7 +1343,7 @@ export default function CronogramaGanttView({
                     type="date"
                     min={selected.start}
                     value={selected.end}
-                    onChange={(e) => update(selected.id, { end: e.target.value })}
+                    onChange={(e) => setEnd(selected, e.target.value)}
                   />
                 </label>
               </div>
@@ -933,7 +1374,7 @@ export default function CronogramaGanttView({
                   value={selected.status}
                   onChange={(e) => update(selected.id, { status: e.target.value as Status })}
                 >
-                  {['Completado', 'En proceso', 'Pendiente', 'Con retraso'].map((x) => (
+                  {STATUS_OPTIONS.map((x) => (
                     <option key={x}>{x}</option>
                   ))}
                 </select>
@@ -950,13 +1391,7 @@ export default function CronogramaGanttView({
                   max="100"
                   step="5"
                   value={selected.progress}
-                  onChange={(e) => {
-                    const n = +e.target.value;
-                    update(selected.id, {
-                      progress: n,
-                      status: n === 100 ? 'Completado' : n === 0 ? 'Pendiente' : 'En proceso',
-                    });
-                  }}
+                  onChange={(e) => setProgress(selected, +e.target.value)}
                 />
               </div>
 
