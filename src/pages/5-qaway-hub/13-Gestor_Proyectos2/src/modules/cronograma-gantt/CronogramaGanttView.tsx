@@ -314,6 +314,13 @@ const formatDate = (s: string) =>
     .toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
     .replace('.', '');
 
+const formatDateRange = (from: string, to: string) => {
+  if (from === RANGE_MIN && to === RANGE_MAX) {
+    return '01 Sep 2026 – 30 Abr 2027';
+  }
+  return `${formatDate(from)} – ${formatDate(to)}`;
+};
+
 const getDays = (a: string, b: string) =>
   Math.max(1, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000) + 1);
 
@@ -454,6 +461,7 @@ export default function CronogramaGanttView({
   const [pickedFile, setPickedFile] = useState('');
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
+  const [datePopOpen, setDatePopOpen] = useState(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -552,9 +560,11 @@ export default function CronogramaGanttView({
   const fixedWidth = useMemo(() => (Object.keys(colWidths) as ColKey[]).reduce((a, k) => a + colWidths[k], 0), [colWidths]);
 
   const timelineMinWidth = useMemo(() => {
-    if (zoom === 'Día') return `${TOTAL_SPAN_DAYS * 32}px`;
-    if (zoom === 'Semana') return `${Math.ceil(TOTAL_SPAN_DAYS / 7) * 72}px`;
-    return '540px';
+    if (zoom === 'Día') return `${TOTAL_SPAN_DAYS * 34}px`;
+    if (zoom === 'Semana') return `${Math.ceil(TOTAL_SPAN_DAYS / 7) * 80}px`;
+    if (zoom === 'Mes') return `${MONTHS.length * 170}px`;
+    if (zoom === 'Trimestre') return '1160px';
+    return '1200px';
   }, [zoom]);
 
   const fixedGridCols = useMemo(
@@ -584,30 +594,24 @@ export default function CronogramaGanttView({
   const scrollTimeline = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return;
     const factor = dir === 'left' ? -1 : 1;
-    let delta = 300;
+    let delta = 240;
     if (zoom === 'Día') {
-      delta = 7 * 32;
+      delta = 7 * 34;
     } else if (zoom === 'Semana') {
-      delta = 4 * 72;
+      delta = 4 * 80;
     } else if (zoom === 'Mes') {
-      const container = scrollRef.current;
-      const timelineVisible = Math.max(300, container.clientWidth - fixedWidth);
-      delta = Math.max(160, timelineVisible / 4);
+      delta = 170;
     } else if (zoom === 'Trimestre') {
-      const container = scrollRef.current;
-      const timelineVisible = Math.max(300, container.clientWidth - fixedWidth);
-      delta = Math.max(200, timelineVisible / 2);
+      delta = 290;
     }
     scrollRef.current.scrollBy({ left: factor * delta, behavior: 'smooth' });
   };
 
   const handleZoomChange = (z: string) => {
     setZoom(z);
-    if (z === 'Día' || z === 'Semana') {
-      setTimeout(() => {
-        scrollToToday();
-      }, 100);
-    }
+    setTimeout(() => {
+      scrollToToday();
+    }, 80);
   };
 
   /* ---------- Cierre global de menús y editores (clic externo / Escape) ---------- */
@@ -621,6 +625,9 @@ export default function CronogramaGanttView({
       if (!t.closest('.cell-editor, .col-resizer, .editable, .cell-pop')) {
         setEdit(null);
       }
+      if (!t.closest('.date-range-wrap')) {
+        setDatePopOpen(false);
+      }
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -631,6 +638,7 @@ export default function CronogramaGanttView({
       if (e.key === 'Escape') {
         setNewMenu(false);
         setEdit(null);
+        setDatePopOpen(false);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -944,7 +952,15 @@ export default function CronogramaGanttView({
             </label>
 
             {/* Macro-filtro Región */}
-            <label className="select">
+            <label
+              className="select"
+              onClick={(e) => {
+                const sel = (e.currentTarget as HTMLElement).querySelector('select');
+                if (sel && typeof sel.showPicker === 'function') {
+                  try { sel.showPicker(); } catch {}
+                }
+              }}
+            >
               <small>Región / Macro</small>
               <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)}>
                 <option value="Todas">Todas las regiones</option>
@@ -958,7 +974,15 @@ export default function CronogramaGanttView({
             </label>
 
             {/* Macro-filtro Gestor */}
-            <label className="select">
+            <label
+              className="select"
+              onClick={(e) => {
+                const sel = (e.currentTarget as HTMLElement).querySelector('select');
+                if (sel && typeof sel.showPicker === 'function') {
+                  try { sel.showPicker(); } catch {}
+                }
+              }}
+            >
               <small>Gestor Territorial</small>
               <select value={gestorFilter} onChange={(e) => setGestorFilter(e.target.value)}>
                 <option value="Todos">Todos los gestores</option>
@@ -970,7 +994,15 @@ export default function CronogramaGanttView({
               <ChevronDown size={14} />
             </label>
 
-            <label className="select">
+            <label
+              className="select"
+              onClick={(e) => {
+                const sel = (e.currentTarget as HTMLElement).querySelector('select');
+                if (sel && typeof sel.showPicker === 'function') {
+                  try { sel.showPicker(); } catch {}
+                }
+              }}
+            >
               <small>Estado</small>
               <select value={stateFilter} onChange={(e) => setStateFilter(e.target.value)}>
                 {['Todos', ...STATUS_OPTIONS].map((x) => (
@@ -980,7 +1012,15 @@ export default function CronogramaGanttView({
               <ChevronDown size={14} />
             </label>
 
-            <label className="select">
+            <label
+              className="select"
+              onClick={(e) => {
+                const sel = (e.currentTarget as HTMLElement).querySelector('select');
+                if (sel && typeof sel.showPicker === 'function') {
+                  try { sel.showPicker(); } catch {}
+                }
+              }}
+            >
               <small>Tipo</small>
               <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
                 {['Todos', 'Hitos', 'Subprocesos'].map((x) => (
@@ -990,31 +1030,131 @@ export default function CronogramaGanttView({
               <ChevronDown size={14} />
             </label>
 
-            {/* Rango de Fechas Operativo */}
-            <div className="date-range" title="Acota las actividades entre dos fechas">
-              <CalendarDays size={15} className="dr-icon" />
-              <input
-                className="cell-editor"
-                type="date"
-                value={rangeFrom}
-                min={RANGE_MIN}
-                max={rangeTo}
-                onChange={(e) => setRangeFrom(e.target.value)}
-              />
-              <span className="dr-sep">–</span>
-              <input
-                className="cell-editor"
-                type="date"
-                value={rangeTo}
-                min={rangeFrom}
-                max={RANGE_MAX}
-                onChange={(e) => setRangeTo(e.target.value)}
-              />
+            {/* Rango de Fechas Operativo con Popover Redondeado Moderno */}
+            <div className="date-range-wrap">
+              <button
+                type="button"
+                className={`date-range-btn ${datePopOpen ? 'active' : ''} ${
+                  rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX ? 'filtered' : ''
+                }`}
+                onClick={() => setDatePopOpen((v) => !v)}
+                title="Filtrar por rango de fechas oficial"
+              >
+                <CalendarDays size={15} className="dr-icon" />
+                <span className="dr-text">{formatDateRange(rangeFrom, rangeTo)}</span>
+                <ChevronDown size={14} className="dr-chevron" />
+              </button>
+
+              {datePopOpen && (
+                <div className="date-range-popover" onClick={(e) => e.stopPropagation()}>
+                  <div className="dr-pop-header">
+                    <div className="dr-pop-title">
+                      <CalendarDays size={16} />
+                      <strong>Rango de Fechas Oficial</strong>
+                    </div>
+                    <button
+                      type="button"
+                      className="dr-close"
+                      onClick={() => setDatePopOpen(false)}
+                      title="Cerrar selector"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+
+                  <div className="dr-presets">
+                    <button
+                      type="button"
+                      className={rangeFrom === RANGE_MIN && rangeTo === RANGE_MAX ? 'active' : ''}
+                      onClick={() => {
+                        setRangeFrom(RANGE_MIN);
+                        setRangeTo(RANGE_MAX);
+                      }}
+                    >
+                      Todo el proyecto
+                    </button>
+                    <button
+                      type="button"
+                      className={rangeFrom === '2026-10-01' && rangeTo === '2026-12-31' ? 'active' : ''}
+                      onClick={() => {
+                        setRangeFrom('2026-10-01');
+                        setRangeTo('2026-12-31');
+                      }}
+                    >
+                      Q4 2026 (Oct-Dic)
+                    </button>
+                    <button
+                      type="button"
+                      className={rangeFrom === '2027-01-01' && rangeTo === '2027-03-31' ? 'active' : ''}
+                      onClick={() => {
+                        setRangeFrom('2027-01-01');
+                        setRangeTo('2027-03-31');
+                      }}
+                    >
+                      Q1 2027 (Ene-Mar)
+                    </button>
+                    <button
+                      type="button"
+                      className={rangeFrom === TODAY_ISO ? 'active' : ''}
+                      onClick={() => {
+                        setRangeFrom(TODAY_ISO);
+                        setRangeTo(shiftDays(TODAY_ISO, 30));
+                      }}
+                    >
+                      Próximos 30 días
+                    </button>
+                  </div>
+
+                  <div className="dr-inputs">
+                    <label>
+                      <span>Desde</span>
+                      <input
+                        type="date"
+                        value={rangeFrom}
+                        min={RANGE_MIN}
+                        max={rangeTo}
+                        onChange={(e) => setRangeFrom(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>Hasta</span>
+                      <input
+                        type="date"
+                        value={rangeTo}
+                        min={rangeFrom}
+                        max={RANGE_MAX}
+                        onChange={(e) => setRangeTo(e.target.value)}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="dr-footer">
+                    <button
+                      type="button"
+                      className="dr-reset"
+                      onClick={() => {
+                        setRangeFrom(RANGE_MIN);
+                        setRangeTo(RANGE_MAX);
+                      }}
+                    >
+                      Restablecer
+                    </button>
+                    <button
+                      type="button"
+                      className="dr-apply"
+                      onClick={() => setDatePopOpen(false)}
+                    >
+                      Aplicar Rango
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Deslizador temporal / Navegador Hoy (Estándar Qaway de imagen 2) */}
             <div className="timeline-nav" title="Navegar por la línea de tiempo">
               <button
+                type="button"
                 className="nav-arrow"
                 onClick={() => scrollTimeline('left')}
                 title="Desplazar línea de tiempo a la izquierda"
@@ -1022,6 +1162,7 @@ export default function CronogramaGanttView({
                 <ChevronLeft size={16} />
               </button>
               <button
+                type="button"
                 className="today-pill"
                 onClick={scrollToToday}
                 title="Ir y centrar en la fecha actual (27 de octubre de 2026)"
@@ -1029,6 +1170,7 @@ export default function CronogramaGanttView({
                 Hoy
               </button>
               <button
+                type="button"
                 className="nav-arrow"
                 onClick={() => scrollTimeline('right')}
                 title="Desplazar línea de tiempo a la derecha"
@@ -1040,6 +1182,7 @@ export default function CronogramaGanttView({
             <div className="zoom">
               {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
                 <button
+                  type="button"
                   key={x}
                   className={zoom === x ? 'active' : ''}
                   onClick={() => handleZoomChange(x)}
@@ -1050,8 +1193,8 @@ export default function CronogramaGanttView({
             </div>
 
             <button
+              type="button"
               className="btn secondary undo-btn"
-              style={{ minHeight: '38px', padding: '0 12px' }}
               disabled={history.length === 0}
               onClick={handleUndo}
               title={
@@ -1066,8 +1209,8 @@ export default function CronogramaGanttView({
             </button>
 
             <button
-              className="btn secondary"
-              style={{ minHeight: '38px', padding: '0 10px' }}
+              type="button"
+              className="btn secondary clear-btn"
               onClick={() => {
                 setSearch('');
                 setStateFilter('Todos');
@@ -1091,13 +1234,22 @@ export default function CronogramaGanttView({
               style={
                 {
                   '--fixed': `${fixedWidth}px`,
+                  width: `calc(var(--fixed) + ${timelineMinWidth})`,
                   minWidth: `calc(var(--fixed) + ${timelineMinWidth})`,
                 } as React.CSSProperties
               }
             >
               {/* Cabecera de la Tabla */}
-              <div className="table-head" style={{ gridTemplateColumns: rowGridCols }}>
-                <div className="fixed-cols" style={{ gridTemplateColumns: fixedGridCols }}>
+              <div className="table-head">
+                <div
+                  className="fixed-cols"
+                  style={{
+                    width: `${fixedWidth}px`,
+                    minWidth: `${fixedWidth}px`,
+                    maxWidth: `${fixedWidth}px`,
+                    gridTemplateColumns: fixedGridCols,
+                  }}
+                >
                   <div className="name-head">
                     <input
                       type="checkbox"
@@ -1130,7 +1282,7 @@ export default function CronogramaGanttView({
                   </div>
                 </div>
 
-                <div className="timeline-head">
+                <div className="timeline-head" style={{ minWidth: timelineMinWidth }}>
                   <div
                     className="years"
                     style={{
@@ -1161,7 +1313,6 @@ export default function CronogramaGanttView({
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
                     selectedId === x.id ? 'selected' : ''
                   }`}
-                  style={{ gridTemplateColumns: rowGridCols }}
                   onClick={() => {
                     setSelectedId(x.id);
                   }}
@@ -1170,7 +1321,15 @@ export default function CronogramaGanttView({
                     setPanelOpen(true);
                   }}
                 >
-                  <div className="fixed-cols" style={{ gridTemplateColumns: fixedGridCols }}>
+                  <div
+                    className="fixed-cols"
+                    style={{
+                      width: `${fixedWidth}px`,
+                      minWidth: `${fixedWidth}px`,
+                      maxWidth: `${fixedWidth}px`,
+                      gridTemplateColumns: fixedGridCols,
+                    }}
+                  >
                     <div className="name-cell">
                     {x.kind === 'hito' ? (
                       <button
@@ -1392,7 +1551,7 @@ export default function CronogramaGanttView({
                   </div>
                 </div>
 
-                <div className="timeline">
+                <div className="timeline" style={{ minWidth: timelineMinWidth }}>
                     <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
                       {segments.map((s) => (
                         <span key={s.key} />

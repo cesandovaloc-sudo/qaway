@@ -532,21 +532,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 180px;
+  min-width: 220px;
   flex: 1.5;
-  height: 38px;
+  height: 42px;
   padding: 0 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   background: #ffffff;
   color: #64748b;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .gantt-v2 .search:focus-within {
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
 }
 
 .gantt-v2 .search input {
@@ -555,7 +555,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: 13.5px;
+  font-size: 13px;
   color: #1e293b;
 }
 
@@ -563,6 +563,7 @@
   border: 0;
   background: transparent;
   color: #94a3b8;
+  cursor: pointer;
 }
 
 .gantt-v2 .select {
@@ -570,30 +571,37 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 130px;
-  height: 38px;
-  padding: 2px 26px 2px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  min-width: 138px;
+  height: 42px;
+  padding: 4px 28px 4px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  user-select: none;
 }
 
 .gantt-v2 .select:hover {
-  border-color: #cbd5e1;
+  border-color: #94a3b8;
+  background: #fcfdfe;
 }
 
 .gantt-v2 .select:focus-within {
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
 }
 
 .gantt-v2 .select small {
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: #64748b;
+  pointer-events: none;
+  line-height: 1.1;
+  margin-bottom: 1px;
 }
 
 .gantt-v2 .select select {
@@ -605,54 +613,255 @@
   font-size: 12.5px;
   color: #1e293b;
   font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .gantt-v2 .select > svg {
   position: absolute;
   right: 10px;
-  top: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #64748b;
   pointer-events: none;
 }
 
-.gantt-v2 .date-range {
-  height: 38px;
-  display: flex;
+/* Rango de Fechas Operativo con Popover Redondeado Moderno */
+.gantt-v2 .date-range-wrap {
+  position: relative;
+}
+
+.gantt-v2 .date-range-btn {
+  height: 42px;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 0 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  white-space: nowrap;
+  padding: 0 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
   font-size: 12.5px;
   font-weight: 600;
-  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.gantt-v2 .date-range-btn:hover,
+.gantt-v2 .date-range-btn.active {
+  border-color: #0066ff;
+  background: #f8fbff;
+}
+
+.gantt-v2 .date-range-btn.filtered {
+  border-color: #0066ff;
+  background: #f0f7ff;
+  color: #0066ff;
+}
+
+.gantt-v2 .date-range-btn .dr-icon {
+  color: #0066ff;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .date-range-btn .dr-chevron {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .date-range-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 100;
+  width: 320px;
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeInPop 0.15s ease-out;
+}
+
+@keyframes fadeInPop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.gantt-v2 .dr-pop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gantt-v2 .dr-pop-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #0066ff;
+}
+
+.gantt-v2 .dr-pop-title strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.gantt-v2 .dr-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.gantt-v2 .dr-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.gantt-v2 .dr-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gantt-v2 .dr-presets button {
+  padding: 4px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .dr-presets button:hover {
+  border-color: #93c5fd;
+  background: #e6f4ff;
+  color: #0066ff;
+}
+
+.gantt-v2 .dr-presets button.active {
+  border-color: #0066ff;
+  background: #0066ff;
+  color: #ffffff;
+}
+
+.gantt-v2 .dr-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.gantt-v2 .dr-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gantt-v2 .dr-inputs label span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.gantt-v2 .dr-inputs input[type="date"] {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  outline: 0;
+  background: #ffffff;
+}
+
+.gantt-v2 .dr-inputs input[type="date"]:focus {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.15);
+}
+
+.gantt-v2 .dr-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.gantt-v2 .dr-reset {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.gantt-v2 .dr-reset:hover {
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+.gantt-v2 .dr-apply {
+  border: 0;
+  background: #0066ff;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.25);
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .dr-apply:hover {
+  background: #0052cc;
 }
 
 .gantt-v2 .zoom {
   display: flex;
   align-items: center;
-  height: 38px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .gantt-v2 .zoom button {
   height: 100%;
-  padding: 0 11px;
+  padding: 0 12px;
   border: 0;
   border-right: 1px solid #e2e8f0;
   background: #fff;
   color: #64748b;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   transition: all 0.12s ease;
+  cursor: pointer;
 }
 
 .gantt-v2 .zoom button:last-child {
@@ -665,6 +874,55 @@
   font-weight: 700;
 }
 
+/* Botón Deshacer (Undo / Retroceder) y Limpiar */
+.gantt-v2 .undo-btn,
+.gantt-v2 .clear-btn {
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .undo-btn:hover:not(:disabled),
+.gantt-v2 .clear-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.gantt-v2 .undo-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #94a3b8 !important;
+}
+
+.gantt-v2 .undo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #e0f2fe;
+  color: #0284c7;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
 /* Área de Gantt con Scroll */
 .gantt-v2 .gantt-scroll {
   overflow: auto;
@@ -675,19 +933,21 @@
 
 .gantt-v2 .gantt {
   position: relative;
-  min-width: calc(var(--fixed, 880px) + 400px);
+  min-width: 100%;
 }
 
 .gantt-v2 .table-head,
 .gantt-v2 .row {
-  display: grid;
+  display: flex;
   align-items: stretch;
+  width: max-content;
+  min-width: 100%;
 }
 
 .gantt-v2 .table-head {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 35;
   height: 52px;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
@@ -702,14 +962,31 @@
   align-items: stretch;
   position: sticky;
   left: 0;
-  z-index: 15;
+  flex-shrink: 0;
   box-shadow: 4px 0 14px -3px rgba(15, 23, 42, 0.08);
   border-right: 1px solid #e2e8f0;
 }
 
 .gantt-v2 .table-head .fixed-cols {
-  z-index: 30;
+  z-index: 45;
   background: #f8fafc;
+}
+
+.gantt-v2 .row .fixed-cols {
+  z-index: 20;
+  background: #ffffff;
+}
+
+.gantt-v2 .row.stripe .fixed-cols {
+  background: #fcfdfe;
+}
+
+.gantt-v2 .row:hover .fixed-cols {
+  background: #f8fafc;
+}
+
+.gantt-v2 .row.selected .fixed-cols {
+  background: #eff6ff;
 }
 
 .gantt-v2 .table-head .fixed-cols > div {
@@ -732,6 +1009,8 @@
 .gantt-v2 .timeline-head {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  flex-shrink: 0;
   min-width: 0;
 }
 
@@ -1528,128 +1807,4 @@ body.gantt-resizing {
   background: #e6f4ff;
 }
 
-/* --- D) Selector de Rango de Fechas operativo --- */
-.gantt-v2 .date-range {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  gap: 6px;
-  height: 38px;
-  padding: 0 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #ffffff;
-}
 
-.gantt-v2 .date-range input[type="date"] {
-  width: 104px;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font: inherit;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.gantt-v2 .date-range input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.55;
-  cursor: pointer;
-}
-
-.gantt-v2 .date-range .dr-sep {
-  color: #94a3b8;
-  font-size: 11px;
-}
-
-/* --- Botón Deshacer (Undo / Retroceder) --- */
-.gantt-v2 .undo-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
-}
-
-.gantt-v2 .undo-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  background: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-  color: #94a3b8 !important;
-}
-
-.gantt-v2 .undo-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: #e0f2fe;
-  color: #0284c7;
-  font-size: 11px;
-  font-weight: 700;
-  margin-left: 2px;
-}
-
-/* --- Navegador Temporal / Deslizador Hoy (Estándar Qaway de imagen 2) --- */
-.gantt-v2 .timeline-nav {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 38px;
-  flex-shrink: 0;
-}
-
-.gantt-v2 .nav-arrow {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.gantt-v2 .nav-arrow:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
-}
-
-.gantt-v2 .nav-arrow:active {
-  transform: scale(0.95);
-}
-
-.gantt-v2 .today-pill {
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--blue, #0066ff);
-  border-radius: 8px;
-  background: var(--blue, #0066ff);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.25);
-  transition: all 0.15s ease;
-}
-
-.gantt-v2 .today-pill:hover {
-  background: #0052cc;
-  border-color: #0052cc;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 102, 255, 0.35);
-}
-
-.gantt-v2 .today-pill:active {
-  transform: translateY(0) scale(0.98);
-}
