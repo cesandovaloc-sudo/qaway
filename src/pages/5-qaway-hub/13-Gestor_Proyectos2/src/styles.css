@@ -50,7 +50,12 @@
   align-items: stretch;
   background: var(--bg-canvas);
 }
-.qm-side {
+.qm-side,
+.qm-side.qt-v2 {
+  width: 238px !important;
+  min-width: 238px !important;
+  max-width: 238px !important;
+  background: #19283b !important;
   flex-shrink: 0;
   height: 100vh;
   position: sticky;
@@ -59,6 +64,7 @@
   z-index: 30;
 }
 .qt-v2 .sidebar {
+  width: 238px !important;
   height: 100vh !important;
   overflow-y: hidden !important;
 }

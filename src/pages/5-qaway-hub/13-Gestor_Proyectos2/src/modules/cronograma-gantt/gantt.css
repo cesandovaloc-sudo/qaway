@@ -27,7 +27,7 @@
 
 .gantt-v2 .app {
   min-height: 100vh;
-  padding: 20px 32px 40px;
+  padding: 20px 24px 40px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -717,34 +717,34 @@
   position: relative;
   min-height: 42px;
   background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #eef2f6;
   cursor: pointer;
   color: #1e293b;
   font-size: 13.5px;
-  transition: background 0.18s ease;
+  transition: background 0.15s ease;
 }
 
 .gantt-v2 .row.stripe {
-  background: #edf3fa;
+  background: #f8fafc;
 }
 
 .gantt-v2 .row:hover {
-  background: #e0edfc;
+  background: #f1f5f9;
 }
 
 .gantt-v2 .row.selected {
-  background: #dbeafe;
+  background: #eff6ff;
   box-shadow: inset 3px 0 #0066ff;
 }
 
 .gantt-v2 .row.hito {
   min-height: 44px;
   font-weight: 700;
-  background: #f1f6fd;
+  background: #ffffff;
 }
 
 .gantt-v2 .row.hito.stripe {
-  background: #e5edf8;
+  background: #f8fafc;
 }
 
 .gantt-v2 .row > div:not(.timeline) {
