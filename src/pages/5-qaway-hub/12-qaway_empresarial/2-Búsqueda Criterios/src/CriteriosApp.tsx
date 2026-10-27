@@ -3040,7 +3040,6 @@ export default function CriteriosApp() {
                   </p>
                   <nav className="space-y-0.5">
                     {[
-                      { id: "nuevo", label: "Asistente & Chat", icon: MessageSquare },
                       { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
                       { id: "historial", label: "Historial de Consultas", icon: History },
                       { id: "config", label: "Configuración & IA", icon: Settings },
@@ -3273,7 +3272,6 @@ export default function CriteriosApp() {
 
                 <nav className="space-y-1.5 w-full flex flex-col items-center">
                   {[
-                    { id: "nuevo", label: "Asistente & Chat", icon: MessageSquare },
                     { id: "fuentes", label: "Repositorio de Fuentes", icon: FileText },
                     { id: "historial", label: "Historial de Consultas", icon: History },
                     { id: "config", label: "Configuración & IA", icon: Settings },
