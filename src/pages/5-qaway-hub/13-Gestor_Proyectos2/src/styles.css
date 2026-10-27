@@ -88,6 +88,10 @@
   border-radius: 8px !important;
   margin-bottom: 2px !important;
 }
+.qt-v2 .sidebar .side-link:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
 .qt-v2 .sidebar .side-link.active {
   font-weight: 600 !important;
 }

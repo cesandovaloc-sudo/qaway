@@ -91,7 +91,8 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [active, setActive] = useState<ModuleKey>(() => resolveModuleFromPath(location.pathname));
+  // Módulo activo unificado: la URL canónica es la fuente única de verdad (cero rebotes)
+  const active: ModuleKey = resolveModuleFromPath(location.pathname);
   const [tasksCount, setTasksCount] = useState<number>(seedTasksCount);
   const [userRole, setUserRole] = useState<UserRole>(readStoredRole);
   const [cronogramaPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial'>(() =>
@@ -112,19 +113,12 @@ function App() {
 
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
 
-  // Sincronizar ruta en barra de direcciones al navegar (popstate / cambio de URL o ruta raíz)
+  // Redirigir a ruta canónica si se ingresa a la raíz '/' o a una ruta no mapeada
   useEffect(() => {
     const clean = location.pathname.replace(/\/+$/, '') || '/';
-    const matched = SLUG_TO_MODULE[clean];
-    if (matched) {
-      if (matched !== active) {
-        setActive(matched);
-      }
-    } else {
-      const targetSlug = MODULE_SLUGS[active] || '/tareas';
-      if (location.pathname !== targetSlug) {
-        navigate(targetSlug, { replace: true });
-      }
+    if (!SLUG_TO_MODULE[clean]) {
+      const targetSlug = MODULE_SLUGS[active] || '/resumen';
+      navigate(targetSlug, { replace: true });
     }
   }, [location.pathname, active, navigate]);
 
@@ -153,7 +147,11 @@ function App() {
   }, [projects]);
 
   const handleSelectModule = (next: ModuleKey) => {
-    setActive(next);
+    try {
+      localStorage.setItem(MODULE_STORAGE_KEY, next);
+    } catch {
+      /* almacenamiento no disponible */
+    }
     const targetSlug = MODULE_SLUGS[next];
     if (targetSlug && location.pathname !== targetSlug) {
       navigate(targetSlug);
@@ -187,7 +185,6 @@ function App() {
     };
     setProjects((prev) => [item, ...prev]);
     setActiveProjectId(item.id);
-    setActive('cronograma');
     navigate(MODULE_SLUGS['cronograma']);
     setCronogramaPerspective('maestro');
     notifyActive(`Proyecto regional "${item.name}" creado con éxito. Cronograma maestro listo para configurar.`);
