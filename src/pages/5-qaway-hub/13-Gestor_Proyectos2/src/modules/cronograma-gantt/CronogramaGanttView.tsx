@@ -304,7 +304,7 @@ const STATUS_CLASS: Record<Status, string> = {
 const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
 const REGION_OPTIONS = [
-  { value: 'Todas', label: 'Todas las regiones' },
+  { value: 'Todas', label: 'Todas' },
   { value: 'Junín', label: 'Junín' },
   { value: 'Loreto', label: 'Loreto' },
   { value: 'Huancavelica', label: 'Huancavelica' },
@@ -313,7 +313,7 @@ const REGION_OPTIONS = [
 ];
 
 const GESTOR_OPTIONS = [
-  { value: 'Todos', label: 'Todos los gestores' },
+  { value: 'Todos', label: 'Todos' },
   { value: 'María Salazar', label: 'María Salazar (Junín)' },
   { value: 'Carlos Mendoza', label: 'Carlos Mendoza (Centro)' },
   { value: 'Lucía Ramos', label: 'Lucía Ramos (Loreto)' },
@@ -321,7 +321,7 @@ const GESTOR_OPTIONS = [
 ];
 
 const TYPE_OPTIONS = [
-  { value: 'Todos', label: 'Todos los tipos' },
+  { value: 'Todos', label: 'Todos' },
   { value: 'Hitos', label: 'Solo Hitos' },
   { value: 'Subprocesos', label: 'Solo Subprocesos' },
 ];
@@ -1002,7 +1002,7 @@ export default function CronogramaGanttView({
               >
                 <div className="filter-card-copy">
                   <small>Región / Macro</small>
-                  <span>{regionFilter === 'Todas' ? 'Todas las regiones' : regionFilter}</span>
+                  <span>{regionFilter === 'Todas' ? 'Todas' : regionFilter}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
@@ -1040,7 +1040,7 @@ export default function CronogramaGanttView({
               >
                 <div className="filter-card-copy">
                   <small>Gestor Territorial</small>
-                  <span>{gestorFilter === 'Todos' ? 'Todos los gestores' : gestorFilter}</span>
+                  <span>{gestorFilter === 'Todos' ? 'Todos' : gestorFilter}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
@@ -1078,7 +1078,7 @@ export default function CronogramaGanttView({
               >
                 <div className="filter-card-copy">
                   <small>Estado</small>
-                  <span>{stateFilter === 'Todos' ? 'Todos los estados' : stateFilter}</span>
+                  <span>{stateFilter === 'Todos' ? 'Todos' : stateFilter}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
@@ -1094,7 +1094,7 @@ export default function CronogramaGanttView({
                         closeMenus();
                       }}
                     >
-                      <span>Todos los estados</span>
+                      <span>Todos</span>
                       {stateFilter === 'Todos' && <Check size={14} className="item-check" />}
                     </button>
                     {STATUS_OPTIONS.map((s) => (
@@ -1127,7 +1127,7 @@ export default function CronogramaGanttView({
               >
                 <div className="filter-card-copy">
                   <small>Tipo</small>
-                  <span>{typeFilter === 'Todos' ? 'Todos los tipos' : typeFilter}</span>
+                  <span>{typeFilter === 'Todos' ? 'Todos' : typeFilter}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>

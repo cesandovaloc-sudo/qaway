@@ -835,12 +835,12 @@ export default function CriteriosApp() {
       const last = segs[segs.length - 1] || "";
       const mapped = slugNavMap[last];
       if (mapped !== undefined) {
-        if (mapped !== activeNav) setActiveNav(mapped);
+        setActiveNav((prev) => (prev !== mapped ? mapped : prev));
       } else if (location.pathname.endsWith("/rag") || location.pathname.endsWith("/rag/")) {
-        if (activeNav !== "nuevo") setActiveNav("nuevo");
+        setActiveNav((prev) => (prev !== "nuevo" ? "nuevo" : prev));
       }
     } catch {}
-  }, [location.pathname, slugNavMap, activeNav]);
+  }, [location.pathname, slugNavMap]);
 
   // Navegación declarativa: actualiza estado y empuja el slug en la URL
   const navigateToNav = useCallback((navId: string) => {
@@ -4266,7 +4266,7 @@ export default function CriteriosApp() {
               <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900 leading-tight">
                       Sesiones de Conversación &amp; Chats
                     </h1>
                     <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
@@ -4361,7 +4361,7 @@ export default function CriteriosApp() {
               <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900 leading-tight">
                       Repositorio de Fuentes del Proyecto
                     </h1>
                     <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
@@ -4608,7 +4608,7 @@ export default function CriteriosApp() {
               <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900 leading-tight">
                       Historial de Consultas y Dictámenes
                     </h1>
                     <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
@@ -4692,7 +4692,7 @@ export default function CriteriosApp() {
               <div className="px-4 sm:px-6 pt-8 sm:pt-9 pb-6 max-w-[940px] w-full mx-auto space-y-5 flex-1 overflow-y-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900">
+                    <h1 style={{ fontSize: 24 }} className="font-bold tracking-tight text-zinc-900 leading-tight">
                       Configuración del Sistema RAG
                     </h1>
                     <p style={{ color: palette.textSecondary, fontSize: 14 }} className="mt-0.5">
