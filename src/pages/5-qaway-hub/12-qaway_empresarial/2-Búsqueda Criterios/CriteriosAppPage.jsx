@@ -20,7 +20,7 @@ class ErrorBoundary extends Component {
       return (
         <div style={{ padding: '40px', textAlign: 'center', background: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111', marginBottom: '12px' }}>
-            Hubo un problema al cargar el módulo de Búsqueda de Criterios
+            Hubo un problema al cargar el módulo RAG Hub
           </h2>
           <p style={{ color: '#71717a', fontSize: '14px', marginBottom: '20px' }}>
             {this.state.error?.message || 'Error de conexión o componente.'}
@@ -44,7 +44,7 @@ export default function CriteriosAppPage() {
       <ErrorBoundary>
         <Suspense fallback={
           <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fcfcfc' }}>
-            <span style={{ fontSize: '14px', color: '#71717a' }}>Cargando Búsqueda de Criterios...</span>
+            <span style={{ fontSize: '14px', color: '#71717a' }}>Cargando RAG Hub...</span>
           </div>
         }>
           <CriteriosApp />

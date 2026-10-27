@@ -1,0 +1,4 @@
+# Ignorar archivos temporales o pesados de documentación
+*.tmp
+*.log
+*.bak

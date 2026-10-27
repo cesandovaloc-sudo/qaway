@@ -113,12 +113,22 @@ function App() {
 
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
 
-  // Redirigir a ruta canónica si se ingresa a la raíz '/' o a una ruta no mapeada
+  // Sincronizar y redirigir a ruta canónica con prefijo /hub/gestor_proyecto
   useEffect(() => {
     const clean = location.pathname.replace(/\/+$/, '') || '/';
-    if (!SLUG_TO_MODULE[clean]) {
-      const targetSlug = MODULE_SLUGS[active] || '/resumen';
-      navigate(targetSlug, { replace: true });
+    const matched = SLUG_TO_MODULE[clean];
+    const canonicalSlug = MODULE_SLUGS[active];
+
+    if (matched) {
+      // Si entró por un alias corto (ej. /reuniones), asegurar la URL canónica con prefijo
+      if (location.pathname !== MODULE_SLUGS[matched]) {
+        navigate(MODULE_SLUGS[matched], { replace: true });
+      }
+    } else {
+      // Si la ruta es '/', '/hub/gestor_proyecto' o desconocida, llevar al slug canónico del módulo activo
+      if (location.pathname !== canonicalSlug) {
+        navigate(canonicalSlug, { replace: true });
+      }
     }
   }, [location.pathname, active, navigate]);
 

@@ -1,20 +1,37 @@
 // Tipos compartidos del shell maestro.
 export type ModuleKey = 'resumen' | 'cronograma' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas';
 
+// Prefijo base del Gestor de Proyectos acoplado al Hub
+export const BASE_PATH = '/hub/gestor_proyecto';
+
 // Slugs canónicos para cada módulo en la URL
 export const MODULE_SLUGS: Record<ModuleKey, string> = {
-  resumen: '/resumen',
-  cronograma: '/cronograma',
-  tareas: '/tareas',
-  hitos: '/hitos',
-  reuniones: '/reuniones',
-  reportes: '/reportes',
-  usuarios: '/equipo',
-  actas: '/actas',
+  resumen: `${BASE_PATH}/resumen`,
+  cronograma: `${BASE_PATH}/cronograma`,
+  tareas: `${BASE_PATH}/tareas`,
+  hitos: `${BASE_PATH}/hitos`,
+  reuniones: `${BASE_PATH}/reuniones`,
+  reportes: `${BASE_PATH}/reportes`,
+  usuarios: `${BASE_PATH}/equipo`,
+  actas: `${BASE_PATH}/actas`,
 };
 
 // Mapeo inverso de slugs (y alias compatibles) hacia la clave de módulo interna
 export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
+  // Rutas canónicas con prefijo /hub/gestor_proyecto
+  [`${BASE_PATH}/resumen`]: 'resumen',
+  [`${BASE_PATH}/cronograma`]: 'cronograma',
+  [`${BASE_PATH}/tareas`]: 'tareas',
+  [`${BASE_PATH}/hitos`]: 'hitos',
+  [`${BASE_PATH}/reuniones`]: 'reuniones',
+  [`${BASE_PATH}/reportes`]: 'reportes',
+  [`${BASE_PATH}/equipo`]: 'usuarios',
+  [`${BASE_PATH}/usuarios`]: 'usuarios',
+  [`${BASE_PATH}/actas`]: 'actas',
+  [`${BASE_PATH}/actas-acuerdos`]: 'actas',
+  [`${BASE_PATH}/actas-y-acuerdos`]: 'actas',
+
+  // Rutas cortas sin prefijo (compatibilidad y redirección si el usuario entra a /reuniones, etc.)
   '/resumen': 'resumen',
   '/cronograma': 'cronograma',
   '/tareas': 'tareas',
@@ -25,7 +42,6 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/usuarios': 'usuarios',
   '/actas': 'actas',
   '/actas-acuerdos': 'actas',
-  '/actas-y-acuerdos': 'actas',
 };
 
 // Conteo semilla del módulo Tareas (paridad con `initial` del módulo: 7 tareas).

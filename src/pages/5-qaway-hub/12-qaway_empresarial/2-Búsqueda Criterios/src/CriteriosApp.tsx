@@ -8,6 +8,7 @@
  * ============================================================================ */
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import type { FormEvent } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Search,
   Send,
@@ -732,7 +733,69 @@ export default function CriteriosApp() {
   const [query, setQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showSqlModal, setShowSqlModal] = useState<boolean>(false);
-  const [activeNav, setActiveNav] = useState<string>("nuevo");
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Mapeo canónico de navegación para URLs limpias (/hub/rag/...)
+  const navSlugMap: Record<string, string> = useMemo(() => ({
+    "nuevo": "chat",
+    "fuentes": "fuentes",
+    "historial": "historial",
+    "config": "configuracion",
+    "chats": "chats",
+  }), []);
+
+  const slugNavMap: Record<string, string> = useMemo(() => ({
+    "": "nuevo",
+    "rag": "nuevo",
+    "chat": "nuevo",
+    "asistente": "nuevo",
+    "fuentes": "fuentes",
+    "repositorio": "fuentes",
+    "historial": "historial",
+    "config": "config",
+    "configuracion": "config",
+    "chats": "chats",
+  }), []);
+
+  // Determinar activeNav inicial desde la URL activa
+  const initialNav = useMemo(() => {
+    try {
+      const segs = window.location.pathname.toLowerCase().replace(/\/+$/, "").split("/");
+      const last = segs[segs.length - 1] || "";
+      if (slugNavMap[last] !== undefined) return slugNavMap[last];
+    } catch {}
+    return "nuevo";
+  }, [slugNavMap]);
+
+  const [activeNav, setActiveNav] = useState<string>(initialNav);
+
+  // Sincronizar activeNav si cambia la URL (navegación por browser back/forward o enlaces externos)
+  useEffect(() => {
+    try {
+      const segs = location.pathname.toLowerCase().replace(/\/+$/, "").split("/");
+      const last = segs[segs.length - 1] || "";
+      const mapped = slugNavMap[last];
+      if (mapped !== undefined) {
+        if (mapped !== activeNav) setActiveNav(mapped);
+      } else if (location.pathname.endsWith("/rag") || location.pathname.endsWith("/rag/")) {
+        if (activeNav !== "nuevo") setActiveNav("nuevo");
+      }
+    } catch {}
+  }, [location.pathname, slugNavMap, activeNav]);
+
+  // Navegación declarativa: actualiza estado y empuja el slug en la URL
+  const navigateToNav = useCallback((navId: string) => {
+    setActiveNav(navId);
+    if (navId !== "nuevo") {
+      setInspectorOpen(false);
+    }
+    const targetSlug = navSlugMap[navId] || "chat";
+    const targetPath = targetSlug === "chat" ? "/hub/rag/chat" : `/hub/rag/${targetSlug}`;
+    if (location.pathname.toLowerCase() !== targetPath.toLowerCase()) {
+      navigate(targetPath);
+    }
+  }, [location.pathname, navigate, navSlugMap]);
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
 
   // Estados de feedback inline (sin toasts flotantes intrusivos)
@@ -1000,7 +1063,7 @@ export default function CriteriosApp() {
     setChatSessions((prev) => [newSession, ...prev]);
     setActiveSessionId(newId);
     setQuery("");
-    setActiveNav("nuevo");
+    navigateToNav("nuevo");
 
     // Persistir de forma no bloqueante a Supabase
     syncSessionToSupabase({
@@ -1048,7 +1111,7 @@ export default function CriteriosApp() {
   }
 
   function handleResetHome() {
-    setActiveNav("nuevo");
+    navigateToNav("nuevo");
     setInspectorOpen(false);
     setShowQuickSearch(false);
     setShowFilterDropdown(false);
@@ -1497,7 +1560,7 @@ export default function CriteriosApp() {
   function handleHeaderSearchSubmit(e: FormEvent) {
     e.preventDefault();
     if (!headerSearch.trim()) return;
-    setActiveNav("nuevo");
+    navigateToNav("nuevo");
     handleSendMessage(headerSearch);
     setHeaderSearch("");
     setShowQuickSearch(false);
@@ -1579,7 +1642,7 @@ export default function CriteriosApp() {
     setProjectSources((prev) => [...addedSources, ...prev]);
     e.target.value = "";
     setShowUploadModal(false);
-    setActiveNav("fuentes");
+    navigateToNav("fuentes");
   }
 
   function handleAddQuickTemplateSource(template: {
@@ -1604,7 +1667,7 @@ export default function CriteriosApp() {
     };
     setProjectSources((prev) => [newSource, ...prev]);
     setShowUploadModal(false);
-    setActiveNav("fuentes");
+    navigateToNav("fuentes");
   }
 
   function handleReindexSource(sourceId: string) {
@@ -2209,7 +2272,7 @@ export default function CriteriosApp() {
                         type="button"
                         onClick={() => {
                           setShowUserMenu(false);
-                          setActiveNav(opt.nav);
+                          navigateToNav(opt.nav);
                         }}
                         className="w-full text-left px-2.5 py-2 text-xs text-zinc-700 hover:bg-zinc-100 rounded-xl cursor-pointer transition-colors flex items-center gap-2"
                       >
@@ -2572,8 +2635,7 @@ export default function CriteriosApp() {
                           key={item.id}
                           type="button"
                           onClick={() => {
-                            setActiveNav(item.id);
-                            if (item.id !== "nuevo") setInspectorOpen(false);
+                            navigateToNav(item.id);
                           }}
                           style={{
                             backgroundColor: isActive ? palette.accentCitationBg : "transparent",
@@ -2640,7 +2702,7 @@ export default function CriteriosApp() {
                               }`}
                               onClick={() => {
                                 setActiveSessionId(session.id);
-                                setActiveNav("nuevo");
+                                navigateToNav("nuevo");
                               }}
                             >
                               <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -3160,7 +3222,7 @@ export default function CriteriosApp() {
                     <button
                       type="button"
                       onClick={() => {
-                        setActiveNav("config");
+                        navigateToNav("config");
                         setConfigTab("providers");
                       }}
                       className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
@@ -3842,7 +3904,7 @@ export default function CriteriosApp() {
                             type="button"
                             onClick={() => {
                               setActiveSessionId(session.id);
-                              setActiveNav("nuevo");
+                              navigateToNav("nuevo");
                             }}
                             style={{ backgroundColor: palette.actionPrimary }}
                             className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-all shadow-xs"
@@ -4165,7 +4227,7 @@ export default function CriteriosApp() {
                             setActiveScenario(item.scenario);
                             setInspectorTab(item.tab);
                             setInspectorOpen(true);
-                            setActiveNav("nuevo");
+                            navigateToNav("nuevo");
                             handleSendMessage(item.question);
                           }}
                           style={{ backgroundColor: palette.bgSubtle, color: palette.accentCitation }}

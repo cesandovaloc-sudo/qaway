@@ -1,4 +1,4 @@
-import { lazy, useEffect, useState } from 'react'
+﻿import { lazy, useEffect, useState } from 'react'
 import { RouteSuspense, RouteLoading } from './RouteSuspense'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
@@ -443,22 +443,39 @@ export default function AppRouter() {
           path="hub/tareas"
           element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
         />
-        {/* Búsqueda de Criterios RAG (12-qaway_empresarial): nativo con shell oficial Hub */}
+        {/* RAG Hub (12-qaway_empresarial): nativo con shell oficial Hub */}
+        <Route
+          path="/hub/rag/*"
+          element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        <Route
+          path="/hub/rag"
+          element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        <Route
+          path="hub/rag/*"
+          element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        <Route
+          path="hub/rag"
+          element={renderRoute('hub', <CriteriosAppPage />)}
+        />
+        {/* Redirección legacy desde /hub/criterios hacia /hub/rag */}
         <Route
           path="/hub/criterios/*"
-          element={renderRoute('hub', <CriteriosAppPage />)}
+          element={<Navigate to="/hub/rag" replace />}
         />
         <Route
           path="/hub/criterios"
-          element={renderRoute('hub', <CriteriosAppPage />)}
+          element={<Navigate to="/hub/rag" replace />}
         />
         <Route
           path="hub/criterios/*"
-          element={renderRoute('hub', <CriteriosAppPage />)}
+          element={<Navigate to="/hub/rag" replace />}
         />
         <Route
           path="hub/criterios"
-          element={renderRoute('hub', <CriteriosAppPage />)}
+          element={<Navigate to="/hub/rag" replace />}
         />
         {/* Banco de Casuísticas y Preguntas Frecuentes MINEDU - RUTA ADMINISTRADOR (Panel de Gestión Exclusivo) */}
         <Route
