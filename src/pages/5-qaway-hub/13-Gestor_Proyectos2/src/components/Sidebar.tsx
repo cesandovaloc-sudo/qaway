@@ -218,7 +218,7 @@ export default function Sidebar({
         className={active === 'resumen' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('resumen')}
       >
-        <LayoutDashboard size={17} />
+        <LayoutDashboard size={18} />
         <span>Resumen del proyecto</span>
       </button>
 
@@ -226,7 +226,7 @@ export default function Sidebar({
         className={active === 'cronograma' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('cronograma')}
       >
-        <CalendarDays size={17} />
+        <CalendarDays size={18} />
         <span>Cronograma</span>
       </button>
 
@@ -234,7 +234,7 @@ export default function Sidebar({
         className={active === 'tareas' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('tareas')}
       >
-        <CheckSquare size={17} />
+        <CheckSquare size={18} />
         <span>Tareas</span>
         <em>{tasksCount}</em>
       </button>
@@ -243,7 +243,7 @@ export default function Sidebar({
         className={active === 'hitos' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('hitos')}
       >
-        <Flag size={17} />
+        <Flag size={18} />
         <span>Hitos</span>
       </button>
 
@@ -251,7 +251,7 @@ export default function Sidebar({
         className={active === 'reuniones' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('reuniones')}
       >
-        <Users size={17} />
+        <Users size={18} />
         <span>Reuniones</span>
       </button>
 
@@ -259,7 +259,7 @@ export default function Sidebar({
         className={active === 'reportes' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('reportes')}
       >
-        <BarChart3 size={17} />
+        <BarChart3 size={18} />
         <span>Reportes</span>
       </button>
 
@@ -267,7 +267,7 @@ export default function Sidebar({
         className={active === 'usuarios' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('usuarios')}
       >
-        <UserRound size={17} />
+        <UserRound size={18} />
         <span>Equipo</span>
       </button>
 
@@ -275,7 +275,7 @@ export default function Sidebar({
         className={active === 'actas' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('actas')}
       >
-        <FileText size={17} />
+        <FileText size={18} />
         <span>Actas y acuerdos</span>
       </button>
 
@@ -289,7 +289,7 @@ export default function Sidebar({
           style={{ width: '100%', marginBottom: 0 }}
           onClick={() => notifyActive('Configuración del proyecto y parámetros institucionales')}
         >
-          <Settings size={17} />
+          <Settings size={18} />
           <span>Configuración</span>
         </button>
       </div>

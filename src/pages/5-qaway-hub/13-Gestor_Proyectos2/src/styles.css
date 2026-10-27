@@ -68,6 +68,44 @@
   height: 100vh !important;
   overflow-y: hidden !important;
 }
+
+/* Sidebar Qaway Lab · Tipografía e íconos calibrados al estándar ergonómico internacional (14px / Lucide 18px) */
+.qt-v2 .sidebar .side-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: #8f9fb2 !important;
+  padding: 0 11px !important;
+  margin: 0 0 6px !important;
+}
+.qt-v2 .sidebar .side-link {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.35 !important;
+  gap: 12px !important;
+  padding: 8.5px 11px !important;
+  border-radius: 8px !important;
+  margin-bottom: 2px !important;
+}
+.qt-v2 .sidebar .side-link.active {
+  font-weight: 600 !important;
+}
+.qt-v2 .sidebar .side-link em {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  padding: 2px 7px !important;
+  border-radius: 5px !important;
+}
+.qt-v2 .sidebar .project b {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+.qt-v2 .sidebar .project small {
+  font-size: 11px !important;
+  color: #a6b4c5 !important;
+}
 .qm-main-container {
   flex: 1;
   min-width: 0;
