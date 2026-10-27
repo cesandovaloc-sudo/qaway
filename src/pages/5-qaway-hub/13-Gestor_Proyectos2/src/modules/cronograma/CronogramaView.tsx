@@ -59,20 +59,6 @@ function App({
  return <div className="app-shell">
   
   <main className="workspace">
-   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '8px 16px', margin: '14px 28px 0', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
-     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 700, color: '#166534', background: '#dcfce7', padding: '4px 10px', borderRadius: '6px' }}>
-       <Check size={16} />
-       <span>MODO GESTOR: Seguimiento y Cumplimiento Territorial</span>
-     </div>
-     <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
-       <button style={{ border: 'none', background: 'transparent', padding: '6px 12px', fontSize: '12px', fontWeight: 600, color: '#64748b', borderRadius: '6px', cursor: 'pointer' }} onClick={() => onSwitchPerspective?.('maestro')}>
-         🏛️ Plan Maestro (Gantt Coordinador)
-       </button>
-       <button style={{ border: 'none', background: '#ffffff', padding: '6px 12px', fontSize: '12px', fontWeight: 700, color: '#0f172a', borderRadius: '6px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-         🗺️ Seguimiento Territorial (Gestor)
-       </button>
-     </div>
-   </div>
    <header className="topbar"><div className="project-select"><FolderKanban size={16}/><b>MINEDU · Dotación 2027</b><ChevronDown size={15}/></div><div className="global-search"><Search size={16}/><input placeholder="Buscar proyectos, UGEL, tareas..." value={query} onChange={e=>setQuery(e.target.value)}/><kbd>⌘ K</kbd></div><button className="icon-button" aria-label="Notificaciones"><Bell size={18}/><i className="notify-dot">3</i></button><button className="icon-button" aria-label="Ayuda"><CircleHelp size={19}/></button><div className="profile"><div className="avatar">CM</div><div><b>Carlos Mendoza</b><small>Gestor del Proyecto</small></div><ChevronDown size={14}/></div></header>
   <div className="breadcrumb"><span>Cartera de proyectos</span><ChevronRight/><span>MINEDU · Dotación 2027</span><ChevronRight/><b>Cronograma del proyecto</b></div>
   <section className="page-head"><div><div className="eyebrow">PLANIFICACIÓN Y EJECUCIÓN</div><h1>Cronograma del proyecto</h1><p>MINEDU · Dotación 2027 <span>·</span> Planificación, seguimiento territorial y avance por unidad ejecutora en MC SIGA</p></div><div className="head-actions"><div className="updated"><span>Última actualización</span><b>25 oct. 2026 · 16:40</b></div><button className="btn secondary" onClick={exportCsv}><Download size={16}/>Exportar reporte territorial</button><button className="btn primary" onClick={()=>setModal(true)}><Plus size={17}/>Nuevo elemento</button></div></section>

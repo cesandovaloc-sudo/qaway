@@ -460,25 +460,6 @@ export default function CronogramaGanttView({
   return (
     <div className="gantt-v2">
       <div className="app">
-        {/* Banner de Perspectiva de Rol */}
-        <div className="perspective-banner">
-          <div className="perspective-badge">
-            <ShieldCheck size={16} />
-            <span>MODO COORDINADOR: Gobernanza y Plan Maestro Regional</span>
-          </div>
-          <div className="perspective-toggle">
-            <button className="perspective-btn active">
-              🏛️ Plan Maestro (Gantt Coordinador)
-            </button>
-            <button
-              className="perspective-btn"
-              onClick={() => onSwitchPerspective?.('territorial')}
-            >
-              🗺️ Seguimiento Territorial (Gestor)
-            </button>
-          </div>
-        </div>
-
         {/* Header Principal */}
         <header className="header">
           <div className="heading">

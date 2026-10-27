@@ -85,12 +85,7 @@ export default function Sidebar({
 
       {/* Sección Proyecto Activo */}
       <div style={{ position: 'relative' }} ref={projectDropdownRef}>
-        <div className="side-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>PROYECTO ACTIVO</span>
-          {userRole === 'coordinador' && (
-            <span style={{ fontSize: '8.5px', color: '#93c5fd', fontWeight: 600 }}>COORDINADOR</span>
-          )}
-        </div>
+        <div className="side-label">PROYECTO ACTIVO</div>
 
         <div
           className="project"
