@@ -655,7 +655,7 @@
 .gantt-v2 .table-head,
 .gantt-v2 .row {
   display: grid;
-  grid-template-columns: minmax(290px, 2.3fr) 95px 95px 85px 120px 105px minmax(360px, 2.7fr);
+  grid-template-columns: minmax(380px, 2.8fr) 95px 95px 85px 120px 105px minmax(360px, 2.7fr);
   align-items: stretch;
 }
 
@@ -715,7 +715,7 @@
 
 .gantt-v2 .row {
   position: relative;
-  min-height: 42px;
+  min-height: 48px;
   background: #ffffff;
   border-bottom: 1px solid #eef2f6;
   cursor: pointer;
@@ -738,8 +738,8 @@
 }
 
 .gantt-v2 .row.hito {
-  min-height: 44px;
-  font-weight: 700;
+  min-height: 50px;
+  font-weight: 600;
   background: #ffffff;
 }
 
@@ -750,15 +750,15 @@
 .gantt-v2 .row > div:not(.timeline) {
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 14px;
   min-width: 0;
   border-right: 1px solid #e9edf3;
 }
 
 .gantt-v2 .name-cell {
-  gap: 8px;
+  gap: 12px;
   overflow: hidden;
-  padding-left: 14px !important;
+  padding-left: 16px !important;
 }
 
 .gantt-v2 .expand {
@@ -792,11 +792,14 @@
   white-space: nowrap;
   color: #64748b;
   font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 .gantt-v2 .hito .code {
   color: #0f172a;
-  font-weight: 800;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .gantt-v2 .name {
@@ -804,6 +807,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: inherit;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
 }
 
 .gantt-v2 .date,
