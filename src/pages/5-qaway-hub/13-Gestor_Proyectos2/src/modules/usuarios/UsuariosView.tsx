@@ -1,10 +1,10 @@
 // @ts-nocheck
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import './usuarios.css';
 import {
   Bell, BriefcaseBusiness, Building2, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleHelp, ContactRound, Copy, Download, History, Mail, MapPin, MoreVertical,
-  Phone, Plus, RefreshCw, Search, ShieldCheck, SlidersHorizontal, UserRound,
+  Phone, Plus, RefreshCw, Search, ShieldCheck, SlidersHorizontal, Trash2, Upload, UserRound,
   UserRoundCheck, UserRoundX, Users, Wrench, X, Clock3
 } from 'lucide-react';
 
@@ -77,9 +77,11 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
   const [showFilters, setShowFilters] = useState(false);
   const [drawerTab, setDrawerTab] = useState('Información');
   const [showCreate, setShowCreate] = useState(false);
+  const [editingUser, setEditingUser] = useState<Person | null>(null);
   const [showMenu, setShowMenu] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [notice, setNotice] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const notify = (message: string) => {
     setNotice(message);
@@ -128,6 +130,121 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
 
   const updatePerson = (id: number, patch: Partial<Person>) =>
     setPeople((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+
+  const deletePerson = (id: number) => {
+    setPeople((prev) => prev.filter((p) => p.id !== id));
+    if (selectedId === id) setSelectedId(null);
+    setEditingUser(null);
+    setShowCreate(false);
+    notify('Usuario eliminado del directorio');
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileName = file.name.toLowerCase();
+      let importedRows: any[] = [];
+
+      if (fileName.endsWith('.csv')) {
+        const text = await file.text();
+        const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+        if (lines.length <= 1) {
+          notify('El archivo CSV no contiene registros.');
+          return;
+        }
+
+        const firstLine = lines[0];
+        const delimiter = firstLine.includes(';') ? ';' : ',';
+        const headers = firstLine
+          .split(delimiter)
+          .map((h) => h.replace(/^["']|["']$/g, '').trim().toLowerCase());
+
+        for (let i = 1; i < lines.length; i++) {
+          const rawCols = lines[i].split(delimiter).map((c) => c.replace(/^["']|["']$/g, '').trim());
+          if (rawCols.length === 0 || !rawCols[0]) continue;
+          const rowObj: any = {};
+          headers.forEach((h, idx) => {
+            rowObj[h] = rawCols[idx] || '';
+          });
+          importedRows.push(rowObj);
+        }
+      } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+        const buffer = await file.arrayBuffer();
+        const XLSX = await import('xlsx');
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        importedRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      } else {
+        notify('Formato no soportado. Selecciona un archivo .xlsx, .xls o .csv');
+        return;
+      }
+
+      if (importedRows.length === 0) {
+        notify('No se encontraron filas con datos en el archivo.');
+        return;
+      }
+
+      const newPeople: Person[] = importedRows.map((r, index) => {
+        const findVal = (keys: string[]) => {
+          const foundKey = Object.keys(r).find((k) =>
+            keys.some((cand) => k.toLowerCase().includes(cand))
+          );
+          return foundKey ? String(r[foundKey]).trim() : '';
+        };
+
+        const name = findVal(['nombre', 'usuario', 'personal', 'name']) || `Usuario Importado ${index + 1}`;
+        const email = findVal(['correo', 'email', 'mail']) || `${name.toLowerCase().replace(/\s+/g, '.')}@minedu.gob.pe`;
+        const role = findVal(['cargo', 'rol', 'puesto', 'role']) || 'Especialista';
+        const rawType = findVal(['tipo', 'type']) || 'Equipo UGEL';
+        const org = findVal(['dre', 'ugel', 'área', 'area', 'entidad', 'sede', 'org']) || 'DRE Junín';
+        const phone = findVal(['teléfono', 'telefono', 'celular', 'phone', 'whatsapp']) || '+51 900 000 000';
+        const statusRaw = findVal(['estado', 'status']) || 'Activo';
+
+        let type: UserType = 'Equipo UGEL';
+        if (/coordinador/i.test(rawType)) type = 'Coordinador';
+        else if (/gestor/i.test(rawType)) type = 'Gestor';
+        else if (/interno|central|sede/i.test(rawType)) type = 'Equipo interno';
+
+        let status: UserStatus = 'Activo';
+        if (/pendiente/i.test(statusRaw)) status = 'Pendiente';
+        else if (/inactiv/i.test(statusRaw)) status = 'Inactivo';
+
+        const initials = name
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase() || 'US';
+
+        return {
+          id: Date.now() + index,
+          name,
+          email,
+          role,
+          type,
+          org,
+          status,
+          lastAccess: 'Recién importado',
+          phone,
+          area: org,
+          location: org.includes('Lima') ? 'Lima, Perú' : 'Junín, Perú',
+          initials,
+          assignments: Math.floor(Math.random() * 4) + 1,
+        };
+      });
+
+      setPeople((prev) => [...newPeople, ...prev]);
+      notify(`¡Éxito! Se importaron ${newPeople.length} usuarios al directorio.`);
+    } catch (err: any) {
+      console.error(err);
+      notify(`Error al procesar el archivo: ${err?.message || 'Formato inválido'}`);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const exportCsv = () => {
     const csv = [
@@ -185,10 +302,26 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
             <p>Directorio institucional de coordinadores, especialistas SIGA y responsables de las 13 UGEL de Junín.</p>
           </div>
           <div className="heading-buttons">
-            <button className="button secondary" onClick={exportCsv}>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              accept=".xlsx, .xls, .csv"
+              onChange={handleFileUpload}
+            />
+            <button className="button secondary" onClick={() => fileInputRef.current?.click()} title="Carga masiva desde archivo Excel (.xlsx) o CSV">
+              <Upload size={15} /> Importar Excel / CSV
+            </button>
+            <button className="button secondary" onClick={exportCsv} title="Descargar listado en formato CSV">
               <Download size={15} /> Exportar CSV
             </button>
-            <button className="button primary" onClick={() => setShowCreate(true)}>
+            <button
+              className="button primary"
+              onClick={() => {
+                setEditingUser(null);
+                setShowCreate(true);
+              }}
+            >
               <Plus size={16} /> Agregar usuario
             </button>
           </div>
@@ -352,14 +485,17 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
                             <button onClick={() => { setSelectedId(p.id); setDrawerTab('Información'); setShowMenu(null); }}>
                               <UserRound size={14} /> Ver ficha
                             </button>
-                            <button onClick={() => { setShowCreate(true); setShowMenu(null); }}>
-                              <Wrench size={14} /> Editar
+                            <button onClick={() => { setEditingUser(p); setShowCreate(false); setShowMenu(null); }}>
+                              <Wrench size={14} /> Modificar datos
                             </button>
                             <button onClick={() => { navigator.clipboard?.writeText(p.email); notify('Correo copiado'); setShowMenu(null); }}>
                               <Copy size={14} /> Copiar correo
                             </button>
                             <button className="danger-text" onClick={() => { deactivate(p); setShowMenu(null); }}>
                               <UserRoundX size={14} /> {p.status === 'Inactivo' ? 'Activar' : 'Desactivar'}
+                            </button>
+                            <button className="danger-text" onClick={() => { deletePerson(p.id); setShowMenu(null); }}>
+                              <Trash2 size={14} /> Eliminar
                             </button>
                           </div>
                         )}
@@ -440,7 +576,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
                   <div className="info-row"><MapPin size={14} /><span className="info-label">Sede</span><span className="info-value">{selected.location}</span></div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                   <button className="button secondary" style={{ width: '100%' }} onClick={() => sendEmail(selected)}>
                     <Mail size={14} /> Correo
                   </button>
@@ -448,6 +584,17 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
                     <Phone size={14} /> WhatsApp
                   </button>
                 </div>
+
+                <button
+                  className="button secondary"
+                  style={{ width: '100%', marginBottom: '10px' }}
+                  onClick={() => {
+                    setEditingUser(selected);
+                    setShowCreate(false);
+                  }}
+                >
+                  <Wrench size={14} /> Modificar datos de este usuario
+                </button>
 
                 <button
                   className="button secondary"
@@ -483,50 +630,94 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
         </aside>
       )}
 
-      {/* Modal Agregar Usuario */}
-      {showCreate && (
-        <div className="modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCreate(false); }}>
+      {/* Modal Agregar / Modificar Usuario */}
+      {(showCreate || editingUser) && (
+        <div
+          className="modal-backdrop"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowCreate(false);
+              setEditingUser(null);
+            }
+          }}
+        >
           <form
+            key={editingUser ? `edit-${editingUser.id}` : 'new-user'}
             className="create-modal"
             onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
-              const name = formData.get('name') as string;
-              const email = formData.get('email') as string;
-              const role = formData.get('role') as string;
+              const name = (formData.get('name') as string)?.trim();
+              const email = (formData.get('email') as string)?.trim();
+              const role = (formData.get('role') as string)?.trim();
               const type = formData.get('type') as UserType;
-              const org = formData.get('org') as string;
-              const phone = formData.get('phone') as string;
+              const org = (formData.get('org') as string)?.trim() || 'DRE Junín';
+              const phone = (formData.get('phone') as string)?.trim() || '+51 900 000 000';
+              const status = (formData.get('status') as UserStatus) || (editingUser?.status ?? 'Activo');
 
-              const initials = name.trim().split(/\s+/).slice(0, 2).map((n) => n[0]).join('').toUpperCase();
-              setPeople((prev) => [
-                {
-                  id: Math.max(0, ...prev.map((p) => p.id)) + 1,
-                  name: name.trim(),
-                  email: email.trim(),
-                  role: role.trim(),
+              const initials = name
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase() || 'US';
+
+              if (editingUser) {
+                updatePerson(editingUser.id, {
+                  name,
+                  email,
+                  role,
                   type,
-                  org: org.trim() || 'DRE Junín',
-                  status: 'Activo',
-                  lastAccess: '—',
-                  phone: phone.trim() || '+51 900 000 000',
-                  area: 'Operaciones',
-                  location: 'Junín, Perú',
+                  org,
+                  phone,
+                  status,
                   initials,
-                  assignments: 1,
-                },
-                ...prev,
-              ]);
-              setShowCreate(false);
-              notify('Usuario añadido al directorio del proyecto');
+                });
+                setEditingUser(null);
+                notify(`Datos de ${name} modificados correctamente`);
+              } else {
+                setPeople((prev) => [
+                  {
+                    id: Math.max(0, ...prev.map((p) => p.id)) + 1,
+                    name,
+                    email,
+                    role,
+                    type,
+                    org,
+                    status,
+                    lastAccess: '—',
+                    phone,
+                    area: org,
+                    location: org.includes('Lima') ? 'Lima, Perú' : 'Junín, Perú',
+                    initials,
+                    assignments: 1,
+                  },
+                  ...prev,
+                ]);
+                setShowCreate(false);
+                notify('Usuario añadido al directorio del proyecto');
+              }
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#0f172a' }}>Agregar usuario al directorio</h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>Registra personal interno o especialistas de las UGEL.</p>
+                <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+                  {editingUser ? 'Modificar datos del usuario' : 'Agregar usuario al directorio'}
+                </h2>
+                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0' }}>
+                  {editingUser
+                    ? `Actualizando información institucional de ${editingUser.name}.`
+                    : 'Registra personal interno o especialistas de las UGEL.'}
+                </p>
               </div>
-              <button type="button" className="action-icon" onClick={() => setShowCreate(false)}>
+              <button
+                type="button"
+                className="action-icon"
+                onClick={() => {
+                  setShowCreate(false);
+                  setEditingUser(null);
+                }}
+              >
                 <X size={18} />
               </button>
             </div>
@@ -534,23 +725,38 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
             <div className="form-grid">
               <label className="form-field wide">
                 <span>Nombre completo *</span>
-                <input name="name" required placeholder="Ej. Carlos Valdivia" />
+                <input name="name" required defaultValue={editingUser?.name || ''} placeholder="Ej. Carlos Valdivia" />
               </label>
               <label className="form-field">
                 <span>Correo institucional *</span>
-                <input name="email" type="email" required placeholder="c.valdivia@minedu.gob.pe" />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  defaultValue={editingUser?.email || ''}
+                  placeholder="c.valdivia@minedu.gob.pe"
+                />
               </label>
               <label className="form-field">
                 <span>Teléfono / WhatsApp</span>
-                <input name="phone" placeholder="+51 964 000 111" />
+                <input
+                  name="phone"
+                  defaultValue={editingUser?.phone || ''}
+                  placeholder="+51 964 000 111"
+                />
               </label>
               <label className="form-field">
                 <span>Cargo o rol *</span>
-                <input name="role" required placeholder="Ej. Especialista de Distribución" />
+                <input
+                  name="role"
+                  required
+                  defaultValue={editingUser?.role || ''}
+                  placeholder="Ej. Especialista de Distribución"
+                />
               </label>
               <label className="form-field">
                 <span>Tipo de usuario</span>
-                <select name="type">
+                <select name="type" defaultValue={editingUser?.type || 'Equipo UGEL'}>
                   <option>Equipo interno</option>
                   <option>Gestor</option>
                   <option>Coordinador</option>
@@ -559,17 +765,50 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
               </label>
               <label className="form-field">
                 <span>DRE / UGEL / Entidad</span>
-                <input name="org" defaultValue="DRE Junín" placeholder="Ej. UGEL Huancayo" />
+                <input
+                  name="org"
+                  defaultValue={editingUser?.org || 'DRE Junín'}
+                  placeholder="Ej. UGEL Huancayo"
+                />
               </label>
+              {editingUser && (
+                <label className="form-field">
+                  <span>Estado</span>
+                  <select name="status" defaultValue={editingUser.status}>
+                    <option>Activo</option>
+                    <option>Pendiente</option>
+                    <option>Inactivo</option>
+                  </select>
+                </label>
+              )}
             </div>
 
-            <div className="modal-actions">
-              <button type="button" className="button secondary" onClick={() => setShowCreate(false)}>
-                Cancelar
-              </button>
-              <button type="submit" className="button primary">
-                <Plus size={15} /> Guardar usuario
-              </button>
+            <div className="modal-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {editingUser ? (
+                <button
+                  type="button"
+                  className="button danger"
+                  onClick={() => deletePerson(editingUser.id)}
+                >
+                  <Trash2 size={15} /> Eliminar usuario
+                </button>
+              ) : <div />}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => {
+                    setShowCreate(false);
+                    setEditingUser(null);
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button type="submit" className="button primary">
+                  {editingUser ? <Check size={15} /> : <Plus size={15} />}
+                  {editingUser ? 'Guardar cambios' : 'Guardar usuario'}
+                </button>
+              </div>
             </div>
           </form>
         </div>
