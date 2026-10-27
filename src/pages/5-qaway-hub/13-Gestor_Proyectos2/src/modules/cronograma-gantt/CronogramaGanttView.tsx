@@ -557,19 +557,25 @@ export default function CronogramaGanttView({
     return '540px';
   }, [zoom]);
 
-  const gridCols = useMemo(
+  const fixedGridCols = useMemo(
     () =>
-      `${colWidths.name}px ${colWidths.start}px ${colWidths.end}px ${colWidths.duration}px ${colWidths.progress}px ${colWidths.status}px minmax(${timelineMinWidth}, 1fr)`,
-    [colWidths, timelineMinWidth]
+      `${colWidths.name}px ${colWidths.start}px ${colWidths.end}px ${colWidths.duration}px ${colWidths.progress}px ${colWidths.status}px`,
+    [colWidths]
   );
 
-  /* ---------- Deslizador Temporal y Centrado en Hoy ---------- */
+  const rowGridCols = useMemo(
+    () => `var(--fixed) minmax(${timelineMinWidth}, 1fr)`,
+    [timelineMinWidth]
+  );
+
+  /* ---------- Deslizador Temporal por Escalas y Centrado en Hoy ---------- */
   const scrollToToday = () => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
     const todayEl = container.querySelector('.today') as HTMLElement | null;
     if (todayEl) {
-      const targetScroll = Math.max(0, todayEl.offsetLeft - container.clientWidth / 2);
+      const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
+      const targetScroll = Math.max(0, todayEl.offsetLeft - fixedWidth - timelineVisibleWidth / 2);
       container.scrollTo({ left: targetScroll, behavior: 'smooth' });
       notify('Vista centrada en Hoy (27 de octubre de 2026)');
     }
@@ -577,8 +583,22 @@ export default function CronogramaGanttView({
 
   const scrollTimeline = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return;
-    const amount = dir === 'left' ? -380 : 380;
-    scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+    const factor = dir === 'left' ? -1 : 1;
+    let delta = 300;
+    if (zoom === 'Día') {
+      delta = 7 * 32;
+    } else if (zoom === 'Semana') {
+      delta = 4 * 72;
+    } else if (zoom === 'Mes') {
+      const container = scrollRef.current;
+      const timelineVisible = Math.max(300, container.clientWidth - fixedWidth);
+      delta = Math.max(160, timelineVisible / 4);
+    } else if (zoom === 'Trimestre') {
+      const container = scrollRef.current;
+      const timelineVisible = Math.max(300, container.clientWidth - fixedWidth);
+      delta = Math.max(200, timelineVisible / 2);
+    }
+    scrollRef.current.scrollBy({ left: factor * delta, behavior: 'smooth' });
   };
 
   const handleZoomChange = (z: string) => {
@@ -1076,37 +1096,40 @@ export default function CronogramaGanttView({
               }
             >
               {/* Cabecera de la Tabla */}
-              <div className="table-head" style={{ gridTemplateColumns: gridCols }}>
-                <div className="name-head">
-                  <input
-                    type="checkbox"
-                    onChange={(e) =>
-                      notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
-                    }
-                  />
-                  <span>Hito Rector / Subproceso Oficial</span>
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'name')} />
+              <div className="table-head" style={{ gridTemplateColumns: rowGridCols }}>
+                <div className="fixed-cols" style={{ gridTemplateColumns: fixedGridCols }}>
+                  <div className="name-head">
+                    <input
+                      type="checkbox"
+                      onChange={(e) =>
+                        notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
+                      }
+                    />
+                    <span>Hito Rector / Subproceso Oficial</span>
+                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'name')} />
+                  </div>
+                  <div>
+                    Inicio
+                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
+                  </div>
+                  <div>
+                    Fin
+                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
+                  </div>
+                  <div>
+                    Duración
+                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
+                  </div>
+                  <div>
+                    Avance
+                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
+                  </div>
+                  <div>
+                    Estado
+                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
+                  </div>
                 </div>
-                <div>
-                  Inicio
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
-                </div>
-                <div>
-                  Fin
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
-                </div>
-                <div>
-                  Duración
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
-                </div>
-                <div>
-                  Avance
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
-                </div>
-                <div>
-                  Estado
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
-                </div>
+
                 <div className="timeline-head">
                   <div
                     className="years"
@@ -1138,7 +1161,7 @@ export default function CronogramaGanttView({
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
                     selectedId === x.id ? 'selected' : ''
                   }`}
-                  style={{ gridTemplateColumns: gridCols }}
+                  style={{ gridTemplateColumns: rowGridCols }}
                   onClick={() => {
                     setSelectedId(x.id);
                   }}
@@ -1147,7 +1170,8 @@ export default function CronogramaGanttView({
                     setPanelOpen(true);
                   }}
                 >
-                  <div className="name-cell">
+                  <div className="fixed-cols" style={{ gridTemplateColumns: fixedGridCols }}>
+                    <div className="name-cell">
                     {x.kind === 'hito' ? (
                       <button
                         className="expand"
@@ -1366,8 +1390,9 @@ export default function CronogramaGanttView({
                       <span className={'status ' + STATUS_CLASS[x.status]}>{x.status}</span>
                     )}
                   </div>
+                </div>
 
-                  <div className="timeline">
+                <div className="timeline">
                     <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
                       {segments.map((s) => (
                         <span key={s.key} />

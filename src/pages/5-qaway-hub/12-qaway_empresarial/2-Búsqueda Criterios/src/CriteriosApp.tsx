@@ -73,6 +73,9 @@ import {
 import {
   syncSessionToSupabase,
   syncTurnToSupabase,
+  syncProjectToSupabase,
+  fetchProjectsFromSupabase,
+  deleteProjectFromSupabase,
   testSupabaseConnection,
   saveCustomSupabaseConfig,
   getActiveSupabaseConfig,
@@ -477,7 +480,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     latency: 142,
     role: "primary_llm",
     description: "Ventana de contexto masiva y velocidad ultrarrápida. Motor nativo RAG para leyes y matrices.",
-    apiKeyMask: "AIzaSy••••••••••••••••••••41Z9",
+    apiKeyMask: "",
     contextWindow: "1M-2M tokens",
   },
   {
@@ -492,7 +495,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     latency: 184,
     role: "standby",
     description: "Líder de razonamiento multimodal y generación ejecutiva de alta coherencia sintáctica.",
-    apiKeyMask: "sk-proj-••••••••••••••••••••39A2",
+    apiKeyMask: "",
     contextWindow: "128k tokens",
   },
   {
@@ -507,7 +510,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     latency: 215,
     role: "standby",
     description: "Benchmark líder en análisis de contratos, normativas densas y reducción de alucinaciones.",
-    apiKeyMask: "sk-ant-••••••••••••••••••••88B1",
+    apiKeyMask: "",
     contextWindow: "200k tokens",
   },
   {
@@ -522,7 +525,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     latency: 118,
     role: "reranker",
     description: "Especialista número 1 global en embeddings multilingües y Cross-Encoder Reranking de alta precisión.",
-    apiKeyMask: "coh-••••••••••••••••••••55X7",
+    apiKeyMask: "",
     contextWindow: "128k tokens",
   },
   {
@@ -537,7 +540,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     latency: 42,
     role: "standby",
     description: "Arquitectura LPU con inferencia instantánea a más de 500 tokens/segundo. Latencia de 42 ms.",
-    apiKeyMask: "gsk_••••••••••••••••••••90Q3",
+    apiKeyMask: "",
     contextWindow: "128k tokens",
   },
   {
@@ -552,7 +555,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     latency: 139,
     role: "standby",
     description: "Modelos abiertos y propietarios con estricta soberanía de datos y rendimiento top en español.",
-    apiKeyMask: "mis-••••••••••••••••••••12F4",
+    apiKeyMask: "",
     contextWindow: "128k tokens",
   },
   {
@@ -567,7 +570,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     latency: 195,
     role: "standby",
     description: "Cadena de pensamiento explícita (Chain-of-Thought) y resolución analítica de costos ultrabajos.",
-    apiKeyMask: "dsk-••••••••••••••••••••73M0",
+    apiKeyMask: "",
     contextWindow: "64k tokens",
   },
 ];
@@ -913,7 +916,7 @@ export default function CriteriosApp() {
       selectedModel: "gemini-1.5-flash",
       contextWindow: "1M-2M tokens",
       latency: 142,
-      apiKeyMask: "AIzaSy••••••••••••••••••••41Z9",
+      apiKeyMask: "",
       models: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"],
     };
   // Alias del proveedor LLM activo (usado por el flujo de latencia/Gemini del chat)

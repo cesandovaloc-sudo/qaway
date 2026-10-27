@@ -255,3 +255,74 @@ export async function fetchSessionsFromSupabase(projectId: string): Promise<any[
     return null;
   }
 }
+
+/**
+ * Guarda o actualiza un proyecto en Supabase
+ */
+export async function syncProjectToSupabase(project: {
+  id: string;
+  name: string;
+  category: string;
+  badge?: string;
+  sourcesCount?: number;
+}): Promise<boolean> {
+  try {
+    const client = getSupabaseClient();
+    const { error } = await client.from("rag_projects").upsert({
+      id: project.id,
+      name: project.name,
+      category: project.category,
+      badge: project.badge || "Activo",
+      updated_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.warn("[RAG Supabase] Proyecto no sincronizado en DB remota (modo local activo):", error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn("[RAG Supabase] Error al sincronizar proyecto:", err);
+    return false;
+  }
+}
+
+/**
+ * Carga proyectos desde Supabase si la tabla existe
+ */
+export async function fetchProjectsFromSupabase(): Promise<any[] | null> {
+  try {
+    const client = getSupabaseClient();
+    const { data, error } = await client
+      .from("rag_projects")
+      .select("*")
+      .order("updated_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return null;
+    }
+
+    return data.map((p) => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      badge: p.badge || "Activo",
+      sourcesCount: 0,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Elimina un proyecto en Supabase
+ */
+export async function deleteProjectFromSupabase(projectId: string): Promise<boolean> {
+  try {
+    const client = getSupabaseClient();
+    const { error } = await client.from("rag_projects").delete().eq("id", projectId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
