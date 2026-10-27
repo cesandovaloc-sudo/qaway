@@ -566,110 +566,158 @@
   cursor: pointer;
 }
 
-.gantt-v2 .select {
+/* --- Dropdowns y Menús Desplegables Tipo Tarjeta (Diseño Unificado 12px / 14px) --- */
+.gantt-v2 .filter-dropdown-wrap {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 138px;
+}
+
+.gantt-v2 .filter-card-btn {
   height: 42px;
-  padding: 4px 28px 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 140px;
+  padding: 4px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  color: #1e293b;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: all 0.15s ease;
   user-select: none;
 }
 
-.gantt-v2 .select:hover {
+.gantt-v2 .filter-card-btn:hover {
   border-color: #94a3b8;
   background: #fcfdfe;
 }
 
-.gantt-v2 .select:focus-within {
+.gantt-v2 .filter-card-btn.active {
   border-color: #0066ff;
   box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+  background: #f8fbff;
 }
 
-.gantt-v2 .select small {
-  font-size: 9.5px;
+.gantt-v2 .filter-card-btn.filtered {
+  border-color: #0066ff;
+  background: #f0f7ff;
+}
+
+.gantt-v2 .filter-card-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.gantt-v2 .filter-card-copy small {
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: #64748b;
-  pointer-events: none;
-  line-height: 1.1;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 
-.gantt-v2 .select select {
-  appearance: none;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-size: 12.5px;
-  color: #1e293b;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.gantt-v2 .select > svg {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #64748b;
-  pointer-events: none;
-}
-
-/* Rango de Fechas Operativo con Popover Redondeado Moderno */
-.gantt-v2 .date-range-wrap {
-  position: relative;
-}
-
-.gantt-v2 .date-range-btn {
-  height: 42px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 13px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #334155;
+.gantt-v2 .filter-card-copy span {
   font-size: 12.5px;
   font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition: all 0.15s ease;
+  color: #0f172a;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
 }
 
-.gantt-v2 .date-range-btn:hover,
-.gantt-v2 .date-range-btn.active {
-  border-color: #0066ff;
-  background: #f8fbff;
+.gantt-v2 .filter-chevron {
+  color: #64748b;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
 }
 
-.gantt-v2 .date-range-btn.filtered {
-  border-color: #0066ff;
-  background: #f0f7ff;
+.gantt-v2 .filter-card-btn.active .filter-chevron {
+  transform: rotate(180deg);
   color: #0066ff;
 }
 
-.gantt-v2 .date-range-btn .dr-icon {
+/* Tarjeta flotante moderna para cada desplegable */
+.gantt-v2 .filter-card-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 120;
+  min-width: 200px;
+  max-width: 280px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: fadeInPop 0.15s ease-out;
+}
+
+.gantt-v2 .filter-popover-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  padding: 4px 8px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 2px;
+}
+
+.gantt-v2 .filter-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.gantt-v2 .filter-item-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .filter-item-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.gantt-v2 .filter-item-btn.selected {
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 700;
+}
+
+.gantt-v2 .item-check {
   color: #0066ff;
   flex-shrink: 0;
 }
 
-.gantt-v2 .date-range-btn .dr-chevron {
-  color: #64748b;
+/* Date range popover enhancements (Cero calendarios nativos rectos) */
+.gantt-v2 .date-range-btn .dr-icon {
+  color: #0066ff;
   flex-shrink: 0;
 }
 
@@ -677,12 +725,12 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  z-index: 100;
-  width: 320px;
+  z-index: 130;
+  width: 360px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
-  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 14px 35px -4px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -732,6 +780,15 @@
   color: #0f172a;
 }
 
+.gantt-v2 .dr-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-top: 2px;
+}
+
 .gantt-v2 .dr-presets {
   display: flex;
   flex-wrap: wrap;
@@ -739,7 +796,7 @@
 }
 
 .gantt-v2 .dr-presets button {
-  padding: 4px 10px;
+  padding: 5px 11px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #f8fafc;
@@ -762,47 +819,67 @@
   color: #ffffff;
 }
 
-.gantt-v2 .dr-inputs {
+.gantt-v2 .dr-months-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
 }
 
-.gantt-v2 .dr-inputs label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.gantt-v2 .dr-inputs label span {
-  font-size: 11px;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-.gantt-v2 .dr-inputs input[type="date"] {
-  height: 36px;
-  padding: 0 8px;
-  border: 1px solid #cbd5e1;
+.gantt-v2 .dr-month-pill {
+  padding: 8px 4px;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 12px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11.5px;
   font-weight: 600;
-  color: #0f172a;
-  outline: 0;
-  background: #ffffff;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s ease;
 }
 
-.gantt-v2 .dr-inputs input[type="date"]:focus {
+.gantt-v2 .dr-month-pill:hover {
+  border-color: #93c5fd;
+  background: #e6f4ff;
+  color: #0066ff;
+}
+
+.gantt-v2 .dr-month-pill.in-range {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 700;
+}
+
+.gantt-v2 .dr-month-pill.exact {
   border-color: #0066ff;
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.15);
+  background: #0066ff;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.gantt-v2 .dr-active-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.gantt-v2 .dr-active-summary b {
+  color: #0066ff;
+  font-weight: 700;
 }
 
 .gantt-v2 .dr-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid #f1f5f9;
 }
 
@@ -828,7 +905,7 @@
   color: #ffffff;
   font-size: 12px;
   font-weight: 700;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 102, 255, 0.25);
