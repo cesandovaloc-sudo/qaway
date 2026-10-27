@@ -3,8 +3,9 @@
 // Keep-alive: los canvas permanecen montados (display:none en el inactivo) para
 // preservar estado de UI/filtros/drawer y eliminar el parpadeo al alternar.
 import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import type { ModuleKey, UserRole } from './types';
-import { MODULE_STORAGE_KEY, TAREAS_SEED_COUNT, USER_ROLE_STORAGE_KEY } from './types';
+import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, TAREAS_SEED_COUNT, USER_ROLE_STORAGE_KEY } from './types';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
@@ -56,6 +57,18 @@ const readStoredModule = (): ModuleKey => {
   }
 };
 
+const resolveModuleFromPath = (path: string): ModuleKey => {
+  try {
+    const clean = path.replace(/\/+$/, '') || '/';
+    if (SLUG_TO_MODULE[clean]) {
+      return SLUG_TO_MODULE[clean];
+    }
+  } catch {
+    /* fallback */
+  }
+  return readStoredModule();
+};
+
 const seedTasksCount = (): number => {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem('qaway-tasks-v1') || 'null');
@@ -75,7 +88,10 @@ const readStoredRole = (): UserRole => {
 };
 
 function App() {
-  const [active, setActive] = useState<ModuleKey>(readStoredModule);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [active, setActive] = useState<ModuleKey>(() => resolveModuleFromPath(location.pathname));
   const [tasksCount, setTasksCount] = useState<number>(seedTasksCount);
   const [userRole, setUserRole] = useState<UserRole>(readStoredRole);
   const [cronogramaPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial'>(() =>
@@ -95,6 +111,22 @@ function App() {
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
 
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
+
+  // Sincronizar ruta en barra de direcciones al navegar (popstate / cambio de URL o ruta raíz)
+  useEffect(() => {
+    const clean = location.pathname.replace(/\/+$/, '') || '/';
+    const matched = SLUG_TO_MODULE[clean];
+    if (matched) {
+      if (matched !== active) {
+        setActive(matched);
+      }
+    } else {
+      const targetSlug = MODULE_SLUGS[active] || '/tareas';
+      if (location.pathname !== targetSlug) {
+        navigate(targetSlug, { replace: true });
+      }
+    }
+  }, [location.pathname, active, navigate]);
 
   useEffect(() => {
     try {
@@ -119,6 +151,14 @@ function App() {
       /* almacenamiento no disponible */
     }
   }, [projects]);
+
+  const handleSelectModule = (next: ModuleKey) => {
+    setActive(next);
+    const targetSlug = MODULE_SLUGS[next];
+    if (targetSlug && location.pathname !== targetSlug) {
+      navigate(targetSlug);
+    }
+  };
 
   const handleChangeRole = (next: UserRole) => {
     setUserRole(next);
@@ -148,6 +188,7 @@ function App() {
     setProjects((prev) => [item, ...prev]);
     setActiveProjectId(item.id);
     setActive('cronograma');
+    navigate(MODULE_SLUGS['cronograma']);
     setCronogramaPerspective('maestro');
     notifyActive(`Proyecto regional "${item.name}" creado con éxito. Cronograma maestro listo para configurar.`);
   };
@@ -165,7 +206,7 @@ function App() {
       <div className="qm-side qt-v2">
         <Sidebar
           active={active}
-          onModule={setActive}
+          onModule={handleSelectModule}
           tasksCount={tasksCount}
           notifyActive={notifyActive}
           setTasksView={setTasksView}
