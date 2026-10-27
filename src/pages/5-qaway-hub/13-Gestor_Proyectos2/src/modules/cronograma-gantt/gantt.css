@@ -707,6 +707,21 @@
   background: #f1f5f9;
 }
 
+.gantt-v2 .years span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-right: 1px solid #e2e8f0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
 .gantt-v2 .months {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
@@ -715,6 +730,19 @@
   text-align: center;
   font-size: 11.5px;
   font-weight: 600;
+}
+
+.gantt-v2 .months span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-right: 1px solid #f1f5f9;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+  user-select: none;
 }
 
 .gantt-v2 .row {
@@ -1306,13 +1334,6 @@ body.gantt-resizing {
   user-select: none;
 }
 
-/* --- D) Escalas temporales densas: etiquetas compactas --- */
-.gantt-v2 .timeline-head[data-density="fine"] .months span {
-  font-size: 9px;
-  letter-spacing: -0.02em;
-  overflow: hidden;
-  padding: 0 1px;
-}
 
 /* --- Celda Nombre: texto editable ergonómico --- */
 .gantt-v2 .name-cell .name {
@@ -1506,4 +1527,64 @@ body.gantt-resizing {
   font-size: 11px;
   font-weight: 700;
   margin-left: 2px;
+}
+
+/* --- Navegador Temporal / Deslizador Hoy (Estándar Qaway de imagen 2) --- */
+.gantt-v2 .timeline-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .nav-arrow {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .nav-arrow:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.gantt-v2 .nav-arrow:active {
+  transform: scale(0.95);
+}
+
+.gantt-v2 .today-pill {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--blue, #0066ff);
+  border-radius: 8px;
+  background: var(--blue, #0066ff);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.25);
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .today-pill:hover {
+  background: #0052cc;
+  border-color: #0052cc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 102, 255, 0.35);
+}
+
+.gantt-v2 .today-pill:active {
+  transform: translateY(0) scale(0.98);
 }

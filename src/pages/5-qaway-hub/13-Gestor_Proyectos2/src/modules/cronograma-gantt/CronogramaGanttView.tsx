@@ -346,6 +346,19 @@ const TODAY_ISO = (() => {
   return '2026-10-27';
 })();
 
+const MONTH_NAMES = [
+  'Septiembre 2026',
+  'Octubre 2026',
+  'Noviembre 2026',
+  'Diciembre 2026',
+  'Enero 2027',
+  'Febrero 2027',
+  'Marzo 2027',
+  'Abril 2027',
+];
+
+const monthCols = MONTHS.map((m) => `${monthDays(m.start)}fr`).join(' ');
+
 /* Segmentación del eje temporal según escala (Día / Semana / Mes / Trimestre).
    Los pesos "fr" derivan de días reales, por lo que las barras (%) y la línea
    "Hoy" quedan sempre alineadas con la cuadrícula. */
@@ -356,7 +369,7 @@ const buildSegments = (zoom: string) => {
     for (let i = 0; i < TOTAL_SPAN_DAYS; i++) {
       const d = new Date(START_TIMESTAMP + i * 86400000);
       const dom = d.getDate();
-      segs.push({ label: dom === 1 || dom === 11 || dom === 21 ? String(dom) : '', days: 1, key: `d${i}` });
+      segs.push({ label: String(dom), days: 1, key: `d${i}` });
     }
     return segs;
   }
@@ -443,6 +456,7 @@ export default function CronogramaGanttView({
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const colRef = useRef(colWidths);
   const dragRef = useRef<{ key: ColKey; startX: number; startW: number } | null>(null);
   colRef.current = colWidths;
@@ -537,19 +551,56 @@ export default function CronogramaGanttView({
 
   const fixedWidth = useMemo(() => (Object.keys(colWidths) as ColKey[]).reduce((a, k) => a + colWidths[k], 0), [colWidths]);
 
+  const timelineMinWidth = useMemo(() => {
+    if (zoom === 'Día') return `${TOTAL_SPAN_DAYS * 32}px`;
+    if (zoom === 'Semana') return `${Math.ceil(TOTAL_SPAN_DAYS / 7) * 72}px`;
+    return '540px';
+  }, [zoom]);
+
   const gridCols = useMemo(
     () =>
-      `${colWidths.name}px ${colWidths.start}px ${colWidths.end}px ${colWidths.duration}px ${colWidths.progress}px ${colWidths.status}px minmax(360px, 1fr)`,
-    [colWidths]
+      `${colWidths.name}px ${colWidths.start}px ${colWidths.end}px ${colWidths.duration}px ${colWidths.progress}px ${colWidths.status}px minmax(${timelineMinWidth}, 1fr)`,
+    [colWidths, timelineMinWidth]
   );
 
-  /* ---------- Editor en celda: cierre global (clic externo / Escape) ---------- */
+  /* ---------- Deslizador Temporal y Centrado en Hoy ---------- */
+  const scrollToToday = () => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const todayEl = container.querySelector('.today') as HTMLElement | null;
+    if (todayEl) {
+      const targetScroll = Math.max(0, todayEl.offsetLeft - container.clientWidth / 2);
+      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+      notify('Vista centrada en Hoy (27 de octubre de 2026)');
+    }
+  };
+
+  const scrollTimeline = (dir: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const amount = dir === 'left' ? -380 : 380;
+    scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
+  const handleZoomChange = (z: string) => {
+    setZoom(z);
+    if (z === 'Día' || z === 'Semana') {
+      setTimeout(() => {
+        scrollToToday();
+      }, 100);
+    }
+  };
+
+  /* ---------- Cierre global de menús y editores (clic externo / Escape) ---------- */
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       const t = e.target as HTMLElement | null;
       if (!t) return;
-      if (t.closest && t.closest('.cell-editor, .col-resizer')) return;
-      setEdit(null);
+      if (!t.closest('.menu-wrap')) {
+        setNewMenu(false);
+      }
+      if (!t.closest('.cell-editor, .col-resizer, .editable, .cell-pop')) {
+        setEdit(null);
+      }
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -557,7 +608,10 @@ export default function CronogramaGanttView({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setEdit(null);
+      if (e.key === 'Escape') {
+        setNewMenu(false);
+        setEdit(null);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -744,12 +798,22 @@ export default function CronogramaGanttView({
                 <ChevronDown size={14} />
               </button>
               {newMenu && (
-                <div className="menu">
-                  <button onClick={() => add('hito')}>
+                <div className="menu" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => {
+                      setNewMenu(false);
+                      add('hito');
+                    }}
+                  >
                     <Folder size={15} />
                     <span>Nuevo hito rector</span>
                   </button>
-                  <button onClick={() => add('subproceso')}>
+                  <button
+                    onClick={() => {
+                      setNewMenu(false);
+                      add('subproceso');
+                    }}
+                  >
                     <FileText size={15} />
                     <span>Nuevo subproceso</span>
                   </button>
@@ -928,12 +992,37 @@ export default function CronogramaGanttView({
               />
             </div>
 
+            {/* Deslizador temporal / Navegador Hoy (Estándar Qaway de imagen 2) */}
+            <div className="timeline-nav" title="Navegar por la línea de tiempo">
+              <button
+                className="nav-arrow"
+                onClick={() => scrollTimeline('left')}
+                title="Desplazar línea de tiempo a la izquierda"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                className="today-pill"
+                onClick={scrollToToday}
+                title="Ir y centrar en la fecha actual (27 de octubre de 2026)"
+              >
+                Hoy
+              </button>
+              <button
+                className="nav-arrow"
+                onClick={() => scrollTimeline('right')}
+                title="Desplazar línea de tiempo a la derecha"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
             <div className="zoom">
               {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
                 <button
                   key={x}
                   className={zoom === x ? 'active' : ''}
-                  onClick={() => setZoom(x)}
+                  onClick={() => handleZoomChange(x)}
                 >
                   {x}
                 </button>
@@ -976,8 +1065,16 @@ export default function CronogramaGanttView({
           </div>
 
           {/* Tabla Gantt con Timeline */}
-          <div className="gantt-scroll">
-            <div className="gantt" style={{ '--fixed': `${fixedWidth}px` } as React.CSSProperties}>
+          <div className="gantt-scroll" ref={scrollRef}>
+            <div
+              className="gantt"
+              style={
+                {
+                  '--fixed': `${fixedWidth}px`,
+                  minWidth: `calc(var(--fixed) + ${timelineMinWidth})`,
+                } as React.CSSProperties
+              }
+            >
               {/* Cabecera de la Tabla */}
               <div className="table-head" style={{ gridTemplateColumns: gridCols }}>
                 <div className="name-head">
@@ -1010,10 +1107,21 @@ export default function CronogramaGanttView({
                   Estado
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
                 </div>
-                <div className="timeline-head" data-density={denseZoom ? 'fine' : 'normal'}>
-                  <div className="years" style={{ gridTemplateColumns: yearCols }}>
-                    <span>2026</span>
-                    <span>2027</span>
+                <div className="timeline-head">
+                  <div
+                    className="years"
+                    style={{
+                      gridTemplateColumns: zoom === 'Día' || zoom === 'Semana' ? monthCols : yearCols,
+                    }}
+                  >
+                    {zoom === 'Día' || zoom === 'Semana' ? (
+                      MONTH_NAMES.map((name, idx) => <span key={idx}>{name}</span>)
+                    ) : (
+                      <>
+                        <span>2026</span>
+                        <span>2027</span>
+                      </>
+                    )}
                   </div>
                   <div className="months" style={{ gridTemplateColumns: segCols }}>
                     {segments.map((s) => (
