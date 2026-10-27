@@ -77,6 +77,25 @@ import {
   saveCustomSupabaseConfig,
   getActiveSupabaseConfig,
 } from "./services/criteriosSupabaseService";
+import {
+  chunkParsedContent,
+  classifyFileName,
+  isSupportedFile,
+  parseSingleFile,
+} from "./services/documentParserService";
+import {
+  buildSourceExcerpt,
+  getLastTurnEvidenceForDocument,
+  getTurnDocumentOrder,
+  getTurnEvidence,
+  loadChunksForDocument,
+  loadStoredDocumentsForProject,
+  persistDocumentWithChunks,
+  removeStoredDocument,
+  retrieveRelevantChunks,
+  storeTurnEvidence,
+} from "./services/ragVectorStoreService";
+import type { RagChunk, RetrievedChunk } from "./services/ragVectorStoreService";
 
 type RagThemeId = "rag-neutral" | "rag-legal" | "rag-finance";
 type InspectorTab = 1 | 2 | 3;
@@ -227,7 +246,19 @@ interface ChatTurn {
   scenarioId?: string;
   sourcesCount?: number;
   hasTable?: boolean;
-  sources?: { id: number; name: string; section: string; tab: InspectorTab }[];
+  sources?:
+    | {
+        id: number;
+        name: string;
+        section: string;
+        tab: InspectorTab;
+        /** Identificador del documento realmente indexado (ingesta del usuario). */
+        sourceId?: string;
+        /** Localizador real del fragmento recuperado (página, hoja/celda, bloque). */
+        locator?: string;
+        /** Etiqueta de similitud del fragmento top del documento citado. */
+        scoreLabel?: string;
+      }[];
   tableData?: {
     concept: string;
     sin: string;
@@ -813,6 +844,12 @@ export default function CriteriosApp() {
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  // Ingesta real: evidencia enfocada en el Inspector + estado de indexación en vivo
+  const [focusedSourceEvidence, setFocusedSourceEvidence] = useState<{
+    sourceId: string;
+    chunks: Array<RagChunk & { normalizedScore?: number }>;
+  } | null>(null);
+  const [isIndexingFiles, setIsIndexingFiles] = useState<boolean>(false);
 
   // Historial dinámico de consultas
   const [historyItems, setHistoryItems] = useState<HistoryRecordItem[]>(INITIAL_HISTORY_ITEMS);
@@ -879,6 +916,8 @@ export default function CriteriosApp() {
       apiKeyMask: "AIzaSy••••••••••••••••••••41Z9",
       models: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"],
     };
+  // Alias del proveedor LLM activo (usado por el flujo de latencia/Gemini del chat)
+  const activeProvider = activeLlmProvider;
 
   // Sesión activa y mensajes de la sesión activa (nunca hardcodeados entre sesiones)
   const activeSession = chatSessions.find((s) => s.id === activeSessionId) || chatSessions[0];
@@ -987,6 +1026,29 @@ export default function CriteriosApp() {
       setCustomDbKey(conf.anonKey);
     }
   }, []);
+
+  // Hidratación: documentos realmente indexados (IndexedDB) del proyecto activo
+  useEffect(() => {
+    let alive = true;
+    setFocusedSourceEvidence(null);
+    loadStoredDocumentsForProject(activeProjectId)
+      .then((storedMetas) => {
+        if (!alive || storedMetas.length === 0) return;
+        setProjectSources((prev) => {
+          const knownIds = new Set(prev.map((source) => source.id));
+          return [
+            ...storedMetas
+              .filter((meta) => !knownIds.has(meta.id))
+              .map((meta) => ({ ...meta, projectId: activeProjectId })),
+            ...prev,
+          ];
+        });
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [activeProjectId]);
 
   // Auto-scroll del hilo de mensajes cuando se envían preguntas o llegan respuestas
   useEffect(() => {
@@ -1274,6 +1336,32 @@ export default function CriteriosApp() {
       !lowerQ.includes("provisión") &&
       !lowerQ.includes("resumen");
 
+    // Recuperación REAL en cliente: Top-K de fragmentos indexados (BM25 ligero)
+    let realEvidenceChunks: RetrievedChunk[] = [];
+    let realEvidenceRelaxed = false;
+    if (activeSources.length > 0 && !isConversationalGreeting) {
+      try {
+        const retrieval = await retrieveRelevantChunks(activeProjectId, q, {
+          topK: Math.max(topK, 6),
+          threshold: similarityThreshold,
+        });
+        realEvidenceChunks = retrieval.top;
+        realEvidenceRelaxed = retrieval.relaxed;
+      } catch (retrievalError) {
+        console.warn("[RAG local] Recuperación no disponible:", retrievalError);
+      }
+    }
+    const bestChunkForDoc = (docId: string): RetrievedChunk | undefined => {
+      let best: RetrievedChunk | undefined;
+      for (const chunk of realEvidenceChunks) {
+        if (chunk.documentId !== docId) continue;
+        if (!best || chunk.rawScore > best.rawScore) best = chunk;
+      }
+      return best;
+    };
+    const evidenceExcerptForDoc = (docId: string): string =>
+      buildSourceExcerpt(realEvidenceChunks.filter((chunk) => chunk.documentId === docId));
+
     let ansText = "";
     let hasTable = false;
     let tableData: any = undefined;
@@ -1295,6 +1383,7 @@ export default function CriteriosApp() {
             badge: s.badge,
             description: s.description,
             tab: s.inspectorTab,
+            excerpt: evidenceExcerptForDoc(s.id),
           })),
           projectName: activeProjName,
           model: activeProvider.selectedModel || "gemini-1.5-flash",
@@ -1318,14 +1407,29 @@ export default function CriteriosApp() {
               .map((citNum) => {
                 const src = activeSources[citNum - 1];
                 if (!src) return null;
+                const topChunk = bestChunkForDoc(src.id);
                 return {
                   id: citNum,
                   name: src.title,
-                  section: src.badge,
+                  section: topChunk ? topChunk.locatorLabel : src.badge,
                   tab: src.inspectorTab,
+                  sourceId: src.id,
+                  locator: topChunk?.locatorLabel,
+                  scoreLabel:
+                    topChunk && topChunk.normalizedScore > 0
+                      ? `Similitud ${topChunk.normalizedScore.toFixed(2)}`
+                      : undefined,
                 };
               })
-              .filter(Boolean) as { id: number; name: string; section: string; tab: InspectorTab }[];
+              .filter(Boolean) as unknown as {
+              id: number;
+              name: string;
+              section: string;
+              tab: InspectorTab;
+              sourceId?: string;
+              locator?: string;
+              scoreLabel?: string;
+            }[];
           }
           if (turnSources.length === 0 && activeSources.length > 0) {
             turnSources = activeSources.slice(0, 2).map((s, idx) => ({
@@ -1343,7 +1447,52 @@ export default function CriteriosApp() {
 
     // Si no se ejecutó llamada real o falló, procesar respuesta RAG local determinística
     if (!ansText) {
-      if (activeSources.length === 0) {
+      // Síntesis local extractiva a partir de los fragmentos REALES recuperados (Top-K en cliente)
+      if (realEvidenceChunks.length > 0) {
+        const citedDocIds = Array.from(
+          new Set(realEvidenceChunks.slice(0, 6).map((chunk) => chunk.documentId))
+        );
+        const sentences: string[] = [];
+        const evidenceTurnSources: {
+          id: number;
+          name: string;
+          section: string;
+          tab: InspectorTab;
+          sourceId?: string;
+          locator?: string;
+          scoreLabel?: string;
+        }[] = [];
+        for (const docId of citedDocIds) {
+          const srcIdx = activeSources.findIndex((source) => source.id === docId);
+          const src = srcIdx >= 0 ? activeSources[srcIdx] : undefined;
+          const docChunks = realEvidenceChunks.filter((chunk) => chunk.documentId === docId);
+          for (let i = 0; i < Math.min(2, docChunks.length); i++) {
+            const chunk = docChunks[i];
+            if (!chunk) continue;
+            const citationNum = srcIdx >= 0 ? srcIdx + 1 : evidenceTurnSources.length + 1;
+            const snippet = chunk.content.replace(/\s+/g, " ").slice(0, 320);
+            sentences.push(
+              `${i === 0 ? `En ${chunk.documentTitle}, ${chunk.locatorLabel}, se constata` : `Complementariamente, en ${chunk.locatorLabel}, se registra`}: «${snippet}${chunk.content.replace(/\s+/g, " ").length > 320 ? "…" : ""}» [${citationNum}]`
+            );
+            if (i === 0 && src) {
+              evidenceTurnSources.push({
+                id: citationNum,
+                name: src.title,
+                section: `${chunk.locatorLabel}${realEvidenceRelaxed ? " · bajo umbral configurado" : ""}`,
+                tab: src.inspectorTab,
+                sourceId: src.id,
+                locator: chunk.locatorLabel,
+                scoreLabel: `Similitud ${chunk.normalizedScore.toFixed(2)}`,
+              });
+            }
+          }
+        }
+        const distinctSentences = Array.from(new Set(sentences));
+        ansText = `Hallazgos evidenciados en los fragmentos reales indexados (motor local, umbral ≥ ${similarityThreshold.toFixed(
+          2
+        )}):\n\n${distinctSentences.join("\n\n")}`;
+        turnSources = evidenceTurnSources;
+      } else if (activeSources.length === 0) {
         if (isConversationalGreeting) {
           ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}". Actualmente este proyecto no cuenta con fuentes ni documentos indexados. Puedes cargar tus archivos (PDF, Excel, Word o carpetas completas) usando el botón "+ Carga de doc" en el panel lateral para habilitar consultas RAG con citas exactas.`;
         } else {
@@ -1429,6 +1578,14 @@ export default function CriteriosApp() {
       tableData,
       sources: turnSources,
     };
+
+    if (realEvidenceChunks.length > 0) {
+      storeTurnEvidence(
+        assistantTurn.id,
+        realEvidenceChunks,
+        activeSources.map((source) => source.id)
+      );
+    }
 
     setChatSessions((prev) =>
       prev.map((s) => {
@@ -1614,34 +1771,105 @@ export default function CriteriosApp() {
     setShowUploadModal(true);
   }
 
-  function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const addedSources: ProjectSourceItem[] = Array.from(files).map((file, idx) => {
-      const lower = file.name.toLowerCase();
-      const isExcel = lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".csv");
-      const isLegal = lower.includes("ley") || lower.includes("ds") || lower.includes("decreto") || lower.includes("norma");
-      const type: "legal" | "excel" | "doc" = isExcel ? "excel" : isLegal ? "legal" : "doc";
-      const sizeKb = Math.max(12, Math.round(file.size / 1024));
-      const estimatedChunks = Math.max(120, sizeKb * 8);
-      return {
-        id: `src-up-${Date.now()}-${idx}`,
-        title: file.name,
-        type,
-        badge: isExcel ? "Matriz Excel" : isLegal ? "Norma Oficial" : "Documento Indexado",
-        description: `Archivo cargado localmente (${sizeKb} KB) e indexado en pgvector para el proyecto activo.`,
-        metaPages: isExcel ? "Hojas dinámicas" : `${Math.max(4, Math.round(sizeKb / 18))} páginas`,
-        chunksCount: estimatedChunks,
-        statusText: "Recién indexado",
-        inspectorTab: isExcel ? 2 : isLegal ? 1 : 3,
-        projectId: activeProjectId,
-      };
-    });
-
-    setProjectSources((prev) => [...addedSources, ...prev]);
+    const allFiles = Array.from(files ?? []);
     e.target.value = "";
+    if (allFiles.length === 0) return;
     setShowUploadModal(false);
+
+    const supportedFiles = allFiles.filter((file) => isSupportedFile(file));
+    if (supportedFiles.length === 0) return;
+
+    const batchStamp = Date.now();
+    const trackedFiles = supportedFiles.map((file, idx) => ({
+      file,
+      sourceId: `src-up-${batchStamp}-${idx}`,
+    }));
+
+    // Tarjetas provisionales al instante; se completan con los datos REALES de extracción
+    setProjectSources((prev) => [
+      ...trackedFiles.map(({ file, sourceId }) => {
+        const classified = classifyFileName(file.name);
+        const relativePath = (file as File & { webkitRelativePath?: string }).webkitRelativePath;
+        return {
+          id: sourceId,
+          title: file.name,
+          type: classified.type,
+          badge: classified.badge,
+          description: relativePath
+            ? `Extrayendo texto real (${relativePath}) para la vectorización del proyecto activo.`
+            : "Extrayendo texto real del archivo para la vectorización del proyecto activo.",
+          metaPages: "Extrayendo…",
+          chunksCount: 0,
+          statusText: "Extrayendo texto…",
+          inspectorTab: classified.inspectorTab,
+          projectId: activeProjectId,
+        };
+      }),
+      ...prev,
+    ]);
+    setIsIndexingFiles(true);
+
+    for (const { file, sourceId } of trackedFiles) {
+      try {
+        const parsed = await parseSingleFile(file);
+        const classified = classifyFileName(file.name);
+        const chunks = chunkParsedContent({
+          documentId: sourceId,
+          documentTitle: file.name,
+          documentType: classified.type,
+          parsed,
+          projectId: activeProjectId,
+        });
+        await persistDocumentWithChunks(
+          activeProjectId,
+          {
+            id: sourceId,
+            title: file.name,
+            type: classified.type,
+            badge: classified.badge,
+            description: parsed.summary,
+            metaPages: parsed.metaPages,
+            chunksCount: chunks.length,
+            statusText: chunks.length > 0 ? "Indexado" : "Sin texto extraíble",
+            inspectorTab: classified.inspectorTab,
+          },
+          chunks
+        );
+        setProjectSources((prev) =>
+          prev.map((source) =>
+            source.id === sourceId
+              ? {
+                  ...source,
+                  description: parsed.summary,
+                  metaPages: parsed.metaPages,
+                  chunksCount: chunks.length,
+                  statusText: chunks.length > 0 ? "Indexado" : "Sin texto extraíble",
+                }
+              : source
+          )
+        );
+      } catch (parseError) {
+        console.error(`[Ingesta] Error de extracción en ${file.name}:`, parseError);
+        setProjectSources((prev) =>
+          prev.map((source) =>
+            source.id === sourceId
+              ? {
+                  ...source,
+                  description: `No se pudo extraer texto de ${file.name}. Verifica el formato o re-intenta la carga.`,
+                  metaPages: "No extraíble",
+                  chunksCount: 0,
+                  statusText: "Error de extracción",
+                }
+              : source
+          )
+        );
+      }
+    }
+
+    setIsIndexingFiles(false);
+    // Paridad visual con el flujo anterior: termina en la pestaña de Fuentes
     navigateToNav("fuentes");
   }
 
@@ -1677,6 +1905,14 @@ export default function CriteriosApp() {
         prev.map((s) => (s.id === sourceId ? { ...s, statusText: "Sincronizado ahora" } : s))
       );
       setReindexingSourceId(null);
+      void (async () => {
+        const storedChunks = await loadChunksForDocument(sourceId);
+        if (storedChunks.length > 0) {
+          setProjectSources((prev) =>
+            prev.map((s) => (s.id === sourceId ? { ...s, chunksCount: storedChunks.length } : s))
+          );
+        }
+      })();
     }, 600);
   }
 
@@ -1710,8 +1946,23 @@ export default function CriteriosApp() {
   }
 
   function handleCopyCitation() {
+    const focusedMeta =
+      focusedSourceEvidence !== null
+        ? projectSources.find((source) => source.id === focusedSourceEvidence.sourceId)
+        : null;
+    const focusedTopChunk = focusedSourceEvidence && focusedSourceEvidence.chunks.length > 0
+      ? focusedSourceEvidence.chunks[0]
+      : null;
     let citation = "";
-    if (inspectorTab === 1) {
+    if (focusedMeta && focusedTopChunk) {
+      const scoreText =
+        typeof focusedTopChunk.normalizedScore === "number"
+          ? ` Similitud: ${focusedTopChunk.normalizedScore.toFixed(2)}.`
+          : "";
+      citation = `${focusedMeta.title}, ${focusedTopChunk.locatorLabel}: «${focusedTopChunk.content
+        .replace(/\s+/g, " ")
+        .slice(0, 170)}».${scoreText}`;
+    } else if (inspectorTab === 1) {
       citation = "D.S. N.º 007-2002-TR, Artículo 9 - Jornada de trabajo (Pág. 12). Publicación: 24/08/2002. Coseno: 0.95.";
     } else if (inspectorTab === 2) {
       citation = "Modelo Financiero Q3 2026.xlsx, Hoja: Proyecciones, Celda D13 =SUMA(D12:D14), Provisión USD 48,500. Coseno: 0.92.";
@@ -1725,19 +1976,44 @@ export default function CriteriosApp() {
     setTimeout(() => setCitationCopied(false), 2000);
   }
 
-  function handleExcelExport() {
+  async function handleExcelExport(sourceId?: string) {
     try {
       let csv = "Fila,Concepto,Valor\n";
-      for (const r of EXCEL_GRID_ROWS) {
-        if (r.label || r.value) {
-          csv += `${r.n},"${r.label}","${r.value}"\n`;
+      let downloadName = "Modelo_Financiero_Q3_2026.csv";
+      if (sourceId) {
+        const chunks = await loadChunksForDocument(sourceId);
+        if (chunks.length > 0) {
+          const sourceMeta = projectSources.find((source) => source.id === sourceId);
+          downloadName = `Matriz_${(sourceMeta?.title ?? "matriz_indexada")
+            .replace(/\.[^.]+$/, "")
+            .replace(/[^\w.-]+/g, "_")}.csv`;
+          csv = "Localizador,Contenido,Fragmento\n";
+          for (const chunk of chunks.slice(0, 500)) {
+            for (const rawLine of chunk.content.split("\n")) {
+              const cleanLine = rawLine.replace(/\s+/g, " ").trim();
+              if (!cleanLine) continue;
+              csv += `"${chunk.locatorLabel}","${cleanLine.replace(/"/g, '""')}","${chunk.id}"\n`;
+            }
+          }
+        } else {
+          for (const r of EXCEL_GRID_ROWS) {
+            if (r.label || r.value) {
+              csv += `${r.n},"${r.label}","${r.value}"\n`;
+            }
+          }
+        }
+      } else {
+        for (const r of EXCEL_GRID_ROWS) {
+          if (r.label || r.value) {
+            csv += `${r.n},"${r.label}","${r.value}"\n`;
+          }
         }
       }
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "Modelo_Financiero_Q3_2026.csv";
+      a.download = downloadName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1773,6 +2049,53 @@ export default function CriteriosApp() {
   function openInspector(tab: InspectorTab) {
     setInspectorTab(tab);
     setInspectorOpen(true);
+  }
+
+  /** Fragmento top de la fuente enfocada (badge de similitud y cita copiable). */
+  const topFocusedChunk =
+    focusedSourceEvidence && focusedSourceEvidence.chunks.length > 0
+      ? focusedSourceEvidence.chunks[0]
+      : null;
+
+  /** ¿El Inspector está mostrando evidencia real de un documento indexado? */
+  const hasRealFocusedSource =
+    focusedSourceEvidence !== null && focusedSourceEvidence.chunks.length > 0;
+
+  /** Abre el Inspector con la evidencia REAL del documento si existe en el almacén. */
+  async function inspectSourceFromStore(sourceId: string, fallbackTab: InspectorTab) {
+    try {
+      const storedChunks = await loadChunksForDocument(sourceId);
+      // Si el turno del chat dejó evidencia con score, se prefiere (badge y sims reales)
+      const turnChunks = getLastTurnEvidenceForDocument(sourceId);
+      const chunks = turnChunks.length > 0 ? turnChunks : storedChunks;
+      if (chunks.length > 0) {
+        setFocusedSourceEvidence({ sourceId, chunks });
+        setInspectorTab(fallbackTab);
+        setInspectorOpen(true);
+      } else {
+        setFocusedSourceEvidence(null);
+        openInspector(fallbackTab);
+      }
+    } catch (storeError) {
+      console.warn("[Ingesta] No se pudo leer la evidencia del almacén:", storeError);
+      setFocusedSourceEvidence(null);
+      openInspector(fallbackTab);
+    }
+  }
+
+  /** Enfoca la evidencia citada inline ([1], [2]…) de un turno del chat. */
+  async function inspectCitedSource(
+    turnId: string,
+    citationNumber: number,
+    fallbackTab: InspectorTab
+  ) {
+    const documentOrder = getTurnDocumentOrder(turnId);
+    const citedDocId = documentOrder[citationNumber - 1];
+    if (citedDocId) {
+      await inspectSourceFromStore(citedDocId, fallbackTab);
+    } else {
+      openInspector(fallbackTab);
+    }
   }
 
   const totalChunksCount = currentProjectSources.reduce((acc, s) => acc + s.chunksCount, 0);
@@ -3432,7 +3755,9 @@ export default function CriteriosApp() {
                                     <button
                                       key={idx}
                                       type="button"
-                                      onClick={() => openInspector(tabNum)}
+                                      onClick={() => {
+                                        void inspectCitedSource(msg.id, citNum, tabNum);
+                                      }}
                                       style={{
                                         backgroundColor: palette.accentCitationBg,
                                         color: palette.accentCitation,
@@ -3524,11 +3849,17 @@ export default function CriteriosApp() {
                                   {linkedSources.map((src) => {
                                     const isLaw = src.tab === 1;
                                     const isExcel = src.tab === 2;
+                                    const citedChunks = src.sourceId ? getTurnEvidence(msg.id, src.sourceId) : [];
+                                    const topCitedChunk = citedChunks.length > 0 ? citedChunks[0] : null;
                                     return (
                                       <button
                                         key={`${msg.id}-src-${src.id}`}
                                         type="button"
-                                        onClick={() => openInspector(src.tab)}
+                                        onClick={() => {
+                                          void (src.sourceId
+                                            ? inspectSourceFromStore(src.sourceId, src.tab)
+                                            : openInspector(src.tab));
+                                        }}
                                         style={{ borderColor: palette.borderDefault }}
                                         className="w-full text-left rounded-xl border p-3 flex items-start justify-between gap-3 hover:bg-zinc-50 cursor-pointer transition-colors shadow-xs"
                                       >
@@ -3557,7 +3888,9 @@ export default function CriteriosApp() {
                                         </div>
                                         <div className="hidden md:block max-w-[340px] text-left">
                                           <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
-                                            {isLaw
+                                            {topCitedChunk
+                                              ? topCitedChunk.content.replace(/\s+/g, " ").slice(0, 170)
+                                              : isLaw
                                               ? "Regulación del trabajo voluntario y recargo obligatorio: 25% las dos primeras horas y 35% las restantes."
                                               : isExcel
                                               ? "Impacto de provisiones por horas extras en EBITDA proyectado y margen porcentual."
@@ -3566,10 +3899,22 @@ export default function CriteriosApp() {
                                         </div>
                                         <div className="text-right shrink-0">
                                           <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
-                                            {isLaw ? "Pág. 14" : isExcel ? "Celda E14" : "p. 28"}
+                                            {topCitedChunk
+                                              ? topCitedChunk.locatorLabel
+                                              : isLaw
+                                              ? "Pág. 14"
+                                              : isExcel
+                                              ? "Celda E14"
+                                              : "p. 28"}
                                           </span>
                                           <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
-                                            {isLaw ? "Similitud 0.95" : isExcel ? "Similitud 0.92" : "v2.1 - 2026"}
+                                            {topCitedChunk
+                                              ? `Similitud ${topCitedChunk.normalizedScore.toFixed(2)}`
+                                              : isLaw
+                                              ? "Similitud 0.95"
+                                              : isExcel
+                                              ? "Similitud 0.92"
+                                              : "v2.1 - 2026"}
                                           </span>
                                           <span
                                             style={{ color: palette.accentCitation, fontSize: 12.5 }}
@@ -4111,7 +4456,9 @@ export default function CriteriosApp() {
                           <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                             <button
                               type="button"
-                              onClick={() => openInspector(src.inspectorTab)}
+                              onClick={() => {
+                                void inspectSourceFromStore(src.id, src.inspectorTab);
+                              }}
                               className="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-xs font-semibold text-zinc-700 cursor-pointer shadow-xs transition-colors"
                             >
                               Inspeccionar en Visor
@@ -4119,7 +4466,9 @@ export default function CriteriosApp() {
                             {src.type === "excel" && (
                               <button
                                 type="button"
-                                onClick={handleExcelExport}
+                                onClick={() => {
+                                void handleExcelExport(src.id);
+                              }}
                                 className="p-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-zinc-500 cursor-pointer transition-colors"
                                 title="Descargar matriz CSV"
                               >
@@ -4141,9 +4490,13 @@ export default function CriteriosApp() {
                             {projectSources.length > 3 && (
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setProjectSources((prev) => prev.filter((item) => item.id !== src.id))
-                                }
+                                onClick={() => {
+                                  if (focusedSourceEvidence?.sourceId === src.id) {
+                                    setFocusedSourceEvidence(null);
+                                  }
+                                  void removeStoredDocument(src.id);
+                                  setProjectSources((prev) => prev.filter((item) => item.id !== src.id));
+                                }}
                                 className="p-1.5 rounded-lg border border-zinc-200 hover:bg-red-50 hover:text-red-600 text-zinc-400 cursor-pointer transition-colors"
                                 title="Eliminar fuente"
                               >
@@ -5113,7 +5466,13 @@ export default function CriteriosApp() {
                     style={{ backgroundColor: palette.bgSubtle, color: palette.textSecondary, fontSize: 11 }}
                     className="px-2 py-0.5 rounded font-mono font-medium"
                   >
-                    {inspectorTab === 1 ? "95.0% sim" : inspectorTab === 2 ? "92.0% sim" : "88.0% sim"}
+                    {topFocusedChunk && typeof topFocusedChunk.normalizedScore === "number"
+                      ? `${(topFocusedChunk.normalizedScore * 100).toFixed(1)}% sim`
+                      : inspectorTab === 1
+                      ? "95.0% sim"
+                      : inspectorTab === 2
+                      ? "92.0% sim"
+                      : "88.0% sim"}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -5188,6 +5547,28 @@ export default function CriteriosApp() {
                             "{activeSrc.description}"
                           </p>
                         </div>
+                        {focusedSourceEvidence?.sourceId === activeSrc.id &&
+                          focusedSourceEvidence.chunks.slice(0, 5).map((chunk) => (
+                            <div
+                              key={chunk.id}
+                              style={{ borderColor: palette.borderDefault }}
+                              className="border rounded-xl p-3 shadow-xs"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-semibold">
+                                  {chunk.locatorLabel}
+                                </span>
+                                {typeof chunk.normalizedScore === "number" && (
+                                  <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="font-mono">
+                                    {chunk.normalizedScore.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                              <p style={{ fontSize: 14, lineHeight: 1.6 }} className="mt-1.5 text-zinc-800 whitespace-pre-line">
+                                {`"${chunk.content.slice(0, 620)}${chunk.content.length > 620 ? "…" : ""}"`}
+                              </p>
+                            </div>
+                          ))}
                         <div style={{ borderColor: palette.borderDefault }} className="border rounded-xl p-3 grid grid-cols-2 gap-2 text-sm shadow-xs">
                           <span style={{ color: palette.textSecondary }}>Estado</span>
                           <span className="font-medium text-emerald-700">{activeSrc.statusText}</span>
@@ -5224,7 +5605,10 @@ export default function CriteriosApp() {
                   <div className="px-4 py-2.5 flex items-center gap-2 shrink-0 border-b border-zinc-100 bg-zinc-50/50">
                     <button
                       type="button"
-                      onClick={() => setInspectorTab(1)}
+                      onClick={() => {
+                        setFocusedSourceEvidence(null);
+                        setInspectorTab(1);
+                      }}
                       style={{
                         backgroundColor: inspectorTab === 1 ? palette.bgSurface : "transparent",
                         borderColor: inspectorTab === 1 ? "#DC2626" : "transparent",
@@ -5242,7 +5626,10 @@ export default function CriteriosApp() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setInspectorTab(2)}
+                      onClick={() => {
+                        setFocusedSourceEvidence(null);
+                        setInspectorTab(2);
+                      }}
                       style={{
                         backgroundColor: inspectorTab === 2 ? palette.bgSurface : "transparent",
                         borderColor: inspectorTab === 2 ? "#059669" : "transparent",
@@ -5260,7 +5647,10 @@ export default function CriteriosApp() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setInspectorTab(3)}
+                      onClick={() => {
+                        setFocusedSourceEvidence(null);
+                        setInspectorTab(3);
+                      }}
                       style={{
                         backgroundColor: inspectorTab === 3 ? palette.bgSurface : "transparent",
                         borderColor: inspectorTab === 3 ? "#64748B" : "transparent",
@@ -5283,8 +5673,85 @@ export default function CriteriosApp() {
                     className="flex-1 overflow-y-auto p-4 space-y-4"
                     style={{ scrollbarGutter: "stable" }}
                   >
+                {/* Evidencias REALES del documento enfocado (ingesta del usuario) */}
+                {hasRealFocusedSource && focusedSourceEvidence && (() => {
+                  const focusedMeta = projectSources.find(
+                    (source) => source.id === focusedSourceEvidence.sourceId
+                  );
+                  if (!focusedMeta) return null;
+                  const shownChunks = focusedSourceEvidence.chunks.slice(0, 5);
+                  return (
+                    <div className="space-y-3">
+                      <div style={{ borderColor: palette.borderDefault }} className="border rounded-xl p-3.5 shadow-xs">
+                        <div className="flex items-start justify-between gap-2">
+                          <p style={{ fontSize: 15 }} className="font-bold text-zinc-900">
+                            {focusedMeta.title}
+                          </p>
+                          <span
+                            className={`text-[11px] font-semibold px-2 py-0.5 rounded border shrink-0 ${
+                              focusedMeta.type === "legal"
+                                ? "text-red-700 bg-red-50 border-red-200"
+                                : focusedMeta.type === "excel"
+                                ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                                : "text-slate-700 bg-slate-100 border-slate-200"
+                            }`}
+                          >
+                            {focusedMeta.badge}
+                          </span>
+                        </div>
+                        <p style={{ color: palette.textSecondary, fontSize: 13 }} className="mt-0.5">
+                          {focusedMeta.metaPages} • {focusedMeta.chunksCount.toLocaleString()} vectores
+                        </p>
+                        <p style={{ fontSize: 14, lineHeight: 1.6 }} className="mt-2 text-zinc-800">
+                          "{focusedMeta.description}"
+                        </p>
+                      </div>
+                      {shownChunks.map((chunk) => (
+                        <div
+                          key={chunk.id}
+                          style={{ borderColor: palette.borderDefault }}
+                          className="border rounded-xl p-3 shadow-xs"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-semibold">
+                              {chunk.locatorLabel}
+                            </span>
+                            {typeof chunk.normalizedScore === "number" && (
+                              <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="font-mono">
+                                {chunk.normalizedScore.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          <p style={{ fontSize: 14, lineHeight: 1.6 }} className="mt-1.5 text-zinc-800 whitespace-pre-line">
+                            {`"${chunk.content.slice(0, 620)}${chunk.content.length > 620 ? "…" : ""}"`}
+                          </p>
+                        </div>
+                      ))}
+                      <div
+                        style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSubtle }}
+                        className="border rounded-xl p-3 space-y-1.5 text-xs shadow-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-zinc-900">Traza Supabase Vector</span>
+                          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                            Indexado en cliente
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 text-[11.5px] pt-1">
+                          <span style={{ color: palette.textSecondary }}>Modelo Embedding:</span>
+                          <span className="font-mono text-zinc-800 text-right truncate">{embeddingModel}</span>
+                          <span style={{ color: palette.textSecondary }}>Fragmento Top-K:</span>
+                          <span className="font-mono text-zinc-800 text-right truncate">
+                            {shownChunks[0]?.locatorLabel ?? "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Pestaña 1: Ley */}
-                {inspectorTab === 1 && (
+                {inspectorTab === 1 && !hasRealFocusedSource && (
                   <div className="space-y-3">
                     <div style={{ borderColor: palette.borderDefault }} className="border rounded-xl p-3.5 shadow-xs">
                       <p style={{ fontSize: 15 }} className="font-bold text-zinc-900">
@@ -5328,7 +5795,7 @@ export default function CriteriosApp() {
                 )}
 
                 {/* Pestaña 2: Excel */}
-                {inspectorTab === 2 && (
+                {inspectorTab === 2 && !hasRealFocusedSource && (
                   <div className="space-y-3.5">
                     <div className="flex items-start gap-2.5">
                       <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
@@ -5478,7 +5945,9 @@ export default function CriteriosApp() {
                     {/* Botón: Abrir en Excel completo */}
                     <button
                       type="button"
-                      onClick={handleExcelExport}
+                      onClick={() => {
+                        void handleExcelExport(focusedSourceEvidence?.sourceId);
+                      }}
                       style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSurface }}
                       className="w-full py-2 px-3 rounded-xl border hover:bg-zinc-50 cursor-pointer text-sm font-medium flex items-center justify-center gap-2 text-zinc-800 shadow-xs transition-colors"
                     >
@@ -5508,7 +5977,7 @@ export default function CriteriosApp() {
                 )}
 
                 {/* Pestaña 3: Documento */}
-                {inspectorTab === 3 && (
+                {inspectorTab === 3 && !hasRealFocusedSource && (
                   <div className="space-y-3">
                     <div style={{ borderColor: palette.borderDefault }} className="border rounded-xl p-3.5 shadow-xs">
                       <p style={{ fontSize: 15 }} className="font-bold text-zinc-900">
