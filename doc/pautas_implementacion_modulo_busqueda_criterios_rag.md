@@ -122,3 +122,23 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
      - **Prioridad Secundaria (al final, -35 puntos):** Diarios y medios periodísticos (`larepublica.pe`, `elcomercio.pe`, `rpp.pe`, `lpderecho.pe`).
   2. **Títulos Descriptivos Ejecutivos (`enhanceLinkTitle`):** Se reemplazaron los nombres de dominio crudos (`mef.gob.pe`, `www.gob.pe`) por denominaciones institucionales claras (ej. `Ministerio de Economía y Finanzas (MEF) - Portal Oficial`).
   3. **Erradicación de Paréntesis Defensivos en el Prompt:** Se prohibió al modelo incluir disculpas o notas aclaratorias de "enlace de ejemplo" en el texto, instruyéndole redactar con seguridad y autoridad ejecutiva.
+
+### J. Badges de Capacidad Multimodal, Embeddings Google text-embedding-004 y Pestaña Perfil del Agente (28-Oct-2026)
+- **Diagnóstico y Necesidad:**
+  1. En la matriz de proveedores solo OpenAI y Cohere mostraban botones para embeddings y reranker, y no se distinguía visualmente qué motores soportan visión/multimodalidad frente a modelos exclusivamente textuales (crucial para saber si el LLM puede analizar capturas de pantalla, tablas escaneadas o PDFs antiguos).
+  2. Dentro del modal de Configuración faltaba una sección dedicada e intuitiva para configurar en profundidad la identidad del agente, su tono, su modo de razonamiento y directivas de empresa personalizadas.
+- **Solución Implementada:**
+  1. **Distintivos de Capacidad Multimodal (`isMultimodal`):**
+     - En [`CriteriosApp.tsx`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/CriteriosApp.tsx) se extendió la interfaz `AiProvider` para etiquetar explícitamente a cada proveedor:
+       - `👁️ Multimodal`: Google DeepMind (Gemini 2.5/2.0/1.5), OpenAI (GPT-4o), Anthropic (Claude 3.5 Sonnet) y Mistral (Pixtral-12b / Large).
+       - `📝 Solo Texto`: DeepSeek (R1/V3), Groq (LPU) y Cohere.
+  2. **Habilitación de Embeddings para Google (`text-embedding-004`) y Mistral:**
+     - Se reemplazó el filtro condicional rígido por `{prov.supportsEmbeddings && ...}`, permitiendo designar a Google DeepMind como motor de embeddings vectoriales (768 dimensiones).
+     - Se actualizó el KPI de Embeddings y el desplegable de Parámetros del Motor para incluir la opción `Google text-embedding-004 (768 dimensiones - Nativo Gemini)`.
+  3. **Pestaña Canónica "Perfil del Agente" en Configuración:**
+     - Se añadió la pestaña `Perfil del Agente` con 4 módulos de configuración interactiva:
+       - **1. Perfil Profesional:** Selector visual de tarjetas para *Auditor Normativo & Laboral*, *Analista Financiero & EBITDA* y *Oficial de Cumplimiento & RRHH*.
+       - **2. Tono y Estilo:** Conmutador entre *Ejecutivo* (sobrio), *Técnico* (rigor legal) y *Didáctico* (pedagógico).
+       - **3. Modo de Razonamiento:** Selección entre *⚡ Rápido*, *⚖️ Estándar* y *🧠 Profundo*.
+       - **4. Directivas Institucionales Personalizadas:** Área de texto con persistencia automática en `localStorage` (`qaway_rag_custom_agent_directives`) inyectada en la Capa 1 de `geminiRAGService.ts` para que Gemini respete directrices específicas de la empresa.
+

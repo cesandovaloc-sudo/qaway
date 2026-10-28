@@ -4972,7 +4972,7 @@ export default function CriteriosApp() {
                   </div>
 
                   {/* Sub-Tabs de Configuración */}
-                  <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl self-start sm:self-auto">
+                  <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl self-start sm:self-auto flex-wrap">
                     <button
                       type="button"
                       onClick={() => setConfigTab("providers")}
@@ -4984,6 +4984,18 @@ export default function CriteriosApp() {
                     >
                       <HubIcon icon={Cpu} size={14} />
                       <span>Proveedores de IA (7)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfigTab("agent")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                        configTab === "agent"
+                          ? "bg-white text-zinc-900 shadow-xs"
+                          : "text-zinc-600 hover:text-zinc-900"
+                      }`}
+                    >
+                      <HubIcon icon={Bot} size={14} />
+                      <span>Perfil del Agente</span>
                     </button>
                     <button
                       type="button"
@@ -5078,8 +5090,12 @@ export default function CriteriosApp() {
                         <span className="text-base font-bold text-emerald-700 block mt-1 truncate">
                           {aiProviders.find((p) => p.id === activeEmbeddingProviderId)?.name}
                         </span>
-                        <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block">
-                          1536 dimensiones (Coseno)
+                        <span className="text-[11.5px] text-zinc-500 font-mono mt-0.5 block truncate">
+                          {activeEmbeddingProviderId === "google"
+                            ? "768 dim (text-embedding-004)"
+                            : activeEmbeddingProviderId === "cohere"
+                            ? "1024 dim (embed-v3)"
+                            : "1536 dim (Coseno)"}
                         </span>
                       </div>
                       <div
@@ -5129,6 +5145,21 @@ export default function CriteriosApp() {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <span className="font-bold text-zinc-900 text-sm">{prov.name}</span>
                                     <span className="text-xs text-zinc-400 font-mono">({prov.company})</span>
+                                    {prov.isMultimodal ? (
+                                      <span
+                                        className="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200/80 flex items-center gap-1"
+                                        title="Motor multimodal: procesa imágenes, capturas, diagramas y visión de documentos"
+                                      >
+                                        <span>👁️ Multimodal</span>
+                                      </span>
+                                    ) : (
+                                      <span
+                                        className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-100 text-zinc-600 font-medium border border-zinc-200"
+                                        title="Motor especializado exclusivamente en texto y código sintáctico"
+                                      >
+                                        <span>📝 Solo Texto</span>
+                                      </span>
+                                    )}
                                     {isPrimaryLlm && (
                                       <span className="px-2 py-0.5 rounded text-[10.5px] font-mono bg-blue-100 text-blue-800 font-bold border border-blue-300 flex items-center gap-1">
                                         <HubIcon icon={Sparkles} size={11} />
@@ -5318,12 +5349,12 @@ export default function CriteriosApp() {
                               </div>
 
                               <div className="flex flex-col justify-end gap-1.5">
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 flex-wrap">
                                   <button
                                     type="button"
                                     onClick={() => handleSwitchPrimaryLlm(prov.id)}
                                     disabled={isPrimaryLlm}
-                                    className={`flex-1 py-1.5 px-2 rounded-lg font-semibold text-[11.5px] cursor-pointer transition-all ${
+                                    className={`flex-1 min-w-[110px] py-1.5 px-2 rounded-lg font-semibold text-[11.5px] cursor-pointer transition-all ${
                                       isPrimaryLlm
                                         ? "bg-blue-600 text-white cursor-default"
                                         : "border border-zinc-200 hover:bg-zinc-100 text-zinc-700"
@@ -5331,17 +5362,32 @@ export default function CriteriosApp() {
                                   >
                                     {isPrimaryLlm ? "LLM Primario Activo" : "Hacer Primario"}
                                   </button>
-                                  {(prov.id === "cohere" || prov.id === "openai") && (
+                                  {prov.supportsEmbeddings && (
                                     <button
                                       type="button"
-                                      onClick={() =>
-                                        prov.id === "cohere"
-                                          ? handleSwitchReranker("cohere")
-                                          : handleSwitchEmbedding("openai")
-                                      }
-                                      className="py-1.5 px-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 text-zinc-600 text-[11px] font-medium cursor-pointer"
+                                      onClick={() => handleSwitchEmbedding(prov.id)}
+                                      disabled={isEmbedding}
+                                      className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold cursor-pointer transition-all ${
+                                        isEmbedding
+                                          ? "bg-emerald-600 text-white cursor-default shadow-2xs"
+                                          : "border border-zinc-200 hover:bg-zinc-100 text-zinc-700"
+                                      }`}
                                     >
-                                      {prov.id === "cohere" ? "Reranker" : "Embeddings"}
+                                      {isEmbedding ? "Embedding Activo" : "Embeddings"}
+                                    </button>
+                                  )}
+                                  {prov.supportsReranker && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSwitchReranker(prov.id)}
+                                      disabled={isReranker}
+                                      className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold cursor-pointer transition-all ${
+                                        isReranker
+                                          ? "bg-purple-600 text-white cursor-default shadow-2xs"
+                                          : "border border-zinc-200 hover:bg-zinc-100 text-zinc-700"
+                                      }`}
+                                    >
+                                      {isReranker ? "Reranker Activo" : "Reranker"}
                                     </button>
                                   )}
                                 </div>
@@ -5354,7 +5400,309 @@ export default function CriteriosApp() {
                   </div>
                 )}
 
-                {/* Sub-Tab 2: Parámetros del Motor RAG */}
+                {/* Sub-Tab 2 (Nuevo): Perfil y Directivas del Agente */}
+                {configTab === "agent" && (
+                  <div className="space-y-5 animate-in fade-in">
+                    {/* Banner explicativo */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs flex items-start gap-3.5"
+                    >
+                      <span className="p-2.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/80 shrink-0">
+                        <HubIcon icon={Bot} size={22} />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-zinc-900">
+                            Personalización & Directivas del Agente RAG
+                          </h3>
+                          <span className="px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                            Capa 1 System Prompt
+                          </span>
+                        </div>
+                        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                          Define la especialidad técnica, el tono de redacción jurídica y las directivas institucionales que gobernarán el razonamiento de Gemini en todas las respuestas de este proyecto.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 1. Especialidad & Perfil Profesional */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">
+                            1. Perfil Profesional del Agente
+                          </label>
+                          <span className="text-[11.5px] text-zinc-400">
+                            Selecciona la perspectiva técnica y el marco normativo prioritario.
+                          </span>
+                        </div>
+                        <span className="text-[11.5px] font-mono font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                          {RAG_AGENT_PROFILES.find((p) => p.id === (activeSession?.agentProfile || "auditor_laboral"))?.shortName}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                        {RAG_AGENT_PROFILES.map((p) => {
+                          const isSelected = (activeSession?.agentProfile || "auditor_laboral") === p.id;
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => {
+                                setChatSessions((prev) =>
+                                  prev.map((s) => (s.id === activeSessionId ? { ...s, agentProfile: p.id } : s))
+                                );
+                                syncSessionToSupabase({
+                                  id: activeSessionId,
+                                  projectId: activeProjectId,
+                                  title: activeSession?.title || "Conversación",
+                                  preview: activeSession?.preview || "",
+                                  agentProfile: p.id,
+                                  tone: activeSession?.tone || "ejecutivo",
+                                  messagesCount: activeSession?.turns.length || 0,
+                                });
+                                showToastMessage(`Perfil asignado: ${p.shortName}`);
+                              }}
+                              className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between ${
+                                isSelected
+                                  ? "bg-zinc-50 border-zinc-900 ring-1 ring-zinc-900 shadow-xs"
+                                  : "border-zinc-200 hover:bg-zinc-50/70 text-zinc-700 bg-white"
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span
+                                    className="p-2 rounded-lg bg-white border border-zinc-200/80 shadow-2xs"
+                                    style={{ color: p.color }}
+                                  >
+                                    <HubIcon icon={p.icon} size={16} />
+                                  </span>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded font-semibold border ${p.badgeBg}`}>
+                                    {p.badge}
+                                  </span>
+                                </div>
+                                <h4 className="font-bold text-xs text-zinc-900 mb-1">{p.fullName}</h4>
+                                <p className="text-[11px] text-zinc-500 leading-relaxed">{p.description}</p>
+                              </div>
+                              <div className="mt-3 pt-2 border-t border-zinc-100 flex items-center justify-between">
+                                <span className="text-[10.5px] font-medium text-zinc-400">
+                                  {isSelected ? "Activo para esta sesión" : "Clic para activar"}
+                                </span>
+                                {isSelected && (
+                                  <span className="w-2 h-2 rounded-full bg-blue-600" />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 2. Tono y Estilo de Redacción */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">
+                            2. Tono y Estilo de Redacción
+                          </label>
+                          <span className="text-[11.5px] text-zinc-400">
+                            Ajusta la formalidad, extensión y profundidad de las citas normativas.
+                          </span>
+                        </div>
+                        <span className="text-[11.5px] font-mono font-semibold text-zinc-700 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-200">
+                          Tono: {RAG_AGENT_TONES.find((t) => t.id === (activeSession?.tone || "ejecutivo"))?.name}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                        {RAG_AGENT_TONES.map((t) => {
+                          const isSelected = (activeSession?.tone || "ejecutivo") === t.id;
+                          return (
+                            <button
+                              key={t.id}
+                              type="button"
+                              onClick={() => {
+                                setChatSessions((prev) =>
+                                  prev.map((s) => (s.id === activeSessionId ? { ...s, tone: t.id } : s))
+                                );
+                                syncSessionToSupabase({
+                                  id: activeSessionId,
+                                  projectId: activeProjectId,
+                                  title: activeSession?.title || "Conversación",
+                                  preview: activeSession?.preview || "",
+                                  agentProfile: activeSession?.agentProfile || "auditor_laboral",
+                                  tone: t.id,
+                                  messagesCount: activeSession?.turns.length || 0,
+                                });
+                                showToastMessage(`Tono configurado: ${t.name}`);
+                              }}
+                              className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between ${
+                                isSelected
+                                  ? "bg-zinc-900 text-white border-zinc-900 shadow-xs"
+                                  : "border-zinc-200 hover:bg-zinc-50 text-zinc-700 bg-white"
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <span className={`font-bold text-xs ${isSelected ? "text-white" : "text-zinc-900"}`}>
+                                    {t.name}
+                                  </span>
+                                  <span
+                                    className={`text-[9.5px] px-1.5 py-0.5 rounded font-mono font-semibold ${
+                                      isSelected ? "bg-zinc-800 text-zinc-200" : "bg-zinc-100 text-zinc-600"
+                                    }`}
+                                  >
+                                    {t.badge}
+                                  </span>
+                                </div>
+                                <p className={`text-[11.5px] leading-relaxed ${isSelected ? "text-zinc-300" : "text-zinc-500"}`}>
+                                  {t.description}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 3. Modo de Razonamiento del Chat */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">
+                            3. Modo de Razonamiento
+                          </label>
+                          <span className="text-[11.5px] text-zinc-400">
+                            Controla el tiempo de procesamiento y la profundidad de la inferencia.
+                          </span>
+                        </div>
+                        <span className="text-[11.5px] font-mono font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                          {chatMode === "fast" ? "Rápido" : chatMode === "standard" ? "Estándar" : "Profundo"}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                        {[
+                          {
+                            id: "fast",
+                            title: "⚡ Rápido",
+                            badge: "~140 ms",
+                            desc: "Inferencia ágil para respuestas directas y consultas frecuentes.",
+                          },
+                          {
+                            id: "standard",
+                            title: "⚖️ Estándar",
+                            badge: "Recomendado",
+                            desc: "Balance óptimo entre citas documentales, verificación y síntesis.",
+                          },
+                          {
+                            id: "deep",
+                            title: "🧠 Profundo",
+                            badge: "Multi-Citas",
+                            desc: "Cadena de pensamiento exhaustiva y validación cruzada de fuentes.",
+                          },
+                        ].map((m) => {
+                          const isSel = chatMode === m.id;
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => {
+                                setChatMode(m.id as "fast" | "standard" | "deep");
+                                showToastMessage(`Modo de razonamiento: ${m.title}`);
+                              }}
+                              className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between ${
+                                isSel
+                                  ? "bg-zinc-50 border-purple-600 ring-1 ring-purple-600 shadow-xs"
+                                  : "border-zinc-200 hover:bg-zinc-50 text-zinc-700 bg-white"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="font-bold text-xs text-zinc-900">{m.title}</span>
+                                <span className="text-[9.5px] px-1.5 py-0.5 rounded font-mono font-semibold bg-zinc-100 text-zinc-600">
+                                  {m.badge}
+                                </span>
+                              </div>
+                              <p className="text-[11.5px] text-zinc-500 leading-relaxed">{m.desc}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 4. Directivas Institucionales Personalizadas (Textarea) */}
+                    <div
+                      style={{ backgroundColor: palette.bgSurface, borderColor: palette.borderDefault }}
+                      className="p-4 rounded-xl border shadow-xs space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider block">
+                            4. Directivas Institucionales Personalizadas (Reglas de Empresa)
+                          </label>
+                          <span className="text-[11.5px] text-zinc-400">
+                            Instrucciones que se inyectan en el System Instruction de Gemini antes de procesar las preguntas.
+                          </span>
+                        </div>
+                        <span className="text-[10.5px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                          <HubIcon icon={ShieldCheck} size={11} />
+                          <span>Guardado automático</span>
+                        </span>
+                      </div>
+
+                      <div className="relative">
+                        <textarea
+                          rows={4}
+                          value={customAgentDirectives}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCustomAgentDirectives(val);
+                            try {
+                              localStorage.setItem("qaway_rag_custom_agent_directives", val);
+                            } catch {}
+                          }}
+                          placeholder="Escribe directivas específicas de tu organización. Por ejemplo:&#10;- Si citas contingencias laborales, calcula siempre la provisión contable en soles y dólares.&#10;- Prioriza las resoluciones del Tribunal de Fiscalización Laboral (TFL) sobre criterios genéricos.&#10;- En caso de horas extras, añade siempre la advertencia sobre el carácter voluntario del sobretiempo."
+                          className="w-full p-3 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-800 placeholder:text-zinc-400 font-sans focus:outline-none focus:border-blue-500 focus:bg-white leading-relaxed transition-all resize-y"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
+                        <span>
+                          {customAgentDirectives.trim()
+                            ? `${customAgentDirectives.trim().length} caracteres configurados`
+                            : "Sin directivas adicionales (usando reglas canónicas predeterminadas)"}
+                        </span>
+                        {customAgentDirectives.trim() && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomAgentDirectives("");
+                              try {
+                                localStorage.removeItem("qaway_rag_custom_agent_directives");
+                              } catch {}
+                              showToastMessage("Directivas personalizadas restablecidas");
+                            }}
+                            className="text-xs font-semibold text-red-600 hover:text-red-700 cursor-pointer"
+                          >
+                            Limpiar Directivas
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-Tab 3: Parámetros del Motor RAG */}
                 {configTab === "engine" && (
                   <div className="space-y-4 animate-in fade-in">
                     {/* 1. Modelo de Embedding (Con Desplegable Redondeado) */}
@@ -5376,6 +5724,8 @@ export default function CriteriosApp() {
                               ? "OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)"
                               : embeddingModel === "text-embedding-3-large"
                               ? "OpenAI text-embedding-3-large (3072 dimensiones - Alta precisión)"
+                              : embeddingModel === "text-embedding-004"
+                              ? "Google text-embedding-004 (768 dimensiones - Nativo Gemini)"
                               : "Cohere embed-multilingual-v3.0 (1024 dimensiones - Multilingüe)"}
                           </span>
                           <HubIcon
@@ -5389,6 +5739,10 @@ export default function CriteriosApp() {
                         {showEmbeddingDropdown && (
                           <div className="absolute left-0 right-0 top-full mt-1.5 rounded-2xl border border-zinc-200 bg-white shadow-xl p-1.5 z-50 space-y-0.5 animate-in fade-in">
                             {[
+                              {
+                                id: "text-embedding-004",
+                                label: "Google text-embedding-004 (768 dimensiones - Nativo Gemini)",
+                              },
                               {
                                 id: "text-embedding-3-small",
                                 label: "OpenAI text-embedding-3-small (1536 dimensiones - Latencia reducida)",

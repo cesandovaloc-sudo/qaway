@@ -2,17 +2,34 @@
 import React, { useState, useEffect } from 'react';
 import './configuracion.css';
 import {
+  AlertCircle,
+  Bot,
   Calendar,
   Check,
+  CheckCircle2,
   Clock3,
+  Eye,
+  EyeOff,
   Globe2,
-  Save,
-  Sliders,
-  Sparkles,
-  ShieldCheck,
+  Key,
   Layers,
-  RotateCcw
+  RotateCcw,
+  Save,
+  ShieldCheck,
+  Sliders,
+  SlidersHorizontal,
+  Sparkles
 } from 'lucide-react';
+import {
+  getStoredGeminiConfig,
+  saveStoredGeminiConfig,
+  testGeminiConnection,
+  AVAILABLE_MODELS,
+  AGENT_PROFILES,
+  AGENT_TONES,
+  AgentProfileId,
+  AgentToneId
+} from '../../services/geminiRAGService';
 
 export type ConfigBinds = { notify: (m: string) => void };
 
@@ -25,7 +42,7 @@ const TIMEZONES = [
 ];
 
 export default function ConfiguracionView({ onActions }: { onActions?: (h: ConfigBinds) => void }) {
-  const [activeTab, setActiveTab] = useState<'general' | 'cronograma' | 'auditoria'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'cronograma' | 'auditoria' | 'asistente'>('general');
   const [timezone, setTimezone] = useState(() => {
     return localStorage.getItem('qaway-system-timezone-v1') || 'America/Lima';
   });
@@ -42,6 +59,12 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
     return localStorage.getItem('qaway-tolerance-days-v1') || '5';
   });
 
+  // Estado del Asistente IA (Google Gemini RAG)
+  const [geminiConfig, setGeminiConfig] = useState(getStoredGeminiConfig);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string; latencyMs?: number } | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+
   const [notice, setNotice] = useState('');
 
   const notify = (m: string) => {
@@ -53,11 +76,29 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
     onActions?.({ notify });
   }, [onActions]);
 
+  const handleTestKey = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const res = await testGeminiConnection(geminiConfig.apiKey, geminiConfig.model);
+      setTestResult(res);
+      if (res.ok) {
+        notify('Conexión con Google Gemini verificada con éxito');
+      }
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   const handleSave = () => {
     localStorage.setItem('qaway-system-timezone-v1', timezone);
     localStorage.setItem('qaway-system-date-mode-v1', dateMode);
     localStorage.setItem('qaway-system-date-v1', customDate);
     localStorage.setItem('qaway-tolerance-days-v1', toleranceDays);
+
+    // Guardar configuración del Asistente IA
+    saveStoredGeminiConfig(geminiConfig);
+    window.dispatchEvent(new CustomEvent('qaway-gemini-config-changed'));
 
     // Disparar evento para que el Gantt y otros módulos sincronicen la fecha actual de inmediato
     window.dispatchEvent(
@@ -70,7 +111,7 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
       })
     );
 
-    notify('Configuración de zona horaria y cronograma guardada y aplicada con éxito');
+    notify('Configuración general y parámetros del Asistente IA guardados con éxito');
   };
 
   const currentDisplayDate = dateMode === 'custom' ? customDate : new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(new Date());
@@ -143,6 +184,14 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
           >
             <ShieldCheck size={15} />
             <span>Seguridad y Auditoría Institucional</span>
+          </button>
+          <button
+            type="button"
+            className={`tab-item ${activeTab === 'asistente' ? 'active' : ''}`}
+            onClick={() => setActiveTab('asistente')}
+          >
+            <Bot size={15} />
+            <span>Asistente IA (Qaway Copilot)</span>
           </button>
         </nav>
 
@@ -298,6 +347,245 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
               <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
                 Todas las modificaciones de cronograma, asignaciones de responsables territoriales y fechas de hito se registran con firma digital y marca temporal conforme a los lineamientos institucionales y directivas del proyecto.
               </p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'asistente' && (
+          <div className="cards-grid">
+            {/* Tarjeta 1: Motor y Conexión BYOK */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#0066ff' }}>
+                  <Key size={20} />
+                </div>
+                <div>
+                  <h2>Conexión con Google Gemini (BYOK)</h2>
+                  <p>
+                    Configura tu propia clave de API de Google Gemini para habilitar razonamiento generativo real, análisis de documentos y proyecciones de cronograma.
+                  </p>
+                </div>
+              </div>
+
+              {/* Fila: API Key */}
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-gemini-key">API Key de Google Gemini</label>
+                  <p>Clave personal segura obtenida desde Google AI Studio (almacenada únicamente en tu navegador).</p>
+                </div>
+                <div className="field-control">
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div style={{ position: 'relative', flex: 1 }}>
+                      <input
+                        id="cfg-gemini-key"
+                        type={showApiKey ? 'text' : 'password'}
+                        placeholder="AIzaSy..."
+                        className="select-input"
+                        style={{ width: '100%', paddingRight: 36, fontFamily: showApiKey ? 'monospace' : 'inherit' }}
+                        value={geminiConfig.apiKey}
+                        onChange={(e) => setGeminiConfig((c) => ({ ...c, apiKey: e.target.value }))}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApiKey((v) => !v)}
+                        style={{
+                          position: 'absolute',
+                          right: 8,
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          border: 0,
+                          background: 'transparent',
+                          color: '#64748b',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: 4
+                        }}
+                        title={showApiKey ? 'Ocultar clave' : 'Mostrar clave'}
+                      >
+                        {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn-save"
+                      style={{
+                        background: '#ffffff',
+                        color: '#0f172a',
+                        border: '1px solid #cbd5e1',
+                        boxShadow: 'none',
+                        height: 38,
+                        padding: '0 14px',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onClick={handleTestKey}
+                      disabled={isTesting || !geminiConfig.apiKey.trim()}
+                    >
+                      {isTesting ? <RefreshCw size={14} className="spin" /> : <Sparkles size={14} color="#0066ff" />}
+                      <span>{isTesting ? 'Verificando...' : 'Probar Conexión'}</span>
+                    </button>
+                  </div>
+
+                  {testResult && (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        background: testResult.ok ? '#f0fdf4' : '#fef2f2',
+                        border: `1px solid ${testResult.ok ? '#bbf7d0' : '#fecaca'}`,
+                        color: testResult.ok ? '#166534' : '#991b1b'
+                      }}
+                    >
+                      {testResult.ok ? <CheckCircle2 size={15} /> : <AlertCircle size={15} />}
+                      <span>{testResult.message}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Fila: Modelo de IA */}
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-gemini-model">Modelo de Lenguaje</label>
+                  <p>Selecciona la versión de Google Gemini que procesará las consultas y documentos.</p>
+                </div>
+                <div className="field-control">
+                  <select
+                    id="cfg-gemini-model"
+                    className="select-input"
+                    value={geminiConfig.model}
+                    onChange={(e) => setGeminiConfig((c) => ({ ...c, model: e.target.value }))}
+                  >
+                    {AVAILABLE_MODELS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Tarjeta 2: Perfil y Tono del Agente */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#f0fdf4', color: '#16a34a' }}>
+                  <Bot size={20} />
+                </div>
+                <div>
+                  <h2>Perfil y Comportamiento del Agente Territorial</h2>
+                  <p>Define la personalidad, enfoque analítico y nivel de rigor en las respuestas del asistente.</p>
+                </div>
+              </div>
+
+              {/* Fila: Perfil */}
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-agent-profile">Perfil de Especialización</label>
+                  <p>Alinea el razonamiento del agente a la función que necesitas priorizar.</p>
+                </div>
+                <div className="field-control">
+                  <select
+                    id="cfg-agent-profile"
+                    className="select-input"
+                    value={geminiConfig.profile}
+                    onChange={(e) => setGeminiConfig((c) => ({ ...c, profile: e.target.value as AgentProfileId }))}
+                  >
+                    {Object.entries(AGENT_PROFILES).map(([key, info]) => (
+                      <option key={key} value={key}>
+                        {info.label}
+                      </option>
+                    ))}
+                  </select>
+                  <small style={{ display: 'block', marginTop: 6, fontSize: '11.5px', color: '#64748b' }}>
+                    {AGENT_PROFILES[geminiConfig.profile]?.desc}
+                  </small>
+                </div>
+              </div>
+
+              {/* Fila: Tono */}
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-agent-tone">Tono de Comunicación</label>
+                  <p>Ajusta el estilo de redacción de las respuestas.</p>
+                </div>
+                <div className="field-control">
+                  <select
+                    id="cfg-agent-tone"
+                    className="select-input"
+                    value={geminiConfig.tone}
+                    onChange={(e) => setGeminiConfig((c) => ({ ...c, tone: e.target.value as AgentToneId }))}
+                  >
+                    {Object.entries(AGENT_TONES).map(([key, info]) => (
+                      <option key={key} value={key}>
+                        {info.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Fila: Temperatura */}
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-agent-temp">Temperatura ({geminiConfig.temperature.toFixed(1)})</label>
+                  <p>Controla el balance entre precisión estricta (0.0) y creatividad exploratoria (1.0).</p>
+                </div>
+                <div className="field-control">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <input
+                      id="cfg-agent-temp"
+                      type="range"
+                      min="0.0"
+                      max="1.0"
+                      step="0.1"
+                      style={{ flex: 1, accentColor: '#0066ff' }}
+                      value={geminiConfig.temperature}
+                      onChange={(e) => setGeminiConfig((c) => ({ ...c, temperature: parseFloat(e.target.value) }))}
+                    />
+                    <b style={{ minWidth: 40, fontSize: '13px', color: '#0f172a' }}>
+                      {geminiConfig.temperature <= 0.2 ? 'Normativo' : geminiConfig.temperature <= 0.5 ? 'Balanceado' : 'Creativo'}
+                    </b>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tarjeta 3: Directivas de Gobernanza */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#fef3c7', color: '#d97706' }}>
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h2>Directivas Adicionales de Gobernanza</h2>
+                  <p>Instrucciones y lineamientos especiales que el agente debe cumplir en cada respuesta.</p>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label htmlFor="cfg-agent-directives">Instrucciones del Sistema Personalizadas</label>
+                  <p>Añade reglas de negocio regionales (ej. nombres de UGEL prioritarias, formatos de actas, directivas MINEDU).</p>
+                </div>
+                <div className="field-control">
+                  <textarea
+                    id="cfg-agent-directives"
+                    rows={4}
+                    className="select-input"
+                    style={{ width: '100%', resize: 'vertical', lineHeight: 1.45, fontSize: '12.5px' }}
+                    placeholder="Ejemplo: Priorizar siempre los entregables de la UGEL Satipo y Chanchamayo. Citar siempre el número de oficio rector correspondiente."
+                    value={geminiConfig.customDirectives}
+                    onChange={(e) => setGeminiConfig((c) => ({ ...c, customDirectives: e.target.value }))}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}
