@@ -3817,34 +3817,89 @@ export default function CriteriosApp() {
                               </div>
                             </div>
 
-                            {/* Texto explicativo real del turno con citas interactivas inline */}
-                            <p style={{ fontSize: 14.5, lineHeight: 1.65, color: palette.textPrimary }}>
-                              {msg.text.split(/(\[\d+\])/g).map((part, idx) => {
-                                const match = part.match(/^\[(\d+)\]$/);
-                                if (match) {
-                                  const citNum = Number(match[1]);
-                                  const tabNum = (citNum >= 1 && citNum <= 3 ? citNum : 1) as InspectorTab;
-                                  return (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      onClick={() => {
-                                        void inspectCitedSource(msg.id, citNum, tabNum);
-                                      }}
-                                      style={{
-                                        backgroundColor: palette.accentCitationBg,
-                                        color: palette.accentCitation,
-                                        borderColor: `${palette.accentCitation}40`,
-                                      }}
-                                      className="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
-                                      title={`Abrir evidencia [${citNum}] en inspector`}
-                                    >
-                                      {citNum}
-                                    </button>
-                                  );
-                                }
-                                return <span key={idx}>{part}</span>;
-                              })}
+                            {/* Texto explicativo real del turno con citas interactivas inline y enlaces clicables */}
+                            <p style={{ fontSize: 14.5, lineHeight: 1.65, color: palette.textPrimary }} className="whitespace-pre-wrap break-words">
+                              {(() => {
+                                const tokenRegex =
+                                  /(\[\d+\](?!\()|\[[^\]]+\]\(https?:\/\/[^\s)]+\)|\*\*[^*]+\*\*|https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+                                const parts = msg.text.split(tokenRegex);
+                                return parts.map((part, idx) => {
+                                  if (!part) return null;
+
+                                  // 1. Citas interactivas [1], [2]
+                                  const citMatch = part.match(/^\[(\d+)\]$/);
+                                  if (citMatch) {
+                                    const citNum = Number(citMatch[1]);
+                                    const tabNum = (citNum >= 1 && citNum <= 3 ? citNum : 1) as InspectorTab;
+                                    return (
+                                      <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => {
+                                          void inspectCitedSource(msg.id, citNum, tabNum);
+                                        }}
+                                        style={{
+                                          backgroundColor: palette.accentCitationBg,
+                                          color: palette.accentCitation,
+                                          borderColor: `${palette.accentCitation}40`,
+                                        }}
+                                        className="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded font-semibold text-xs border cursor-pointer hover:opacity-80 transition-colors"
+                                        title={`Abrir evidencia [${citNum}] en inspector`}
+                                      >
+                                        {citNum}
+                                      </button>
+                                    );
+                                  }
+
+                                  // 2. Enlaces Markdown [Texto](url)
+                                  const mdLinkMatch = part.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
+                                  if (mdLinkMatch) {
+                                    return (
+                                      <a
+                                        key={idx}
+                                        href={mdLinkMatch[2]}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 underline underline-offset-2 break-all hover:opacity-90 transition-opacity"
+                                        title={`Abrir enlace oficial: ${mdLinkMatch[2]}`}
+                                      >
+                                        <span>{mdLinkMatch[1]}</span>
+                                        <HubIcon icon={ExternalLink} size={12} className="inline-block shrink-0" />
+                                      </a>
+                                    );
+                                  }
+
+                                  // 3. URLs directas https://...
+                                  if (/^https?:\/\/[^\s)]+$/.test(part)) {
+                                    return (
+                                      <a
+                                        key={idx}
+                                        href={part}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 underline underline-offset-2 break-all hover:opacity-90 transition-opacity"
+                                        title={`Abrir enlace: ${part}`}
+                                      >
+                                        <span>{part}</span>
+                                        <HubIcon icon={ExternalLink} size={12} className="inline-block shrink-0" />
+                                      </a>
+                                    );
+                                  }
+
+                                  // 4. Negritas **texto**
+                                  const boldMatch = part.match(/^\*\*([^*]+)\*\*$/);
+                                  if (boldMatch) {
+                                    return (
+                                      <strong key={idx} className="font-semibold text-zinc-900">
+                                        {boldMatch[1]}
+                                      </strong>
+                                    );
+                                  }
+
+                                  // 5. Texto normal
+                                  return <span key={idx}>{part}</span>;
+                                });
+                              })()}
                             </p>
 
                             {/* Tabla: Comparativo de impacto financiero si aplica */}

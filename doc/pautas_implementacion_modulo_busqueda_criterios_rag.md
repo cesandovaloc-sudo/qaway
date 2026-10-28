@@ -69,3 +69,10 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
   1. **Directiva de Orientación:** Se incorporó en la Capa 0 de [`geminiRAGService.ts`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/services/geminiRAGService.ts) la instrucción explícita de informar con amabilidad si el enlace no figura en las normas y guiar al usuario a activar el modo online o solicitar permisos a su administrador.
   2. **Switch en Chat y Configuración:** En [`CriteriosApp.tsx`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/CriteriosApp.tsx), se agregó un botón toggle con icono `Globe` (`[🌐 Búsqueda Web / Web en vivo]`) persistido en `localStorage` y replicado en la pestaña *Motor RAG* de Configuración.
   3. **Conector en Tiempo Real:** Al activar el modo, se envía `tools: [{ google_search: {} }]` a la API de Gemini para que consulte Google en vivo y devuelva los enlaces oficiales verificados.
+
+
+### D. Renderizado de Enlaces Clicables y Formato Markdown en Mensajes
+* **Diagnóstico:** El renderizador del mensaje asistente en [`CriteriosApp.tsx`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/CriteriosApp.tsx) solo dividía el texto por citas numéricas `(\[\d+\])`. Cuando el modelo generaba enlaces Markdown (`[Título](https://...)`) o URLs directas desde Google Search Grounding, estas se imprimían como texto plano no interactivo.
+* **Solución Implementada:** Se refactorizó el tokenizador inline de la burbuja sin alterar el layout:
+  1. **Enlaces Markdown y URLs directas:** Ahora se renderizan como hipervínculos `<a>` interactivos con `target="_blank"`, icono `ExternalLink` y estilo corporativo accesible.
+  2. **Compatibilidad Total:** Mantiene las citas documentales `[1]`, `[2]` abriendo el Inspector lateral, interpreta negritas `**texto**`, y preserva saltos de línea con `whitespace-pre-wrap`.

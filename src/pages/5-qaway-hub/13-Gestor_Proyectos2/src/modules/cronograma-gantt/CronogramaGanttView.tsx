@@ -38,7 +38,7 @@ import {
 
 type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
-type ColKey = 'name' | 'start' | 'end' | 'duration' | 'progress' | 'status';
+type ColKey = 'name' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region';
 type EditField = ColKey;
 
 interface Item {
@@ -340,8 +340,40 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const DEFAULT_COLS: Record<ColKey, number> = { name: 380, start: 95, end: 95, duration: 85, progress: 120, status: 105 };
-const MIN_COLS: Record<ColKey, number> = { name: 180, start: 70, end: 70, duration: 60, progress: 75, status: 75 };
+const DEFAULT_COLS: Record<ColKey, number> = {
+  name: 360,
+  start: 95,
+  end: 95,
+  duration: 85,
+  progress: 115,
+  status: 105,
+  gestor: 135,
+  region: 110,
+};
+
+const MIN_COLS: Record<ColKey, number> = {
+  name: 180,
+  start: 70,
+  end: 70,
+  duration: 60,
+  progress: 75,
+  status: 75,
+  gestor: 85,
+  region: 75,
+};
+
+const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
+  { key: 'name', label: 'Hito Rector / Subproceso Oficial', fixed: true },
+  { key: 'start', label: 'Inicio' },
+  { key: 'end', label: 'Fin' },
+  { key: 'duration', label: 'Duración' },
+  { key: 'progress', label: 'Avance' },
+  { key: 'status', label: 'Estado' },
+  { key: 'gestor', label: 'Responsable' },
+  { key: 'region', label: 'Región' },
+];
+
+const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status'];
 
 const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
@@ -646,6 +678,42 @@ export default function CronogramaGanttView({
   type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
+  const [colsMenuOpen, setColsMenuOpen] = useState(false);
+
+  const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-gantt-visible-cols-v1') || 'null');
+      if (Array.isArray(saved) && saved.includes('name')) return saved;
+    } catch {
+      /* almacenamiento no disponible */
+    }
+    return DEFAULT_VISIBLE_COLS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('qaway-gantt-visible-cols-v1', JSON.stringify(visibleCols));
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }, [visibleCols]);
+
+  const toggleColVisibility = (key: ColKey) => {
+    if (key === 'name') return;
+    setVisibleCols((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  const resetColWidths = () => {
+    setColWidths({ ...DEFAULT_COLS });
+    try {
+      localStorage.setItem('qaway-gantt-cols-v1', JSON.stringify(DEFAULT_COLS));
+    } catch {
+      /* almacenamiento no disponible */
+    }
+    notify('Anchos de columnas reordenados de acuerdo al contenido óptimo');
+  };
   const toggleMenu = (key: FilterMenuKey) => {
     setActiveMenu((cur) => (cur === key ? null : key));
     setCalOpen(null);
@@ -756,7 +824,10 @@ export default function CronogramaGanttView({
     document.body.classList.add('gantt-resizing');
   };
 
-  const fixedWidth = useMemo(() => (Object.keys(colWidths) as ColKey[]).reduce((a, k) => a + colWidths[k], 0), [colWidths]);
+  const fixedWidth = useMemo(
+    () => visibleCols.reduce((acc, k) => acc + (colWidths[k] || DEFAULT_COLS[k]), 0),
+    [visibleCols, colWidths]
+  );
 
   const timelineMinWidth = useMemo(() => {
     if (zoom === 'Día') return `${TOTAL_SPAN_DAYS * 34}px`;
@@ -767,9 +838,8 @@ export default function CronogramaGanttView({
   }, [zoom]);
 
   const fixedGridCols = useMemo(
-    () =>
-      `${colWidths.name}px ${colWidths.start}px ${colWidths.end}px ${colWidths.duration}px ${colWidths.progress}px ${colWidths.status}px`,
-    [colWidths]
+    () => visibleCols.map((k) => `${colWidths[k] || DEFAULT_COLS[k]}px`).join(' '),
+    [visibleCols, colWidths]
   );
 
   const rowGridCols = useMemo(
@@ -849,6 +919,9 @@ export default function CronogramaGanttView({
       if (!t.closest('.cell-editor, .col-resizer, .editable, .cell-pop')) {
         setEdit(null);
       }
+      if (!t.closest('.name-head')) {
+        setColsMenuOpen(false);
+      }
       if (!t.closest('.filter-dropdown-wrap')) {
         setActiveMenu(null);
         setCalOpen(null);
@@ -868,6 +941,7 @@ export default function CronogramaGanttView({
         setEdit(null);
         setActiveMenu(null);
         setCalOpen(null);
+        setColsMenuOpen(false);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -1625,28 +1699,115 @@ export default function CronogramaGanttView({
                   }
                 />
                 <span>Hito Rector / Subproceso Oficial</span>
+                <div className="head-col-actions">
+                  <button
+                    type="button"
+                    className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setColsMenuOpen((v) => !v);
+                    }}
+                    title="Configurar columnas visibles (Mostrar / Ocultar)"
+                  >
+                    <SlidersHorizontal size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    className="cols-reset-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetColWidths();
+                    }}
+                    title="Auto-ajustar / Reordenar columnas al contenido"
+                  >
+                    <RefreshCw size={12} />
+                  </button>
+                </div>
+                {colsMenuOpen && (
+                  <div className="cols-popover" onClick={(e) => e.stopPropagation()}>
+                    <div className="cols-pop-head">
+                      <strong>Columnas Visibles</strong>
+                      <button type="button" onClick={() => setColsMenuOpen(false)}>
+                        <X size={13} />
+                      </button>
+                    </div>
+                    <div className="cols-pop-list">
+                      {ALL_COL_META.map((col) => {
+                        const isVisible = visibleCols.includes(col.key);
+                        return (
+                          <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
+                            <input
+                              type="checkbox"
+                              checked={isVisible}
+                              disabled={col.fixed}
+                              onChange={() => toggleColVisibility(col.key)}
+                            />
+                            <span>{col.label}</span>
+                            {col.fixed && <small className="fixed-pill">Fija</small>}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <div className="cols-pop-foot">
+                      <button
+                        type="button"
+                        className="cols-reorder-btn"
+                        onClick={() => {
+                          resetColWidths();
+                          setColsMenuOpen(false);
+                        }}
+                      >
+                        <RefreshCw size={12} />
+                        <span>Ajustar anchos al contenido</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="col-resizer" onMouseDown={(e) => startResize(e, 'name')} />
               </div>
-              <div>
-                Inicio
-                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
-              </div>
-              <div>
-                Fin
-                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
-              </div>
-              <div>
-                Duración
-                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
-              </div>
-              <div>
-                Avance
-                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
-              </div>
-              <div>
-                Estado
-                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
-              </div>
+
+              {visibleCols.includes('start') && (
+                <div>
+                  Inicio
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
+                </div>
+              )}
+              {visibleCols.includes('end') && (
+                <div>
+                  Fin
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
+                </div>
+              )}
+              {visibleCols.includes('duration') && (
+                <div>
+                  Duración
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
+                </div>
+              )}
+              {visibleCols.includes('progress') && (
+                <div>
+                  Avance
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
+                </div>
+              )}
+              {visibleCols.includes('status') && (
+                <div>
+                  Estado
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
+                </div>
+              )}
+              {visibleCols.includes('gestor') && (
+                <div>
+                  Responsable
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'gestor')} />
+                </div>
+              )}
+              {visibleCols.includes('region') && (
+                <div>
+                  Región
+                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'region')} />
+                </div>
+              )}
             </div>
 
             <div className="timeline-head-viewport" ref={headScrollRef}>
@@ -1762,175 +1923,252 @@ export default function CronogramaGanttView({
                     )}
                   </div>
 
-                  <div
-                    className="date editable"
-                    title="Clic para cambiar la fecha de inicio"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleEdit(x, 'start');
-                    }}
-                  >
-                    {isEditing(x, 'start') ? (
-                      <input
-                        className="cell-editor cell-input date-edit"
-                        type="date"
-                        autoFocus
-                        value={x.start}
-                        onClick={(e) => e.stopPropagation()}
-                        onFocus={(e) => {
-                          try {
-                            (e.target as HTMLInputElement).showPicker?.();
-                          } catch {
-                            /* navegador sin soporte */
-                          }
-                        }}
-                        onChange={(e) => setStart(x, e.target.value)}
-                        onBlur={closeEdit}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') e.currentTarget.blur();
-                          if (e.key === 'Escape') closeEdit();
-                        }}
-                      />
-                    ) : (
-                      formatDate(x.start)
-                    )}
-                  </div>
-
-                  <div
-                    className="date editable"
-                    title="Clic para cambiar la fecha de fin"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleEdit(x, 'end');
-                    }}
-                  >
-                    {isEditing(x, 'end') ? (
-                      <input
-                        className="cell-editor cell-input date-edit"
-                        type="date"
-                        autoFocus
-                        value={x.end}
-                        min={x.start}
-                        onClick={(e) => e.stopPropagation()}
-                        onFocus={(e) => {
-                          try {
-                            (e.target as HTMLInputElement).showPicker?.();
-                          } catch {
-                            /* navegador sin soporte */
-                          }
-                        }}
-                        onChange={(e) => setEnd(x, e.target.value)}
-                        onBlur={closeEdit}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') e.currentTarget.blur();
-                          if (e.key === 'Escape') closeEdit();
-                        }}
-                      />
-                    ) : (
-                      formatDate(x.end)
-                    )}
-                  </div>
-
-                  <div
-                    className="duration editable"
-                    title="Editar días: recalcula la fecha de fin"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleEdit(x, 'duration');
-                    }}
-                  >
-                    {isEditing(x, 'duration') ? (
-                      <input
-                        className="cell-editor cell-input num-edit"
-                        type="number"
-                        min={1}
-                        max={365}
-                        autoFocus
-                        defaultValue={getDays(x.start, x.end)}
-                        onClick={(e) => e.stopPropagation()}
-                        onBlur={(e) => {
-                          setDuration(x, e.target.value);
-                          closeEdit();
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') e.currentTarget.blur();
-                          if (e.key === 'Escape') closeEdit();
-                        }}
-                      />
-                    ) : (
-                      `${getDays(x.start, x.end)} días`
-                    )}
-                  </div>
-
-                  <div
-                    className="progress editable"
-                    title="Clic para ajustar el avance (0–100%)"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleEdit(x, 'progress');
-                    }}
-                  >
-                    {isEditing(x, 'progress') ? (
-                      <div className="cell-editor cell-pop progress-pop">
+                  {visibleCols.includes('start') && (
+                    <div
+                      className="date editable"
+                      title="Clic para cambiar la fecha de inicio"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEdit(x, 'start');
+                      }}
+                    >
+                      {isEditing(x, 'start') ? (
                         <input
-                          type="range"
-                          min={0}
-                          max={100}
-                          step={5}
-                          value={x.progress}
-                          onChange={(e) => setProgress(x, +e.target.value)}
-                        />
-                        <b>{x.progress}%</b>
-                      </div>
-                    ) : (
-                      <>
-                        <span>
-                          <i
-                            className={
-                              x.progress === 100
-                                ? 'green'
-                                : x.status === 'Con retraso'
-                                ? 'red'
-                                : x.status === 'Pendiente'
-                                ? 'gray'
-                                : 'blue'
+                          className="cell-editor cell-input date-edit"
+                          type="date"
+                          autoFocus
+                          value={x.start}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={(e) => {
+                            try {
+                              (e.target as HTMLInputElement).showPicker?.();
+                            } catch {
+                              /* navegador sin soporte */
                             }
-                            style={{ width: `${x.progress}%` }}
-                          />
-                        </span>
-                        <b>{x.progress}%</b>
-                      </>
-                    )}
-                  </div>
+                          }}
+                          onChange={(e) => setStart(x, e.target.value)}
+                          onBlur={closeEdit}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') e.currentTarget.blur();
+                            if (e.key === 'Escape') closeEdit();
+                          }}
+                        />
+                      ) : (
+                        <span className="cell-text">{formatDate(x.start)}</span>
+                      )}
+                    </div>
+                  )}
 
-                  <div
-                    className="status-cell editable"
-                    title="Clic para cambiar el estado"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleEdit(x, 'status');
-                    }}
-                  >
-                    {isEditing(x, 'status') ? (
-                      <div className="cell-editor cell-pop status-pop">
-                        {STATUS_OPTIONS.map((s) => (
-                          <button
-                            key={s}
-                            className={s === x.status ? 'cur' : ''}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              update(x.id, { status: s });
-                              closeEdit();
-                            }}
-                          >
-                            <span className={'status ' + STATUS_CLASS[s]}>{s}</span>
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className={'status ' + STATUS_CLASS[x.status]}>{x.status}</span>
-                    )}
-                  </div>
+                  {visibleCols.includes('end') && (
+                    <div
+                      className="date editable"
+                      title="Clic para cambiar la fecha de fin"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEdit(x, 'end');
+                      }}
+                    >
+                      {isEditing(x, 'end') ? (
+                        <input
+                          className="cell-editor cell-input date-edit"
+                          type="date"
+                          autoFocus
+                          value={x.end}
+                          min={x.start}
+                          onClick={(e) => e.stopPropagation()}
+                          onFocus={(e) => {
+                            try {
+                              (e.target as HTMLInputElement).showPicker?.();
+                            } catch {
+                              /* navegador sin soporte */
+                            }
+                          }}
+                          onChange={(e) => setEnd(x, e.target.value)}
+                          onBlur={closeEdit}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') e.currentTarget.blur();
+                            if (e.key === 'Escape') closeEdit();
+                          }}
+                        />
+                      ) : (
+                        <span className="cell-text">{formatDate(x.end)}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {visibleCols.includes('duration') && (
+                    <div
+                      className="duration editable"
+                      title="Editar días: recalcula la fecha de fin"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEdit(x, 'duration');
+                      }}
+                    >
+                      {isEditing(x, 'duration') ? (
+                        <input
+                          className="cell-editor cell-input num-edit"
+                          type="number"
+                          min={1}
+                          max={365}
+                          autoFocus
+                          defaultValue={getDays(x.start, x.end)}
+                          onClick={(e) => e.stopPropagation()}
+                          onBlur={(e) => {
+                            setDuration(x, e.target.value);
+                            closeEdit();
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') e.currentTarget.blur();
+                            if (e.key === 'Escape') closeEdit();
+                          }}
+                        />
+                      ) : (
+                        <span className="cell-text">{getDays(x.start, x.end)} días</span>
+                      )}
+                    </div>
+                  )}
+
+                  {visibleCols.includes('progress') && (
+                    <div
+                      className="progress editable"
+                      title="Clic para ajustar el avance (0–100%)"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEdit(x, 'progress');
+                      }}
+                    >
+                      {isEditing(x, 'progress') ? (
+                        <div className="cell-editor cell-pop progress-pop">
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={x.progress}
+                            onChange={(e) => setProgress(x, +e.target.value)}
+                          />
+                          <b>{x.progress}%</b>
+                        </div>
+                      ) : (
+                        <>
+                          <span>
+                            <i
+                              className={
+                                x.progress === 100
+                                  ? 'green'
+                                  : x.status === 'Con retraso'
+                                  ? 'red'
+                                  : x.status === 'Pendiente'
+                                  ? 'gray'
+                                  : 'blue'
+                              }
+                              style={{ width: `${x.progress}%` }}
+                            />
+                          </span>
+                          <b>{x.progress}%</b>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {visibleCols.includes('status') && (
+                    <div
+                      className="status-cell editable"
+                      title="Clic para cambiar el estado"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEdit(x, 'status');
+                      }}
+                    >
+                      {isEditing(x, 'status') ? (
+                        <div className="cell-editor cell-pop status-pop">
+                          {STATUS_OPTIONS.map((s) => (
+                            <button
+                              key={s}
+                              className={s === x.status ? 'cur' : ''}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                update(x.id, { status: s });
+                                closeEdit();
+                              }}
+                            >
+                              <span className={'status ' + STATUS_CLASS[s]}>{s}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className={'status ' + STATUS_CLASS[x.status]}>{x.status}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {visibleCols.includes('gestor') && (
+                    <div
+                      className="gestor-cell editable"
+                      title="Clic para reasignar gestor territorial"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEdit(x, 'gestor');
+                      }}
+                    >
+                      {isEditing(x, 'gestor') ? (
+                        <div className="cell-editor cell-pop gestor-pop" onClick={(e) => e.stopPropagation()}>
+                          {GESTOR_OPTIONS.filter((g) => g.value !== 'Todos').map((g) => (
+                            <button
+                              key={g.value}
+                              className={x.gestor === g.value ? 'cur' : ''}
+                              onClick={() => {
+                                update(x.id, { gestor: g.value });
+                                closeEdit();
+                                notify(`Responsable asignado: ${g.value}`);
+                              }}
+                            >
+                              <span>{g.label}</span>
+                              {x.gestor === g.value && <Check size={12} />}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="cell-text gestor-text">
+                          <span className="gestor-dot" />
+                          {x.gestor || 'Sin asignar'}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {visibleCols.includes('region') && (
+                    <div
+                      className="region-cell editable"
+                      title="Clic para cambiar región"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleEdit(x, 'region');
+                      }}
+                    >
+                      {isEditing(x, 'region') ? (
+                        <div className="cell-editor cell-pop region-pop" onClick={(e) => e.stopPropagation()}>
+                          {REGION_OPTIONS.filter((r) => r.value !== 'Todas').map((r) => (
+                            <button
+                              key={r.value}
+                              className={x.region === r.value ? 'cur' : ''}
+                              onClick={() => {
+                                update(x.id, { region: r.value });
+                                closeEdit();
+                                notify(`Región asignada: ${r.value}`);
+                              }}
+                            >
+                              <span>{r.label}</span>
+                              {x.region === r.value && <Check size={12} />}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="region-badge-pill">{x.region || 'Nacional'}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="timeline" style={{ minWidth: timelineMinWidth }}>
