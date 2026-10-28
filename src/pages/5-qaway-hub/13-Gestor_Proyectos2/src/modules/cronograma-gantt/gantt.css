@@ -1269,8 +1269,9 @@
 .gantt-v2 .timeline-head-viewport {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
+  overflow: hidden !important;
   pointer-events: none;
+  position: relative;
 }
 
 .gantt-v2 .timeline-head {
@@ -2389,7 +2390,7 @@
   position: relative;
 }
 
-.gantt-v2 .table-head > div:not(.timeline-head) {
+.gantt-v2 .table-head > .fixed-cols {
   position: relative;
   overflow: visible;
 }

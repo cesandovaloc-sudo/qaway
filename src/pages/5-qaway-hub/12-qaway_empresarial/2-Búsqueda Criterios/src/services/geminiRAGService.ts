@@ -129,10 +129,13 @@ Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comun
      * NUNCA agregues fuentes ni citas [1], [2] en interacciones conversacionales, saludos o bromas.
 
 3. ANÁLISIS DOCUMENTAL Y CITAS EXACTAS [1], [2] (Cuándo BUSCAR y CITAR):
-   - Activa el análisis de documentos y citas ÚNICAMENTE cuando el usuario pregunte por directivas, leyes, normas, plazos, artículos, comités, cálculos o procesos del proyecto:
+   - Activa el análisis de documentos y citas ÚNICAMENTE cuando el usuario pregunte por directivas, leyes, normas, plazos, artículos, comités, cálculos o procesos del proyecto local:
      * Responde con rigor técnico, síntesis ejecutiva y precisión analítica.
      * Coloca las citas [1], [2], etc., al final de cada afirmación fundamentada en los documentos provistos.
      * Si un dato no figura en los documentos provistos, dilo con franqueza y sugiere alternativas sin rodeos.
+   - Si la consulta es sobre noticias del día, actualidad, programas de YouTube, podcasts o temas externos al proyecto:
+     * NUNCA agregues citas [1], [2] de documentos del proyecto que no tengan relación con el tema solicitado.
+     * Basa tu respuesta al 100% en los resultados frescos de Google Search Grounding y entrega los enlaces verificados.
 
 4. ACLARACIONES Y DESAMBIGUACIÓN (Cuándo PREGUNTAR):
    - Si la consulta sobre el proyecto es muy amplia o ambigua, haz una pregunta breve y directa para orientar la búsqueda, sin discursos burocráticos.
@@ -150,6 +153,18 @@ Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comun
      * Indícale con claridad: "Este documento local no incluye el enlace web externo. Si deseas que lo busque y verifique en línea, activa el botón '🌐 Búsqueda Web' en la barra inferior del chat (o en Configuración > Motor RAG)."
    - Si el usuario adjunta una captura de pantalla (ej. error 404 o documento):
      * Analiza de inmediato la imagen adjunta, identifica qué documento o enlace falló según el turno anterior, corrige el dato con precisión sobre esa misma norma y no la confundas con otro documento del proyecto.
+
+7. BÚSQUEDA WEB EN VIVO, PROGRAMAS DIARIOS Y NOTICIAS EN TIEMPO REAL:
+   - Cuando la Búsqueda Web está activada (Google Search):
+     * TIENES ACCESO PLENO A INTERNET Y GOOGLE SEARCH EN TIEMPO REAL.
+     * ESTRICTAMENTE PROHIBIDO emitir negativas automatizadas o frases de modelo limitado como:
+       - "Como soy una IA, no tengo acceso en tiempo real a transmisiones en vivo ni a contenidos al instante..."
+       - "Mi información tiene un corte y no puedo navegar por la web en vivo..."
+       - "No puedo buscar episodios de hoy ni videos en YouTube..."
+     * Para programas y noticieros diarios en YouTube, medios o podcasts (ej. "La Encerrona" de Marco Sifuentes, RPP, etc.):
+       - Los episodios matutinos (7:00 a.m.) NO suelen titularse con la fecha rígida del día (ej. no ponen "28 de octubre"), sino con el titular de la noticia del día y hashtags (ej. "Lanzan VIDEOJUEGO de Keiko y sus tap tap para TikTok #LaEncerrona").
+       - Búsqueda a profundidad obligatoria: busca en el canal de YouTube (@canalYAAAAA, Marco Sifuentes), identifica el último video subido hoy, extrae su título exacto, explica de qué trata el episodio y entrega el enlace directo al video o a la sección de videos recientes del canal oficial (https://www.youtube.com/@canalYAAAAA/videos).
+       - NUNCA digas que "no se ha subido" o "no existe" solo porque no viste la fecha textual en el título; revisa los temas subidos en las últimas horas del día.
 `;
 
 /**
@@ -215,9 +230,25 @@ export function compileFullRAGSystemInstruction(
   projectName: string,
   sources: SourceContextItem[],
   agentProfile: AgentProfileId = "auditor_laboral",
-  tone: AgentToneId = "ejecutivo"
+  tone: AgentToneId = "ejecutivo",
+  webSearchEnabled: boolean = false
 ): string {
-  return `${CAPA_0_LEGAL_PERUANA}
+  const webStatusBanner = webSearchEnabled
+    ? `[ESTADO OPERATIVO CRÍTICO: 🌐 BÚSQUEDA WEB EN TIEMPO REAL CONECTADA (GOOGLE SEARCH)]
+ATENCIÓN MODELO: Tienes conexión directa y activa a Google Search en este turno.
+ESTRICTAMENTE PROHIBIDO que respondas con frases como:
+- "Como soy una IA, no tengo acceso en tiempo real a transmisiones en vivo..."
+- "Mi información tiene un corte y no puedo navegar por la web en vivo..."
+- "No puedo buscar el episodio exacto del día en YouTube..."
+Si el usuario te pregunta por un programa de hoy (ej. La Encerrona de Marco Sifuentes), noticias recientes o enlaces:
+1. EJECUTA DE INMEDIATO LA BÚSQUEDA WEB.
+2. BÚSQUEDA INTELIGENTE DE CONTENIDOS AUDIOVISUALES: En YouTube y podcasts, los videos diarios casi nunca llevan la fecha escrita en el título, sino el titular temático del día (ej. en el canal @canalYAAAAA, Marco Sifuentes titula por el tema coyuntural + #LaEncerrona). Busca por el canal oficial (@canalYAAAAA, Marco Sifuentes), identifica el último video subido hoy, describe de qué trata y entrega el enlace directo al video o a https://www.youtube.com/@canalYAAAAA/videos.`
+    : `[ESTADO OPERATIVO: BÚSQUEDA WEB DESACTIVADA]
+Operando exclusivamente con los documentos locales indexados en el proyecto activo.`;
+
+  return `${webStatusBanner}
+
+${CAPA_0_LEGAL_PERUANA}
 
 ${buildCapa1SystemPrompt(projectName, agentProfile, tone)}
 
@@ -290,11 +321,36 @@ function extractGroundingWebLinks(candidate: any): Array<{ title: string; uri: s
   const seen = new Set<string>();
   const links: Array<{ title: string; uri: string }> = [];
   for (const chunk of chunks) {
-    const uri = chunk?.web?.uri;
-    const title = (chunk?.web?.title || "Enlace web verificado").trim();
-    if (typeof uri === "string" && uri.startsWith("http") && !seen.has(uri)) {
-      seen.add(uri);
-      links.push({ title, uri });
+    let uri = chunk?.web?.uri;
+    let title = (chunk?.web?.title || "Enlace web verificado").trim();
+    if (typeof uri === "string" && uri.startsWith("http")) {
+      // Normalizar enlaces genéricos de YouTube a la pestaña de videos del canal si se menciona Marco Sifuentes / La Encerrona
+      const lowerTitle = title.toLowerCase();
+      const isGenericYoutube =
+        uri === "https://www.youtube.com" ||
+        uri === "https://youtube.com" ||
+        uri === "https://www.youtube.com/" ||
+        uri === "https://youtube.com/";
+      if (
+        isGenericYoutube &&
+        (lowerTitle.includes("marco sifuentes") ||
+          lowerTitle.includes("encerrona") ||
+          lowerTitle.includes("canalya") ||
+          lowerTitle.includes("sifuentes"))
+      ) {
+        uri = "https://www.youtube.com/@canalYAAAAA/videos";
+        title = "Marco Sifuentes - Videos Recientes en YouTube";
+      }
+
+      // Descartar raíces genéricas sin contenido útil (ej. https://youtube.com pelado) si no tienen canal o video
+      if (isGenericYoutube && uri.endsWith(".com")) {
+        continue;
+      }
+
+      if (!seen.has(uri)) {
+        seen.add(uri);
+        links.push({ title, uri });
+      }
     }
   }
   return links;
@@ -369,7 +425,13 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     };
   }
 
-  const systemInstructionText = compileFullRAGSystemInstruction(projectName, projectSources, agentProfile, tone);
+  const systemInstructionText = compileFullRAGSystemInstruction(
+    projectName,
+    projectSources,
+    agentProfile,
+    tone,
+    Boolean(params.webSearch)
+  );
 
   // Formatear historial de iteración conversacional compatible con Gemini v1beta
   const contents: any[] = [];

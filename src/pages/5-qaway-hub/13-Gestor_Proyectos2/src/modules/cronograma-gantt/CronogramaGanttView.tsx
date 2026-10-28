@@ -876,18 +876,18 @@ export default function CronogramaGanttView({
   );
 
   /* Función matemática unificada de posición en píxeles según escala de zoom (0% margen de error) */
-  const getDatePixelOffset = (iso: string): number => {
+  const getDatePixelOffset = (iso: string, targetZoom: string = zoom): number => {
     const targetTime = new Date(iso + 'T12:00:00').getTime();
     const daysDiff = (targetTime - START_TIMESTAMP) / 86400000;
     const clampedDays = Math.max(0, Math.min(TOTAL_SPAN_DAYS, daysDiff));
 
-    if (zoom === 'Día') {
+    if (targetZoom === 'Día') {
       return clampedDays * 34;
     }
-    if (zoom === 'Semana') {
+    if (targetZoom === 'Semana') {
       return (clampedDays / 7) * 80;
     }
-    if (zoom === 'Mes') {
+    if (targetZoom === 'Mes') {
       let px = 0;
       for (const m of MONTHS) {
         const mDays = monthDays(m.start);
@@ -903,7 +903,7 @@ export default function CronogramaGanttView({
       }
       return px;
     }
-    const totalPx = parseFloat(timelineMinWidth) || 1160;
+    const totalPx = targetZoom === 'Trimestre' ? 1160 : (parseFloat(timelineMinWidth) || 1200);
     return (clampedDays / TOTAL_SPAN_DAYS) * totalPx;
   };
 
@@ -911,20 +911,26 @@ export default function CronogramaGanttView({
   const scrollToToday = () => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
-    const todayPx = getDatePixelOffset(currentTodayIso);
+    const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
     const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
     const targetScroll = Math.max(0, todayPx - timelineVisibleWidth / 2);
     container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    if (headScrollRef.current) {
+      headScrollRef.current.scrollLeft = targetScroll;
+    }
     notify(`Vista centrada en Hoy (${formatDate(currentTodayIso)})`);
   };
 
   const scrollToDate = (iso: string, label?: string) => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
-    const targetPx = getDatePixelOffset(iso);
+    const targetPx = getDatePixelOffset(iso, zoom);
     const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
     const targetScroll = Math.max(0, targetPx - timelineVisibleWidth / 4);
     container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    if (headScrollRef.current) {
+      headScrollRef.current.scrollLeft = targetScroll;
+    }
     if (label) notify(label);
   };
 
@@ -960,18 +966,23 @@ export default function CronogramaGanttView({
 
   const handleZoomChange = (z: string) => {
     setZoom(z);
-    setTimeout(() => {
-      scrollToToday();
-    }, 80);
   };
 
-  /* Centrado automático en la fecha actual al inicializar la vista */
+  /* Centrado automático e inmediato en la fecha actual al inicializar la vista o cambiar de escala (Día/Semana/Mes/Trimestre) */
   useEffect(() => {
     const timer = setTimeout(() => {
-      scrollToToday();
-    }, 120);
+      if (!scrollRef.current) return;
+      const container = scrollRef.current;
+      const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
+      const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
+      const targetScroll = Math.max(0, todayPx - timelineVisibleWidth / 2);
+      container.scrollLeft = targetScroll;
+      if (headScrollRef.current) {
+        headScrollRef.current.scrollLeft = targetScroll;
+      }
+    }, 30);
     return () => clearTimeout(timer);
-  }, [currentTodayIso]);
+  }, [zoom, currentTodayIso]);
 
   /* ---------- Cierre global de menús y editores (clic externo / Escape) ---------- */
   useEffect(() => {
