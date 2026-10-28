@@ -1347,7 +1347,8 @@
 }
 
 .gantt-v2 .cols-trigger-btn,
-.gantt-v2 .cols-reset-btn {
+.gantt-v2 .cols-reset-btn,
+.gantt-v2 .collapse-toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1363,13 +1364,15 @@
 }
 
 .gantt-v2 .cols-trigger-btn:hover,
-.gantt-v2 .cols-reset-btn:hover {
+.gantt-v2 .cols-reset-btn:hover,
+.gantt-v2 .collapse-toggle-btn:hover {
   background: #f1f5f9;
   color: #0f172a;
   border-color: #94a3b8;
 }
 
-.gantt-v2 .cols-trigger-btn.active {
+.gantt-v2 .cols-trigger-btn.active,
+.gantt-v2 .collapse-toggle-btn.collapsed {
   background: #e6f4ff;
   color: #0066ff;
   border-color: #93c5fd;

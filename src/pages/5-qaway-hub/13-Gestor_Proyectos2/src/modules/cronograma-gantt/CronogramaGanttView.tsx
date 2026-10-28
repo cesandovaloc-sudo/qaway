@@ -12,10 +12,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock3,
+  Download,
+  FileSpreadsheet,
   FileText,
   FileUp,
   Folder,
+  FolderMinus,
   FolderOpen,
+  FolderPlus,
   HelpCircle,
   Layers3,
   MapPin,
@@ -1242,6 +1246,71 @@ export default function CronogramaGanttView({
     });
   }, [items, search, stateFilter, typeFilter, tab, regionFilter, gestorFilter, rangeFrom, rangeTo]);
 
+  /* Control de Colapso / Despliegue global de Hitos y Subprocesos (Niveles 1 y 2) */
+  const allHitosExpanded = useMemo(() => {
+    const hList = items.filter((x) => x.kind === 'hito');
+    return hList.length > 0 && hList.every((h) => h.expanded !== false);
+  }, [items]);
+
+  const toggleAllHitosExpand = () => {
+    const nextState = !allHitosExpanded;
+    commitChange((old) =>
+      old.map((x) => (x.kind === 'hito' ? { ...x, expanded: nextState } : x))
+    );
+    notify(
+      nextState
+        ? 'Todos los subprocesos desplegados (Nivel 2)'
+        : 'Vista colapsada a solo hitos rectores (Nivel 1)'
+    );
+  };
+
+  /* Exportación de Plantilla Oficial de Cronograma para completar en Excel */
+  const exportExcelTemplate = () => {
+    const headers = [
+      'Código',
+      'Nombre de Tarea o Hito',
+      'Tipo (hito/subproceso)',
+      'Hito Padre (Código)',
+      'Fecha Inicio (YYYY-MM-DD)',
+      'Fecha Fin (YYYY-MM-DD)',
+      'Avance (%)',
+      'Estado',
+      'Responsable(s)',
+      'Región',
+      'Descripción'
+    ];
+
+    const sampleRows = items.map((x) => {
+      const parent = items.find((p) => p.id === x.parentId);
+      const gestoresList = getItemGestores(x);
+      return [
+        x.code,
+        `"${x.name.replace(/"/g, '""')}"`,
+        x.kind,
+        parent ? parent.code : '',
+        x.start,
+        x.end,
+        x.progress,
+        x.status,
+        `"${gestoresList.join(', ')}"`,
+        `"${x.region || 'Nacional'}"`,
+        `"${(x.description || '').replace(/"/g, '""')}"`
+      ];
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...sampleRows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Plantilla_Cronograma_QawayLab_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    notify('Plantilla oficial de cronograma descargada. Completa en Excel y vuelve a subir.');
+  };
+
   const segments = useMemo(() => buildSegments(zoom), [zoom]);
   const segCols = useMemo(() => segments.map((s) => `${s.days}fr`).join(' '), [segments]);
   const yearCols = useMemo(() => ['2026', '2027'].map((y, i) => `${getDays(i === 0 ? RANGE_MIN : '2027-01-01', i === 0 ? '2026-12-31' : RANGE_MAX)}fr`).join(' '), []);
@@ -1331,8 +1400,13 @@ export default function CronogramaGanttView({
             </div>
           </div>
           <div className="head-actions">
-            <button className="square" onClick={exportCSV} title="Exportar cronograma CSV">
-              <MoreHorizontal size={18} />
+            <button
+              className="btn secondary"
+              onClick={exportExcelTemplate}
+              title="Descargar plantilla oficial de cronograma para completar en Excel"
+            >
+              <FileSpreadsheet size={15} />
+              <span>Plantilla Excel</span>
             </button>
             <button
               className="btn secondary"
@@ -1905,6 +1979,21 @@ export default function CronogramaGanttView({
                 />
                 <span>Hito Rector / Subproceso Oficial</span>
                 <div className="head-col-actions">
+                  <button
+                    type="button"
+                    className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleAllHitosExpand();
+                    }}
+                    title={
+                      allHitosExpanded
+                        ? 'Colapsar a solo hitos rectores (Nivel 1)'
+                        : 'Desplegar todos los subprocesos (Nivel 2)'
+                    }
+                  >
+                    {allHitosExpanded ? <FolderMinus size={13} /> : <FolderPlus size={13} />}
+                  </button>
                   <button
                     type="button"
                     className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
@@ -2884,6 +2973,33 @@ export default function CronogramaGanttView({
                 <b style={{ fontSize: '13px' }}>{pickedFile || 'Arrastra un archivo o haz clic aquí'}</b>
                 <small style={{ fontSize: '11px', color: '#64748b' }}>PDF, Excel, Word o CSV</small>
               </button>
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  background: '#f8fafc',
+                  borderRadius: 8,
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <div>
+                  <b style={{ fontSize: '12px', color: '#1e293b', display: 'block' }}>¿No tienes el formato oficial?</b>
+                  <small style={{ fontSize: '11px', color: '#64748b' }}>Descarga la plantilla con ejemplos para completar en Excel</small>
+                </div>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  style={{ height: 28, fontSize: '11px', padding: '0 10px', gap: 6 }}
+                  onClick={exportExcelTemplate}
+                >
+                  <FileSpreadsheet size={13} />
+                  <span>Descargar Plantilla</span>
+                </button>
+              </div>
+
               <div
                 style={{
                   display: 'flex',
