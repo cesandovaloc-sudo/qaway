@@ -3,6 +3,7 @@ import React, { useMemo, useRef, useState, useEffect } from 'react';
 import './gantt.css';
 import {
   AlertTriangle,
+  ArrowLeftRight,
   CalendarDays,
   ChartNoAxesColumnIncreasing,
   Check,
@@ -1718,9 +1719,9 @@ export default function CronogramaGanttView({
                       e.stopPropagation();
                       resetColWidths();
                     }}
-                    title="Auto-ajustar / Reordenar columnas al contenido"
+                    title="Auto-ajustar anchos de columnas al contenido"
                   >
-                    <RefreshCw size={12} />
+                    <ArrowLeftRight size={12} />
                   </button>
                 </div>
                 {colsMenuOpen && (
@@ -1757,7 +1758,7 @@ export default function CronogramaGanttView({
                           setColsMenuOpen(false);
                         }}
                       >
-                        <RefreshCw size={12} />
+                        <ArrowLeftRight size={12} />
                         <span>Ajustar anchos al contenido</span>
                       </button>
                     </div>
@@ -1854,7 +1855,7 @@ export default function CronogramaGanttView({
                   key={x.id}
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
                     selectedId === x.id ? 'selected' : ''
-                  }`}
+                  } ${edit?.id === x.id ? 'is-editing-row' : ''}`}
                   onClick={() => {
                     setSelectedId(x.id);
                   }}
@@ -1891,8 +1892,12 @@ export default function CronogramaGanttView({
                     ) : (
                       <FileText size={15} className="file" />
                     )}
-                    <b className="code">{x.code}</b>
-                    {x.kind === 'hito' && <span className="hito-tag">Hito</span>}
+                    <b className="code">
+                      {x.kind === 'hito' && (
+                        <span className="hito-micro-diamond" title="Hito Rector Oficial">◆</span>
+                      )}
+                      {x.code}
+                    </b>
                     {isEditing(x, 'name') ? (
                       <input
                         className="cell-editor cell-input name-edit"
@@ -2197,7 +2202,10 @@ export default function CronogramaGanttView({
                         </span>
                       ) : null}
                       {isRangeActive && x.end > rangeTo && (
-                        <span className="exceed-pill" title="Finaliza después del plazo oficial consultado">
+                        <span
+                          className={`exceed-pill ${x.kind === 'hito' ? 'pill-with-diamond' : ''}`}
+                          title="Finaliza después del plazo oficial consultado"
+                        >
                           +fuera plazo
                         </span>
                       )}

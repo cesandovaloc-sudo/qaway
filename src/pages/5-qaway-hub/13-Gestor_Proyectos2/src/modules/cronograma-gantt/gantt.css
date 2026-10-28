@@ -1605,6 +1605,21 @@
   background: #f1f5f9;
 }
 
+/* Fila activa en edición para elevar z-index sobre filas inferiores */
+.gantt-v2 .row.is-editing-row {
+  z-index: 120 !important;
+  position: relative;
+}
+
+.gantt-v2 .row.is-editing-row .fixed-cols {
+  z-index: 125 !important;
+  overflow: visible !important;
+}
+
+.gantt-v2 .row.is-editing-row .fixed-cols > div {
+  overflow: visible !important;
+}
+
 .gantt-v2 .row .fixed-cols > div {
   display: flex;
   align-items: center;
@@ -1729,13 +1744,13 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 120;
-  width: 175px;
+  z-index: 250;
+  width: 185px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.15);
-  padding: 4px;
+  box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.22), 0 6px 14px rgba(15, 23, 42, 0.08);
+  padding: 5px;
 }
 
 .gantt-v2 .gestor-pop button,
@@ -1901,6 +1916,9 @@
 .gantt-v2 .hito-diamond-badge .diamond-shape {
   width: 12px;
   height: 12px;
+  min-width: 12px;
+  min-height: 12px;
+  flex-shrink: 0;
   background: #0066ff;
   border: 2px solid #ffffff;
   border-radius: 2px;
@@ -1935,7 +1953,23 @@
   white-space: nowrap;
 }
 
-/* Etiqueta distintiva Hito en la tabla izquierda */
+/* Cuando la barra es un hito con diamante en la punta, la pastilla se desplaza a la izquierda para no tapar el rombo */
+.gantt-v2 .bar.major .exceed-pill,
+.gantt-v2 .exceed-pill.pill-with-diamond {
+  right: 18px;
+}
+
+/* Micro-diamante distintivo para Hitos en la tabla de tareas (ocupa mínimo espacio y conserva alineación) */
+.gantt-v2 .hito-micro-diamond {
+  color: #0066ff;
+  font-size: 10px;
+  margin-right: 3px;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Etiqueta distintiva Hito en la tabla izquierda (conservada por compatibilidad) */
 .gantt-v2 .hito-tag {
   display: inline-flex;
   align-items: center;
@@ -2455,17 +2489,17 @@ body.gantt-resizing {
   cursor: pointer;
 }
 
-/* --- E) Popovers de celda (Avance / Estado) --- */
+/* --- E) Popovers de celda (Avance / Estado / Desplegables) --- */
 .gantt-v2 .cell-pop {
   position: absolute;
-  z-index: 50;
+  z-index: 250;
   top: calc(50% + 18px);
   left: 50%;
   transform: translateX(-50%);
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
   background: #ffffff;
-  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.22), 0 6px 14px -2px rgba(15, 23, 42, 0.08);
   padding: 8px;
 }
 
