@@ -1240,31 +1240,27 @@ export default function CronogramaGanttView({
                     </button>
                   </div>
 
-                  <div className="dr-section-label">Meses Oficiales (MINEDU 2026-2027)</div>
-                  <div className="dr-months-grid">
-                    {PROJECT_MONTHS.map((m) => {
-                      const isSelected = rangeFrom <= m.end && rangeTo >= m.start;
-                      const isExact = rangeFrom === m.start && rangeTo === m.end;
-                      return (
-                        <button
-                          key={m.label}
-                          type="button"
-                          className={`dr-month-pill ${isExact ? 'exact' : isSelected ? 'in-range' : ''}`}
-                          onClick={() => {
-                            setRangeFrom(m.start);
-                            setRangeTo(m.end);
-                          }}
-                          title={`Seleccionar mes ${m.label}`}
-                        >
-                          {m.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="dr-active-summary">
-                    <span>Período activo:</span>
-                    <b>{formatDateRange(rangeFrom, rangeTo)}</b>
+                  <div className="dr-inputs">
+                    <label>
+                      <span>Desde</span>
+                      <input
+                        type="date"
+                        value={rangeFrom}
+                        min={RANGE_MIN}
+                        max={rangeTo}
+                        onChange={(e) => setRangeFrom(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>Hasta</span>
+                      <input
+                        type="date"
+                        value={rangeTo}
+                        min={rangeFrom}
+                        max={RANGE_MAX}
+                        onChange={(e) => setRangeTo(e.target.value)}
+                      />
+                    </label>
                   </div>
 
                   <div className="dr-footer">
