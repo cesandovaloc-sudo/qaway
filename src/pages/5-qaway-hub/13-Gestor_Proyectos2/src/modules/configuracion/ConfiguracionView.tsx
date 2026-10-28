@@ -27,8 +27,8 @@ import {
   AVAILABLE_MODELS,
   AGENT_PROFILES,
   AGENT_TONES,
-  AgentProfileId,
-  AgentToneId
+  type AgentProfileId,
+  type AgentToneId
 } from '../../services/geminiRAGService';
 
 export type ConfigBinds = { notify: (m: string) => void };
