@@ -142,3 +142,15 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
        - **3. Modo de Razonamiento:** Selección entre *⚡ Rápido*, *⚖️ Estándar* y *🧠 Profundo*.
        - **4. Directivas Institucionales Personalizadas:** Área de texto con persistencia automática en `localStorage` (`qaway_rag_custom_agent_directives`) inyectada en la Capa 1 de `geminiRAGService.ts` para que Gemini respete directrices específicas de la empresa.
 
+### K. Diagnóstico de Ingesta OCR en PDFs Escaneados Preexistentes y Erradicación de Fallback Ficticio (28-Oct-2026)
+- **Diagnóstico del Caso RM 0401-2008-ED (Numeral 6.3.4):**
+  1. **¿Por qué por texto puro no lo encontraba y por captura sí?**:
+     - El archivo `4. RM 401-2008-ED_Gestión Banco del Libro de EBR.pdf` fue subido al proyecto con anterioridad a la incorporación del motor OCR en el código. Al tratarse de una fotocopia escaneada sin capa de texto seleccionable, el parser inicial generó 0 fragmentos de texto en memoria/IndexedDB.
+     - Al consultar por texto en el chat (*"qué dice literalmente el numeral 6.3.4"*), el recuperador RAG no tenía fragmentos del documento para inyectar en el prompt. Gemini, operando con veracidad, informó que en los fragmentos indexados disponibles no figuraba dicho numeral.
+     - Al pegar la captura de pantalla con `Ctrl+V`, la imagen viajó directamente a Gemini mediante su API multimodal nativa, reconociendo y transcribiendo los píxeles del numeral 6.3.4 al instante.
+  2. **Erradicación del Mock de "Horas Extras p. 28":**
+     - En [`CriteriosApp.tsx`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/CriteriosApp.tsx), cuando una cita documental no contaba con un fragmento vectorial asociado (`topCitedChunk === null`), la tarjeta visual mostraba por defecto el texto quemado *"Procedimiento interno para el registro de horas extras y validación con el área de RR.HH. p. 28"*. Se eliminó este fallback estático reemplazándolo por la descripción institucional real del documento o su estado de indexación.
+  3. **Solución Definitiva para Ingesta RAG de PDFs Antiguos**:
+     - Para que el motor RAG indexe y lea todos los numerales de la RM 0401-2008-ED sin requerir capturas de pantalla, basta con eliminar el archivo antiguo de la pestaña **Fuentes** y volver a cargarlo (o arrastrarlo a *Indexar Archivos*). El nuevo `documentParserService.ts` con Tesseract.js procesará automáticamente cada página escaneada, etiquetando los fragmentos como `Página N (OCR)` y vectorizándolos en el sistema.
+
+

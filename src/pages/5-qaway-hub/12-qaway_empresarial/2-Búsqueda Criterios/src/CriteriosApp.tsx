@@ -4217,31 +4217,19 @@ export default function CriteriosApp() {
                                           <p style={{ color: palette.textSecondary, fontSize: 12.5, lineHeight: 1.4 }}>
                                             {topCitedChunk
                                               ? topCitedChunk.content.replace(/\s+/g, " ").slice(0, 170)
-                                              : isLaw
-                                              ? "Regulación del trabajo voluntario y recargo obligatorio: 25% las dos primeras horas y 35% las restantes."
-                                              : isExcel
-                                              ? "Impacto de provisiones por horas extras en EBITDA proyectado y margen porcentual."
-                                              : "Procedimiento interno para el registro de horas extras y validación con el área de RR.HH."}
+                                              : src.section || "Documento oficial indexado en el proyecto activo."}
                                           </p>
                                         </div>
                                         <div className="text-right shrink-0">
                                           <span style={{ color: palette.textSecondary, fontSize: 12.5 }} className="block leading-tight">
                                             {topCitedChunk
                                               ? topCitedChunk.locatorLabel
-                                              : isLaw
-                                              ? "Pág. 14"
-                                              : isExcel
-                                              ? "Celda E14"
-                                              : "p. 28"}
+                                              : "Doc. Indexado"}
                                           </span>
                                           <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="block leading-tight">
                                             {topCitedChunk
                                               ? `Similitud ${topCitedChunk.normalizedScore.toFixed(2)}`
-                                              : isLaw
-                                              ? "Similitud 0.95"
-                                              : isExcel
-                                              ? "Similitud 0.92"
-                                              : "v2.1 - 2026"}
+                                              : "Fuente activa"}
                                           </span>
                                           <span
                                             style={{ color: palette.accentCitation, fontSize: 12.5 }}
