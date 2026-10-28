@@ -291,20 +291,47 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
 
   const systemInstructionText = compileFullRAGSystemInstruction(projectName, projectSources, agentProfile, tone);
 
-  // Formatear historial si existe
+  // Formatear historial de iteración conversacional compatible con Gemini v1beta
   const contents: any[] = [];
 
   if (params.history && params.history.length > 0) {
-    // Tomar los últimos 4 turnos para no sobrecargar
-    const recent = params.history.slice(-4);
+    // Tomar los turnos recientes para contexto
+    const recent = params.history.slice(-8);
+    let firstUserFound = false;
+    let lastRole: string | null = null;
+
     for (const h of recent) {
+      if (!h.text || !h.text.trim()) continue;
+      const role = h.sender === "user" ? "user" : "model";
+
+      // Gemini exige estrictamente que el primer turno sea 'user'
+      if (!firstUserFound) {
+        if (role !== "user") continue; // Descartar saludos iniciales del modelo
+        firstUserFound = true;
+      }
+
+      // Evitar turnos consecutivos del mismo rol
+      if (role === lastRole) {
+        if (contents.length > 0) {
+          contents[contents.length - 1].parts[0].text += `\n${h.text}`;
+        }
+        continue;
+      }
+
       contents.push({
-        role: h.sender === "user" ? "user" : "model",
+        role,
         parts: [{ text: h.text }],
       });
+      lastRole = role;
+    }
+
+    // Si el último turno del historial fue 'user', concatenarlo o removerlo para que el query actual sea el 'user' final
+    if (contents.length > 0 && contents[contents.length - 1].role === "user") {
+      contents.pop();
     }
   }
 
+  // Consulta actual del usuario como turno activo
   contents.push({
     role: "user",
     parts: [{ text: query }],

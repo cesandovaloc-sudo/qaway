@@ -1464,77 +1464,92 @@ export default function CriteriosApp() {
     const isGeminiActive = activeProvider.id === "google";
     const geminiApiKey = getStoredGeminiApiKey();
 
-    // Inferencia real con Google Gemini calibrada con perfil de agente, modo y umbral coseno
-    if (isGeminiActive && !isConversationalGreeting && geminiApiKey) {
-      try {
-        const geminiResult = await queryGeminiRAG({
-          query: q,
-          projectSources: activeSources.map((s, idx) => ({
-            id: s.id,
-            title: s.title,
-            type: s.type,
-            badge: s.badge,
-            description: s.description,
-            tab: s.inspectorTab,
-            excerpt: evidenceExcerptForDoc(s.id),
-          })),
-          projectName: activeProjName,
-          model: activeProvider.selectedModel || "gemini-1.5-flash",
-          apiKey: geminiApiKey,
-          agentProfile: currentAgentProfile,
-          tone: currentAgentTone,
-          mode: chatMode,
-          similarityThreshold,
-          topK,
-        });
-
-        if (geminiResult.success && geminiResult.text) {
-          ansText = geminiResult.text;
-          latencyLabel = `${geminiResult.latencyMs} ms (Gemini en vivo)`;
-          if (geminiResult.tableData && geminiResult.tableData.length > 0) {
-            hasTable = true;
-            tableData = geminiResult.tableData;
-          }
-          if (geminiResult.citations.length > 0) {
-            turnSources = geminiResult.citations
-              .map((citNum) => {
-                const src = activeSources[citNum - 1];
-                if (!src) return null;
-                const topChunk = bestChunkForDoc(src.id);
-                return {
-                  id: citNum,
-                  name: src.title,
-                  section: topChunk ? topChunk.locatorLabel : src.badge,
-                  tab: src.inspectorTab,
-                  sourceId: src.id,
-                  locator: topChunk?.locatorLabel,
-                  scoreLabel:
-                    topChunk && topChunk.normalizedScore > 0
-                      ? `Similitud ${topChunk.normalizedScore.toFixed(2)}`
-                      : undefined,
-                };
-              })
-              .filter(Boolean) as unknown as {
-              id: number;
-              name: string;
-              section: string;
-              tab: InspectorTab;
-              sourceId?: string;
-              locator?: string;
-              scoreLabel?: string;
-            }[];
-          }
-          if (turnSources.length === 0 && activeSources.length > 0) {
-            turnSources = activeSources.slice(0, 2).map((s, idx) => ({
-              id: idx + 1,
-              name: s.title,
-              section: s.badge,
+    // Inferencia real con Google Gemini calibrada con perfil de agente, modo, historial y umbral coseno
+    if (isGeminiActive && !isConversationalGreeting) {
+      if (!geminiApiKey) {
+        ansText = `ℹ️ **Google DeepMind (Gemini) está seleccionado pero no cuenta con API Key configurada:**\n\nPara activar respuestas en vivo generadas por Gemini con citas directas:\n1. Ve a **Configurar IA** (o módulo Configuración en el panel lateral).\n2. En **Google DeepMind**, haz clic en **Editar** y pega tu clave API de Google AI Studio.\n3. Haz clic en **Guardar** (o presiona Enter).`;
+        latencyLabel = `0 ms (Clave requerida)`;
+      } else {
+        try {
+          const geminiResult = await queryGeminiRAG({
+            query: q,
+            history: chatMessages.map((m) => ({
+              sender: m.sender,
+              text: m.text,
+            })),
+            projectSources: activeSources.map((s, idx) => ({
+              id: s.id,
+              title: s.title,
+              type: s.type,
+              badge: s.badge,
+              description: s.description,
               tab: s.inspectorTab,
-            }));
+              excerpt: evidenceExcerptForDoc(s.id),
+            })),
+            projectName: activeProjName,
+            model: activeProvider.selectedModel || "gemini-1.5-flash",
+            apiKey: geminiApiKey,
+            agentProfile: currentAgentProfile,
+            tone: currentAgentTone,
+            mode: chatMode,
+            similarityThreshold,
+            topK,
+          });
+
+          if (geminiResult.success && geminiResult.text) {
+            ansText = geminiResult.text;
+            latencyLabel = `${geminiResult.latencyMs} ms (Gemini en vivo)`;
+            if (geminiResult.tableData && geminiResult.tableData.length > 0) {
+              hasTable = true;
+              tableData = geminiResult.tableData;
+            }
+            if (geminiResult.citations.length > 0) {
+              turnSources = geminiResult.citations
+                .map((citNum) => {
+                  const src = activeSources[citNum - 1];
+                  if (!src) return null;
+                  const topChunk = bestChunkForDoc(src.id);
+                  return {
+                    id: citNum,
+                    name: src.title,
+                    section: topChunk ? topChunk.locatorLabel : src.badge,
+                    tab: src.inspectorTab,
+                    sourceId: src.id,
+                    locator: topChunk?.locatorLabel,
+                    scoreLabel:
+                      topChunk && topChunk.normalizedScore > 0
+                        ? `Similitud ${topChunk.normalizedScore.toFixed(2)}`
+                        : undefined,
+                  };
+                })
+                .filter(Boolean) as unknown as {
+                id: number;
+                name: string;
+                section: string;
+                tab: InspectorTab;
+                sourceId?: string;
+                locator?: string;
+                scoreLabel?: string;
+              }[];
+            }
+            if (turnSources.length === 0 && activeSources.length > 0) {
+              turnSources = activeSources.slice(0, 2).map((s, idx) => ({
+                id: idx + 1,
+                name: s.title,
+                section: s.badge,
+                tab: s.inspectorTab,
+              }));
+            }
+          } else if (!geminiResult.success) {
+            // Mostrar error real de Google Gemini para visibilidad total en vez de silenciarlo
+            ansText = `⚠️ **Aviso de Google Gemini:** ${geminiResult.text || geminiResult.error || "No se pudo obtener respuesta del modelo."}\n\n*Por favor revisa tu API Key en Configuración > Proveedores de IA o verifica la cuota de tu clave en Google AI Studio.*`;
+            latencyLabel = `${geminiResult.latencyMs} ms (Error Gemini)`;
           }
+        } catch (err: any) {
+          console.warn("[Gemini RAG] Excepción en llamada real:", err);
+          ansText = `⚠️ **Error de conexión con Gemini:** ${err?.message || String(err)}`;
+          latencyLabel = `0 ms (Error red)`;
         }
-      } catch (err) {
-        console.warn("[Gemini RAG] Fallback al motor local RAG:", err);
       }
     }
 
@@ -4973,6 +4988,28 @@ export default function CriteriosApp() {
                                       readOnly={!isEditingKey}
                                       value={isEditingKey ? apiKeyDraft : (prov.apiKeyMask || "")}
                                       onChange={(e) => setApiKeyDraft(e.target.value)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter" && isEditingKey) {
+                                          e.preventDefault();
+                                          if (apiKeyDraft.trim()) {
+                                            if (prov.id === "google") {
+                                              saveStoredGeminiApiKey(apiKeyDraft.trim());
+                                            }
+                                            const cleanKey = apiKeyDraft.trim();
+                                            const masked = cleanKey.length > 10
+                                              ? cleanKey.slice(0, 6) + "••••••••" + cleanKey.slice(-4)
+                                              : cleanKey;
+                                            setAiProviders((prev) =>
+                                              prev.map((p) =>
+                                                p.id === prov.id ? { ...p, apiKeyMask: masked } : p
+                                              )
+                                            );
+                                            showToastMessage(`Clave de ${prov.name} guardada correctamente`);
+                                          }
+                                          setEditingApiKeyId(null);
+                                          setApiKeyDraft("");
+                                        }
+                                      }}
                                       placeholder={isEditingKey ? "Pega tu API Key..." : "Sin clave configurada"}
                                       className={`w-full pl-7 pr-2 py-1.5 rounded-lg border font-mono text-[11px] ${
                                         isEditingKey
@@ -5000,6 +5037,7 @@ export default function CriteriosApp() {
                                               p.id === prov.id ? { ...p, apiKeyMask: masked } : p
                                             )
                                           );
+                                          showToastMessage(`Clave de ${prov.name} guardada correctamente`);
                                         }
                                         setEditingApiKeyId(null);
                                         setApiKeyDraft("");

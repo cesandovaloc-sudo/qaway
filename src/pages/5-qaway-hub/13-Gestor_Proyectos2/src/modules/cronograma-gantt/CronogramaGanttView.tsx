@@ -505,9 +505,16 @@ export default function CronogramaGanttView({
 
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const headScrollRef = useRef<HTMLDivElement>(null);
   const colRef = useRef(colWidths);
   const dragRef = useRef<{ key: ColKey; startX: number; startW: number } | null>(null);
   colRef.current = colWidths;
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (headScrollRef.current) {
+      headScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
+    }
+  };
 
   useEffect(() => {
     try {
@@ -1360,8 +1367,77 @@ export default function CronogramaGanttView({
             </button>
           </div>
 
-          {/* Tabla Gantt con Timeline */}
-          <div className="gantt-scroll" ref={scrollRef}>
+          {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
+          <div className="table-head">
+            <div
+              className="fixed-cols"
+              style={{
+                width: `${fixedWidth}px`,
+                minWidth: `${fixedWidth}px`,
+                maxWidth: `${fixedWidth}px`,
+                gridTemplateColumns: fixedGridCols,
+              }}
+            >
+              <div className="name-head">
+                <input
+                  type="checkbox"
+                  onChange={(e) =>
+                    notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
+                  }
+                />
+                <span>Hito Rector / Subproceso Oficial</span>
+                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'name')} />
+              </div>
+              <div>
+                Inicio
+                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
+              </div>
+              <div>
+                Fin
+                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
+              </div>
+              <div>
+                Duración
+                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
+              </div>
+              <div>
+                Avance
+                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
+              </div>
+              <div>
+                Estado
+                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
+              </div>
+            </div>
+
+            <div className="timeline-head-viewport" ref={headScrollRef}>
+              <div className="timeline-head" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
+                <div
+                  className="years"
+                  style={{
+                    gridTemplateColumns: zoom === 'Día' || zoom === 'Semana' ? monthCols : yearCols,
+                  }}
+                >
+                  {zoom === 'Día' || zoom === 'Semana' ? (
+                    MONTH_NAMES.map((name, idx) => <span key={idx}>{name}</span>)
+                  ) : (
+                    <>
+                      <span>2026</span>
+                      <span>2027</span>
+                    </>
+                  )}
+                </div>
+                <div className="months" style={{ gridTemplateColumns: segCols }}>
+                  {segments.map((s) => (
+                    <span key={s.key}>{s.label}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabla Gantt con Timeline (Filas operativas con scroll 2D) */}
+          <div className="gantt-scroll" ref={scrollRef} onScroll={handleScroll}>
             <div
               className="gantt"
               style={
@@ -1372,73 +1448,6 @@ export default function CronogramaGanttView({
                 } as React.CSSProperties
               }
             >
-              {/* Cabecera de la Tabla */}
-              <div className="table-head">
-                <div
-                  className="fixed-cols"
-                  style={{
-                    width: `${fixedWidth}px`,
-                    minWidth: `${fixedWidth}px`,
-                    maxWidth: `${fixedWidth}px`,
-                    gridTemplateColumns: fixedGridCols,
-                  }}
-                >
-                  <div className="name-head">
-                    <input
-                      type="checkbox"
-                      onChange={(e) =>
-                        notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
-                      }
-                    />
-                    <span>Hito Rector / Subproceso Oficial</span>
-                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'name')} />
-                  </div>
-                  <div>
-                    Inicio
-                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
-                  </div>
-                  <div>
-                    Fin
-                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
-                  </div>
-                  <div>
-                    Duración
-                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
-                  </div>
-                  <div>
-                    Avance
-                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
-                  </div>
-                  <div>
-                    Estado
-                    <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
-                  </div>
-                </div>
-
-                <div className="timeline-head" style={{ minWidth: timelineMinWidth }}>
-                  <div
-                    className="years"
-                    style={{
-                      gridTemplateColumns: zoom === 'Día' || zoom === 'Semana' ? monthCols : yearCols,
-                    }}
-                  >
-                    {zoom === 'Día' || zoom === 'Semana' ? (
-                      MONTH_NAMES.map((name, idx) => <span key={idx}>{name}</span>)
-                    ) : (
-                      <>
-                        <span>2026</span>
-                        <span>2027</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="months" style={{ gridTemplateColumns: segCols }}>
-                    {segments.map((s) => (
-                      <span key={s.key}>{s.label}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
               {/* Filas */}
               {shown.map((x, i) => (
                 <div
