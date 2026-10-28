@@ -486,8 +486,8 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     company: "Google LLC",
     logoColor: "#2563EB",
     badge: "LLM Primario (Gemini)",
-    models: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro", "text-embedding-004", "gemini-1.5-flash-latest", "gemini-1.5-pro"],
-    selectedModel: "gemini-2.0-flash",
+    models: ["gemini-3.8-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash", "gemini-1.5-pro", "text-embedding-004"],
+    selectedModel: "gemini-3.8-flash",
     status: "active",
     latency: 142,
     role: "primary_llm",
@@ -1016,11 +1016,11 @@ export default function CriteriosApp() {
     aiProviders[0] || {
       id: "google",
       name: "Google DeepMind",
-      selectedModel: "gemini-2.0-flash",
+      selectedModel: "gemini-3.8-flash",
       contextWindow: "1M-2M tokens",
       latency: 142,
       apiKeyMask: "",
-      models: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"],
+      models: ["gemini-3.8-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"],
     };
   // Alias del proveedor LLM activo (usado por el flujo de latencia/Gemini del chat)
   const activeProvider = activeLlmProvider;
@@ -1687,7 +1687,7 @@ export default function CriteriosApp() {
               excerpt: evidenceExcerptForDoc(s.id),
             })),
             projectName: activeProjName,
-            model: activeProvider.selectedModel || "gemini-2.0-flash",
+            model: activeProvider.selectedModel || "gemini-3.8-flash",
             apiKey: geminiApiKey,
             agentProfile: currentAgentProfile,
             tone: currentAgentTone,

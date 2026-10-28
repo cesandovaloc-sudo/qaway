@@ -154,3 +154,15 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
      - Para que el motor RAG indexe y lea todos los numerales de la RM 0401-2008-ED sin requerir capturas de pantalla, basta con eliminar el archivo antiguo de la pestaña **Fuentes** y volver a cargarlo (o arrastrarlo a *Indexar Archivos*). El nuevo `documentParserService.ts` con Tesseract.js procesará automáticamente cada página escaneada, etiquetando los fragmentos como `Página N (OCR)` y vectorizándolos en el sistema.
 
 
+
+### L. Actualizacion Definitiva a Gemini 3.8 Flash y Auto-Recuperacion de Modelos Descatalogados (28-Oct-2026)
+- **Diagnostico del Error de Google:**
+  - Google retiro permanentemente el endpoint models/gemini-2.0-flash con el mensaje oficial: "This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash".
+  - Al estar fijado gemini-2.0-flash como fallback de cuota en el codigo anterior, cualquier consulta caia en un bucle de error (429 en 2.5 por limite de 20 consultas -> fallback a 2.0 que ya no existia en Google).
+- **Solucion Aplicada:**
+  1. **Actualizacion a gemini-3.8-flash:**
+     - En geminiRAGService.ts y CriteriosApp.tsx se configuro gemini-3.8-flash como modelo institucional predeterminado y fallback de cuota.
+     - Se actualizo la lista de modelos de Google DeepMind en la matriz de orquestacion a ["gemini-3.8-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash", "gemini-1.5-pro", "text-embedding-004"].
+  2. **Motor de Auto-Recuperacion Auto-Sanable (Self-Healing):**
+     - En geminiRAGService.ts, ante cualquier error 400/404 de Google con mensaje de modelo deprecado o descatalogado (no longer available), el servicio extrae automaticamente el modelo sustituto sugerido por Google mediante regex (models/([a-zA-Z0-9.-]+)) y re-ejecuta la consulta de inmediato sin mostrar error en pantalla.
+     - En caso de saturacion de cuota, rota limpiamente entre gemini-3.8-flash y gemini-1.5-flash para mantener siempre activo el asistente.
