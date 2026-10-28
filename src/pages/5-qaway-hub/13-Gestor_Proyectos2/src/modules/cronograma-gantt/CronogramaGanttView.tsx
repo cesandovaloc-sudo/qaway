@@ -683,6 +683,11 @@ export default function CronogramaGanttView({
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
   const [zoom, setZoom] = useState('Mes');
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
+  const [hoveredTask, setHoveredTask] = useState<{
+    item: Item;
+    x: number;
+    y: number;
+  } | null>(null);
 
   useEffect(() => {
     const onDateChanged = (e: any) => {
@@ -968,7 +973,7 @@ export default function CronogramaGanttView({
     setZoom(z);
   };
 
-  /* Centrado automático e inmediato en la fecha actual al inicializar la vista o cambiar de escala (Día/Semana/Mes/Trimestre) */
+  /* Centrado fluido con física suave en la fecha actual al inicializar la vista o cambiar de escala (Día/Semana/Mes/Trimestre) */
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!scrollRef.current) return;
@@ -976,11 +981,11 @@ export default function CronogramaGanttView({
       const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
       const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
       const targetScroll = Math.max(0, todayPx - timelineVisibleWidth / 2);
-      container.scrollLeft = targetScroll;
+      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
       if (headScrollRef.current) {
-        headScrollRef.current.scrollLeft = targetScroll;
+        headScrollRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
       }
-    }, 30);
+    }, 60);
     return () => clearTimeout(timer);
   }, [zoom, currentTodayIso]);
 
@@ -2248,12 +2253,17 @@ export default function CronogramaGanttView({
                       style={{
                         left: `${getDatePixelOffset(x.start)}px`,
                         width: `${Math.max(8, getDatePixelOffset(shiftDays(x.end, 1)) - getDatePixelOffset(x.start))}px`,
+                        animationDelay: `${Math.min(i * 35, 320)}ms`,
                       }}
-                      title={
-                        x.kind === 'hito'
-                          ? `Hito Rector: ${x.name} (${formatDate(x.start)} – ${formatDate(x.end)})`
-                          : `Subproceso: ${x.name} (${formatDate(x.start)} – ${formatDate(x.end)})`
-                      }
+                      onMouseEnter={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredTask({
+                          item: x,
+                          x: rect.left + rect.width / 2,
+                          y: rect.top - 8,
+                        });
+                      }}
+                      onMouseLeave={() => setHoveredTask(null)}
                     >
                       {x.kind === 'hito' ? (
                         <span className="hito-diamond-badge" title="Hito Rector Oficial">
@@ -2345,6 +2355,50 @@ export default function CronogramaGanttView({
               </div>
             </div>
           </div>
+
+          {/* Tooltip Flotante Sofisticado estilo Módulo Reportes */}
+          {hoveredTask && (
+            <div
+              className="gantt-modern-tooltip"
+              style={{
+                left: `${hoveredTask.x}px`,
+                top: `${hoveredTask.y}px`,
+              }}
+            >
+              <div className="tooltip-header">
+                <span className="tooltip-code">
+                  {hoveredTask.item.kind === 'hito' ? '◆ ' : ''}
+                  {hoveredTask.item.code}
+                </span>
+                <span className="tooltip-name">{hoveredTask.item.name}</span>
+              </div>
+              <div className="tooltip-grid">
+                <div className="tooltip-row">
+                  <span className="tooltip-label">Plazo:</span>
+                  <span className="tooltip-val">
+                    {formatDate(hoveredTask.item.start)} – {formatDate(hoveredTask.item.end)}
+                    <span className="tooltip-days"> ({getDays(hoveredTask.item.start, hoveredTask.item.end)} días)</span>
+                  </span>
+                </div>
+                <div className="tooltip-row">
+                  <span className="tooltip-label">Cumplimiento:</span>
+                  <span className="tooltip-val tooltip-pct">{hoveredTask.item.progress}%</span>
+                </div>
+                <div className="tooltip-row">
+                  <span className="tooltip-label">Estado:</span>
+                  <span className={`status ${STATUS_CLASS[hoveredTask.item.status]}`}>
+                    {hoveredTask.item.status}
+                  </span>
+                </div>
+                {hoveredTask.item.gestor && (
+                  <div className="tooltip-row">
+                    <span className="tooltip-label">Responsable:</span>
+                    <span className="tooltip-val">{hoveredTask.item.gestor}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Footer de Paginación */}
           <footer className="footer">
