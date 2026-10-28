@@ -1099,6 +1099,92 @@ export default function CronogramaGanttView({
       status: v >= 100 ? 'Cumple' : v === 0 ? 'Pendiente' : 'En proceso',
     });
 
+  /* Sincronización bidireccional Estado <-> Avance */
+  const setStatusWithSync = (x: Item, s: Status) => {
+    let newProgress = x.progress;
+    if (s === 'Pendiente') {
+      newProgress = 0;
+    } else if (s === 'Completado' || s === 'Cumple') {
+      newProgress = 100;
+    } else if (s === 'En proceso' || s === 'En curso') {
+      if (newProgress === 0 || newProgress === 100) newProgress = 50;
+    } else if (s === 'Con retraso') {
+      if (newProgress === 100) newProgress = 50;
+    }
+    update(x.id, { status: s, progress: newProgress });
+    notify(`Estado: ${s} (${newProgress}%)`);
+  };
+
+  /* Asignación multi-responsables */
+  const toggleItemGestor = (item: Item, gestorName: string) => {
+    const current = getItemGestores(item);
+    let updated: string[];
+    if (current.includes(gestorName)) {
+      updated = current.filter((g) => g !== gestorName);
+    } else {
+      updated = [...current, gestorName];
+    }
+    update(item.id, {
+      gestores: updated,
+      gestor: updated[0] || '',
+    });
+    notify(`Responsables actualizados (${updated.length})`);
+  };
+
+  /* Modificación interactiva de fechas por arrastre de barra */
+  const handleResizeMouseDown = (e: React.MouseEvent, item: Item) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const startMouseX = e.clientX;
+    const startOffset = getDatePixelOffset(item.start);
+    const initialWidth = Math.max(8, getDatePixelOffset(shiftDays(item.end, 1)) - startOffset);
+
+    let pxPerDay = 34; // default Día
+    if (zoom === 'Semana') pxPerDay = 80 / 7;
+    else if (zoom === 'Mes') pxPerDay = 170 / 30.41;
+    else if (zoom === 'Trimestre') pxPerDay = 1160 / 242;
+
+    setResizingTaskId(item.id);
+    setResizeTempWidth(initialWidth);
+    setResizeTempEndDate(item.end);
+    setHoveredTask(null);
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startMouseX;
+      const newWidth = Math.max(pxPerDay, initialWidth + deltaX);
+      const addedDays = Math.round((newWidth - initialWidth) / pxPerDay);
+      const newEnd = shiftDays(item.end, addedDays);
+
+      if (newEnd >= item.start) {
+        setResizeTempWidth(newWidth);
+        setResizeTempEndDate(newEnd);
+      }
+    };
+
+    const onMouseUp = (upEvent: MouseEvent) => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+
+      const deltaX = upEvent.clientX - startMouseX;
+      const addedDays = Math.round(deltaX / pxPerDay);
+      let finalEnd = shiftDays(item.end, addedDays);
+      if (finalEnd < item.start) finalEnd = item.start;
+
+      setResizingTaskId(null);
+      setResizeTempWidth(null);
+      setResizeTempEndDate(null);
+
+      if (finalEnd !== item.end) {
+        update(item.id, { end: finalEnd });
+        notify(`Plazo actualizado: hasta ${formatDate(finalEnd)} (${getDays(item.start, finalEnd)} días)`);
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
   const selected = items.find((x) => x.id === selectedId);
   const hitos = items.filter((x) => x.kind === 'hito');
   const subs = items.filter((x) => x.kind === 'subproceso');
@@ -1129,7 +1215,8 @@ export default function CronogramaGanttView({
         x.status === tab;
       const matchRegion =
         regionFilter === 'Todas' || x.region === 'Todas las Regiones' || x.region === regionFilter;
-      const matchGestor = gestorFilter === 'Todos' || x.gestor === gestorFilter;
+      const matchGestor =
+        gestorFilter === 'Todos' || x.gestor === gestorFilter || getItemGestores(x).includes(gestorFilter);
 
       // Solapamiento de fechas con el período oficial consultado
       let matchRange = true;
@@ -1762,6 +1849,20 @@ export default function CronogramaGanttView({
               ))}
             </div>
 
+            {/* Alternar avance en barras (limpio por defecto, activable a demanda) */}
+            <button
+              type="button"
+              className={`btn-toggle-labels ${showBarLabels ? 'active' : ''}`}
+              onClick={() => {
+                setShowBarLabels((prev) => !prev);
+                notify(!showBarLabels ? 'Mostrando avance en las barras' : 'Vista de barras limpia');
+              }}
+              title="Alternar visibilidad del porcentaje de avance en las barras"
+            >
+              <Percent size={13} />
+              <span>Avance</span>
+            </button>
+
             <button
               type="button"
               className="btn secondary clear-btn"
@@ -2197,7 +2298,7 @@ export default function CronogramaGanttView({
                               className={s === x.status ? 'cur' : ''}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                update(x.id, { status: s });
+                                setStatusWithSync(x, s);
                                 closeEdit();
                               }}
                             >
@@ -2214,7 +2315,7 @@ export default function CronogramaGanttView({
                   {visibleCols.includes('gestor') && (
                     <div
                       className="gestor-cell editable"
-                      title="Clic para reasignar gestor territorial"
+                      title="Clic para gestionar responsables asignados"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleEdit(x, 'gestor');
@@ -2222,26 +2323,101 @@ export default function CronogramaGanttView({
                     >
                       {isEditing(x, 'gestor') ? (
                         <div className="cell-editor cell-pop gestor-pop" onClick={(e) => e.stopPropagation()}>
-                          {GESTOR_OPTIONS.filter((g) => g.value !== 'Todos').map((g) => (
+                          <div className="gestor-pop-head">
+                            <span>Asignar Responsables</span>
+                          </div>
+                          <div className="gestor-pop-list">
+                            {GESTOR_OPTIONS.filter((g) => g.value !== 'Todos').map((g) => {
+                              const currentGestores = getItemGestores(x);
+                              const isAssigned = currentGestores.includes(g.value);
+                              return (
+                                <button
+                                  key={g.value}
+                                  type="button"
+                                  className={`gestor-pop-item ${isAssigned ? 'selected' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleItemGestor(x, g.value);
+                                  }}
+                                >
+                                  <span className="gestor-pop-check">
+                                    {isAssigned && <Check size={11} strokeWidth={3} />}
+                                  </span>
+                                  <span
+                                    className="gestor-circle-avatar mini"
+                                    style={{ backgroundColor: getGestorColor(g.value) }}
+                                  >
+                                    {getGestorInitials(g.value)}
+                                  </span>
+                                  <span className="gestor-pop-name">{g.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="gestor-pop-footer">
                             <button
-                              key={g.value}
-                              className={x.gestor === g.value ? 'cur' : ''}
-                              onClick={() => {
-                                update(x.id, { gestor: g.value });
+                              type="button"
+                              className="gestor-pop-done-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 closeEdit();
-                                notify(`Responsable asignado: ${g.value}`);
                               }}
                             >
-                              <span>{g.label}</span>
-                              {x.gestor === g.value && <Check size={12} />}
+                              Listo
                             </button>
-                          ))}
+                          </div>
                         </div>
                       ) : (
-                        <span className="cell-text gestor-text">
-                          <span className="gestor-dot" />
-                          {x.gestor || 'Sin asignar'}
-                        </span>
+                        (() => {
+                          const gestoresList = getItemGestores(x);
+                          if (gestoresList.length === 0) {
+                            return (
+                              <span className="cell-text gestor-text unassigned">
+                                <span className="gestor-dot empty" />
+                                Sin asignar
+                              </span>
+                            );
+                          }
+                          if (gestoresList.length === 1) {
+                            const gName = gestoresList[0];
+                            return (
+                              <div className="gestor-single-badge" title={gName}>
+                                <span
+                                  className="gestor-circle-avatar"
+                                  style={{ backgroundColor: getGestorColor(gName) }}
+                                >
+                                  {getGestorInitials(gName)}
+                                </span>
+                                <span className="gestor-name-text">{gName}</span>
+                              </div>
+                            );
+                          }
+                          return (
+                            <div className="gestor-multi-stack" title={gestoresList.join(', ')}>
+                              <div className="gestor-stacked-circles">
+                                {gestoresList.slice(0, 3).map((g, idx) => (
+                                  <span
+                                    key={g}
+                                    className="gestor-circle-avatar stacked"
+                                    style={{
+                                      backgroundColor: getGestorColor(g),
+                                      zIndex: 10 - idx,
+                                    }}
+                                    title={g}
+                                  >
+                                    {getGestorInitials(g)}
+                                  </span>
+                                ))}
+                                {gestoresList.length > 3 && (
+                                  <span className="gestor-circle-avatar stacked more-count" style={{ zIndex: 6 }}>
+                                    +{gestoresList.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="gestor-stack-label">{gestoresList.length}</span>
+                            </div>
+                          );
+                        })()
                       )}
                     </div>
                   )}
@@ -2288,13 +2464,24 @@ export default function CronogramaGanttView({
                     <div
                       className={`bar ${STATUS_CLASS[x.status]} ${x.kind === 'hito' ? 'major' : ''} ${
                         isRangeActive && x.end > rangeTo ? 'exceeds-range' : ''
-                      }`}
+                      } ${resizingTaskId === x.id ? 'is-resizing' : ''}`}
                       style={{
                         left: `${getDatePixelOffset(x.start)}px`,
-                        width: `${Math.max(8, getDatePixelOffset(shiftDays(x.end, 1)) - getDatePixelOffset(x.start))}px`,
+                        width: `${
+                          resizingTaskId === x.id && resizeTempWidth !== null
+                            ? resizeTempWidth
+                            : Math.max(8, getDatePixelOffset(shiftDays(x.end, 1)) - getDatePixelOffset(x.start))
+                        }px`,
                         animationDelay: `${Math.min(i * 35, 320)}ms`,
                       }}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedId(x.id);
+                        setPanelOpen(true);
+                        notify(`Editando: ${x.name}`);
+                      }}
                       onMouseEnter={(e) => {
+                        if (resizingTaskId) return;
                         const rect = e.currentTarget.getBoundingClientRect();
                         setHoveredTask({
                           item: x,
@@ -2302,8 +2489,17 @@ export default function CronogramaGanttView({
                           y: rect.top - 8,
                         });
                       }}
-                      onMouseLeave={() => setHoveredTask(null)}
+                      onMouseLeave={() => {
+                        if (!resizingTaskId) setHoveredTask(null);
+                      }}
                     >
+                      {/* Avance limpio embebido (conmutable a través del botón superior) */}
+                      {showBarLabels && (
+                        <span className="bar-label-inner">
+                          {x.progress}%
+                        </span>
+                      )}
+
                       {x.kind === 'hito' ? (
                         <span className="hito-diamond-badge" title="Hito Rector Oficial">
                           <span className="diamond-shape" />
@@ -2316,6 +2512,20 @@ export default function CronogramaGanttView({
                         >
                           +fuera rango
                         </span>
+                      )}
+
+                      {/* Manillar interactivo de estiramiento / redimensión de fechas */}
+                      <div
+                        className="bar-resizer-right"
+                        title="Arrastra para modificar la fecha de fin (o doble clic para editar)"
+                        onMouseDown={(e) => handleResizeMouseDown(e, x)}
+                      />
+
+                      {/* Badge flotante en vivo durante el arrastre */}
+                      {resizingTaskId === x.id && resizeTempEndDate && (
+                        <div className="resize-live-badge">
+                          Hasta {formatDate(resizeTempEndDate)} ({getDays(x.start, resizeTempEndDate)}d)
+                        </div>
                       )}
                     </div>
                   </div>
@@ -2395,8 +2605,8 @@ export default function CronogramaGanttView({
             </div>
           </div>
 
-          {/* Tooltip Flotante Sofisticado estilo Módulo Reportes */}
-          {hoveredTask && (
+          {/* Tooltip Minimalista estilo Módulo Reportes (1-2 datos limpios, cero sobrecarga) */}
+          {hoveredTask && !resizingTaskId && (
             <div
               className="gantt-modern-tooltip"
               style={{
@@ -2405,35 +2615,14 @@ export default function CronogramaGanttView({
               }}
             >
               <div className="tooltip-header">
-                <span className="tooltip-code">
-                  {hoveredTask.item.kind === 'hito' ? '◆ ' : ''}
-                  {hoveredTask.item.code}
-                </span>
-                <span className="tooltip-name">{hoveredTask.item.name}</span>
+                {hoveredTask.item.kind === 'hito' ? '◆ ' : ''}
+                {hoveredTask.item.code} {hoveredTask.item.name}
               </div>
-              <div className="tooltip-grid">
-                <div className="tooltip-row">
-                  <span className="tooltip-label">Plazo:</span>
-                  <span className="tooltip-val">
-                    {formatDate(hoveredTask.item.start)} – {formatDate(hoveredTask.item.end)}
-                    <span className="tooltip-days"> ({getDays(hoveredTask.item.start, hoveredTask.item.end)} días)</span>
-                  </span>
-                </div>
-                <div className="tooltip-row">
-                  <span className="tooltip-label">Cumplimiento:</span>
-                  <span className="tooltip-val tooltip-pct">{hoveredTask.item.progress}%</span>
-                </div>
-                <div className="tooltip-row">
-                  <span className="tooltip-label">Estado:</span>
-                  <span className={`status ${STATUS_CLASS[hoveredTask.item.status]}`}>
-                    {hoveredTask.item.status}
-                  </span>
-                </div>
-                {hoveredTask.item.gestor && (
-                  <div className="tooltip-row">
-                    <span className="tooltip-label">Responsable:</span>
-                    <span className="tooltip-val">{hoveredTask.item.gestor}</span>
-                  </div>
+              <div className="tooltip-metric">
+                <span className={`tooltip-dot ${STATUS_CLASS[hoveredTask.item.status]}`} />
+                <span>Cumplimiento: <strong>{hoveredTask.item.progress}%</strong></span>
+                {hoveredTask.item.kind === 'hito' && (
+                  <span className="tooltip-sub"> · Corte: {formatDate(hoveredTask.item.end)}</span>
                 )}
               </div>
             </div>
@@ -2566,7 +2755,7 @@ export default function CronogramaGanttView({
                 <span>Estado de cumplimiento</span>
                 <select
                   value={selected.status}
-                  onChange={(e) => update(selected.id, { status: e.target.value as Status })}
+                  onChange={(e) => setStatusWithSync(selected, e.target.value as Status)}
                 >
                   {STATUS_OPTIONS.map((x) => (
                     <option key={x}>{x}</option>
