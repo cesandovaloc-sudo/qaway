@@ -23,6 +23,7 @@ import {
   PanelRightOpen,
   Paperclip,
   Pencil,
+  Percent,
   Plus,
   RefreshCw,
   Save,
@@ -32,6 +33,7 @@ import {
   Trash2,
   Upload,
   UserCheck,
+  UserPlus,
   Users,
   X
 } from 'lucide-react';
@@ -56,6 +58,7 @@ interface Item {
   reportType?: string;
   region?: string;
   gestor?: string;
+  gestores?: string[];
 }
 
 const INITIAL_ITEMS: Item[] = [
@@ -73,6 +76,7 @@ const INITIAL_ITEMS: Item[] = [
     reportType: 'Línea de tiempo',
     region: 'Junín',
     gestor: 'Carlos Mendoza',
+    gestores: ['Carlos Mendoza', 'María Salazar'],
   },
   {
     id: 's11',
@@ -86,6 +90,7 @@ const INITIAL_ITEMS: Item[] = [
     status: 'Completado',
     region: 'Junín',
     gestor: 'María Salazar',
+    gestores: ['María Salazar'],
   },
   {
     id: 's12',
@@ -99,6 +104,7 @@ const INITIAL_ITEMS: Item[] = [
     status: 'En proceso',
     region: 'Junín',
     gestor: 'María Salazar',
+    gestores: ['María Salazar', 'Carlos Mendoza'],
   },
   {
     id: 'h2',
@@ -114,6 +120,7 @@ const INITIAL_ITEMS: Item[] = [
     reportType: 'Matriz de entregables',
     region: 'Junín',
     gestor: 'Carlos Mendoza',
+    gestores: ['Carlos Mendoza', 'Lucía Ramos', 'Javier Ruiz'],
   },
   {
     id: 's21',
@@ -319,6 +326,34 @@ const GESTOR_OPTIONS = [
   { value: 'Lucía Ramos', label: 'Lucía Ramos (Loreto)' },
   { value: 'Javier Ruiz', label: 'Javier Ruiz (Transporte)' },
 ];
+
+const GESTOR_COLORS: Record<string, string> = {
+  'María Salazar': '#2563eb',
+  'Carlos Mendoza': '#0284c7',
+  'Lucía Ramos': '#7c3aed',
+  'Javier Ruiz': '#059669',
+};
+
+const getGestorInitials = (name: string): string => {
+  if (!name) return '??';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const getGestorColor = (name: string): string => {
+  if (GESTOR_COLORS[name]) return GESTOR_COLORS[name];
+  const colors = ['#2563eb', '#0284c7', '#7c3aed', '#059669', '#d97706', '#dc2626'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+  return colors[Math.abs(hash) % colors.length];
+};
+
+const getItemGestores = (item: Item): string[] => {
+  if (item.gestores && item.gestores.length > 0) return item.gestores;
+  if (item.gestor) return [item.gestor];
+  return [];
+};
 
 const TYPE_OPTIONS = [
   { value: 'Todos', label: 'Todos' },
@@ -688,6 +723,10 @@ export default function CronogramaGanttView({
     x: number;
     y: number;
   } | null>(null);
+  const [showBarLabels, setShowBarLabels] = useState(false);
+  const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
+  const [resizeTempWidth, setResizeTempWidth] = useState<number | null>(null);
+  const [resizeTempEndDate, setResizeTempEndDate] = useState<string | null>(null);
 
   useEffect(() => {
     const onDateChanged = (e: any) => {

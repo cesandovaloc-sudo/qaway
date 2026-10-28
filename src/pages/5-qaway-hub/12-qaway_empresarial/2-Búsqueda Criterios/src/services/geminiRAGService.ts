@@ -148,11 +148,15 @@ Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comun
    - PROHIBICIÓN ABSOLUTA DE INFERIR, ADIVINAR O ARMAR URLs EN TU TEXTO:
      * NUNCA inventes números correlativos, slugs de normativas (ej. ".../normas-legales/12345-..."), ni enlaces con "?term=...".
      * Si la Búsqueda Web está activa, la ÚNICA fuente válida para enlaces externos es Google Search Grounding.
-     * Si necesitas citar una norma o enlace web, NO escribas un enlace markdown [Texto](https://...) a menos que la URL provenga literalmente de los resultados devueltos por Google Search.
+     * Si necesitas citar una norma o enlace web, prioriza siempre el portal oficial del organismo rector correspondiente (ej. MEF para presupuesto/finanzas, MINEDU para educación, El Peruano para leyes publicadas).
+     * ESTRICTAMENTE PROHIBIDO añadir disculpas, explicaciones técnicas o paréntesis defensivos como:
+       - "(Este enlace es un ejemplo, ya que el sistema no me permite...)"
+       - "(Nota: no puedo generar URLs exactas...)"
+       Redacta con total seguridad, aplomo y autoridad ejecutiva profesional.
    - GENERACIÓN DE CONSULTAS RESTRICTIVAS Y PRECISAS PARA GOOGLE SEARCH:
-     * Para normas legales oficiales: genera consultas con el número completo, año y sitio oficial, ej: "Resolución Ministerial 057-2026-MINEDU site:gob.pe", "site:elperuano.pe", "site:minedu.gob.pe".
+     * Para normas legales oficiales: genera consultas con el número completo, año y sitio oficial, ej: "Ley 32513 site:mef.gob.pe", "Resolución Ministerial 057-2026-MINEDU site:gob.pe", "site:elperuano.pe".
      * Para programas y canales de YouTube: "site:youtube.com/@canalYAAAAA", "Marco Sifuentes #LaEncerrona".
-   - Si no obtienes un enlace verificado directo tras la búsqueda, dilo con honestidad: "No se encontró un enlace web verificado en línea para este documento", pero NUNCA inventes una URL para disimular.
+   - Si no obtienes un enlace verificado directo tras la búsqueda, dilo con honestidad ejecutiva: "No se encontró un enlace web verificado en línea para este documento", pero NUNCA inventes una URL para disimular.
    - Si la Búsqueda Web está desactivada y el usuario pide buscar información o enlaces en internet:
      * Indícale con claridad: "Este documento local no incluye el enlace web externo. Si deseas que lo busque y verifique en línea, activa el botón '🌐 Búsqueda Web' en la barra inferior del chat (o en Configuración > Motor RAG)."
    - Si el usuario adjunta una captura de pantalla (ej. error 404 o documento):
@@ -317,9 +321,120 @@ function extractCandidateText(candidate: any): string {
 }
 
 /**
- * Extrae los enlaces web reales verificados por Google Search Grounding (groundingMetadata.groundingChunks)
+ * Asigna un título limpio, legible y representativo a cada enlace según su entidad
  */
-function extractGroundingWebLinks(candidate: any): Array<{ title: string; uri: string }> {
+function enhanceLinkTitle(uri: string, originalTitle: string): string {
+  const cleanTitle = (originalTitle || "").trim();
+  const lowerUri = uri.toLowerCase();
+
+  const isGeneric =
+    !cleanTitle ||
+    cleanTitle.toLowerCase() === "enlace web verificado" ||
+    cleanTitle.toLowerCase().startsWith("http") ||
+    /^[\w.-]+\.(pe|com|org|gob|net)(\.pe)?$/i.test(cleanTitle);
+
+  if (lowerUri.includes("mef.gob.pe") || lowerUri.includes("/institucion/mef/")) {
+    return isGeneric ? "Ministerio de Economía y Finanzas (MEF) - Portal Oficial" : `${cleanTitle} (MEF)`;
+  }
+  if (lowerUri.includes("minedu.gob.pe") || lowerUri.includes("/institucion/minedu/")) {
+    return isGeneric ? "Ministerio de Educación (MINEDU) - Portal Oficial" : `${cleanTitle} (MINEDU)`;
+  }
+  if (lowerUri.includes("elperuano.pe")) {
+    return isGeneric ? "Diario Oficial El Peruano - Normas Legales" : cleanTitle;
+  }
+  if (lowerUri.includes("gob.pe")) {
+    return isGeneric ? "Plataforma Digital Única del Estado Peruano (gob.pe)" : cleanTitle;
+  }
+  if (lowerUri.includes("lpderecho.pe")) {
+    return isGeneric ? "LP Pasión por el Derecho (Portal Jurídico)" : cleanTitle;
+  }
+  if (lowerUri.includes("gacetajuridica.com.pe")) {
+    return isGeneric ? "Gaceta Jurídica" : cleanTitle;
+  }
+  if (lowerUri.includes("larepublica.pe")) {
+    return isGeneric ? "Diario La República (Prensa)" : cleanTitle;
+  }
+  if (lowerUri.includes("elcomercio.pe")) {
+    return isGeneric ? "Diario El Comercio (Prensa)" : cleanTitle;
+  }
+  if (lowerUri.includes("gestion.pe")) {
+    return isGeneric ? "Diario Gestión (Economía y Negocios)" : cleanTitle;
+  }
+  if (lowerUri.includes("rpp.pe")) {
+    return isGeneric ? "RPP Noticias" : cleanTitle;
+  }
+  if (lowerUri.includes("youtube.com/@canalyaaaaa") || lowerUri.includes("canalyaaaaa")) {
+    return isGeneric ? "Marco Sifuentes - La Encerrona en YouTube" : cleanTitle;
+  }
+
+  return cleanTitle || uri;
+}
+
+/**
+ * Calcula el puntaje de autoridad oficial para que los portales del Estado (.gob.pe / sector consultado)
+ * aparezcan siempre primero, y los diarios o medios periodísticos queden al final.
+ */
+function calculateLinkAuthorityScore(uri: string, queryContext: string = ""): number {
+  const lowerUri = uri.toLowerCase();
+  const lowerQ = queryContext.toLowerCase();
+  let score = 50;
+
+  // Detección contextual del sector consultado
+  const isMef = /mef|presupuesto|econom[ií]a|finanzas|fiscal|tribut|uit|deuda/i.test(lowerQ);
+  const isMinedu = /minedu|educaci[oó]n|colegio|docente|banco de libro|ugel|drelm/i.test(lowerQ);
+  const isMinsa = /minsa|salud|hospital|digemid|m[eé]dico/i.test(lowerQ);
+  const isMtpe = /mtpe|trabajo|laboral|sunafil|empleo/i.test(lowerQ);
+  const isOsce = /osce|seace|contrataci[oó]n|licitaci[oó]n/i.test(lowerQ);
+
+  // 1. MÁXIMA PRIORIDAD: Entidad rectora o ministerio específico consultado (Score +150)
+  if (isMef && (lowerUri.includes("mef.gob.pe") || lowerUri.includes("/institucion/mef/"))) {
+    score += 150;
+  } else if (isMinedu && (lowerUri.includes("minedu.gob.pe") || lowerUri.includes("/institucion/minedu/"))) {
+    score += 150;
+  } else if (isMinsa && (lowerUri.includes("minsa.gob.pe") || lowerUri.includes("/institucion/minsa/"))) {
+    score += 150;
+  } else if (isMtpe && (lowerUri.includes("mtpe.gob.pe") || lowerUri.includes("/institucion/mtpe/") || lowerUri.includes("sunafil.gob.pe"))) {
+    score += 150;
+  } else if (isOsce && (lowerUri.includes("osce.gob.pe") || lowerUri.includes("seace.gob.pe"))) {
+    score += 150;
+  }
+
+  // 2. ALTA PRIORIDAD: Portales Oficiales del Estado / Diario Oficial (Score +80)
+  if (lowerUri.includes("gob.pe") || lowerUri.includes("elperuano.pe") || lowerUri.includes("spij.minjus.gob.pe")) {
+    score += 80;
+  }
+
+  // 3. PRIORIDAD MEDIA-ALTA: Entidades públicas / Congreso / BCRP / Universidades (Score +30)
+  if (lowerUri.includes(".edu.pe") || lowerUri.includes("congreso.gob.pe") || lowerUri.includes("bcrp.gob.pe")) {
+    score += 30;
+  }
+
+  // 4. PRIORIDAD MEDIA: Portales jurídicos especializados de análisis (Score +10)
+  if (lowerUri.includes("lpderecho.pe") || lowerUri.includes("gacetajuridica.com.pe") || lowerUri.includes("enfoquederecho.com")) {
+    score += 10;
+  }
+
+  // 5. PRIORIDAD SECUNDARIA (AL FINAL): Prensa y medios periodísticos (Score -35)
+  if (
+    lowerUri.includes("larepublica.pe") ||
+    lowerUri.includes("elcomercio.pe") ||
+    lowerUri.includes("rpp.pe") ||
+    lowerUri.includes("gestion.pe") ||
+    lowerUri.includes("trome.pe") ||
+    lowerUri.includes("infobae.com") ||
+    lowerUri.includes("andina.pe")
+  ) {
+    score -= 35;
+  }
+
+  return score;
+}
+
+/**
+ * Extrae y ordena los enlaces web reales verificados por Google Search Grounding:
+ * Primero el portal del Estado / sector específico consultado (.gob.pe, MEF, etc.), y al final los diarios.
+ */
+function extractGroundingWebLinks(candidate: any, queryContext: string = ""): Array<{ title: string; uri: string }> {
   const chunks = candidate?.groundingMetadata?.groundingChunks;
   if (!Array.isArray(chunks)) return [];
   const seen = new Set<string>();
@@ -353,10 +468,17 @@ function extractGroundingWebLinks(candidate: any): Array<{ title: string; uri: s
 
       if (!seen.has(uri)) {
         seen.add(uri);
-        links.push({ title, uri });
+        links.push({
+          title: enhanceLinkTitle(uri, title),
+          uri,
+        });
       }
     }
   }
+
+  // Ordenar por nivel de autoridad: sector oficial (.gob.pe) primero, prensa y diarios al final
+  links.sort((a, b) => calculateLinkAuthorityScore(b.uri, queryContext) - calculateLinkAuthorityScore(a.uri, queryContext));
+
   return links;
 }
 
@@ -374,11 +496,16 @@ function normalizeUriForComparison(uri: string): string {
 
 /**
  * Enriquecer la respuesta con los enlaces reales de Google Search Grounding,
- * validando que NINGUNA URL inventada o rota (404) pase al usuario.
+ * priorizando fuentes gubernamentales del sector (.gob.pe) y validando que NINGUNA URL rota pase al usuario.
  */
-function enrichTextWithGroundingLinks(rawText: string, candidate: any, isWebSearchActive = true): string {
+function enrichTextWithGroundingLinks(
+  rawText: string,
+  candidate: any,
+  isWebSearchActive = true,
+  queryContext = ""
+): string {
   if (!rawText) return "No se obtuvo respuesta del modelo Gemini.";
-  const groundingLinks = extractGroundingWebLinks(candidate);
+  const groundingLinks = extractGroundingWebLinks(candidate, queryContext);
   const verifiedUris = new Set(groundingLinks.map((l) => normalizeUriForComparison(l.uri)));
   const primaryVerifiedUri = groundingLinks.length > 0 ? groundingLinks[0].uri : "";
 
@@ -403,7 +530,7 @@ function enrichTextWithGroundingLinks(rawText: string, candidate: any, isWebSear
         }
       }
 
-      // Si la búsqueda web está activa y Google nos dio enlaces reales, redirigir al enlace verificado
+      // Si la búsqueda web está activa y Google nos dio enlaces reales, redirigir al enlace prioritario oficial
       if (isWebSearchActive && primaryVerifiedUri) {
         return `[${label}](${primaryVerifiedUri})`;
       }
@@ -423,7 +550,7 @@ function enrichTextWithGroundingLinks(rawText: string, candidate: any, isWebSear
     primaryVerifiedUri || "https://www.gob.pe/institucion/minedu/normas-legales"
   );
 
-  // 3. Adjuntar bloque de enlaces verificados de Google Search si existen y no están en el texto
+  // 3. Adjuntar bloque de enlaces verificados de Google Search ordenados (portal del sector primero, prensa al final)
   if (groundingLinks.length > 0) {
     const missingLinks = groundingLinks.filter((l) => !cleanedText.includes(l.uri)).slice(0, 4);
     if (missingLinks.length > 0) {
@@ -611,7 +738,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
                 const retryCandidate = retryData.candidates?.[0];
                 const rawRetryText =
                   extractCandidateText(retryCandidate) || "No se obtuvo respuesta del modelo Gemini.";
-                const retryText = enrichTextWithGroundingLinks(rawRetryText, retryCandidate, Boolean(params.webSearch));
+                const retryText = enrichTextWithGroundingLinks(rawRetryText, retryCandidate, Boolean(params.webSearch), query);
                 return {
                   success: true,
                   text: retryText,
@@ -643,7 +770,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     const data = await response.json();
     const candidate = data.candidates?.[0];
     const rawGeneratedText = extractCandidateText(candidate) || "No se obtuvo respuesta del modelo Gemini.";
-    const generatedText = enrichTextWithGroundingLinks(rawGeneratedText, candidate, Boolean(params.webSearch));
+    const generatedText = enrichTextWithGroundingLinks(rawGeneratedText, candidate, Boolean(params.webSearch), query);
     const citations = extractCitations(generatedText);
     const tableData = extractMarkdownTable(generatedText);
 

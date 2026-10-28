@@ -112,3 +112,13 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
      - Si hay un enlace verificado de Grounding disponible, se sustituye el enlace roto por la URL real verificada.
      - Si no hay verificación web en vivo, se neutraliza el enlace convirtiéndolo en texto plano (`**Texto** *(enlace web no verificado en línea)*`), garantizando 0% de enlaces 404.
   3. **Generación de Consultas Restrictivas en el Prompt:** Se añadieron pautas explícitas en `CAPA_0_LEGAL_PERUANA` para que las consultas internas de búsqueda utilicen sintaxis restrictiva (`site:gob.pe`, `site:elperuano.pe`, `site:youtube.com/@canalYAAAAA`).
+
+### I. Jerarquía de Autoridad Oficial en Enlaces Web (.gob.pe Primero, Prensa al Final) (28-Oct-2026)
+- **Problema:** En consultas sobre leyes y normativas públicas (ej. Ley de Presupuesto del MEF), Google Search Grounding devolvía primero diarios o portales de noticias (como `lpderecho.pe` o `larepublica.pe`), colocando las fuentes gubernamentales oficiales (`mef.gob.pe`, `gob.pe`) en posiciones secundarias, y el modelo agregaba notas aclaratorias defensivas en paréntesis.
+- **Solución Aplicada:**
+  1. **Algoritmo de Priorización por Autoridad (`calculateLinkAuthorityScore`):** En [`geminiRAGService.ts`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/services/geminiRAGService.ts) se implementó un sistema de puntuación que clasifica y ordena los enlaces devueltos por Google Search:
+     - **Máxima Prioridad (+150 puntos):** Portal institucional del ministerio o sector consultado (ej. `mef.gob.pe` / `/institucion/mef/` para finanzas, `minedu.gob.pe` para educación).
+     - **Alta Prioridad (+80 puntos):** Plataforma digital del Estado (`gob.pe`), Diario Oficial El Peruano (`elperuano.pe`), SPIJ.
+     - **Prioridad Secundaria (al final, -35 puntos):** Diarios y medios periodísticos (`larepublica.pe`, `elcomercio.pe`, `rpp.pe`, `lpderecho.pe`).
+  2. **Títulos Descriptivos Ejecutivos (`enhanceLinkTitle`):** Se reemplazaron los nombres de dominio crudos (`mef.gob.pe`, `www.gob.pe`) por denominaciones institucionales claras (ej. `Ministerio de Economía y Finanzas (MEF) - Portal Oficial`).
+  3. **Erradicación de Paréntesis Defensivos en el Prompt:** Se prohibió al modelo incluir disculpas o notas aclaratorias de "enlace de ejemplo" en el texto, instruyéndole redactar con seguridad y autoridad ejecutiva.
