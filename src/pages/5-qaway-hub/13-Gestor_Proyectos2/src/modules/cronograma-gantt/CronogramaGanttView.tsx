@@ -355,6 +355,147 @@ const formatDateRange = (from: string, to: string) => {
   return `${formatDate(from)} – ${formatDate(to)}`;
 };
 
+const formatDatePE = (iso: string) => {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+};
+
+function MiniCalendar({
+  value,
+  onChange,
+  min,
+  max,
+  onClose,
+  align = 'left',
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  min?: string;
+  max?: string;
+  onClose: () => void;
+  align?: 'left' | 'right';
+}) {
+  const [viewDate, setViewDate] = useState(() =>
+    value ? new Date(value + 'T12:00:00') : new Date('2026-10-27T12:00:00')
+  );
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const monthName = viewDate.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
+  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  const firstDayOfWeek = (new Date(year, month, 1).getDay() + 6) % 7; // Lunes = 0
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const prevMonthTotalDays = new Date(year, month, 0).getDate();
+
+  const prevMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setViewDate(new Date(year, month - 1, 1, 12));
+  };
+
+  const nextMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setViewDate(new Date(year, month + 1, 1, 12));
+  };
+
+  const days: { day: number; currentMonth: boolean; iso: string }[] = [];
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    const d = prevMonthTotalDays - i;
+    const prevDate = new Date(year, month - 1, d, 12);
+    const mStr = String(prevDate.getMonth() + 1).padStart(2, '0');
+    const dStr = String(d).padStart(2, '0');
+    days.push({ day: d, currentMonth: false, iso: `${prevDate.getFullYear()}-${mStr}-${dStr}` });
+  }
+  for (let d = 1; d <= totalDays; d++) {
+    const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    days.push({ day: d, currentMonth: true, iso });
+  }
+  const remaining = (7 - (days.length % 7)) % 7;
+  for (let d = 1; d <= remaining; d++) {
+    const nextDate = new Date(year, month + 1, d, 12);
+    const mStr = String(nextDate.getMonth() + 1).padStart(2, '0');
+    const dStr = String(d).padStart(2, '0');
+    days.push({ day: d, currentMonth: false, iso: `${nextDate.getFullYear()}-${mStr}-${dStr}` });
+  }
+
+  return (
+    <div
+      className={`custom-calendar-pop ${align === 'right' ? 'align-right' : 'align-left'}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="cal-head">
+        <span className="cal-title">{capitalizedMonth}</span>
+        <div className="cal-arrows">
+          <button type="button" onClick={prevMonth} title="Mes anterior">
+            <ChevronLeft size={14} />
+          </button>
+          <button type="button" onClick={nextMonth} title="Mes siguiente">
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+      <div className="cal-weekdays">
+        <span>LU</span>
+        <span>MA</span>
+        <span>MI</span>
+        <span>JU</span>
+        <span>VI</span>
+        <span>SA</span>
+        <span>DO</span>
+      </div>
+      <div className="cal-grid">
+        {days.map((item, idx) => {
+          const isSelected = item.iso === value;
+          const isToday = item.iso === TODAY_ISO;
+          const isDisabled = (min && item.iso < min) || (max && item.iso > max);
+          return (
+            <button
+              key={idx}
+              type="button"
+              disabled={isDisabled}
+              className={`cal-day ${item.currentMonth ? '' : 'outside'} ${isSelected ? 'selected' : ''} ${
+                isToday ? 'today-day' : ''
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled) {
+                  onChange(item.iso);
+                  onClose();
+                }
+              }}
+            >
+              {item.day}
+            </button>
+          );
+        })}
+      </div>
+      <div className="cal-footer">
+        <button
+          type="button"
+          className="cal-today-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onChange(TODAY_ISO);
+            onClose();
+          }}
+        >
+          Hoy
+        </button>
+        <button
+          type="button"
+          className="cal-close-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const getDays = (a: string, b: string) =>
   Math.max(1, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000) + 1);
 
@@ -498,10 +639,15 @@ export default function CronogramaGanttView({
   
   type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
+  const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const toggleMenu = (key: FilterMenuKey) => {
     setActiveMenu((cur) => (cur === key ? null : key));
+    setCalOpen(null);
   };
-  const closeMenus = () => setActiveMenu(null);
+  const closeMenus = () => {
+    setActiveMenu(null);
+    setCalOpen(null);
+  };
 
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -674,6 +820,10 @@ export default function CronogramaGanttView({
       }
       if (!t.closest('.filter-dropdown-wrap')) {
         setActiveMenu(null);
+        setCalOpen(null);
+      }
+      if (!t.closest('.dr-input-box')) {
+        setCalOpen(null);
       }
     };
     document.addEventListener('mousedown', onDoc);
@@ -686,6 +836,7 @@ export default function CronogramaGanttView({
         setNewMenu(false);
         setEdit(null);
         setActiveMenu(null);
+        setCalOpen(null);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -1241,26 +1392,54 @@ export default function CronogramaGanttView({
                   </div>
 
                   <div className="dr-inputs">
-                    <label>
+                    <div className="dr-input-box">
                       <span>Desde</span>
-                      <input
-                        type="date"
-                        value={rangeFrom}
-                        min={RANGE_MIN}
-                        max={rangeTo}
-                        onChange={(e) => setRangeFrom(e.target.value)}
-                      />
-                    </label>
-                    <label>
+                      <button
+                        type="button"
+                        className={`dr-date-field ${calOpen === 'from' ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCalOpen((c) => (c === 'from' ? null : 'from'));
+                        }}
+                      >
+                        <span>{formatDatePE(rangeFrom)}</span>
+                        <CalendarDays size={14} className="dr-field-icon" />
+                      </button>
+                      {calOpen === 'from' && (
+                        <MiniCalendar
+                          value={rangeFrom}
+                          max={rangeTo}
+                          min={RANGE_MIN}
+                          onChange={(v) => setRangeFrom(v)}
+                          onClose={() => setCalOpen(null)}
+                          align="left"
+                        />
+                      )}
+                    </div>
+                    <div className="dr-input-box">
                       <span>Hasta</span>
-                      <input
-                        type="date"
-                        value={rangeTo}
-                        min={rangeFrom}
-                        max={RANGE_MAX}
-                        onChange={(e) => setRangeTo(e.target.value)}
-                      />
-                    </label>
+                      <button
+                        type="button"
+                        className={`dr-date-field ${calOpen === 'to' ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCalOpen((c) => (c === 'to' ? null : 'to'));
+                        }}
+                      >
+                        <span>{formatDatePE(rangeTo)}</span>
+                        <CalendarDays size={14} className="dr-field-icon" />
+                      </button>
+                      {calOpen === 'to' && (
+                        <MiniCalendar
+                          value={rangeTo}
+                          min={rangeFrom}
+                          max={RANGE_MAX}
+                          onChange={(v) => setRangeTo(v)}
+                          onClose={() => setCalOpen(null)}
+                          align="right"
+                        />
+                      )}
+                    </div>
                   </div>
 
                   <div className="dr-footer">
