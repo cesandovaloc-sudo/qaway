@@ -1416,23 +1416,20 @@ export default function CriteriosApp() {
       .filter((s) => s.projectId === activeProjectId)
       .filter((s) => (filterSourceType === "all" ? true : s.type === filterSourceType));
 
-    // Detectar saludos o mensajes conversacionales cortos sin intención de búsqueda documental
-    const isConversationalGreeting =
-      /^(hola|buenos d[ií]as|buenas tardes|buenas noches|buenas|hey|saludos|qu[eé] tal|c[oó]mo est[aá]s|gracias|muchas gracias|ok|listo|perfecto|ayuda|qu[eé] puedes hacer|qui[eé]n eres)([!.,?\s].*)?$/i.test(
+    // Detectar si la consulta es netamente conversacional / saludo abierto
+    // (en cuyo caso NO forzamos búsqueda pesada de fragmentos ni citas descontextualizadas)
+    const isPurelyConversational =
+      /^(hola|buenos d[ií]as|buenas tardes|buenas noches|buenas|hey|saludos|qu[eé] tal|c[oó]mo est[aá]s|gracias|muchas gracias|ok|listo|perfecto|ayuda|ay[uú]dame|qu[eé] puedes hacer|qui[eé]n eres|dime algo|empieza|cu[eé]ntame algo)([!.,?\s].*)?$/i.test(
         lowerQ
       ) &&
-      !lowerQ.includes("horas") &&
-      !lowerQ.includes("ebitda") &&
-      !lowerQ.includes("ley") &&
-      !lowerQ.includes("artículo") &&
-      !lowerQ.includes("manual") &&
-      !lowerQ.includes("provisión") &&
-      !lowerQ.includes("resumen");
+      !/(artículo|ley|norma|decreto|resolución|rm|directiva|plazo|fecha|comité|libro|secundaria|distribución|entrega|responsable|multa|sanción|contingencia|ebitda|provisión|matriz|cuadro|tabla|resumen|requisito|política|manual|procedimiento)/i.test(
+        lowerQ
+      );
 
-    // Recuperación REAL en cliente: Top-K de fragmentos indexados (BM25 ligero)
+    // Recuperación REAL en cliente: Top-K de fragmentos indexados (solo si no es saludo puro o conversación genérica)
     let realEvidenceChunks: RetrievedChunk[] = [];
     let realEvidenceRelaxed = false;
-    if (activeSources.length > 0 && !isConversationalGreeting) {
+    if (activeSources.length > 0 && !isPurelyConversational) {
       try {
         const retrieval = await retrieveRelevantChunks(activeProjectId, q, {
           topK: Math.max(topK, 6),
@@ -1465,7 +1462,7 @@ export default function CriteriosApp() {
     const geminiApiKey = getStoredGeminiApiKey();
 
     // Inferencia real con Google Gemini calibrada con perfil de agente, modo, historial y umbral coseno
-    if (isGeminiActive && !isConversationalGreeting) {
+    if (isGeminiActive) {
       if (!geminiApiKey) {
         ansText = `ℹ️ **Google DeepMind (Gemini) está seleccionado pero no cuenta con API Key configurada:**\n\nPara activar respuestas en vivo generadas por Gemini con citas directas:\n1. Ve a **Configurar IA** (o módulo Configuración en el panel lateral).\n2. En **Google DeepMind**, haz clic en **Editar** y pega tu clave API de Google AI Studio.\n3. Haz clic en **Guardar** (o presiona Enter).`;
         latencyLabel = `0 ms (Clave requerida)`;
@@ -1600,77 +1597,11 @@ export default function CriteriosApp() {
           2
         )}):\n\n${distinctSentences.join("\n\n")}`;
         turnSources = evidenceTurnSources;
-      } else if (activeSources.length === 0) {
-        if (isConversationalGreeting) {
-          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}". Actualmente este proyecto no cuenta con fuentes ni documentos indexados. Puedes cargar tus archivos (PDF, Excel, Word o carpetas completas) usando el botón "+ Carga de doc" en el panel lateral para habilitar consultas RAG con citas exactas.`;
-        } else {
-          ansText = `Actualmente no existen fuentes documentales ni vectores indexados en el proyecto "${activeProjName}". Para realizar búsquedas semánticas y recibir respuestas respaldadas por evidencia oficial, por favor carga tus archivos mediante "+ Carga de doc" en el panel izquierdo.`;
-        }
-        turnSources = [];
-      } else if (isConversationalGreeting) {
-        if (lowerQ.startsWith("gracias") || lowerQ.includes("muchas gracias")) {
-          ansText = `¡Con gusto, Carlos! Quedo atento si necesitas cruzar otra consulta o revisar documentos en el proyecto "${activeProjName}".`;
-        } else {
-          ansText = `¡Hola Carlos! Soy tu asistente de Búsqueda de Criterios activo en el proyecto "${activeProjName}" (${activeSources.length} fuente(s) indexada(s) con Google Gemini 1.5). Escribe tu consulta sobre normas, matrices o manuales —o carga más documentos desde el panel izquierdo— y te responderé con trazabilidad exacta.`;
-        }
-        turnSources = [];
-      } else if (
-        activeProjectId === "auditoria-q3" &&
-        (lowerQ.includes("horas extras") ||
-          lowerQ.includes("ebitda") ||
-          lowerQ.includes("contingencia") ||
-          lowerQ.includes("laboral") ||
-          lowerQ.includes("q4") ||
-          lowerQ.includes("provisión"))
-      ) {
-        ansText =
-          "El trabajo en sobretiempo es voluntario, pero la ausencia de registro en el sistema de asistencia invierte la carga de la prueba y genera recargos obligatorios del 25% para las dos primeras horas y 35% para las restantes [1]. Al cruzar esta obligación con la matriz financiera del tercer trimestre, la provisión contable por contingencias laborales asciende a USD 48,500, reduciendo el margen EBITDA proyectado en 2.3 pp [2].";
-        hasTable = true;
-        tableData = [
-          { concept: "EBITDA (USD)", sin: "2,150,000", con: "2,101,500", var: "-48,500", isNegative: true },
-          { concept: "Margen EBITDA", sin: "18.4%", con: "16.1%", var: "-2.3 pp", isNegative: true },
-        ];
-        turnSources = [
-          { id: 1, name: "D.S. N.º 007-2002-TR", section: "Art. 10 y 11 - Jornada y sobretiempo", tab: 1 },
-          { id: 2, name: "Contingencias_Laborales_Q3.xlsx", section: "Hoja: Resumen_Ejecutivo • Celda E14", tab: 2 },
-        ];
-      } else if (
-        activeProjectId === "auditoria-q3" &&
-        (lowerQ.includes("artículo") ||
-          lowerQ.includes("ley") ||
-          lowerQ.includes("007") ||
-          lowerQ.includes("norma") ||
-          lowerQ.includes("15"))
-      ) {
-        ansText =
-          "Según el D.S. N.º 007-2002-TR (TUO de la Ley de Jornada de Trabajo), los artículos 9, 10 y 15 estipulan que el sobretiempo antes de la hora de entrada o después de la salida debe ser remunerado con sobretasa legal del 25% y 35% [1]. Asimismo, el empleador debe conservar los registros de asistencia por un mínimo de 5 años.";
-        turnSources = [
-          { id: 1, name: "D.S. N.º 007-2002-TR", section: "Art. 9, 10 y 15 - Jornada y sobretiempo", tab: 1 },
-        ];
-      } else if (
-        activeProjectId === "auditoria-q3" &&
-        (lowerQ.includes("procedimiento") ||
-          lowerQ.includes("política") ||
-          lowerQ.includes("manual") ||
-          lowerQ.includes("rrhh") ||
-          lowerQ.includes("auditoría"))
-      ) {
-        ansText =
-          "La Sección 4.2 del Manual de Políticas Laborales establece que toda contingencia mayor a USD 25,000 requiere autorización del Comité de Auditoría y validación con RR.HH. [3]. Se recomienda emitir acta vinculante antes del cierre contable.";
-        turnSources = [
-          { id: 3, name: "Manual de Políticas Laborales", section: "Sección 4.2 - Control de asistencia", tab: 3 },
-        ];
       } else {
-        const sourceTitles = activeSources.slice(0, 3).map((s) => s.title).join(", ");
-        ansText = `Respecto a "${q}" en el proyecto "${activeProjName}": tras consultar los vectores indexados (umbral ≥ ${similarityThreshold.toFixed(
+        ansText = `No se hallaron fragmentos documentales con similitud suficiente (umbral ≥ ${similarityThreshold.toFixed(
           2
-        )}) en las fuentes activas (${sourceTitles}), la evidencia analizada confirma los lineamientos operativos y criterios aplicables según los fragmentos recuperados.`;
-        turnSources = activeSources.slice(0, 3).map((s, idx) => ({
-          id: idx + 1,
-          name: s.title,
-          section: s.badge,
-          tab: s.inspectorTab,
-        }));
+        )}) para responder esta consulta en el proyecto "${activeProjName}". Puedes reformular tu pregunta o verificar tu conexión con Google Gemini.`;
+        turnSources = [];
       }
     }
 

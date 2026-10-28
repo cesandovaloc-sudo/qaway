@@ -98,15 +98,34 @@ export function saveStoredGeminiApiKey(key: string): void {
  * CAPA 0: Core Ético, Legal y Prevención de Alucinaciones
  * Cumplimiento Ley Peruana Nº 31814 (Ley de IA) y Ley Nº 29733 (Datos Personales)
  */
+/**
+ * CAPA 0: Directrices Maestras de Inteligencia Conversacional, Ética y RAG
+ * Cumplimiento Ley Peruana Nº 31814 (Ley de IA) y Google Responsible AI
+ */
 export const CAPA_0_LEGAL_PERUANA = `
-[CAPA 0 — NORMAS ÉTICAS Y LEGALES INVIOLABLES (LEY PERUANA 31814 & GOOGLE RESPONSIBLE AI)]
-1. TRANSPARENCIA ACTIVA Y TRAZABILIDAD:
-   - Actúas como asistente de Inteligencia Artificial para el análisis de evidencias y criterios normativos.
-2. PREVENCIÓN ABSOLUTA DE ALUCINACIONES:
-   - Toda afirmación de hecho, artículo de ley, porcentaje de sobretasa, fórmula, monto financiero o criterio regulatorio DEBE provenir de los fragmentos de fuentes documentales provistas en el contexto.
-   - Si una consulta no puede responderse con el material indexado, declara con honestidad: "Esta información no figura en las fuentes documentales indexadas del proyecto."
-3. PROTECCIÓN DE DATOS PERSONALES (LEY 29733):
-   - Nunca expongas credenciales confidenciales, datos biométricos sensibles no anonimizados ni información bancaria privada.
+[DIRECTRICES MAESTRAS DEL ASISTENTE INTELIGENTE]
+Eres un consultor y asesor de Inteligencia Artificial avanzado para Qaway Lab y MINEDU.
+Tu comunicación es fluida, inteligente, empática, profesional y ejecutiva, exactamente como un colega experto.
+
+1. DIÁLOGO NATURAL E INTELIGENTE (Cuándo NO forzar citas):
+   - Si el usuario te saluda ("hola", "buenas", "qué tal"), te escribe frases abiertas ("dime algo", "ayúdame", "qué opinas", "cómo empezamos"), o hace comentarios de seguimiento ("ok", "entiendo", "gracias"):
+     * Responde con total naturalidad humana y sentido común. No fuerces citas [1], [2] ni sueltes resúmenes descontextualizados si no te han hecho una pregunta específica.
+     * Saluda cordialmente, menciona brevemente el proyecto activo y pregúntale con amabilidad qué tema, duda o procedimiento específico de los documentos desea revisar.
+
+2. ANÁLISIS DOCUMENTAL Y CITAS EXACTAS [1], [2] (Cuándo BUSCAR y CITAR):
+   - Cuando el usuario te consulte sobre directivas, leyes, normas, plazos, artículos, comités, obligaciones o contingencias:
+     * Analiza a fondo los fragmentos documentales del proyecto provistos en el contexto.
+     * Responde con exactitud técnica, claridad y síntesis ejecutiva.
+     * Coloca las citas [1], [2], etc., al final de cada afirmación fundamentada en los documentos.
+     * Si un dato no figura en los documentos provistos, infórmalo con transparencia y sugiere alternativas.
+
+3. ACLARACIONES Y DESAMBIGUACIÓN (Cuándo PREGUNTAR):
+   - Si la consulta del usuario es muy amplia, vaga o ambigua:
+     * Explica brevemente el contexto y pregúntale qué aspecto específico o documento prefiere priorizar.
+
+4. MEMORIA CONTINUA DEL HILO (Iteración real):
+   - Mantén siempre la coherencia del hilo de la conversación previa.
+   - Si el usuario hace repreguntas ("¿y quién es el responsable?", "¿cuál es el plazo?", "¿por qué?"), enlaza directamente con lo conversado anteriormente sin reiniciar el diálogo.
 `;
 
 /**
@@ -117,72 +136,52 @@ export function buildCapa1SystemPrompt(
   profile: AgentProfileId = "auditor_laboral",
   tone: AgentToneId = "ejecutivo"
 ): string {
-  let roleTitle = "Auditor Normativo & Laboral Senior";
-  let roleSpecialty =
-    "Especialista en derecho laboral peruano (D.S. 007-2002-TR, jornada de trabajo, sobretiempo, descansos remunerados y fiscalizaciones SUNAFIL).";
+  let roleTitle = "Asesor Senior de Gestión y Normatividad";
+  let roleSpecialty = "Especialista en análisis de evidencias normativas, directivas institucionales y optimización de procesos.";
 
   if (profile === "analista_financiero") {
     roleTitle = "Analista Financiero & Nóminas Senior";
-    roleSpecialty =
-      "Especialista en modelado financiero, cálculo de provisiones contables, impacto en EBITDA y cotejo de matrices cuantitativas de contingencia.";
+    roleSpecialty = "Especialista en modelado financiero, cálculo de provisiones contables, matrices cuantitativas e impacto presupuestal.";
   } else if (profile === "oficial_cumplimiento") {
-    roleTitle = "Oficial de Cumplimiento & Auditoría Interna";
-    roleSpecialty =
-      "Especialista en control interno, manuales de procedimientos corporativos, aprobación de comités y gobernanza de riesgos.";
+    roleTitle = "Oficial de Cumplimiento & Control Interno";
+    roleSpecialty = "Especialista en control interno, manuales de procedimientos corporativos, aprobación de comités y gobernanza de riesgos.";
   }
 
-  let toneDirectives =
-    "Tono Ejecutivo Formal: Sobrio, conciso, orientado a conclusiones de impacto y directrices de alta dirección. Respuestas sin rodeos.";
+  let toneDirectives = "Tono Ejecutivo y Natural: Claro, directo, consultivo y con foco en soluciones prácticas.";
   if (tone === "tecnico") {
-    toneDirectives =
-      "Tono Técnico Exhaustivo: Máximo rigor dogmático, citas textuales de normas, artículos, cálculo de contingencias paso a paso y análisis pormenorizado.";
+    toneDirectives = "Tono Técnico y Riguroso: Máximo detalle normativo, citas textuales de directivas y artículos aplicables.";
   } else if (tone === "didactico") {
-    toneDirectives =
-      "Tono Didáctico y Accesible: Explicación pedagógica, lenguaje comprensible para gerentes o personal no legal, con viñetas limpias y resumen aclaratorio.";
+    toneDirectives = "Tono Didáctico y Accesible: Explicación pedagógica, lenguaje accesible, viñetas limpias y síntesis clara.";
   }
 
   return `
-[CAPA 1 — ROL DEL AGENTE ESPECIALIZADO (${roleTitle.toUpperCase()})]
-- Rol Asignado: ${roleTitle} de Qaway Lab y MINEDU.
+[CONTEXTO DE TRABAJO]
+- Rol Asignado: ${roleTitle}
 - Especialidad: ${roleSpecialty}
-- Proyecto Activo: "${projectName}".
-- Tono y Estilo Requerido:
-  * ${toneDirectives}
-  * Terminología jurídica y contable peruana precisa (TUO, D.S., EBITDA, sobretiempos, provisiones, NIIF).
+- Proyecto Activo: "${projectName}"
+- Estilo: ${toneDirectives}
 `;
 }
-
-/**
- * CAPA 2: Few-Shot Golden Examples y Reglas de Citación Estricta [1], [2], [3]
- */
-export const CAPA_2_FEW_SHOT_CITATIONS = `
-[CAPA 2 — REGLAS ESTRICTAS DE CITACIÓN Y FORMATEO RAG]
-1. CITACIONES NUMÉRICAS OBLIGATORIAS:
-   - Cuando menciones un hecho, regla, cálculo o artículo, coloca la citación inmediatamente al final de la frase usando el formato exacto de corchete simple: [1], [2] o [3], según el número de la fuente de donde se extrajo.
-   - Ejemplo: "La tasa legal para las dos primeras horas de sobretiempo es de 25% y 35% para las restantes [1]. Esto genera una provisión de USD 48,500 en la matriz financiera del Q3 [2]."
-2. SÍNTESIS DE IMPACTO NUMÉRICO:
-   - Si la consulta involucra cálculos financieros o tablas comparativas, resume la conclusión en prosa con sus citas y, si es relevante, presenta una tabla markdown simple con columnas: Concepto | Sin provisión | Con provisión | Variación.
-`;
 
 /**
  * Empaqueta las fuentes activas en el contexto documental estructurado
  */
 export function formatProjectSourcesContext(sources: SourceContextItem[]): string {
   if (!sources || sources.length === 0) {
-    return "[FUENTES DOCUMENTALES INDEXADAS]\nNo hay documentos indexados en este proyecto.\n";
+    return "[FUENTES DOCUMENTALES DEL PROYECTO]\nNo hay documentos indexados en este proyecto.\n";
   }
 
   const items = sources.map((s, index) => {
     const num = index + 1;
     const desc = s.description || s.badge || "Documento indexado";
-    const excerpt = s.excerpt ? `\n   Fragmentos relevantes:\n   "${s.excerpt}"` : "";
+    const excerpt = s.excerpt && s.excerpt.trim() ? `\n   Fragmentos relevantes:\n   "${s.excerpt}"` : "";
     return `[FUENTE ${num}]
 - Título: ${s.title}
 - Tipo: ${s.type} (${s.badge})
-- Alcance/Descripción: ${desc}${excerpt}`;
+- Descripción: ${desc}${excerpt}`;
   }).join("\n\n");
 
-  return `[FUENTES DOCUMENTALES INDEXADAS EN EL PROYECTO — DISPONIBLES PARA CITACIÓN [1], [2], etc.]\n\n${items}`;
+  return `[DOCUMENTOS DISPONIBLES EN EL PROYECTO — PARA CITACIÓN [1], [2], etc.]\n\n${items}`;
 }
 
 /**
@@ -197,8 +196,6 @@ export function compileFullRAGSystemInstruction(
   return `${CAPA_0_LEGAL_PERUANA}
 
 ${buildCapa1SystemPrompt(projectName, agentProfile, tone)}
-
-${CAPA_2_FEW_SHOT_CITATIONS}
 
 ${formatProjectSourcesContext(sources)}
 `;

@@ -364,8 +364,8 @@ const formatDatePE = (iso: string) => {
 function MiniCalendar({
   value,
   onChange,
-  min,
-  max,
+  min = RANGE_MIN,
+  max = RANGE_MAX,
   onClose,
   align = 'left',
 }: {
@@ -379,6 +379,12 @@ function MiniCalendar({
   const [viewDate, setViewDate] = useState(() =>
     value ? new Date(value + 'T12:00:00') : new Date('2026-10-27T12:00:00')
   );
+
+  useEffect(() => {
+    if (value) {
+      setViewDate(new Date(value + 'T12:00:00'));
+    }
+  }, [value]);
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -771,7 +777,7 @@ export default function CronogramaGanttView({
     [timelineMinWidth]
   );
 
-  /* ---------- Deslizador Temporal por Escalas y Centrado en Hoy ---------- */
+  /* ---------- Deslizador Temporal por Escalas y Centrado en Hoy / Fechas ---------- */
   const scrollToToday = () => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
@@ -781,6 +787,31 @@ export default function CronogramaGanttView({
       const targetScroll = Math.max(0, todayEl.offsetLeft - fixedWidth - timelineVisibleWidth / 2);
       container.scrollTo({ left: targetScroll, behavior: 'smooth' });
       notify('Vista centrada en Hoy (27 de octubre de 2026)');
+    }
+  };
+
+  const scrollToDate = (iso: string, label?: string) => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const posPct = calcPosition(iso);
+    const totalTimelineWidth = Math.max(0, container.scrollWidth - fixedWidth);
+    const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
+    const targetScroll = Math.max(0, (posPct / 100) * totalTimelineWidth - timelineVisibleWidth / 4);
+    container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    if (label) notify(label);
+  };
+
+  const handleSelectFrom = (v: string) => {
+    setRangeFrom(v);
+    if (v > rangeTo) {
+      setRangeTo(v);
+    }
+  };
+
+  const handleSelectTo = (v: string) => {
+    setRangeTo(v);
+    if (v < rangeFrom) {
+      setRangeFrom(v);
     }
   };
 
@@ -886,6 +917,8 @@ export default function CronogramaGanttView({
   const DEFAULT_RANGE = { from: RANGE_MIN, to: RANGE_MAX };
 
   const shown = useMemo(() => {
+    const isRangeActive = rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX;
+
     return items.filter((x) => {
       const parent = items.find((p) => p.id === x.parentId);
       const matchSearch = `${x.code} ${x.name}`.toLowerCase().includes(search.toLowerCase());
@@ -904,8 +937,23 @@ export default function CronogramaGanttView({
       const matchRegion =
         regionFilter === 'Todas' || x.region === 'Todas las Regiones' || x.region === regionFilter;
       const matchGestor = gestorFilter === 'Todos' || x.gestor === gestorFilter;
-      /* Rango de fechas: solapamiento del ítem con el período consultado */
-      const matchRange = x.start <= rangeTo && x.end >= rangeFrom;
+
+      // Solapamiento de fechas con el período oficial consultado
+      let matchRange = true;
+      if (isRangeActive) {
+        if (x.kind === 'hito') {
+          // El hito coincide si su propio rango se solapa O si cualquiera de sus subprocesos se solapa
+          const selfOverlaps = x.start <= rangeTo && x.end >= rangeFrom;
+          const anyChildOverlaps = items.some(
+            (c) => c.parentId === x.id && c.start <= rangeTo && c.end >= rangeFrom
+          );
+          matchRange = selfOverlaps || anyChildOverlaps;
+        } else {
+          // El subproceso coincide si sus fechas se solapan con el período
+          matchRange = x.start <= rangeTo && x.end >= rangeFrom;
+        }
+      }
+
       const notCollapsed = !parent || parent.expanded !== false;
 
       return (
@@ -1355,6 +1403,8 @@ export default function CronogramaGanttView({
                       onClick={() => {
                         setRangeFrom(RANGE_MIN);
                         setRangeTo(RANGE_MAX);
+                        scrollToDate(RANGE_MIN);
+                        notify('Visualizando todo el cronograma oficial');
                       }}
                     >
                       Todo el proyecto
@@ -1365,6 +1415,8 @@ export default function CronogramaGanttView({
                       onClick={() => {
                         setRangeFrom('2026-10-01');
                         setRangeTo('2026-12-31');
+                        scrollToDate('2026-10-01');
+                        notify('Enfocando Q4 2026 (Octubre – Diciembre)');
                       }}
                     >
                       Q4 2026 (Oct-Dic)
@@ -1375,6 +1427,8 @@ export default function CronogramaGanttView({
                       onClick={() => {
                         setRangeFrom('2027-01-01');
                         setRangeTo('2027-03-31');
+                        scrollToDate('2027-01-01');
+                        notify('Enfocando Q1 2027 (Enero – Marzo)');
                       }}
                     >
                       Q1 2027 (Ene-Mar)
@@ -1383,8 +1437,11 @@ export default function CronogramaGanttView({
                       type="button"
                       className={rangeFrom === TODAY_ISO ? 'active' : ''}
                       onClick={() => {
+                        const next30 = shiftDays(TODAY_ISO, 30);
                         setRangeFrom(TODAY_ISO);
-                        setRangeTo(shiftDays(TODAY_ISO, 30));
+                        setRangeTo(next30);
+                        scrollToDate(TODAY_ISO);
+                        notify('Enfocando próximos 30 días de actividad territorial');
                       }}
                     >
                       Próximos 30 días
@@ -1408,9 +1465,9 @@ export default function CronogramaGanttView({
                       {calOpen === 'from' && (
                         <MiniCalendar
                           value={rangeFrom}
-                          max={rangeTo}
                           min={RANGE_MIN}
-                          onChange={(v) => setRangeFrom(v)}
+                          max={RANGE_MAX}
+                          onChange={handleSelectFrom}
                           onClose={() => setCalOpen(null)}
                           align="left"
                         />
@@ -1432,9 +1489,9 @@ export default function CronogramaGanttView({
                       {calOpen === 'to' && (
                         <MiniCalendar
                           value={rangeTo}
-                          min={rangeFrom}
+                          min={RANGE_MIN}
                           max={RANGE_MAX}
-                          onChange={(v) => setRangeTo(v)}
+                          onChange={handleSelectTo}
                           onClose={() => setCalOpen(null)}
                           align="right"
                         />
@@ -1449,6 +1506,8 @@ export default function CronogramaGanttView({
                       onClick={() => {
                         setRangeFrom(RANGE_MIN);
                         setRangeTo(RANGE_MAX);
+                        scrollToDate(RANGE_MIN);
+                        notify('Rango restablecido a todo el proyecto');
                       }}
                     >
                       Restablecer
@@ -1456,7 +1515,11 @@ export default function CronogramaGanttView({
                     <button
                       type="button"
                       className="dr-apply"
-                      onClick={closeMenus}
+                      onClick={() => {
+                        closeMenus();
+                        scrollToDate(rangeFrom);
+                        notify(`Rango oficial aplicado: ${formatDate(rangeFrom)} – ${formatDate(rangeTo)}`);
+                      }}
                     >
                       Aplicar Rango
                     </button>
@@ -1535,6 +1598,8 @@ export default function CronogramaGanttView({
                 setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
                 closeMenus();
+                scrollToDate(RANGE_MIN);
+                notify('Filtros y rango temporal restablecidos');
               }}
             >
               <RefreshCw size={14} />
