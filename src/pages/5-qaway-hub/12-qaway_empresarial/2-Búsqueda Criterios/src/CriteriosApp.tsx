@@ -1529,14 +1529,6 @@ export default function CriteriosApp() {
                 scoreLabel?: string;
               }[];
             }
-            if (turnSources.length === 0 && activeSources.length > 0) {
-              turnSources = activeSources.slice(0, 2).map((s, idx) => ({
-                id: idx + 1,
-                name: s.title,
-                section: s.badge,
-                tab: s.inspectorTab,
-              }));
-            }
           } else if (!geminiResult.success) {
             // Mostrar error real de Google Gemini para visibilidad total en vez de silenciarlo
             ansText = `⚠️ **Aviso de Google Gemini:** ${geminiResult.text || geminiResult.error || "No se pudo obtener respuesta del modelo."}\n\n*Por favor revisa tu API Key en Configuración > Proveedores de IA o verifica la cuota de tu clave en Google AI Studio.*`;

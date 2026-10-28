@@ -1622,10 +1622,146 @@
 .gantt-v2 .bar.progress { background: #fa8c16; color: #fff; }
 .gantt-v2 .bar.pending { background: #94a3b8; }
 .gantt-v2 .bar.late { background: #ef4444; }
+
+/* Barra Maestra de Hito Rector */
 .gantt-v2 .bar.major {
-  height: 22px;
+  height: 20px;
+  background: linear-gradient(90deg, #0052cc 0%, #0066ff 100%);
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.35);
+  position: relative;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.gantt-v2 .hito-diamond-badge {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.gantt-v2 .hito-diamond-badge .diamond-shape {
+  width: 12px;
+  height: 12px;
   background: #0066ff;
-  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.3);
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.gantt-v2 .bar.major:hover .hito-diamond-badge .diamond-shape {
+  transform: rotate(45deg) scale(1.2);
+  background: #0052cc;
+}
+
+/* Indicador de barra que excede el plazo del rango */
+.gantt-v2 .bar.exceeds-range {
+  border-right: 2px dashed #f59e0b;
+}
+
+.gantt-v2 .exceed-pill {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 8.5px;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fbbf24;
+  padding: 1px 4px;
+  border-radius: 3px;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Etiqueta distintiva Hito en la tabla izquierda */
+.gantt-v2 .hito-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #e6f4ff;
+  color: #0066ff;
+  border: 1px solid #93c5fd;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+/* Máscara de Zona Fuera de Plazo (Translúcida con rayado suave) */
+.gantt-v2 .range-mask-before,
+.gantt-v2 .range-mask-after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(241, 245, 249, 0.55),
+    rgba(241, 245, 249, 0.55) 10px,
+    rgba(226, 232, 240, 0.45) 10px,
+    rgba(226, 232, 240, 0.45) 20px
+  );
+  border-right: 1px dashed #cbd5e1;
+}
+
+.gantt-v2 .range-mask-after {
+  border-right: none;
+  border-left: 1px dashed #cbd5e1;
+}
+
+/* Líneas de delimitación del rango oficial */
+.gantt-v2 .range-boundary-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 12;
+  pointer-events: none;
+}
+
+.gantt-v2 .range-boundary-line.start-line {
+  border-left: 2px dashed #0066ff;
+}
+
+.gantt-v2 .range-boundary-line.end-line {
+  border-left: 2px dashed #f59e0b;
+}
+
+.gantt-v2 .range-boundary-tag {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.gantt-v2 .range-boundary-tag.start-tag {
+  background: #0066ff;
+  color: #ffffff;
+}
+
+.gantt-v2 .range-boundary-tag.end-tag {
+  background: #f59e0b;
+  color: #ffffff;
 }
 
 .gantt-v2 .today {
@@ -1634,7 +1770,7 @@
   bottom: 0;
   width: 2px;
   background: #ef4444;
-  z-index: 10;
+  z-index: 15;
   pointer-events: none;
 }
 

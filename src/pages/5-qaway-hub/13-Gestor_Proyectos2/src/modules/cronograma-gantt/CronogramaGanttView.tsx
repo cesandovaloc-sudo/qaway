@@ -915,10 +915,9 @@ export default function CronogramaGanttView({
 
   /* Rango predeterminado del botón Limpiar */
   const DEFAULT_RANGE = { from: RANGE_MIN, to: RANGE_MAX };
+  const isRangeActive = rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX;
 
   const shown = useMemo(() => {
-    const isRangeActive = rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX;
-
     return items.filter((x) => {
       const parent = items.find((p) => p.id === x.parentId);
       const matchSearch = `${x.code} ${x.name}`.toLowerCase().includes(search.toLowerCase());
@@ -1732,6 +1731,7 @@ export default function CronogramaGanttView({
                       <FileText size={15} className="file" />
                     )}
                     <b className="code">{x.code}</b>
+                    {x.kind === 'hito' && <span className="hito-tag">Hito</span>}
                     {isEditing(x, 'name') ? (
                       <input
                         className="cell-editor cell-input name-edit"
@@ -1940,17 +1940,82 @@ export default function CronogramaGanttView({
                       ))}
                     </div>
                     <div
-                      className={`bar ${STATUS_CLASS[x.status]} ${x.kind === 'hito' ? 'major' : ''}`}
+                      className={`bar ${STATUS_CLASS[x.status]} ${x.kind === 'hito' ? 'major' : ''} ${
+                        isRangeActive && x.end > rangeTo ? 'exceeds-range' : ''
+                      }`}
                       style={{
                         left: `${calcPosition(x.start)}%`,
                         width: `${calcWidth(x.start, x.end)}%`,
                       }}
+                      title={
+                        x.kind === 'hito'
+                          ? `Hito Rector: ${x.name} (${formatDate(x.start)} – ${formatDate(x.end)})`
+                          : `Subproceso: ${x.name} (${formatDate(x.start)} – ${formatDate(x.end)})`
+                      }
                     >
-                      {x.kind === 'hito' ? '◆' : ''}
+                      {x.kind === 'hito' ? (
+                        <span className="hito-diamond-badge" title="Hito Rector Oficial">
+                          <span className="diamond-shape" />
+                        </span>
+                      ) : null}
+                      {isRangeActive && x.end > rangeTo && (
+                        <span className="exceed-pill" title="Finaliza después del plazo oficial consultado">
+                          +fuera plazo
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
+
+              {/* Máscara visual de zona fuera de plazo (cuando hay filtro de rango activo) */}
+              {isRangeActive && (
+                <>
+                  {/* Zona previa al inicio del rango */}
+                  {calcPosition(rangeFrom) > 0 && (
+                    <div
+                      className="range-mask-before"
+                      style={{
+                        left: 'var(--fixed)',
+                        width: `calc((100% - var(--fixed)) * ${calcPosition(rangeFrom) / 100})`,
+                      }}
+                      title={`Zona fuera del plazo: previa al ${formatDate(rangeFrom)}`}
+                    />
+                  )}
+
+                  {/* Línea divisoria de Inicio de Rango */}
+                  <div
+                    className="range-boundary-line start-line"
+                    style={{
+                      left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeFrom) / 100})`,
+                    }}
+                  >
+                    <span className="range-boundary-tag start-tag">Inicio: {formatDate(rangeFrom)}</span>
+                  </div>
+
+                  {/* Zona posterior al fin del rango */}
+                  {calcPosition(rangeTo) < 100 && (
+                    <div
+                      className="range-mask-after"
+                      style={{
+                        left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeTo) / 100})`,
+                        width: `calc((100% - var(--fixed)) * ${(100 - calcPosition(rangeTo)) / 100})`,
+                      }}
+                      title={`Zona fuera del plazo: posterior al ${formatDate(rangeTo)}`}
+                    />
+                  )}
+
+                  {/* Línea divisoria de Fin de Rango */}
+                  <div
+                    className="range-boundary-line end-line"
+                    style={{
+                      left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeTo) / 100})`,
+                    }}
+                  >
+                    <span className="range-boundary-tag end-tag">Fin de plazo: {formatDate(rangeTo)}</span>
+                  </div>
+                </>
+              )}
 
               {/* Indicador dinámico de "Hoy" */}
               <div

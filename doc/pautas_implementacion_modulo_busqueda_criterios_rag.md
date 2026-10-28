@@ -45,3 +45,19 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
 * **Sin iframes ni parches:** Todo es React puro y tipado.
 * **Candado Visual:** Todas las clases Tailwind, estilos inline, radios y paletas permanecen 100% fieles a la propuesta original.
 * **Aislamiento CSS:** Encapsulado bajo `.qaway-criterios-root` sin estilos que alteren el Navbar ni el Footer de Qaway.
+
+
+---
+
+## 4. Iteración y Calibración RAG en Vivo (2026-10-27)
+
+### A. Eliminación de Inyección Artificial de Fuentes (Mock Fallback)
+* **Diagnóstico:** En [`CriteriosApp.tsx`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/CriteriosApp.tsx), la condición `if (turnSources.length === 0 && activeSources.length > 0)` inyectaba forzosamente las dos primeras fuentes del proyecto cuando el modelo no citaba ninguna (ej. chistes, saludos o preguntas abiertas). Esto generaba la tarjeta *"Fuentes y referencias vinculadas (2)"* con datos inconexos e innecesarios.
+* **Solución:** Se retiró dicho fallback. La lista de fuentes del turno `turnSources` solo se puebla a partir de citaciones explícitas (`geminiResult.citations`), manteniendo el chat limpio y sin tarjetas residuales.
+
+### B. Calibración Conversacional y Empatía Humana (Gemini RAG)
+* **Diagnóstico:** En [`geminiRAGService.ts`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/services/geminiRAGService.ts), las directivas imponían un tono acartonado que inducía a la IA a justificarse con preámbulos robóticos (*"Entiendo perfectamente tu punto y aprecio tu interés..."*) y a forzar una transición institucional forzada al final de cada interacción informal.
+* **Solución:** Se reformularon la **Capa 0** y la **Capa 1**:
+  - Prohibición estricta de aperturas defensivas o discursos burocráticos.
+  - Conversación ágil, ingeniosa y cercana en intercambios casuales o de humor.
+  - Activación rigurosa del análisis documental y citaciones únicamente ante consultas de fondo sobre normas, directivas y procesos del proyecto.
