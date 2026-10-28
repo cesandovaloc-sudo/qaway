@@ -1487,7 +1487,7 @@ export default function CriteriosApp() {
               excerpt: evidenceExcerptForDoc(s.id),
             })),
             projectName: activeProjName,
-            model: activeProvider.selectedModel || "gemini-1.5-flash",
+            model: activeProvider.selectedModel || "gemini-1.5-flash-latest",
             apiKey: geminiApiKey,
             agentProfile: currentAgentProfile,
             tone: currentAgentTone,
