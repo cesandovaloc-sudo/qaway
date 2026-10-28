@@ -17,7 +17,7 @@ import {
 export type ConfigBinds = { notify: (m: string) => void };
 
 const TIMEZONES = [
-  { id: 'America/Lima', label: 'America/Lima (UTC-05:00) · Hora Oficial de Perú (MINEDU)' },
+  { id: 'America/Lima', label: 'America/Lima (UTC-05:00) · Hora Oficial de Perú' },
   { id: 'America/Bogota', label: 'America/Bogota (UTC-05:00) · Colombia / Región Andina' },
   { id: 'America/La_Paz', label: 'America/La_Paz (UTC-04:00) · Bolivia' },
   { id: 'America/Santiago', label: 'America/Santiago (UTC-04:00) · Chile' },
@@ -197,7 +197,7 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
                         onChange={() => setDateMode('custom')}
                       />
                       <div className="radio-text">
-                        <strong>Fecha Operativa MINEDU (Recomendado para seguimiento)</strong>
+                        <strong>Fecha Operativa del Proyecto (Control de seguimiento)</strong>
                         <span>
                           Fija la fecha de control territorial para evaluar con precisión el estado de hitos pasados, presentes y futuros.
                         </span>
@@ -296,7 +296,7 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
                 </div>
               </div>
               <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
-                Todas las modificaciones de cronograma, asignaciones de responsables territoriales y fechas de hito se registran con firma digital y marca temporal conforme a la Directiva MINEDU 2027.
+                Todas las modificaciones de cronograma, asignaciones de responsables territoriales y fechas de hito se registran con firma digital y marca temporal conforme a los lineamientos institucionales y directivas del proyecto.
               </p>
             </div>
           </div>

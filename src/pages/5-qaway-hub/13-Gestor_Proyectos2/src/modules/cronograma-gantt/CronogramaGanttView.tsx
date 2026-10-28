@@ -875,26 +875,55 @@ export default function CronogramaGanttView({
     [timelineMinWidth]
   );
 
+  /* Función matemática unificada de posición en píxeles según escala de zoom (0% margen de error) */
+  const getDatePixelOffset = (iso: string): number => {
+    const targetTime = new Date(iso + 'T12:00:00').getTime();
+    const daysDiff = (targetTime - START_TIMESTAMP) / 86400000;
+    const clampedDays = Math.max(0, Math.min(TOTAL_SPAN_DAYS, daysDiff));
+
+    if (zoom === 'Día') {
+      return clampedDays * 34;
+    }
+    if (zoom === 'Semana') {
+      return (clampedDays / 7) * 80;
+    }
+    if (zoom === 'Mes') {
+      let px = 0;
+      for (const m of MONTHS) {
+        const mDays = monthDays(m.start);
+        const mStartTime = new Date(m.start + 'T12:00:00').getTime();
+        const mEndTime = mStartTime + (mDays - 1) * 86400000;
+        if (targetTime >= mStartTime && targetTime <= mEndTime) {
+          const dayInMonth = (targetTime - mStartTime) / 86400000;
+          px += (dayInMonth / mDays) * 170;
+          break;
+        } else if (targetTime > mEndTime) {
+          px += 170;
+        }
+      }
+      return px;
+    }
+    const totalPx = parseFloat(timelineMinWidth) || 1160;
+    return (clampedDays / TOTAL_SPAN_DAYS) * totalPx;
+  };
+
   /* ---------- Deslizador Temporal por Escalas y Centrado en Hoy / Fechas ---------- */
   const scrollToToday = () => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
-    const todayEl = container.querySelector('.today') as HTMLElement | null;
-    if (todayEl) {
-      const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-      const targetScroll = Math.max(0, todayEl.offsetLeft - fixedWidth - timelineVisibleWidth / 2);
-      container.scrollTo({ left: targetScroll, behavior: 'smooth' });
-      notify('Vista centrada en Hoy (27 de octubre de 2026)');
-    }
+    const todayPx = getDatePixelOffset(currentTodayIso);
+    const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
+    const targetScroll = Math.max(0, todayPx - timelineVisibleWidth / 2);
+    container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    notify(`Vista centrada en Hoy (${formatDate(currentTodayIso)})`);
   };
 
   const scrollToDate = (iso: string, label?: string) => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
-    const posPct = calcPosition(iso);
-    const totalTimelineWidth = Math.max(0, container.scrollWidth - fixedWidth);
+    const targetPx = getDatePixelOffset(iso);
     const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-    const targetScroll = Math.max(0, (posPct / 100) * totalTimelineWidth - timelineVisibleWidth / 4);
+    const targetScroll = Math.max(0, targetPx - timelineVisibleWidth / 4);
     container.scrollTo({ left: targetScroll, behavior: 'smooth' });
     if (label) notify(label);
   };
@@ -935,6 +964,14 @@ export default function CronogramaGanttView({
       scrollToToday();
     }, 80);
   };
+
+  /* Centrado automático en la fecha actual al inicializar la vista */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToToday();
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [currentTodayIso]);
 
   /* ---------- Cierre global de menús y editores (clic externo / Escape) ---------- */
   useEffect(() => {
@@ -2198,8 +2235,8 @@ export default function CronogramaGanttView({
                         isRangeActive && x.end > rangeTo ? 'exceeds-range' : ''
                       }`}
                       style={{
-                        left: `${calcPosition(x.start)}%`,
-                        width: `${calcWidth(x.start, x.end)}%`,
+                        left: `${getDatePixelOffset(x.start)}px`,
+                        width: `${Math.max(8, getDatePixelOffset(x.end) - getDatePixelOffset(x.start))}px`,
                       }}
                       title={
                         x.kind === 'hito'
@@ -2238,12 +2275,12 @@ export default function CronogramaGanttView({
                 {isRangeActive && (
                   <>
                     {/* Zona previa al inicio del rango */}
-                    {calcPosition(rangeFrom) > 0 && (
+                    {getDatePixelOffset(rangeFrom) > 0 && (
                       <div
                         className="range-mask-before"
                         style={{
                           left: 0,
-                          width: `${calcPosition(rangeFrom)}%`,
+                          width: `${getDatePixelOffset(rangeFrom)}px`,
                         }}
                         title={`Zona fuera de rango: previa al ${formatDate(rangeFrom)}`}
                       />
@@ -2253,7 +2290,7 @@ export default function CronogramaGanttView({
                     <div
                       className="range-boundary-line start-line"
                       style={{
-                        left: `${calcPosition(rangeFrom)}%`,
+                        left: `${getDatePixelOffset(rangeFrom)}px`,
                       }}
                       title={`Rango Inicio: ${formatDate(rangeFrom)}`}
                     >
@@ -2261,12 +2298,12 @@ export default function CronogramaGanttView({
                     </div>
 
                     {/* Zona posterior al fin del rango */}
-                    {calcPosition(rangeTo) < 100 && (
+                    {getDatePixelOffset(rangeTo) < (parseFloat(timelineMinWidth) || 8228) && (
                       <div
                         className="range-mask-after"
                         style={{
-                          left: `${calcPosition(rangeTo)}%`,
-                          width: `${100 - calcPosition(rangeTo)}%`,
+                          left: `${getDatePixelOffset(rangeTo)}px`,
+                          width: `${Math.max(0, (parseFloat(timelineMinWidth) || 8228) - getDatePixelOffset(rangeTo))}px`,
                         }}
                         title={`Zona fuera de rango: posterior al ${formatDate(rangeTo)}`}
                       />
@@ -2276,7 +2313,7 @@ export default function CronogramaGanttView({
                     <div
                       className="range-boundary-line end-line"
                       style={{
-                        left: `${calcPosition(rangeTo)}%`,
+                        left: `${getDatePixelOffset(rangeTo)}px`,
                       }}
                       title={`Rango Fin: ${formatDate(rangeTo)}`}
                     >
@@ -2289,7 +2326,7 @@ export default function CronogramaGanttView({
                 <div
                   className="today"
                   style={{
-                    left: `${todayPos}%`,
+                    left: `${getDatePixelOffset(currentTodayIso)}px`,
                   }}
                 >
                   <span>Hoy</span>
