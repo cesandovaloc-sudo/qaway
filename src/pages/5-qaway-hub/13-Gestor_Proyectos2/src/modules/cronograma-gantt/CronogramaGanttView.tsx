@@ -5,9 +5,11 @@ import {
   AlertTriangle,
   ArrowLeftRight,
   CalendarDays,
+  CalendarRange,
   ChartNoAxesColumnIncreasing,
   Check,
   CheckCircle2,
+  CheckSquare,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -34,6 +36,7 @@ import {
   Search,
   ShieldCheck,
   SlidersHorizontal,
+  Target,
   Trash2,
   Upload,
   UserCheck,
@@ -59,10 +62,15 @@ interface Item {
   status: Status;
   expanded?: boolean;
   description?: string;
+  deliverable?: string;
   reportType?: string;
   region?: string;
   gestor?: string;
   gestores?: string[];
+  tasks?: number;
+  done?: number;
+  unit?: string;
+  phase?: string;
 }
 
 const INITIAL_ITEMS: Item[] = [
@@ -321,6 +329,31 @@ const REGION_OPTIONS = [
   { value: 'Huancavelica', label: 'Huancavelica' },
   { value: 'Cusco', label: 'Cusco' },
   { value: 'Pasco', label: 'Pasco' },
+];
+
+const FASES_OPTIONS = [
+  { value: 'Todas', label: 'Todas las fases' },
+  { value: 'Planificación', label: 'Planificación y CDL' },
+  { value: 'Gestión de almacenes', label: 'Gestión de Almacenes' },
+  { value: 'Registro MC SIGA', label: 'Registro MC SIGA (RAR / NEA)' },
+  { value: 'Distribución y Transporte', label: 'Distribución a II.EE.' },
+  { value: 'Liquidación', label: 'Liquidación y Cierre' },
+];
+
+const REGIONAL_UGEL_STATS = [
+  { name: 'UGEL Chupaca', progress: 100, status: 'Cumple', tasks: '4/4', sede: 'Chupaca', gestor: 'María Salazar' },
+  { name: 'UGEL Concepción', progress: 85, status: 'En curso', tasks: '3/4', sede: 'Concepción', gestor: 'María Salazar' },
+  { name: 'UGEL Huancayo', progress: 55, status: 'En proceso', tasks: '5/13', sede: 'Huancayo', gestor: 'Carlos Mendoza' },
+  { name: 'UGEL Jauja', progress: 50, status: 'En curso', tasks: '2/4', sede: 'Jauja', gestor: 'Carlos Mendoza' },
+  { name: 'UGEL Junín', progress: 50, status: 'En curso', tasks: '2/4', sede: 'Junín', gestor: 'María Salazar' },
+  { name: 'UGEL Tarma', progress: 45, status: 'En proceso', tasks: '2/5', sede: 'Tarma', gestor: 'Carlos Mendoza' },
+  { name: 'UGEL Chanchamayo', progress: 35, status: 'En proceso', tasks: '2/6', sede: 'La Merced', gestor: 'Lucía Ramos' },
+  { name: 'UGEL Yauli', progress: 30, status: 'En proceso', tasks: '1/4', sede: 'La Oroya', gestor: 'Carlos Mendoza' },
+  { name: 'UGEL Satipo', progress: 20, status: 'Con retraso', tasks: '1/5', sede: 'Satipo', gestor: 'María Salazar' },
+  { name: 'UGEL Pichanaki', progress: 20, status: 'En proceso', tasks: '1/5', sede: 'Pichanaki', gestor: 'Lucía Ramos' },
+  { name: 'UGEL Perené', progress: 15, status: 'En proceso', tasks: '1/6', sede: 'Perené', gestor: 'Lucía Ramos' },
+  { name: 'UGEL Río Tambo', progress: 10, status: 'Con retraso', tasks: '0/4', sede: 'Puerto Prado', gestor: 'Javier Ruiz' },
+  { name: 'UGEL Pangoa', progress: 10, status: 'Pendiente', tasks: '0/4', sede: 'San Martín', gestor: 'Javier Ruiz' },
 ];
 
 const GESTOR_OPTIONS = [
@@ -713,10 +746,12 @@ export default function CronogramaGanttView({
   const [panelOpen, setPanelOpen] = useState(false);
   const [history, setHistory] = useState<Item[][]>([]);
   const [tab, setTab] = useState('Todos');
+  const [viewPerspective, setViewPerspective] = useState<'gantt' | 'ugel'>('gantt');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
   const [typeFilter, setTypeFilter] = useState('Todos');
   const [regionFilter, setRegionFilter] = useState('Todas');
+  const [phaseFilter, setPhaseFilter] = useState('Todas');
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
@@ -1222,6 +1257,8 @@ export default function CronogramaGanttView({
         regionFilter === 'Todas' || x.region === 'Todas las Regiones' || x.region === regionFilter;
       const matchGestor =
         gestorFilter === 'Todos' || x.gestor === gestorFilter || getItemGestores(x).includes(gestorFilter);
+      const matchPhase =
+        phaseFilter === 'Todas' || x.phase === phaseFilter || parent?.phase === phaseFilter;
 
       // Solapamiento de fechas con el período oficial consultado
       let matchRange = true;
@@ -1242,10 +1279,10 @@ export default function CronogramaGanttView({
       const notCollapsed = !parent || parent.expanded !== false;
 
       return (
-        matchSearch && matchState && matchType && matchTab && matchRegion && matchGestor && matchRange && notCollapsed
+        matchSearch && matchState && matchType && matchTab && matchRegion && matchGestor && matchPhase && matchRange && notCollapsed
       );
     });
-  }, [items, search, stateFilter, typeFilter, tab, regionFilter, gestorFilter, rangeFrom, rangeTo]);
+  }, [items, search, stateFilter, typeFilter, tab, regionFilter, phaseFilter, gestorFilter, rangeFrom, rangeTo]);
 
   /* Control de Colapso / Despliegue global de Hitos y Subprocesos (Niveles 1 y 2) */
   const allHitosExpanded = useMemo(() => {
@@ -1516,25 +1553,51 @@ export default function CronogramaGanttView({
 
         {/* Workspace Central */}
         <main className="workspace">
-          {/* Tabs Superiores */}
-          <nav className="tabs">
-            {[
-              { n: 'Todos', c: items.length },
-              { n: 'Hitos', c: hitos.length },
-              { n: 'Subprocesos', c: subs.length },
-              { n: 'En proceso', c: inprog },
-              { n: 'Con retraso', c: late },
-              { n: 'Completados', c: complete },
-            ].map((t) => (
+          {/* Tabs Superiores y Switch de Perspectiva Territorial */}
+          <div className="tabs-header-row">
+            <nav className="tabs">
+              {[
+                { n: 'Todos', c: items.length },
+                { n: 'Hitos', c: hitos.length },
+                { n: 'Subprocesos', c: subs.length },
+                { n: 'En proceso', c: inprog },
+                { n: 'Con retraso', c: late },
+                { n: 'Completados', c: complete },
+              ].map((t) => (
+                <button
+                  key={t.n}
+                  className={tab === t.n ? 'active' : ''}
+                  onClick={() => {
+                    setTab(t.n);
+                    if (viewPerspective !== 'gantt') setViewPerspective('gantt');
+                  }}
+                >
+                  {t.n} <span>({t.c})</span>
+                </button>
+              ))}
+            </nav>
+
+            <div className="perspective-pill-group">
               <button
-                key={t.n}
-                className={tab === t.n ? 'active' : ''}
-                onClick={() => setTab(t.n)}
+                type="button"
+                className={`perspective-btn ${viewPerspective === 'gantt' ? 'active' : ''}`}
+                onClick={() => setViewPerspective('gantt')}
+                title="Vista cronograma y línea de tiempo Gantt"
               >
-                {t.n} <span>({t.c})</span>
+                <CalendarRange size={14} />
+                <span>Gantt Maestro</span>
               </button>
-            ))}
-          </nav>
+              <button
+                type="button"
+                className={`perspective-btn ${viewPerspective === 'ugel' ? 'active' : ''}`}
+                onClick={() => setViewPerspective('ugel')}
+                title="Vista analítica territorial por cada una de las 13 UGEL"
+              >
+                <MapPin size={14} />
+                <span>Por UGEL (13)</span>
+              </button>
+            </div>
+          </div>
 
           {/* Filtros Macro para Coordinador */}
           <div className="filters">
@@ -1708,6 +1771,44 @@ export default function CronogramaGanttView({
                       >
                         <span>{opt.label}</span>
                         {typeFilter === opt.value && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Macro-filtro Fase Territorial (Rescate Vista María Salazar) */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'phase' ? 'active' : ''} ${
+                  phaseFilter !== 'Todas' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('phase')}
+              >
+                <div className="filter-card-copy">
+                  <small>Fase Normativa</small>
+                  <span>{phaseFilter === 'Todas' ? 'Todas' : phaseFilter}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'phase' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                  <div className="filter-popover-title">Fase de Dotación 2027</div>
+                  <div className="filter-popover-list">
+                    {FASES_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`filter-item-btn ${phaseFilter === opt.value ? 'selected' : ''}`}
+                        onClick={() => {
+                          setPhaseFilter(opt.value);
+                          closeMenus();
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        {phaseFilter === opt.value && <Check size={14} className="item-check" />}
                       </button>
                     ))}
                   </div>
@@ -1945,6 +2046,7 @@ export default function CronogramaGanttView({
                 setStateFilter('Todos');
                 setTypeFilter('Todos');
                 setRegionFilter('Todas');
+                setPhaseFilter('Todas');
                 setGestorFilter('Todos');
                 setRangeFrom(DEFAULT_RANGE.from);
                 setRangeTo(DEFAULT_RANGE.to);
@@ -1959,8 +2061,88 @@ export default function CronogramaGanttView({
             </button>
           </div>
 
-          {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
-          <div className="table-head">
+          {viewPerspective === 'ugel' ? (
+            <div className="ugel-grid-layout">
+              <div className="ugel-grid-header">
+                <div>
+                  <h3 className="ugel-grid-title">Monitoreo Territorial · 13 Unidades Ejecutoras (UGEL Junín)</h3>
+                  <p className="ugel-grid-desc">
+                    Supervisión del grado de cumplimiento normativo y avance operativo por cada sede territorial para Dotación 2027.
+                  </p>
+                </div>
+                <div className="ugel-summary-chips">
+                  <span className="ugel-chip chip-green">1 UGEL Cumplida</span>
+                  <span className="ugel-chip chip-blue">5 En curso / proceso</span>
+                  <span className="ugel-chip chip-amber">2 Con retraso</span>
+                </div>
+              </div>
+
+              <div className="ugel-cards-grid">
+                {REGIONAL_UGEL_STATS.map((u) => (
+                  <div key={u.name} className="ugel-card">
+                    <div className="ugel-card-top">
+                      <div>
+                        <h4 className="ugel-name">{u.name}</h4>
+                        <span className="ugel-sede">
+                          <MapPin size={12} /> Sede {u.sede}
+                        </span>
+                      </div>
+                      <span
+                        className={`ugel-status-badge ${
+                          u.status === 'Cumple'
+                            ? 'badge-green'
+                            : u.status === 'En curso' || u.status === 'En proceso'
+                            ? 'badge-blue'
+                            : 'badge-amber'
+                        }`}
+                      >
+                        {u.status}
+                      </span>
+                    </div>
+
+                    <div className="ugel-card-metrics">
+                      <div className="metric-row">
+                        <span>Avance consolidado</span>
+                        <b>{u.progress}%</b>
+                      </div>
+                      <div className="ugel-progress-track">
+                        <div
+                          className="ugel-progress-fill"
+                          style={{
+                            width: `${u.progress}%`,
+                            backgroundColor:
+                              u.progress === 100 ? '#16a34a' : u.progress >= 40 ? '#2563eb' : '#f59e0b',
+                          }}
+                        />
+                      </div>
+                      <div className="metric-footer">
+                        <span>Tareas: <b>{u.tasks}</b></span>
+                        <span>Gestor: <b>{u.gestor}</b></span>
+                      </div>
+                    </div>
+
+                    <div className="ugel-card-action">
+                      <button
+                        type="button"
+                        className="ugel-inspect-btn"
+                        onClick={() => {
+                          setSearch(u.name.replace('UGEL ', ''));
+                          setViewPerspective('gantt');
+                          notify(`Filtrando en Gantt por: ${u.name}`);
+                        }}
+                      >
+                        <CalendarRange size={13} />
+                        <span>Ver en Gantt</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
+              <div className="table-head">
             <div
               className="fixed-cols"
               style={{
@@ -2727,6 +2909,8 @@ export default function CronogramaGanttView({
               </div>
             </div>
           )}
+          </>
+          )}
 
           {/* Footer de Paginación */}
           <footer className="footer">
@@ -2923,6 +3107,47 @@ export default function CronogramaGanttView({
                   value={selected.progress}
                   onChange={(e) => setProgress(selected, +e.target.value)}
                 />
+              </div>
+
+              {/* Entregable Oficial de la Normativa */}
+              <label className="field">
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Target size={13} style={{ color: '#2563eb' }} />
+                  Entregable Oficial (Criterio de Cumplimiento)
+                </span>
+                <input
+                  value={selected.deliverable || ''}
+                  onChange={(e) => update(selected.id, { deliverable: e.target.value })}
+                  placeholder="Ej. Acta de entrega, Padrón SIGA visado, RD aprobatoria..."
+                />
+              </label>
+
+              {/* Desglose territorial de Tareas asociadas */}
+              <div className="task-relation-box">
+                <div className="task-relation-head">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <CheckSquare size={13} style={{ color: '#2563eb' }} />
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
+                      Tareas territoriales vinculadas
+                    </span>
+                  </div>
+                  <span className="task-relation-badge">
+                    {selected.done ?? Math.round((selected.progress / 100) * (selected.tasks || 4))} / {selected.tasks || 4} ejecutadas
+                  </span>
+                </div>
+                <div className="task-relation-bar">
+                  <div
+                    className="task-relation-fill"
+                    style={{
+                      width: `${selected.progress}%`,
+                      backgroundColor:
+                        selected.progress === 100 ? '#16a34a' : selected.progress >= 40 ? '#2563eb' : '#f59e0b',
+                    }}
+                  />
+                </div>
+                <small style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: 4 }}>
+                  {selected.unit || 'Seguimiento en las 13 UGEL de Junín'}
+                </small>
               </div>
 
               {/* Archivo de Referencia Normativa */}

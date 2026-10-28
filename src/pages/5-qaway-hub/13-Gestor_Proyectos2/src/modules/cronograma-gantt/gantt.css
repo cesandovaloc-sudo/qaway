@@ -3118,4 +3118,318 @@ body.gantt-resizing {
   animation: tooltipFadeIn 0.12s ease both;
 }
 
+/* ==========================================================================
+   TABS HEADER ROW & PERSPECTIVE SWITCH (GANTT MAESTRO VS POR UGEL)
+   ========================================================================== */
+.gantt-v2 .tabs-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding-right: 16px;
+  min-height: 44px;
+}
+
+.gantt-v2 .tabs-header-row .tabs {
+  border-bottom: none;
+}
+
+.gantt-v2 .perspective-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid #e2e8f0;
+}
+
+.gantt-v2 .perspective-btn {
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 5px 11px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.gantt-v2 .perspective-btn:hover {
+  color: #0f172a;
+}
+
+.gantt-v2 .perspective-btn.active {
+  background: #ffffff;
+  color: #0284c7;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+/* ==========================================================================
+   VISTA TERRITORIAL POR UGEL (13 UNIDADES EJECUTORAS)
+   ========================================================================== */
+.gantt-v2 .ugel-grid-layout {
+  padding: 20px 24px 32px;
+  flex: 1;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+.gantt-v2 .ugel-grid-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.gantt-v2 .ugel-grid-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+}
+
+.gantt-v2 .ugel-grid-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  max-width: 680px;
+}
+
+.gantt-v2 .ugel-summary-chips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.gantt-v2 .ugel-chip {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.gantt-v2 .chip-green {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.gantt-v2 .chip-blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.gantt-v2 .chip-amber {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.gantt-v2 .ugel-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+.gantt-v2 .ugel-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gantt-v2 .ugel-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.gantt-v2 .ugel-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gantt-v2 .ugel-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 3px 0;
+  letter-spacing: -0.01em;
+}
+
+.gantt-v2 .ugel-sede {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.gantt-v2 .ugel-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.gantt-v2 .badge-green {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.gantt-v2 .badge-blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.gantt-v2 .badge-amber {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.gantt-v2 .ugel-card-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gantt-v2 .metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.gantt-v2 .metric-row b {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.gantt-v2 .ugel-progress-track {
+  width: 100%;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.gantt-v2 .ugel-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.gantt-v2 .metric-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.gantt-v2 .metric-footer b {
+  color: #334155;
+}
+
+.gantt-v2 .ugel-card-action {
+  padding-top: 4px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.gantt-v2 .ugel-inspect-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .ugel-inspect-btn:hover {
+  background: #f8fafc;
+  color: #0284c7;
+  border-color: #0284c7;
+}
+
+/* ==========================================================================
+   DRAWER: DETALLES DE TAREAS Y ENTREGABLES VINCULADOS
+   ========================================================================== */
+.gantt-v2 .task-relation-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 12px 14px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gantt-v2 .task-relation-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gantt-v2 .task-relation-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.gantt-v2 .task-relation-bar {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.gantt-v2 .task-relation-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+
 
