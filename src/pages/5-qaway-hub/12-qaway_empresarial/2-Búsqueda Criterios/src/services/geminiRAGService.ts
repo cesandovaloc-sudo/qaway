@@ -65,12 +65,12 @@ export interface GeminiRAGResponse {
 }
 
 const STORAGE_KEY_GEMINI_KEY = "qaway_gemini_api_key";
-// Calibración Free Tier: gemini-2.0-flash ≈ 1.500 req/día (15 RPM) frente a las
-// ~20 req/día de gemini-2.5-flash. Es el default institucional del chat.
-const DEFAULT_GEMINI_MODEL = "gemini-2.0-flash";
-const QUOTA_FALLBACK_MODEL = "gemini-2.0-flash";
+// Modelo institucional por defecto con cuota completa en producción:
+// gemini-3.8-flash (sustituto oficial de gemini-2.0-flash retirado por Google)
+const DEFAULT_GEMINI_MODEL = "gemini-3.8-flash";
+const QUOTA_FALLBACK_MODEL = "gemini-3.8-flash";
 
-/** "gemini-2.5-flash" → "Gemini 2.5 Flash" (para mensajes de cuota al usuario). */
+/** "gemini-3.8-flash" → "Gemini 3.8 Flash" (para mensajes de cuota al usuario). */
 function prettyModelName(model: string): string {
   return model
     .replace(/^gemini-([0-9.]+)/, "Gemini $1")
@@ -723,48 +723,57 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
       console.error("[GeminiRAG] Error en respuesta de Gemini API:", errMsg);
 
       // ── Cuota del Free Tier excedida (429): conmutación transparente ──
-      // Gemini 2.5 Flash: ~20 req/día · Gemini 2.0 Flash: ~1.500 req/día (15 RPM).
+      // Gemini 2.5 Flash: ~20 req/día · Gemini 3.8 Flash / 1.5 Flash: ~1.500 req/día.
       const quotaTriggered =
         response.status === 429 || /quota|exceeded|exhausted/i.test(errMsg);
-      if (quotaTriggered && model !== QUOTA_FALLBACK_MODEL) {
-        try {
-          console.warn(
-            "[GeminiRAG] Cuota del modelo seleccionado agotada; conmutando en transparente a gemini-2.0-flash…"
-          );
-          const quotaEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${QUOTA_FALLBACK_MODEL}:generateContent?key=${resolvedApiKey}`;
-          const quotaResp = await fetch(quotaEndpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody),
-          });
-          if (quotaResp.ok) {
-            const quotaData = await quotaResp.json();
-            const quotaCandidate = quotaData.candidates?.[0];
-            const rawQuotaText =
-              extractCandidateText(quotaCandidate) ||
-              "No se obtuvo respuesta del modelo Gemini.";
-            const quotaText = enrichTextWithGroundingLinks(
-              rawQuotaText,
-              quotaCandidate,
-              Boolean(params.webSearch),
-              query
+      if (quotaTriggered) {
+        const quotaCandidates = [
+          QUOTA_FALLBACK_MODEL,
+          "gemini-1.5-flash",
+          "gemini-1.5-flash-latest",
+        ].filter((m) => m !== model);
+
+        for (const candidateModel of quotaCandidates) {
+          try {
+            console.warn(
+              `[GeminiRAG] Cuota agotada en ${model}; conmutando en transparente a ${candidateModel}…`
             );
-            return {
-              success: true,
-              text: quotaText,
-              latencyMs: Math.round(performance.now() - startTime),
-              provider: "Google Gemini",
-              model: QUOTA_FALLBACK_MODEL,
-              citations: extractCitations(quotaText),
-              tableData: extractMarkdownTable(quotaText),
-            };
+            const quotaEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:generateContent?key=${resolvedApiKey}`;
+            const quotaResp = await fetch(quotaEndpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(requestBody),
+            });
+            if (quotaResp.ok) {
+              const quotaData = await quotaResp.json();
+              const quotaCandidate = quotaData.candidates?.[0];
+              const rawQuotaText =
+                extractCandidateText(quotaCandidate) ||
+                "No se obtuvo respuesta del modelo Gemini.";
+              const quotaText = enrichTextWithGroundingLinks(
+                rawQuotaText,
+                quotaCandidate,
+                Boolean(params.webSearch),
+                query
+              );
+              return {
+                success: true,
+                text: quotaText,
+                latencyMs: Math.round(performance.now() - startTime),
+                provider: "Google Gemini",
+                model: candidateModel,
+                citations: extractCitations(quotaText),
+                tableData: extractMarkdownTable(quotaText),
+              };
+            }
+          } catch (quotaErr) {
+            console.warn(`[GeminiRAG] Fallback por cuota a ${candidateModel} falló:`, quotaErr);
           }
-        } catch (quotaErr) {
-          console.warn("[GeminiRAG] Fallback transparente por cuota falló:", quotaErr);
         }
+
         return {
           success: false,
-          text: `Has alcanzado la cuota de prueba de ${prettyModelName(model)} (20 consultas/día en Free Tier). Conmuta a Gemini 2.0 Flash en Configuración para disfrutar de 1,500 consultas diarias gratuitas.`,
+          text: `Has alcanzado la cuota de prueba de ${prettyModelName(model)} (20 consultas/día en Free Tier). Conmuta a Gemini 3.8 Flash o Gemini 1.5 Flash en Configuración para disfrutar de 1,500 consultas diarias gratuitas.`,
           latencyMs: elapsed,
           provider: "Google Gemini",
           model,
@@ -773,56 +782,62 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
         };
       }
 
-      // Auto-recuperación si el modelo no está disponible en la versión de API
-      if (response.status === 404 || errMsg.toLowerCase().includes("not found")) {
-        try {
-          const listEndpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${resolvedApiKey}`;
-          const listResp = await fetch(listEndpoint);
-          if (listResp.ok) {
-            const listData = await listResp.json();
-            const availableModels: string[] = (listData.models || [])
-              .filter((m: any) => m.supportedGenerationMethods?.includes("generateContent"))
-              .map((m: any) => m.name.replace(/^models\//, ""));
+      // Auto-recuperación si el modelo está retirado/deprecado (ej. gemini-2.0-flash) o no disponible (400/404)
+      const isModelUnavailable =
+        response.status === 404 ||
+        (response.status === 400 && /no longer available|not found|deprecated|invalid model|unsupported/i.test(errMsg)) ||
+        /no longer available|is not available/i.test(errMsg);
 
-            const fallbackModel =
-              availableModels.find((m) => m !== model && m === "gemini-2.0-flash") ||
-              availableModels.find((m) => m !== model && m === "gemini-2.5-flash") ||
-              availableModels.find((m) => m !== model && m === "gemini-1.5-flash") ||
-              availableModels.find((m) => m !== model && m === "gemini-1.5-flash-latest") ||
-              availableModels.find((m) => m !== model && m.includes("flash")) ||
-              availableModels.find((m) => m !== model && m.includes("gemini-2")) ||
-              availableModels.find((m) => m !== model) ||
-              availableModels[0];
+      if (isModelUnavailable) {
+        // Si el mensaje de Google sugiere explícitamente un modelo activo (ej. models/gemini-3.8-flash)
+        const suggestedMatch = errMsg.match(/models\/([a-zA-Z0-9.-]+)/);
+        const suggestedModel = suggestedMatch && suggestedMatch[1] && suggestedMatch[1] !== model ? suggestedMatch[1] : null;
 
-            if (fallbackModel && fallbackModel !== model) {
-              console.log(`[GeminiRAG] Auto-reintentando con modelo compatible: ${fallbackModel}`);
-              const retryEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent?key=${resolvedApiKey}`;
-              const retryResp = await fetch(retryEndpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(requestBody),
-              });
+        const candidateModels = [
+          suggestedModel,
+          "gemini-3.8-flash",
+          "gemini-1.5-flash",
+          "gemini-2.5-flash",
+          "gemini-1.5-pro",
+        ].filter(Boolean) as string[];
 
-              if (retryResp.ok) {
-                const retryData = await retryResp.json();
-                const retryCandidate = retryData.candidates?.[0];
-                const rawRetryText =
-                  extractCandidateText(retryCandidate) || "No se obtuvo respuesta del modelo Gemini.";
-                const retryText = enrichTextWithGroundingLinks(rawRetryText, retryCandidate, Boolean(params.webSearch), query);
-                return {
-                  success: true,
-                  text: retryText,
-                  latencyMs: Math.round(performance.now() - startTime),
-                  provider: "Google Gemini",
-                  model: fallbackModel,
-                  citations: extractCitations(retryText),
-                  tableData: extractMarkdownTable(retryText),
-                };
-              }
+        for (const candidateModel of candidateModels) {
+          if (candidateModel === model) continue;
+          try {
+            console.warn(
+              `[GeminiRAG] Modelo ${model} no disponible en Google API; auto-reintentando con ${candidateModel}…`
+            );
+            const retryEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:generateContent?key=${resolvedApiKey}`;
+            const retryResp = await fetch(retryEndpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(requestBody),
+            });
+
+            if (retryResp.ok) {
+              const retryData = await retryResp.json();
+              const retryCandidate = retryData.candidates?.[0];
+              const rawRetryText =
+                extractCandidateText(retryCandidate) || "No se obtuvo respuesta del modelo Gemini.";
+              const retryText = enrichTextWithGroundingLinks(
+                rawRetryText,
+                retryCandidate,
+                Boolean(params.webSearch),
+                query
+              );
+              return {
+                success: true,
+                text: retryText,
+                latencyMs: Math.round(performance.now() - startTime),
+                provider: "Google Gemini",
+                model: candidateModel,
+                citations: extractCitations(retryText),
+                tableData: extractMarkdownTable(retryText),
+              };
             }
+          } catch (retryErr) {
+            console.warn(`[GeminiRAG] Reintento con ${candidateModel} falló:`, retryErr);
           }
-        } catch (autoErr) {
-          console.warn("[GeminiRAG] No se pudo ejecutar auto-descubrimiento de modelos:", autoErr);
         }
       }
 
