@@ -39,6 +39,10 @@ export interface GeminiRAGQueryParams {
   similarityThreshold?: number;
   topK?: number;
   webSearch?: boolean;
+  image?: {
+    mimeType: string;
+    data: string;
+  };
 }
 
 export interface GeminiRAGResponse {
@@ -131,13 +135,17 @@ Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comun
    - Mantén la coherencia continua del hilo de conversación previa.
    - Si el usuario hace repreguntas ("¿y quién es el responsable?", "¿cuál es el plazo?", "¿por qué?"), enlaza directamente con lo conversado anteriormente sin reiniciar el diálogo ni repetir saludos.
 
-5. ENLACES EXTERNOS Y MODO BÚSQUEDA WEB (Orientación clara):
-   - Si los documentos del proyecto NO contienen un enlace web directo o URL solicitada por el usuario:
-     * Explica con claridad y brevedad que la documentación interna cargada no contiene el enlace directo a esa sección web.
-     * Orienta al usuario directamente: "Para consultar enlaces externos o información en tiempo real de internet, activa el botón '🌐 Búsqueda Web' en la barra superior del chat (o en Configuración). Si no tienes permisos habilitados en tu perfil, solicita autorización a tu administrador para activar el modo online."
-     * NO alucines ni inventes links rotos.
-   - Si la Búsqueda Web está activada y Google devuelve resultados:
-     * Proporciona el enlace web oficial verificado con formato Markdown [Texto descriptivo](url).
+5. ENLACES EXTERNOS, BÚSQUEDA WEB Y PREVENCIÓN DE ENLACES ROTOS (0% ERRORES 404):
+   - PROHIBIDO inventar códigos numéricos o slugs aleatorios al final de URLs de gob.pe o minedu.gob.pe (ej. alucinaciones como ".../normas-legales/2008-...-112678").
+   - Si el usuario te pide el enlace de una norma oficial de MINEDU (como la RM 0401-2008-ED o similares):
+     * Si no tienes una URL directa que haya sido explícitamente devuelta por la búsqueda de Google, entrega SIEMPRE el enlace del Buscador Oficial de Normas del MINEDU con el parámetro de búsqueda:
+       [Buscador Oficial MINEDU - RM 0401-2008-ED](https://www.gob.pe/institucion/minedu/normas-legales?term=0401-2008-ED)
+     * Este enlace parametrizado NUNCA se rompe, jamás da error 404 y dirige al usuario a la ficha y anexos oficiales vigentes.
+   - Si la Búsqueda Web está desactivada y la información no está en los documentos del proyecto:
+     * Orienta al usuario: "Este documento normativo no contiene un enlace web directo. Si cuentas con los permisos correspondientes, puedes activar el botón '🌐 Búsqueda Web' en la barra del chat (o en Configuración) para consultar Google en tiempo real, o ingresar al portal oficial de normas del MINEDU."
+   - Si el usuario te adjunta una imagen o captura de pantalla (ej. pantalla de 404, error o documento):
+     * Analiza de inmediato la evidencia visual de la imagen adjunta.
+     * Si la imagen muestra un "404 ERROR" o página no encontrada, reconócelo con naturalidad humana y dale el enlace del buscador oficial o la alternativa verificada sin rodeos.
 `;
 
 /**
@@ -341,9 +349,18 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
   }
 
   // Consulta actual del usuario como turno activo
+  const userParts: any[] = [{ text: query }];
+  if (params.image && params.image.data) {
+    userParts.push({
+      inline_data: {
+        mime_type: params.image.mimeType || "image/png",
+        data: params.image.data,
+      },
+    });
+  }
   contents.push({
     role: "user",
-    parts: [{ text: query }],
+    parts: userParts,
   });
 
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${resolvedApiKey}`;
@@ -392,11 +409,12 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
               .map((m: any) => m.name.replace(/^models\//, ""));
 
             const fallbackModel =
-              availableModels.find((m) => m === "gemini-1.5-flash-latest") ||
-              availableModels.find((m) => m === "gemini-2.0-flash") ||
-              availableModels.find((m) => m === "gemini-2.0-flash-exp") ||
-              availableModels.find((m) => m.includes("flash")) ||
-              availableModels.find((m) => m.includes("gemini-1.5")) ||
+              availableModels.find((m) => m !== model && m === "gemini-2.0-flash") ||
+              availableModels.find((m) => m !== model && m === "gemini-1.5-flash") ||
+              availableModels.find((m) => m !== model && m === "gemini-1.5-flash-latest") ||
+              availableModels.find((m) => m !== model && m.includes("flash")) ||
+              availableModels.find((m) => m !== model && m.includes("gemini-1.5")) ||
+              availableModels.find((m) => m !== model) ||
               availableModels[0];
 
             if (fallbackModel && fallbackModel !== model) {
