@@ -76,3 +76,13 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
 * **Solución Implementada:** Se refactorizó el tokenizador inline de la burbuja sin alterar el layout:
   1. **Enlaces Markdown y URLs directas:** Ahora se renderizan como hipervínculos `<a>` interactivos con `target="_blank"`, icono `ExternalLink` y estilo corporativo accesible.
   2. **Compatibilidad Total:** Mantiene las citas documentales `[1]`, `[2]` abriendo el Inspector lateral, interpreta negritas `**texto**`, y preserva saltos de línea con `whitespace-pre-wrap`.
+
+
+### E. Soporte Multimodal (Pegado de Capturas Ctrl+V) y Enlaces Infalibles Anti-404
+* **Diagnóstico:** 
+  1. Al copiar capturas de pantalla (`Win+Shift+S`) para reportar errores visuales, el `<textarea>` del chat no permitía pegarlas (`Ctrl+V`), imposibilitando el feedback visual al modelo.
+  2. Al solicitar resoluciones previas a 2018 (como la RM 0401-2008-ED), el LLM generaba enlaces con IDs numéricos aleatorios en `gob.pe` provocando páginas de error 404.
+* **Solución Implementada:**
+  1. **Pegado Multimodal Directo (`Ctrl+V`):** Se intercepta el evento `onPaste` en el `<textarea>` de [`CriteriosApp.tsx`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/CriteriosApp.tsx), extrayendo la imagen a Base64 y desplegando un chip de previsualización `[ 🖼️ Captura adjunta ✕ ]`.
+  2. **Envío Multimodal a Gemini:** La imagen se transmite como `inline_data` a la API de Gemini para que el modelo analice visualmente la captura (reconociendo pantallas de error 404 o interfaces).
+  3. **Regla de Enlaces Infalibles:** En [`geminiRAGService.ts`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/services/geminiRAGService.ts), se prohíbe inventar slugs o IDs numéricos ficticios y se exige entregar enlaces del buscador oficial parametrizado (`https://www.gob.pe/institucion/minedu/normas-legales?term=...`), garantizando que jamás se rompan.

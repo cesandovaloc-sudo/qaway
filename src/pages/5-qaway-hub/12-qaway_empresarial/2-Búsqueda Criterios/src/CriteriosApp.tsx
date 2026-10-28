@@ -250,6 +250,7 @@ interface ChatTurn {
   scenarioId?: string;
   sourcesCount?: number;
   hasTable?: boolean;
+  imageUrl?: string;
   sources?:
     | {
         id: number;
@@ -923,6 +924,17 @@ export default function CriteriosApp() {
     }
   });
 
+  // Captura de pantalla o imagen adjunta para visión multimodal
+  const [pastedImage, setPastedImage] = useState<{
+    file: File;
+    previewUrl: string;
+    base64: string;
+    mimeType: string;
+    name: string;
+    sizeLabel: string;
+  } | null>(null);
+  const chatImageInputRef = useRef<HTMLInputElement>(null);
+
   // Pestaña activa en Configuración (Proveedores / Motor / Base de Datos Supabase)
   const [configTab, setConfigTab] = useState<"providers" | "engine" | "database">("providers");
 
@@ -1213,6 +1225,51 @@ export default function CriteriosApp() {
     });
   }, []);
 
+  const processImageFile = useCallback((file: File) => {
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      if (result) {
+        const base64 = result.split(",")[1];
+        const sizeKb = Math.round(file.size / 1024);
+        setPastedImage({
+          file,
+          previewUrl: result,
+          base64,
+          mimeType: file.type || "image/png",
+          name: file.name && file.name !== "image.png" ? file.name : "Captura_adjunta.png",
+          sizeLabel: `${sizeKb} KB`,
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleChatPaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          e.preventDefault();
+          processImageFile(file);
+          return;
+        }
+      }
+    }
+  }, [processImageFile]);
+
+  const handleImageFileSelected = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processImageFile(file);
+      e.target.value = "";
+    }
+  }, [processImageFile]);
+
   function handleCreateNewSession(customTitle?: string, customProjectId?: string, initialProfile?: AgentProfileId) {
     const newId = `session-${Date.now()}`;
     const pId = customProjectId || activeProjectId;
@@ -1393,8 +1450,14 @@ export default function CriteriosApp() {
   }
 
   async function handleSendMessage(textToSend?: string) {
-    const q = (textToSend !== undefined ? textToSend : query).trim();
-    if (!q) return;
+    let q = (textToSend !== undefined ? textToSend : query).trim();
+    if (!q && !pastedImage) return;
+    if (!q && pastedImage) {
+      q = "Por favor analiza esta captura de pantalla adjunta.";
+    }
+
+    const currentAttachedImage = pastedImage;
+    setPastedImage(null);
 
     const targetSessionId = activeSessionId;
     const currentSession = chatSessions.find((s) => s.id === targetSessionId) || activeSession;
@@ -1406,6 +1469,7 @@ export default function CriteriosApp() {
       sender: "user",
       text: q,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      imageUrl: currentAttachedImage?.previewUrl,
     };
 
     // Sincronizar turno de usuario en Supabase (no bloqueante)
@@ -1512,6 +1576,12 @@ export default function CriteriosApp() {
             similarityThreshold,
             topK,
             webSearch: webSearchEnabled,
+            image: currentAttachedImage
+              ? {
+                  mimeType: currentAttachedImage.mimeType,
+                  data: currentAttachedImage.base64,
+                }
+              : undefined,
           });
 
           if (geminiResult.success && geminiResult.text) {
@@ -3741,6 +3811,17 @@ export default function CriteriosApp() {
                                 </div>
                                 <span>{msg.timestamp}</span>
                               </div>
+                              {msg.imageUrl && (
+                                <div className="mb-2 rounded-xl overflow-hidden border border-zinc-700 bg-zinc-800/90">
+                                  <img
+                                    src={msg.imageUrl}
+                                    alt="Captura adjunta"
+                                    className="max-h-60 max-w-full object-contain rounded-xl cursor-pointer hover:opacity-95 transition-opacity"
+                                    onClick={() => window.open(msg.imageUrl, "_blank")}
+                                    title="Clic para ver en tamaño original"
+                                  />
+                                </div>
+                              )}
                               <p style={{ fontSize: 14.5, lineHeight: 1.55 }} className="text-zinc-100">
                                 {msg.text}
                               </p>
@@ -4086,10 +4167,36 @@ export default function CriteriosApp() {
                         isRecordingVoice ? "ring-2 ring-red-300" : "focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20"
                       }`}
                     >
+                      {/* Chip de captura de pantalla pegada / imagen adjunta */}
+                      {pastedImage && (
+                        <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-blue-50/90 border border-blue-200/90 text-blue-900 text-xs animate-in fade-in">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <img
+                              src={pastedImage.previewUrl}
+                              alt="Captura"
+                              className="w-9 h-9 rounded-lg object-cover border border-blue-300 shadow-2xs shrink-0"
+                            />
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-semibold truncate max-w-[240px] text-zinc-900">{pastedImage.name}</span>
+                              <span className="text-[10.5px] text-blue-600 font-medium">{pastedImage.sizeLabel} • Captura lista para análisis</span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setPastedImage(null)}
+                            className="p-1 rounded-lg hover:bg-blue-100 text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
+                            title="Quitar captura"
+                          >
+                            <HubIcon icon={X} size={14} />
+                          </button>
+                        </div>
+                      )}
+
                       <textarea
                         ref={chatTextareaRef}
                         rows={1}
                         value={query}
+                        onPaste={handleChatPaste}
                         onChange={(e) => {
                           setQuery(e.target.value);
                           e.target.style.height = "auto";
@@ -4099,7 +4206,7 @@ export default function CriteriosApp() {
                         onKeyDown={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
                             e.preventDefault();
-                            if (query.trim() && !isSearching) {
+                            if ((query.trim() || pastedImage) && !isSearching) {
                               handleSubmit(e);
                               if (chatTextareaRef.current) {
                                 chatTextareaRef.current.style.height = "auto";
@@ -4121,14 +4228,23 @@ export default function CriteriosApp() {
                         aria-label="Consulta en chat"
                       />
 
+                      {/* Input oculto para adjuntar imágenes desde selector de archivos */}
+                      <input
+                        ref={chatImageInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileSelected}
+                        className="hidden"
+                      />
+
                       <div className="flex items-center justify-between pt-1 border-t border-zinc-100/90">
                         <div className="flex items-center gap-1.5">
-                          {/* Botón Adjuntar Archivo / Imagen (abre selector real o modal de ingesta) */}
+                          {/* Botón Adjuntar Archivo / Imagen (abre selector de imagen o permite pegar con Ctrl+V) */}
                           <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={() => chatImageInputRef.current?.click()}
                             className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 cursor-pointer transition-colors"
-                            title="Adjuntar e indexar documento o planilla Excel"
+                            title="Adjuntar captura de pantalla o imagen (también puedes pegar con Ctrl+V)"
                             aria-label="Adjuntar archivo o imagen"
                           >
                             <HubIcon icon={Paperclip} size={16} />
@@ -4264,7 +4380,7 @@ export default function CriteriosApp() {
 
                         <button
                           type="submit"
-                          disabled={isSearching || !query.trim()}
+                          disabled={isSearching || (!query.trim() && !pastedImage)}
                           style={{ backgroundColor: palette.actionPrimary }}
                           className="h-8 px-3 rounded-xl text-white font-semibold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 cursor-pointer shrink-0 transition-all shadow-xs disabled:opacity-40"
                           aria-label="Enviar mensaje"
