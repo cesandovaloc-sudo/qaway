@@ -2486,7 +2486,7 @@ export default function CronogramaGanttView({
                         setHoveredTask({
                           item: x,
                           x: rect.left + rect.width / 2,
-                          y: rect.top - 8,
+                          y: rect.top - 2,
                         });
                       }}
                       onMouseLeave={() => {
@@ -2619,8 +2619,7 @@ export default function CronogramaGanttView({
                 {hoveredTask.item.code} {hoveredTask.item.name}
               </div>
               <div className="tooltip-metric">
-                <span className={`tooltip-dot ${STATUS_CLASS[hoveredTask.item.status]}`} />
-                <span>Cumplimiento: <strong>{hoveredTask.item.progress}%</strong></span>
+                Cumplimiento : {hoveredTask.item.progress}%
                 {hoveredTask.item.kind === 'hito' && (
                   <span className="tooltip-sub"> · Corte: {formatDate(hoveredTask.item.end)}</span>
                 )}
