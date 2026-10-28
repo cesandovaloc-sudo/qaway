@@ -2358,19 +2358,21 @@
   background: #fff;
 }
 
-/* Panel Lateral Editor (Drawer) */
+/* Panel Lateral Editor (Drawer de Coordinador) */
 .gantt-v2 .editor {
   position: fixed;
-  z-index: 999;
+  z-index: 1001;
   top: 0;
   right: 0;
-  width: 360px;
+  width: 415px;
+  max-width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: white;
-  border-left: 1px solid #cbd5e1;
-  box-shadow: -10px 0 35px rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: -10px 0 35px rgba(15, 23, 42, 0.14);
+  animation: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .gantt-v2 .editor-head {
@@ -2384,10 +2386,30 @@
 }
 
 .gantt-v2 .editor-head h2 {
-  font-size: 17px;
+  font-size: 16.5px;
   margin: 0;
   color: #0f172a;
   font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.gantt-v2 .editor-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .editor-icon-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .gantt-v2 .editor-tabs {
@@ -2453,18 +2475,88 @@
 .gantt-v2 .field textarea {
   width: 100%;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  padding: 9px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 10px 12px;
   color: #0f172a;
-  font-size: 13.5px;
+  font-size: 13px;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gantt-v2 .field select {
+  cursor: pointer;
+}
+
+.gantt-v2 .field input:focus,
+.gantt-v2 .field select:focus,
+.gantt-v2 .field textarea:focus {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+}
+
+.gantt-v2 .field.relative {
+  position: relative;
+}
+
+.gantt-v2 .custom-date-btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0 12px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .custom-date-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.gantt-v2 .custom-date-btn.active {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+  background: #eff6ff;
+}
+
+.gantt-v2 .custom-date-btn .date-btn-icon {
+  color: #64748b;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.gantt-v2 .custom-date-btn.active .date-btn-icon {
+  color: #0066ff;
+}
+
+.gantt-v2 .editor .custom-calendar-pop {
+  z-index: 200;
+  top: calc(100% + 4px);
+  width: 250px;
+}
+
+.gantt-v2 .editor .custom-calendar-pop.align-right {
+  right: 0;
+  left: auto;
+}
+
+.gantt-v2 .editor .custom-calendar-pop.align-left {
+  left: 0;
+  right: auto;
 }
 
 .gantt-v2 .date-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
 .gantt-v2 .progress-edit input {

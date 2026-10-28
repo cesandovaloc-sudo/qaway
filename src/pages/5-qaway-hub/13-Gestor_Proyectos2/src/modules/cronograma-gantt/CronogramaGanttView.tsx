@@ -728,6 +728,7 @@ export default function CronogramaGanttView({
     y: number;
   } | null>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
+  const [editorCalOpen, setEditorCalOpen] = useState<'start' | 'end' | null>(null);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
   const [resizeTempWidth, setResizeTempWidth] = useState<number | null>(null);
   const [resizeTempEndDate, setResizeTempEndDate] = useState<string | null>(null);
@@ -2756,21 +2757,31 @@ export default function CronogramaGanttView({
 
         {/* Panel Lateral Editor (Drawer de Coordinador) */}
         {panelOpen && selected && (
-          <aside className="editor">
+          <aside className="editor" onClick={() => setEditorCalOpen(null)}>
             <div className="editor-head">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <button
-                  style={{ border: 0, background: 'transparent' }}
-                  onClick={() => setPanelOpen(false)}
+                  type="button"
+                  className="editor-icon-btn"
+                  onClick={() => {
+                    setPanelOpen(false);
+                    setEditorCalOpen(null);
+                  }}
+                  title="Volver"
                 >
                   <ChevronLeft size={18} />
                 </button>
                 <h2>Editar {selected.kind === 'hito' ? 'Hito Rector' : 'Subproceso'}</h2>
               </div>
               <button
-                style={{ border: 0, background: 'transparent' }}
-                onClick={() => setPanelOpen(false)}
+                type="button"
+                className="editor-icon-btn"
+                onClick={() => {
+                  setPanelOpen(false);
+                  setEditorCalOpen(null);
+                }}
                 aria-label="Cerrar editor"
+                title="Cerrar panel de detalles"
               >
                 <X size={18} />
               </button>
@@ -2811,23 +2822,60 @@ export default function CronogramaGanttView({
               </label>
 
               <div className="date-fields">
-                <label className="field">
+                <div className="field relative">
                   <span>Fecha de inicio</span>
-                  <input
-                    type="date"
-                    value={selected.start}
-                    onChange={(e) => setStart(selected, e.target.value)}
-                  />
-                </label>
-                <label className="field">
+                  <button
+                    type="button"
+                    className={`custom-date-btn ${editorCalOpen === 'start' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditorCalOpen((p) => p === 'start' ? null : 'start');
+                    }}
+                    title="Seleccionar fecha de inicio con calendario institucional"
+                  >
+                    <span>{formatDatePE(selected.start)}</span>
+                    <CalendarDays size={14} className="date-btn-icon" />
+                  </button>
+                  {editorCalOpen === 'start' && (
+                    <MiniCalendar
+                      value={selected.start}
+                      onChange={(newDate) => {
+                        setStart(selected, newDate);
+                        setEditorCalOpen(null);
+                      }}
+                      onClose={() => setEditorCalOpen(null)}
+                      align="left"
+                    />
+                  )}
+                </div>
+
+                <div className="field relative">
                   <span>Fecha de fin</span>
-                  <input
-                    type="date"
-                    min={selected.start}
-                    value={selected.end}
-                    onChange={(e) => setEnd(selected, e.target.value)}
-                  />
-                </label>
+                  <button
+                    type="button"
+                    className={`custom-date-btn ${editorCalOpen === 'end' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditorCalOpen((p) => p === 'end' ? null : 'end');
+                    }}
+                    title="Seleccionar fecha de fin con calendario institucional"
+                  >
+                    <span>{formatDatePE(selected.end)}</span>
+                    <CalendarDays size={14} className="date-btn-icon" />
+                  </button>
+                  {editorCalOpen === 'end' && (
+                    <MiniCalendar
+                      value={selected.end}
+                      min={selected.start}
+                      onChange={(newDate) => {
+                        setEnd(selected, newDate);
+                        setEditorCalOpen(null);
+                      }}
+                      onClose={() => setEditorCalOpen(null)}
+                      align="right"
+                    />
+                  )}
+                </div>
               </div>
 
               {selected.kind === 'hito' && (
