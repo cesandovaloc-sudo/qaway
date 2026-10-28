@@ -25,7 +25,6 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  RotateCcw,
   Save,
   Search,
   ShieldCheck,
@@ -1645,22 +1644,6 @@ export default function CronogramaGanttView({
 
             <button
               type="button"
-              className="btn secondary undo-btn"
-              disabled={history.length === 0}
-              onClick={handleUndo}
-              title={
-                history.length > 0
-                  ? `Deshacer último cambio (Ctrl+Z) · ${history.length} en historial`
-                  : 'No hay cambios para deshacer'
-              }
-            >
-              <RotateCcw size={14} />
-              <span>Deshacer</span>
-              {history.length > 0 && <span className="undo-badge">{history.length}</span>}
-            </button>
-
-            <button
-              type="button"
               className="btn secondary clear-btn"
               onClick={() => {
                 setSearch('');
@@ -2204,9 +2187,9 @@ export default function CronogramaGanttView({
                       {isRangeActive && x.end > rangeTo && (
                         <span
                           className={`exceed-pill ${x.kind === 'hito' ? 'pill-with-diamond' : ''}`}
-                          title="Finaliza después del plazo oficial consultado"
+                          title="Finaliza después del rango de fechas seleccionado"
                         >
-                          +fuera plazo
+                          +fuera rango
                         </span>
                       )}
                     </div>
@@ -2214,7 +2197,7 @@ export default function CronogramaGanttView({
                 </div>
               ))}
 
-              {/* Máscara visual de zona fuera de plazo (cuando hay filtro de rango activo) */}
+              {/* Máscara visual de zona fuera de rango (cuando hay filtro de rango activo) */}
               {isRangeActive && (
                 <>
                   {/* Zona previa al inicio del rango */}
@@ -2225,7 +2208,7 @@ export default function CronogramaGanttView({
                         left: 'var(--fixed)',
                         width: `calc((100% - var(--fixed)) * ${calcPosition(rangeFrom) / 100})`,
                       }}
-                      title={`Zona fuera del plazo: previa al ${formatDate(rangeFrom)}`}
+                      title={`Zona fuera de rango: previa al ${formatDate(rangeFrom)}`}
                     />
                   )}
 
