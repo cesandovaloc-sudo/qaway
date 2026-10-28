@@ -2493,6 +2493,16 @@ export default function CronogramaGanttView({
                         if (!resizingTaskId) setHoveredTask(null);
                       }}
                     >
+                      {/* Relleno de avance proporcional (refleja el % real de cumplimiento) */}
+                      <div
+                        className="bar-progress-fill"
+                        style={{
+                          width: `${Math.min(100, Math.max(0, x.progress))}%`,
+                          borderTopRightRadius: x.progress >= 98 ? 'inherit' : 0,
+                          borderBottomRightRadius: x.progress >= 98 ? 'inherit' : 0,
+                        }}
+                      />
+
                       {/* Avance limpio embebido (conmutable a través del botón superior) */}
                       {showBarLabels && (
                         <span className="bar-label-inner">
