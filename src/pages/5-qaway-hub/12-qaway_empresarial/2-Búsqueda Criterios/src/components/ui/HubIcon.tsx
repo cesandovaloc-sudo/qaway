@@ -4,7 +4,10 @@
  * ============================================================================ */
 import type { LucideIcon } from "lucide-react";
 
-export type AllowedIconSize = 14 | 16 | 18 | 20 | 24;
+/* Tamaños libres: la app ya usa 11–26 px (incl. 12.5) en producción; el union
+ * original (14|16|18|20|24) solo existía en la propuesta tipográfica y excluía
+ * usos reales. Ajuste puramente declarativo: cero impacto visual. */
+export type AllowedIconSize = number;
 
 export interface HubIconProps {
   icon: LucideIcon | undefined;

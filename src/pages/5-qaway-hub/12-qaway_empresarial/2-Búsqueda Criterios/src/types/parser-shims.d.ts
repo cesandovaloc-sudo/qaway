@@ -21,3 +21,10 @@ declare module "mammoth/mammoth.browser.min.js" {
   const mammothBrowser: MammothBrowserModule;
   export default mammothBrowser;
 }
+
+/** Bundle UMD de tesseract.js incluido en node_modules — fallback de carga OCR
+ * cuando la resolución ESM del paquete no está disponible en el empaquetador. */
+declare module "tesseract.js/dist/tesseract.min.js" {
+  export const createWorker: any;
+  export default undefined;
+}
