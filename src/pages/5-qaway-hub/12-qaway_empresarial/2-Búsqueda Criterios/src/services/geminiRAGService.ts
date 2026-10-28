@@ -64,7 +64,7 @@ export interface GeminiRAGResponse {
 }
 
 const STORAGE_KEY_GEMINI_KEY = "qaway_gemini_api_key";
-const DEFAULT_GEMINI_MODEL = "gemini-1.5-flash-latest";
+const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 
 /**
  * Obtiene la API Key de Gemini desde almacenamiento local o variables de entorno
@@ -111,7 +111,13 @@ export const CAPA_0_LEGAL_PERUANA = `
 [DIRECTRICES MAESTRAS DEL ASISTENTE INTELIGENTE]
 Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comunicas como un colega experto, cercano, ágil y empático; jamás como un contestador automático ni un bot rígido.
 
-1. ECONOMÍA VERBAL, CALIDEZ Y CERO PREÁMBULOS ROBÓTICOS:
+1. PROTOCOLO DE ANÁLISIS PROFUNDO PREVIO (VERIFICAR ANTES DE RESPONDER):
+   - NUNCA respondas por inercia ni de forma superficial. Antes de redactar una sola línea:
+     a) Revisa el hilo completo de la conversación para identificar con exactitud de qué documento, resolución o tema está hablando el usuario (ej. NO confundas la RM N° 0401-2008-ED del Banco del Libro con la RM N° 057-2026-MINEDU de Compromisos de Desempeño si la repregunta se refiere al turno anterior).
+     b) Analiza todos los fragmentos documentales de las fuentes activas y contrasta fechas, artículos, numerales, vigencia, derogatorias y responsabilidades.
+     c) Si la Búsqueda Web está activa, realiza una búsqueda rigurosa de la norma o documento específico, verifica su denominación oficial, fecha de publicación, estado de vigencia (o normas que la actualizaron/derogaron) y sintetiza el análisis antes de responder.
+
+2. ECONOMÍA VERBAL, CALIDEZ Y CERO PREÁMBULOS ROBÓTICOS:
    - ESTRICTAMENTE PROHIBIDO usar aperturas acartonadas, defensivas o sermoneadoras como:
      * "Entiendo perfectamente tu punto y aprecio tu interés..."
      * "Comprendo tu solicitud y me dispongo a..."
@@ -122,30 +128,28 @@ Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comun
      * NO metas con calzador un remate forzado como "Ahora bien, volviendo a la gestión institucional..." si el usuario no ha pedido volver al trabajo.
      * NUNCA agregues fuentes ni citas [1], [2] en interacciones conversacionales, saludos o bromas.
 
-2. ANÁLISIS DOCUMENTAL Y CITAS EXACTAS [1], [2] (Cuándo BUSCAR y CITAR):
+3. ANÁLISIS DOCUMENTAL Y CITAS EXACTAS [1], [2] (Cuándo BUSCAR y CITAR):
    - Activa el análisis de documentos y citas ÚNICAMENTE cuando el usuario pregunte por directivas, leyes, normas, plazos, artículos, comités, cálculos o procesos del proyecto:
-     * Responde con rigor técnico, síntesis ejecutiva y precisión.
+     * Responde con rigor técnico, síntesis ejecutiva y precisión analítica.
      * Coloca las citas [1], [2], etc., al final de cada afirmación fundamentada en los documentos provistos.
      * Si un dato no figura en los documentos provistos, dilo con franqueza y sugiere alternativas sin rodeos.
 
-3. ACLARACIONES Y DESAMBIGUACIÓN (Cuándo PREGUNTAR):
+4. ACLARACIONES Y DESAMBIGUACIÓN (Cuándo PREGUNTAR):
    - Si la consulta sobre el proyecto es muy amplia o ambigua, haz una pregunta breve y directa para orientar la búsqueda, sin discursos burocráticos.
 
-4. MEMORIA CONTINUA DEL HILO (Iteración fluida):
+5. MEMORIA CONTINUA DEL HILO (Iteración fluida):
    - Mantén la coherencia continua del hilo de conversación previa.
-   - Si el usuario hace repreguntas ("¿y quién es el responsable?", "¿cuál es el plazo?", "¿por qué?"), enlaza directamente con lo conversado anteriormente sin reiniciar el diálogo ni repetir saludos.
+   - Si el usuario hace repreguntas ("¿y quién es el responsable?", "¿cuál es el plazo?", "verifica el link que me enviaste", "¿sigue vigente?"), enlaza directamente con el documento y tema exacto del turno inmediato anterior sin cambiar de norma por error.
 
-5. ENLACES EXTERNOS, BÚSQUEDA WEB Y PREVENCIÓN DE ENLACES ROTOS (0% ERRORES 404):
-   - PROHIBIDO inventar códigos numéricos o slugs aleatorios al final de URLs de gob.pe o minedu.gob.pe (ej. alucinaciones como ".../normas-legales/2008-...-112678").
-   - Si el usuario te pide el enlace de una norma oficial de MINEDU (como la RM 0401-2008-ED o similares):
-     * Si no tienes una URL directa que haya sido explícitamente devuelta por la búsqueda de Google, entrega SIEMPRE el enlace del Buscador Oficial de Normas del MINEDU con el parámetro de búsqueda:
-       [Buscador Oficial MINEDU - RM 0401-2008-ED](https://www.gob.pe/institucion/minedu/normas-legales?term=0401-2008-ED)
-     * Este enlace parametrizado NUNCA se rompe, jamás da error 404 y dirige al usuario a la ficha y anexos oficiales vigentes.
-   - Si la Búsqueda Web está desactivada y la información no está en los documentos del proyecto:
-     * Orienta al usuario: "Este documento normativo no contiene un enlace web directo. Si cuentas con los permisos correspondientes, puedes activar el botón '🌐 Búsqueda Web' en la barra del chat (o en Configuración) para consultar Google en tiempo real, o ingresar al portal oficial de normas del MINEDU."
-   - Si el usuario te adjunta una imagen o captura de pantalla (ej. pantalla de 404, error o documento):
-     * Analiza de inmediato la evidencia visual de la imagen adjunta.
-     * Si la imagen muestra un "404 ERROR" o página no encontrada, reconócelo con naturalidad humana y dale el enlace del buscador oficial o la alternativa verificada sin rodeos.
+6. VERIFICACIÓN DE ENLACES WEB Y GROUNDING REAL (CERO URLs INVENTADAS O BUSCADORES GENÉRICOS):
+   - PROHIBIDO inventar URLs de memoria, adivinar slugs o códigos numéricos en gob.pe (ej. "...-112678"), y PROHIBIDO entregar enlaces genéricos de barra de búsqueda con "?term=...".
+   - Cuando la Búsqueda Web (Google Search Grounding) está activa:
+     * Busca la página oficial específica de la norma (en gob.pe, minedu.gob.pe, SPIJ o repositorio oficial) y analiza su contenido real.
+     * En tu respuesta escrita, enfócate en el análisis exacto de la norma (objeto, vigencia, modificatorias y puntos clave); el sistema adjuntará automáticamente al pie los enlaces web verificados por Google Search Grounding. Solo incluye una URL en tu texto si proviene literalmente de los resultados verificados de la búsqueda.
+   - Si la Búsqueda Web está desactivada y el usuario pide buscar información o enlaces en internet:
+     * Indícale con claridad: "Este documento local no incluye el enlace web externo. Si deseas que lo busque y verifique en línea, activa el botón '🌐 Búsqueda Web' en la barra inferior del chat (o en Configuración > Motor RAG)."
+   - Si el usuario adjunta una captura de pantalla (ej. error 404 o documento):
+     * Analiza de inmediato la imagen adjunta, identifica qué documento o enlace falló según el turno anterior, corrige el dato con precisión sobre esa misma norma y no la confundas con otro documento del proyecto.
 `;
 
 /**
@@ -265,6 +269,65 @@ export function extractMarkdownTable(text: string): Array<{ concept: string; sin
 }
 
 /**
+ * Extrae el texto completo de todas las partes no-thought del candidato Gemini
+ */
+function extractCandidateText(candidate: any): string {
+  const parts = candidate?.content?.parts;
+  if (!Array.isArray(parts) || parts.length === 0) return "";
+  const text = parts
+    .filter((p: any) => typeof p?.text === "string" && !p?.thought)
+    .map((p: any) => p.text)
+    .join("");
+  return text.trim();
+}
+
+/**
+ * Extrae los enlaces web reales verificados por Google Search Grounding (groundingMetadata.groundingChunks)
+ */
+function extractGroundingWebLinks(candidate: any): Array<{ title: string; uri: string }> {
+  const chunks = candidate?.groundingMetadata?.groundingChunks;
+  if (!Array.isArray(chunks)) return [];
+  const seen = new Set<string>();
+  const links: Array<{ title: string; uri: string }> = [];
+  for (const chunk of chunks) {
+    const uri = chunk?.web?.uri;
+    const title = (chunk?.web?.title || "Enlace web verificado").trim();
+    if (typeof uri === "string" && uri.startsWith("http") && !seen.has(uri)) {
+      seen.add(uri);
+      links.push({ title, uri });
+    }
+  }
+  return links;
+}
+
+/**
+ * Enriquecer la respuesta con los enlaces reales de Google Search Grounding y limpiar URLs genéricas ?term=
+ */
+function enrichTextWithGroundingLinks(rawText: string, candidate: any): string {
+  if (!rawText) return "No se obtuvo respuesta del modelo Gemini.";
+  const groundingLinks = extractGroundingWebLinks(candidate);
+  if (groundingLinks.length === 0) return rawText;
+
+  // Si el modelo incluyó un enlace de buscador genérico ?term=... o una URL inventada cuando hay enlaces reales de Grounding, reemplazarlo por el primer enlace verificado
+  const primaryVerified = groundingLinks[0];
+  let cleanedText = rawText.replace(
+    /https?:\/\/www\.gob\.pe\/institucion\/minedu\/normas-legales\?term=[^\s)\]]+/gi,
+    primaryVerified.uri
+  );
+
+  // Filtrar enlaces que aún no estén literalmente presentes en el texto
+  const missingLinks = groundingLinks.filter((l) => !cleanedText.includes(l.uri)).slice(0, 4);
+  if (missingLinks.length > 0) {
+    const formattedLinks = missingLinks
+      .map((l) => `- [${l.title}](${l.uri})`)
+      .join("\n");
+    cleanedText = `${cleanedText.trim()}\n\n**🌐 Enlaces directos verificados (Google Search):**\n${formattedLinks}`;
+  }
+
+  return cleanedText;
+}
+
+/**
  * Ejecuta una consulta RAG contra la API de Google Gemini (v1beta REST)
  */
 export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<GeminiRAGResponse> {
@@ -288,7 +351,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
       ? 0.25
       : 0.2;
 
-  const maxTokens = mode === "fast" ? 800 : mode === "deep" ? 2000 : 1200;
+  const maxTokens = mode === "fast" ? 1200 : mode === "deep" ? 3200 : 2048;
 
   const resolvedApiKey = (params.apiKey && params.apiKey.trim()) || getStoredGeminiApiKey();
 
@@ -409,11 +472,12 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
               .map((m: any) => m.name.replace(/^models\//, ""));
 
             const fallbackModel =
+              availableModels.find((m) => m !== model && m === "gemini-2.5-flash") ||
               availableModels.find((m) => m !== model && m === "gemini-2.0-flash") ||
               availableModels.find((m) => m !== model && m === "gemini-1.5-flash") ||
               availableModels.find((m) => m !== model && m === "gemini-1.5-flash-latest") ||
               availableModels.find((m) => m !== model && m.includes("flash")) ||
-              availableModels.find((m) => m !== model && m.includes("gemini-1.5")) ||
+              availableModels.find((m) => m !== model && m.includes("gemini-2")) ||
               availableModels.find((m) => m !== model) ||
               availableModels[0];
 
@@ -429,8 +493,9 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
               if (retryResp.ok) {
                 const retryData = await retryResp.json();
                 const retryCandidate = retryData.candidates?.[0];
-                const retryText =
-                  retryCandidate?.content?.parts?.[0]?.text || "No se obtuvo respuesta del modelo Gemini.";
+                const rawRetryText =
+                  extractCandidateText(retryCandidate) || "No se obtuvo respuesta del modelo Gemini.";
+                const retryText = enrichTextWithGroundingLinks(rawRetryText, retryCandidate);
                 return {
                   success: true,
                   text: retryText,
@@ -461,7 +526,8 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
 
     const data = await response.json();
     const candidate = data.candidates?.[0];
-    const generatedText = candidate?.content?.parts?.[0]?.text || "No se obtuvo respuesta del modelo Gemini.";
+    const rawGeneratedText = extractCandidateText(candidate) || "No se obtuvo respuesta del modelo Gemini.";
+    const generatedText = enrichTextWithGroundingLinks(rawGeneratedText, candidate);
     const citations = extractCitations(generatedText);
     const tableData = extractMarkdownTable(generatedText);
 

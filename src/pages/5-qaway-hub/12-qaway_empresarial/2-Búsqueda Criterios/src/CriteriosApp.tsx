@@ -25,6 +25,7 @@ import {
   BarChart3,
   ExternalLink,
   Globe,
+  Volume2,
   ChevronDown,
   ChevronUp,
   ChevronRight,
@@ -476,8 +477,8 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     company: "Google LLC",
     logoColor: "#2563EB",
     badge: "LLM Primario (Gemini)",
-    models: ["gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.5-pro-latest"],
-    selectedModel: "gemini-1.5-flash-latest",
+    models: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro", "gemini-1.5-flash-latest", "gemini-1.5-pro"],
+    selectedModel: "gemini-2.5-flash",
     status: "active",
     latency: 142,
     role: "primary_llm",
@@ -924,6 +925,16 @@ export default function CriteriosApp() {
     }
   });
 
+  // Switch de Notificación con Sonido al recibir respuesta del Asistente
+  const [soundNotificationEnabled, setSoundNotificationEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem("qaway_rag_sound_notification");
+      return saved === null ? true : saved === "true";
+    } catch {
+      return true;
+    }
+  });
+
   // Captura de pantalla o imagen adjunta para visión multimodal
   const [pastedImage, setPastedImage] = useState<{
     file: File;
@@ -974,11 +985,11 @@ export default function CriteriosApp() {
     aiProviders[0] || {
       id: "google",
       name: "Google DeepMind",
-      selectedModel: "gemini-1.5-flash-latest",
+      selectedModel: "gemini-2.5-flash",
       contextWindow: "1M-2M tokens",
       latency: 142,
       apiKeyMask: "",
-      models: ["gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-pro"],
+      models: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"],
     };
   // Alias del proveedor LLM activo (usado por el flujo de latencia/Gemini del chat)
   const activeProvider = activeLlmProvider;
@@ -1224,6 +1235,59 @@ export default function CriteriosApp() {
       return next;
     });
   }, []);
+
+  const playNotificationSound = useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      // Acorde ejecutivo sutil de dos notas cristalinas (E5 -> B5)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(659.25, now); // E5
+      gain1.gain.setValueAtTime(0.0001, now);
+      gain1.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.19);
+
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(987.77, now + 0.09); // B5
+      gain2.gain.setValueAtTime(0.0001, now + 0.09);
+      gain2.gain.exponentialRampToValueAtTime(0.09, now + 0.11);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.09);
+      osc2.stop(now + 0.35);
+
+      setTimeout(() => {
+        ctx.close().catch(() => {});
+      }, 450);
+    } catch {
+      // Silencioso si el navegador bloquea AudioContext sin interacción previa
+    }
+  }, []);
+
+  const toggleSoundNotification = useCallback(() => {
+    setSoundNotificationEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("qaway_rag_sound_notification", String(next));
+      } catch {}
+      if (next) {
+        playNotificationSound();
+      }
+      return next;
+    });
+  }, [playNotificationSound]);
 
   const processImageFile = useCallback((file: File) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -1510,17 +1574,39 @@ export default function CriteriosApp() {
         lowerQ
       );
 
-    // Recuperación REAL en cliente: Top-K de fragmentos indexados (solo si no es saludo puro o conversación genérica)
+    // Recuperación REAL en cliente: Top-K de fragmentos indexados contextualizados con el hilo reciente
     let realEvidenceChunks: RetrievedChunk[] = [];
     let realEvidenceRelaxed = false;
+    const fallbackDocExcerpts = new Map<string, string>();
     if (activeSources.length > 0 && !isPurelyConversational) {
       try {
-        const retrieval = await retrieveRelevantChunks(activeProjectId, q, {
-          topK: Math.max(topK, 6),
+        const recentThreadContext = (currentSession?.turns || [])
+          .slice(-4)
+          .map((t) => t.text)
+          .join(" ");
+        const contextualQuery = recentThreadContext ? `${recentThreadContext} ${q}` : q;
+
+        const retrieval = await retrieveRelevantChunks(activeProjectId, contextualQuery, {
+          topK: Math.max(topK * 3, 18),
           threshold: similarityThreshold,
         });
         realEvidenceChunks = retrieval.top;
         realEvidenceRelaxed = retrieval.relaxed;
+
+        // Garantizar que todas las fuentes activas tengan al menos su extracto base cargado para que Gemini no confunda documentos
+        for (const src of activeSources) {
+          const hasChunk = realEvidenceChunks.some((c) => c.documentId === src.id);
+          if (!hasChunk) {
+            const baseChunks = await loadChunksForDocument(src.id);
+            if (baseChunks && baseChunks.length > 0) {
+              const firstSnippets = baseChunks
+                .slice(0, 2)
+                .map((c) => `[${c.locatorLabel}] «${c.content.replace(/\s+/g, " ").trim().slice(0, 650)}»`)
+                .join("\n   ");
+              fallbackDocExcerpts.set(src.id, firstSnippets);
+            }
+          }
+        }
       } catch (retrievalError) {
         console.warn("[RAG local] Recuperación no disponible:", retrievalError);
       }
@@ -1533,8 +1619,10 @@ export default function CriteriosApp() {
       }
       return best;
     };
-    const evidenceExcerptForDoc = (docId: string): string =>
-      buildSourceExcerpt(realEvidenceChunks.filter((chunk) => chunk.documentId === docId));
+    const evidenceExcerptForDoc = (docId: string): string => {
+      const built = buildSourceExcerpt(realEvidenceChunks.filter((chunk) => chunk.documentId === docId));
+      return built || fallbackDocExcerpts.get(docId) || "";
+    };
 
     let ansText = "";
     let hasTable = false;
@@ -1568,7 +1656,7 @@ export default function CriteriosApp() {
               excerpt: evidenceExcerptForDoc(s.id),
             })),
             projectName: activeProjName,
-            model: activeProvider.selectedModel || "gemini-1.5-flash-latest",
+            model: activeProvider.selectedModel || "gemini-2.5-flash",
             apiKey: geminiApiKey,
             agentProfile: currentAgentProfile,
             tone: currentAgentTone,
@@ -1707,6 +1795,10 @@ export default function CriteriosApp() {
         realEvidenceChunks,
         activeSources.map((source) => source.id)
       );
+    }
+
+    if (soundNotificationEnabled) {
+      playNotificationSound();
     }
 
     setChatSessions((prev) =>
@@ -5449,6 +5541,33 @@ export default function CriteriosApp() {
                           />
                         </button>
                       </div>
+
+                      <div className="h-px bg-zinc-100" />
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-sm text-zinc-900 flex items-center gap-1.5">
+                            <HubIcon icon={Volume2} size={15} className="text-blue-600" />
+                            <span>Notificaciones con Sonido por Respuesta</span>
+                          </span>
+                          <span className="text-xs text-zinc-500 block">
+                            Reproduce un aviso sonoro sutil cada vez que el asistente finaliza el análisis y entrega una respuesta en el chat.
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={toggleSoundNotification}
+                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                            soundNotificationEnabled ? "bg-blue-600" : "bg-zinc-300"
+                          }`}
+                        >
+                          <span
+                            className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
+                              soundNotificationEnabled ? "right-1" : "left-1"
+                            }`}
+                          />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Botones de acción con confirmación inline */}
@@ -5461,6 +5580,10 @@ export default function CriteriosApp() {
                           setTopK(5);
                           setEnableReranker(true);
                           setHybridSearch(true);
+                          setSoundNotificationEnabled(true);
+                          try {
+                            localStorage.setItem("qaway_rag_sound_notification", "true");
+                          } catch {}
                         }}
                         className="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-600 hover:bg-zinc-50 cursor-pointer transition-colors"
                       >

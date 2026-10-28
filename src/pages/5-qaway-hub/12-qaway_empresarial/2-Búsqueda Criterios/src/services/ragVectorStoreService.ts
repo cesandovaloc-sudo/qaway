@@ -413,13 +413,13 @@ function trimSnippet(text: string, maxLength: number): string {
   return flat.length > maxLength ? `${flat.slice(0, maxLength).trimEnd()}…` : flat;
 }
 
-/** Une los fragmentos top de un documento en un excerpt compacto para el prompt. */
-export function buildSourceExcerpt(chunks: RetrievedChunk[], maxChars = 1350): string {
+/** Une los fragmentos top de un documento en un excerpt amplio para análisis profundo en el prompt. */
+export function buildSourceExcerpt(chunks: RetrievedChunk[], maxChars = 2800): string {
   if (!chunks || chunks.length === 0) return "";
   const parts: string[] = [];
   let used = 0;
   for (const chunk of chunks) {
-    const snippet = trimSnippet(chunk.content, 430);
+    const snippet = trimSnippet(chunk.content, 850);
     const part = `[${chunk.locatorLabel}] «${snippet}»`;
     if (used + part.length > maxChars && parts.length > 0) break;
     parts.push(part);
