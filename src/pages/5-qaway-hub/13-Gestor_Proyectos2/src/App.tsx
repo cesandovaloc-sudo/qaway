@@ -303,6 +303,7 @@ function App() {
       <FloatingChatAssistant
         activeModule={active}
         userRole={userRole}
+        onNavigateModule={handleSelectModule}
         notify={notifyActive}
       />
     </div>

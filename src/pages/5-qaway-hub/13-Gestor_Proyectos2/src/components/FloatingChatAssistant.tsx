@@ -20,11 +20,13 @@ import {
   Layers,
   ChevronDown
 } from 'lucide-react';
+import { queryGeminiRAG, getStoredGeminiConfig } from '../services/geminiRAGService';
 
 interface FloatingChatAssistantProps {
   activeModule: ModuleKey;
   userRole?: UserRole;
   onApplyTasksFromExcel?: (tasks: any[]) => void;
+  onNavigateModule?: (module: ModuleKey) => void;
   notify?: (msg: string) => void;
 }
 
@@ -132,6 +134,7 @@ export default function FloatingChatAssistant({
   activeModule,
   userRole = 'gestor',
   onApplyTasksFromExcel,
+  onNavigateModule,
   notify = () => {}
 }: FloatingChatAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -139,8 +142,20 @@ export default function FloatingChatAssistant({
   const [isTyping, setIsTyping] = useState(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [geminiConfig, setGeminiConfig] = useState(getStoredGeminiConfig);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Escuchar cambios de configuración de Gemini en tiempo real
+  useEffect(() => {
+    const handleConfigChange = () => {
+      setGeminiConfig(getStoredGeminiConfig());
+    };
+    window.addEventListener('qaway-gemini-config-changed', handleConfigChange);
+    return () => {
+      window.removeEventListener('qaway-gemini-config-changed', handleConfigChange);
+    };
+  }, []);
 
   const contextInfo = MODULE_CONTEXT_INFO[activeModule] || MODULE_CONTEXT_INFO.cronograma;
 
@@ -153,7 +168,6 @@ export default function FloatingChatAssistant({
     }
   ]);
 
-  // Actualizar mensaje de saludo al cambiar de módulo si el chat está abierto
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping, isOpen]);
@@ -162,7 +176,7 @@ export default function FloatingChatAssistant({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() && !attachedFile) return;
 
     const userText = input.trim();
@@ -170,13 +184,32 @@ export default function FloatingChatAssistant({
     const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     let fileAttachment: ChatMessage['attachment'] = undefined;
+    let docData: { name: string; type: string; rawText?: string; contentSummary?: string } | undefined = undefined;
+
     if (currentFile) {
       const ext = currentFile.name.split('.').pop()?.toLowerCase();
+      const typeKey = ext === 'xlsx' || ext === 'xls' || ext === 'csv' ? 'excel' : ext === 'pdf' ? 'pdf' : 'other';
       fileAttachment = {
         name: currentFile.name,
         size: `${Math.round(currentFile.size / 1024)} KB`,
-        type: ext === 'xlsx' || ext === 'xls' || ext === 'csv' ? 'excel' : ext === 'pdf' ? 'pdf' : 'other'
+        type: typeKey
       };
+
+      docData = {
+        name: currentFile.name,
+        type: typeKey,
+        contentSummary: `Archivo ${currentFile.name} (${fileAttachment.size}), formato ${ext?.toUpperCase()}. Contiene estructura de cronograma o directiva técnica.`
+      };
+
+      // Si es un CSV o texto plano, podemos leerlo de inmediato para proveer contexto exacto a Gemini
+      if (ext === 'csv' || ext === 'txt') {
+        try {
+          const textPreview = await currentFile.text();
+          docData.rawText = textPreview.slice(0, 4000);
+        } catch {
+          /* fallback si falla lectura */
+        }
+      }
     }
 
     const newMsg: ChatMessage = {
@@ -192,73 +225,77 @@ export default function FloatingChatAssistant({
     setAttachedFile(null);
     setIsTyping(true);
 
-    // Simulación de procesamiento de IA contextual
-    setTimeout(() => {
-      let botResponse = '';
+    try {
+      // Preparar historial conversacional previo para el contexto multimodal RAG
+      const historyForRAG = messages.slice(-6).map((m) => ({
+        role: m.sender === 'user' ? ('user' as const) : ('model' as const),
+        text: m.text
+      }));
+
+      const ragResponse = await queryGeminiRAG({
+        query: userText || 'Interpreta la información del archivo adjunto y propón acciones para el cronograma.',
+        activeModule,
+        history: historyForRAG,
+        documentData: docData
+      });
+
       let actions: ChatMessage['actions'] = undefined;
 
       if (fileAttachment) {
         if (fileAttachment.type === 'excel') {
-          botResponse = `📑 **Análisis de Hoja de Cálculo completado con éxito:**\n\n` +
-            `He leído la estructura de **${fileAttachment.name}** (${fileAttachment.size}):\n` +
-            `* **Columnas detectadas:** Código, Nombre, Fechas (Inicio / Fin), Avance %, Responsable, Región.\n` +
-            `* **Registros identificados:** 5 hitos rectores y 12 subprocesos vinculados a las UGEL de Junín.\n` +
-            `* **Rango temporal estimado:** Sep 2026 – Abr 2027.\n` +
-            `* **Cumplimiento ponderado inicial:** 58%.\n\n` +
-            `💡 *El archivo no requirió OCR porque es un formato estructurado digital nativo.* ¿Deseas proyectar estos datos en el diagrama de Gantt?`;
           actions = [
             { label: '✅ Proyectar datos en el Gantt', actionKey: 'apply-excel' },
             { label: '🔍 Ver tabla resumida de filas', actionKey: 'preview-rows' }
           ];
         } else if (fileAttachment.type === 'pdf') {
-          botResponse = `📄 **Análisis de Documento Normativo PDF:**\n\n` +
-            `He procesado el archivo **${fileAttachment.name}**:\n` +
-            `* **Naturaleza del documento:** Oficio Múltiple / Resolución Directoral de Dotación 2027.\n` +
-            `* **Hitos normados extraídos:** 4 entregables obligatorios con fechas de corte en Octubre, Diciembre y Febrero.\n` +
-            `* **UGEL impactadas:** Huancayo, Concepción, Chanchamayo, Tarma, Satipo, Yauli (13 UGEL en total).\n\n` +
-            `ℹ️ *Nota técnica:* Como el PDF contiene texto digital embebido, la lectura se realizó directamente sin recurrir a OCR de imágenes escaneadas.`;
           actions = [
             { label: '📥 Vincular como sustento oficial', actionKey: 'link-pdf' }
           ];
         }
-      } else {
-        const lower = userText.toLowerCase();
-        if (lower.includes('retraso') || lower.includes('riesgo') || lower.includes('cuello')) {
-          botResponse = `⚠️ **Diagnóstico de Retrasos y Cuellos de Botella (Módulo: ${contextInfo.title}):**\n\n` +
-            `1. **Subproceso 1.2 (Elaboración y validación del plan de distribución):** Se encuentra al **55%** de avance. Su fecha de corte es el 30 de noviembre; requiere acelerar la validación con la DRE Junín.\n` +
-            `2. **Hito 2 (Gestión de Almacenes):** Avance en **42%**. Existe demora en la recepción de actas de la UGEL Satipo por accesibilidad geográfica.\n\n` +
-            `🎯 **Recomendación:** Convocar una mesa de trabajo territorial con la Gestora Territorial María Salazar para priorizar las 3 UGEL rezagadas.`;
-        } else if (lower.includes('excel') || lower.includes('plantilla') || lower.includes('completar')) {
-          botResponse = `📊 **Guía para Carga de Datos desde Excel:**\n\n` +
-            `1. Puedes descargar la **Plantilla Oficial de Cronograma** desde el botón superior *Plantilla Excel*.\n` +
-            `2. Rellena las columnas requeridas (Código, Nombre, Tipo, Inicio, Fin, Avance, Estado, Responsables).\n` +
-            `3. Arrastra el archivo aquí al chat o usa el botón *Importar Cronograma Oficial* para reflejarlo en vivo en las barras del Gantt.`;
-        } else if (lower.includes('resumen') || lower.includes('q4') || lower.includes('2026')) {
-          botResponse = `📅 **Resumen de Hitos para Q4 2026 (Octubre – Diciembre):**\n\n` +
-            `* **Hito 1 (30 Nov 2026):** Planificación de la distribución territorial (Avance actual: 67%).\n` +
-            `* **Hito 2 (En curso hasta Ene 2027):** Recepción y almacén territorial en MC SIGA (Avance: 42%).\n` +
-            `* **Meta del trimestre:** Cerrar el año con el 85% de actas de comités UGEL debidamente suscritas.`;
-        } else {
-          botResponse = `Entendido. En el contexto de **${contextInfo.title}**, tu solicitud ha sido registrada.\n\n` +
-            `Para el proyecto **Dotación 2027**, recuerda que los datos se sincronizan con las directrices territoriales del MINEDU. ¿Deseas que analice algún archivo específico o genere una sugerencia de optimización?`;
-        }
+      }
+
+      // Si no hay API Key configurada, sugerir el botón de acceso rápido a Configuración
+      if (!geminiConfig.apiKey && !actions) {
+        actions = [
+          { label: '⚙️ Configurar API Key de Gemini', actionKey: 'open-config' }
+        ];
       }
 
       const botMsg: ChatMessage = {
         id: 'bot-' + Date.now(),
         sender: 'assistant',
-        text: botResponse,
+        text: ragResponse.text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         actions
       };
 
       setMessages((prev) => [...prev, botMsg]);
+    } catch (err: any) {
+      console.error('[FloatingChatAssistant] Error al procesar mensaje:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: 'bot-' + Date.now(),
+          sender: 'assistant',
+          text: `⚠️ Hubo un inconveniente al conectar con el servicio: ${err?.message || 'Error desconocido'}.\n\nPuedes revisar tu configuración en **Configuración > Asistente IA**.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          actions: [{ label: '⚙️ Abrir Configuración', actionKey: 'open-config' }]
+        }
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 900);
+    }
   };
 
   const handleActionClick = (actionKey: string) => {
-    if (actionKey === 'apply-excel') {
+    if (actionKey === 'open-config') {
+      if (onNavigateModule) {
+        onNavigateModule('configuracion');
+        notify('Navegando a Configuración > Asistente IA.');
+      } else {
+        notify('Dirígete a la pestaña Configuración en el menú lateral para gestionar la clave.');
+      }
+    } else if (actionKey === 'apply-excel') {
       notify('Datos del archivo Excel integrados preliminarmente al cronograma.');
       setMessages((prev) => [
         ...prev,
@@ -352,7 +389,9 @@ export default function FloatingChatAssistant({
                 <div className="chat-header-info">
                   <div className="chat-title-row">
                     <strong>Qaway Copilot</strong>
-                    <span className="ai-tag">IA Territorial</span>
+                    <span className="ai-tag" title={geminiConfig.apiKey ? `Conectado a Google Gemini (${geminiConfig.model})` : 'Operando en modo local'}>
+                      {geminiConfig.apiKey ? geminiConfig.model.replace('gemini-', '') : 'Modo Local'}
+                    </span>
                   </div>
                   <div className="chat-context-pill" title={`Contexto vivo: ${contextInfo.title}`}>
                     <Layers size={11} />
