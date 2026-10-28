@@ -65,7 +65,18 @@ export interface GeminiRAGResponse {
 }
 
 const STORAGE_KEY_GEMINI_KEY = "qaway_gemini_api_key";
-const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+// Calibración Free Tier: gemini-2.0-flash ≈ 1.500 req/día (15 RPM) frente a las
+// ~20 req/día de gemini-2.5-flash. Es el default institucional del chat.
+const DEFAULT_GEMINI_MODEL = "gemini-2.0-flash";
+const QUOTA_FALLBACK_MODEL = "gemini-2.0-flash";
+
+/** "gemini-2.5-flash" → "Gemini 2.5 Flash" (para mensajes de cuota al usuario). */
+function prettyModelName(model: string): string {
+  return model
+    .replace(/^gemini-([0-9.]+)/, "Gemini $1")
+    .replace(/-flash$/, " Flash")
+    .replace(/-pro$/, " Pro");
+}
 
 /**
  * Obtiene la API Key de Gemini desde almacenamiento local o variables de entorno
@@ -711,6 +722,57 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
       const errMsg = errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
       console.error("[GeminiRAG] Error en respuesta de Gemini API:", errMsg);
 
+      // ── Cuota del Free Tier excedida (429): conmutación transparente ──
+      // Gemini 2.5 Flash: ~20 req/día · Gemini 2.0 Flash: ~1.500 req/día (15 RPM).
+      const quotaTriggered =
+        response.status === 429 || /quota|exceeded|exhausted/i.test(errMsg);
+      if (quotaTriggered && model !== QUOTA_FALLBACK_MODEL) {
+        try {
+          console.warn(
+            "[GeminiRAG] Cuota del modelo seleccionado agotada; conmutando en transparente a gemini-2.0-flash…"
+          );
+          const quotaEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${QUOTA_FALLBACK_MODEL}:generateContent?key=${resolvedApiKey}`;
+          const quotaResp = await fetch(quotaEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody),
+          });
+          if (quotaResp.ok) {
+            const quotaData = await quotaResp.json();
+            const quotaCandidate = quotaData.candidates?.[0];
+            const rawQuotaText =
+              extractCandidateText(quotaCandidate) ||
+              "No se obtuvo respuesta del modelo Gemini.";
+            const quotaText = enrichTextWithGroundingLinks(
+              rawQuotaText,
+              quotaCandidate,
+              Boolean(params.webSearch),
+              query
+            );
+            return {
+              success: true,
+              text: quotaText,
+              latencyMs: Math.round(performance.now() - startTime),
+              provider: "Google Gemini",
+              model: QUOTA_FALLBACK_MODEL,
+              citations: extractCitations(quotaText),
+              tableData: extractMarkdownTable(quotaText),
+            };
+          }
+        } catch (quotaErr) {
+          console.warn("[GeminiRAG] Fallback transparente por cuota falló:", quotaErr);
+        }
+        return {
+          success: false,
+          text: `Has alcanzado la cuota de prueba de ${prettyModelName(model)} (20 consultas/día en Free Tier). Conmuta a Gemini 2.0 Flash en Configuración para disfrutar de 1,500 consultas diarias gratuitas.`,
+          latencyMs: elapsed,
+          provider: "Google Gemini",
+          model,
+          citations: [],
+          error: errMsg,
+        };
+      }
+
       // Auto-recuperación si el modelo no está disponible en la versión de API
       if (response.status === 404 || errMsg.toLowerCase().includes("not found")) {
         try {
@@ -723,8 +785,8 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
               .map((m: any) => m.name.replace(/^models\//, ""));
 
             const fallbackModel =
-              availableModels.find((m) => m !== model && m === "gemini-2.5-flash") ||
               availableModels.find((m) => m !== model && m === "gemini-2.0-flash") ||
+              availableModels.find((m) => m !== model && m === "gemini-2.5-flash") ||
               availableModels.find((m) => m !== model && m === "gemini-1.5-flash") ||
               availableModels.find((m) => m !== model && m === "gemini-1.5-flash-latest") ||
               availableModels.find((m) => m !== model && m.includes("flash")) ||

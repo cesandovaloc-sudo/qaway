@@ -101,6 +101,12 @@ import {
   storeTurnEvidence,
 } from "./services/ragVectorStoreService";
 import type { RagChunk, RetrievedChunk } from "./services/ragVectorStoreService";
+import {
+  downloadSourceAsDocx,
+  downloadSourceAsTxt,
+  selectPageChunks,
+  stitchChunkTexts,
+} from "./services/documentExportService";
 
 type RagThemeId = "rag-neutral" | "rag-legal" | "rag-finance";
 type InspectorTab = 1 | 2 | 3;
@@ -481,7 +487,7 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     logoColor: "#2563EB",
     badge: "LLM Primario (Gemini)",
     models: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro", "text-embedding-004", "gemini-1.5-flash-latest", "gemini-1.5-pro"],
-    selectedModel: "gemini-2.5-flash",
+    selectedModel: "gemini-2.0-flash",
     status: "active",
     latency: 142,
     role: "primary_llm",
@@ -1010,7 +1016,7 @@ export default function CriteriosApp() {
     aiProviders[0] || {
       id: "google",
       name: "Google DeepMind",
-      selectedModel: "gemini-2.5-flash",
+      selectedModel: "gemini-2.0-flash",
       contextWindow: "1M-2M tokens",
       latency: 142,
       apiKeyMask: "",
@@ -1681,7 +1687,7 @@ export default function CriteriosApp() {
               excerpt: evidenceExcerptForDoc(s.id),
             })),
             projectName: activeProjName,
-            model: activeProvider.selectedModel || "gemini-2.5-flash",
+            model: activeProvider.selectedModel || "gemini-2.0-flash",
             apiKey: geminiApiKey,
             agentProfile: currentAgentProfile,
             tone: currentAgentTone,
@@ -2260,6 +2266,62 @@ export default function CriteriosApp() {
       URL.revokeObjectURL(url);
     } catch {
       // Fallback silencioso
+    }
+  }
+
+  /** Exporta el texto completo del documento enfocado (.txt / .docx editable). */
+  async function handleDownloadFocusedDocument(format: "txt" | "docx") {
+    try {
+      const focused = focusedSourceEvidence;
+      if (!focused) return;
+      const sourceMeta = projectSources.find((source) => source.id === focused.sourceId);
+      const chunks =
+        (await loadChunksForDocument(focused.sourceId).catch(() => focused.chunks)) ||
+        focused.chunks;
+      if (!chunks || chunks.length === 0) return;
+      const input = {
+        documentTitle: sourceMeta?.title ?? "Documento indexado",
+        chunks,
+        origin: chunks.some((chunk) => chunk.locatorLabel.includes("(OCR)"))
+          ? ("ocr" as const)
+          : ("digital" as const),
+      };
+      if (format === "txt") {
+        downloadSourceAsTxt(input);
+      } else {
+        await downloadSourceAsDocx(input);
+      }
+    } catch (exportError) {
+      console.warn("[Ingesta] Exportación de documento no disponible:", exportError);
+    }
+  }
+
+  /** Exporta la página actual del Inspector (texto limpio, nombre con localizador). */
+  async function handleDownloadFocusedPage(
+    chunk: RagChunk & { normalizedScore?: number },
+    format: "txt" | "docx"
+  ) {
+    try {
+      const focused = focusedSourceEvidence;
+      if (!focused) return;
+      const sourceMeta = projectSources.find((source) => source.id === focused.sourceId);
+      const allChunks =
+        (await loadChunksForDocument(focused.sourceId).catch(() => [] as RetrievedChunk[])) ?? [];
+      const baseChunks = allChunks.length > 0 ? allChunks : focused.chunks;
+      const pageChunks = selectPageChunks(baseChunks, chunk);
+      const input = {
+        documentTitle: sourceMeta?.title ?? "Documento indexado",
+        chunks: pageChunks,
+        origin: chunk.locatorLabel.includes("(OCR)") ? ("ocr" as const) : ("digital" as const),
+      };
+      const scope = { label: chunk.locatorLabel, text: stitchChunkTexts(pageChunks) };
+      if (format === "txt") {
+        downloadSourceAsTxt(input, scope);
+      } else {
+        await downloadSourceAsDocx(input, scope);
+      }
+    } catch (exportError) {
+      console.warn("[Ingesta] Exportación de página no disponible:", exportError);
     }
   }
 
@@ -6503,11 +6565,24 @@ export default function CriteriosApp() {
                             <span style={{ color: palette.accentCitation, fontSize: 12.5 }} className="font-semibold">
                               {chunk.locatorLabel}
                             </span>
-                            {typeof chunk.normalizedScore === "number" && (
-                              <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="font-mono">
-                                {chunk.normalizedScore.toFixed(2)}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {typeof chunk.normalizedScore === "number" && (
+                                <span style={{ color: palette.textMuted, fontSize: 11.5 }} className="font-mono">
+                                  {chunk.normalizedScore.toFixed(2)}
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                title="Descargar esta página como texto editable (.txt)"
+                                onClick={() => {
+                                  void handleDownloadFocusedPage(chunk, "txt");
+                                }}
+                                style={{ borderColor: palette.borderDefault, color: palette.textMuted }}
+                                className="w-6 h-6 rounded-md border flex items-center justify-center hover:bg-zinc-100 hover:text-zinc-700 cursor-pointer transition-colors"
+                              >
+                                <HubIcon icon={Download} size={12.5} />
+                              </button>
+                            </div>
                           </div>
                           <p style={{ fontSize: 14, lineHeight: 1.6 }} className="mt-1.5 text-zinc-800 whitespace-pre-line">
                             {`"${chunk.content.slice(0, 620)}${chunk.content.length > 620 ? "…" : ""}"`}
@@ -6532,6 +6607,32 @@ export default function CriteriosApp() {
                             {shownChunks[0]?.locatorLabel ?? "—"}
                           </span>
                         </div>
+                      </div>
+
+                      {/* Exportar texto OCR / documento editable (pie del Inspector) */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleDownloadFocusedDocument("txt");
+                          }}
+                          style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSurface }}
+                          className="py-2 px-2 rounded-xl border hover:bg-zinc-50 cursor-pointer text-[13px] font-medium flex items-center justify-center gap-1.5 text-zinc-800 shadow-xs transition-colors"
+                        >
+                          <HubIcon icon={Download} size={14} />
+                          <span className="truncate">Texto (.txt)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleDownloadFocusedDocument("docx");
+                          }}
+                          style={{ borderColor: palette.borderDefault, backgroundColor: palette.bgSurface }}
+                          className="py-2 px-2 rounded-xl border hover:bg-zinc-50 cursor-pointer text-[13px] font-medium flex items-center justify-center gap-1.5 text-zinc-800 shadow-xs transition-colors"
+                        >
+                          <HubIcon icon={FileText} size={14} />
+                          <span className="truncate">Word (.docx)</span>
+                        </button>
                       </div>
                     </div>
                   );

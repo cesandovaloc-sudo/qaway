@@ -165,28 +165,76 @@ interface OcrWorkerLike {
   terminate: () => Promise<unknown>;
 }
 
+/** Fallback de resiliencia: script UMD vía CDN si el import local no resuelve
+ * (conflicto del empaquetador con los workers). Versionado al mayor instalado. */
+const TESSERACT_CDN_URLS = [
+  "https://cdn.jsdelivr.net/npm/tesseract.js@7/dist/tesseract.min.js",
+  "https://unpkg.com/tesseract.js@7/dist/tesseract.min.js",
+];
+
+async function loadTesseractFromCdn(): Promise<any | null> {
+  try {
+    const existing = (globalThis as any)?.Tesseract;
+    if (existing?.createWorker) return existing;
+  } catch {
+    // Entorno sin global expuesto: pasa a la inyección de script
+  }
+  for (const url of TESSERACT_CDN_URLS) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = url;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`CDN no disponible: ${url}`));
+        document.head.appendChild(script);
+      });
+      const global = (globalThis as any)?.Tesseract;
+      if (global?.createWorker) return global;
+    } catch {
+      // Prueba el siguiente CDN
+    }
+  }
+  return null;
+}
+
 /** Worker único de Tesseract por documento, creado solo si aparece la primera
- * página escaneada. worker/wasm/langdata 'spa' se cargan bajo demanda con
- * versión fijada por CDN y quedan cacheados por tesseract.js en IndexedDB. */
+ * página escaneada. worker/wasm/langdata 'spa' se cargan bajo demanda y quedan
+ * cacheados por tesseract.js en IndexedDB. Cadena de carga: import local →
+ * bundle UMD del paquete → script UMD por CDN (independiente del empaquetador). */
 async function createOcrWorker(): Promise<OcrWorkerLike | null> {
   try {
-    const candidates: any[] = [];
+    let createWorkerFn: any = null;
+
+    // 1) Import local empaquetado por Vite (camino preferente)
     try {
-      candidates.push(await import("tesseract.js"));
+      const mod: any = await import("tesseract.js");
+      createWorkerFn = mod?.createWorker ?? mod?.default?.createWorker ?? null;
     } catch {
       // Resolución ESM/CJS alternativa si el empaquetador no la sirve directa
     }
-    if (!candidates[0]?.createWorker) {
+
+    // 2) Bundle UMD del paquete instalado en node_modules
+    if (typeof createWorkerFn !== "function") {
       try {
-        candidates.push((await import("tesseract.js/dist/tesseract.min.js")) as any);
+        const dist: any = await import("tesseract.js/dist/tesseract.min.js");
+        createWorkerFn = dist?.createWorker ?? dist?.default?.createWorker ?? null;
       } catch {
-        // Última instancia: objeto global expuesto por el bundle UMD
+        // CDN como último recurso
       }
     }
-    const mod = candidates.find((m) => m?.createWorker || m?.default?.createWorker);
-    const createWorker = mod?.createWorker ?? mod?.default?.createWorker ?? (globalThis as any)?.Tesseract?.createWorker;
-    if (typeof createWorker !== "function") return null;
-    const worker = await createWorker("spa", 1);
+
+    // 3) Script UMD vía CDN (jsdelivr → unpkg), a prueba de conflictos de bundler
+    if (typeof createWorkerFn !== "function") {
+      const cdn: any = await loadTesseractFromCdn();
+      createWorkerFn = cdn?.createWorker ?? (globalThis as any)?.Tesseract?.createWorker ?? null;
+    }
+
+    if (typeof createWorkerFn !== "function") {
+      console.warn("[Ingesta] OCR no disponible: tesseract.js no resolvió ni local ni por CDN.");
+      return null;
+    }
+    const worker = await createWorkerFn("spa", 1);
     return worker as OcrWorkerLike;
   } catch (err) {
     console.warn("[Ingesta] OCR no disponible (tesseract.js):", err);

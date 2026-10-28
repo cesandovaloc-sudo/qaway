@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "docx": "^9.15.0",
     "lucide-react": "^1.16.0",
     "mammoth": "^1.13.0",
     "pdfjs-dist": "^4.10.38",
