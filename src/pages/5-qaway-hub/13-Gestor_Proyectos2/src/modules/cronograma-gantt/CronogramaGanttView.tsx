@@ -2247,7 +2247,7 @@ export default function CronogramaGanttView({
                       }`}
                       style={{
                         left: `${getDatePixelOffset(x.start)}px`,
-                        width: `${Math.max(8, getDatePixelOffset(x.end) - getDatePixelOffset(x.start))}px`,
+                        width: `${Math.max(8, getDatePixelOffset(shiftDays(x.end, 1)) - getDatePixelOffset(x.start))}px`,
                       }}
                       title={
                         x.kind === 'hito'
@@ -2309,12 +2309,12 @@ export default function CronogramaGanttView({
                     </div>
 
                     {/* Zona posterior al fin del rango */}
-                    {getDatePixelOffset(rangeTo) < (parseFloat(timelineMinWidth) || 8228) && (
+                    {getDatePixelOffset(shiftDays(rangeTo, 1)) < (parseFloat(timelineMinWidth) || 8228) && (
                       <div
                         className="range-mask-after"
                         style={{
-                          left: `${getDatePixelOffset(rangeTo)}px`,
-                          width: `${Math.max(0, (parseFloat(timelineMinWidth) || 8228) - getDatePixelOffset(rangeTo))}px`,
+                          left: `${getDatePixelOffset(shiftDays(rangeTo, 1))}px`,
+                          width: `${Math.max(0, (parseFloat(timelineMinWidth) || 8228) - getDatePixelOffset(shiftDays(rangeTo, 1)))}px`,
                         }}
                         title={`Zona fuera de rango: posterior al ${formatDate(rangeTo)}`}
                       />
@@ -2324,7 +2324,7 @@ export default function CronogramaGanttView({
                     <div
                       className="range-boundary-line end-line"
                       style={{
-                        left: `${getDatePixelOffset(rangeTo)}px`,
+                        left: `${getDatePixelOffset(shiftDays(rangeTo, 1))}px`,
                       }}
                       title={`Rango Fin: ${formatDate(rangeTo)}`}
                     >
@@ -2337,7 +2337,7 @@ export default function CronogramaGanttView({
                 <div
                   className="today"
                   style={{
-                    left: `${getDatePixelOffset(currentTodayIso)}px`,
+                    left: `${getDatePixelOffset(currentTodayIso) + (zoom === 'Día' ? 17 : 0)}px`,
                   }}
                 >
                   <span>Hoy</span>
