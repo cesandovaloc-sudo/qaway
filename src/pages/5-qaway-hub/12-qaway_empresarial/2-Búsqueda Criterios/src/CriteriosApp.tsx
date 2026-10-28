@@ -468,6 +468,9 @@ interface AiProvider {
   description: string;
   apiKeyMask: string;
   contextWindow: string;
+  isMultimodal?: boolean;
+  supportsEmbeddings?: boolean;
+  supportsReranker?: boolean;
 }
 
 const DEFAULT_PROVIDERS: AiProvider[] = [
@@ -477,14 +480,16 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     company: "Google LLC",
     logoColor: "#2563EB",
     badge: "LLM Primario (Gemini)",
-    models: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro", "gemini-1.5-flash-latest", "gemini-1.5-pro"],
+    models: ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro", "text-embedding-004", "gemini-1.5-flash-latest", "gemini-1.5-pro"],
     selectedModel: "gemini-2.5-flash",
     status: "active",
     latency: 142,
     role: "primary_llm",
-    description: "Ventana de contexto masiva y velocidad ultrarrápida. Motor nativo RAG para leyes y matrices.",
+    description: "Ventana de contexto masiva, visión multimodal y velocidad ultrarrápida. Motor nativo RAG para leyes y matrices.",
     apiKeyMask: "",
     contextWindow: "1M-2M tokens",
+    isMultimodal: true,
+    supportsEmbeddings: true,
   },
   {
     id: "openai",
@@ -500,6 +505,8 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     description: "Líder de razonamiento multimodal y generación ejecutiva de alta coherencia sintáctica.",
     apiKeyMask: "",
     contextWindow: "128k tokens",
+    isMultimodal: true,
+    supportsEmbeddings: true,
   },
   {
     id: "anthropic",
@@ -512,9 +519,11 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     status: "connected",
     latency: 215,
     role: "standby",
-    description: "Benchmark líder en análisis de contratos, normativas densas y reducción de alucinaciones.",
+    description: "Benchmark líder en análisis de contratos, normativas densas y reducción de alucinaciones con visión de documentos.",
     apiKeyMask: "",
     contextWindow: "200k tokens",
+    isMultimodal: true,
+    supportsEmbeddings: false,
   },
   {
     id: "cohere",
@@ -530,6 +539,9 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     description: "Especialista número 1 global en embeddings multilingües y Cross-Encoder Reranking de alta precisión.",
     apiKeyMask: "",
     contextWindow: "128k tokens",
+    isMultimodal: false,
+    supportsEmbeddings: true,
+    supportsReranker: true,
   },
   {
     id: "groq",
@@ -545,6 +557,8 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     description: "Arquitectura LPU con inferencia instantánea a más de 500 tokens/segundo. Latencia de 42 ms.",
     apiKeyMask: "",
     contextWindow: "128k tokens",
+    isMultimodal: false,
+    supportsEmbeddings: false,
   },
   {
     id: "mistral",
@@ -552,14 +566,16 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     company: "Mistral AI SAS",
     logoColor: "#DC2626",
     badge: "Soberanía Europea",
-    models: ["mistral-large-2411", "codestral-2501", "mistral-embed"],
+    models: ["mistral-large-2411", "pixtral-12b", "codestral-2501", "mistral-embed"],
     selectedModel: "mistral-large-2411",
     status: "connected",
     latency: 139,
     role: "standby",
-    description: "Modelos abiertos y propietarios con estricta soberanía de datos y rendimiento top en español.",
+    description: "Modelos abiertos y propietarios con estricta soberanía de datos y visión multimodal en Pixtral.",
     apiKeyMask: "",
     contextWindow: "128k tokens",
+    isMultimodal: true,
+    supportsEmbeddings: true,
   },
   {
     id: "deepseek",
@@ -572,9 +588,11 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     status: "connected",
     latency: 195,
     role: "standby",
-    description: "Cadena de pensamiento explícita (Chain-of-Thought) y resolución analítica de costos ultrabajos.",
+    description: "Cadena de pensamiento explícita (Chain-of-Thought) y resolución analítica de costos ultrabajos. Motor enfocado en texto y código.",
     apiKeyMask: "",
     contextWindow: "64k tokens",
+    isMultimodal: false,
+    supportsEmbeddings: false,
   },
 ];
 
@@ -946,8 +964,15 @@ export default function CriteriosApp() {
   } | null>(null);
   const chatImageInputRef = useRef<HTMLInputElement>(null);
 
-  // Pestaña activa en Configuración (Proveedores / Motor / Base de Datos Supabase)
-  const [configTab, setConfigTab] = useState<"providers" | "engine" | "database">("providers");
+  // Pestaña activa en Configuración (Proveedores / Agente / Motor / Base de Datos Supabase)
+  const [configTab, setConfigTab] = useState<"providers" | "agent" | "engine" | "database">("providers");
+  const [customAgentDirectives, setCustomAgentDirectives] = useState<string>(() => {
+    try {
+      return localStorage.getItem("qaway_rag_custom_agent_directives") || "";
+    } catch {
+      return "";
+    }
+  });
 
   // Estado de conexión y pruebas de Supabase desacoplada
   const [supabaseStatus, setSupabaseStatus] = useState<{
@@ -1664,6 +1689,7 @@ export default function CriteriosApp() {
             similarityThreshold,
             topK,
             webSearch: webSearchEnabled,
+            customDirectives: customAgentDirectives,
             image: currentAttachedImage
               ? {
                   mimeType: currentAttachedImage.mimeType,

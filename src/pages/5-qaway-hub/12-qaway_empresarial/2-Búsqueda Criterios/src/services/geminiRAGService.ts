@@ -39,6 +39,7 @@ export interface GeminiRAGQueryParams {
   similarityThreshold?: number;
   topK?: number;
   webSearch?: boolean;
+  customDirectives?: string;
   image?: {
     mimeType: string;
     data: string;
@@ -239,7 +240,8 @@ export function compileFullRAGSystemInstruction(
   sources: SourceContextItem[],
   agentProfile: AgentProfileId = "auditor_laboral",
   tone: AgentToneId = "ejecutivo",
-  webSearchEnabled: boolean = false
+  webSearchEnabled: boolean = false,
+  customDirectives: string = ""
 ): string {
   const webStatusBanner = webSearchEnabled
     ? `[ESTADO OPERATIVO CRÍTICO: 🌐 BÚSQUEDA WEB EN TIEMPO REAL CONECTADA (GOOGLE SEARCH)]
@@ -254,12 +256,17 @@ Si el usuario te pregunta por un programa de hoy (ej. La Encerrona de Marco Sifu
     : `[ESTADO OPERATIVO: BÚSQUEDA WEB DESACTIVADA]
 Operando exclusivamente con los documentos locales indexados en el proyecto activo.`;
 
+  const customDirectivesBlock =
+    customDirectives && customDirectives.trim()
+      ? `\n[DIRECTIVAS INSTITUCIONALES PERSONALIZADAS (REGLAS DEL USUARIO)]\n${customDirectives.trim()}\n`
+      : "";
+
   return `${webStatusBanner}
 
 ${CAPA_0_LEGAL_PERUANA}
 
 ${buildCapa1SystemPrompt(projectName, agentProfile, tone)}
-
+${customDirectivesBlock}
 ${formatProjectSourcesContext(sources)}
 `;
 }
@@ -611,7 +618,8 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     projectSources,
     agentProfile,
     tone,
-    Boolean(params.webSearch)
+    Boolean(params.webSearch),
+    params.customDirectives || ""
   );
 
   // Formatear historial de iteración conversacional compatible con Gemini v1beta
