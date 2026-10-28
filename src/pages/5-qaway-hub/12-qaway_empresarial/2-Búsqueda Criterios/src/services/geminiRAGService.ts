@@ -144,11 +144,15 @@ Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comun
    - Mantén la coherencia continua del hilo de conversación previa.
    - Si el usuario hace repreguntas ("¿y quién es el responsable?", "¿cuál es el plazo?", "verifica el link que me enviaste", "¿sigue vigente?"), enlaza directamente con el documento y tema exacto del turno inmediato anterior sin cambiar de norma por error.
 
-6. VERIFICACIÓN DE ENLACES WEB Y GROUNDING REAL (CERO URLs INVENTADAS O BUSCADORES GENÉRICOS):
-   - PROHIBIDO inventar URLs de memoria, adivinar slugs o códigos numéricos en gob.pe (ej. "...-112678"), y PROHIBIDO entregar enlaces genéricos de barra de búsqueda con "?term=...".
-   - Cuando la Búsqueda Web (Google Search Grounding) está activa:
-     * Busca la página oficial específica de la norma (en gob.pe, minedu.gob.pe, SPIJ o repositorio oficial) y analiza su contenido real.
-     * En tu respuesta escrita, enfócate en el análisis exacto de la norma (objeto, vigencia, modificatorias y puntos clave); el sistema adjuntará automáticamente al pie los enlaces web verificados por Google Search Grounding. Solo incluye una URL en tu texto si proviene literalmente de los resultados verificados de la búsqueda.
+6. PRIORIZACIÓN ESTRICTA DE BÚSQUEDA WEB Y CERO ENLACES ADIVINADOS (0% 404):
+   - PROHIBICIÓN ABSOLUTA DE INFERIR, ADIVINAR O ARMAR URLs EN TU TEXTO:
+     * NUNCA inventes números correlativos, slugs de normativas (ej. ".../normas-legales/12345-..."), ni enlaces con "?term=...".
+     * Si la Búsqueda Web está activa, la ÚNICA fuente válida para enlaces externos es Google Search Grounding.
+     * Si necesitas citar una norma o enlace web, NO escribas un enlace markdown [Texto](https://...) a menos que la URL provenga literalmente de los resultados devueltos por Google Search.
+   - GENERACIÓN DE CONSULTAS RESTRICTIVAS Y PRECISAS PARA GOOGLE SEARCH:
+     * Para normas legales oficiales: genera consultas con el número completo, año y sitio oficial, ej: "Resolución Ministerial 057-2026-MINEDU site:gob.pe", "site:elperuano.pe", "site:minedu.gob.pe".
+     * Para programas y canales de YouTube: "site:youtube.com/@canalYAAAAA", "Marco Sifuentes #LaEncerrona".
+   - Si no obtienes un enlace verificado directo tras la búsqueda, dilo con honestidad: "No se encontró un enlace web verificado en línea para este documento", pero NUNCA inventes una URL para disimular.
    - Si la Búsqueda Web está desactivada y el usuario pide buscar información o enlaces en internet:
      * Indícale con claridad: "Este documento local no incluye el enlace web externo. Si deseas que lo busque y verifique en línea, activa el botón '🌐 Búsqueda Web' en la barra inferior del chat (o en Configuración > Motor RAG)."
    - Si el usuario adjunta una captura de pantalla (ej. error 404 o documento):
@@ -357,27 +361,77 @@ function extractGroundingWebLinks(candidate: any): Array<{ title: string; uri: s
 }
 
 /**
- * Enriquecer la respuesta con los enlaces reales de Google Search Grounding y limpiar URLs genéricas ?term=
+ * Normaliza una URI para comparación robusta ignorando protocolos y barras finales
  */
-function enrichTextWithGroundingLinks(rawText: string, candidate: any): string {
+function normalizeUriForComparison(uri: string): string {
+  try {
+    const parsed = new URL(uri);
+    return `${parsed.hostname}${parsed.pathname}`.replace(/\/+$/, "").toLowerCase();
+  } catch {
+    return uri.replace(/^https?:\/\//i, "").replace(/\/+$/, "").toLowerCase();
+  }
+}
+
+/**
+ * Enriquecer la respuesta con los enlaces reales de Google Search Grounding,
+ * validando que NINGUNA URL inventada o rota (404) pase al usuario.
+ */
+function enrichTextWithGroundingLinks(rawText: string, candidate: any, isWebSearchActive = true): string {
   if (!rawText) return "No se obtuvo respuesta del modelo Gemini.";
   const groundingLinks = extractGroundingWebLinks(candidate);
-  if (groundingLinks.length === 0) return rawText;
+  const verifiedUris = new Set(groundingLinks.map((l) => normalizeUriForComparison(l.uri)));
+  const primaryVerifiedUri = groundingLinks.length > 0 ? groundingLinks[0].uri : "";
 
-  // Si el modelo incluyó un enlace de buscador genérico ?term=... o una URL inventada cuando hay enlaces reales de Grounding, reemplazarlo por el primer enlace verificado
-  const primaryVerified = groundingLinks[0];
+  // 1. Sanitizar enlaces Markdown [Texto](url): validar contra las URLs reales devueltas por Google Grounding
   let cleanedText = rawText.replace(
-    /https?:\/\/www\.gob\.pe\/institucion\/minedu\/normas-legales\?term=[^\s)\]]+/gi,
-    primaryVerified.uri
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    (fullMatch, label, url) => {
+      const norm = normalizeUriForComparison(url);
+
+      // Si la URL fue explícitamente verificada por Google Search Grounding, es 100% segura
+      if (verifiedUris.has(norm)) {
+        return fullMatch;
+      }
+
+      // Si es un dominio institucional o multimedia donde los LLMs suelen alucinar slugs (gob.pe, minedu, elperuano, youtube)
+      const isSensitiveDomain = /gob\.pe|minedu\.gob\.pe|elperuano\.pe|youtube\.com|youtu\.be/i.test(url);
+      if (isSensitiveDomain) {
+        if (primaryVerifiedUri) {
+          return `[${label}](${primaryVerifiedUri})`;
+        } else {
+          return `**${label}** *(enlace web no verificado en línea)*`;
+        }
+      }
+
+      // Si la búsqueda web está activa y Google nos dio enlaces reales, redirigir al enlace verificado
+      if (isWebSearchActive && primaryVerifiedUri) {
+        return `[${label}](${primaryVerifiedUri})`;
+      }
+
+      // Si no hay verificación web en vivo, no permitir enlaces externos dudosos
+      if (!isWebSearchActive) {
+        return `**${label}** *(enlace externo)*`;
+      }
+
+      return fullMatch;
+    }
   );
 
-  // Filtrar enlaces que aún no estén literalmente presentes en el texto
-  const missingLinks = groundingLinks.filter((l) => !cleanedText.includes(l.uri)).slice(0, 4);
-  if (missingLinks.length > 0) {
-    const formattedLinks = missingLinks
-      .map((l) => `- [${l.title}](${l.uri})`)
-      .join("\n");
-    cleanedText = `${cleanedText.trim()}\n\n**🌐 Enlaces directos verificados (Google Search):**\n${formattedLinks}`;
+  // 2. Limpiar URLs directas sueltas con ?term= o slugs genéricos
+  cleanedText = cleanedText.replace(
+    /https?:\/\/www\.gob\.pe\/institucion\/minedu\/normas-legales\?term=[^\s)\]]+/gi,
+    primaryVerifiedUri || "https://www.gob.pe/institucion/minedu/normas-legales"
+  );
+
+  // 3. Adjuntar bloque de enlaces verificados de Google Search si existen y no están en el texto
+  if (groundingLinks.length > 0) {
+    const missingLinks = groundingLinks.filter((l) => !cleanedText.includes(l.uri)).slice(0, 4);
+    if (missingLinks.length > 0) {
+      const formattedLinks = missingLinks
+        .map((l) => `- [${l.title}](${l.uri})`)
+        .join("\n");
+      cleanedText = `${cleanedText.trim()}\n\n**🌐 Enlaces directos verificados (Google Search):**\n${formattedLinks}`;
+    }
   }
 
   return cleanedText;
@@ -557,7 +611,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
                 const retryCandidate = retryData.candidates?.[0];
                 const rawRetryText =
                   extractCandidateText(retryCandidate) || "No se obtuvo respuesta del modelo Gemini.";
-                const retryText = enrichTextWithGroundingLinks(rawRetryText, retryCandidate);
+                const retryText = enrichTextWithGroundingLinks(rawRetryText, retryCandidate, Boolean(params.webSearch));
                 return {
                   success: true,
                   text: retryText,
@@ -589,7 +643,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
     const data = await response.json();
     const candidate = data.candidates?.[0];
     const rawGeneratedText = extractCandidateText(candidate) || "No se obtuvo respuesta del modelo Gemini.";
-    const generatedText = enrichTextWithGroundingLinks(rawGeneratedText, candidate);
+    const generatedText = enrichTextWithGroundingLinks(rawGeneratedText, candidate, Boolean(params.webSearch));
     const citations = extractCitations(generatedText);
     const tableData = extractMarkdownTable(generatedText);
 
