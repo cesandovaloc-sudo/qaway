@@ -474,8 +474,8 @@ const DEFAULT_PROVIDERS: AiProvider[] = [
     company: "Google LLC",
     logoColor: "#2563EB",
     badge: "LLM Primario (Gemini)",
-    models: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash", "text-embedding-004"],
-    selectedModel: "gemini-1.5-flash",
+    models: ["gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.5-pro-latest"],
+    selectedModel: "gemini-1.5-flash-latest",
     status: "active",
     latency: 142,
     role: "primary_llm",
@@ -952,11 +952,11 @@ export default function CriteriosApp() {
     aiProviders[0] || {
       id: "google",
       name: "Google DeepMind",
-      selectedModel: "gemini-1.5-flash",
+      selectedModel: "gemini-1.5-flash-latest",
       contextWindow: "1M-2M tokens",
       latency: 142,
       apiKeyMask: "",
-      models: ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"],
+      models: ["gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-pro"],
     };
   // Alias del proveedor LLM activo (usado por el flujo de latencia/Gemini del chat)
   const activeProvider = activeLlmProvider;

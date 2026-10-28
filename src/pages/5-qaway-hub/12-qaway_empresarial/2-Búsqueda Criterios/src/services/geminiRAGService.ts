@@ -59,7 +59,7 @@ export interface GeminiRAGResponse {
 }
 
 const STORAGE_KEY_GEMINI_KEY = "qaway_gemini_api_key";
-const DEFAULT_GEMINI_MODEL = "gemini-1.5-flash";
+const DEFAULT_GEMINI_MODEL = "gemini-1.5-flash-latest";
 
 /**
  * Obtiene la API Key de Gemini desde almacenamiento local o variables de entorno
@@ -366,6 +366,57 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
       const errorData = await response.json().catch(() => null);
       const errMsg = errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
       console.error("[GeminiRAG] Error en respuesta de Gemini API:", errMsg);
+
+      // Auto-recuperación si el modelo no está disponible en la versión de API
+      if (response.status === 404 || errMsg.toLowerCase().includes("not found")) {
+        try {
+          const listEndpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${resolvedApiKey}`;
+          const listResp = await fetch(listEndpoint);
+          if (listResp.ok) {
+            const listData = await listResp.json();
+            const availableModels: string[] = (listData.models || [])
+              .filter((m: any) => m.supportedGenerationMethods?.includes("generateContent"))
+              .map((m: any) => m.name.replace(/^models\//, ""));
+
+            const fallbackModel =
+              availableModels.find((m) => m === "gemini-1.5-flash-latest") ||
+              availableModels.find((m) => m === "gemini-2.0-flash") ||
+              availableModels.find((m) => m === "gemini-2.0-flash-exp") ||
+              availableModels.find((m) => m.includes("flash")) ||
+              availableModels.find((m) => m.includes("gemini-1.5")) ||
+              availableModels[0];
+
+            if (fallbackModel && fallbackModel !== model) {
+              console.log(`[GeminiRAG] Auto-reintentando con modelo compatible: ${fallbackModel}`);
+              const retryEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${fallbackModel}:generateContent?key=${resolvedApiKey}`;
+              const retryResp = await fetch(retryEndpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestBody),
+              });
+
+              if (retryResp.ok) {
+                const retryData = await retryResp.json();
+                const retryCandidate = retryData.candidates?.[0];
+                const retryText =
+                  retryCandidate?.content?.parts?.[0]?.text || "No se obtuvo respuesta del modelo Gemini.";
+                return {
+                  success: true,
+                  text: retryText,
+                  latencyMs: Math.round(performance.now() - startTime),
+                  provider: "Google Gemini",
+                  model: fallbackModel,
+                  citations: extractCitations(retryText),
+                  tableData: extractMarkdownTable(retryText),
+                };
+              }
+            }
+          }
+        } catch (autoErr) {
+          console.warn("[GeminiRAG] No se pudo ejecutar auto-descubrimiento de modelos:", autoErr);
+        }
+      }
+
       return {
         success: false,
         text: `Error al consultar Google Gemini (${errMsg}). Por favor verifica tu API Key o conexión.`,
