@@ -1929,7 +1929,6 @@ export default function CronogramaGanttView({
               className={`btn-toggle-labels ${showBarLabels ? 'active' : ''}`}
               onClick={() => {
                 setShowBarLabels((prev) => !prev);
-                notify(!showBarLabels ? 'Mostrando avance en las barras' : 'Vista de barras limpia');
               }}
               title="Alternar visibilidad del porcentaje de avance en las barras"
             >
@@ -2594,7 +2593,9 @@ export default function CronogramaGanttView({
 
                       {/* Avance limpio embebido (conmutable a través del botón superior) */}
                       {showBarLabels && (
-                        <span className="bar-label-inner">
+                        <span
+                          className={`bar-label-inner ${x.progress >= 25 ? 'in-bar' : 'after-bar'} ${x.kind === 'hito' ? 'is-hito' : ''}`}
+                        >
                           {x.progress}%
                         </span>
                       )}
