@@ -24,6 +24,7 @@ import {
   Check,
   BarChart3,
   ExternalLink,
+  Globe,
   ChevronDown,
   ChevronUp,
   ChevronRight,
@@ -913,6 +914,15 @@ export default function CriteriosApp() {
   const agentMenuRef = useRef<HTMLDivElement>(null);
   const backupFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Switch de Búsqueda Web / Grounding en vivo con Google Search
+  const [webSearchEnabled, setWebSearchEnabled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("qaway_rag_web_search") === "true";
+    } catch {
+      return false;
+    }
+  });
+
   // Pestaña activa en Configuración (Proveedores / Motor / Base de Datos Supabase)
   const [configTab, setConfigTab] = useState<"providers" | "engine" | "database">("providers");
 
@@ -1192,6 +1202,16 @@ export default function CriteriosApp() {
   function showToastMessage(_msg?: string) {
     // Eliminado intencionalmente el popup flotante negro a solicitud del usuario
   }
+
+  const toggleWebSearch = useCallback(() => {
+    setWebSearchEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("qaway_rag_web_search", String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   function handleCreateNewSession(customTitle?: string, customProjectId?: string, initialProfile?: AgentProfileId) {
     const newId = `session-${Date.now()}`;

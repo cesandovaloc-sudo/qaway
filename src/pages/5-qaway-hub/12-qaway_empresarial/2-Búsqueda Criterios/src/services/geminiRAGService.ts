@@ -38,6 +38,7 @@ export interface GeminiRAGQueryParams {
   mode?: "fast" | "standard" | "deep";
   similarityThreshold?: number;
   topK?: number;
+  webSearch?: boolean;
 }
 
 export interface GeminiRAGResponse {
@@ -129,6 +130,14 @@ Eres un consultor y asesor de IA de alto nivel para Qaway Lab y MINEDU. Te comun
 4. MEMORIA CONTINUA DEL HILO (Iteración fluida):
    - Mantén la coherencia continua del hilo de conversación previa.
    - Si el usuario hace repreguntas ("¿y quién es el responsable?", "¿cuál es el plazo?", "¿por qué?"), enlaza directamente con lo conversado anteriormente sin reiniciar el diálogo ni repetir saludos.
+
+5. ENLACES EXTERNOS Y MODO BÚSQUEDA WEB (Orientación clara):
+   - Si los documentos del proyecto NO contienen un enlace web directo o URL solicitada por el usuario:
+     * Explica con claridad y brevedad que la documentación interna cargada no contiene el enlace directo a esa sección web.
+     * Orienta al usuario directamente: "Para consultar enlaces externos o información en tiempo real de internet, activa el botón '🌐 Búsqueda Web' en la barra superior del chat (o en Configuración). Si no tienes permisos habilitados en tu perfil, solicita autorización a tu administrador para activar el modo online."
+     * NO alucines ni inventes links rotos.
+   - Si la Búsqueda Web está activada y Google devuelve resultados:
+     * Proporciona el enlace web oficial verificado con formato Markdown [Texto descriptivo](url).
 `;
 
 /**
@@ -339,7 +348,7 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
 
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${resolvedApiKey}`;
 
-  const requestBody = {
+  const requestBody: any = {
     system_instruction: {
       parts: [{ text: systemInstructionText }],
     },
@@ -350,6 +359,10 @@ export async function queryGeminiRAG(params: GeminiRAGQueryParams): Promise<Gemi
       maxOutputTokens: maxTokens,
     },
   };
+
+  if (params.webSearch) {
+    requestBody.tools = [{ google_search: {} }];
+  }
 
   try {
     const response = await fetch(endpoint, {

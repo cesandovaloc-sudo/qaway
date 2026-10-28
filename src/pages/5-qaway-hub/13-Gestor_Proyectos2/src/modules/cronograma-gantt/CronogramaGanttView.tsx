@@ -1989,8 +1989,9 @@ export default function CronogramaGanttView({
                     style={{
                       left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeFrom) / 100})`,
                     }}
+                    title={`Rango Inicio: ${formatDate(rangeFrom)}`}
                   >
-                    <span className="range-boundary-tag start-tag">Inicio: {formatDate(rangeFrom)}</span>
+                    <span className="range-boundary-tag start-tag">Rango Inicio</span>
                   </div>
 
                   {/* Zona posterior al fin del rango */}
@@ -2001,7 +2002,7 @@ export default function CronogramaGanttView({
                         left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeTo) / 100})`,
                         width: `calc((100% - var(--fixed)) * ${(100 - calcPosition(rangeTo)) / 100})`,
                       }}
-                      title={`Zona fuera del plazo: posterior al ${formatDate(rangeTo)}`}
+                      title={`Zona fuera de rango: posterior al ${formatDate(rangeTo)}`}
                     />
                   )}
 
@@ -2011,8 +2012,9 @@ export default function CronogramaGanttView({
                     style={{
                       left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeTo) / 100})`,
                     }}
+                    title={`Rango Fin: ${formatDate(rangeTo)}`}
                   >
-                    <span className="range-boundary-tag end-tag">Fin de plazo: {formatDate(rangeTo)}</span>
+                    <span className="range-boundary-tag end-tag">Rango Fin</span>
                   </div>
                 </>
               )}

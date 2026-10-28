@@ -1722,7 +1722,7 @@
   border-left: 1px dashed #cbd5e1;
 }
 
-/* Líneas de delimitación del rango oficial */
+/* Líneas de delimitación del rango oficial (Gris moderno neutro) */
 .gantt-v2 .range-boundary-line {
   position: absolute;
   top: 0;
@@ -1732,36 +1732,36 @@
   pointer-events: none;
 }
 
-.gantt-v2 .range-boundary-line.start-line {
-  border-left: 2px dashed #0066ff;
-}
-
+.gantt-v2 .range-boundary-line.start-line,
 .gantt-v2 .range-boundary-line.end-line {
-  border-left: 2px dashed #f59e0b;
+  border-left: 1.5px dashed #94a3b8;
 }
 
 .gantt-v2 .range-boundary-tag {
   position: absolute;
-  top: 6px;
-  transform: translateX(-50%);
-  padding: 2px 7px;
+  top: 3px;
+  padding: 1px 6px;
   border-radius: 4px;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   white-space: nowrap;
   pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  background: #475569;
+  color: #f8fafc;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.2);
+  line-height: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .gantt-v2 .range-boundary-tag.start-tag {
-  background: #0066ff;
-  color: #ffffff;
+  left: 3px;
+  transform: none;
 }
 
 .gantt-v2 .range-boundary-tag.end-tag {
-  background: #f59e0b;
-  color: #ffffff;
+  right: 3px;
+  transform: none;
 }
 
 .gantt-v2 .today {
