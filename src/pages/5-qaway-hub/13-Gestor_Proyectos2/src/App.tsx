@@ -18,6 +18,7 @@ import ReporteadorView from './modules/reporteador/ReporteadorView';
 import UsuariosView from './modules/usuarios/UsuariosView';
 import HitosView from './modules/hitos/HitosView';
 import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
+import ConfiguracionView from './modules/configuracion/ConfiguracionView';
 
 type Binds = { notify: (m: string) => void; setView?: (v: string) => void };
 
@@ -49,7 +50,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
@@ -283,6 +284,9 @@ function App() {
           </div>
           <div className={active === 'actas' ? 'act-v1 qm-pane-active' : 'act-v1 qm-pane'}>
             <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
+          </div>
+          <div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
+            <ConfiguracionView onActions={(h) => { binds.current['configuracion'] = h; }} />
           </div>
         </main>
       </div>

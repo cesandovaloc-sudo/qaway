@@ -285,9 +285,9 @@ export default function Sidebar({
       {/* Configuración en la base del sidebar */}
       <div style={{ borderTop: '1px solid #35465a', paddingTop: '10px' }}>
         <button
-          className="side-link"
+          className={active === 'configuracion' ? 'side-link active' : 'side-link'}
           style={{ width: '100%', marginBottom: 0 }}
-          onClick={() => notifyActive('Configuración del proyecto y parámetros institucionales')}
+          onClick={() => onModule('configuracion')}
         >
           <Settings size={18} />
           <span>Configuración</span>

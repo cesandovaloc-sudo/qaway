@@ -558,13 +558,27 @@ const calcPosition = (s: string) =>
 
 const calcWidth = (a: string, b: string) => (getDays(a, b) / TOTAL_SPAN_DAYS) * 100;
 
-/* Línea "Hoy" dinámica: fecha real del sistema o 2026-10-27 si el reloj está fuera del marco oficial. */
-const TODAY_ISO = (() => {
-  const n = new Date();
-  const iso = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
-  if (iso >= RANGE_MIN && iso <= RANGE_MAX) return iso;
-  return '2026-10-27';
-})();
+const getSystemTodayIso = () => {
+  try {
+    const mode = localStorage.getItem('qaway-system-date-mode-v1') || 'custom';
+    const custom = localStorage.getItem('qaway-system-date-v1');
+    if (mode === 'custom' && custom && custom >= RANGE_MIN && custom <= RANGE_MAX) {
+      return custom;
+    }
+    const tz = localStorage.getItem('qaway-system-timezone-v1') || 'America/Lima';
+    const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: tz });
+    const nowIso = formatter.format(new Date());
+    if (nowIso >= RANGE_MIN && nowIso <= RANGE_MAX) {
+      return nowIso;
+    }
+  } catch {
+    /* fallback */
+  }
+  return '2026-10-28';
+};
+
+/* Línea "Hoy" dinámica calibrada con zona horaria o fecha de corte operativa MINEDU */
+const TODAY_ISO = getSystemTodayIso();
 
 const MONTH_NAMES = [
   'Septiembre 2026',
@@ -668,6 +682,20 @@ export default function CronogramaGanttView({
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
   const [zoom, setZoom] = useState('Mes');
+  const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
+
+  useEffect(() => {
+    const onDateChanged = (e: any) => {
+      const detailDate = e?.detail?.date;
+      if (detailDate) {
+        setCurrentTodayIso(detailDate);
+      } else {
+        setCurrentTodayIso(getSystemTodayIso());
+      }
+    };
+    window.addEventListener('qaway-date-changed', onDateChanged);
+    return () => window.removeEventListener('qaway-date-changed', onDateChanged);
+  }, []);
   const [newMenu, setNewMenu] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [attachment, setAttachment] = useState('OFICIO_MULTIPLE_00032-2026-MINEDU_Dotacion2027.pdf');
@@ -1038,7 +1066,7 @@ export default function CronogramaGanttView({
   const segments = useMemo(() => buildSegments(zoom), [zoom]);
   const segCols = useMemo(() => segments.map((s) => `${s.days}fr`).join(' '), [segments]);
   const yearCols = useMemo(() => ['2026', '2027'].map((y, i) => `${getDays(i === 0 ? RANGE_MIN : '2027-01-01', i === 0 ? '2026-12-31' : RANGE_MAX)}fr`).join(' '), []);
-  const todayPos = calcPosition(TODAY_ISO);
+  const todayPos = calcPosition(currentTodayIso);
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
   const add = (kind: Kind) => {
@@ -2159,7 +2187,7 @@ export default function CronogramaGanttView({
                   )}
                 </div>
 
-                <div className="timeline" style={{ minWidth: timelineMinWidth }}>
+                <div className="timeline" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
                     <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
                       {segments.map((s) => (
                         <span key={s.key} />
@@ -2197,65 +2225,75 @@ export default function CronogramaGanttView({
                 </div>
               ))}
 
-              {/* Máscara visual de zona fuera de rango (cuando hay filtro de rango activo) */}
-              {isRangeActive && (
-                <>
-                  {/* Zona previa al inicio del rango */}
-                  {calcPosition(rangeFrom) > 0 && (
-                    <div
-                      className="range-mask-before"
-                      style={{
-                        left: 'var(--fixed)',
-                        width: `calc((100% - var(--fixed)) * ${calcPosition(rangeFrom) / 100})`,
-                      }}
-                      title={`Zona fuera de rango: previa al ${formatDate(rangeFrom)}`}
-                    />
-                  )}
-
-                  {/* Línea divisoria de Inicio de Rango */}
-                  <div
-                    className="range-boundary-line start-line"
-                    style={{
-                      left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeFrom) / 100})`,
-                    }}
-                    title={`Rango Inicio: ${formatDate(rangeFrom)}`}
-                  >
-                    <span className="range-boundary-tag start-tag">Rango Inicio</span>
-                  </div>
-
-                  {/* Zona posterior al fin del rango */}
-                  {calcPosition(rangeTo) < 100 && (
-                    <div
-                      className="range-mask-after"
-                      style={{
-                        left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeTo) / 100})`,
-                        width: `calc((100% - var(--fixed)) * ${(100 - calcPosition(rangeTo)) / 100})`,
-                      }}
-                      title={`Zona fuera de rango: posterior al ${formatDate(rangeTo)}`}
-                    />
-                  )}
-
-                  {/* Línea divisoria de Fin de Rango */}
-                  <div
-                    className="range-boundary-line end-line"
-                    style={{
-                      left: `calc(var(--fixed) + (100% - var(--fixed)) * ${calcPosition(rangeTo) / 100})`,
-                    }}
-                    title={`Rango Fin: ${formatDate(rangeTo)}`}
-                  >
-                    <span className="range-boundary-tag end-tag">Rango Fin</span>
-                  </div>
-                </>
-              )}
-
-              {/* Indicador dinámico de "Hoy" */}
+              {/* Capa Overlay de Línea de Tiempo (Mismas dimensiones y alineación absoluta que las barras del timeline) */}
               <div
-                className="today"
+                className="timeline-grid-overlay"
                 style={{
-                  left: `calc(var(--fixed) + (100% - var(--fixed)) * ${todayPos / 100})`,
+                  left: `${fixedWidth}px`,
+                  width: timelineMinWidth,
+                  minWidth: timelineMinWidth,
                 }}
               >
-                <span>Hoy</span>
+                {/* Máscara visual de zona fuera de rango (cuando hay filtro de rango activo) */}
+                {isRangeActive && (
+                  <>
+                    {/* Zona previa al inicio del rango */}
+                    {calcPosition(rangeFrom) > 0 && (
+                      <div
+                        className="range-mask-before"
+                        style={{
+                          left: 0,
+                          width: `${calcPosition(rangeFrom)}%`,
+                        }}
+                        title={`Zona fuera de rango: previa al ${formatDate(rangeFrom)}`}
+                      />
+                    )}
+
+                    {/* Línea divisoria de Inicio de Rango */}
+                    <div
+                      className="range-boundary-line start-line"
+                      style={{
+                        left: `${calcPosition(rangeFrom)}%`,
+                      }}
+                      title={`Rango Inicio: ${formatDate(rangeFrom)}`}
+                    >
+                      <span className="range-boundary-tag start-tag">Rango Inicio</span>
+                    </div>
+
+                    {/* Zona posterior al fin del rango */}
+                    {calcPosition(rangeTo) < 100 && (
+                      <div
+                        className="range-mask-after"
+                        style={{
+                          left: `${calcPosition(rangeTo)}%`,
+                          width: `${100 - calcPosition(rangeTo)}%`,
+                        }}
+                        title={`Zona fuera de rango: posterior al ${formatDate(rangeTo)}`}
+                      />
+                    )}
+
+                    {/* Línea divisoria de Fin de Rango */}
+                    <div
+                      className="range-boundary-line end-line"
+                      style={{
+                        left: `${calcPosition(rangeTo)}%`,
+                      }}
+                      title={`Rango Fin: ${formatDate(rangeTo)}`}
+                    >
+                      <span className="range-boundary-tag end-tag">Rango Fin</span>
+                    </div>
+                  </>
+                )}
+
+                {/* Indicador dinámico de "Hoy" */}
+                <div
+                  className="today"
+                  style={{
+                    left: `${todayPos}%`,
+                  }}
+                >
+                  <span>Hoy</span>
+                </div>
               </div>
             </div>
           </div>

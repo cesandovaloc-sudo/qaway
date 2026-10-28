@@ -1,5 +1,5 @@
 // Tipos compartidos del shell maestro.
-export type ModuleKey = 'resumen' | 'cronograma' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas';
+export type ModuleKey = 'resumen' | 'cronograma' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'configuracion';
 
 // Prefijo base del Gestor de Proyectos acoplado al Hub
 export const BASE_PATH = '/hub/gestor_proyecto';
@@ -14,6 +14,7 @@ export const MODULE_SLUGS: Record<ModuleKey, string> = {
   reportes: `${BASE_PATH}/reportes`,
   usuarios: `${BASE_PATH}/equipo`,
   actas: `${BASE_PATH}/actas`,
+  configuracion: `${BASE_PATH}/configuracion`,
 };
 
 // Mapeo inverso de slugs (y alias compatibles) hacia la clave de módulo interna
@@ -30,6 +31,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   [`${BASE_PATH}/actas`]: 'actas',
   [`${BASE_PATH}/actas-acuerdos`]: 'actas',
   [`${BASE_PATH}/actas-y-acuerdos`]: 'actas',
+  [`${BASE_PATH}/configuracion`]: 'configuracion',
 
   // Rutas cortas sin prefijo (compatibilidad y redirección si el usuario entra a /reuniones, etc.)
   '/resumen': 'resumen',
@@ -42,6 +44,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/usuarios': 'usuarios',
   '/actas': 'actas',
   '/actas-acuerdos': 'actas',
+  '/configuracion': 'configuracion',
 };
 
 // Conteo semilla del módulo Tareas (paridad con `initial` del módulo: 7 tareas).
