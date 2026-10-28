@@ -18,6 +18,7 @@
  */
 
 import * as XLSX from "xlsx";
+import type { PDFPageProxy } from "pdfjs-dist";
 import type { RagChunk } from "./ragVectorStoreService";
 
 /* -------------------------------------------------------------------------- */
@@ -148,6 +149,83 @@ function cleanExtractedText(raw: string): string {
     .trim();
 }
 
+/* -------------------------------------------------------------------------- */
+/* OCR en cliente (Tesseract.js) para PDFs escaneados o fotocopias antiguas    */
+/* -------------------------------------------------------------------------- */
+
+/** Debajo de este umbral de texto limpio, la página se clasifica como escaneada. */
+const OCR_TEXT_MIN_CHARS = 30;
+/** Escala máxima de render (control de memoria). */
+const OCR_SCALE_MAX = 1.5;
+/** Área máxima del canvas (~4.2 MP): páginas tipo A3 no deben reventar memoria. */
+const OCR_MAX_CANVAS_AREA = 4_200_000;
+
+interface OcrWorkerLike {
+  recognize: (image: unknown) => Promise<{ data?: { text?: string } }>;
+  terminate: () => Promise<unknown>;
+}
+
+/** Worker único de Tesseract por documento, creado solo si aparece la primera
+ * página escaneada. worker/wasm/langdata 'spa' se cargan bajo demanda con
+ * versión fijada por CDN y quedan cacheados por tesseract.js en IndexedDB. */
+async function createOcrWorker(): Promise<OcrWorkerLike | null> {
+  try {
+    const candidates: any[] = [];
+    try {
+      candidates.push(await import("tesseract.js"));
+    } catch {
+      // Resolución ESM/CJS alternativa si el empaquetador no la sirve directa
+    }
+    if (!candidates[0]?.createWorker) {
+      try {
+        candidates.push((await import("tesseract.js/dist/tesseract.min.js")) as any);
+      } catch {
+        // Última instancia: objeto global expuesto por el bundle UMD
+      }
+    }
+    const mod = candidates.find((m) => m?.createWorker || m?.default?.createWorker);
+    const createWorker = mod?.createWorker ?? mod?.default?.createWorker ?? (globalThis as any)?.Tesseract?.createWorker;
+    if (typeof createWorker !== "function") return null;
+    const worker = await createWorker("spa", 1);
+    return worker as OcrWorkerLike;
+  } catch (err) {
+    console.warn("[Ingesta] OCR no disponible (tesseract.js):", err);
+    return null;
+  }
+}
+
+/** Renderiza la página en un canvas en memoria y corre OCR; libera recursos al terminar. */
+async function ocrPdfPageCanvas(worker: OcrWorkerLike, page: PDFPageProxy): Promise<string> {
+  const canvas = document.createElement("canvas");
+  try {
+    const reference = page.getViewport({ scale: OCR_SCALE_MAX });
+    const area = reference.width * reference.height;
+    const scale =
+      area > OCR_MAX_CANVAS_AREA
+        ? Math.max(0.75, OCR_SCALE_MAX * Math.sqrt(OCR_MAX_CANVAS_AREA / area))
+        : OCR_SCALE_MAX;
+    const viewport = page.getViewport({ scale });
+    canvas.width = Math.max(1, Math.floor(viewport.width));
+    canvas.height = Math.max(1, Math.floor(viewport.height));
+    const context = canvas.getContext("2d");
+    if (!context) return "";
+    await page.render({ canvasContext: context, viewport }).promise;
+    const result = await worker.recognize(canvas);
+    return cleanExtractedText(String(result?.data?.text ?? ""));
+  } catch (err) {
+    console.warn("[Ingesta] OCR de página fallido:", err);
+    return "";
+  } finally {
+    canvas.width = 0;
+    canvas.height = 0;
+    try {
+      page.cleanup();
+    } catch {
+      // Liberación de recursos de la página: silenciosa
+    }
+  }
+}
+
 async function parsePdfFile(file: File): Promise<{ pages: ParsedPage[]; pageCount: number }> {
   const lib = await loadPdfjs();
   const arrayBuffer = await file.arrayBuffer();
@@ -159,20 +237,50 @@ async function parsePdfFile(file: File): Promise<{ pages: ParsedPage[]; pageCoun
 
   const pageCount = Math.min(pdf.numPages, MAX_PDF_PAGES);
   const pages: ParsedPage[] = [];
-  for (let p = 1; p <= pageCount; p++) {
-    try {
-      const page = await pdf.getPage(p);
-      const textContent = await page.getTextContent();
-      let text = "";
-      for (const item of textContent.items as PdfTextItem[]) {
-        text += (item.str ?? "") + (item.hasEOL ? "\n" : " ");
+  // Worker de OCR único por documento: se instancia solo si aparece la primera
+  // página escaneada y se libera al terminar (también en caso de error).
+  let ocrWorker: OcrWorkerLike | null = null;
+  try {
+    for (let p = 1; p <= pageCount; p++) {
+      try {
+        const page = await pdf.getPage(p);
+        const textContent = await page.getTextContent();
+        let text = "";
+        for (const item of textContent.items as PdfTextItem[]) {
+          text += (item.str ?? "") + (item.hasEOL ? "\n" : " ");
+        }
+        const cleaned = cleanExtractedText(text);
+        if (cleaned.length >= OCR_TEXT_MIN_CHARS) {
+          pages.push({ locator: `Página ${p}`, pageNumber: p, text: cleaned });
+          continue;
+        }
+
+        // Página escaneada o fotocopia: OCR en memoria (escala máx. 1.5x)
+        if (!ocrWorker) ocrWorker = await createOcrWorker();
+        if (!ocrWorker) {
+          if (cleaned) {
+            pages.push({ locator: `Página ${p}`, pageNumber: p, text: cleaned });
+          }
+          continue;
+        }
+        console.info(`[Ingesta] OCR página ${p}/${pageCount} de ${file.name}…`);
+        const ocrText = await ocrPdfPageCanvas(ocrWorker, page);
+        if (ocrText) {
+          pages.push({ locator: `Página ${p} (OCR)`, pageNumber: p, text: ocrText });
+        } else if (cleaned) {
+          pages.push({ locator: `Página ${p}`, pageNumber: p, text: cleaned });
+        }
+      } catch (pageError) {
+        console.warn(`[Ingesta] Página ${p} de ${file.name} no extraíble:`, pageError);
       }
-      const cleaned = cleanExtractedText(text);
-      if (cleaned) {
-        pages.push({ locator: `Página ${p}`, pageNumber: p, text: cleaned });
+    }
+  } finally {
+    if (ocrWorker) {
+      try {
+        await ocrWorker.terminate();
+      } catch {
+        // Liberación del worker de OCR: silenciosa
       }
-    } catch (pageError) {
-      console.warn(`[Ingesta] Página ${p} de ${file.name} no extraíble:`, pageError);
     }
   }
   return { pages, pageCount: pdf.numPages };

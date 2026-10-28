@@ -19,6 +19,7 @@ import UsuariosView from './modules/usuarios/UsuariosView';
 import HitosView from './modules/hitos/HitosView';
 import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
 import ConfiguracionView from './modules/configuracion/ConfiguracionView';
+import FloatingChatAssistant from './components/FloatingChatAssistant';
 
 type Binds = { notify: (m: string) => void; setView?: (v: string) => void };
 
@@ -296,6 +297,13 @@ function App() {
         isOpen={isCreateProjectOpen}
         onClose={() => setIsCreateProjectOpen(false)}
         onCreate={handleCreateProject}
+      />
+
+      {/* Asistente Territorial con IA Flotante (Context-Aware para todos los módulos) */}
+      <FloatingChatAssistant
+        activeModule={active}
+        userRole={userRole}
+        notify={notifyActive}
       />
     </div>
   );

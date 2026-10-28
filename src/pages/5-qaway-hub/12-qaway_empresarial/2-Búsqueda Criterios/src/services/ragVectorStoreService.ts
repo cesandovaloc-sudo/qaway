@@ -15,6 +15,18 @@
  * ============================================================================
  */
 
+import {
+  fetchRemoteChunkMatches,
+  fetchRemoteProjectChunkCount,
+  generateGeminiChunkEmbeddings,
+  generateGeminiQueryEmbedding,
+  insertRemoteChunkRows,
+  isGeminiEmbeddingConfigured,
+  isRemoteChunkStoreAvailable,
+  purgeRemoteDocumentChunks,
+  type RemoteChunkRow,
+} from "./criteriosSupabaseService";
+
 /* -------------------------------------------------------------------------- */
 /* Modelos                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -164,6 +176,11 @@ export async function persistDocumentWithChunks(
   documentMetaMemory.set(documentMetaKey(projectId, record.documentId), [record]);
   cacheDocumentChunks(chunks, projectId);
 
+  // ── Capa de ingesta remota (pgvector): embeddings Gemini por lotes + purga
+  // idempotente + upsert. Best-effort: sin API key, sin cuota o sin conectividad
+  // el documento queda operativo en el motor local sin interrumpir la ingesta.
+  await ingestRemoteDocumentChunks(projectId, record, chunks);
+
   const db = await openRagDb();
   if (!db) return;
   try {
@@ -274,6 +291,13 @@ export async function removeStoredDocument(documentId: string): Promise<void> {
       );
     }
   }
+
+  // Purga espejo remota (pgvector): best-effort y silenciosa; la purga local de
+  // IndexedDB sigue siendo la fuente de verdad inmediata de la sesión.
+  if (isGeminiEmbeddingConfigured()) {
+    await purgeRemoteDocumentChunks(documentId);
+  }
+
   const db = await openRagDb();
   if (!db) return;
   try {
@@ -334,8 +358,14 @@ export async function retrieveRelevantChunks(
   query: string,
   options: { topK: number; threshold: number }
 ): Promise<RetrievalResult> {
-  const chunks = await getChunksForProject(projectId);
   const { topK, threshold } = options;
+
+  // ── Capa 1: lectura vectorial remota (pgvector + HNSW, umbral calibrado) ──
+  const remote = await retrieveFromRemoteVectorStore(projectId, query, topK, threshold);
+  if (remote) return remote;
+
+  // ── Capa 2: BM25 local (IndexedDB) — motor de respaldo resiliente ──
+  const chunks = await getChunksForProject(projectId);
   if (chunks.length === 0 || !query.trim()) {
     return { top: [], relaxed: false, totalChunks: chunks.length };
   }
@@ -402,6 +432,133 @@ export async function retrieveRelevantChunks(
     top = scored.slice(0, Math.max(3, Math.min(topK, scored.length)));
   }
   return { top, relaxed, totalChunks: chunks.length };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Capa de lectura vectorial remota (Supabase pgvector + índice HNSW)          */
+/* -------------------------------------------------------------------------- */
+
+/** Calibración de umbrales entre motores:
+ * - El BM25 local normaliza en [0.35, 1.0] (umbral de UI por defecto: 0.75).
+ * - El coseno de embeddings reales suele moverse en [0.15, 0.75].
+ * Conversión: coseno ≈ 0.52 × BM25 (piso 0.25) y segunda pasada relaxed a 0.18. */
+const REMOTE_THRESHOLD_RATIO = 0.52;
+const REMOTE_THRESHOLD_FLOOR = 0.25;
+const REMOTE_THRESHOLD_RELAXED = 0.18;
+/** Remapea el coseno [0, 0.7] a la escala de "Similitud" mostrada en la UI [0, 1]. */
+const REMOTE_SCORE_SCALE = 1.45;
+
+/** Mapea filas del RPC al contrato estricto de RetrievedChunk que consume la UI. */
+function mapRemoteRowsToRetrieved(rows: RemoteChunkRow[]): RetrievedChunk[] {
+  const mapped: RetrievedChunk[] = [];
+  for (const row of rows) {
+    if (!row || typeof row.content !== "string" || !row.content.trim()) continue;
+    mapped.push({
+      id: row.id,
+      projectId: row.project_id ?? "",
+      documentId: row.document_id,
+      documentTitle: row.document_title,
+      documentType: row.document_type === "legal" || row.document_type === "excel" ? row.document_type : "doc",
+      locatorLabel: row.locator_label,
+      pageNumber: row.page_number,
+      content: row.content,
+      createdAt: Date.now(),
+      rawScore: row.similarity,
+      normalizedScore: Math.min(1, row.similarity * REMOTE_SCORE_SCALE),
+    });
+  }
+  return mapped;
+}
+
+/** Lectura semántica remota; null = "no disponible este turno" → BM25 local. */
+async function retrieveFromRemoteVectorStore(
+  projectId: string,
+  query: string,
+  topK: number,
+  threshold: number
+): Promise<RetrievalResult | null> {
+  const trimmed = query.trim();
+  if (!trimmed) return null;
+  try {
+    if (!isGeminiEmbeddingConfigured()) return null;
+    if (!(await isRemoteChunkStoreAvailable())) return null;
+
+    const queryVector = await generateGeminiQueryEmbedding(trimmed);
+    if (!queryVector) return null;
+
+    const matchCount = Math.max(topK, 18);
+    const remoteThreshold = Math.max(REMOTE_THRESHOLD_FLOOR, threshold * REMOTE_THRESHOLD_RATIO);
+
+    let rows = await fetchRemoteChunkMatches(queryVector, remoteThreshold, matchCount, projectId);
+    if (rows === null) return null;
+
+    let relaxed = false;
+    if (rows.length === 0) {
+      rows = await fetchRemoteChunkMatches(queryVector, REMOTE_THRESHOLD_RELAXED, matchCount, projectId);
+      if (rows === null) return null;
+      if (rows.length === 0) {
+        // Sin coincidencias remotas: si el proyecto vive en el motor local, usar BM25.
+        const localChunks = await getChunksForProject(projectId);
+        if (localChunks.length > 0) return null;
+        return { top: [], relaxed: false, totalChunks: 0 };
+      }
+      relaxed = true;
+    }
+
+    const top = mapRemoteRowsToRetrieved(rows).slice(0, Math.max(1, topK));
+    let totalChunks = await fetchRemoteProjectChunkCount(projectId);
+    if (totalChunks === null) {
+      totalChunks = (await getChunksForProject(projectId)).length;
+    }
+    return { top, relaxed, totalChunks };
+  } catch (err) {
+    console.warn("[AlmacénRAG] Lectura vectorial remota no disponible; se usa el motor local:", err);
+    return null;
+  }
+}
+
+/** Ingesta remota de un documento: embeddings por lotes → purga idempotente → upsert. */
+async function ingestRemoteDocumentChunks(
+  projectId: string,
+  record: StoredDocumentRecord,
+  chunks: RagChunk[]
+): Promise<void> {
+  if (chunks.length === 0) return;
+  try {
+    if (!isGeminiEmbeddingConfigured()) return;
+    if (!(await isRemoteChunkStoreAvailable())) return;
+
+    const vectors = await generateGeminiChunkEmbeddings(
+      chunks.map((chunk) => ({ content: chunk.content, title: chunk.documentTitle }))
+    );
+    if (!vectors || vectors.length !== chunks.length) {
+      console.warn(`[AlmacénRAG] "${record.sourceMeta.title}" queda operativo solo en el motor local (embeddings no disponibles).`);
+      return;
+    }
+
+    // Purga idempotente ANTES de insertar: re-indexado sin huérfanos remotos.
+    await purgeRemoteDocumentChunks(record.documentId, projectId);
+
+    const rows = chunks.map((chunk, index) => ({
+      id: chunk.id,
+      project_id: projectId,
+      document_id: chunk.documentId,
+      document_title: chunk.documentTitle,
+      document_type: chunk.documentType,
+      locator_label: chunk.locatorLabel,
+      page_number: chunk.pageNumber,
+      content: chunk.content,
+      embedding: vectors[index] ?? [],
+    }));
+
+    if (await insertRemoteChunkRows(rows)) {
+      console.info(`[AlmacénRAG] ${chunks.length} fragmentos con embedding en Supabase (pgvector) para "${record.sourceMeta.title}".`);
+    } else {
+      console.warn(`[AlmacénRAG] Inserción remota incompleta para "${record.sourceMeta.title}"; queda operativo en el motor local.`);
+    }
+  } catch (err) {
+    console.warn("[AlmacénRAG] Ingesta remota omitida:", err);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
