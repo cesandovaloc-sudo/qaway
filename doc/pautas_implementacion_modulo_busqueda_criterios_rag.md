@@ -61,3 +61,11 @@ Se desglosó el código monolítico sin alterar ni un solo detalle visual:
   - Prohibición estricta de aperturas defensivas o discursos burocráticos.
   - Conversación ágil, ingeniosa y cercana en intercambios casuales o de humor.
   - Activación rigurosa del análisis documental y citaciones únicamente ante consultas de fondo sobre normas, directivas y procesos del proyecto.
+
+
+### C. Soporte Híbrido: Google Search Grounding y Toggle Búsqueda Web
+* **Diagnóstico:** En un RAG cerrado corporativo, si el usuario solicita enlaces directos a portales externos (ej. link del Banco del Libro en `minedu.gob.pe`), la IA no los posee en sus documentos internos locales y no debe alucinarlos. Se requería un mecanismo de orientación al usuario y un switch para habilitar consultas en tiempo real a internet cuando se cuente con autorización.
+* **Solución Implementada:**
+  1. **Directiva de Orientación:** Se incorporó en la Capa 0 de [`geminiRAGService.ts`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/services/geminiRAGService.ts) la instrucción explícita de informar con amabilidad si el enlace no figura en las normas y guiar al usuario a activar el modo online o solicitar permisos a su administrador.
+  2. **Switch en Chat y Configuración:** En [`CriteriosApp.tsx`](file:///c:/LEO/EMPRESAS/QAWAY%20LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda%20Criterios/src/CriteriosApp.tsx), se agregó un botón toggle con icono `Globe` (`[🌐 Búsqueda Web / Web en vivo]`) persistido en `localStorage` y replicado en la pestaña *Motor RAG* de Configuración.
+  3. **Conector en Tiempo Real:** Al activar el modo, se envía `tools: [{ google_search: {} }]` a la API de Gemini para que consulte Google en vivo y devuelva los enlaces oficiales verificados.

@@ -1511,6 +1511,7 @@ export default function CriteriosApp() {
             mode: chatMode,
             similarityThreshold,
             topK,
+            webSearch: webSearchEnabled,
           });
 
           if (geminiResult.success && geminiResult.text) {
@@ -3582,6 +3583,29 @@ export default function CriteriosApp() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {/* Toggle Búsqueda Web en Vivo (Google Search Grounding) */}
+                    <button
+                      type="button"
+                      onClick={toggleWebSearch}
+                      className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors ${
+                        webSearchEnabled
+                          ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                          : "border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700"
+                      }`}
+                      title={
+                        webSearchEnabled
+                          ? "Búsqueda Web en tiempo real activada: La IA consultará Google Search para enlaces y datos online"
+                          : "Activar Búsqueda Web en Google para enlaces oficiales y datos en tiempo real"
+                      }
+                    >
+                      <HubIcon icon={Globe} size={13} className={webSearchEnabled ? "text-white" : "text-zinc-500"} />
+                      <span>{webSearchEnabled ? "Web en vivo" : "Búsqueda Web"}</span>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          webSearchEnabled ? "bg-white animate-pulse" : "bg-zinc-300"
+                        }`}
+                      />
+                    </button>
                     <button
                       type="button"
                       onClick={handleResetChat}
@@ -5223,6 +5247,33 @@ export default function CriteriosApp() {
                           <span
                             className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
                               hybridSearch ? "right-1" : "left-1"
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      <div className="h-px bg-zinc-100" />
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-bold text-sm text-zinc-900 flex items-center gap-1.5">
+                            <HubIcon icon={Globe} size={15} className="text-blue-600" />
+                            <span>Búsqueda Web en Vivo (Google Search Grounding)</span>
+                          </span>
+                          <span className="text-xs text-zinc-500 block">
+                            Permite a Gemini consultar Google en tiempo real para verificar enlaces oficiales y portales que no figuren en los PDFs del proyecto.
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={toggleWebSearch}
+                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                            webSearchEnabled ? "bg-blue-600" : "bg-zinc-300"
+                          }`}
+                        >
+                          <span
+                            className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
+                              webSearchEnabled ? "right-1" : "left-1"
                             }`}
                           />
                         </button>
