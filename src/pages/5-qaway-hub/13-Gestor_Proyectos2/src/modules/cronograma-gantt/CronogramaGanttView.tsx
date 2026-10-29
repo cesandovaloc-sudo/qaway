@@ -4,6 +4,7 @@ import './gantt.css';
 import {
   AlertTriangle,
   ArrowLeftRight,
+  ArrowRight,
   CalendarDays,
   CalendarRange,
   ChartNoAxesColumnIncreasing,
@@ -733,6 +734,14 @@ export default function CronogramaGanttView({
             localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify([]));
             return [];
           }
+          // Limpiar hitos fantasma huérfanos que se guardaron accidentalmente sin confirmación
+          const cleaned = parsed.filter(
+            (it) => !(it.id.startsWith('new-') && (it.name === 'Nuevo hito' || it.name === 'Nuevo subproceso') && it.progress === 0 && !it.description)
+          );
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify(cleaned));
+            return cleaned;
+          }
           return parsed;
         }
       }
@@ -784,10 +793,16 @@ export default function CronogramaGanttView({
   const [selectedId, setSelectedId] = useState<string | null>('h1');
   const selected = items.find((x) => x.id === selectedId);
 
+  // Estado del borrador del editor (evita mutaciones en caliente y ghost items)
+  const [drawerDraft, setDrawerDraft] = useState<Item | null>(null);
+  const [isNewDraft, setIsNewDraft] = useState<boolean>(false);
+  const [editorTab, setEditorTab] = useState<'info' | 'subprocesos' | 'dependencias'>('info');
+  const activeItem = drawerDraft || selected;
+
   // Snapshot inicial al abrir el editor para detectar si el usuario ha realizado cambios o cargado datos
   const [editorInitialSnapshot, setEditorInitialSnapshot] = useState<string>('');
 
-  const captureSnapshot = (item: Item | undefined) => {
+  const captureSnapshot = (item: Item | undefined | null) => {
     if (!item) return '';
     return JSON.stringify({
       name: item.name,
@@ -798,12 +813,14 @@ export default function CronogramaGanttView({
       status: item.status,
       progress: item.progress,
       deliverable: item.deliverable || '',
+      parentId: item.parentId || '',
     });
   };
 
   const isEditorDirty = () => {
-    if (!selected || !editorInitialSnapshot) return false;
-    const current = captureSnapshot(selected);
+    const target = drawerDraft || selected;
+    if (!target || !editorInitialSnapshot) return false;
+    const current = captureSnapshot(target);
     return current !== editorInitialSnapshot;
   };
 
@@ -813,14 +830,133 @@ export default function CronogramaGanttView({
     setEditorStatusOpen(false);
 
     if (isEditorDirty()) {
-      setPendingCloseAction(() => action || (() => setPanelOpen(false)));
+      setPendingCloseAction(() => action || (() => {
+        setPanelOpen(false);
+        setDrawerDraft(null);
+        setIsNewDraft(false);
+        setEditorInitialSnapshot('');
+      }));
       setUnsavedAlertOpen(true);
     } else {
+      setPanelOpen(false);
+      setDrawerDraft(null);
+      setIsNewDraft(false);
+      setEditorInitialSnapshot('');
       if (action) {
         action();
-      } else {
-        setPanelOpen(false);
       }
+    }
+  };
+
+  const openEditorForItem = (item: Item) => {
+    setSelectedId(item.id);
+    setDrawerDraft({ ...item });
+    setIsNewDraft(false);
+    setEditorInitialSnapshot(captureSnapshot(item));
+    setEditorTab('info');
+    setPanelOpen(true);
+  };
+
+  const updateDraft = (p: Partial<Item>) => {
+    setDrawerDraft((prev) => (prev ? { ...prev, ...p } : null));
+  };
+
+  const setDraftStart = (v: string) => {
+    if (!v || !drawerDraft) return;
+    updateDraft(v > drawerDraft.end ? { start: v, end: v } : { start: v });
+  };
+
+  const setDraftEnd = (v: string) => {
+    if (!v || !drawerDraft) return;
+    updateDraft(v < drawerDraft.start ? { start: v, end: v } : { end: v });
+  };
+
+  const setDraftProgress = (v: number) => {
+    if (!drawerDraft) return;
+    updateDraft({
+      progress: v,
+      status: v >= 100 ? 'Cumple' : v === 0 ? 'Pendiente' : 'En proceso',
+    });
+  };
+
+  const setDraftStatus = (s: Status) => {
+    if (!drawerDraft) return;
+    let newProgress = drawerDraft.progress;
+    if (s === 'Pendiente') {
+      newProgress = 0;
+    } else if (s === 'Completado' || s === 'Cumple') {
+      newProgress = 100;
+    } else if (s === 'En proceso' || s === 'En curso') {
+      if (newProgress === 0 || newProgress === 100) newProgress = 50;
+    }
+    updateDraft({ status: s, progress: newProgress });
+  };
+
+  const handleSaveDrawer = () => {
+    if (!drawerDraft) return;
+    if (!drawerDraft.name.trim()) {
+      notify('El nombre no puede estar vacío');
+      return;
+    }
+    if (isNewDraft) {
+      commitChange((old) =>
+        drawerDraft.kind === 'subproceso' && drawerDraft.parentId
+          ? old.flatMap((x) => (x.id === drawerDraft.parentId ? [x, drawerDraft] : [x]))
+          : [...old, drawerDraft]
+      );
+      notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'hito' : 'subproceso'} guardado con éxito en el cronograma maestro`);
+    } else {
+      commitChange((old) => old.map((x) => (x.id === drawerDraft.id ? drawerDraft : x)));
+      notify('Cambios guardados con éxito en el cronograma maestro');
+    }
+    setEditorInitialSnapshot('');
+    setDrawerDraft(null);
+    setIsNewDraft(false);
+    setPanelOpen(false);
+  };
+
+  const getLinkedTasks = (milestoneName?: string) => {
+    if (!milestoneName) return [];
+    try {
+      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      if (Array.isArray(raw)) {
+        return raw.filter((t: any) => t.milestone === milestoneName);
+      }
+    } catch {
+      /* fallback */
+    }
+    return [];
+  };
+
+  const handleCreateLinkedTask = (milestoneName: string) => {
+    const taskTitle = window.prompt(`Nueva tarea vinculada a "${milestoneName}":`, 'Nueva tarea operativa');
+    if (!taskTitle?.trim()) return;
+    try {
+      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const list = Array.isArray(raw) ? raw : [];
+      const newTask = {
+        id: Math.max(0, ...list.map((x: any) => x.id || 0)) + 1,
+        title: taskTitle.trim(),
+        milestone: milestoneName,
+        owner: 'Carlos Mendoza',
+        due: activeItem?.end || '2026-11-30',
+        status: 'Pendiente',
+        priority: 'Media',
+        origin: 'Hito del proyecto',
+        kind: 'Vinculada al cronograma',
+        deliverable: activeItem?.deliverable || 'Entregable de hito',
+        description: `Tarea operativa para el cumplimiento de ${milestoneName}`,
+        checklist: [],
+        comments: [],
+        attachments: [],
+        history: [{ text: 'Tarea creada desde el cronograma', date: new Date().toLocaleString('es-PE') }],
+      };
+      const nextList = [newTask, ...list];
+      localStorage.setItem('qaway-tasks-v1', JSON.stringify(nextList));
+      notify(`Tarea "${taskTitle.trim()}" vinculada y agregada al módulo Tareas`);
+      window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
+    } catch {
+      notify('Error al crear tarea vinculada');
     }
   };
   const [panelOpen, setPanelOpen] = useState(false);
@@ -1439,36 +1575,36 @@ export default function CronogramaGanttView({
   const todayPos = calcPosition(currentTodayIso);
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
-  const add = (kind: Kind) => {
+  const add = (kind: Kind, parentHitoId?: string) => {
     const id = 'new-' + Date.now();
     const n = kind === 'hito' ? hitos.length + 1 : subs.length + 1;
-    const item: Item = {
+    const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.kind === 'hito' ? drawerDraft.id : hitos[0]?.id) : undefined);
+    const draftItem: Item = {
       id,
       code: kind === 'hito' ? `${n}.` : `${Math.ceil(n / 3)}.${n}`,
       name: kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso',
       kind,
-      parentId: kind === 'subproceso' ? (selected?.kind === 'hito' ? selected.id : hitos[0]?.id) : undefined,
+      parentId: pId,
       start: '2026-10-26',
       end: '2026-11-30',
       progress: 0,
       status: 'Pendiente',
       expanded: true,
       description: '',
+      deliverable: '',
       reportType: 'Línea de tiempo',
       region: 'Todas',
       gestor: 'Sin asignar',
     };
 
-    commitChange((old) =>
-      kind === 'subproceso' && item.parentId
-        ? old.flatMap((x) => (x.id === item.parentId ? [x, item] : [x]))
-        : [...old, item]
-    );
     setSelectedId(id);
-    setEditorInitialSnapshot(captureSnapshot(item));
+    setDrawerDraft(draftItem);
+    setIsNewDraft(true);
+    setEditorInitialSnapshot(captureSnapshot(draftItem));
+    setEditorTab('info');
     setPanelOpen(true);
     setNewMenu(false);
-    notify(`Nuevo ${kind} incorporado. Configura y guarda los cambios en el panel lateral.`);
+    notify(`Borrador de nuevo ${kind} abierto. Configura y pulsa "Guardar cambios".`);
   };
 
   const exportCSV = () => {
@@ -1499,8 +1635,18 @@ export default function CronogramaGanttView({
   };
 
   const deleteItem = () => {
-    if (!selected || !confirm(`¿Eliminar “${selected.name}”?`)) return;
-    commitChange((old) => old.filter((x) => x.id !== selected.id && x.parentId !== selected.id));
+    if (!activeItem) return;
+    if (isNewDraft) {
+      setPanelOpen(false);
+      setDrawerDraft(null);
+      setIsNewDraft(false);
+      setEditorInitialSnapshot('');
+      notify('Borrador descartado');
+      return;
+    }
+    if (!confirm(`¿Eliminar “${activeItem.name}”?`)) return;
+    commitChange((old) => old.filter((x) => x.id !== activeItem.id && x.parentId !== activeItem.id));
+    setDrawerDraft(null);
     setSelectedId(null);
     setPanelOpen(false);
     notify('Elemento eliminado del cronograma maestro');
@@ -2247,8 +2393,7 @@ export default function CronogramaGanttView({
                     setSelectedId(x.id);
                   }}
                   onDoubleClick={() => {
-                    setSelectedId(x.id);
-                    setPanelOpen(true);
+                    openEditorForItem(x);
                   }}
                 >
                   <div
@@ -2281,9 +2426,7 @@ export default function CronogramaGanttView({
                         title={`Clic para ver/editar detalle de hito: ${x.name}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedId(x.id);
-                          setEditorInitialSnapshot(captureSnapshot(x));
-                          setPanelOpen(true);
+                          openEditorForItem(x);
                         }}
                       >
                         <FolderOpen size={16} className="folder" />
@@ -2295,9 +2438,7 @@ export default function CronogramaGanttView({
                         title={`Clic para ver/editar detalle de subproceso: ${x.name}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedId(x.id);
-                          setEditorInitialSnapshot(captureSnapshot(x));
-                          setPanelOpen(true);
+                          openEditorForItem(x);
                         }}
                       >
                         <FileText size={15} className="file" />
@@ -2690,9 +2831,7 @@ export default function CronogramaGanttView({
                           }}
                           onDoubleClick={(e) => {
                             e.stopPropagation();
-                            setSelectedId(x.id);
-                            setPanelOpen(true);
-                            notify(`Editando: ${x.name}`);
+                            openEditorForItem(x);
                           }}
                           onMouseEnter={(e) => {
                             if (resizingTaskId) return;
@@ -2871,10 +3010,10 @@ export default function CronogramaGanttView({
                   if (panelOpen) {
                     requestCloseDrawer();
                   } else {
-                    if (selected) {
-                      setEditorInitialSnapshot(captureSnapshot(selected));
+                    const target = selected || hitos[0] || items[0];
+                    if (target) {
+                      openEditorForItem(target);
                     }
-                    setPanelOpen(true);
                   }
                 }}
                 title="Abrir o cerrar panel de detalles del elemento seleccionado"
@@ -2904,7 +3043,7 @@ export default function CronogramaGanttView({
         )}
 
         {/* Panel Lateral Editor (Drawer de Coordinador) */}
-        {panelOpen && selected && (
+        {panelOpen && activeItem && (
           <aside className="editor" onClick={() => {
             setEditorCalOpen(null);
             setEditorReportTypeOpen(false);
@@ -2920,7 +3059,7 @@ export default function CronogramaGanttView({
                 >
                   <ChevronLeft size={18} />
                 </button>
-                <h2>Editar {selected.kind === 'hito' ? 'Hito' : 'Subproceso'}</h2>
+                <h2>{isNewDraft ? 'Crear' : 'Editar'} {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}</h2>
               </div>
               <button
                 type="button"
@@ -2934,148 +3073,170 @@ export default function CronogramaGanttView({
             </div>
 
             <div className="editor-tabs">
-              <button className="active">Información</button>
               <button
-                onClick={() =>
-                  notify(
-                    `Subprocesos vinculados: ${items.filter((x) => x.parentId === selected.id).length}`
-                  )
-                }
+                type="button"
+                className={editorTab === 'info' ? 'active' : ''}
+                onClick={() => setEditorTab('info')}
               >
-                Subprocesos ({items.filter((x) => x.parentId === selected.id).length})
+                Información
               </button>
-              <button onClick={() => notify('Selecciona un elemento para revisar dependencias')}>
+              <button
+                type="button"
+                className={editorTab === 'subprocesos' ? 'active' : ''}
+                onClick={() => setEditorTab('subprocesos')}
+              >
+                Subprocesos ({items.filter((x) => x.parentId === activeItem.id).length})
+              </button>
+              <button
+                type="button"
+                className={editorTab === 'dependencias' ? 'active' : ''}
+                onClick={() => setEditorTab('dependencias')}
+              >
                 Dependencias
               </button>
             </div>
 
-            <div className="editor-body">
-              <label className="field">
-                <span>Nombre ({selected.kind === 'hito' ? 'Hito' : 'Subproceso'})</span>
-                <input
-                  value={selected.name}
-                  onChange={(e) => update(selected.id, { name: e.target.value })}
-                />
-              </label>
+            {editorTab === 'info' && (
+              <div className="editor-body">
+                {/* 1. Nombre */}
+                <label className="field">
+                  <span>Nombre ({activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'})</span>
+                  <input
+                    value={activeItem.name}
+                    onChange={(e) => updateDraft({ name: e.target.value })}
+                    placeholder="Nombre del hito o subproceso..."
+                  />
+                </label>
 
-              <label className="field">
-                <span>Descripción y Alcance</span>
-                <textarea
-                  value={selected.description || ''}
-                  onChange={(e) => update(selected.id, { description: e.target.value })}
-                  placeholder="Describe el alcance y el resultado esperado..."
-                />
-              </label>
+                {/* 2. Descripción y Alcance */}
+                <label className="field">
+                  <span>Descripción y Alcance</span>
+                  <textarea
+                    value={activeItem.description || ''}
+                    onChange={(e) => updateDraft({ description: e.target.value })}
+                    placeholder="Describe el alcance y el resultado esperado..."
+                  />
+                </label>
 
-              <div className="date-fields">
-                <div className="field relative">
-                  <span>Fecha de inicio</span>
-                  <button
-                    type="button"
-                    className={`custom-date-btn ${editorCalOpen === 'start' ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditorReportTypeOpen(false);
-                      setEditorStatusOpen(false);
-                      setEditorCalOpen((p) => p === 'start' ? null : 'start');
-                    }}
-                    title="Seleccionar fecha de inicio con calendario institucional"
-                  >
-                    <span>{formatDatePE(selected.start)}</span>
-                    <CalendarDays size={14} className="date-btn-icon" />
-                  </button>
-                  {editorCalOpen === 'start' && (
-                    <MiniCalendar
-                      value={selected.start}
-                      onChange={(newDate) => {
-                        setStart(selected, newDate);
-                        setEditorCalOpen(null);
+                {/* 3. Entregable Oficial (Criterio de Cumplimiento) - justo después de Alcance */}
+                <label className="field">
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Target size={13} style={{ color: '#2563eb' }} />
+                    Entregable Oficial (Criterio de Cumplimiento)
+                  </span>
+                  <input
+                    value={activeItem.deliverable || ''}
+                    onChange={(e) => updateDraft({ deliverable: e.target.value })}
+                    placeholder="Ej. Losa vaciada y fraguada, Acta de entrega, Informe técnico visado..."
+                  />
+                </label>
+
+                {/* 4. Fechas (Inicio y Fin) */}
+                <div className="date-fields">
+                  <div className="field relative">
+                    <span>Fecha de inicio</span>
+                    <button
+                      type="button"
+                      className={`custom-date-btn ${editorCalOpen === 'start' ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditorReportTypeOpen(false);
+                        setEditorStatusOpen(false);
+                        setEditorCalOpen((p) => p === 'start' ? null : 'start');
                       }}
-                      onClose={() => setEditorCalOpen(null)}
-                      align="left"
-                    />
-                  )}
+                      title="Seleccionar fecha de inicio con calendario institucional"
+                    >
+                      <span>{formatDatePE(activeItem.start)}</span>
+                      <CalendarDays size={14} className="date-btn-icon" />
+                    </button>
+                    {editorCalOpen === 'start' && (
+                      <MiniCalendar
+                        value={activeItem.start}
+                        onChange={(newDate) => {
+                          setDraftStart(newDate);
+                          setEditorCalOpen(null);
+                        }}
+                        onClose={() => setEditorCalOpen(null)}
+                        align="left"
+                      />
+                    )}
+                  </div>
+
+                  <div className="field relative">
+                    <span>Fecha de fin</span>
+                    <button
+                      type="button"
+                      className={`custom-date-btn ${editorCalOpen === 'end' ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditorReportTypeOpen(false);
+                        setEditorStatusOpen(false);
+                        setEditorCalOpen((p) => p === 'end' ? null : 'end');
+                      }}
+                      title="Seleccionar fecha de fin con calendario institucional"
+                    >
+                      <span>{formatDatePE(activeItem.end)}</span>
+                      <CalendarDays size={14} className="date-btn-icon" />
+                    </button>
+                    {editorCalOpen === 'end' && (
+                      <MiniCalendar
+                        value={activeItem.end}
+                        min={activeItem.start}
+                        onChange={(newDate) => {
+                          setDraftEnd(newDate);
+                          setEditorCalOpen(null);
+                        }}
+                        onClose={() => setEditorCalOpen(null)}
+                        align="right"
+                      />
+                    )}
+                  </div>
                 </div>
 
+                {/* 5. Estado de cumplimiento */}
                 <div className="field relative">
-                  <span>Fecha de fin</span>
-                  <button
-                    type="button"
-                    className={`custom-date-btn ${editorCalOpen === 'end' ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditorReportTypeOpen(false);
-                      setEditorStatusOpen(false);
-                      setEditorCalOpen((p) => p === 'end' ? null : 'end');
-                    }}
-                    title="Seleccionar fecha de fin con calendario institucional"
-                  >
-                    <span>{formatDatePE(selected.end)}</span>
-                    <CalendarDays size={14} className="date-btn-icon" />
-                  </button>
-                  {editorCalOpen === 'end' && (
-                    <MiniCalendar
-                      value={selected.end}
-                      min={selected.start}
-                      onChange={(newDate) => {
-                        setEnd(selected, newDate);
-                        setEditorCalOpen(null);
-                      }}
-                      onClose={() => setEditorCalOpen(null)}
-                      align="right"
-                    />
-                  )}
-                </div>
-              </div>
-
-              {selected.kind === 'hito' && (
-                <div className="field relative">
-                  <span>Tipo de reporte</span>
+                  <span>Estado de cumplimiento</span>
                   <div className="filter-dropdown-wrap">
                     <button
                       type="button"
-                      className={`filter-card-btn ${editorReportTypeOpen ? 'active' : ''}`}
+                      className={`filter-card-btn ${editorStatusOpen ? 'active' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditorCalOpen(null);
-                        setEditorStatusOpen(false);
-                        setEditorReportTypeOpen((v) => !v);
+                        setEditorReportTypeOpen(false);
+                        setEditorStatusOpen((v) => !v);
                       }}
                     >
-                      <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>
-                        {selected.reportType || 'Línea de tiempo'}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <span className={`status ${STATUS_CLASS[activeItem.status]}`}>
+                          {activeItem.status}
+                        </span>
                       </span>
                       <ChevronDown
                         size={14}
                         className="filter-chevron"
                         style={{
-                          transform: editorReportTypeOpen ? 'rotate(180deg)' : 'none',
+                          transform: editorStatusOpen ? 'rotate(180deg)' : 'none',
                           transition: 'transform 0.15s ease',
                           color: '#64748b',
                         }}
                       />
                     </button>
-                    {editorReportTypeOpen && (
+                    {editorStatusOpen && (
                       <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                        <div className="filter-popover-title">Formato de Reporte</div>
-                        {[
-                          'Línea de tiempo',
-                          'Matriz de entregables',
-                          'Registro de entregas',
-                          'Consolidado de datos',
-                          'Informe de cierre',
-                        ].map((opt) => (
+                        <div className="filter-popover-title">Estado Oficial</div>
+                        {STATUS_OPTIONS.map((st) => (
                           <button
-                            key={opt}
+                            key={st}
                             type="button"
-                            className={`filter-item-btn ${(selected.reportType || 'Línea de tiempo') === opt ? 'selected' : ''}`}
+                            className={`filter-item-btn ${activeItem.status === st ? 'selected' : ''}`}
                             onClick={() => {
-                              update(selected.id, { reportType: opt });
-                              setEditorReportTypeOpen(false);
+                              setDraftStatus(st);
+                              setEditorStatusOpen(false);
                             }}
                           >
-                            <span>{opt}</span>
-                            {(selected.reportType || 'Línea de tiempo') === opt && (
+                            <span className={`status ${STATUS_CLASS[st]}`}>{st}</span>
+                            {activeItem.status === st && (
                               <Check size={14} className="item-check" />
                             )}
                           </button>
@@ -3084,172 +3245,343 @@ export default function CronogramaGanttView({
                     )}
                   </div>
                 </div>
-              )}
 
-              <div className="field relative">
-                <span>Estado de cumplimiento</span>
-                <div className="filter-dropdown-wrap">
-                  <button
-                    type="button"
-                    className={`filter-card-btn ${editorStatusOpen ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditorCalOpen(null);
-                      setEditorReportTypeOpen(false);
-                      setEditorStatusOpen((v) => !v);
-                    }}
-                  >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      <span className={`status ${STATUS_CLASS[selected.status]}`}>
-                        {selected.status}
+                {/* 6. Avance */}
+                <div className="progress-edit">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Avance</span>
+                    <b style={{ fontSize: '13px', color: '#0f172a' }}>{activeItem.progress}%</b>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={activeItem.progress}
+                    onChange={(e) => setDraftProgress(+e.target.value)}
+                  />
+                </div>
+
+                {/* 7. Tipo de reporte */}
+                {activeItem.kind === 'hito' && (
+                  <div className="field relative">
+                    <span>Tipo de reporte</span>
+                    <div className="filter-dropdown-wrap">
+                      <button
+                        type="button"
+                        className={`filter-card-btn ${editorReportTypeOpen ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditorCalOpen(null);
+                          setEditorStatusOpen(false);
+                          setEditorReportTypeOpen((v) => !v);
+                        }}
+                      >
+                        <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>
+                          {activeItem.reportType || 'Línea de tiempo'}
+                        </span>
+                        <ChevronDown
+                          size={14}
+                          className="filter-chevron"
+                          style={{
+                            transform: editorReportTypeOpen ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.15s ease',
+                            color: '#64748b',
+                          }}
+                        />
+                      </button>
+                      {editorReportTypeOpen && (
+                        <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                          <div className="filter-popover-title">Formato de Reporte</div>
+                          {[
+                            'Línea de tiempo',
+                            'Matriz de entregables',
+                            'Registro de entregas',
+                            'Consolidado de datos',
+                            'Informe de cierre',
+                          ].map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              className={`filter-item-btn ${(activeItem.reportType || 'Línea de tiempo') === opt ? 'selected' : ''}`}
+                              onClick={() => {
+                                updateDraft({ reportType: opt });
+                                setEditorReportTypeOpen(false);
+                              }}
+                            >
+                              <span>{opt}</span>
+                              {(activeItem.reportType || 'Línea de tiempo') === opt && (
+                                <Check size={14} className="item-check" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 8. Desglose de Tareas vinculadas */}
+                <div className="task-relation-box">
+                  <div className="task-relation-head">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <CheckSquare size={13} style={{ color: '#2563eb' }} />
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
+                        Tareas vinculadas
                       </span>
+                    </div>
+                    <span className="task-relation-badge">
+                      {getLinkedTasks(activeItem.name).filter((t: any) => t.status === 'Cumple').length} / {getLinkedTasks(activeItem.name).length || 4} ejecutadas
                     </span>
-                    <ChevronDown
-                      size={14}
-                      className="filter-chevron"
+                  </div>
+                  <div className="task-relation-bar">
+                    <div
+                      className="task-relation-fill"
                       style={{
-                        transform: editorStatusOpen ? 'rotate(180deg)' : 'none',
-                        transition: 'transform 0.15s ease',
-                        color: '#64748b',
+                        width: `${getLinkedTasks(activeItem.name).length ? (getLinkedTasks(activeItem.name).filter((t: any) => t.status === 'Cumple').length / getLinkedTasks(activeItem.name).length) * 100 : activeItem.progress}%`,
+                        backgroundColor:
+                          activeItem.progress === 100 ? '#16a34a' : activeItem.progress >= 40 ? '#2563eb' : '#f59e0b',
                       }}
                     />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+                    <small style={{ fontSize: '11px', color: '#64748b' }}>
+                      {getLinkedTasks(activeItem.name).length > 0
+                        ? `${getLinkedTasks(activeItem.name).length} tareas en módulo Tareas`
+                        : (activeItem.unit || 'Supervisión en sedes operativas')}
+                    </small>
+                    <button
+                      type="button"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#0284c7',
+                        fontSize: '11.5px',
+                        fontWeight: 650,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        padding: 0,
+                      }}
+                      onClick={() => handleCreateLinkedTask(activeItem.name)}
+                    >
+                      <Plus size={12} />
+                      <span>+ Crear tarea para este hito</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 9. Documento de Sustento */}
+                <div className="attachment">
+                  <span className="field-title">Documento de Sustento</span>
+                  {attachment && (
+                    <div className="file-card">
+                      <span className="pdf">PDF</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <b style={{ fontSize: '12px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {attachment}
+                        </b>
+                        <small style={{ fontSize: '11px', color: '#64748b' }}>
+                          {pickedFile ? 'Archivo seleccionado' : 'Documento adjunto'}
+                        </small>
+                      </div>
+                      <button
+                        style={{ border: 0, background: 'transparent' }}
+                        onClick={() => setAttachment('')}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                  <button className="attach" onClick={() => fileRef.current?.click()}>
+                    <Paperclip size={15} />
+                    <span>Adjuntar documento de sustento</span>
                   </button>
-                  {editorStatusOpen && (
-                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                      <div className="filter-popover-title">Estado Oficial</div>
-                      {STATUS_OPTIONS.map((st) => (
+                  <input
+                    ref={fileRef}
+                    hidden
+                    type="file"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        setPickedFile(f.name);
+                        setAttachment(f.name);
+                        notify(`Archivo "${f.name}" adjuntado al hito`);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Pestaña: Subprocesos del Hito */}
+            {editorTab === 'subprocesos' && (
+              <div className="editor-body">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div>
+                    <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
+                      Subprocesos ({items.filter((x) => x.parentId === activeItem.id).length})
+                    </b>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                      Desglose de entregables y etapas hijas.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn primary"
+                    style={{ height: '32px', padding: '0 12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                    onClick={() => add('subproceso', activeItem.id)}
+                  >
+                    <Plus size={14} />
+                    <span>Agregar Subproceso</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {items.filter((x) => x.parentId === activeItem.id).map((sub) => (
+                    <div
+                      key={sub.id}
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        background: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                          <FileText size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b' }}>{sub.code}</span>
+                          <b style={{ fontSize: '12.5px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {sub.name}
+                          </b>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11.5px', color: '#64748b' }}>
+                          <span>{formatDatePE(sub.start)} – {formatDatePE(sub.end)}</span>
+                          <span>•</span>
+                          <b>{sub.progress}%</b>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <span className={`status ${STATUS_CLASS[sub.status]}`} style={{ fontSize: '11px' }}>
+                          {sub.status}
+                        </span>
                         <button
-                          key={st}
                           type="button"
-                          className={`filter-item-btn ${selected.status === st ? 'selected' : ''}`}
-                          onClick={() => {
-                            setStatusWithSync(selected, st);
-                            setEditorStatusOpen(false);
-                          }}
+                          className="btn secondary"
+                          style={{ height: '28px', padding: '0 10px', fontSize: '11.5px' }}
+                          onClick={() => openEditorForItem(sub)}
                         >
-                          <span className={`status ${STATUS_CLASS[st]}`}>{st}</span>
-                          {selected.status === st && (
-                            <Check size={14} className="item-check" />
-                          )}
+                          Editar
                         </button>
-                      ))}
+                      </div>
+                    </div>
+                  ))}
+                  {items.filter((x) => x.parentId === activeItem.id).length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                      <FileText size={28} style={{ color: '#94a3b8', margin: '0 auto 8px' }} />
+                      <b style={{ fontSize: '13px', color: '#334155', display: 'block' }}>No hay subprocesos asignados</b>
+                      <span style={{ fontSize: '12px', color: '#64748b', display: 'block', margin: '4px 0 14px' }}>
+                        Desglosa este hito en etapas o paquetes de trabajo estructurados.
+                      </span>
+                      <button
+                        type="button"
+                        className="btn primary"
+                        style={{ height: '32px', padding: '0 14px', fontSize: '12px', margin: '0 auto', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                        onClick={() => add('subproceso', activeItem.id)}
+                      >
+                        <Plus size={14} />
+                        <span>Crear primer subproceso</span>
+                      </button>
                     </div>
                   )}
                 </div>
               </div>
+            )}
 
-              <div className="progress-edit">
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Avance</span>
-                  <b style={{ fontSize: '13px', color: '#0f172a' }}>{selected.progress}%</b>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={selected.progress}
-                  onChange={(e) => setProgress(selected, +e.target.value)}
-                />
-              </div>
-
-              {/* Entregable Oficial de la Normativa */}
-              <label className="field">
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Target size={13} style={{ color: '#2563eb' }} />
-                  Entregable Oficial (Criterio de Cumplimiento)
-                </span>
-                <input
-                  value={selected.deliverable || ''}
-                  onChange={(e) => update(selected.id, { deliverable: e.target.value })}
-                  placeholder="Ej. Acta de entrega, Informe de avance, Certificado de conformidad..."
-                />
-              </label>
-
-              {/* Desglose territorial de Tareas asociadas */}
-              <div className="task-relation-box">
-                <div className="task-relation-head">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <CheckSquare size={13} style={{ color: '#2563eb' }} />
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
-                      Tareas vinculadas
-                    </span>
-                  </div>
-                  <span className="task-relation-badge">
-                    {selected.done ?? Math.round((selected.progress / 100) * (selected.tasks || 4))} / {selected.tasks || 4} ejecutadas
+            {/* Pestaña: Dependencias y Prelaciones */}
+            {editorTab === 'dependencias' && (
+              <div className="editor-body">
+                <div style={{ marginBottom: 12 }}>
+                  <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
+                    Dependencias y Prelación (Ruta Crítica)
+                  </b>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                    Configura qué hitos deben finalizar antes de iniciar esta etapa (Finish-to-Start).
                   </span>
                 </div>
-                <div className="task-relation-bar">
-                  <div
-                    className="task-relation-fill"
-                    style={{
-                      width: `${selected.progress}%`,
-                      backgroundColor:
-                        selected.progress === 100 ? '#16a34a' : selected.progress >= 40 ? '#2563eb' : '#f59e0b',
-                    }}
-                  />
-                </div>
-                <small style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: 4 }}>
-                  {selected.unit || 'Supervisión en sedes operativas'}
-                </small>
-              </div>
 
-              {/* Archivo de Referencia Normativa */}
-              <div className="attachment">
-                <span className="field-title">Documento de Sustento</span>
-                {attachment && (
-                  <div className="file-card">
-                    <span className="pdf">PDF</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <b style={{ fontSize: '12px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {attachment}
-                      </b>
-                      <small style={{ fontSize: '11px', color: '#64748b' }}>
-                        {pickedFile ? 'Archivo seleccionado' : 'Documento adjunto'}
-                      </small>
+                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px 14px', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#166534', fontSize: '12.5px', fontWeight: 650 }}>
+                    <ArrowRight size={15} />
+                    <span>Cadena de Prelación Oficial</span>
+                  </div>
+                  <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: '#15803d', lineHeight: 1.4 }}>
+                    Los desfases en el hito predecesor alertarán automáticamente sobre posibles cuellos de botella en la entrega.
+                  </p>
+                </div>
+
+                <label className="field">
+                  <span>Vincular Hito Predecesor (Requisito previo)</span>
+                  <select
+                    value={activeItem.parentId || ''}
+                    onChange={(e) => updateDraft({ parentId: e.target.value || undefined })}
+                    style={{
+                      height: '38px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      padding: '0 10px',
+                      fontSize: '12.5px',
+                      color: '#0f172a',
+                      background: '#ffffff',
+                    }}
+                  >
+                    <option value="">Sin predecesor (Hito independiente o inicial)</option>
+                    {hitos
+                      .filter((h) => h.id !== activeItem.id)
+                      .map((h) => (
+                        <option key={h.id} value={h.id}>
+                          {h.code} {h.name} (Fin: {formatDatePE(h.end)})
+                        </option>
+                      ))}
+                  </select>
+                </label>
+
+                {activeItem.parentId && (
+                  <div style={{ marginTop: 12, padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                    <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Flujo de Ejecución Configurado
+                    </small>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: 8 }}>
+                      <div style={{ padding: '6px 10px', background: '#e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#1e293b' }}>
+                        {items.find((x) => x.id === activeItem.parentId)?.name || 'Hito Predecesor'}
+                      </div>
+                      <ArrowRight size={16} color="#0284c7" />
+                      <div style={{ padding: '6px 10px', background: '#dbeafe', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '12px', fontWeight: 700, color: '#1d4ed8' }}>
+                        {activeItem.name}
+                      </div>
                     </div>
-                    <button
-                      style={{ border: 0, background: 'transparent' }}
-                      onClick={() => setAttachment('')}
-                    >
-                      <X size={14} />
-                    </button>
                   </div>
                 )}
-                <button className="attach" onClick={() => fileRef.current?.click()}>
-                  <Paperclip size={15} />
-                  <span>Adjuntar documento de sustento</span>
-                </button>
-                <input
-                  ref={fileRef}
-                  hidden
-                  type="file"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) {
-                      setPickedFile(f.name);
-                      setAttachment(f.name);
-                      notify(`Archivo "${f.name}" adjuntado al hito`);
-                    }
-                  }}
-                />
               </div>
-            </div>
+            )}
 
             <div className="editor-footer">
               <button className="delete" onClick={deleteItem}>
                 <Trash2 size={15} />
-                <span>Eliminar</span>
+                <span>{isNewDraft ? 'Cancelar borrador' : 'Eliminar'}</span>
               </button>
               <button
                 className="btn primary"
                 style={{ flex: 1 }}
-                onClick={() => {
-                  setEditorInitialSnapshot(captureSnapshot(selected));
-                  setPanelOpen(false);
-                  notify('Cambios guardados con éxito en el cronograma maestro');
-                }}
+                onClick={handleSaveDrawer}
               >
                 <Save size={15} />
                 <span>Guardar cambios</span>
@@ -3321,6 +3653,8 @@ export default function CronogramaGanttView({
                   onClick={() => {
                     setUnsavedAlertOpen(false);
                     setPanelOpen(false);
+                    setDrawerDraft(null);
+                    setIsNewDraft(false);
                     setEditorInitialSnapshot('');
                     if (pendingCloseAction) {
                       pendingCloseAction();

@@ -85,9 +85,9 @@ const seedTasksCount = (): number => {
 const readStoredRole = (): UserRole => {
   try {
     const saved = localStorage.getItem(USER_ROLE_STORAGE_KEY);
-    return saved === 'coordinador' ? 'coordinador' : 'gestor';
+    return saved === 'gestor' ? 'gestor' : 'coordinador';
   } catch {
-    return 'gestor';
+    return 'coordinador';
   }
 };
 
