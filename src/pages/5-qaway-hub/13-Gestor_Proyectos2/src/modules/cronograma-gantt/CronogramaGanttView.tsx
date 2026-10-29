@@ -16,22 +16,28 @@ import {
   ChevronRight,
   Clock3,
   Download,
+  ExternalLink,
   FileSpreadsheet,
   FileText,
   FileUp,
+  Filter,
   Folder,
   FolderMinus,
   FolderOpen,
   FolderPlus,
+  Globe,
   HelpCircle,
   Layers3,
+  Link2,
   MapPin,
   MoreHorizontal,
+  Package,
   PanelRightOpen,
   Paperclip,
   Pencil,
   Percent,
   Plus,
+  Presentation,
   RefreshCw,
   Save,
   Search,
@@ -51,6 +57,24 @@ type Kind = 'hito' | 'subproceso';
 type ColKey = 'name' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region';
 type EditField = ColKey;
 
+export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
+
+export interface DeliverableItem {
+  id: string;
+  name: string;
+  type: DeliverableType;
+  url?: string;
+  fileName?: string;
+}
+
+export interface AttachmentItem {
+  id: string;
+  name: string;
+  date: string;
+  url?: string;
+  type?: string;
+}
+
 interface Item {
   id: string;
   code: string;
@@ -64,6 +88,8 @@ interface Item {
   expanded?: boolean;
   description?: string;
   deliverable?: string;
+  deliverables?: DeliverableItem[];
+  attachments?: AttachmentItem[];
   reportType?: string;
   region?: string;
   gestor?: string;
@@ -805,23 +831,44 @@ export default function CronogramaGanttView({
   const captureSnapshot = (item: Item | undefined | null) => {
     if (!item) return '';
     return JSON.stringify({
-      name: item.name,
+      name: item.name || '',
       description: item.description || '',
-      start: item.start,
-      end: item.end,
+      start: item.start || '',
+      end: item.end || '',
       reportType: item.reportType || '',
-      status: item.status,
-      progress: item.progress,
+      status: item.status || '',
+      progress: item.progress || 0,
       deliverable: item.deliverable || '',
+      deliverables: item.deliverables || [],
+      attachments: item.attachments || [],
       parentId: item.parentId || '',
     });
   };
 
+  const drawerDraftRef = useRef(drawerDraft);
+  drawerDraftRef.current = drawerDraft;
+  const editorInitialSnapshotRef = useRef(editorInitialSnapshot);
+  editorInitialSnapshotRef.current = editorInitialSnapshot;
+  const panelOpenRef = useRef(panelOpen);
+  panelOpenRef.current = panelOpen;
+  const unsavedAlertOpenRef = useRef(unsavedAlertOpen);
+  unsavedAlertOpenRef.current = unsavedAlertOpen;
+  const isNewDraftRef = useRef(isNewDraft);
+  isNewDraftRef.current = isNewDraft;
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
+
+  const [showAddDeliverable, setShowAddDeliverable] = useState(false);
+  const [newDelivName, setNewDelivName] = useState('');
+  const [newDelivType, setNewDelivType] = useState<DeliverableType>('document');
+  const [newDelivUrl, setNewDelivUrl] = useState('');
+  const [, setForceTasksNonce] = useState(0);
+
   const isEditorDirty = () => {
-    const target = drawerDraft || selected;
-    if (!target || !editorInitialSnapshot) return false;
+    const target = drawerDraftRef.current || selectedRef.current;
+    if (!target || !editorInitialSnapshotRef.current) return false;
     const current = captureSnapshot(target);
-    return current !== editorInitialSnapshot;
+    return current !== editorInitialSnapshotRef.current;
   };
 
   const requestCloseDrawer = (action?: () => void) => {
@@ -1006,6 +1053,8 @@ export default function CronogramaGanttView({
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
+  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
   const [editorReportTypeOpen, setEditorReportTypeOpen] = useState(false);
   const [editorStatusOpen, setEditorStatusOpen] = useState(false);
   const [unsavedAlertOpen, setUnsavedAlertOpen] = useState(false);
@@ -1496,29 +1545,99 @@ export default function CronogramaGanttView({
         }
       }
 
-      const notCollapsed = !parent || parent.expanded !== false;
+      // Ocultar si cualquiera de sus ancestros en la jerarquía (padre, abuelo, etc.) está colapsado
+      let notCollapsed = true;
+      let currParentId = x.parentId;
+      while (currParentId) {
+        const pNode = items.find((p) => p.id === currParentId);
+        if (!pNode) break;
+        if (pNode.expanded === false) {
+          notCollapsed = false;
+          break;
+        }
+        currParentId = pNode.parentId;
+      }
+
+      // Reglas de filtros personalizados avanzados
+      let matchCustom = true;
+      if (customRules.length > 0) {
+        matchCustom = customRules.every((r) => {
+          if (!r.val) return true;
+          const queryVal = r.val.trim().toLowerCase();
+          if (r.field === 'name') {
+            const full = `${x.code} ${x.name}`.toLowerCase();
+            return r.op === 'not_contains' ? !full.includes(queryVal) : full.includes(queryVal);
+          }
+          if (r.field === 'status') {
+            const st = x.status.toLowerCase();
+            return r.op === 'neq' ? st !== queryVal : st === queryVal;
+          }
+          if (r.field === 'progress') {
+            const num = parseFloat(r.val) || 0;
+            if (r.op === 'gte') return x.progress >= num;
+            if (r.op === 'lte') return x.progress <= num;
+            return x.progress === num;
+          }
+          if (r.field === 'gestor') {
+            const gList = getItemGestores(x).map((g) => g.toLowerCase());
+            return r.op === 'neq'
+              ? !gList.some((g) => g.includes(queryVal))
+              : gList.some((g) => g.includes(queryVal));
+          }
+          if (r.field === 'region') {
+            const reg = (x.region || 'Todas').toLowerCase();
+            return r.op === 'neq' ? !reg.includes(queryVal) : reg.includes(queryVal);
+          }
+          return true;
+        });
+      }
 
       return (
-        matchSearch && matchState && matchType && matchTab && matchRegion && matchGestor && matchPhase && matchRange && notCollapsed
+        matchSearch &&
+        matchState &&
+        matchType &&
+        matchTab &&
+        matchRegion &&
+        matchGestor &&
+        matchPhase &&
+        matchRange &&
+        notCollapsed &&
+        matchCustom
       );
     });
-  }, [items, search, stateFilter, typeFilter, tab, regionFilter, phaseFilter, gestorFilter, rangeFrom, rangeTo]);
+  }, [
+    items,
+    search,
+    stateFilter,
+    typeFilter,
+    tab,
+    regionFilter,
+    phaseFilter,
+    gestorFilter,
+    rangeFrom,
+    rangeTo,
+    customRules
+  ]);
 
-  /* Control de Colapso / Despliegue global de Hitos y Subprocesos (Niveles 1 y 2) */
-  const allHitosExpanded = useMemo(() => {
-    const hList = items.filter((x) => x.kind === 'hito');
-    return hList.length > 0 && hList.every((h) => h.expanded !== false);
+  /* Control de Colapso / Despliegue global Recursivo (Hitos, Subprocesos y Sub-subprocesos) */
+  const parentItems = useMemo(() => {
+    return items.filter((it) => items.some((child) => child.parentId === it.id));
   }, [items]);
+
+  const allHitosExpanded = useMemo(() => {
+    return parentItems.length > 0 && parentItems.every((h) => h.expanded !== false);
+  }, [parentItems]);
 
   const toggleAllHitosExpand = () => {
     const nextState = !allHitosExpanded;
-    commitChange((old) =>
-      old.map((x) => (x.kind === 'hito' ? { ...x, expanded: nextState } : x))
-    );
+    commitChange((old) => {
+      const parentIds = new Set(old.filter((it) => old.some((c) => c.parentId === it.id)).map((p) => p.id));
+      return old.map((x) => (parentIds.has(x.id) ? { ...x, expanded: nextState } : x));
+    });
     notify(
       nextState
-        ? 'Todos los subprocesos desplegados (Nivel 2)'
-        : 'Vista colapsada a solo hitos rectores (Nivel 1)'
+        ? 'Todos los niveles desplegados recursivamente'
+        : 'Vista colapsada a niveles principales'
     );
   };
 
@@ -2111,10 +2230,22 @@ export default function CronogramaGanttView({
               onClick={() => {
                 setShowBarLabels((prev) => !prev);
               }}
-              title="Alternar visibilidad del porcentaje de avance en las barras"
             >
               <Percent size={13} />
               <span>Avance</span>
+            </button>
+
+            {/* Botón Filtros Personalizados Avanzados */}
+            <button
+              type="button"
+              className={`btn secondary custom-filter-trigger-btn ${advancedFiltersOpen || customRules.length > 0 ? 'active' : ''}`}
+              onClick={() => setAdvancedFiltersOpen((v) => !v)}
+            >
+              <Filter size={13} />
+              <span>Filtro avanzado</span>
+              {customRules.length > 0 && (
+                <span className="custom-filter-counter-badge">{customRules.length}</span>
+              )}
             </button>
 
             <button
@@ -2130,6 +2261,7 @@ export default function CronogramaGanttView({
                 setRangeFrom(DEFAULT_RANGE.from);
                 setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
+                setCustomRules([]);
                 closeMenus();
                 scrollToDate(RANGE_MIN);
                 notify('Filtros y rango temporal restablecidos');
@@ -2139,6 +2271,197 @@ export default function CronogramaGanttView({
               <span>Limpiar</span>
             </button>
           </div>
+
+          {/* Fila extra expandible de Filtros Personalizados */}
+          {advancedFiltersOpen && (
+            <div className="advanced-filter-row">
+              <div className="advanced-filter-header">
+                <div className="advanced-filter-title">
+                  <Filter size={14} className="af-title-icon" />
+                  <span>Condiciones de filtrado personalizadas</span>
+                </div>
+                <div className="advanced-filter-actions">
+                  <button
+                    type="button"
+                    className="af-btn-add"
+                    onClick={() => {
+                      const newId = 'rule-' + Date.now();
+                      setCustomRules((prev) => [
+                        ...prev,
+                        { id: newId, field: 'name', op: 'contains', val: '' }
+                      ]);
+                    }}
+                  >
+                    <Plus size={13} />
+                    <span>Agregar condición</span>
+                  </button>
+                  {customRules.length > 0 && (
+                    <button
+                      type="button"
+                      className="af-btn-clear"
+                      onClick={() => {
+                        setCustomRules([]);
+                        notify('Condiciones personalizadas eliminadas');
+                      }}
+                    >
+                      <Trash2 size={13} />
+                      <span>Limpiar reglas</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="af-btn-close"
+                    onClick={() => setAdvancedFiltersOpen(false)}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {customRules.length === 0 ? (
+                <div className="af-empty-state">
+                  <span>Sin reglas activas. Pulsa <b>"Agregar condición"</b> para filtrar por estado, avance, responsable o texto.</span>
+                </div>
+              ) : (
+                <div className="af-rules-list">
+                  {customRules.map((rule, idx) => (
+                    <div key={rule.id} className="af-rule-item">
+                      <span className="af-rule-badge">{idx === 0 ? 'Donde' : 'Y'}</span>
+                      <select
+                        className="af-select"
+                        value={rule.field}
+                        onChange={(e) => {
+                          const newField = e.target.value;
+                          setCustomRules((prev) =>
+                            prev.map((r) =>
+                              r.id === rule.id
+                                ? {
+                                    ...r,
+                                    field: newField,
+                                    op: newField === 'progress' ? 'gte' : newField === 'name' ? 'contains' : 'eq',
+                                    val: ''
+                                  }
+                                : r
+                            )
+                          );
+                        }}
+                      >
+                        <option value="name">Hito / Subproceso (Nombre o Código)</option>
+                        <option value="status">Estado Oficial</option>
+                        <option value="progress">Avance (%)</option>
+                        <option value="gestor">Responsable</option>
+                        <option value="region">Zona / Frente</option>
+                      </select>
+
+                      <select
+                        className="af-select af-select-op"
+                        value={rule.op}
+                        onChange={(e) => {
+                          const newOp = e.target.value;
+                          setCustomRules((prev) =>
+                            prev.map((r) => (r.id === rule.id ? { ...r, op: newOp } : r))
+                          );
+                        }}
+                      >
+                        {rule.field === 'name' && (
+                          <>
+                            <option value="contains">Contiene</option>
+                            <option value="not_contains">No contiene</option>
+                          </>
+                        )}
+                        {rule.field === 'status' && (
+                          <>
+                            <option value="eq">Es igual a</option>
+                            <option value="neq">No es igual a</option>
+                          </>
+                        )}
+                        {rule.field === 'progress' && (
+                          <>
+                            <option value="gte">Mayor o igual a (&ge;)</option>
+                            <option value="lte">Menor o igual a (&le;)</option>
+                            <option value="eq">Exactamente igual a (=)</option>
+                          </>
+                        )}
+                        {(rule.field === 'gestor' || rule.field === 'region') && (
+                          <>
+                            <option value="contains">Contiene / Es</option>
+                            <option value="neq">No contiene</option>
+                          </>
+                        )}
+                      </select>
+
+                      {rule.field === 'status' ? (
+                        <select
+                          className="af-select af-select-val"
+                          value={rule.val}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setCustomRules((prev) =>
+                              prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
+                            );
+                          }}
+                        >
+                          <option value="">Seleccionar estado...</option>
+                          {STATUS_OPTIONS.map((st) => (
+                            <option key={st} value={st.toLowerCase()}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      ) : rule.field === 'progress' ? (
+                        <div className="af-input-group">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            placeholder="Ej. 50"
+                            className="af-input af-input-num"
+                            value={rule.val}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setCustomRules((prev) =>
+                                prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
+                              );
+                            }}
+                          />
+                          <span className="af-input-affix">%</span>
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder={
+                            rule.field === 'gestor'
+                              ? 'Escribe nombre del responsable...'
+                              : rule.field === 'region'
+                              ? 'Escribe sede o región...'
+                              : 'Término a buscar...'
+                          }
+                          className="af-input"
+                          value={rule.val}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setCustomRules((prev) =>
+                              prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
+                            );
+                          }}
+                        />
+                      )}
+
+                      <button
+                        type="button"
+                        className="af-btn-remove"
+                        onClick={() => {
+                          setCustomRules((prev) => prev.filter((r) => r.id !== rule.id));
+                        }}
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head">
@@ -2167,11 +2490,6 @@ export default function CronogramaGanttView({
                       e.stopPropagation();
                       toggleAllHitosExpand();
                     }}
-                    title={
-                      allHitosExpanded
-                        ? 'Colapsar a solo hitos principales (Nivel 1)'
-                        : 'Desplegar todos los subprocesos (Nivel 2)'
-                    }
                   >
                     {allHitosExpanded ? <FolderMinus size={13} /> : <FolderPlus size={13} />}
                   </button>
@@ -2182,7 +2500,6 @@ export default function CronogramaGanttView({
                       e.stopPropagation();
                       setColsMenuOpen((v) => !v);
                     }}
-                    title="Configurar columnas visibles (Mostrar / Ocultar)"
                   >
                     <SlidersHorizontal size={13} />
                   </button>
@@ -2193,7 +2510,6 @@ export default function CronogramaGanttView({
                       e.stopPropagation();
                       resetColWidths();
                     }}
-                    title="Auto-ajustar anchos de columnas al contenido"
                   >
                     <ArrowLeftRight size={12} />
                   </button>
@@ -2405,7 +2721,7 @@ export default function CronogramaGanttView({
                     }}
                   >
                     <div className="name-cell">
-                    {x.kind === 'hito' ? (
+                    {items.some((c) => c.parentId === x.id) ? (
                       <button
                         className="expand"
                         onClick={(e) => {
@@ -2422,7 +2738,6 @@ export default function CronogramaGanttView({
                       <button
                         type="button"
                         className="row-icon-action"
-                        title={`Clic para ver/editar detalle de hito: ${x.name}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           openEditorForItem(x);
@@ -2434,7 +2749,6 @@ export default function CronogramaGanttView({
                       <button
                         type="button"
                         className="row-icon-action"
-                        title={`Clic para ver/editar detalle de subproceso: ${x.name}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           openEditorForItem(x);
@@ -2445,7 +2759,7 @@ export default function CronogramaGanttView({
                     )}
                     <b className="code">
                       {x.kind === 'hito' && (
-                        <span className="hito-micro-diamond" title="Hito Rector Oficial">◆</span>
+                        <span className="hito-micro-diamond">◆</span>
                       )}
                       {x.code}
                     </b>

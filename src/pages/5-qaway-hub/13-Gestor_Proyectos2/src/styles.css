@@ -129,6 +129,26 @@
   overflow-y: auto;
   overflow-x: hidden;
   display: block;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.qm-canvas::-webkit-scrollbar {
+  width: 6px;
+}
+.qm-canvas::-webkit-scrollbar-track {
+  background: transparent;
+}
+.qm-canvas::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.qm-canvas::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.qm-canvas::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 .qm-pane {
   display: none;
