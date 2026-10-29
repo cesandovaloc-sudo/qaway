@@ -245,12 +245,12 @@ function App() {
       } catch {
         /* fallback */
       }
-      if (activeProjectId === id) {
-        setActiveProjectId(finalProjects[0].id);
-      }
+      const nextActiveId = finalProjects[0].id;
+      setActiveProjectId(nextActiveId);
+      navigate(MODULE_SLUGS['cronograma']);
       return finalProjects;
     });
-    notifyActive('Proyecto eliminado definitivamente del sistema.');
+    notifyActive('Proyecto eliminado definitivamente. Se abrió el cronograma del proyecto activo.');
   };
 
   const handleUpdateProject = (updated: ProjectItem) => {

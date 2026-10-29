@@ -109,7 +109,26 @@ export default function ConfiguracionView({
   const [editCode, setEditCode] = useState(currentProj.code);
   const [editRegion, setEditRegion] = useState(currentProj.region || '');
   const [editSubtext, setEditSubtext] = useState(currentProj.subtext || '');
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
+  // Flujo estricto de eliminación en dos pasos (Doble candado de confirmación)
+  const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
+  const [typedProjectName, setTypedProjectName] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+
+  const openDeleteFlow = () => {
+    setDeleteStep(1);
+    setTypedProjectName('');
+    setAdminPassword('');
+    setDeleteError('');
+  };
+
+  const closeDeleteFlow = () => {
+    setDeleteStep(0);
+    setTypedProjectName('');
+    setAdminPassword('');
+    setDeleteError('');
+  };
 
   useEffect(() => {
     setEditName(currentProj.name);
@@ -152,8 +171,19 @@ export default function ConfiguracionView({
   };
 
   const handleConfirmDelete = () => {
-    onDeleteProject?.(currentProj.id);
-    setIsDeleteModalOpen(false);
+    if (typedProjectName.trim() !== currentProj.name.trim()) {
+      setDeleteError('El nombre ingresado no coincide con el proyecto activo.');
+      return;
+    }
+    if (!adminPassword.trim()) {
+      setDeleteError('Ingresa tu clave de autorización institucional.');
+      return;
+    }
+    const targetId = currentProj.id;
+    const targetName = currentProj.name;
+    closeDeleteFlow();
+    onDeleteProject?.(targetId);
+    notify(`Proyecto "${targetName}" eliminado definitivamente. Redirigiendo...`);
   };
 
   // Estado del Asistente IA (Google Gemini RAG)
@@ -617,7 +647,7 @@ export default function ConfiguracionView({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsDeleteModalOpen(true)}
+                  onClick={openDeleteFlow}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -937,103 +967,275 @@ export default function ConfiguracionView({
         )}
       </div>
 
-      {/* Modal de Confirmación de Eliminación Ergonómico estilo Linear / Jira */}
-      {isDeleteModalOpen && (
+      {/* Modales de Confirmación de Borrado: Doble Candado Estricto con Diseño Qaway */}
+      {deleteStep > 0 && (
         <div
           style={{
             position: 'fixed',
             inset: 0,
             zIndex: 99999,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
+            background: 'rgba(15, 23, 42, 0.55)',
+            backdropFilter: 'blur(3px)',
             display: 'grid',
             placeItems: 'center',
             padding: '16px',
+            animation: 'fadeInPop 0.18s ease-out',
           }}
-          onClick={() => setIsDeleteModalOpen(false)}
+          onClick={closeDeleteFlow}
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: 'min(450px, 100%)',
-              background: '#ffffff',
-              borderRadius: '14px',
-              padding: '24px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-              border: '1px solid #fee2e2',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-              <div
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '10px',
-                  background: '#fee2e2',
-                  color: '#dc2626',
-                  display: 'grid',
-                  placeItems: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <AlertTriangle size={22} />
+          {deleteStep === 1 ? (
+            /* PASO 1: Alerta Inicial de Impacto e Irreversibilidad */
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: 'min(480px, 94vw)',
+                background: '#ffffff',
+                borderRadius: '16px',
+                padding: '26px',
+                boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 10px 24px -4px rgba(15, 23, 42, 0.15)',
+                border: '1px solid #fee2e2',
+                animation: 'fadeInPop 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' }}>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '12px',
+                    background: '#fee2e2',
+                    color: '#dc2626',
+                    display: 'grid',
+                    placeItems: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <AlertTriangle size={24} />
+                </div>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: '#fee2e2', color: '#b91c1c', fontSize: '11px', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Alerta de Seguridad · Paso 1 de 2
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 750, color: '#0f172a', lineHeight: 1.3 }}>
+                    ¿Eliminar permanentemente este proyecto?
+                  </h3>
+                  <small style={{ fontSize: '12px', color: '#64748b' }}>
+                    Acción crítica e irreversible
+                  </small>
+                </div>
               </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 750, color: '#0f172a' }}>
-                  ¿Eliminar este proyecto?
-                </h3>
-                <small style={{ fontSize: '12px', color: '#64748b' }}>
-                  Acción irreversible · Borrado de frentes y cronograma
-                </small>
+
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '14px', marginBottom: '18px' }}>
+                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>Proyecto a eliminar:</div>
+                <div style={{ fontSize: '14px', fontWeight: 750, color: '#0f172a' }}>{currentProj.name}</div>
+                <div style={{ fontSize: '12px', color: '#0284c7', fontWeight: 600 }}>{currentProj.code} · {currentProj.region || 'Ámbito General'}</div>
+              </div>
+
+              <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.55 }}>
+                Esta acción <b style={{ color: '#dc2626' }}>borrará de forma irrecuperable</b> todos los hitos, cronogramas Gantt, frentes y tareas asignadas. Ningún dato podrá restaurarse automáticamente; cualquier consulta de recuperación dependerá de base de datos con el Administrador del Sistema.
+              </p>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={closeDeleteFlow}
+                  style={{
+                    height: '40px',
+                    padding: '0 18px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    borderRadius: '9px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteStep(2);
+                    setDeleteError('');
+                  }}
+                  style={{
+                    height: '40px',
+                    padding: '0 20px',
+                    border: 'none',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    borderRadius: '9px',
+                    fontSize: '13px',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span>Continuar a confirmación</span>
+                  <ChevronRight size={15} />
+                </button>
               </div>
             </div>
+          ) : (
+            /* PASO 2: Confirmación con Nombre Exacto del Proyecto y Clave */
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: 'min(500px, 94vw)',
+                background: '#ffffff',
+                borderRadius: '16px',
+                padding: '26px',
+                boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 10px 24px -4px rgba(15, 23, 42, 0.15)',
+                border: '1.5px solid #dc2626',
+                animation: 'fadeInPop 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' }}>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '12px',
+                    background: '#991b1b',
+                    color: '#ffffff',
+                    display: 'grid',
+                    placeItems: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <ShieldAlert size={24} />
+                </div>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: '#fef2f2', color: '#991b1b', fontSize: '11px', fontWeight: 800, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Confirmación de Autorización · Paso 2 de 2
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 750, color: '#0f172a', lineHeight: 1.3 }}>
+                    Escribe el nombre del proyecto para destruir
+                  </h3>
+                  <small style={{ fontSize: '12px', color: '#64748b' }}>
+                    Se requiere verificación explícita antes de purgar
+                  </small>
+                </div>
+              </div>
 
-            <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Estás a punto de eliminar el proyecto <b style={{ color: '#0f172a' }}>"{currentProj.name}"</b> ({currentProj.code}). Esta acción purgará todo su cronograma y tareas asignadas.
-            </p>
+              <p style={{ margin: '0 0 14px', fontSize: '12.8px', color: '#475569', lineHeight: 1.5 }}>
+                Para confirmar la eliminación permanente, escribe exactamente: <br />
+                <code style={{ display: 'inline-block', margin: '6px 0', padding: '3px 8px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontWeight: 750, fontSize: '13px' }}>
+                  {currentProj.name}
+                </code>
+              </p>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button
-                type="button"
-                onClick={() => setIsDeleteModalOpen(false)}
-                style={{
-                  height: '38px',
-                  padding: '0 16px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#475569',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDelete}
-                style={{
-                  height: '38px',
-                  padding: '0 18px',
-                  border: 'none',
-                  background: '#dc2626',
-                  color: '#ffffff',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 650,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)',
-                }}
-              >
-                <Trash2 size={14} />
-                <span>Sí, Eliminar Proyecto</span>
-              </button>
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 650, color: '#334155', marginBottom: '6px' }}>
+                  Nombre exacto del proyecto:
+                </label>
+                <input
+                  type="text"
+                  autoFocus
+                  value={typedProjectName}
+                  onChange={(e) => {
+                    setTypedProjectName(e.target.value);
+                    if (deleteError) setDeleteError('');
+                  }}
+                  placeholder={currentProj.name}
+                  style={{
+                    width: '100%',
+                    height: '40px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '9px',
+                    padding: '0 12px',
+                    fontSize: '13px',
+                    color: '#0f172a',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 650, color: '#334155', marginBottom: '6px' }}>
+                  Clave o PIN de autorización del Coordinador:
+                </label>
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => {
+                    setAdminPassword(e.target.value);
+                    if (deleteError) setDeleteError('');
+                  }}
+                  placeholder="Ingresa clave de confirmación institucional..."
+                  style={{
+                    width: '100%',
+                    height: '40px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '9px',
+                    padding: '0 12px',
+                    fontSize: '13px',
+                    color: '#0f172a',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              {deleteError && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', fontSize: '12.5px', marginBottom: '16px' }}>
+                  <AlertCircle size={15} />
+                  <span>{deleteError}</span>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setDeleteStep(1)}
+                  style={{
+                    height: '40px',
+                    padding: '0 16px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    borderRadius: '9px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Volver atrás
+                </button>
+                <button
+                  type="button"
+                  disabled={typedProjectName.trim() !== currentProj.name.trim() || !adminPassword.trim()}
+                  onClick={handleConfirmDelete}
+                  style={{
+                    height: '40px',
+                    padding: '0 20px',
+                    border: 'none',
+                    background: typedProjectName.trim() === currentProj.name.trim() && adminPassword.trim() ? '#b91c1c' : '#94a3b8',
+                    color: '#ffffff',
+                    borderRadius: '9px',
+                    fontSize: '13px',
+                    fontWeight: 650,
+                    cursor: typedProjectName.trim() === currentProj.name.trim() && adminPassword.trim() ? 'pointer' : 'not-allowed',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                    boxShadow: typedProjectName.trim() === currentProj.name.trim() && adminPassword.trim() ? '0 2px 8px rgba(185, 28, 28, 0.4)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <Trash2 size={15} />
+                  <span>Destruir Proyecto Definitivamente</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
