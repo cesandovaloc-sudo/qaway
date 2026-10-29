@@ -5,7 +5,7 @@ import {
   Bell, BriefcaseBusiness, Building2, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleHelp, ContactRound, Copy, Download, History, Mail, MapPin, MoreVertical,
   Phone, Plus, RefreshCw, Search, ShieldCheck, SlidersHorizontal, Trash2, Upload, UserRound,
-  UserRoundCheck, UserRoundX, Users, Wrench, X, Clock3
+  UserRoundCheck, UserRoundX, Users, Wrench, X, Clock3, Network, Table, GitFork, Layers, Workflow
 } from 'lucide-react';
 
 export type UserBinds = { notify: (m: string) => void };
@@ -67,6 +67,8 @@ const tabs: { label: string; type?: UserType }[] = [
 ];
 
 export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds) => void }) {
+  const [currentMode, setCurrentMode] = useState<'directorio' | 'organigrama'>('directorio');
+  const [organigramaTipo, setOrganigramaTipo] = useState<'tradicional' | 'matricial' | 'territorial' | 'circular'>('tradicional');
   const [people, setPeople] = useState<Person[]>(initialPeople);
   const [selectedId, setSelectedId] = useState<number | null>(1);
   const [activeTab, setActiveTab] = useState('Todos');
@@ -297,11 +299,57 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
         {/* Cabecera */}
         <div className="page-heading">
           <div className="heading-copy">
-            <div className="eyebrow"><Users size={14} /> DIRECTORIO DEL PROYECTO</div>
+            <div className="eyebrow"><Users size={14} /> DIRECTORIO Y ESTRUCTURA DEL EQUIPO</div>
             <h1>Gestión de equipo y usuarios</h1>
             <p>Directorio institucional de coordinadores, especialistas SIGA y responsables de las 13 UGEL de Junín.</p>
           </div>
           <div className="heading-buttons">
+            {/* Selector de Vista: Directorio vs Organigrama */}
+            <div className="view-mode-toggle" style={{ display: 'inline-flex', background: '#e2e8f0', borderRadius: '8px', padding: '3px', marginRight: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setCurrentMode('directorio')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: currentMode === 'directorio' ? '#ffffff' : 'transparent',
+                  color: currentMode === 'directorio' ? '#0f172a' : '#64748b',
+                  boxShadow: currentMode === 'directorio' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Table size={14} /> Directorio
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentMode('organigrama')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  background: currentMode === 'organigrama' ? '#ffffff' : 'transparent',
+                  color: currentMode === 'organigrama' ? '#0f172a' : '#64748b',
+                  boxShadow: currentMode === 'organigrama' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Network size={14} /> Organigrama
+              </button>
+            </div>
+
             <input
               type="file"
               ref={fileInputRef}
@@ -364,6 +412,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
         </section>
 
         {/* Directorio de Usuarios */}
+        {currentMode === 'directorio' ? (
         <div className="directory">
           <div className="tabbar">
             {tabs.map((t) => (
@@ -533,6 +582,69 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
             </div>
           </div>
         </div>
+        ) : (
+          /* Maqueta Simple: Vista Organigrama */
+          <div className="directory" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#0f172a' }}>Organigrama del Proyecto</h2>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>
+                  Estructura jerárquica de responsabilidades y líneas de reporte para la dotación regional.
+                </p>
+              </div>
+
+              {/* Selector de tipo de organigrama */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Tipo de organigrama:</span>
+                <select
+                  value={organigramaTipo}
+                  onChange={(e) => setOrganigramaTipo(e.target.value as any)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '13px',
+                    background: '#ffffff',
+                    color: '#0f172a',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="tradicional">Jerárquico Tradicional (Vertical)</option>
+                  <option value="matricial">Estructura Matricial (Funcional / Territorial)</option>
+                  <option value="territorial">Por Jurisdicción Territorial (DRE / 13 UGEL)</option>
+                  <option value="circular">Estructura Circular / Red Radial</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Espacio reservado para el canvas de organigrama */}
+            <div
+              style={{
+                minHeight: '360px',
+                border: '2px dashed #cbd5e1',
+                borderRadius: '12px',
+                background: '#f8fafc',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '40px 20px',
+                textAlign: 'center'
+              }}
+            >
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#e0e7ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', marginBottom: '14px' }}>
+                <Network size={24} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#1e293b' }}>
+                Vista Organigrama: {organigramaTipo === 'tradicional' ? 'Jerárquico Tradicional' : organigramaTipo === 'matricial' ? 'Estructura Matricial' : organigramaTipo === 'territorial' ? 'Por Jurisdicción Territorial' : 'Estructura Circular'}
+              </h3>
+              <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#64748b', maxWidth: '440px' }}>
+                Espacio maquetado listo para la renderización de la estructura de cargos y dependencias.
+              </p>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Drawer Lateral de Detalle */}

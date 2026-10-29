@@ -829,6 +829,50 @@ export default function CronogramaGanttView({
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
+  const [editorReportTypeOpen, setEditorReportTypeOpen] = useState(false);
+  const [editorStatusOpen, setEditorStatusOpen] = useState(false);
+  const [unsavedAlertOpen, setUnsavedAlertOpen] = useState(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
+
+  // Snapshot inicial al abrir el editor para detectar si el usuario ha realizado cambios o cargado datos
+  const [editorInitialSnapshot, setEditorInitialSnapshot] = useState<string>('');
+
+  const captureSnapshot = (item: Item | undefined) => {
+    if (!item) return '';
+    return JSON.stringify({
+      name: item.name,
+      description: item.description || '',
+      start: item.start,
+      end: item.end,
+      reportType: item.reportType || '',
+      status: item.status,
+      progress: item.progress,
+      deliverable: item.deliverable || '',
+    });
+  };
+
+  const isEditorDirty = () => {
+    if (!selected || !editorInitialSnapshot) return false;
+    const current = captureSnapshot(selected);
+    return current !== editorInitialSnapshot;
+  };
+
+  const requestCloseDrawer = (action?: () => void) => {
+    setEditorCalOpen(null);
+    setEditorReportTypeOpen(false);
+    setEditorStatusOpen(false);
+
+    if (isEditorDirty()) {
+      setPendingCloseAction(() => action || (() => setPanelOpen(false)));
+      setUnsavedAlertOpen(true);
+    } else {
+      if (action) {
+        action();
+      } else {
+        setPanelOpen(false);
+      }
+    }
+  };
 
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => {
     try {
@@ -1128,6 +1172,15 @@ export default function CronogramaGanttView({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        if (unsavedAlertOpen) {
+          setUnsavedAlertOpen(false);
+          setPendingCloseAction(null);
+          return;
+        }
+        if (panelOpen) {
+          requestCloseDrawer();
+          return;
+        }
         setNewMenu(false);
         setEdit(null);
         setActiveMenu(null);
@@ -1137,7 +1190,7 @@ export default function CronogramaGanttView({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [panelOpen, unsavedAlertOpen, editorInitialSnapshot, selected]);
 
   const closeEdit = () => setEdit(null);
   const isEditing = (x: Item, field: EditField) => !!edit && edit.id === x.id && edit.field === field;
@@ -1412,9 +1465,10 @@ export default function CronogramaGanttView({
         : [...old, item]
     );
     setSelectedId(id);
+    setEditorInitialSnapshot(captureSnapshot(item));
     setPanelOpen(true);
     setNewMenu(false);
-    notify(`Nuevo ${kind} incorporado al cronograma maestro`);
+    notify(`Nuevo ${kind} incorporado. Configura y guarda los cambios en el panel lateral.`);
   };
 
   const exportCSV = () => {
@@ -2221,9 +2275,33 @@ export default function CronogramaGanttView({
                       <span className="indent" />
                     )}
                     {x.kind === 'hito' ? (
-                      <FolderOpen size={16} className="folder" />
+                      <button
+                        type="button"
+                        className="row-icon-action"
+                        title={`Clic para ver/editar detalle de hito: ${x.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedId(x.id);
+                          setEditorInitialSnapshot(captureSnapshot(x));
+                          setPanelOpen(true);
+                        }}
+                      >
+                        <FolderOpen size={16} className="folder" />
+                      </button>
                     ) : (
-                      <FileText size={15} className="file" />
+                      <button
+                        type="button"
+                        className="row-icon-action"
+                        title={`Clic para ver/editar detalle de subproceso: ${x.name}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedId(x.id);
+                          setEditorInitialSnapshot(captureSnapshot(x));
+                          setPanelOpen(true);
+                        }}
+                      >
+                        <FileText size={15} className="file" />
+                      </button>
                     )}
                     <b className="code">
                       {x.kind === 'hito' && (
@@ -2778,7 +2856,16 @@ export default function CronogramaGanttView({
               <button
                 className="btn secondary"
                 style={{ minHeight: '32px', fontSize: '12px' }}
-                onClick={() => setPanelOpen((v) => !v)}
+                onClick={() => {
+                  if (panelOpen) {
+                    requestCloseDrawer();
+                  } else {
+                    if (selected) {
+                      setEditorInitialSnapshot(captureSnapshot(selected));
+                    }
+                    setPanelOpen(true);
+                  }
+                }}
                 title="Abrir o cerrar panel de detalles del elemento seleccionado"
               >
                 <PanelRightOpen size={14} />
@@ -2796,18 +2883,28 @@ export default function CronogramaGanttView({
           </footer>
         </main>
 
+        {/* Backdrop Scrim para cerrar drawer al hacer clic afuera */}
+        {panelOpen && (
+          <div
+            className="editor-backdrop"
+            onClick={() => requestCloseDrawer()}
+            aria-label="Cerrar panel lateral"
+          />
+        )}
+
         {/* Panel Lateral Editor (Drawer de Coordinador) */}
         {panelOpen && selected && (
-          <aside className="editor" onClick={() => setEditorCalOpen(null)}>
+          <aside className="editor" onClick={() => {
+            setEditorCalOpen(null);
+            setEditorReportTypeOpen(false);
+            setEditorStatusOpen(false);
+          }}>
             <div className="editor-head">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <button
                   type="button"
                   className="editor-icon-btn"
-                  onClick={() => {
-                    setPanelOpen(false);
-                    setEditorCalOpen(null);
-                  }}
+                  onClick={() => requestCloseDrawer()}
                   title="Volver"
                 >
                   <ChevronLeft size={18} />
@@ -2817,10 +2914,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className="editor-icon-btn"
-                onClick={() => {
-                  setPanelOpen(false);
-                  setEditorCalOpen(null);
-                }}
+                onClick={() => requestCloseDrawer()}
                 aria-label="Cerrar editor"
                 title="Cerrar panel de detalles"
               >
@@ -2870,6 +2964,8 @@ export default function CronogramaGanttView({
                     className={`custom-date-btn ${editorCalOpen === 'start' ? 'active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
+                      setEditorReportTypeOpen(false);
+                      setEditorStatusOpen(false);
                       setEditorCalOpen((p) => p === 'start' ? null : 'start');
                     }}
                     title="Seleccionar fecha de inicio con calendario institucional"
@@ -2897,6 +2993,8 @@ export default function CronogramaGanttView({
                     className={`custom-date-btn ${editorCalOpen === 'end' ? 'active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
+                      setEditorReportTypeOpen(false);
+                      setEditorStatusOpen(false);
                       setEditorCalOpen((p) => p === 'end' ? null : 'end');
                     }}
                     title="Seleccionar fecha de fin con calendario institucional"
@@ -2920,36 +3018,114 @@ export default function CronogramaGanttView({
               </div>
 
               {selected.kind === 'hito' && (
-                <label className="field">
+                <div className="field relative">
                   <span>Tipo de reporte</span>
-                  <select
-                    value={selected.reportType || 'Línea de tiempo'}
-                    onChange={(e) => update(selected.id, { reportType: e.target.value })}
-                  >
-                    {[
-                      'Línea de tiempo',
-                      'Matriz de entregables',
-                      'Registro de entregas',
-                      'Consolidado de datos',
-                      'Informe de cierre',
-                    ].map((x) => (
-                      <option key={x}>{x}</option>
-                    ))}
-                  </select>
-                </label>
+                  <div className="filter-dropdown-wrap">
+                    <button
+                      type="button"
+                      className={`filter-card-btn ${editorReportTypeOpen ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditorCalOpen(null);
+                        setEditorStatusOpen(false);
+                        setEditorReportTypeOpen((v) => !v);
+                      }}
+                    >
+                      <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>
+                        {selected.reportType || 'Línea de tiempo'}
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        className="filter-chevron"
+                        style={{
+                          transform: editorReportTypeOpen ? 'rotate(180deg)' : 'none',
+                          transition: 'transform 0.15s ease',
+                          color: '#64748b',
+                        }}
+                      />
+                    </button>
+                    {editorReportTypeOpen && (
+                      <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                        <div className="filter-popover-title">Formato de Reporte</div>
+                        {[
+                          'Línea de tiempo',
+                          'Matriz de entregables',
+                          'Registro de entregas',
+                          'Consolidado de datos',
+                          'Informe de cierre',
+                        ].map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className={`filter-item-btn ${(selected.reportType || 'Línea de tiempo') === opt ? 'selected' : ''}`}
+                            onClick={() => {
+                              update(selected.id, { reportType: opt });
+                              setEditorReportTypeOpen(false);
+                            }}
+                          >
+                            <span>{opt}</span>
+                            {(selected.reportType || 'Línea de tiempo') === opt && (
+                              <Check size={14} className="item-check" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
 
-              <label className="field">
+              <div className="field relative">
                 <span>Estado de cumplimiento</span>
-                <select
-                  value={selected.status}
-                  onChange={(e) => setStatusWithSync(selected, e.target.value as Status)}
-                >
-                  {STATUS_OPTIONS.map((x) => (
-                    <option key={x}>{x}</option>
-                  ))}
-                </select>
-              </label>
+                <div className="filter-dropdown-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${editorStatusOpen ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditorCalOpen(null);
+                      setEditorReportTypeOpen(false);
+                      setEditorStatusOpen((v) => !v);
+                    }}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <span className={`status ${STATUS_CLASS[selected.status]}`}>
+                        {selected.status}
+                      </span>
+                    </span>
+                    <ChevronDown
+                      size={14}
+                      className="filter-chevron"
+                      style={{
+                        transform: editorStatusOpen ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.15s ease',
+                        color: '#64748b',
+                      }}
+                    />
+                  </button>
+                  {editorStatusOpen && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                      <div className="filter-popover-title">Estado Oficial</div>
+                      {STATUS_OPTIONS.map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          className={`filter-item-btn ${selected.status === st ? 'selected' : ''}`}
+                          onClick={() => {
+                            setStatusWithSync(selected, st);
+                            setEditorStatusOpen(false);
+                          }}
+                        >
+                          <span className={`status ${STATUS_CLASS[st]}`}>{st}</span>
+                          {selected.status === st && (
+                            <Check size={14} className="item-check" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className="progress-edit">
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -3058,13 +3234,96 @@ export default function CronogramaGanttView({
               <button
                 className="btn primary"
                 style={{ flex: 1 }}
-                onClick={() => notify('Cambios guardados en el cronograma maestro')}
+                onClick={() => {
+                  setEditorInitialSnapshot(captureSnapshot(selected));
+                  setPanelOpen(false);
+                  notify('Cambios guardados con éxito en el cronograma maestro');
+                }}
               >
                 <Save size={15} />
                 <span>Guardar cambios</span>
               </button>
             </div>
           </aside>
+        )}
+
+        {/* Modal Pop-up de Alerta Centrado: Salir sin Guardar */}
+        {unsavedAlertOpen && (
+          <div
+            className="overlay"
+            style={{ zIndex: 99999 }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setUnsavedAlertOpen(false);
+                setPendingCloseAction(null);
+              }
+            }}
+          >
+            <div className="unsaved-alert-modal" onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '14px' }}>
+                <div className="unsaved-alert-icon">
+                  <AlertTriangle size={24} />
+                </div>
+                <div>
+                  <h3 style={{ margin: '2px 0 4px', fontSize: '16.5px', fontWeight: 750, color: '#0f172a' }}>
+                    ¿Salir sin guardar cambios?
+                  </h3>
+                  <small style={{ fontSize: '12px', color: '#64748b' }}>
+                    Hay modificaciones o datos pendientes en este {selected?.kind === 'hito' ? 'hito' : 'subproceso'}.
+                  </small>
+                </div>
+              </div>
+              <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.55 }}>
+                Has cargado o editado información en el formulario lateral. Si sales ahora, se descartarán los cambios no confirmados.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  style={{ height: '38px', padding: '0 16px', fontSize: '12.5px', fontWeight: 600 }}
+                  onClick={() => {
+                    setUnsavedAlertOpen(false);
+                    setPendingCloseAction(null);
+                  }}
+                >
+                  Continuar editando
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    height: '38px',
+                    padding: '0 18px',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '12.5px',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'background 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#b91c1c')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#dc2626')}
+                  onClick={() => {
+                    setUnsavedAlertOpen(false);
+                    setPanelOpen(false);
+                    setEditorInitialSnapshot('');
+                    if (pendingCloseAction) {
+                      pendingCloseAction();
+                      setPendingCloseAction(null);
+                    }
+                    notify('Cambios descartados');
+                  }}
+                >
+                  <Trash2 size={14} />
+                  <span>Descartar y salir</span>
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Modal para Importar Cronograma Oficial */}
