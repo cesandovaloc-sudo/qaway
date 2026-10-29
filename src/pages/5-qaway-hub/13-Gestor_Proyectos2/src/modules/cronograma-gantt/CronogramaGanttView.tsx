@@ -820,6 +820,7 @@ export default function CronogramaGanttView({
   const [editorReportTypeOpen, setEditorReportTypeOpen] = useState(false);
   const [editorStatusOpen, setEditorStatusOpen] = useState(false);
   const [editorCalOpen, setEditorCalOpen] = useState<'start' | 'end' | null>(null);
+  const [editorHitoSelectOpen, setEditorHitoSelectOpen] = useState(false);
 
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
   const [newDelivName, setNewDelivName] = useState('');
@@ -880,6 +881,7 @@ export default function CronogramaGanttView({
     setEditorCalOpen(null);
     setEditorReportTypeOpen(false);
     setEditorStatusOpen(false);
+    setEditorHitoSelectOpen(false);
 
     if (isEditorDirty()) {
       setPendingCloseAction(() => action || (() => {
@@ -1939,11 +1941,22 @@ export default function CronogramaGanttView({
 
   const add = (kind: Kind, parentHitoId?: string) => {
     const id = 'new-' + Date.now();
-    const n = kind === 'hito' ? hitos.length + 1 : subs.length + 1;
-    const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.kind === 'hito' ? drawerDraft.id : hitos[0]?.id) : undefined);
+    const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
+    let code = `${hitos.length + 1}.`;
+    if (kind === 'subproceso') {
+      const parent = items.find((x) => x.id === pId);
+      if (parent) {
+        const siblings = items.filter((x) => x.parentId === pId);
+        const childIndex = siblings.length + 1;
+        const parentCodeClean = parent.code.endsWith('.') ? parent.code.slice(0, -1) : parent.code;
+        code = `${parentCodeClean}.${childIndex}`;
+      } else {
+        code = `1.${subs.length + 1}`;
+      }
+    }
     const draftItem: Item = {
       id,
-      code: kind === 'hito' ? `${n}.` : `${Math.ceil(n / 3)}.${n}`,
+      code,
       name: kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso',
       kind,
       parentId: pId,
@@ -3604,6 +3617,7 @@ export default function CronogramaGanttView({
             setEditorCalOpen(null);
             setEditorReportTypeOpen(false);
             setEditorStatusOpen(false);
+            setEditorHitoSelectOpen(false);
           }}>
             <div className="editor-head">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
@@ -3632,7 +3646,7 @@ export default function CronogramaGanttView({
               </button>
             </div>
 
-            {/* Selector permanente de hito para navegar o cambiar entre hitos creados */}
+            {/* Selector permanente de hito con diseño oficial de la página */}
             {hitos.length > 0 && (
               <div
                 style={{
@@ -3644,7 +3658,6 @@ export default function CronogramaGanttView({
                   gap: '8px',
                 }}
               >
-                <Layers3 size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
                 <span
                   style={{
                     fontSize: '11px',
@@ -3655,47 +3668,104 @@ export default function CronogramaGanttView({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Hito activo:
+                  Hito:
                 </span>
-                <select
-                  value={
-                    activeItem.kind === 'hito' && !isNewDraft
-                      ? activeItem.id
-                      : activeItem.kind === 'subproceso'
-                      ? activeItem.parentId || ''
-                      : ''
-                  }
-                  onChange={(e) => {
-                    const target = hitos.find((x) => x.id === e.target.value);
-                    if (target) handleSwitchActiveHito(target);
-                  }}
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    height: '32px',
-                    fontSize: '12px',
-                    fontWeight: 650,
-                    color: '#0f172a',
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    padding: '0 8px',
-                    cursor: 'pointer',
-                    outline: 'none',
-                  }}
-                  title="Seleccionar otro hito ya creado para editarlo directamente"
-                >
-                  {isNewDraft && (
-                    <option value="" disabled>
-                      + {activeItem.kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso'} (en borrador)
-                    </option>
+                <div className="filter-dropdown-wrap" style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${editorHitoSelectOpen ? 'active' : ''}`}
+                    style={{
+                      width: '100%',
+                      height: '32px',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      padding: '0 10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditorCalOpen(null);
+                      setEditorStatusOpen(false);
+                      setEditorReportTypeOpen(false);
+                      setEditorHitoSelectOpen((v) => !v);
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '12px',
+                        fontWeight: 650,
+                        color: '#0f172a',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        textAlign: 'left',
+                      }}
+                    >
+                      {isNewDraft
+                        ? `+ ${activeItem.kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso'} (en borrador)`
+                        : activeItem.kind === 'hito'
+                        ? `${activeItem.code} ${activeItem.name}`
+                        : `${hitos.find((h) => h.id === activeItem.parentId)?.code || ''} ${hitos.find((h) => h.id === activeItem.parentId)?.name || 'Hito padre'}`}
+                    </span>
+                    <ChevronDown
+                      size={14}
+                      className="filter-chevron"
+                      style={{
+                        transform: editorHitoSelectOpen ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.15s ease',
+                        color: '#64748b',
+                        flexShrink: 0,
+                        marginLeft: 6,
+                      }}
+                    />
+                  </button>
+                  {editorHitoSelectOpen && (
+                    <div
+                      className="filter-card-popover"
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        zIndex: 9999,
+                        marginTop: '4px',
+                        maxHeight: '260px',
+                        overflowY: 'auto',
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="filter-popover-title">Hitos del Cronograma</div>
+                      {hitos.map((h) => {
+                        const isSelected = activeItem.kind === 'hito' && !isNewDraft && activeItem.id === h.id;
+                        return (
+                          <button
+                            key={h.id}
+                            type="button"
+                            className={`filter-item-btn ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setEditorHitoSelectOpen(false);
+                              handleSwitchActiveHito(h);
+                            }}
+                            style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                          >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>
+                              <b style={{ color: '#0284c7', marginRight: 5 }}>{h.code}</b> {h.name}
+                            </span>
+                            {isSelected && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
-                  {hitos.map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.code} {h.name}
-                    </option>
-                  ))}
-                </select>
+                </div>
               </div>
             )}
 
@@ -3705,14 +3775,14 @@ export default function CronogramaGanttView({
                 className={editorTab === 'info' ? 'active' : ''}
                 onClick={() => setEditorTab('info')}
               >
-                Información
+                {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}
               </button>
               <button
                 type="button"
                 className={editorTab === 'subprocesos' ? 'active' : ''}
                 onClick={() => setEditorTab('subprocesos')}
               >
-                Subprocesos ({items.filter((x) => x.parentId === activeItem.id).length})
+                Subprocesos
               </button>
               <button
                 type="button"
@@ -3725,11 +3795,11 @@ export default function CronogramaGanttView({
 
             {editorTab === 'info' && (
               <div className="editor-body">
-                {/* Selector de Hito Rector Padre si es subproceso */}
+                {/* Selector de Elemento Padre si es subproceso (admite Hitos y Subprocesos para multinivel) */}
                 {activeItem.kind === 'subproceso' && (
                   <label className="field" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                     <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                      Hito Rector Padre (Vincular a)
+                      Elemento Padre (Asociado a)
                     </span>
                     <select
                       value={activeItem.parentId || ''}
@@ -3747,12 +3817,16 @@ export default function CronogramaGanttView({
                         width: '100%',
                       }}
                     >
-                      <option value="" disabled>Selecciona el hito rector padre</option>
-                      {hitos.map((h) => (
-                        <option key={h.id} value={h.id}>
-                          {h.code} {h.name}
-                        </option>
-                      ))}
+                      <option value="" disabled>Selecciona el elemento padre</option>
+                      {items
+                        .filter((x) => x.id !== activeItem.id)
+                        .map((cand) => (
+                          <option key={cand.id} value={cand.id}>
+                            {cand.kind === 'hito'
+                              ? `[Hito] ${cand.code} ${cand.name}`
+                              : `   └ [Subproceso] ${cand.code} ${cand.name}`}
+                          </option>
+                        ))}
                     </select>
                   </label>
                 )}
@@ -3801,7 +3875,7 @@ export default function CronogramaGanttView({
                       onClick={() => setShowAddDeliverable((v) => !v)}
                     >
                       <Plus size={12} />
-                      <span>+ Agregar entregable</span>
+                      <span>Agregar entregable</span>
                     </button>
                   </div>
 
@@ -4038,21 +4112,7 @@ export default function CronogramaGanttView({
                           fontSize: '11.5px',
                         }}
                       >
-                        No hay entregables configurados.{' '}
-                        <button
-                          type="button"
-                          onClick={() => setShowAddDeliverable(true)}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#0284c7',
-                            fontWeight: 650,
-                            cursor: 'pointer',
-                            padding: 0,
-                          }}
-                        >
-                          Haz clic para agregar uno
-                        </button>
+                        Sin entregables oficiales vinculados
                       </div>
                     )}
                   </div>
@@ -4355,7 +4415,7 @@ export default function CronogramaGanttView({
                           onClick={() => handleOpenCreateTaskModal(activeItem.name)}
                         >
                           <Plus size={12} />
-                          <span>+ Crear tarea para este hito</span>
+                          <span>Crear tarea para este hito</span>
                         </button>
                       </div>
                     </div>
@@ -4385,7 +4445,7 @@ export default function CronogramaGanttView({
                       onClick={() => fileRef.current?.click()}
                     >
                       <Paperclip size={12} />
-                      <span>+ Adjuntar archivo</span>
+                      <span>Adjuntar archivo</span>
                     </button>
                   </div>
 
@@ -4463,10 +4523,12 @@ export default function CronogramaGanttView({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <div>
                     <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
-                      Subprocesos ({items.filter((x) => x.parentId === activeItem.id).length})
+                      {activeItem.kind === 'hito' ? 'Subprocesos' : 'Sub-subprocesos'} ({items.filter((x) => x.parentId === activeItem.id).length})
                     </b>
                     <span style={{ fontSize: '12px', color: '#64748b' }}>
-                      Desglose de entregables y etapas hijas.
+                      {activeItem.kind === 'hito'
+                        ? 'Desglose de entregables y etapas hijas.'
+                        : 'Sub-subprocesos y actividades vinculadas.'}
                     </span>
                   </div>
                   <button
@@ -4476,7 +4538,7 @@ export default function CronogramaGanttView({
                     onClick={() => add('subproceso', activeItem.id)}
                   >
                     <Plus size={14} />
-                    <span>Agregar Subproceso</span>
+                    <span>{activeItem.kind === 'hito' ? 'Agregar Subproceso' : 'Agregar Sub-subproceso'}</span>
                   </button>
                 </div>
 
@@ -4528,9 +4590,13 @@ export default function CronogramaGanttView({
                   {items.filter((x) => x.parentId === activeItem.id).length === 0 && (
                     <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
                       <FileText size={28} style={{ color: '#94a3b8', margin: '0 auto 8px' }} />
-                      <b style={{ fontSize: '13px', color: '#334155', display: 'block' }}>No hay subprocesos asignados</b>
+                      <b style={{ fontSize: '13px', color: '#334155', display: 'block' }}>
+                        {activeItem.kind === 'hito' ? 'No hay subprocesos asignados' : 'No hay sub-subprocesos asignados'}
+                      </b>
                       <span style={{ fontSize: '12px', color: '#64748b', display: 'block', margin: '4px 0 14px' }}>
-                        Desglosa este hito en etapas o paquetes de trabajo estructurados.
+                        {activeItem.kind === 'hito'
+                          ? 'Desglosa este hito en etapas o paquetes de trabajo estructurados.'
+                          : 'Desglosa este subproceso en niveles operativos de mayor detalle.'}
                       </span>
                       <button
                         type="button"
@@ -4539,7 +4605,7 @@ export default function CronogramaGanttView({
                         onClick={() => add('subproceso', activeItem.id)}
                       >
                         <Plus size={14} />
-                        <span>Crear primer subproceso</span>
+                        <span>{activeItem.kind === 'hito' ? 'Crear primer subproceso' : 'Crear primer sub-subproceso'}</span>
                       </button>
                     </div>
                   )}
