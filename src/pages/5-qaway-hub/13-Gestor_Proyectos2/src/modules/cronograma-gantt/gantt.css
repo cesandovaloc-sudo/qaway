@@ -3135,25 +3135,46 @@ body.gantt-resizing {
   background: transparent !important;
 }
 
-/* Cuando el avance es suficiente (>= 25%): texto blanco nítido dentro del relleno */
+/* Texto de porcentaje de avance (% Avance) sobre la barra o adyacente */
+.gantt-v2 .bar-label-inner {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 6;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  transition: all 0.18s ease;
+  height: auto !important;
+  min-width: unset !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+/* Cuando el ancho del progreso permite albergar el texto: texto blanco limpio y sin sombras */
 .gantt-v2 .bar-label-inner.in-bar {
   left: 8px;
   color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
+  text-shadow: none !important;
   background: transparent !important;
   border: 0 !important;
 }
 
-/* Cuando el avance es menor a 25% o 0%: micro-pill exterior a la derecha */
+/* Cuando el espacio en la barra es insuficiente o avance 0%: etiqueta externa legible */
 .gantt-v2 .bar-label-inner.after-bar {
-  left: calc(100% + 7px);
-  color: #475569 !important;
-  background: #ffffff !important;
-  padding: 1px 5px;
-  border-radius: 4px !important;
-  border: 1px solid #cbd5e1;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  font-size: 10px;
+  left: calc(100% + 6px);
+  color: #334155 !important;
+  text-shadow: none !important;
+  background: transparent !important;
+  padding: 0;
+  border: 0 !important;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .gantt-v2 .bar-label-inner.after-bar.is-hito {

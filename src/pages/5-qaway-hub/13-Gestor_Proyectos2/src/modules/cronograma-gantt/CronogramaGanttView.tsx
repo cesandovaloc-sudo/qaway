@@ -2668,70 +2668,79 @@ export default function CronogramaGanttView({
                         <span key={s.key} />
                       ))}
                     </div>
-                    <div
-                      className={`bar ${STATUS_CLASS[x.status]} ${x.kind === 'hito' ? 'major' : ''} ${
-                        isRangeActive && x.end > rangeTo ? 'exceeds-range' : ''
-                      } ${resizingTaskId === x.id ? 'is-resizing' : ''}`}
-                      style={{
-                        left: `${getDatePixelOffset(x.start)}px`,
-                        width: `${
-                          resizingTaskId === x.id && resizeTempWidth !== null
-                            ? resizeTempWidth
-                            : Math.max(8, getDatePixelOffset(shiftDays(x.end, 1)) - getDatePixelOffset(x.start))
-                        }px`,
-                        animationDelay: `${Math.min(i * 35, 320)}ms`,
-                      }}
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedId(x.id);
-                        setPanelOpen(true);
-                        notify(`Editando: ${x.name}`);
-                      }}
-                      onMouseEnter={(e) => {
-                        if (resizingTaskId) return;
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setHoveredTask({
-                          item: x,
-                          x: rect.left + rect.width / 2,
-                          y: rect.top - 2,
-                        });
-                      }}
-                      onMouseLeave={() => {
-                        if (!resizingTaskId) setHoveredTask(null);
-                      }}
-                    >
-                      {/* Relleno de avance proporcional (refleja el % real de cumplimiento) */}
-                      <div
-                        className="bar-progress-fill"
-                        style={{
-                          width: `${Math.min(100, Math.max(0, x.progress))}%`,
-                          borderTopRightRadius: x.progress >= 98 ? 'inherit' : 0,
-                          borderBottomRightRadius: x.progress >= 98 ? 'inherit' : 0,
-                        }}
-                      />
+                    {(() => {
+                      const barWidthPx =
+                        resizingTaskId === x.id && resizeTempWidth !== null
+                          ? resizeTempWidth
+                          : Math.max(8, getDatePixelOffset(shiftDays(x.end, 1)) - getDatePixelOffset(x.start));
+                      // El relleno físico real en píxeles que tiene el color de avance
+                      const fillWidthPx = barWidthPx * (Math.min(100, Math.max(0, x.progress)) / 100);
+                      // Vive dentro de la barra si el relleno físico tiene al menos 42px para el texto
+                      const fitsInsideBar = fillWidthPx >= 42;
 
-                      {/* Avance limpio embebido (conmutable a través del botón superior) */}
-                      {showBarLabels && (
-                        <span
-                          className={`bar-label-inner ${x.progress >= 25 ? 'in-bar' : 'after-bar'} ${x.kind === 'hito' ? 'is-hito' : ''}`}
+                      return (
+                        <div
+                          className={`bar ${STATUS_CLASS[x.status]} ${x.kind === 'hito' ? 'major' : ''} ${
+                            isRangeActive && x.end > rangeTo ? 'exceeds-range' : ''
+                          } ${resizingTaskId === x.id ? 'is-resizing' : ''}`}
+                          style={{
+                            left: `${getDatePixelOffset(x.start)}px`,
+                            width: `${barWidthPx}px`,
+                            animationDelay: `${Math.min(i * 35, 320)}ms`,
+                          }}
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedId(x.id);
+                            setPanelOpen(true);
+                            notify(`Editando: ${x.name}`);
+                          }}
+                          onMouseEnter={(e) => {
+                            if (resizingTaskId) return;
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setHoveredTask({
+                              item: x,
+                              x: rect.left + rect.width / 2,
+                              y: rect.top - 2,
+                            });
+                          }}
+                          onMouseLeave={() => {
+                            if (!resizingTaskId) setHoveredTask(null);
+                          }}
                         >
-                          {x.progress}%
-                        </span>
-                      )}
+                          {/* Relleno de avance proporcional (refleja el % real de cumplimiento) */}
+                          <div
+                            className="bar-progress-fill"
+                            style={{
+                              width: `${Math.min(100, Math.max(0, x.progress))}%`,
+                              borderTopRightRadius: x.progress >= 98 ? 'inherit' : 0,
+                              borderBottomRightRadius: x.progress >= 98 ? 'inherit' : 0,
+                            }}
+                          />
 
-                      {x.kind === 'hito' ? (
-                        <span className="hito-diamond-badge" title="Hito Rector Oficial">
-                          <span className="diamond-shape" />
-                        </span>
-                      ) : null}
-                      {isRangeActive && x.end > rangeTo && (
-                        <span
-                          className={`exceed-pill ${x.kind === 'hito' ? 'pill-with-diamond' : ''}`}
-                          title="Finaliza después del rango de fechas seleccionado"
-                        >
-                          +fuera rango
-                        </span>
-                      )}
+                          {/* Avance limpio embebido (conmutable a través del botón superior) */}
+                          {showBarLabels && (
+                            <span
+                              className={`bar-label-inner ${fitsInsideBar ? 'in-bar' : 'after-bar'} ${
+                                x.kind === 'hito' ? 'is-hito' : ''
+                              }`}
+                            >
+                              {x.progress}%
+                            </span>
+                          )}
+
+                          {x.kind === 'hito' ? (
+                            <span className="hito-diamond-badge" title="Hito Rector Oficial">
+                              <span className="diamond-shape" />
+                            </span>
+                          ) : null}
+                          {isRangeActive && x.end > rangeTo && (
+                            <span
+                              className={`exceed-pill ${x.kind === 'hito' ? 'pill-with-diamond' : ''}`}
+                              title="Finaliza después del rango de fechas seleccionado"
+                            >
+                              +fuera rango
+                            </span>
+                          )}
 
                       {/* Manillar interactivo de estiramiento / redimensión de fechas */}
                       <div
@@ -2747,9 +2756,11 @@ export default function CronogramaGanttView({
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })()}
+              </div>
+            </div>
+          ))}
 
               {/* Capa Overlay de Línea de Tiempo (Mismas dimensiones y alineación absoluta que las barras del timeline) */}
               <div
