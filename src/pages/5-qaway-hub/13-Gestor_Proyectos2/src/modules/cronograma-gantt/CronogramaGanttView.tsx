@@ -827,6 +827,15 @@ export default function CronogramaGanttView({
   const [newDelivUrl, setNewDelivUrl] = useState('');
   const [, setForceTasksNonce] = useState(0);
 
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const [taskModalMilestone, setTaskModalMilestone] = useState('');
+  const [newTaskForm, setNewTaskForm] = useState({
+    title: '',
+    owner: 'Carlos Mendoza',
+    due: '2026-11-30',
+    priority: 'Media' as 'Alta' | 'Media' | 'Baja',
+  });
+
   const activeItem = drawerDraft || selected;
 
   // Referencias para blindaje contra stale closures y escape handler
@@ -971,32 +980,47 @@ export default function CronogramaGanttView({
     return [];
   };
 
-  const handleCreateLinkedTask = (milestoneName: string) => {
-    const taskTitle = window.prompt(`Nueva tarea vinculada a "${milestoneName}":`, 'Nueva tarea operativa');
-    if (!taskTitle?.trim()) return;
+  const handleOpenCreateTaskModal = (milestoneName: string) => {
+    setTaskModalMilestone(milestoneName);
+    setNewTaskForm({
+      title: '',
+      owner: activeItem?.gestor || 'Carlos Mendoza',
+      due: activeItem?.end || '2026-11-30',
+      priority: 'Media',
+    });
+    setCreateTaskModalOpen(true);
+  };
+
+  const handleConfirmCreateTask = () => {
+    if (!newTaskForm.title.trim()) {
+      notify('Ingresa el título de la tarea');
+      return;
+    }
     try {
       const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
       const list = Array.isArray(raw) ? raw : [];
       const newTask = {
         id: Math.max(0, ...list.map((x: any) => x.id || 0)) + 1,
-        title: taskTitle.trim(),
-        milestone: milestoneName,
-        owner: 'Carlos Mendoza',
-        due: activeItem?.end || '2026-11-30',
+        title: newTaskForm.title.trim(),
+        milestone: taskModalMilestone || activeItem?.name || 'Hito del cronograma',
+        owner: newTaskForm.owner,
+        due: newTaskForm.due || activeItem?.end || '2026-11-30',
         status: 'Pendiente',
-        priority: 'Media',
+        priority: newTaskForm.priority,
         origin: 'Hito del proyecto',
         kind: 'Vinculada al cronograma',
         deliverable: activeItem?.deliverable || 'Entregable de hito',
-        description: `Tarea operativa para el cumplimiento de ${milestoneName}`,
+        description: `Tarea operativa para el cumplimiento de ${taskModalMilestone}`,
         checklist: [],
         comments: [],
         attachments: [],
-        history: [{ text: 'Tarea creada desde el cronograma', date: new Date().toLocaleString('es-PE') }],
+        history: [{ text: 'Tarea creada desde el cronograma maestro', date: new Date().toLocaleString('es-PE') }],
       };
       const nextList = [newTask, ...list];
       localStorage.setItem('qaway-tasks-v1', JSON.stringify(nextList));
-      notify(`Tarea "${taskTitle.trim()}" vinculada y agregada al módulo Tareas`);
+      setForceTasksNonce((n) => n + 1);
+      setCreateTaskModalOpen(false);
+      notify(`Tarea "${newTaskForm.title.trim()}" vinculada y agregada al módulo Tareas`);
       window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
     } catch {
       notify('Error al crear tarea vinculada');
@@ -3592,36 +3616,9 @@ export default function CronogramaGanttView({
                   <ChevronLeft size={18} />
                 </button>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h2 style={{ fontSize: '15px', margin: 0 }}>{isNewDraft ? 'Crear' : 'Editar'} {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}</h2>
-                  {!isNewDraft && hitos.length > 1 && (
-                    <select
-                      value={activeItem.kind === 'hito' ? activeItem.id : (activeItem.parentId || '')}
-                      onChange={(e) => {
-                        const target = items.find((x) => x.id === e.target.value);
-                        if (target) handleSwitchActiveHito(target);
-                      }}
-                      style={{
-                        fontSize: '11px',
-                        color: '#0284c7',
-                        background: '#f0f9ff',
-                        border: '1px solid #bae6fd',
-                        borderRadius: '6px',
-                        padding: '2px 6px',
-                        fontWeight: 650,
-                        maxWidth: '220px',
-                        cursor: 'pointer',
-                        marginTop: '3px',
-                        outline: 'none',
-                      }}
-                      title="Navegar rápidamente a otro hito del cronograma"
-                    >
-                      {hitos.map((h) => (
-                        <option key={h.id} value={h.id}>
-                          {h.code} · {h.name.length > 28 ? h.name.slice(0, 28) + '...' : h.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <h2 style={{ fontSize: '15px', margin: 0, fontWeight: 700 }}>
+                    {isNewDraft ? 'Crear' : 'Editar'} {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}
+                  </h2>
                 </div>
               </div>
               <button
@@ -3634,6 +3631,73 @@ export default function CronogramaGanttView({
                 <X size={18} />
               </button>
             </div>
+
+            {/* Selector permanente de hito para navegar o cambiar entre hitos creados */}
+            {hitos.length > 0 && (
+              <div
+                style={{
+                  padding: '9px 16px',
+                  background: '#f8fafc',
+                  borderBottom: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <Layers3 size={14} style={{ color: '#0284c7', flexShrink: 0 }} />
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: '#475569',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Hito activo:
+                </span>
+                <select
+                  value={
+                    activeItem.kind === 'hito' && !isNewDraft
+                      ? activeItem.id
+                      : activeItem.kind === 'subproceso'
+                      ? activeItem.parentId || ''
+                      : ''
+                  }
+                  onChange={(e) => {
+                    const target = hitos.find((x) => x.id === e.target.value);
+                    if (target) handleSwitchActiveHito(target);
+                  }}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    height: '32px',
+                    fontSize: '12px',
+                    fontWeight: 650,
+                    color: '#0f172a',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '0 8px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                  }}
+                  title="Seleccionar otro hito ya creado para editarlo directamente"
+                >
+                  {isNewDraft && (
+                    <option value="" disabled>
+                      + {activeItem.kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso'} (en borrador)
+                    </option>
+                  )}
+                  {hitos.map((h) => (
+                    <option key={h.id} value={h.id}>
+                      {h.code} {h.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="editor-tabs">
               <button
@@ -4288,7 +4352,7 @@ export default function CronogramaGanttView({
                             gap: '3px',
                             padding: 0,
                           }}
-                          onClick={() => handleCreateLinkedTask(activeItem.name)}
+                          onClick={() => handleOpenCreateTaskModal(activeItem.name)}
                         >
                           <Plus size={12} />
                           <span>+ Crear tarea para este hito</span>
@@ -4642,6 +4706,154 @@ export default function CronogramaGanttView({
                 >
                   <Trash2 size={14} />
                   <span>Descartar y salir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Institucional: Nueva Tarea Vinculada */}
+        {createTaskModalOpen && (
+          <div
+            className="overlay"
+            style={{ zIndex: 99999 }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setCreateTaskModalOpen(false);
+            }}
+          >
+            <div className="unsaved-alert-modal" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1d4ed8', flexShrink: 0 }}>
+                  <CheckSquare size={22} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
+                    Nueva Tarea Operativa
+                  </h3>
+                  <small style={{ fontSize: '12px', color: '#64748b', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    Vinculada a: <b>{taskModalMilestone}</b>
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                  onClick={() => setCreateTaskModalOpen(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 650, color: '#334155', marginBottom: '4px' }}>
+                    Título de la Tarea *
+                  </label>
+                  <input
+                    autoFocus
+                    value={newTaskForm.title}
+                    onChange={(e) => setNewTaskForm((p) => ({ ...p, title: e.target.value }))}
+                    placeholder="Ej. Revisar inventario físico en sede regional..."
+                    style={{
+                      width: '100%',
+                      height: '36px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      padding: '0 10px',
+                      fontSize: '12.5px',
+                      boxSizing: 'border-box',
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleConfirmCreateTask();
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 650, color: '#334155', marginBottom: '4px' }}>
+                      Responsable
+                    </label>
+                    <select
+                      value={newTaskForm.owner}
+                      onChange={(e) => setNewTaskForm((p) => ({ ...p, owner: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        height: '34px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        padding: '0 8px',
+                        fontSize: '12px',
+                        background: '#ffffff',
+                      }}
+                    >
+                      {GESTOR_OPTIONS.filter((g) => g.value !== 'Todos').map((g) => (
+                        <option key={g.value} value={g.value}>{g.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 650, color: '#334155', marginBottom: '4px' }}>
+                      Prioridad
+                    </label>
+                    <select
+                      value={newTaskForm.priority}
+                      onChange={(e) => setNewTaskForm((p) => ({ ...p, priority: e.target.value as any }))}
+                      style={{
+                        width: '100%',
+                        height: '34px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        padding: '0 8px',
+                        fontSize: '12px',
+                        background: '#ffffff',
+                      }}
+                    >
+                      <option value="Alta">Alta</option>
+                      <option value="Media">Media</option>
+                      <option value="Baja">Baja</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 650, color: '#334155', marginBottom: '4px' }}>
+                    Fecha Límite
+                  </label>
+                  <input
+                    type="date"
+                    value={newTaskForm.due}
+                    onChange={(e) => setNewTaskForm((p) => ({ ...p, due: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      height: '34px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      padding: '0 10px',
+                      fontSize: '12px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  style={{ height: '34px', padding: '0 14px', fontSize: '12px' }}
+                  onClick={() => setCreateTaskModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn primary"
+                  style={{ height: '34px', padding: '0 16px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  onClick={handleConfirmCreateTask}
+                >
+                  <Plus size={14} />
+                  <span>Crear Tarea</span>
                 </button>
               </div>
             </div>
