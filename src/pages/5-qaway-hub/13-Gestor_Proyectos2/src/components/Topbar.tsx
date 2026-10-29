@@ -9,8 +9,8 @@ import {
   LogOut,
   Mail,
   ShieldCheck,
-  Sliders,
-  User,
+  SlidersHorizontal,
+  UserRound,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
@@ -147,18 +147,22 @@ export default function Topbar({
 
         {/* Botón de Perfil en Topbar */}
         <div
+          ref={profileTriggerRef}
           className="qm-topbar-profile"
           onClick={() => setIsProfileMenuOpen((prev) => !prev)}
           title="Opciones de perfil institucional"
           style={{
-            borderColor: isProfileMenuOpen ? '#0284c7' : '#e2e8f0',
-            boxShadow: isProfileMenuOpen ? '0 0 0 3px rgba(2, 132, 199, 0.12)' : 'none',
+            borderColor: isProfileMenuOpen ? '#0066ff' : '#e2e8f0',
+            boxShadow: isProfileMenuOpen ? '0 0 0 3px rgba(0, 102, 255, 0.15)' : 'none',
+            background: isProfileMenuOpen ? '#f8faff' : '#ffffff',
           }}
         >
           <div
             className="qm-topbar-avatar"
             style={{
-              background: '#0f172a',
+              background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
+              color: '#ffffff',
+              boxShadow: '0 2px 6px rgba(0, 102, 255, 0.28)',
             }}
           >
             CM
@@ -172,7 +176,7 @@ export default function Topbar({
             color="#64748b"
             style={{
               transform: isProfileMenuOpen ? 'rotate(180deg)' : 'none',
-              transition: 'transform 0.2s',
+              transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           />
         </div>
@@ -182,22 +186,23 @@ export default function Topbar({
           <div
             style={{
               position: 'absolute',
-              top: '50px',
+              top: '52px',
               right: '0',
-              width: '320px',
+              width: '310px',
               background: '#ffffff',
-              borderRadius: '12px',
+              borderRadius: '14px',
               border: '1px solid #e2e8f0',
-              boxShadow: '0 12px 36px rgba(15, 23, 42, 0.16)',
+              boxShadow: '0 16px 36px -4px rgba(15, 23, 42, 0.14), 0 4px 12px -2px rgba(15, 23, 42, 0.06)',
               zIndex: 9999,
               padding: '16px',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
+              animation: 'qmFadeInScale 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
             {/* Header de Usuario Activo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '14px', borderBottom: '1px solid #f1f5f9' }}>
               <div
                 style={{
                   width: '42px',
@@ -207,29 +212,33 @@ export default function Topbar({
                   placeItems: 'center',
                   fontSize: '14px',
                   fontWeight: 800,
-                  background: '#0f172a',
+                  background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
                   color: '#ffffff',
+                  boxShadow: '0 3px 8px rgba(0, 102, 255, 0.3)',
+                  flexShrink: 0,
                 }}
               >
                 CM
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>
+                <b style={{ fontSize: '14px', color: '#0f172a', display: 'block', fontWeight: 700, lineHeight: 1.3 }}>
                   Carlos Mendoza
                 </b>
-                <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block' }}>
+                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                   cmendoza@qawaylab.com
                 </span>
                 <span
                   style={{
                     display: 'inline-block',
-                    fontSize: '10px',
+                    fontSize: '11px',
                     fontWeight: 700,
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    background: '#f1f5f9',
-                    color: '#334155',
-                    marginTop: '3px',
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                    background: '#eff6ff',
+                    color: '#0066ff',
+                    border: '1px solid #bfdbfe',
+                    marginTop: '5px',
+                    letterSpacing: '0.2px',
                   }}
                 >
                   Coordinador General
@@ -238,52 +247,78 @@ export default function Topbar({
             </div>
 
             {/* Opciones de Perfil del Usuario */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingBottom: '8px', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.8px', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingBottom: '10px', borderBottom: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: '10.5px', fontWeight: 800, letterSpacing: '0.6px', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px', paddingLeft: '4px' }}>
                 OPCIONES DE PERFIL
               </div>
               <button
+                className="qm-profile-dropdown-item"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
-                  padding: '7px 10px',
+                  padding: '8px 10px',
                   border: 'none',
                   background: 'transparent',
                   color: '#334155',
-                  fontSize: '12px',
-                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   textAlign: 'left',
+                  transition: 'background 0.15s, color 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.color = '#0066ff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#334155';
                 }}
                 onClick={() => {
                   setIsProfileMenuOpen(false);
                   notify('Ficha institucional del usuario y permisos de sistema');
                 }}
               >
-                <User size={15} color="#64748b" />
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', display: 'grid', placeItems: 'center', color: '#0066ff', flexShrink: 0 }}>
+                  <UserRound size={15} />
+                </div>
                 <span>Mi perfil institucional</span>
               </button>
               <button
+                className="qm-profile-dropdown-item"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
-                  padding: '7px 10px',
+                  padding: '8px 10px',
                   border: 'none',
                   background: 'transparent',
                   color: '#334155',
-                  fontSize: '12px',
-                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   textAlign: 'left',
+                  transition: 'background 0.15s, color 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.color = '#0066ff';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#334155';
                 }}
                 onClick={() => {
                   setIsProfileMenuOpen(false);
                   notify('Configuración de cuenta y notificaciones territoriales');
                 }}
               >
-                <Sliders size={15} color="#64748b" />
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#f1f5f9', display: 'grid', placeItems: 'center', color: '#475569', flexShrink: 0 }}>
+                  <SlidersHorizontal size={15} />
+                </div>
                 <span>Preferencias de la cuenta</span>
               </button>
             </div>
@@ -295,22 +330,32 @@ export default function Topbar({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
-                  padding: '7px 10px',
+                  padding: '8px 10px',
                   border: 'none',
                   background: 'transparent',
                   color: '#dc2626',
-                  fontSize: '12px',
-                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   textAlign: 'left',
                   width: '100%',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#fef2f2';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
                 }}
                 onClick={() => {
                   setIsProfileMenuOpen(false);
                   notify('Sesión cerrada en modo demostración');
                 }}
               >
-                <LogOut size={15} />
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#fee2e2', display: 'grid', placeItems: 'center', color: '#dc2626', flexShrink: 0 }}>
+                  <LogOut size={15} />
+                </div>
                 <span>Cerrar sesión</span>
               </button>
             </div>
