@@ -819,14 +819,39 @@ export default function CronogramaGanttView({
   const [selectedId, setSelectedId] = useState<string | null>('h1');
   const selected = items.find((x) => x.id === selectedId);
 
-  // Estado del borrador del editor (evita mutaciones en caliente y ghost items)
+  // Estados del editor y panel lateral (Drawer de Coordinador)
   const [drawerDraft, setDrawerDraft] = useState<Item | null>(null);
   const [isNewDraft, setIsNewDraft] = useState<boolean>(false);
   const [editorTab, setEditorTab] = useState<'info' | 'subprocesos' | 'dependencias'>('info');
+  const [editorInitialSnapshot, setEditorInitialSnapshot] = useState<string>('');
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [unsavedAlertOpen, setUnsavedAlertOpen] = useState(false);
+  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
+  const [editorReportTypeOpen, setEditorReportTypeOpen] = useState(false);
+  const [editorStatusOpen, setEditorStatusOpen] = useState(false);
+  const [editorCalOpen, setEditorCalOpen] = useState<'start' | 'end' | null>(null);
+
+  const [showAddDeliverable, setShowAddDeliverable] = useState(false);
+  const [newDelivName, setNewDelivName] = useState('');
+  const [newDelivType, setNewDelivType] = useState<DeliverableType>('document');
+  const [newDelivUrl, setNewDelivUrl] = useState('');
+  const [, setForceTasksNonce] = useState(0);
+
   const activeItem = drawerDraft || selected;
 
-  // Snapshot inicial al abrir el editor para detectar si el usuario ha realizado cambios o cargado datos
-  const [editorInitialSnapshot, setEditorInitialSnapshot] = useState<string>('');
+  // Referencias para blindaje contra stale closures y escape handler
+  const drawerDraftRef = useRef(drawerDraft);
+  drawerDraftRef.current = drawerDraft;
+  const editorInitialSnapshotRef = useRef(editorInitialSnapshot);
+  editorInitialSnapshotRef.current = editorInitialSnapshot;
+  const panelOpenRef = useRef(panelOpen);
+  panelOpenRef.current = panelOpen;
+  const unsavedAlertOpenRef = useRef(unsavedAlertOpen);
+  unsavedAlertOpenRef.current = unsavedAlertOpen;
+  const isNewDraftRef = useRef(isNewDraft);
+  isNewDraftRef.current = isNewDraft;
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
 
   const captureSnapshot = (item: Item | undefined | null) => {
     if (!item) return '';
@@ -844,25 +869,6 @@ export default function CronogramaGanttView({
       parentId: item.parentId || '',
     });
   };
-
-  const drawerDraftRef = useRef(drawerDraft);
-  drawerDraftRef.current = drawerDraft;
-  const editorInitialSnapshotRef = useRef(editorInitialSnapshot);
-  editorInitialSnapshotRef.current = editorInitialSnapshot;
-  const panelOpenRef = useRef(panelOpen);
-  panelOpenRef.current = panelOpen;
-  const unsavedAlertOpenRef = useRef(unsavedAlertOpen);
-  unsavedAlertOpenRef.current = unsavedAlertOpen;
-  const isNewDraftRef = useRef(isNewDraft);
-  isNewDraftRef.current = isNewDraft;
-  const selectedRef = useRef(selected);
-  selectedRef.current = selected;
-
-  const [showAddDeliverable, setShowAddDeliverable] = useState(false);
-  const [newDelivName, setNewDelivName] = useState('');
-  const [newDelivType, setNewDelivType] = useState<DeliverableType>('document');
-  const [newDelivUrl, setNewDelivUrl] = useState('');
-  const [, setForceTasksNonce] = useState(0);
 
   const isEditorDirty = () => {
     const target = drawerDraftRef.current || selectedRef.current;
@@ -1234,7 +1240,6 @@ export default function CronogramaGanttView({
     const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl, '_blank');
   };
-  const [panelOpen, setPanelOpen] = useState(false);
   const [history, setHistory] = useState<Item[][]>([]);
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
@@ -1253,7 +1258,6 @@ export default function CronogramaGanttView({
     y: number;
   } | null>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
-  const [editorCalOpen, setEditorCalOpen] = useState<'start' | 'end' | null>(null);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
   const [resizeTempWidth, setResizeTempWidth] = useState<number | null>(null);
   const [resizeTempEndDate, setResizeTempEndDate] = useState<string | null>(null);
@@ -1283,10 +1287,6 @@ export default function CronogramaGanttView({
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
-  const [editorReportTypeOpen, setEditorReportTypeOpen] = useState(false);
-  const [editorStatusOpen, setEditorStatusOpen] = useState(false);
-  const [unsavedAlertOpen, setUnsavedAlertOpen] = useState(false);
-  const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
 
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => {
     try {
