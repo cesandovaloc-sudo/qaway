@@ -701,99 +701,64 @@ export default function CronogramaGanttView({
   };
 }) {
   const projectId = activeProject?.id || 'p1';
-  const storageKey = `qaway-gantt-items-${projectId}`;
+  const currentPidRef = useRef(projectId);
 
-  const [items, setItems] = useState<Item[]>(() => {
+  const loadProjectItems = (pid: string): Item[] => {
     try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) return JSON.parse(saved);
-      if (projectId === 'p1') {
-        const globalSaved = localStorage.getItem('qaway-gantt-master-v1');
-        return globalSaved ? JSON.parse(globalSaved) : INITIAL_ITEMS;
+      if (pid === 'p1') {
+        const saved = localStorage.getItem('qaway-gantt-items-p1');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+        const masterSaved = localStorage.getItem('qaway-gantt-master-v1');
+        if (masterSaved) {
+          const parsedMaster = JSON.parse(masterSaved);
+          if (Array.isArray(parsedMaster) && parsedMaster.length > 0) return parsedMaster;
+        }
+        return INITIAL_ITEMS;
       }
-      return [
-        {
-          id: 'h1',
-          code: 'HIT-01',
-          name: `Fase 1: Planificación y Organización · ${activeProject?.name || 'Nuevo Proyecto'}`,
-          start: '2026-11-01',
-          end: '2026-12-15',
-          kind: 'hito',
-          progress: 20,
-          status: 'En proceso',
-          expanded: true,
-          description: `Plan de ejecución y levantamiento de requerimientos para ${activeProject?.name || 'este proyecto'}.`,
-          deliverable: 'Acta de Aprobación de Plan de Trabajo',
-          tasks: 4,
-          done: 1,
-        },
-        {
-          id: 's1-1',
-          code: 'SUB-01.1',
-          name: 'Levantamiento de Sedes y Frentes Operativos',
-          start: '2026-11-01',
-          end: '2026-11-20',
-          kind: 'subproceso',
-          parentId: 'h1',
-          progress: 50,
-          status: 'En proceso',
-          tasks: 2,
-          done: 1,
-        },
-        {
-          id: 's1-2',
-          code: 'SUB-01.2',
-          name: 'Asignación de Supervisores y Presupuestos',
-          start: '2026-11-15',
-          end: '2026-12-15',
-          kind: 'subproceso',
-          parentId: 'h1',
-          progress: 0,
-          status: 'Pendiente',
-          tasks: 2,
-          done: 0,
-        },
-        {
-          id: 'h2',
-          code: 'HIT-02',
-          name: 'Fase 2: Ejecución en Campo y Seguimiento',
-          start: '2026-12-16',
-          end: '2027-04-30',
-          kind: 'hito',
-          progress: 0,
-          status: 'Pendiente',
-          expanded: true,
-          deliverable: 'Reportes de Avance Físico y Calidad',
-          tasks: 6,
-          done: 0,
-        },
-        {
-          id: 'h3',
-          code: 'HIT-03',
-          name: 'Fase 3: Cierre y Entrega Final',
-          start: '2027-05-01',
-          end: '2027-06-30',
-          kind: 'hito',
-          progress: 0,
-          status: 'Pendiente',
-          expanded: false,
-          deliverable: 'Acta de Liquidación y Cierre de Proyecto',
-          tasks: 3,
-          done: 0,
-        },
-      ];
+      const saved = localStorage.getItem(`qaway-gantt-items-${pid}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Si por una duplicación accidental previa se guardaron hitos de MINEDU (ej. s11/h1), limpiar a calato
+          const isPolluted = parsed.some((it) => it.id === 's11' || it.code === '1.1');
+          if (isPolluted) {
+            localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify([]));
+            return [];
+          }
+          return parsed;
+        }
+      }
+      return []; // Nuevo proyecto siempre inicia completamente vacío / calato
     } catch {
-      return INITIAL_ITEMS;
+      return pid === 'p1' ? INITIAL_ITEMS : [];
     }
-  });
+  };
 
+  const [items, setItems] = useState<Item[]>(() => loadProjectItems(projectId));
+
+  // Sincronización reactiva con Keep-Alive al conmutar de proyecto
   useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(items));
-    } catch {
-      /* fallback */
+    if (currentPidRef.current !== projectId) {
+      currentPidRef.current = projectId;
+      const loaded = loadProjectItems(projectId);
+      setItems(loaded);
+      setSelectedId(null);
     }
-  }, [items, storageKey]);
+  }, [projectId]);
+
+  // Persistencia segura por proyecto activo
+  useEffect(() => {
+    if (currentPidRef.current === projectId) {
+      try {
+        localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(items));
+      } catch {
+        /* fallback */
+      }
+    }
+  }, [items, projectId]);
 
   const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
     try {
@@ -916,13 +881,6 @@ export default function CronogramaGanttView({
     }
   };
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('qaway-gantt-master-v1', JSON.stringify(items));
-    } catch {
-      /* almacenamiento no disponible */
-    }
-  }, [items]);
 
   const notify = (s: string) => {
     setToast(s);
@@ -1299,7 +1257,7 @@ export default function CronogramaGanttView({
   const inprog = items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length;
   const late = items.filter((x) => x.status === 'Con retraso').length;
   const complete = items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length;
-  const overall = Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length);
+  const overall = items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0;
 
   /* Rango predeterminado del botón Limpiar */
   const DEFAULT_RANGE = { from: RANGE_MIN, to: RANGE_MAX };
@@ -1499,9 +1457,15 @@ export default function CronogramaGanttView({
               <CalendarDays size={26} />
             </span>
             <div>
-              <h1>Cronograma Maestro · {activeProject?.name || 'Gestión del Proyecto'}</h1>
+              <h1>
+                {projectId === 'p1'
+                  ? 'Gestión del Cronograma Regional (Gantt Maestro)'
+                  : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`}
+              </h1>
               <p>
-                Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.
+                {projectId === 'p1'
+                  ? 'Eleva y calibra la línea de tiempo oficial, importa normativas MINEDU y sincroniza fechas límite para los gestores territoriales.'
+                  : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'}
               </p>
             </div>
           </div>
@@ -2151,6 +2115,64 @@ export default function CronogramaGanttView({
 
           {/* Tabla Gantt con Timeline (Filas operativas con scroll 2D) */}
           <div className="gantt-scroll" ref={scrollRef} onScroll={handleScroll}>
+            {items.length === 0 ? (
+              <div
+                style={{
+                  padding: '70px 24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  width: '100%',
+                  background: '#ffffff',
+                }}
+              >
+                <div
+                  style={{
+                    width: '54px',
+                    height: '54px',
+                    borderRadius: '14px',
+                    background: '#eff6ff',
+                    color: '#2563eb',
+                    display: 'grid',
+                    placeItems: 'center',
+                    boxShadow: '0 2px 6px rgba(37, 99, 235, 0.15)',
+                  }}
+                >
+                  <FolderPlus size={26} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 750, color: '#0f172a' }}>
+                  Cronograma nuevo · Listo para estructurar
+                </h3>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', maxWidth: '440px', textAlign: 'center', lineHeight: 1.45 }}>
+                  Este proyecto inicia desde cero (completamente en blanco). Agrega tu primer hito rector o importa un cronograma oficial para comenzar.
+                </p>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    className="btn primary"
+                    onClick={() => add('hito')}
+                    style={{ height: '38px', padding: '0 18px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Plus size={15} />
+                    <span>Agregar Primer Hito</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => {
+                      setImportOpen(true);
+                      setPickedFile('');
+                    }}
+                    style={{ height: '38px', padding: '0 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Upload size={14} />
+                    <span>Importar Plantilla</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
             <div
               className="gantt"
               style={
@@ -2723,6 +2745,7 @@ export default function CronogramaGanttView({
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           {/* Tooltip Minimalista estilo Módulo Reportes (1-2 datos limpios, cero sobrecarga) */}

@@ -215,6 +215,11 @@ function App() {
       riskLevel: newProj.riskLevel,
       metodologia: newProj.metodologia,
     };
+    try {
+      localStorage.setItem(`qaway-gantt-items-${item.id}`, JSON.stringify([]));
+    } catch {
+      /* fallback */
+    }
     setProjects((prev) => [item, ...prev]);
     setActiveProjectId(item.id);
     navigate(MODULE_SLUGS['cronograma']);
