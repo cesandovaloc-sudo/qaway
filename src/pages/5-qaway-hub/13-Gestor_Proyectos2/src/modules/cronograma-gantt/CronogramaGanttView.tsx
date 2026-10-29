@@ -3907,6 +3907,8 @@ export default function CronogramaGanttView({
             setEditorReportTypeOpen(false);
             setEditorStatusOpen(false);
             setEditorHitoSelectOpen(false);
+            setEditorParentSelectOpen(false);
+            setEditorDepSelectOpen(false);
           }}>
             <div className="editor-head">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
@@ -4086,38 +4088,116 @@ export default function CronogramaGanttView({
               <div className="editor-body">
                 {/* Selector de Elemento Padre si es subproceso (admite Hitos y Subprocesos para multinivel) */}
                 {activeItem.kind === 'subproceso' && (
-                  <label className="field" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  <div className="field relative" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em', display: 'block', marginBottom: '6px' }}>
                       Elemento Padre (Asociado a)
                     </span>
-                    <select
-                      value={activeItem.parentId || ''}
-                      onChange={(e) => updateDraft({ parentId: e.target.value })}
-                      style={{
-                        height: '36px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        padding: '0 10px',
-                        fontSize: '12px',
-                        color: '#0f172a',
-                        background: '#ffffff',
-                        fontWeight: 600,
-                        marginTop: '4px',
-                        width: '100%',
-                      }}
-                    >
-                      <option value="" disabled>Selecciona el elemento padre</option>
-                      {items
-                        .filter((x) => x.id !== activeItem.id)
-                        .map((cand) => (
-                          <option key={cand.id} value={cand.id}>
-                            {cand.kind === 'hito'
-                              ? `[Hito] ${cand.code} ${cand.name}`
-                              : `   └ [Subproceso] ${cand.code} ${cand.name}`}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
+                    <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        className={`filter-card-btn ${editorParentSelectOpen ? 'active' : ''}`}
+                        style={{
+                          width: '100%',
+                          height: '36px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          padding: '0 10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditorCalOpen(null);
+                          setEditorStatusOpen(false);
+                          setEditorReportTypeOpen(false);
+                          setEditorHitoSelectOpen(false);
+                          setEditorDepSelectOpen(false);
+                          setEditorParentSelectOpen((v) => !v);
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            color: '#0f172a',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            textAlign: 'left',
+                          }}
+                        >
+                          {(() => {
+                            const parent = items.find((x) => x.id === activeItem.parentId);
+                            if (!parent) return 'Selecciona el elemento padre...';
+                            return parent.kind === 'hito'
+                              ? `[Hito] ${parent.code} ${parent.name}`
+                              : `└ [Subproceso] ${parent.code} ${parent.name}`;
+                          })()}
+                        </span>
+                        <ChevronDown
+                          size={14}
+                          className="filter-chevron"
+                          style={{
+                            transform: editorParentSelectOpen ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.15s ease',
+                            color: '#64748b',
+                            flexShrink: 0,
+                            marginLeft: 6,
+                          }}
+                        />
+                      </button>
+                      {editorParentSelectOpen && (
+                        <div
+                          className="filter-card-popover"
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            zIndex: 9999,
+                            marginTop: '4px',
+                            maxHeight: '220px',
+                            overflowY: 'auto',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="filter-popover-title">Seleccionar Elemento Padre</div>
+                          {items
+                            .filter((x) => x.id !== activeItem.id)
+                            .map((cand) => {
+                              const isSelected = activeItem.parentId === cand.id;
+                              return (
+                                <button
+                                  key={cand.id}
+                                  type="button"
+                                  className={`filter-item-btn ${isSelected ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    updateDraft({ parentId: cand.id });
+                                    setEditorParentSelectOpen(false);
+                                  }}
+                                  style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                                >
+                                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>
+                                    <b style={{ color: cand.kind === 'hito' ? '#0284c7' : '#64748b', marginRight: 5 }}>
+                                      {cand.kind === 'hito' ? `[Hito] ${cand.code}` : `└ ${cand.code}`}
+                                    </b>
+                                    {cand.name}
+                                  </span>
+                                  {isSelected && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                                </button>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 {/* 1. Nombre */}
@@ -4241,19 +4321,43 @@ export default function CronogramaGanttView({
                           boxSizing: 'border-box',
                         }}
                       />
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
                         <button
                           type="button"
-                          className="btn secondary"
-                          style={{ height: '28px', padding: '0 10px', fontSize: '11px' }}
+                          style={{
+                            minHeight: 'unset',
+                            height: '30px',
+                            padding: '0 12px',
+                            fontSize: '11.5px',
+                            fontWeight: 600,
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            background: '#ffffff',
+                            color: '#475569',
+                            cursor: 'pointer',
+                          }}
                           onClick={() => setShowAddDeliverable(false)}
                         >
                           Cancelar
                         </button>
                         <button
                           type="button"
-                          className="btn primary"
-                          style={{ height: '28px', padding: '0 12px', fontSize: '11px' }}
+                          style={{
+                            minHeight: 'unset',
+                            height: '30px',
+                            padding: '0 14px',
+                            fontSize: '11.5px',
+                            fontWeight: 650,
+                            borderRadius: '6px',
+                            border: '1px solid #0066ff',
+                            background: '#0066ff',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: 'none',
+                          }}
                           onClick={() => {
                             if (!newDelivName.trim()) {
                               notify('Ingresa el nombre del entregable');
@@ -4266,7 +4370,8 @@ export default function CronogramaGanttView({
                             });
                           }}
                         >
-                          Guardar entregable
+                          <Plus size={13} />
+                          <span>Guardar entregable</span>
                         </button>
                       </div>
                     </div>
@@ -4924,31 +5029,120 @@ export default function CronogramaGanttView({
                   </p>
                 </div>
 
-                <label className="field">
+                <div className="field relative">
                   <span>Vincular Hito Predecesor (Requisito previo)</span>
-                  <select
-                    value={activeItem.parentId || ''}
-                    onChange={(e) => updateDraft({ parentId: e.target.value || undefined })}
-                    style={{
-                      height: '38px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      padding: '0 10px',
-                      fontSize: '12.5px',
-                      color: '#0f172a',
-                      background: '#ffffff',
-                    }}
-                  >
-                    <option value="">Sin predecesor (Hito independiente o inicial)</option>
-                    {hitos
-                      .filter((h) => h.id !== activeItem.id)
-                      .map((h) => (
-                        <option key={h.id} value={h.id}>
-                          {h.code} {h.name} (Fin: {formatDatePE(h.end)})
-                        </option>
-                      ))}
-                  </select>
-                </label>
+                  <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                    <button
+                      type="button"
+                      className={`filter-card-btn ${editorDepSelectOpen ? 'active' : ''}`}
+                      style={{
+                        width: '100%',
+                        height: '36px',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        padding: '0 10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditorCalOpen(null);
+                        setEditorStatusOpen(false);
+                        setEditorReportTypeOpen(false);
+                        setEditorHitoSelectOpen(false);
+                        setEditorParentSelectOpen(false);
+                        setEditorDepSelectOpen((v) => !v);
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: '#0f172a',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          textAlign: 'left',
+                        }}
+                      >
+                        {(() => {
+                          const dep = hitos.find((x) => x.id === activeItem.parentId);
+                          return dep ? `${dep.code} ${dep.name}` : 'Sin predecesor (Hito independiente o inicial)';
+                        })()}
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        className="filter-chevron"
+                        style={{
+                          transform: editorDepSelectOpen ? 'rotate(180deg)' : 'none',
+                          transition: 'transform 0.15s ease',
+                          color: '#64748b',
+                          flexShrink: 0,
+                          marginLeft: 6,
+                        }}
+                      />
+                    </button>
+                    {editorDepSelectOpen && (
+                      <div
+                        className="filter-card-popover"
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          zIndex: 9999,
+                          marginTop: '4px',
+                          maxHeight: '220px',
+                          overflowY: 'auto',
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="filter-popover-title">Predecesor en Ruta Crítica</div>
+                        <button
+                          type="button"
+                          className={`filter-item-btn ${!activeItem.parentId ? 'selected' : ''}`}
+                          onClick={() => {
+                            updateDraft({ parentId: undefined });
+                            setEditorDepSelectOpen(false);
+                          }}
+                          style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                        >
+                          <span style={{ fontSize: '12px' }}>Sin predecesor (Hito independiente o inicial)</span>
+                          {!activeItem.parentId && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                        </button>
+                        {hitos
+                          .filter((h) => h.id !== activeItem.id)
+                          .map((h) => {
+                            const isSelected = activeItem.parentId === h.id;
+                            return (
+                              <button
+                                key={h.id}
+                                type="button"
+                                className={`filter-item-btn ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  updateDraft({ parentId: h.id });
+                                  setEditorDepSelectOpen(false);
+                                }}
+                                style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                              >
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>
+                                  <b style={{ color: '#0284c7', marginRight: 5 }}>{h.code}</b> {h.name} (Fin: {formatDatePE(h.end)})
+                                </span>
+                                {isSelected && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                              </button>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {activeItem.parentId && (
                   <div style={{ marginTop: 12, padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
@@ -5107,7 +5301,7 @@ export default function CronogramaGanttView({
                     autoFocus
                     value={newTaskForm.title}
                     onChange={(e) => setNewTaskForm((p) => ({ ...p, title: e.target.value }))}
-                    placeholder="Ej. Revisar inventario físico en sede regional..."
+                    placeholder="Ej. Elaborar informe técnico, coordinar entregas o validar requerimientos..."
                     style={{
                       width: '100%',
                       height: '36px',
@@ -5124,71 +5318,217 @@ export default function CronogramaGanttView({
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <div>
+                  <div style={{ position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 650, color: '#334155', marginBottom: '4px' }}>
                       Responsable
                     </label>
-                    <select
-                      value={newTaskForm.owner}
-                      onChange={(e) => setNewTaskForm((p) => ({ ...p, owner: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        height: '34px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        padding: '0 8px',
-                        fontSize: '12px',
-                        background: '#ffffff',
-                      }}
-                    >
-                      {GESTOR_OPTIONS.filter((g) => g.value !== 'Todos').map((g) => (
-                        <option key={g.value} value={g.value}>{g.label}</option>
-                      ))}
-                    </select>
+                    <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        className={`filter-card-btn ${taskOwnerOpen ? 'active' : ''}`}
+                        style={{
+                          width: '100%',
+                          height: '36px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          padding: '0 10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTaskPriorityOpen(false);
+                          setNewTaskCalOpen(false);
+                          setTaskOwnerOpen((v) => !v);
+                        }}
+                      >
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {newTaskForm.owner}
+                        </span>
+                        <ChevronDown
+                          size={14}
+                          className="filter-chevron"
+                          style={{
+                            transform: taskOwnerOpen ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.15s ease',
+                            color: '#64748b',
+                            flexShrink: 0,
+                            marginLeft: 6,
+                          }}
+                        />
+                      </button>
+                      {taskOwnerOpen && (
+                        <div
+                          className="filter-card-popover"
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            zIndex: 9999,
+                            marginTop: '4px',
+                            maxHeight: '180px',
+                            overflowY: 'auto',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="filter-popover-title">Responsable de Tarea</div>
+                          {GESTOR_OPTIONS.filter((g) => g.value !== 'Todos').map((g) => {
+                            const isSelected = newTaskForm.owner === g.value;
+                            return (
+                              <button
+                                key={g.value}
+                                type="button"
+                                className={`filter-item-btn ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setNewTaskForm((p) => ({ ...p, owner: g.value }));
+                                  setTaskOwnerOpen(false);
+                                }}
+                                style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                              >
+                                <span style={{ fontSize: '12px' }}>{g.label}</span>
+                                {isSelected && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div>
+                  <div style={{ position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 650, color: '#334155', marginBottom: '4px' }}>
                       Prioridad
                     </label>
-                    <select
-                      value={newTaskForm.priority}
-                      onChange={(e) => setNewTaskForm((p) => ({ ...p, priority: e.target.value as any }))}
-                      style={{
-                        width: '100%',
-                        height: '34px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        padding: '0 8px',
-                        fontSize: '12px',
-                        background: '#ffffff',
-                      }}
-                    >
-                      <option value="Alta">Alta</option>
-                      <option value="Media">Media</option>
-                      <option value="Baja">Baja</option>
-                    </select>
+                    <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        className={`filter-card-btn ${taskPriorityOpen ? 'active' : ''}`}
+                        style={{
+                          width: '100%',
+                          height: '36px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          padding: '0 10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTaskOwnerOpen(false);
+                          setNewTaskCalOpen(false);
+                          setTaskPriorityOpen((v) => !v);
+                        }}
+                      >
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
+                          {newTaskForm.priority}
+                        </span>
+                        <ChevronDown
+                          size={14}
+                          className="filter-chevron"
+                          style={{
+                            transform: taskPriorityOpen ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.15s ease',
+                            color: '#64748b',
+                            flexShrink: 0,
+                            marginLeft: 6,
+                          }}
+                        />
+                      </button>
+                      {taskPriorityOpen && (
+                        <div
+                          className="filter-card-popover"
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            zIndex: 9999,
+                            marginTop: '4px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="filter-popover-title">Nivel de Prioridad</div>
+                          {(['Alta', 'Media', 'Baja'] as const).map((prio) => {
+                            const isSelected = newTaskForm.priority === prio;
+                            return (
+                              <button
+                                key={prio}
+                                type="button"
+                                className={`filter-item-btn ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setNewTaskForm((p) => ({ ...p, priority: prio }));
+                                  setTaskPriorityOpen(false);
+                                }}
+                                style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                              >
+                                <span style={{ fontSize: '12px' }}>{prio}</span>
+                                {isSelected && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div>
+                <div style={{ position: 'relative' }}>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 650, color: '#334155', marginBottom: '4px' }}>
                     Fecha Límite
                   </label>
-                  <input
-                    type="date"
-                    value={newTaskForm.due}
-                    onChange={(e) => setNewTaskForm((p) => ({ ...p, due: e.target.value }))}
+                  <button
+                    type="button"
+                    className={`custom-date-btn ${newTaskCalOpen ? 'active' : ''}`}
                     style={{
                       width: '100%',
-                      height: '34px',
-                      borderRadius: '6px',
+                      height: '36px',
+                      background: '#ffffff',
                       border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
                       padding: '0 10px',
-                      fontSize: '12px',
-                      boxSizing: 'border-box',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      cursor: 'pointer',
                     }}
-                  />
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTaskOwnerOpen(false);
+                      setTaskPriorityOpen(false);
+                      setNewTaskCalOpen((v) => !v);
+                    }}
+                  >
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
+                      {formatDatePE(newTaskForm.due)}
+                    </span>
+                    <CalendarDays size={14} className="date-btn-icon" style={{ color: '#64748b' }} />
+                  </button>
+                  {newTaskCalOpen && (
+                    <MiniCalendar
+                      value={newTaskForm.due}
+                      onChange={(newDate) => {
+                        setNewTaskForm((p) => ({ ...p, due: newDate }));
+                        setNewTaskCalOpen(false);
+                      }}
+                      onClose={() => setNewTaskCalOpen(false)}
+                      align="left"
+                    />
+                  )}
                 </div>
               </div>
 
