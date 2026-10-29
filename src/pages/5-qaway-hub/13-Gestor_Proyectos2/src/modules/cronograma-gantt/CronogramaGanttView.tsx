@@ -911,12 +911,14 @@ export default function CronogramaGanttView({
     }
   };
 
-  const openEditorForItem = (item: Item) => {
+  const openEditorForItem = (item: Item, preserveTab: boolean = false) => {
     setSelectedId(item.id);
     setDrawerDraft({ ...item });
     setIsNewDraft(false);
     setEditorInitialSnapshot(captureSnapshot(item));
-    setEditorTab('info');
+    if (!preserveTab) {
+      setEditorTab('info');
+    }
     setPanelOpen(true);
   };
 
@@ -1066,11 +1068,11 @@ export default function CronogramaGanttView({
     if (targetHito.id === activeItem?.id) return;
     if (isEditorDirty()) {
       setPendingCloseAction(() => () => {
-        openEditorForItem(targetHito);
+        openEditorForItem(targetHito, true);
       });
       setUnsavedAlertOpen(true);
     } else {
-      openEditorForItem(targetHito);
+      openEditorForItem(targetHito, true);
     }
   };
 
@@ -4709,190 +4711,242 @@ export default function CronogramaGanttView({
                   const completed = tasks.filter((t: any) => t.status === 'Cumple' || t.status === 'Completado' || t.status === 'Completada').length;
                   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
                   return (
-                    <div className="task-relation-box">
-                      <div className="task-relation-head">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <CheckSquare size={13} style={{ color: '#2563eb' }} />
-                          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
-                            Tareas vinculadas
-                          </span>
-                        </div>
-                        <span className="task-relation-badge">
-                          {total === 0 ? '0 tareas vinculadas · 0%' : `${completed} / ${total} ejecutadas (${pct}%)`}
+                    <div className="field" style={{ marginTop: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                          <CheckSquare size={15} style={{ color: '#0284c7' }} />
+                          Tareas vinculadas ({total})
                         </span>
-                      </div>
-                      <div className="task-relation-bar">
-                        <div
-                          className="task-relation-fill"
-                          style={{
-                            width: `${pct}%`,
-                            backgroundColor: pct === 100 ? '#16a34a' : pct >= 40 ? '#2563eb' : '#f59e0b',
-                          }}
-                        />
-                      </div>
-
-                      {/* Lista interactiva de tareas vinculadas si existen */}
-                      {total > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', margin: '4px 0' }}>
-                          {tasks.map((task: any) => {
-                            const isDone = task.status === 'Cumple' || task.status === 'Completado' || task.status === 'Completada';
-                            return (
-                              <div
-                                key={task.id}
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  padding: '5px 8px',
-                                  background: '#ffffff',
-                                  border: '1px solid #e2e8f0',
-                                  borderRadius: '6px',
-                                  fontSize: '11.5px',
-                                }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isDone}
-                                  onChange={() => handleToggleTask(task.id)}
-                                  style={{ cursor: 'pointer', accentColor: '#16a34a' }}
-                                />
-                                <span
-                                  style={{
-                                    flex: 1,
-                                    color: isDone ? '#94a3b8' : '#0f172a',
-                                    textDecoration: isDone ? 'line-through' : 'none',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {task.title}
-                                </span>
-                                <span
-                                  style={{
-                                    fontSize: '10px',
-                                    fontWeight: 700,
-                                    padding: '1px 6px',
-                                    borderRadius: '4px',
-                                    background: isDone ? '#dcfce7' : '#f1f5f9',
-                                    color: isDone ? '#15803d' : '#64748b',
-                                  }}
-                                >
-                                  {task.status || 'Pendiente'}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
-                        <small style={{ fontSize: '11px', color: '#64748b' }}>
-                          {total > 0
-                            ? `${total} tarea(s) en módulo Tareas Kanban`
-                            : 'Sin tareas operativas asignadas'}
-                        </small>
                         <button
                           type="button"
                           style={{
-                            background: 'transparent',
-                            border: 'none',
+                            background: '#f0f9ff',
+                            border: '1px solid #bae6fd',
+                            borderRadius: '6px',
                             color: '#0284c7',
-                            fontSize: '11.5px',
+                            fontSize: '12px',
                             fontWeight: 650,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '3px',
-                            padding: 0,
+                            gap: '5px',
+                            padding: '4px 10px',
+                            transition: 'all 0.15s ease',
                           }}
                           onClick={() => handleOpenCreateTaskModal(activeItem.name)}
                         >
-                          <Plus size={12} />
+                          <Plus size={13} />
                           <span>Crear tarea para este hito</span>
                         </button>
+                      </div>
+
+                      <div className="task-relation-box">
+                        <div className="task-relation-head">
+                          <span style={{ fontSize: '13.5px', fontWeight: 650, color: '#0f172a' }}>
+                            {total === 0 ? 'Sin tareas operativas asignadas' : `${completed} de ${total} completadas`}
+                          </span>
+                          <span className="task-relation-badge">
+                            {total === 0 ? '0 tareas · 0%' : `${pct}% ejecutado`}
+                          </span>
+                        </div>
+                        <div className="task-relation-bar">
+                          <div
+                            className="task-relation-fill"
+                            style={{
+                              width: `${pct}%`,
+                              backgroundColor: pct === 100 ? '#16a34a' : pct >= 40 ? '#0284c7' : '#f59e0b',
+                            }}
+                          />
+                        </div>
+
+                        {/* Lista interactiva de tareas vinculadas si existen */}
+                        {total > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', margin: '4px 0' }}>
+                            {tasks.map((task: any) => {
+                              const isDone = task.status === 'Cumple' || task.status === 'Completado' || task.status === 'Completada';
+                              return (
+                                <div
+                                  key={task.id}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    padding: '8px 12px',
+                                    background: '#f8fafc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '7px',
+                                    fontSize: '13px',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isDone}
+                                    onChange={() => handleToggleTask(task.id)}
+                                    style={{ cursor: 'pointer', accentColor: '#16a34a', width: '15px', height: '15px' }}
+                                  />
+                                  <span
+                                    style={{
+                                      flex: 1,
+                                      color: isDone ? '#94a3b8' : '#0f172a',
+                                      textDecoration: isDone ? 'line-through' : 'none',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                      fontWeight: 500,
+                                    }}
+                                  >
+                                    {task.title}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: '11px',
+                                      fontWeight: 700,
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                      background: isDone ? '#dcfce7' : '#f1f5f9',
+                                      color: isDone ? '#15803d' : '#475569',
+                                    }}
+                                  >
+                                    {task.status || 'Pendiente'}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '2px' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b' }}>
+                            {total > 0
+                              ? `${total} tarea(s) sincronizadas con módulo Tareas Kanban`
+                              : 'Vincula tareas operativas con responsables y fechas para medir el avance del hito'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
                 })()}
 
                 {/* 9. Documentos de Sustento (Múltiples con apertura en pestaña nueva) */}
-                <div className="attachment">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span className="field-title" style={{ margin: 0 }}>
+                <div className="field" style={{ marginTop: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      <Paperclip size={15} style={{ color: '#0284c7' }} />
                       Documentos de Sustento ({getActiveAttachments(activeItem).length})
                     </span>
                     <button
                       type="button"
                       style={{
-                        background: 'transparent',
-                        border: 'none',
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        borderRadius: '6px',
                         color: '#0284c7',
-                        fontSize: '11.5px',
+                        fontSize: '12px',
                         fontWeight: 650,
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: 3,
-                        padding: 0,
+                        gap: '5px',
+                        padding: '4px 10px',
+                        transition: 'all 0.15s ease',
                       }}
                       onClick={() => fileRef.current?.click()}
                     >
-                      <Paperclip size={12} />
+                      <Plus size={13} />
                       <span>Adjuntar archivo</span>
                     </button>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {getActiveAttachments(activeItem).map((att) => {
                       const isPdf = att.name.toLowerCase().endsWith('.pdf');
                       const isExcel = att.name.toLowerCase().endsWith('.xls') || att.name.toLowerCase().endsWith('.xlsx') || att.name.toLowerCase().endsWith('.csv');
                       return (
-                        <div key={att.id} className="file-card" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span className={isPdf ? 'pdf' : isExcel ? 'status' : 'pdf'} style={{ background: isExcel ? '#16a34a' : undefined, color: isExcel ? '#ffffff' : undefined, fontSize: '10px', fontWeight: 700, padding: '2px 5px', borderRadius: '4px' }}>
+                        <div
+                          key={att.id}
+                          className="file-card"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            padding: '10px 14px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                          }}
+                        >
+                          <span
+                            className={isPdf ? 'pdf' : isExcel ? 'status' : 'pdf'}
+                            style={{
+                              background: isExcel ? '#16a34a' : isPdf ? '#dc2626' : '#2563eb',
+                              color: '#ffffff',
+                              fontSize: '10.5px',
+                              fontWeight: 750,
+                              padding: '3px 7px',
+                              borderRadius: '5px',
+                              flexShrink: 0,
+                            }}
+                          >
                             {isPdf ? 'PDF' : isExcel ? 'XLS' : 'DOC'}
                           </span>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <b style={{ fontSize: '12px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <b style={{ fontSize: '13px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#0f172a' }}>
                               {att.name}
                             </b>
-                            <small style={{ fontSize: '11px', color: '#64748b' }}>
+                            <small style={{ fontSize: '11.5px', color: '#64748b' }}>
                               {att.date || 'Sustento oficial'}
                             </small>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <button
                               type="button"
                               onClick={() => handleOpenAttachment(att)}
                               style={{
                                 background: '#f1f5f9',
                                 border: '1px solid #cbd5e1',
-                                borderRadius: '5px',
-                                padding: '3px 6px',
+                                borderRadius: '6px',
+                                padding: '4px 9px',
                                 color: '#0f172a',
-                                fontSize: '11px',
+                                fontSize: '11.5px',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '3px',
+                                gap: '4px',
                                 cursor: 'pointer',
+                                fontWeight: 600,
                               }}
                               title="Abrir documento en pestaña nueva"
                             >
-                              <ExternalLink size={11} color="#0284c7" />
-                              <span style={{ fontWeight: 600 }}>Ver</span>
+                              <ExternalLink size={12} color="#0284c7" />
+                              <span>Ver</span>
                             </button>
                             <button
                               type="button"
-                              style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: '4px' }}
+                              style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: '4px', color: '#94a3b8' }}
                               onClick={() => handleRemoveAttachment(att.id)}
                               title="Eliminar archivo"
                             >
-                              <X size={14} />
+                              <X size={15} />
                             </button>
                           </div>
                         </div>
                       );
                     })}
+
+                    {getActiveAttachments(activeItem).length === 0 && (
+                      <div
+                        style={{
+                          padding: '16px',
+                          border: '1px dashed #cbd5e1',
+                          borderRadius: '8px',
+                          textAlign: 'center',
+                          color: '#64748b',
+                          fontSize: '12.5px',
+                          background: '#f8fafc',
+                        }}
+                      >
+                        Sin documentos de sustento adjuntos
+                      </div>
+                    )}
                   </div>
 
                   <input
