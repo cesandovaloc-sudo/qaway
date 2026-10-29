@@ -833,6 +833,7 @@ export default function CronogramaGanttView({
   const [, setForceTasksNonce] = useState(0);
 
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
+  const [deleteConfirmModalOpen, setDeleteConfirmModalOpen] = useState(false);
   const [taskModalMilestone, setTaskModalMilestone] = useState('');
   const [taskOwnerOpen, setTaskOwnerOpen] = useState(false);
   const [taskPriorityOpen, setTaskPriorityOpen] = useState(false);
@@ -853,8 +854,10 @@ export default function CronogramaGanttView({
   editorInitialSnapshotRef.current = editorInitialSnapshot;
   const panelOpenRef = useRef(panelOpen);
   panelOpenRef.current = panelOpen;
+  const deleteConfirmModalOpenRef = useRef(deleteConfirmModalOpen);
   const unsavedAlertOpenRef = useRef(unsavedAlertOpen);
   unsavedAlertOpenRef.current = unsavedAlertOpen;
+  deleteConfirmModalOpenRef.current = deleteConfirmModalOpen;
   const isNewDraftRef = useRef(isNewDraft);
   isNewDraftRef.current = isNewDraft;
   const selectedRef = useRef(selected);
@@ -1620,6 +1623,10 @@ export default function CronogramaGanttView({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        if (deleteConfirmModalOpenRef.current) {
+          setDeleteConfirmModalOpen(false);
+          return;
+        }
         if (unsavedAlertOpenRef.current) {
           // Si la alerta de confirmación está abierta y presiona Escape, se cancela la intención de salir (permanece en el editor)
           setUnsavedAlertOpen(false);
@@ -2037,7 +2044,11 @@ export default function CronogramaGanttView({
       notify('Borrador descartado');
       return;
     }
-    if (!confirm(`¿Eliminar “${activeItem.name}”?`)) return;
+    setDeleteConfirmModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!activeItem) return;
     commitChange((old) => old.filter((x) => x.id !== activeItem.id && x.parentId !== activeItem.id));
     setDrawerDraft(null);
     setSelectedId(null);
@@ -5309,6 +5320,85 @@ export default function CronogramaGanttView({
                 >
                   <Trash2 size={14} />
                   <span>Descartar y salir</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Institucional: Confirmar Eliminación de Hito / Subproceso */}
+        {deleteConfirmModalOpen && activeItem && (
+          <div
+            className="overlay"
+            style={{ zIndex: 99999 }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setDeleteConfirmModalOpen(false);
+            }}
+          >
+            <div className="unsaved-alert-modal" onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '14px' }}>
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '10px',
+                    background: '#fee2e2',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#dc2626',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Trash2 size={22} />
+                </div>
+                <div>
+                  <h3 style={{ margin: '2px 0 4px', fontSize: '16.5px', fontWeight: 750, color: '#0f172a' }}>
+                    ¿Eliminar {activeItem.kind === 'hito' ? 'hito' : 'subproceso'}?
+                  </h3>
+                  <small style={{ fontSize: '12px', color: '#64748b' }}>
+                    Esta acción retirará el registro y sus dependencias directas del cronograma maestro.
+                  </small>
+                </div>
+              </div>
+              <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.55 }}>
+                Estás a punto de eliminar permanentemente <b>"{activeItem.code} {activeItem.name}"</b>.
+                {activeItem.kind === 'hito' && (
+                  <span> Todos los subprocesos y actividades vinculadas a este hito también serán removidos.</span>
+                )}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  style={{ height: '38px', padding: '0 16px', fontSize: '12.5px', fontWeight: 600 }}
+                  onClick={() => setDeleteConfirmModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    height: '38px',
+                    padding: '0 18px',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '12.5px',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'background 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#b91c1c')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#dc2626')}
+                  onClick={handleConfirmDelete}
+                >
+                  <Trash2 size={14} />
+                  <span>Eliminar definitivamente</span>
                 </button>
               </div>
             </div>
