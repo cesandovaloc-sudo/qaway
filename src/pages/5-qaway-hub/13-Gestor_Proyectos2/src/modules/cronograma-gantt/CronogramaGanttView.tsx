@@ -734,25 +734,17 @@ export default function CronogramaGanttView({
 
   const loadProjectItems = (pid: string): Item[] => {
     try {
-      if (pid === 'p1') {
-        try {
-          localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
-        } catch {
-          /* fallback */
-        }
-        return INITIAL_ITEMS;
-      }
       const saved = localStorage.getItem(`qaway-gantt-items-${pid}`);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          // Si por una duplicación accidental previa se guardaron hitos de MINEDU (ej. s11/h1), limpiar a calato
-          const isPolluted = parsed.some((it) => it.id === 's11' || it.code === '1.1');
-          if (isPolluted) {
-            localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify([]));
-            return [];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (pid !== 'p1') {
+            const isPolluted = parsed.some((it) => it.id === 's11' || it.code === '1.1');
+            if (isPolluted) {
+              localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify([]));
+              return [];
+            }
           }
-          // Limpiar hitos fantasma huérfanos que se guardaron accidentalmente sin confirmación
           const cleaned = parsed.filter(
             (it) => !(it.id.startsWith('new-') && (it.name === 'Nuevo hito' || it.name === 'Nuevo subproceso') && it.progress === 0 && !it.description)
           );
@@ -762,6 +754,14 @@ export default function CronogramaGanttView({
           }
           return parsed;
         }
+      }
+      if (pid === 'p1') {
+        try {
+          localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
+        } catch {
+          /* fallback */
+        }
+        return INITIAL_ITEMS;
       }
       return []; // Nuevo proyecto siempre inicia completamente vacío / calato
     } catch {
