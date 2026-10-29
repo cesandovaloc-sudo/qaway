@@ -92,7 +92,7 @@ export default function Topbar({
           aria-label="Ayuda del sistema"
           title="Ayuda y documentación normativa"
           onClick={() =>
-            notify('MINEDU - DIGERE · Guía oficial de uso para el monitoreo territorial')
+            notify('Guía oficial de uso del gestor de proyectos')
           }
         >
           <CircleHelp size={18} />
@@ -201,7 +201,7 @@ export default function Topbar({
                   {userRole === 'coordinador' ? 'Carlos Mendoza' : 'María Salazar'}
                 </b>
                 <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block' }}>
-                  {userRole === 'coordinador' ? 'cmendoza@minedu.gob.pe' : 'msalazar@minedu.gob.pe'}
+                  {userRole === 'coordinador' ? 'cmendoza@qawaylab.com' : 'msalazar@qawaylab.com'}
                 </span>
                 <span
                   style={{

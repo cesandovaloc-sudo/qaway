@@ -815,7 +815,7 @@ export default function CronogramaGanttView({
   }, []);
   const [newMenu, setNewMenu] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
-  const [attachment, setAttachment] = useState('OFICIO_MULTIPLE_00032-2026-MINEDU_Dotacion2027.pdf');
+  const [attachment, setAttachment] = useState('');
   const [pickedFile, setPickedFile] = useState('');
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
@@ -1387,7 +1387,7 @@ export default function CronogramaGanttView({
     const item: Item = {
       id,
       code: kind === 'hito' ? `${n}.` : `${Math.ceil(n / 3)}.${n}`,
-      name: kind === 'hito' ? 'Nuevo hito oficial' : 'Nuevo subproceso operativo',
+      name: kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso',
       kind,
       parentId: kind === 'subproceso' ? (selected?.kind === 'hito' ? selected.id : hitos[0]?.id) : undefined,
       start: '2026-10-26',
@@ -1395,10 +1395,10 @@ export default function CronogramaGanttView({
       progress: 0,
       status: 'Pendiente',
       expanded: true,
-      description: 'Definido por el Coordinador General.',
+      description: '',
       reportType: 'Línea de tiempo',
-      region: 'Todas las Regiones',
-      gestor: 'Carlos Mendoza',
+      region: 'Todas',
+      gestor: 'Sin asignar',
     };
 
     commitChange((old) =>
@@ -1433,7 +1433,7 @@ export default function CronogramaGanttView({
 
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
-    a.download = `Cronograma_Maestro_MINEDU_Dotacion_2027_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `Cronograma_Maestro_${(activeProject?.name || 'Proyecto').replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
     notify('Cronograma maestro exportado a CSV');
@@ -1457,15 +1457,9 @@ export default function CronogramaGanttView({
               <CalendarDays size={26} />
             </span>
             <div>
-              <h1>
-                {projectId === 'p1'
-                  ? 'Gestión del Cronograma Regional (Gantt Maestro)'
-                  : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`}
-              </h1>
+              <h1>Cronograma Maestro · {activeProject?.name || 'Gestión del Proyecto'}</h1>
               <p>
-                {projectId === 'p1'
-                  ? 'Eleva y calibra la línea de tiempo oficial, importa normativas MINEDU y sincroniza fechas límite para los gestores territoriales.'
-                  : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'}
+                Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.
               </p>
             </div>
           </div>
@@ -1473,7 +1467,7 @@ export default function CronogramaGanttView({
             <button
               className="btn secondary"
               onClick={exportExcelTemplate}
-              title="Descargar plantilla oficial de cronograma para completar en Excel"
+              title="Descargar plantilla de cronograma para completar en Excel"
             >
               <FileSpreadsheet size={15} />
               <span>Plantilla Excel</span>
@@ -1486,7 +1480,7 @@ export default function CronogramaGanttView({
               }}
             >
               <Upload size={15} />
-              <span>Importar Cronograma Oficial</span>
+              <span>Importar Cronograma</span>
               <ChevronDown size={14} />
             </button>
             <div className="menu-wrap">
@@ -1529,8 +1523,8 @@ export default function CronogramaGanttView({
             </span>
             <div className="metric-copy">
               <b>{hitos.length}</b>
-              <strong>Hitos Rectores</strong>
-              <small>oficiales del proyecto</small>
+              <strong>Hitos Principales</strong>
+              <small>del proyecto</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -1554,7 +1548,7 @@ export default function CronogramaGanttView({
             <div className="metric-copy">
               <b>{inprog}</b>
               <strong>En Curso</strong>
-              <small>con actividad territorial</small>
+              <small>en ejecución activa</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -1566,7 +1560,7 @@ export default function CronogramaGanttView({
             <div className="metric-copy">
               <b>{late}</b>
               <strong>Con Retraso</strong>
-              <small>alerta para gestores</small>
+              <small>atención requerida</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -1576,8 +1570,8 @@ export default function CronogramaGanttView({
               <b>{overall}%</b>
             </div>
             <div>
-              <strong>Avance Regional Global</strong>
-              <small>según cronograma oficial</small>
+              <strong>Avance Global</strong>
+              <small>según cronograma</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -1960,7 +1954,7 @@ export default function CronogramaGanttView({
                     notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
                   }
                 />
-                <span>Hito Rector / Subproceso Oficial</span>
+                <span>Hito / Subproceso</span>
                 <div className="head-col-actions">
                   <button
                     type="button"
@@ -1971,7 +1965,7 @@ export default function CronogramaGanttView({
                     }}
                     title={
                       allHitosExpanded
-                        ? 'Colapsar a solo hitos rectores (Nivel 1)'
+                        ? 'Colapsar a solo hitos principales (Nivel 1)'
                         : 'Desplegar todos los subprocesos (Nivel 2)'
                     }
                   >
@@ -2773,7 +2767,7 @@ export default function CronogramaGanttView({
           {/* Footer de Paginación */}
           <footer className="footer">
             <span>
-              Mostrando {shown.length ? 1 : 0}–{shown.length} de {items.length} registros oficiales
+              Mostrando {shown.length ? 1 : 0}–{shown.length} de {items.length} registros
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <button
@@ -2788,10 +2782,10 @@ export default function CronogramaGanttView({
               <button
                 className="btn secondary"
                 style={{ minHeight: '32px', fontSize: '12px' }}
-                onClick={() => notify('Cronograma maestro sincronizado con la red de gestores')}
+                onClick={() => notify('Cronograma maestro sincronizado con el equipo')}
               >
                 <CheckCircle2 size={14} color="#16a34a" />
-                <span>Publicar a Gestores Territoriales</span>
+                <span>Publicar Cronograma</span>
               </button>
             </div>
           </footer>
@@ -2813,7 +2807,7 @@ export default function CronogramaGanttView({
                 >
                   <ChevronLeft size={18} />
                 </button>
-                <h2>Editar {selected.kind === 'hito' ? 'Hito Rector' : 'Subproceso'}</h2>
+                <h2>Editar {selected.kind === 'hito' ? 'Hito' : 'Subproceso'}</h2>
               </div>
               <button
                 type="button"
@@ -2847,7 +2841,7 @@ export default function CronogramaGanttView({
 
             <div className="editor-body">
               <label className="field">
-                <span>Nombre oficial ({selected.kind})</span>
+                <span>Nombre ({selected.kind === 'hito' ? 'Hito' : 'Subproceso'})</span>
                 <input
                   value={selected.name}
                   onChange={(e) => update(selected.id, { name: e.target.value })}
@@ -2922,7 +2916,7 @@ export default function CronogramaGanttView({
 
               {selected.kind === 'hito' && (
                 <label className="field">
-                  <span>Tipo de reporte para UGEL</span>
+                  <span>Tipo de reporte</span>
                   <select
                     value={selected.reportType || 'Línea de tiempo'}
                     onChange={(e) => update(selected.id, { reportType: e.target.value })}
@@ -2976,7 +2970,7 @@ export default function CronogramaGanttView({
                 <input
                   value={selected.deliverable || ''}
                   onChange={(e) => update(selected.id, { deliverable: e.target.value })}
-                  placeholder="Ej. Acta de entrega, Padrón SIGA visado, RD aprobatoria..."
+                  placeholder="Ej. Acta de entrega, Informe de avance, Certificado de conformidad..."
                 />
               </label>
 
@@ -2986,7 +2980,7 @@ export default function CronogramaGanttView({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <CheckSquare size={13} style={{ color: '#2563eb' }} />
                     <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
-                      Tareas territoriales vinculadas
+                      Tareas vinculadas
                     </span>
                   </div>
                   <span className="task-relation-badge">
@@ -3004,13 +2998,13 @@ export default function CronogramaGanttView({
                   />
                 </div>
                 <small style={{ fontSize: '11px', color: '#64748b', display: 'block', marginTop: 4 }}>
-                  {selected.unit || 'Seguimiento en las 13 UGEL de Junín'}
+                  {selected.unit || 'Supervisión en sedes operativas'}
                 </small>
               </div>
 
               {/* Archivo de Referencia Normativa */}
               <div className="attachment">
-                <span className="field-title">Documento de Sustento Oficial</span>
+                <span className="field-title">Documento de Sustento</span>
                 {attachment && (
                   <div className="file-card">
                     <span className="pdf">PDF</span>
@@ -3019,7 +3013,7 @@ export default function CronogramaGanttView({
                         {attachment}
                       </b>
                       <small style={{ fontSize: '11px', color: '#64748b' }}>
-                        {pickedFile ? 'Archivo seleccionado' : 'Referencia oficial MINEDU'}
+                        {pickedFile ? 'Archivo seleccionado' : 'Documento adjunto'}
                       </small>
                     </div>
                     <button
@@ -3032,7 +3026,7 @@ export default function CronogramaGanttView({
                 )}
                 <button className="attach" onClick={() => fileRef.current?.click()}>
                   <Paperclip size={15} />
-                  <span>Adjuntar nuevo archivo oficial</span>
+                  <span>Adjuntar documento de sustento</span>
                 </button>
                 <input
                   ref={fileRef}
@@ -3095,10 +3089,10 @@ export default function CronogramaGanttView({
                 <FileUp size={22} />
               </div>
               <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                Importar Cronograma Oficial desde Cero
+                Importar Cronograma desde Cero
               </h2>
               <p style={{ fontSize: '13px', color: '#64748b', margin: '8px 0 16px', lineHeight: 1.5 }}>
-                Sube el archivo normativo del Oficio Múltiple MINEDU (PDF o Excel) para vincularlo como base oficial de los hitos regionales.
+                Sube el archivo de cronograma o plan de trabajo (PDF, Excel o CSV) para vincularlo como base de los hitos del proyecto.
               </p>
               <button className="drop" onClick={() => fileRef.current?.click()}>
                 <Upload size={24} />
@@ -3118,8 +3112,8 @@ export default function CronogramaGanttView({
                 }}
               >
                 <div>
-                  <b style={{ fontSize: '12px', color: '#1e293b', display: 'block' }}>¿No tienes el formato oficial?</b>
-                  <small style={{ fontSize: '11px', color: '#64748b' }}>Descarga la plantilla con ejemplos para completar en Excel</small>
+                  <b style={{ fontSize: '12px', color: '#1e293b', display: 'block' }}>¿No tienes la plantilla de cronograma?</b>
+                  <small style={{ fontSize: '11px', color: '#64748b' }}>Descarga la plantilla estructurada para completar en Excel</small>
                 </div>
                 <button
                   type="button"

@@ -49,73 +49,82 @@ interface ChatMessage {
 const MODULE_CONTEXT_INFO: Record<ModuleKey, { title: string; hint: string; suggestions: string[] }> = {
   cronograma: {
     title: 'Cronograma Gantt Maestro',
-    hint: 'Línea de tiempo, hitos de dotación y plazos por UGEL.',
+    hint: 'Línea de tiempo, hitos clave y plazos por frente operativo.',
     suggestions: [
       '📊 Analizar cuellos de botella y fechas críticas',
       '📑 Interpretar Excel para proyectar tareas',
       '⚠️ Detectar hitos con retraso en el cronograma'
     ]
   },
+  sedes: {
+    title: 'Sedes de Supervisión',
+    hint: 'Monitoreo de avance y cumplimiento por sede operativa.',
+    suggestions: [
+      '🏢 Estado de cumplimiento por sede',
+      '⚠️ Sedes con observaciones o retrasos',
+      '📈 Comparativa de rendimiento entre sedes'
+    ]
+  },
   hitos: {
-    title: 'Hitos Rectores MINEDU',
-    hint: 'Control de cumplimiento normativo y entregables territoriales.',
+    title: 'Hitos y Entregables Clave',
+    hint: 'Control de cumplimiento y entregables del proyecto.',
     suggestions: [
       '🎯 Revisar hitos en riesgo de incumplimiento',
-      '📑 Cruzar fechas de corte con Oficio Múltiple',
+      '📑 Cruzar fechas de corte con entregables',
       '📋 Resumen ejecutivo de entregables'
     ]
   },
   tareas: {
     title: 'Bandeja Operativa de Tareas',
-    hint: 'Seguimiento por gestor, tablero kanban y lista de pendientes.',
+    hint: 'Seguimiento por responsable, tablero kanban y lista de pendientes.',
     suggestions: [
       '✅ Tareas pendientes con mayor prioridad',
-      '👤 Distribución de carga por gestor territorial',
+      '👤 Distribución de carga por responsable de campo',
       '📅 Tareas que vencen esta semana'
     ]
   },
   reportes: {
-    title: 'Reporteador Territorial',
-    hint: 'Métricas de avance físico, financiero y distribución regional.',
+    title: 'Reporteador del Proyecto',
+    hint: 'Métricas de avance físico, financiero y ejecución operativa.',
     suggestions: [
-      '📈 Explicar avance ponderado del 67%',
-      '📊 Comparativa de cumplimiento entre UGEL',
+      '📈 Explicar avance ponderado del proyecto',
+      '📊 Comparativa de cumplimiento entre sedes',
       '📑 Generar resumen para informe mensual'
     ]
   },
   reuniones: {
-    title: 'Reuniones y Traslados',
-    hint: 'Agendas territoriales, traslados y mesas de trabajo UGEL.',
+    title: 'Reuniones y Coordinación',
+    hint: 'Agendas de trabajo, traslados y minutas de coordinación.',
     suggestions: [
-      '🗓️ Próximas reuniones de coordinación territorial',
-      '🚗 Seguimiento de traslados a UGEL distritales',
+      '🗓️ Próximas reuniones de coordinación',
+      '🚗 Seguimiento de traslados a sedes',
       '📝 Puntos clave tratados en la última mesa'
     ]
   },
   resumen: {
     title: 'Resumen Ejecutivo del Proyecto',
-    hint: 'Visión macro, salud del proyecto y metas MINEDU 2027.',
+    hint: 'Visión macro, salud del proyecto y metas clave.',
     suggestions: [
-      '📌 Diagnóstico general del proyecto regional',
+      '📌 Diagnóstico general del proyecto',
       '⚡ Principales alertas tempranas activas',
-      '🎯 Estado de la dotación de materiales 2027'
+      '🎯 Estado de avance y cumplimiento de metas'
     ]
   },
   usuarios: {
-    title: 'Equipo y Gestores Regionales',
-    hint: 'Directorio de coordinadores y gestores territoriales.',
+    title: 'Equipo y Supervisores',
+    hint: 'Directorio de coordinadores y responsables de campo.',
     suggestions: [
-      '👥 Gestores asignados a la región Junín',
-      '📞 Datos de contacto de la UGEL Huancayo',
+      '👥 Supervisores asignados a sedes operativas',
+      '📞 Directorio de contactos y responsables',
       '📊 Carga operativa por especialista'
     ]
   },
   actas: {
     title: 'Actas y Acuerdos',
-    hint: 'Compromisos oficiales suscritos con las autoridades.',
+    hint: 'Compromisos oficiales suscritos y seguimiento de actas.',
     suggestions: [
       '🤝 Acuerdos pendientes de cumplimiento',
-      '📑 Actas firmadas con DRE Junín',
+      '📑 Actas firmadas y acuerdos vigentes',
       '⏱️ Acuerdos con fecha límite próxima'
     ]
   },
@@ -313,7 +322,7 @@ export default function FloatingChatAssistant({
         {
           id: 'bot-' + Date.now(),
           sender: 'assistant',
-          text: '📌 El PDF ha sido registrado como documento de referencia oficial para las 13 UGEL.',
+          text: '📌 El documento ha sido registrado como sustento de referencia oficial para las sedes operativas.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -324,10 +333,10 @@ export default function FloatingChatAssistant({
           id: 'bot-' + Date.now(),
           sender: 'assistant',
           text: `📋 **Vista preliminar de filas leídas:**\n\n` +
-            `* \`1.1\` · Conformación de comités UGEL (100% · Completado)\n` +
-            `* \`1.2\` · Validación plan de distribución (55% · En proceso)\n` +
-            `* \`2.1\` · Directorio de almacenes (100% · Completado)\n` +
-            `* \`2.2\` · Recepción en almacén territorial (30% · En proceso)`,
+            `* \`1.1\` · Conformación de equipos de trabajo (100% · Completado)\n` +
+            `* \`1.2\` · Validación de plan operativo (55% · En proceso)\n` +
+            `* \`2.1\` · Levantamiento y registro de sedes (100% · Completado)\n` +
+            `* \`2.2\` · Despliegue en sedes de supervisión (30% · En proceso)`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);

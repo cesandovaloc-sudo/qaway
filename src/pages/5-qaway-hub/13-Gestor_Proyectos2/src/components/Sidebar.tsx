@@ -46,8 +46,7 @@ export default function Sidebar({
   notifyActive,
   userRole,
   projects = [
-    { id: 'p1', code: 'PRJ-MIN-2027-01', name: 'MINEDU · Dotación 2027', region: 'DRE Junín (9 UGEL)', subtext: 'Seguimiento regional' },
-    { id: 'p2', code: 'PRJ-MIN-2027-02', name: 'MINEDU · Conectividad Rural 2027', region: 'DRE Cusco (14 UGEL)', subtext: 'Infraestructura digital' },
+    { id: 'p1', code: 'PRJ-MIN-2027-01', name: 'MINEDU · Dotación 2027', region: 'Junín', subtext: 'Seguimiento de operaciones' },
   ],
   activeProjectId = 'p1',
   onSelectProject,
@@ -97,7 +96,7 @@ export default function Sidebar({
           <i style={{ background: userRole === 'coordinador' ? '#60a5fa' : '#7388e2' }} />
           <div>
             <b>{activeProject?.name || 'MINEDU · Dotación 2027'}</b>
-            <small>{activeProject?.region || activeProject?.subtext || 'Seguimiento regional'}</small>
+            {activeProject?.code && <small>{activeProject.code}</small>}
           </div>
           <ChevronDown
             size={15}
@@ -174,7 +173,7 @@ export default function Sidebar({
                       {p.name}
                     </b>
                     <small style={{ display: 'block', fontSize: '9.5px', color: '#94a3b8' }}>
-                      {p.region}
+                      {p.code}
                     </small>
                   </div>
                   {isSelected && <Check size={12} color="#60a5fa" />}
