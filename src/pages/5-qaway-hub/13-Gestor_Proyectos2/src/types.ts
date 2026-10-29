@@ -1,5 +1,5 @@
 // Tipos compartidos del shell maestro.
-export type ModuleKey = 'resumen' | 'cronograma' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'configuracion';
+export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'configuracion';
 
 // Prefijo base del Gestor de Proyectos acoplado al Hub
 export const BASE_PATH = '/hub/gestor_proyecto';
@@ -8,6 +8,7 @@ export const BASE_PATH = '/hub/gestor_proyecto';
 export const MODULE_SLUGS: Record<ModuleKey, string> = {
   resumen: `${BASE_PATH}/resumen`,
   cronograma: `${BASE_PATH}/cronograma`,
+  sedes: `${BASE_PATH}/sedes`,
   tareas: `${BASE_PATH}/tareas`,
   hitos: `${BASE_PATH}/hitos`,
   reuniones: `${BASE_PATH}/reuniones`,
@@ -22,6 +23,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   // Rutas canónicas con prefijo /hub/gestor_proyecto
   [`${BASE_PATH}/resumen`]: 'resumen',
   [`${BASE_PATH}/cronograma`]: 'cronograma',
+  [`${BASE_PATH}/sedes`]: 'sedes',
   [`${BASE_PATH}/tareas`]: 'tareas',
   [`${BASE_PATH}/hitos`]: 'hitos',
   [`${BASE_PATH}/reuniones`]: 'reuniones',
@@ -36,6 +38,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   // Rutas cortas sin prefijo (compatibilidad y redirección si el usuario entra a /reuniones, etc.)
   '/resumen': 'resumen',
   '/cronograma': 'cronograma',
+  '/sedes': 'sedes',
   '/tareas': 'tareas',
   '/hitos': 'hitos',
   '/reuniones': 'reuniones',

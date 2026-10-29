@@ -18,17 +18,26 @@ interface TopbarProps {
   userRole: UserRole;
   onChangeRole: (role: UserRole) => void;
   notify: (msg: string) => void;
+  activeProject?: {
+    id: string;
+    code: string;
+    name: string;
+    region: string;
+    subtext?: string;
+  };
 }
 
 const MODULE_LABELS: Record<ModuleKey, string> = {
   resumen: 'Resumen del proyecto',
   cronograma: 'Cronograma del proyecto',
+  sedes: 'Sedes de Supervisión',
   tareas: 'Tareas',
   hitos: 'Hitos rectores',
   reuniones: 'Reuniones',
   reportes: 'Reportes y estadísticas',
   usuarios: 'Equipo del proyecto',
   actas: 'Actas y acuerdos',
+  configuracion: 'Configuración del sistema',
 };
 
 export default function Topbar({
@@ -36,6 +45,7 @@ export default function Topbar({
   userRole,
   onChangeRole,
   notify,
+  activeProject,
 }: TopbarProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,13 +71,16 @@ export default function Topbar({
     );
   };
 
+  const projectContext = activeProject?.subtext || activeProject?.region || 'Qaway Lab';
+  const projectName = activeProject?.name || 'Proyecto';
+
   return (
     <header className="qm-topbar">
-      {/* Breadcrumb oficial en el extremo izquierdo */}
+      {/* Breadcrumb dinámico sincronizado con el proyecto activo */}
       <div className="qm-topbar-left">
-        <span>MINEDU</span>
+        <span>{projectContext}</span>
         <ChevronRight size={13} color="#94a3b8" />
-        <span>Dotación 2027</span>
+        <span style={{ fontWeight: 650, color: '#0f172a' }}>{projectName}</span>
         <ChevronRight size={13} color="#94a3b8" />
         <b>{MODULE_LABELS[activeModule] || 'Panel'}</b>
       </div>

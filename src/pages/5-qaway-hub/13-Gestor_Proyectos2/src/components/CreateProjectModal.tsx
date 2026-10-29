@@ -241,6 +241,9 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
   const [name, setName] = useState('');
   const [region, setRegion] = useState('');
   const [entidad, setEntidad] = useState('');
+  const [presupuesto, setPresupuesto] = useState('');
+  const [sponsor, setSponsor] = useState('');
+  const [riskLevel, setRiskLevel] = useState('Bajo');
   const [metodologia, setMetodologia] = useState('Híbrido: Hitos Clave + Tareas de Campo');
   const [startDate, setStartDate] = useState('2026-11-01');
   const [endDate, setEndDate] = useState('2027-06-30');
@@ -258,10 +261,15 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
       region: region.trim() || 'Zona Central',
       entidad: entidad.trim() || 'Qaway Lab',
       metodologia,
+      budget: presupuesto.trim() || 'S/ 350,000',
+      sponsor: sponsor.trim() || 'Directorio General',
+      riskLevel,
     });
     setName('');
     setRegion('');
     setEntidad('');
+    setPresupuesto('');
+    setSponsor('');
     setOpenCal(null);
     onClose();
   };
@@ -443,7 +451,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
             </label>
           </div>
 
-          <div style={{ marginBottom: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px', marginBottom: '14px' }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px', fontWeight: 650, color: '#334155' }}>
               Metodología Operativa
               <select
@@ -463,6 +471,66 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
                 <option>Gestión por Frentes y Sedes de Supervisión</option>
                 <option>Línea de Tiempo Tradicional (Gantt Maestro)</option>
               </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px', fontWeight: 650, color: '#334155' }}>
+              Nivel de Riesgo Inicial
+              <select
+                value={riskLevel}
+                onChange={(e) => setRiskLevel(e.target.value)}
+                style={{
+                  padding: '9px 12px',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '9px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                }}
+              >
+                <option>Bajo</option>
+                <option>Medio</option>
+                <option>Alto</option>
+                <option>Crítico</option>
+              </select>
+            </label>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px', fontWeight: 650, color: '#334155' }}>
+              Presupuesto Estimado / Techo Financiero
+              <input
+                type="text"
+                value={presupuesto}
+                onChange={(e) => setPresupuesto(e.target.value)}
+                placeholder="Ej. S/ 450,000 ó $ 120,000 USD"
+                style={{
+                  padding: '9px 12px',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '9px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  color: '#0f172a',
+                  background: '#ffffff',
+                }}
+              />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px', fontWeight: 650, color: '#334155' }}>
+              Patrocinador / Stakeholder Principal
+              <input
+                type="text"
+                value={sponsor}
+                onChange={(e) => setSponsor(e.target.value)}
+                placeholder="Ej. Gerencia General / Directorio"
+                style={{
+                  padding: '9px 12px',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '9px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  color: '#0f172a',
+                  background: '#ffffff',
+                }}
+              />
             </label>
           </div>
 

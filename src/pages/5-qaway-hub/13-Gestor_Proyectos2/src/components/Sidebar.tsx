@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ModuleKey, UserRole } from '../types';
 import {
   BarChart3,
+  Building2,
   CalendarDays,
   Check,
   CheckSquare,
@@ -228,6 +229,14 @@ export default function Sidebar({
       >
         <CalendarDays size={18} />
         <span>Cronograma</span>
+      </button>
+
+      <button
+        className={active === 'sedes' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('sedes')}
+      >
+        <Building2 size={18} />
+        <span>Sedes de Supervisión</span>
       </button>
 
       <button

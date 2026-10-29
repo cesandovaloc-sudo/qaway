@@ -11,6 +11,7 @@ import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
+import SedesView from './modules/sedes/SedesView';
 import CronogramaView from './modules/cronograma/CronogramaView';
 import CronogramaGanttView from './modules/cronograma-gantt/CronogramaGanttView';
 import ReunionesView from './modules/reuniones/ReunionesView';
@@ -29,6 +30,10 @@ export interface ProjectItem {
   name: string;
   region: string;
   subtext?: string;
+  budget?: string;
+  sponsor?: string;
+  riskLevel?: string;
+  metodologia?: string;
 }
 
 const DEFAULT_PROJECTS: ProjectItem[] = [
@@ -38,6 +43,10 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     name: 'MINEDU · Dotación 2027',
     region: 'DRE Junín (9 UGEL)',
     subtext: 'Seguimiento regional',
+    budget: 'S/ 850,000',
+    sponsor: 'MINEDU - DIGERE',
+    riskLevel: 'Medio',
+    metodologia: 'Híbrido: Hitos Clave + Tareas de Campo',
   },
   {
     id: 'p2',
@@ -45,13 +54,17 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     name: 'MINEDU · Conectividad Rural 2027',
     region: 'DRE Cusco (14 UGEL)',
     subtext: 'Infraestructura digital',
+    budget: 'S/ 1,200,000',
+    sponsor: 'MINEDU - PRONATEL',
+    riskLevel: 'Alto',
+    metodologia: 'Gestión por Frentes y Sedes de Supervisión',
   },
 ];
 
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
@@ -187,6 +200,9 @@ function App() {
     region: string;
     entidad: string;
     metodologia: string;
+    budget?: string;
+    sponsor?: string;
+    riskLevel?: string;
   }) => {
     const item: ProjectItem = {
       id: newProj.id,
@@ -194,13 +210,19 @@ function App() {
       name: newProj.name,
       region: newProj.region,
       subtext: newProj.entidad,
+      budget: newProj.budget,
+      sponsor: newProj.sponsor,
+      riskLevel: newProj.riskLevel,
+      metodologia: newProj.metodologia,
     };
     setProjects((prev) => [item, ...prev]);
     setActiveProjectId(item.id);
     navigate(MODULE_SLUGS['cronograma']);
     setCronogramaPerspective('maestro');
-    notifyActive(`Proyecto regional "${item.name}" creado con éxito. Cronograma maestro listo para configurar.`);
+    notifyActive(`Proyecto "${item.name}" creado con éxito. Cronograma maestro y frentes listos.`);
   };
+
+  const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
 
   const notifyActive = (m: string) => {
     binds.current[active]?.notify(m);
@@ -232,6 +254,7 @@ function App() {
           userRole={userRole}
           onChangeRole={handleChangeRole}
           notify={notifyActive}
+          activeProject={activeProject}
         />
         <main className="qm-canvas">
           <div className={active === 'resumen' ? 'res-v1 qm-pane-active' : 'res-v1 qm-pane'}>
@@ -255,8 +278,15 @@ function App() {
             }
           >
             <CronogramaGanttView
+              activeProject={activeProject}
               onSwitchPerspective={setCronogramaPerspective}
               onActions={(h) => { binds.current['cronograma'] = h; }}
+            />
+          </div>
+          <div className={active === 'sedes' ? 'sd-v1 qm-pane-active' : 'sd-v1 qm-pane'}>
+            <SedesView
+              activeProjectId={activeProjectId}
+              onActions={(h) => { binds.current['sedes'] = h; }}
             />
           </div>
           <div
