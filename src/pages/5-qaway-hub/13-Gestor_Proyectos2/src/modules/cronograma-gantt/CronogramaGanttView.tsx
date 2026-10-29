@@ -745,13 +745,6 @@ export default function CronogramaGanttView({
               return [];
             }
           }
-          const cleaned = parsed.filter(
-            (it) => !(it.id.startsWith('new-') && (it.name === 'Nuevo hito' || it.name === 'Nuevo subproceso') && it.progress === 0 && !it.description)
-          );
-          if (cleaned.length !== parsed.length) {
-            localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify(cleaned));
-            return cleaned;
-          }
           return parsed;
         }
       }
@@ -1965,7 +1958,7 @@ export default function CronogramaGanttView({
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
   const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false) => {
-    const id = 'new-' + Date.now();
+    const id = (kind === 'hito' ? 'h-' : 'sub-') + Date.now();
     const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
     let code = `${hitos.length + 1}.`;
     let defaultStart = '2026-10-26';
