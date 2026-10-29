@@ -216,6 +216,44 @@ function App() {
     notifyActive(`Proyecto "${item.name}" creado con éxito. Cronograma maestro y frentes listos.`);
   };
 
+  const handleDeleteProject = (id: string) => {
+    if (id === 'p1') {
+      notifyActive('El proyecto rector oficial no puede ser eliminado.');
+      return;
+    }
+    try {
+      localStorage.removeItem(`qaway-gantt-items-${id}`);
+    } catch {
+      /* fallback */
+    }
+    setProjects((prev) => {
+      const next = prev.filter((p) => p.id !== id);
+      try {
+        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(next));
+      } catch {
+        /* fallback */
+      }
+      return next;
+    });
+    if (activeProjectId === id) {
+      setActiveProjectId('p1');
+    }
+    notifyActive('Proyecto eliminado definitivamente del sistema.');
+  };
+
+  const handleUpdateProject = (updated: ProjectItem) => {
+    setProjects((prev) => {
+      const next = prev.map((p) => (p.id === updated.id ? updated : p));
+      try {
+        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(next));
+      } catch {
+        /* fallback */
+      }
+      return next;
+    });
+    notifyActive(`Proyecto "${updated.name}" actualizado con éxito.`);
+  };
+
   const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
 
   const notifyActive = (m: string) => {
@@ -311,7 +349,14 @@ function App() {
             <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
           </div>
           <div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
-            <ConfiguracionView onActions={(h) => { binds.current['configuracion'] = h; }} />
+            <ConfiguracionView
+              projects={projects}
+              activeProjectId={activeProjectId}
+              onSelectProject={setActiveProjectId}
+              onUpdateProject={handleUpdateProject}
+              onDeleteProject={handleDeleteProject}
+              onActions={(h) => { binds.current['configuracion'] = h; }}
+            />
           </div>
         </main>
       </div>

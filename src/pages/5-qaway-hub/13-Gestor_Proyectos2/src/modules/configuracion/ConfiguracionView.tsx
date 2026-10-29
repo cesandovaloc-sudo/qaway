@@ -1,24 +1,31 @@
 // @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './configuracion.css';
 import {
   AlertCircle,
+  AlertTriangle,
   Bot,
+  Building2,
   Calendar,
   Check,
   CheckCircle2,
   Clock3,
+  Download,
   Eye,
   EyeOff,
+  FolderKanban,
   Globe2,
   Key,
   Layers,
   RotateCcw,
   Save,
+  ShieldAlert,
   ShieldCheck,
   Sliders,
   SlidersHorizontal,
-  Sparkles
+  Sparkles,
+  Trash2,
+  X,
 } from 'lucide-react';
 import {
   getStoredGeminiConfig,
@@ -33,6 +40,27 @@ import {
 
 export type ConfigBinds = { notify: (m: string) => void };
 
+export interface ProjectItem {
+  id: string;
+  code: string;
+  name: string;
+  region: string;
+  subtext?: string;
+  budget?: string;
+  sponsor?: string;
+  riskLevel?: string;
+  metodologia?: string;
+}
+
+export interface ConfiguracionViewProps {
+  onActions?: (h: ConfigBinds) => void;
+  projects?: ProjectItem[];
+  activeProjectId?: string;
+  onSelectProject?: (id: string) => void;
+  onUpdateProject?: (updated: ProjectItem) => void;
+  onDeleteProject?: (id: string) => void;
+}
+
 const TIMEZONES = [
   { id: 'America/Lima', label: 'America/Lima (UTC-05:00) · Hora Oficial de Perú' },
   { id: 'America/Bogota', label: 'America/Bogota (UTC-05:00) · Colombia / Región Andina' },
@@ -41,8 +69,15 @@ const TIMEZONES = [
   { id: 'UTC', label: 'UTC (UTC+00:00) · Tiempo Universal Coordinado' },
 ];
 
-export default function ConfiguracionView({ onActions }: { onActions?: (h: ConfigBinds) => void }) {
-  const [activeTab, setActiveTab] = useState<'general' | 'cronograma' | 'auditoria' | 'asistente'>('general');
+export default function ConfiguracionView({
+  onActions,
+  projects = [],
+  activeProjectId = 'p1',
+  onSelectProject,
+  onUpdateProject,
+  onDeleteProject,
+}: ConfiguracionViewProps) {
+  const [activeTab, setActiveTab] = useState<'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente'>('general');
   const [timezone, setTimezone] = useState(() => {
     return localStorage.getItem('qaway-system-timezone-v1') || 'America/Lima';
   });
@@ -58,6 +93,69 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
   const [toleranceDays, setToleranceDays] = useState(() => {
     return localStorage.getItem('qaway-tolerance-days-v1') || '5';
   });
+
+  // Proyecto activo en configuración
+  const currentProj = useMemo(() => {
+    return projects.find((p) => p.id === activeProjectId) || projects[0] || {
+      id: 'p1',
+      code: 'PRJ-MIN-2027-01',
+      name: 'MINEDU · Dotación 2027',
+      region: 'Junín',
+      subtext: 'Seguimiento de operaciones',
+    };
+  }, [projects, activeProjectId]);
+
+  const [editName, setEditName] = useState(currentProj.name);
+  const [editCode, setEditCode] = useState(currentProj.code);
+  const [editRegion, setEditRegion] = useState(currentProj.region || '');
+  const [editSubtext, setEditSubtext] = useState(currentProj.subtext || '');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  useEffect(() => {
+    setEditName(currentProj.name);
+    setEditCode(currentProj.code);
+    setEditRegion(currentProj.region || '');
+    setEditSubtext(currentProj.subtext || '');
+  }, [currentProj]);
+
+  const handleSaveCurrentProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editName.trim()) {
+      notify('El nombre del proyecto no puede estar vacío');
+      return;
+    }
+    onUpdateProject?.({
+      ...currentProj,
+      name: editName.trim(),
+      code: editCode.trim() || currentProj.code,
+      region: editRegion.trim(),
+      subtext: editSubtext.trim(),
+    });
+    notify(`Proyecto "${editName}" actualizado correctamente.`);
+  };
+
+  const handleExportProject = () => {
+    const ganttData = localStorage.getItem(`qaway-gantt-items-${currentProj.id}`) || '[]';
+    const payload = {
+      project: currentProj,
+      cronograma: JSON.parse(ganttData),
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Backup_${currentProj.code || currentProj.id}_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    notify('Copia de seguridad del proyecto exportada con éxito.');
+  };
+
+  const handleConfirmDelete = () => {
+    if (currentProj.id === 'p1') return;
+    onDeleteProject?.(currentProj.id);
+    setIsDeleteModalOpen(false);
+  };
 
   // Estado del Asistente IA (Google Gemini RAG)
   const [geminiConfig, setGeminiConfig] = useState(getStoredGeminiConfig);
@@ -168,6 +266,14 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
           >
             <Clock3 size={15} />
             <span>Zona Horaria y Fecha Operativa</span>
+          </button>
+          <button
+            type="button"
+            className={`tab-item ${activeTab === 'proyectos' ? 'active' : ''}`}
+            onClick={() => setActiveTab('proyectos')}
+          >
+            <FolderKanban size={15} />
+            <span>Gestión del Proyecto Activo</span>
           </button>
           <button
             type="button"
@@ -293,6 +399,271 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
                 </div>
                 <span className="status-banner-badge">Sincronizado</span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'proyectos' && (
+          <div className="cards-grid">
+            {/* Tarjeta 1: Parámetros y Datos del Proyecto */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                  <FolderKanban size={20} />
+                </div>
+                <div>
+                  <h2>Configuración y Datos del Proyecto Activo</h2>
+                  <p>
+                    Edita el nombre oficial, código identificador y ámbito operativo del proyecto activo.
+                  </p>
+                </div>
+              </div>
+
+              {/* Selector de proyecto si hay múltiples */}
+              {(projects || []).length > 1 && (
+                <div className="form-row">
+                  <div className="field-info">
+                    <label>Proyecto en Edición</label>
+                    <p>Selecciona qué proyecto deseas parametrizar o gestionar.</p>
+                  </div>
+                  <div className="field-control">
+                    <select
+                      value={currentProj.id}
+                      onChange={(e) => onSelectProject?.(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        background: '#ffffff',
+                        color: '#0f172a',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {(projects || []).map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveCurrentProject}>
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-name">Nombre del Proyecto *</label>
+                    <p>Título identificador visible en la barra superior, cronograma y reportes.</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-name"
+                      type="text"
+                      required
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        color: '#0f172a',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-code">Código Oficial</label>
+                    <p>Identificador correlativo del proyecto para reportes y exportaciones.</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-code"
+                      type="text"
+                      value={editCode}
+                      onChange={(e) => setEditCode(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        color: '#0f172a',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-region">Ámbito / Zona Operativa</label>
+                    <p>Zona o territorio donde operan las sedes y supervisores de campo.</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-region"
+                      type="text"
+                      value={editRegion}
+                      onChange={(e) => setEditRegion(e.target.value)}
+                      placeholder="Ej. Zona Centro, Lima Norte, Frentes Regionales..."
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        color: '#0f172a',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '18px', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={handleExportProject}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '9px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#334155',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Download size={14} />
+                    <span>Exportar Copia de Seguridad (JSON)</span>
+                  </button>
+                  <button
+                    type="submit"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '9px 18px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: '#0066ff',
+                      color: '#ffffff',
+                      fontSize: '13px',
+                      fontWeight: 650,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 6px rgba(0, 102, 255, 0.25)',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Save size={14} />
+                    <span>Guardar Cambios</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Tarjeta 2: Zona de Peligro (Danger Zone) */}
+            <div
+              className="cfg-card"
+              style={{
+                border: '1px solid #fecaca',
+                background: '#fffafb',
+              }}
+            >
+              <div className="card-header" style={{ borderBottomColor: '#fee2e2' }}>
+                <div
+                  className="card-icon-wrap"
+                  style={{
+                    background: '#fee2e2',
+                    color: '#dc2626',
+                  }}
+                >
+                  <AlertTriangle size={20} />
+                </div>
+                <div>
+                  <h2 style={{ color: '#991b1b' }}>Zona de Peligro · Gestión del Proyecto</h2>
+                  <p style={{ color: '#7f1d1d' }}>
+                    Acciones irreversibles que impactan la disponibilidad del proyecto y sus datos asociados.
+                  </p>
+                </div>
+              </div>
+
+              {currentProj.id === 'p1' ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '14px 16px',
+                    borderRadius: '8px',
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                  }}
+                >
+                  <ShieldCheck size={20} color="#0066ff" style={{ flexShrink: 0 }} />
+                  <div>
+                    <b style={{ fontSize: '13px', color: '#1e3a8a', display: 'block' }}>
+                      Proyecto Oficial Protegido
+                    </b>
+                    <span style={{ fontSize: '12px', color: '#3b82f6', lineHeight: 1.4 }}>
+                      El proyecto rector oficial ("MINEDU · Dotación 2027") está blindado contra borrado para preservar el registro histórico.
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px',
+                    padding: '14px 16px',
+                    borderRadius: '8px',
+                    background: '#ffffff',
+                    border: '1px solid #fecaca',
+                  }}
+                >
+                  <div>
+                    <b style={{ fontSize: '13px', color: '#991b1b', display: 'block' }}>
+                      Eliminar permanentemente este proyecto
+                    </b>
+                    <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
+                      Se borrará el proyecto "{currentProj.name}", su cronograma Gantt, tareas y sedes asignadas.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '9px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #f87171',
+                      background: '#ef4444',
+                      color: '#ffffff',
+                      fontSize: '12.5px',
+                      fontWeight: 650,
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Trash2 size={14} />
+                    <span>Eliminar Proyecto</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -580,7 +951,7 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
                     rows={4}
                     className="select-input"
                     style={{ width: '100%', resize: 'vertical', lineHeight: 1.45, fontSize: '12.5px' }}
-                    placeholder="Ejemplo: Priorizar siempre los entregables de la UGEL Satipo y Chanchamayo. Citar siempre el número de oficio rector correspondiente."
+                    placeholder="Ejemplo: Priorizar siempre los entregables de las sedes críticas. Citar siempre el número de acta o hito correspondiente."
                     value={geminiConfig.customDirectives}
                     onChange={(e) => setGeminiConfig((c) => ({ ...c, customDirectives: e.target.value }))}
                   />
@@ -590,6 +961,106 @@ export default function ConfiguracionView({ onActions }: { onActions?: (h: Confi
           </div>
         )}
       </div>
+
+      {/* Modal de Confirmación de Eliminación Ergonómico estilo Linear / Jira */}
+      {isDeleteModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'grid',
+            placeItems: 'center',
+            padding: '16px',
+          }}
+          onClick={() => setIsDeleteModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 'min(450px, 100%)',
+              background: '#ffffff',
+              borderRadius: '14px',
+              padding: '24px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+              border: '1px solid #fee2e2',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: '#fee2e2',
+                  color: '#dc2626',
+                  display: 'grid',
+                  placeItems: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <AlertTriangle size={22} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 750, color: '#0f172a' }}>
+                  ¿Eliminar este proyecto?
+                </h3>
+                <small style={{ fontSize: '12px', color: '#64748b' }}>
+                  Acción irreversible · Borrado de frentes y cronograma
+                </small>
+              </div>
+            </div>
+
+            <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+              Estás a punto de eliminar el proyecto <b style={{ color: '#0f172a' }}>"{currentProj.name}"</b> ({currentProj.code}). Esta acción purgará todo su cronograma y tareas asignadas.
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(false)}
+                style={{
+                  height: '38px',
+                  padding: '0 16px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#475569',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                style={{
+                  height: '38px',
+                  padding: '0 18px',
+                  border: 'none',
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 650,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 6px rgba(220, 38, 38, 0.3)',
+                }}
+              >
+                <Trash2 size={14} />
+                <span>Sí, Eliminar Proyecto</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

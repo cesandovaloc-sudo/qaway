@@ -709,12 +709,17 @@ export default function CronogramaGanttView({
         const saved = localStorage.getItem('qaway-gantt-items-p1');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length >= 15) return parsed;
         }
         const masterSaved = localStorage.getItem('qaway-gantt-master-v1');
         if (masterSaved) {
           const parsedMaster = JSON.parse(masterSaved);
-          if (Array.isArray(parsedMaster) && parsedMaster.length > 0) return parsedMaster;
+          if (Array.isArray(parsedMaster) && parsedMaster.length >= 15) return parsedMaster;
+        }
+        try {
+          localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
+        } catch {
+          /* fallback */
         }
         return INITIAL_ITEMS;
       }
