@@ -145,11 +145,11 @@ export default function Topbar({
           </span>
         </button>
 
-        {/* Botón de Perfil en Topbar (Solo despliega u oculta el menú, NO cambia directamente el perfil) */}
+        {/* Botón de Perfil en Topbar */}
         <div
           className="qm-topbar-profile"
           onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-          title="Clic para abrir opciones de perfil y cambio de usuario"
+          title="Opciones de perfil institucional"
           style={{
             borderColor: isProfileMenuOpen ? '#0284c7' : '#e2e8f0',
             boxShadow: isProfileMenuOpen ? '0 0 0 3px rgba(2, 132, 199, 0.12)' : 'none',
@@ -158,14 +158,14 @@ export default function Topbar({
           <div
             className="qm-topbar-avatar"
             style={{
-              background: userRole === 'coordinador' ? '#0f172a' : '#2563eb',
+              background: '#0f172a',
             }}
           >
-            {userRole === 'coordinador' ? 'CM' : 'MS'}
+            CM
           </div>
           <div className="qm-topbar-profile-info">
-            <b>{userRole === 'coordinador' ? 'Carlos Mendoza' : 'María Salazar'}</b>
-            <small>{userRole === 'coordinador' ? 'Coordinador General' : 'Gestora Territorial'}</small>
+            <b>Carlos Mendoza</b>
+            <small>Coordinador General</small>
           </div>
           <ChevronDown
             size={14}
@@ -184,7 +184,7 @@ export default function Topbar({
               position: 'absolute',
               top: '50px',
               right: '0',
-              width: '350px',
+              width: '320px',
               background: '#ffffff',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
@@ -207,18 +207,18 @@ export default function Topbar({
                   placeItems: 'center',
                   fontSize: '14px',
                   fontWeight: 800,
-                  background: userRole === 'coordinador' ? '#0f172a' : '#2563eb',
+                  background: '#0f172a',
                   color: '#ffffff',
                 }}
               >
-                {userRole === 'coordinador' ? 'CM' : 'MS'}
+                CM
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>
-                  {userRole === 'coordinador' ? 'Carlos Mendoza' : 'María Salazar'}
+                  Carlos Mendoza
                 </b>
                 <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block' }}>
-                  {userRole === 'coordinador' ? 'cmendoza@qawaylab.com' : 'msalazar@qawaylab.com'}
+                  cmendoza@qawaylab.com
                 </span>
                 <span
                   style={{
@@ -227,12 +227,12 @@ export default function Topbar({
                     fontWeight: 700,
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    background: userRole === 'coordinador' ? '#f1f5f9' : '#eff6ff',
-                    color: userRole === 'coordinador' ? '#334155' : '#1d4ed8',
+                    background: '#f1f5f9',
+                    color: '#334155',
                     marginTop: '3px',
                   }}
                 >
-                  {userRole === 'coordinador' ? 'Coordinador General' : 'Gestora Territorial'}
+                  Coordinador General
                 </span>
               </div>
             </div>
@@ -288,114 +288,8 @@ export default function Topbar({
               </button>
             </div>
 
-            {/* Selector Especial con CHECK para Cambiar de Usuario */}
-            <div>
-              <div
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 800,
-                  letterSpacing: '0.8px',
-                  color: '#94a3b8',
-                  textTransform: 'uppercase',
-                  marginBottom: '8px',
-                }}
-              >
-                CAMBIAR PERSPECTIVA DE USUARIO
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {/* Opción 1: Gestora Territorial (María Salazar) */}
-                <div
-                  onClick={() => handleSelectRole('gestor')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: userRole === 'gestor' ? '1.5px solid #2563eb' : '1px solid #e2e8f0',
-                    background: userRole === 'gestor' ? '#eff6ff' : '#ffffff',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  title="Seleccionar perspectiva: Gestora Territorial"
-                >
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      border: userRole === 'gestor' ? '2px solid #2563eb' : '2px solid #cbd5e1',
-                      background: userRole === 'gestor' ? '#2563eb' : '#ffffff',
-                      display: 'grid',
-                      placeItems: 'center',
-                      color: '#ffffff',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {userRole === 'gestor' && <Check size={12} strokeWidth={3} />}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '13px', color: '#0f172a' }}>María Salazar</strong>
-                      {userRole === 'gestor' && (
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#16a34a' }}>● Activo</span>
-                      )}
-                    </div>
-                    <small style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>
-                      Gestora Territorial (Monitoreo Operativo)
-                    </small>
-                  </div>
-                </div>
-
-                {/* Opción 2: Coordinador General (Carlos Mendoza) */}
-                <div
-                  onClick={() => handleSelectRole('coordinador')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: userRole === 'coordinador' ? '1.5px solid #0f172a' : '1px solid #e2e8f0',
-                    background: userRole === 'coordinador' ? '#f8fafc' : '#ffffff',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  title="Seleccionar perspectiva: Coordinador General"
-                >
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      border: userRole === 'coordinador' ? '2px solid #0f172a' : '2px solid #cbd5e1',
-                      background: userRole === 'coordinador' ? '#0f172a' : '#ffffff',
-                      display: 'grid',
-                      placeItems: 'center',
-                      color: '#ffffff',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {userRole === 'coordinador' && <Check size={12} strokeWidth={3} />}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong style={{ fontSize: '13px', color: '#0f172a' }}>Carlos Mendoza</strong>
-                      {userRole === 'coordinador' && (
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#16a34a' }}>● Activo</span>
-                      )}
-                    </div>
-                    <small style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>
-                      Coordinador General (Creación de Proyectos y Gantt)
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Cerrar sesión */}
-            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+            <div style={{ paddingTop: '2px' }}>
               <button
                 style={{
                   display: 'flex',
