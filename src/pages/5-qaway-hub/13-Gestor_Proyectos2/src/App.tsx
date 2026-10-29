@@ -134,6 +134,35 @@ function App() {
     return 'p1';
   });
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('qaway-sidebar-collapsed');
+      if (saved !== null) return saved === 'true';
+      return window.innerWidth < 1024;
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('qaway-sidebar-collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 960 && !sidebarCollapsed) {
+        setSidebarCollapsed(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarCollapsed]);
 
   useEffect(() => {
     try {
@@ -305,8 +334,8 @@ function App() {
   };
 
   return (
-    <div className="qm-root">
-      <div className="qm-side qt-v2">
+    <div className={`qm-root ${sidebarCollapsed ? 'qm-sidebar-is-collapsed' : ''}`}>
+      <div className={`qm-side qt-v2 ${sidebarCollapsed ? 'collapsed' : ''}`}>
         <Sidebar
           active={active}
           onModule={handleSelectModule}
@@ -314,6 +343,8 @@ function App() {
           notifyActive={notifyActive}
           setTasksView={setTasksView}
           userRole={userRole}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
           projects={projects}
           activeProjectId={activeProjectId}
           onSelectProject={setActiveProjectId}
@@ -326,6 +357,8 @@ function App() {
           userRole={userRole}
           onChangeRole={handleChangeRole}
           notify={notifyActive}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={toggleSidebar}
           activeProject={activeProject}
         />
         <main className="qm-canvas">

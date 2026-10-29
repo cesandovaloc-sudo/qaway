@@ -33,6 +33,8 @@ type SidebarProps = {
   notifyActive: (m: string) => void;
   setTasksView?: (v: string) => void;
   userRole: UserRole;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
   projects?: ProjectSummary[];
   activeProjectId?: string;
   onSelectProject?: (id: string) => void;
@@ -45,6 +47,8 @@ export default function Sidebar({
   tasksCount,
   notifyActive,
   userRole,
+  collapsed = false,
+  onToggleCollapse,
   projects = [
     { id: 'p1', code: 'PRJ-MIN-2027-01', name: 'MINEDU · Dotación 2027', region: 'Junín', subtext: 'Seguimiento de operaciones' },
   ],

@@ -823,6 +823,8 @@ export default function CronogramaGanttView({
   const [editorStatusOpen, setEditorStatusOpen] = useState(false);
   const [editorCalOpen, setEditorCalOpen] = useState<'start' | 'end' | null>(null);
   const [editorHitoSelectOpen, setEditorHitoSelectOpen] = useState(false);
+  const [editorParentSelectOpen, setEditorParentSelectOpen] = useState(false);
+  const [editorDepSelectOpen, setEditorDepSelectOpen] = useState(false);
 
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
   const [newDelivName, setNewDelivName] = useState('');
@@ -832,6 +834,9 @@ export default function CronogramaGanttView({
 
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [taskModalMilestone, setTaskModalMilestone] = useState('');
+  const [taskOwnerOpen, setTaskOwnerOpen] = useState(false);
+  const [taskPriorityOpen, setTaskPriorityOpen] = useState(false);
+  const [newTaskCalOpen, setNewTaskCalOpen] = useState(false);
   const [newTaskForm, setNewTaskForm] = useState({
     title: '',
     owner: 'Carlos Mendoza',
@@ -884,6 +889,8 @@ export default function CronogramaGanttView({
     setEditorReportTypeOpen(false);
     setEditorStatusOpen(false);
     setEditorHitoSelectOpen(false);
+    setEditorParentSelectOpen(false);
+    setEditorDepSelectOpen(false);
 
     if (isEditorDirty()) {
       setPendingCloseAction(() => action || (() => {
@@ -986,6 +993,9 @@ export default function CronogramaGanttView({
 
   const handleOpenCreateTaskModal = (milestoneName: string) => {
     setTaskModalMilestone(milestoneName);
+    setTaskOwnerOpen(false);
+    setTaskPriorityOpen(false);
+    setNewTaskCalOpen(false);
     setNewTaskForm({
       title: '',
       owner: activeItem?.gestor || 'Carlos Mendoza',
@@ -1148,9 +1158,9 @@ export default function CronogramaGanttView({
         <div class="container">
           <div class="badge">${typeLabel}</div>
           <h1>${deliv.name}</h1>
-          <p>Entregable oficial vinculado al proyecto regional MINEDU · Dotación 2027.</p>
+          <p>Entregable oficial vinculado al proyecto ${activeProject?.name || 'Gestión de Proyectos'}.</p>
           <div class="meta-box">
-            <div><strong>Hito Rector Asociado:</strong> ${activeItem?.name || 'MINEDU'}</div>
+            <div><strong>Hito / Etapa Asociada:</strong> ${activeItem?.name || 'Hito del cronograma'}</div>
             <div style="margin-top:6px;"><strong>Estado Actual:</strong> ${activeItem?.status || 'En proceso'} (${activeItem?.progress || 0}%)</div>
             <div style="margin-top:6px;"><strong>Tipo de Instrumento:</strong> ${typeLabel}</div>
             ${deliv.url ? `<div style="margin-top:6px;"><strong>URL Origen:</strong> <a href="${deliv.url}" target="_blank">${deliv.url}</a></div>` : ''}
@@ -1242,13 +1252,13 @@ export default function CronogramaGanttView({
           </div>
         </div>
         <div class="content-preview">
-          <h2>Sustento Oficial de Fiscalización Territorial</h2>
+          <h2>Sustento Oficial del Proyecto</h2>
           <p><strong>Archivo:</strong> ${att.name}</p>
           <p><strong>Fecha de carga:</strong> ${att.date || new Date().toLocaleDateString('es-PE')}</p>
           <p><strong>Asociado a:</strong> ${activeItem?.name || 'Hito del cronograma'}</p>
           <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;" />
           <p style="color: #64748b; font-size: 14px;">
-            Este documento está certificado en el repositorio del proyecto regional MINEDU · Dotación 2027.
+            Este documento está certificado en el repositorio del proyecto ${activeProject?.name || 'Gestión de Proyectos'}.
           </p>
         </div>
       </body>
@@ -2530,9 +2540,10 @@ export default function CronogramaGanttView({
                 scrollToDate(RANGE_MIN);
                 notify('Filtros y rango temporal restablecidos');
               }}
+              title="Restablecer filtros y rango temporal"
             >
               <RefreshCw size={14} />
-              <span>Limpiar</span>
+              <span className="btn-label-text">Limpiar</span>
             </button>
           </div>
 

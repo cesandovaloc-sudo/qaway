@@ -54,9 +54,9 @@
 }
 .qm-side,
 .qm-side.qt-v2 {
-  width: 238px !important;
-  min-width: 238px !important;
-  max-width: 238px !important;
+  width: 238px;
+  min-width: 238px;
+  max-width: 238px;
   background: #19283b !important;
   flex-shrink: 0;
   height: 100vh;
@@ -64,11 +64,62 @@
   top: 0;
   overflow-y: hidden;
   z-index: 30;
+  transition: width 0.24s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.24s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .qt-v2 .sidebar {
-  width: 238px !important;
+  width: 238px;
   height: 100vh !important;
   overflow-y: hidden !important;
+  transition: width 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Estado Colapsado del Sidebar (Modo Iconos 64px) */
+.qm-side.collapsed,
+.qm-side.qt-v2.collapsed {
+  width: 64px !important;
+  min-width: 64px !important;
+  max-width: 64px !important;
+}
+.qm-side.collapsed .sidebar {
+  width: 64px !important;
+  padding: 16px 8px 12px !important;
+}
+.qm-side.collapsed .brand {
+  justify-content: center !important;
+  padding: 0 0 20px !important;
+}
+.qm-side.collapsed .brand div {
+  display: none !important;
+}
+.qm-side.collapsed .side-label {
+  display: none !important;
+}
+.qm-side.collapsed .project {
+  justify-content: center !important;
+  padding: 8px !important;
+}
+.qm-side.collapsed .project div,
+.qm-side.collapsed .project svg {
+  display: none !important;
+}
+.qm-side.collapsed .side-link {
+  justify-content: center !important;
+  padding: 10px 0 !important;
+  gap: 0 !important;
+}
+.qm-side.collapsed .side-link span,
+.qm-side.collapsed .side-link em {
+  display: none !important;
+}
+
+/* Botón toggle de sidebar en Topbar */
+.qm-btn-toggle-sidebar {
+  margin-right: 6px;
+  color: #475569 !important;
+}
+.qm-btn-toggle-sidebar:hover {
+  background: #f1f5f9 !important;
+  color: #0066ff !important;
 }
 
 /* Sidebar Qaway Lab · Tipografía e íconos calibrados al estándar ergonómico internacional (14px / Lucide 18px) */

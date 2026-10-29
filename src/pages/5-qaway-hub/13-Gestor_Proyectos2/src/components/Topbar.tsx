@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   Sliders,
   User,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 interface TopbarProps {
@@ -18,6 +20,8 @@ interface TopbarProps {
   userRole: UserRole;
   onChangeRole: (role: UserRole) => void;
   notify: (msg: string) => void;
+  sidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
   activeProject?: {
     id: string;
     code: string;
@@ -45,6 +49,8 @@ export default function Topbar({
   userRole,
   onChangeRole,
   notify,
+  sidebarCollapsed = false,
+  onToggleSidebar,
   activeProject,
 }: TopbarProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -76,8 +82,19 @@ export default function Topbar({
 
   return (
     <header className="qm-topbar">
-      {/* Breadcrumb dinámico sincronizado con el proyecto activo */}
+      {/* Botón de colapso/expansión del Sidebar + Breadcrumb dinámico sincronizado con el proyecto activo */}
       <div className="qm-topbar-left">
+        {onToggleSidebar && (
+          <button
+            type="button"
+            className="qm-topbar-btn qm-btn-toggle-sidebar"
+            onClick={onToggleSidebar}
+            title={sidebarCollapsed ? 'Expandir panel lateral' : 'Colapsar panel lateral'}
+            aria-label={sidebarCollapsed ? 'Expandir panel lateral' : 'Colapsar panel lateral'}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          </button>
+        )}
         <span>{projectContext}</span>
         <ChevronRight size={13} color="#94a3b8" />
         <span style={{ fontWeight: 650, color: '#0f172a' }}>{projectName}</span>
