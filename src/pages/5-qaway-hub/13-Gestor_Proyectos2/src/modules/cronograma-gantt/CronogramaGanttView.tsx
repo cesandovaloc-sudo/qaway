@@ -1006,6 +1006,234 @@ export default function CronogramaGanttView({
       notify('Error al crear tarea vinculada');
     }
   };
+
+  const handleToggleTask = (taskId: number) => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      if (Array.isArray(raw)) {
+        const nextList = raw.map((t: any) => {
+          if (t.id === taskId) {
+            const isDone = t.status === 'Cumple' || t.status === 'Completado' || t.status === 'Completada';
+            return { ...t, status: isDone ? 'Pendiente' : 'Cumple' };
+          }
+          return t;
+        });
+        localStorage.setItem('qaway-tasks-v1', JSON.stringify(nextList));
+        window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
+        setForceTasksNonce((n) => n + 1);
+        notify('Estado de tarea operativa actualizado');
+      }
+    } catch {
+      /* fallback */
+    }
+  };
+
+  const handleSwitchActiveHito = (targetHito: Item) => {
+    if (targetHito.id === activeItem?.id) return;
+    if (isEditorDirty()) {
+      setPendingCloseAction(() => () => {
+        openEditorForItem(targetHito);
+      });
+      setUnsavedAlertOpen(true);
+    } else {
+      openEditorForItem(targetHito);
+    }
+  };
+
+  const getActiveDeliverables = (item: Item): DeliverableItem[] => {
+    if (item.deliverables && item.deliverables.length > 0) {
+      return item.deliverables;
+    }
+    if (item.deliverable && item.deliverable.trim()) {
+      return [
+        {
+          id: 'deliv-legacy',
+          name: item.deliverable.trim(),
+          type: 'document',
+        },
+      ];
+    }
+    return [];
+  };
+
+  const handleAddDeliverable = (deliv: Omit<DeliverableItem, 'id'>) => {
+    if (!activeItem) return;
+    const currentList = getActiveDeliverables(activeItem);
+    const itemToAdd: DeliverableItem = {
+      ...deliv,
+      id: `deliv-${Date.now()}`,
+    };
+    const updated = [...currentList, itemToAdd];
+    updateDraft({
+      deliverables: updated,
+      deliverable: updated.map((d) => d.name).join('; '),
+    });
+    setShowAddDeliverable(false);
+    setNewDelivName('');
+    setNewDelivUrl('');
+    notify(`Entregable "${deliv.name}" agregado`);
+  };
+
+  const handleRemoveDeliverable = (delivId: string) => {
+    if (!activeItem) return;
+    const currentList = getActiveDeliverables(activeItem);
+    const updated = currentList.filter((d) => d.id !== delivId);
+    updateDraft({
+      deliverables: updated,
+      deliverable: updated.map((d) => d.name).join('; '),
+    });
+    notify('Entregable eliminado');
+  };
+
+  const handleOpenDeliverable = (deliv: DeliverableItem) => {
+    if (deliv.url && (deliv.url.startsWith('http://') || deliv.url.startsWith('https://'))) {
+      window.open(deliv.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    const typeLabel =
+      deliv.type === 'spreadsheet'
+        ? 'Hoja de Cálculo / Matriz'
+        : deliv.type === 'presentation'
+        ? 'Presentación / Canva'
+        : deliv.type === 'link'
+        ? 'Enlace Externo'
+        : deliv.type === 'physical'
+        ? 'Entrega Física / Inspección'
+        : 'Documento Oficial';
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>${deliv.name} · Visor de Entregable Oficial - Qaway Lab</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px 20px; display: flex; justify-content: center; }
+          .container { max-width: 800px; width: 100%; background: #ffffff; color: #0f172a; border-radius: 12px; padding: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+          .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #e0f2fe; color: #0369a1; text-transform: uppercase; margin-bottom: 12px; }
+          h1 { margin: 0 0 8px; font-size: 22px; color: #0f172a; }
+          p { margin: 4px 0 20px; color: #64748b; font-size: 14px; line-height: 1.5; }
+          .meta-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+          .btn-group { display: flex; gap: 12px; }
+          .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; }
+          .btn-primary { background: #2563eb; color: #ffffff; }
+          .btn-secondary { background: #f1f5f9; color: #334155; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="badge">${typeLabel}</div>
+          <h1>${deliv.name}</h1>
+          <p>Entregable oficial vinculado al proyecto regional MINEDU · Dotación 2027.</p>
+          <div class="meta-box">
+            <div><strong>Hito Rector Asociado:</strong> ${activeItem?.name || 'MINEDU'}</div>
+            <div style="margin-top:6px;"><strong>Estado Actual:</strong> ${activeItem?.status || 'En proceso'} (${activeItem?.progress || 0}%)</div>
+            <div style="margin-top:6px;"><strong>Tipo de Instrumento:</strong> ${typeLabel}</div>
+            ${deliv.url ? `<div style="margin-top:6px;"><strong>URL Origen:</strong> <a href="${deliv.url}" target="_blank">${deliv.url}</a></div>` : ''}
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="window.print()">Imprimir / Guardar como PDF</button>
+            <button class="btn btn-secondary" onclick="window.close()">Cerrar visor</button>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
+  };
+
+  const getActiveAttachments = (item: Item): AttachmentItem[] => {
+    if (item.attachments && item.attachments.length > 0) {
+      return item.attachments;
+    }
+    if (attachment && attachment.trim()) {
+      return [
+        {
+          id: 'att-legacy',
+          name: attachment.trim(),
+          date: '28/10/2026',
+        },
+      ];
+    }
+    return [];
+  };
+
+  const handleAddAttachments = (fileList: FileList | null) => {
+    if (!fileList || !activeItem) return;
+    const currentList = getActiveAttachments(activeItem);
+    const newItems: AttachmentItem[] = [];
+    const dateStr = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      newItems.push({
+        id: `att-${Date.now()}-${i}`,
+        name: file.name,
+        date: dateStr,
+        type: file.type || 'application/octet-stream',
+      });
+    }
+    const updated = [...currentList, ...newItems];
+    updateDraft({
+      attachments: updated,
+    });
+    setAttachment(updated[0]?.name || '');
+    notify(`${newItems.length} documento(s) de sustento adjuntado(s)`);
+  };
+
+  const handleRemoveAttachment = (attId: string) => {
+    if (!activeItem) return;
+    const currentList = getActiveAttachments(activeItem);
+    const updated = currentList.filter((a) => a.id !== attId);
+    updateDraft({ attachments: updated });
+    setAttachment(updated[0]?.name || '');
+    notify('Documento de sustento eliminado');
+  };
+
+  const handleOpenAttachment = (att: AttachmentItem) => {
+    if (att.url && (att.url.startsWith('http://') || att.url.startsWith('https://'))) {
+      window.open(att.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>${att.name} · Sustento Oficial - Qaway Lab</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; margin: 0; padding: 24px; color: #f8fafc; }
+          .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+          .title { font-size: 18px; font-weight: 700; }
+          .content-preview { background: #ffffff; color: #0f172a; border-radius: 8px; padding: 36px; min-height: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+          .btn { background: #0284c7; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; border: none; cursor: pointer; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="title">📄 ${att.name}</div>
+          <div>
+            <button class="btn" onclick="window.print()">Descargar / Imprimir</button>
+          </div>
+        </div>
+        <div class="content-preview">
+          <h2>Sustento Oficial de Fiscalización Territorial</h2>
+          <p><strong>Archivo:</strong> ${att.name}</p>
+          <p><strong>Fecha de carga:</strong> ${att.date || new Date().toLocaleDateString('es-PE')}</p>
+          <p><strong>Asociado a:</strong> ${activeItem?.name || 'Hito del cronograma'}</p>
+          <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;" />
+          <p style="color: #64748b; font-size: 14px;">
+            Este documento está certificado en el repositorio del proyecto regional MINEDU · Dotación 2027.
+          </p>
+        </div>
+      </body>
+      </html>
+    `;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, '_blank');
+  };
   const [panelOpen, setPanelOpen] = useState(false);
   const [history, setHistory] = useState<Item[][]>([]);
   const [tab, setTab] = useState('Todos');
@@ -1358,12 +1586,13 @@ export default function CronogramaGanttView({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (unsavedAlertOpen) {
+        if (unsavedAlertOpenRef.current) {
+          // Si la alerta de confirmación está abierta y presiona Escape, se cancela la intención de salir (permanece en el editor)
           setUnsavedAlertOpen(false);
           setPendingCloseAction(null);
           return;
         }
-        if (panelOpen) {
+        if (panelOpenRef.current) {
           requestCloseDrawer();
           return;
         }
@@ -1376,7 +1605,7 @@ export default function CronogramaGanttView({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [panelOpen, unsavedAlertOpen, editorInitialSnapshot, selected]);
+  }, []);
 
   const closeEdit = () => setEdit(null);
   const isEditing = (x: Item, field: EditField) => !!edit && edit.id === x.id && edit.field === field;
@@ -3363,7 +3592,7 @@ export default function CronogramaGanttView({
             setEditorStatusOpen(false);
           }}>
             <div className="editor-head">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
                 <button
                   type="button"
                   className="editor-icon-btn"
@@ -3372,7 +3601,38 @@ export default function CronogramaGanttView({
                 >
                   <ChevronLeft size={18} />
                 </button>
-                <h2>{isNewDraft ? 'Crear' : 'Editar'} {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}</h2>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h2 style={{ fontSize: '15px', margin: 0 }}>{isNewDraft ? 'Crear' : 'Editar'} {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}</h2>
+                  {!isNewDraft && hitos.length > 1 && (
+                    <select
+                      value={activeItem.kind === 'hito' ? activeItem.id : (activeItem.parentId || '')}
+                      onChange={(e) => {
+                        const target = items.find((x) => x.id === e.target.value);
+                        if (target) handleSwitchActiveHito(target);
+                      }}
+                      style={{
+                        fontSize: '11px',
+                        color: '#0284c7',
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        borderRadius: '6px',
+                        padding: '2px 6px',
+                        fontWeight: 650,
+                        maxWidth: '220px',
+                        cursor: 'pointer',
+                        marginTop: '3px',
+                        outline: 'none',
+                      }}
+                      title="Navegar rápidamente a otro hito del cronograma"
+                    >
+                      {hitos.map((h) => (
+                        <option key={h.id} value={h.id}>
+                          {h.code} · {h.name.length > 28 ? h.name.slice(0, 28) + '...' : h.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
               </div>
               <button
                 type="button"
@@ -3411,6 +3671,38 @@ export default function CronogramaGanttView({
 
             {editorTab === 'info' && (
               <div className="editor-body">
+                {/* Selector de Hito Rector Padre si es subproceso */}
+                {activeItem.kind === 'subproceso' && (
+                  <label className="field" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      Hito Rector Padre (Vincular a)
+                    </span>
+                    <select
+                      value={activeItem.parentId || ''}
+                      onChange={(e) => updateDraft({ parentId: e.target.value })}
+                      style={{
+                        height: '36px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        padding: '0 10px',
+                        fontSize: '12px',
+                        color: '#0f172a',
+                        background: '#ffffff',
+                        fontWeight: 600,
+                        marginTop: '4px',
+                        width: '100%',
+                      }}
+                    >
+                      <option value="" disabled>Selecciona el hito rector padre</option>
+                      {hitos.map((h) => (
+                        <option key={h.id} value={h.id}>
+                          {h.code} {h.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+
                 {/* 1. Nombre */}
                 <label className="field">
                   <span>Nombre ({activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'})</span>
@@ -3431,18 +3723,286 @@ export default function CronogramaGanttView({
                   />
                 </label>
 
-                {/* 3. Entregable Oficial (Criterio de Cumplimiento) - justo después de Alcance */}
-                <label className="field">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Target size={13} style={{ color: '#2563eb' }} />
-                    Entregable Oficial (Criterio de Cumplimiento)
-                  </span>
-                  <input
-                    value={activeItem.deliverable || ''}
-                    onChange={(e) => updateDraft({ deliverable: e.target.value })}
-                    placeholder="Ej. Losa vaciada y fraguada, Acta de entrega, Informe técnico visado..."
-                  />
-                </label>
+                {/* 3. Entregables Oficiales (Criterios de Cumplimiento) */}
+                <div className="field">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 650, color: '#334155' }}>
+                      <Target size={13} style={{ color: '#2563eb' }} />
+                      Entregables Oficiales ({getActiveDeliverables(activeItem).length})
+                    </span>
+                    <button
+                      type="button"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#0284c7',
+                        fontSize: '11.5px',
+                        fontWeight: 650,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 3,
+                        padding: 0,
+                      }}
+                      onClick={() => setShowAddDeliverable((v) => !v)}
+                    >
+                      <Plus size={12} />
+                      <span>+ Agregar entregable</span>
+                    </button>
+                  </div>
+
+                  {/* Formulario en línea para nuevo entregable */}
+                  {showAddDeliverable && (
+                    <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                        Nuevo Entregable de Hito
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                        {[
+                          { type: 'document' as DeliverableType, label: 'Doc / PDF', icon: FileText, color: '#2563eb' },
+                          { type: 'spreadsheet' as DeliverableType, label: 'Excel / Sheets', icon: FileSpreadsheet, color: '#16a34a' },
+                          { type: 'presentation' as DeliverableType, label: 'Canva / PPT', icon: Presentation, color: '#ea580c' },
+                          { type: 'link' as DeliverableType, label: 'Enlace Web', icon: ExternalLink, color: '#7c3aed' },
+                          { type: 'physical' as DeliverableType, label: 'Físico', icon: Package, color: '#d97706' },
+                        ].map((btn) => {
+                          const IconComponent = btn.icon;
+                          const isSel = newDelivType === btn.type;
+                          return (
+                            <button
+                              key={btn.type}
+                              type="button"
+                              onClick={() => setNewDelivType(btn.type)}
+                              style={{
+                                flex: 1,
+                                padding: '6px 4px',
+                                borderRadius: '6px',
+                                border: isSel ? `1.5px solid ${btn.color}` : '1px solid #e2e8f0',
+                                background: isSel ? '#ffffff' : '#f1f5f9',
+                                color: isSel ? btn.color : '#64748b',
+                                fontSize: '10.5px',
+                                fontWeight: isSel ? 700 : 500,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '3px',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <IconComponent size={14} />
+                              <span>{btn.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <input
+                        value={newDelivName}
+                        onChange={(e) => setNewDelivName(e.target.value)}
+                        placeholder="Nombre del entregable (ej. Acta de Conformidad, Plan Excel)..."
+                        style={{
+                          width: '100%',
+                          height: '34px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          padding: '0 10px',
+                          fontSize: '12px',
+                          marginBottom: '6px',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                      <input
+                        value={newDelivUrl}
+                        onChange={(e) => setNewDelivUrl(e.target.value)}
+                        placeholder="URL de enlace en línea (opcional: Canva, OneDrive, Google Drive...)"
+                        style={{
+                          width: '100%',
+                          height: '34px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          padding: '0 10px',
+                          fontSize: '12px',
+                          marginBottom: '8px',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <button
+                          type="button"
+                          className="btn secondary"
+                          style={{ height: '28px', padding: '0 10px', fontSize: '11px' }}
+                          onClick={() => setShowAddDeliverable(false)}
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          className="btn primary"
+                          style={{ height: '28px', padding: '0 12px', fontSize: '11px' }}
+                          onClick={() => {
+                            if (!newDelivName.trim()) {
+                              notify('Ingresa el nombre del entregable');
+                              return;
+                            }
+                            handleAddDeliverable({
+                              name: newDelivName.trim(),
+                              type: newDelivType,
+                              url: newDelivUrl.trim() || undefined,
+                            });
+                          }}
+                        >
+                          Guardar entregable
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Lista de Entregables */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {getActiveDeliverables(activeItem).map((deliv) => {
+                      const IconComp =
+                        deliv.type === 'spreadsheet'
+                          ? FileSpreadsheet
+                          : deliv.type === 'presentation'
+                          ? Presentation
+                          : deliv.type === 'link'
+                          ? Link2
+                          : deliv.type === 'physical'
+                          ? Package
+                          : FileText;
+                      const iconColor =
+                        deliv.type === 'spreadsheet'
+                          ? '#16a34a'
+                          : deliv.type === 'presentation'
+                          ? '#ea580c'
+                          : deliv.type === 'link'
+                          ? '#7c3aed'
+                          : deliv.type === 'physical'
+                          ? '#d97706'
+                          : '#2563eb';
+                      return (
+                        <div
+                          key={deliv.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 10px',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '7px',
+                            gap: '8px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                            <div
+                              style={{
+                                width: '28px',
+                                height: '28px',
+                                borderRadius: '6px',
+                                background: `${iconColor}15`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                              }}
+                            >
+                              <IconComp size={15} style={{ color: iconColor }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <b
+                                style={{
+                                  fontSize: '12px',
+                                  color: '#0f172a',
+                                  display: 'block',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {deliv.name}
+                              </b>
+                              <span style={{ fontSize: '10.5px', color: '#64748b' }}>
+                                {deliv.type === 'spreadsheet'
+                                  ? 'Matriz Excel'
+                                  : deliv.type === 'presentation'
+                                  ? 'Presentación / Canva'
+                                  : deliv.type === 'link'
+                                  ? 'Enlace Web'
+                                  : deliv.type === 'physical'
+                                  ? 'Bien / Entrega Física'
+                                  : 'Documento Oficial'}
+                                {deliv.url ? ' · En línea' : ''}
+                              </span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDeliverable(deliv)}
+                              style={{
+                                background: '#f1f5f9',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '5px',
+                                padding: '4px 7px',
+                                color: '#0f172a',
+                                fontSize: '11px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                cursor: 'pointer',
+                              }}
+                              title="Abrir en pestaña nueva del navegador"
+                            >
+                              <ExternalLink size={12} color="#0284c7" />
+                              <span style={{ fontWeight: 600 }}>Abrir</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveDeliverable(deliv.id)}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#94a3b8',
+                                padding: '4px',
+                                cursor: 'pointer',
+                              }}
+                              title="Eliminar entregable"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {getActiveDeliverables(activeItem).length === 0 && !showAddDeliverable && (
+                      <div
+                        style={{
+                          padding: '10px',
+                          border: '1px dashed #cbd5e1',
+                          borderRadius: '6px',
+                          textAlign: 'center',
+                          color: '#64748b',
+                          fontSize: '11.5px',
+                        }}
+                      >
+                        No hay entregables configurados.{' '}
+                        <button
+                          type="button"
+                          onClick={() => setShowAddDeliverable(true)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#0284c7',
+                            fontWeight: 650,
+                            cursor: 'pointer',
+                            padding: 0,
+                          }}
+                        >
+                          Haz clic para agregar uno
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* 4. Fechas (Inicio y Fin) */}
                 <div className="date-fields">
@@ -3634,35 +4194,126 @@ export default function CronogramaGanttView({
                   </div>
                 )}
 
-                {/* 8. Desglose de Tareas vinculadas */}
-                <div className="task-relation-box">
-                  <div className="task-relation-head">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <CheckSquare size={13} style={{ color: '#2563eb' }} />
-                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
-                        Tareas vinculadas
-                      </span>
+                {/* 8. Desglose de Tareas vinculadas (100% Dinámico) */}
+                {(() => {
+                  const tasks = getLinkedTasks(activeItem.name);
+                  const total = tasks.length;
+                  const completed = tasks.filter((t: any) => t.status === 'Cumple' || t.status === 'Completado' || t.status === 'Completada').length;
+                  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+                  return (
+                    <div className="task-relation-box">
+                      <div className="task-relation-head">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <CheckSquare size={13} style={{ color: '#2563eb' }} />
+                          <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f172a' }}>
+                            Tareas vinculadas
+                          </span>
+                        </div>
+                        <span className="task-relation-badge">
+                          {total === 0 ? '0 tareas vinculadas · 0%' : `${completed} / ${total} ejecutadas (${pct}%)`}
+                        </span>
+                      </div>
+                      <div className="task-relation-bar">
+                        <div
+                          className="task-relation-fill"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: pct === 100 ? '#16a34a' : pct >= 40 ? '#2563eb' : '#f59e0b',
+                          }}
+                        />
+                      </div>
+
+                      {/* Lista interactiva de tareas vinculadas si existen */}
+                      {total > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', margin: '4px 0' }}>
+                          {tasks.map((task: any) => {
+                            const isDone = task.status === 'Cumple' || task.status === 'Completado' || task.status === 'Completada';
+                            return (
+                              <div
+                                key={task.id}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  padding: '5px 8px',
+                                  background: '#ffffff',
+                                  border: '1px solid #e2e8f0',
+                                  borderRadius: '6px',
+                                  fontSize: '11.5px',
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isDone}
+                                  onChange={() => handleToggleTask(task.id)}
+                                  style={{ cursor: 'pointer', accentColor: '#16a34a' }}
+                                />
+                                <span
+                                  style={{
+                                    flex: 1,
+                                    color: isDone ? '#94a3b8' : '#0f172a',
+                                    textDecoration: isDone ? 'line-through' : 'none',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {task.title}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: '10px',
+                                    fontWeight: 700,
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    background: isDone ? '#dcfce7' : '#f1f5f9',
+                                    color: isDone ? '#15803d' : '#64748b',
+                                  }}
+                                >
+                                  {task.status || 'Pendiente'}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+                        <small style={{ fontSize: '11px', color: '#64748b' }}>
+                          {total > 0
+                            ? `${total} tarea(s) en módulo Tareas Kanban`
+                            : 'Sin tareas operativas asignadas'}
+                        </small>
+                        <button
+                          type="button"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#0284c7',
+                            fontSize: '11.5px',
+                            fontWeight: 650,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            padding: 0,
+                          }}
+                          onClick={() => handleCreateLinkedTask(activeItem.name)}
+                        >
+                          <Plus size={12} />
+                          <span>+ Crear tarea para este hito</span>
+                        </button>
+                      </div>
                     </div>
-                    <span className="task-relation-badge">
-                      {getLinkedTasks(activeItem.name).filter((t: any) => t.status === 'Cumple').length} / {getLinkedTasks(activeItem.name).length || 4} ejecutadas
+                  );
+                })()}
+
+                {/* 9. Documentos de Sustento (Múltiples con apertura en pestaña nueva) */}
+                <div className="attachment">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span className="field-title" style={{ margin: 0 }}>
+                      Documentos de Sustento ({getActiveAttachments(activeItem).length})
                     </span>
-                  </div>
-                  <div className="task-relation-bar">
-                    <div
-                      className="task-relation-fill"
-                      style={{
-                        width: `${getLinkedTasks(activeItem.name).length ? (getLinkedTasks(activeItem.name).filter((t: any) => t.status === 'Cumple').length / getLinkedTasks(activeItem.name).length) * 100 : activeItem.progress}%`,
-                        backgroundColor:
-                          activeItem.progress === 100 ? '#16a34a' : activeItem.progress >= 40 ? '#2563eb' : '#f59e0b',
-                      }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
-                    <small style={{ fontSize: '11px', color: '#64748b' }}>
-                      {getLinkedTasks(activeItem.name).length > 0
-                        ? `${getLinkedTasks(activeItem.name).length} tareas en módulo Tareas`
-                        : (activeItem.unit || 'Supervisión en sedes operativas')}
-                    </small>
                     <button
                       type="button"
                       style={{
@@ -3674,54 +4325,77 @@ export default function CronogramaGanttView({
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '3px',
+                        gap: 3,
                         padding: 0,
                       }}
-                      onClick={() => handleCreateLinkedTask(activeItem.name)}
+                      onClick={() => fileRef.current?.click()}
                     >
-                      <Plus size={12} />
-                      <span>+ Crear tarea para este hito</span>
+                      <Paperclip size={12} />
+                      <span>+ Adjuntar archivo</span>
                     </button>
                   </div>
-                </div>
 
-                {/* 9. Documento de Sustento */}
-                <div className="attachment">
-                  <span className="field-title">Documento de Sustento</span>
-                  {attachment && (
-                    <div className="file-card">
-                      <span className="pdf">PDF</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <b style={{ fontSize: '12px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {attachment}
-                        </b>
-                        <small style={{ fontSize: '11px', color: '#64748b' }}>
-                          {pickedFile ? 'Archivo seleccionado' : 'Documento adjunto'}
-                        </small>
-                      </div>
-                      <button
-                        style={{ border: 0, background: 'transparent' }}
-                        onClick={() => setAttachment('')}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-                  <button className="attach" onClick={() => fileRef.current?.click()}>
-                    <Paperclip size={15} />
-                    <span>Adjuntar documento de sustento</span>
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {getActiveAttachments(activeItem).map((att) => {
+                      const isPdf = att.name.toLowerCase().endsWith('.pdf');
+                      const isExcel = att.name.toLowerCase().endsWith('.xls') || att.name.toLowerCase().endsWith('.xlsx') || att.name.toLowerCase().endsWith('.csv');
+                      return (
+                        <div key={att.id} className="file-card" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className={isPdf ? 'pdf' : isExcel ? 'status' : 'pdf'} style={{ background: isExcel ? '#16a34a' : undefined, color: isExcel ? '#ffffff' : undefined, fontSize: '10px', fontWeight: 700, padding: '2px 5px', borderRadius: '4px' }}>
+                            {isPdf ? 'PDF' : isExcel ? 'XLS' : 'DOC'}
+                          </span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <b style={{ fontSize: '12px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {att.name}
+                            </b>
+                            <small style={{ fontSize: '11px', color: '#64748b' }}>
+                              {att.date || 'Sustento oficial'}
+                            </small>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAttachment(att)}
+                              style={{
+                                background: '#f1f5f9',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '5px',
+                                padding: '3px 6px',
+                                color: '#0f172a',
+                                fontSize: '11px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                cursor: 'pointer',
+                              }}
+                              title="Abrir documento en pestaña nueva"
+                            >
+                              <ExternalLink size={11} color="#0284c7" />
+                              <span style={{ fontWeight: 600 }}>Ver</span>
+                            </button>
+                            <button
+                              type="button"
+                              style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: '4px' }}
+                              onClick={() => handleRemoveAttachment(att.id)}
+                              title="Eliminar archivo"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
                   <input
                     ref={fileRef}
                     hidden
                     type="file"
+                    multiple
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
                     onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) {
-                        setPickedFile(f.name);
-                        setAttachment(f.name);
-                        notify(`Archivo "${f.name}" adjuntado al hito`);
+                      if (e.target.files && e.target.files.length > 0) {
+                        handleAddAttachments(e.target.files);
                       }
                     }}
                   />
