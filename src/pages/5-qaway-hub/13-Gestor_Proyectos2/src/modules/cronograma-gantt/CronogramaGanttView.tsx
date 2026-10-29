@@ -1904,7 +1904,6 @@ export default function CronogramaGanttView({
                   rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('dates')}
-                title="Filtrar por rango de fechas oficial"
               >
                 <CalendarDays size={15} className="dr-icon" />
                 <div className="filter-card-copy">

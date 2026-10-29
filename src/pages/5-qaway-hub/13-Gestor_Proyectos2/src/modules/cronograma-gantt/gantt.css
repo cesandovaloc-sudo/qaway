@@ -518,6 +518,8 @@
 
 /* Filtros */
 .gantt-v2 .filters {
+  position: relative;
+  z-index: 80;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -526,7 +528,7 @@
   min-width: 0;
   flex-wrap: nowrap;
   background: #f8fafc;
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .gantt-v2 .search {

@@ -45,7 +45,9 @@
 
 /* Layout base consolidado (shell maestro, Sidebar + Canvas keep-alive) */
 .qm-root {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   display: flex;
   align-items: stretch;
   background: var(--bg-canvas);
@@ -113,12 +115,19 @@
 .qm-main-container {
   flex: 1;
   min-width: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 .qm-canvas {
   flex: 1;
   min-width: 0;
+  height: calc(100vh - 58px);
+  max-height: calc(100vh - 58px);
+  overflow-y: auto;
+  overflow-x: hidden;
   display: block;
 }
 .qm-pane {
