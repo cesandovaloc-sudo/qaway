@@ -106,14 +106,42 @@ function App() {
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
     try {
       const stored = localStorage.getItem('qaway-gp-projects-v1');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const minedu = DEFAULT_PROJECTS[0];
+          const userProject = parsed.find((p: ProjectItem) => p.id !== 'p1');
+          if (userProject) {
+            const twoOnly = [userProject, minedu];
+            localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(twoOnly));
+            return twoOnly;
+          }
+          return [minedu];
+        }
+      }
     } catch {
       /* fallback */
     }
     return DEFAULT_PROJECTS;
   });
-  const [activeProjectId, setActiveProjectId] = useState<string>('p1');
+  const [activeProjectId, setActiveProjectId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('qaway-gp-active-project-id');
+      if (saved) return saved;
+    } catch {
+      /* fallback */
+    }
+    return 'p1';
+  });
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('qaway-gp-active-project-id', activeProjectId);
+    } catch {
+      /* fallback */
+    }
+  }, [activeProjectId]);
 
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
 
