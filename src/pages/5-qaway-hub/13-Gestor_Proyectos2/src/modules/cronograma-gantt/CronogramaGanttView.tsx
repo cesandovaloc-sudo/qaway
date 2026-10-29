@@ -3379,6 +3379,8 @@ export default function CronogramaGanttView({
                       >
                         {x.name}
                       </span>
+                    )}
+                    {!isEditing(x, 'name') && (
                       <button
                         type="button"
                         className="quick-inline-add-btn"
