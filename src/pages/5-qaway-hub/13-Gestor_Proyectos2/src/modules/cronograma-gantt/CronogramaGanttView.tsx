@@ -782,6 +782,47 @@ export default function CronogramaGanttView({
   });
 
   const [selectedId, setSelectedId] = useState<string | null>('h1');
+  const selected = items.find((x) => x.id === selectedId);
+
+  // Snapshot inicial al abrir el editor para detectar si el usuario ha realizado cambios o cargado datos
+  const [editorInitialSnapshot, setEditorInitialSnapshot] = useState<string>('');
+
+  const captureSnapshot = (item: Item | undefined) => {
+    if (!item) return '';
+    return JSON.stringify({
+      name: item.name,
+      description: item.description || '',
+      start: item.start,
+      end: item.end,
+      reportType: item.reportType || '',
+      status: item.status,
+      progress: item.progress,
+      deliverable: item.deliverable || '',
+    });
+  };
+
+  const isEditorDirty = () => {
+    if (!selected || !editorInitialSnapshot) return false;
+    const current = captureSnapshot(selected);
+    return current !== editorInitialSnapshot;
+  };
+
+  const requestCloseDrawer = (action?: () => void) => {
+    setEditorCalOpen(null);
+    setEditorReportTypeOpen(false);
+    setEditorStatusOpen(false);
+
+    if (isEditorDirty()) {
+      setPendingCloseAction(() => action || (() => setPanelOpen(false)));
+      setUnsavedAlertOpen(true);
+    } else {
+      if (action) {
+        action();
+      } else {
+        setPanelOpen(false);
+      }
+    }
+  };
   const [panelOpen, setPanelOpen] = useState(false);
   const [history, setHistory] = useState<Item[][]>([]);
   const [tab, setTab] = useState('Todos');
@@ -833,46 +874,6 @@ export default function CronogramaGanttView({
   const [editorStatusOpen, setEditorStatusOpen] = useState(false);
   const [unsavedAlertOpen, setUnsavedAlertOpen] = useState(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
-
-  // Snapshot inicial al abrir el editor para detectar si el usuario ha realizado cambios o cargado datos
-  const [editorInitialSnapshot, setEditorInitialSnapshot] = useState<string>('');
-
-  const captureSnapshot = (item: Item | undefined) => {
-    if (!item) return '';
-    return JSON.stringify({
-      name: item.name,
-      description: item.description || '',
-      start: item.start,
-      end: item.end,
-      reportType: item.reportType || '',
-      status: item.status,
-      progress: item.progress,
-      deliverable: item.deliverable || '',
-    });
-  };
-
-  const isEditorDirty = () => {
-    if (!selected || !editorInitialSnapshot) return false;
-    const current = captureSnapshot(selected);
-    return current !== editorInitialSnapshot;
-  };
-
-  const requestCloseDrawer = (action?: () => void) => {
-    setEditorCalOpen(null);
-    setEditorReportTypeOpen(false);
-    setEditorStatusOpen(false);
-
-    if (isEditorDirty()) {
-      setPendingCloseAction(() => action || (() => setPanelOpen(false)));
-      setUnsavedAlertOpen(true);
-    } else {
-      if (action) {
-        action();
-      } else {
-        setPanelOpen(false);
-      }
-    }
-  };
 
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => {
     try {
@@ -1309,7 +1310,6 @@ export default function CronogramaGanttView({
     window.addEventListener('mouseup', onMouseUp);
   };
 
-  const selected = items.find((x) => x.id === selectedId);
   const hitos = items.filter((x) => x.kind === 'hito');
   const subs = items.filter((x) => x.kind === 'subproceso');
   const inprog = items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length;
