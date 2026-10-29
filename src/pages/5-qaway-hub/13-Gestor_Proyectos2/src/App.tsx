@@ -217,10 +217,6 @@ function App() {
   };
 
   const handleDeleteProject = (id: string) => {
-    if (id === 'p1') {
-      notifyActive('El proyecto rector oficial no puede ser eliminado.');
-      return;
-    }
     try {
       localStorage.removeItem(`qaway-gantt-items-${id}`);
     } catch {
@@ -228,16 +224,32 @@ function App() {
     }
     setProjects((prev) => {
       const next = prev.filter((p) => p.id !== id);
+      const finalProjects =
+        next.length > 0
+          ? next
+          : [
+              {
+                id: 'p-' + Date.now().toString(36),
+                code: 'PRJ-01',
+                name: 'Nuevo Proyecto',
+                region: 'General',
+                subtext: 'Seguimiento de operaciones',
+                budget: 'S/ 0',
+                sponsor: 'Comité Directivo',
+                riskLevel: 'Bajo',
+                metodologia: 'Híbrido: Hitos Clave + Tareas de Campo',
+              },
+            ];
       try {
-        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(next));
+        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(finalProjects));
       } catch {
         /* fallback */
       }
-      return next;
+      if (activeProjectId === id) {
+        setActiveProjectId(finalProjects[0].id);
+      }
+      return finalProjects;
     });
-    if (activeProjectId === id) {
-      setActiveProjectId('p1');
-    }
     notifyActive('Proyecto eliminado definitivamente del sistema.');
   };
 

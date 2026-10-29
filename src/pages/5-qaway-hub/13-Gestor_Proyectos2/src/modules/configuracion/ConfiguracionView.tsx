@@ -152,7 +152,6 @@ export default function ConfiguracionView({
   };
 
   const handleConfirmDelete = () => {
-    if (currentProj.id === 'p1') return;
     onDeleteProject?.(currentProj.id);
     setIsDeleteModalOpen(false);
   };
@@ -596,74 +595,50 @@ export default function ConfiguracionView({
                 </div>
               </div>
 
-              {currentProj.id === 'p1' ? (
-                <div
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  padding: '14px 16px',
+                  borderRadius: '8px',
+                  background: '#ffffff',
+                  border: '1px solid #fecaca',
+                }}
+              >
+                <div>
+                  <b style={{ fontSize: '13px', color: '#991b1b', display: 'block' }}>
+                    Eliminar permanentemente este proyecto
+                  </b>
+                  <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
+                    Se borrará el proyecto "{currentProj.name}", su cronograma Gantt, tareas y sedes asignadas.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(true)}
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '14px 16px',
+                    gap: '7px',
+                    padding: '9px 16px',
                     borderRadius: '8px',
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
+                    border: '1px solid #f87171',
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    fontSize: '12.5px',
+                    fontWeight: 650,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  <ShieldCheck size={20} color="#0066ff" style={{ flexShrink: 0 }} />
-                  <div>
-                    <b style={{ fontSize: '13px', color: '#1e3a8a', display: 'block' }}>
-                      Proyecto Oficial Protegido
-                    </b>
-                    <span style={{ fontSize: '12px', color: '#3b82f6', lineHeight: 1.4 }}>
-                      El proyecto rector oficial ("MINEDU · Dotación 2027") está blindado contra borrado para preservar el registro histórico.
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '16px',
-                    padding: '14px 16px',
-                    borderRadius: '8px',
-                    background: '#ffffff',
-                    border: '1px solid #fecaca',
-                  }}
-                >
-                  <div>
-                    <b style={{ fontSize: '13px', color: '#991b1b', display: 'block' }}>
-                      Eliminar permanentemente este proyecto
-                    </b>
-                    <span style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
-                      Se borrará el proyecto "{currentProj.name}", su cronograma Gantt, tareas y sedes asignadas.
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      padding: '9px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #f87171',
-                      background: '#ef4444',
-                      color: '#ffffff',
-                      fontSize: '12.5px',
-                      fontWeight: 650,
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                      boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <Trash2 size={14} />
-                    <span>Eliminar Proyecto</span>
-                  </button>
-                </div>
-              )}
+                  <Trash2 size={14} />
+                  <span>Eliminar Proyecto</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
