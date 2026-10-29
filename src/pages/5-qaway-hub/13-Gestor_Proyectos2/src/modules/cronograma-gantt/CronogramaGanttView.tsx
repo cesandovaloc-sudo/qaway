@@ -323,45 +323,20 @@ const STATUS_CLASS: Record<Status, string> = {
 const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
 const REGION_OPTIONS = [
-  { value: 'Todas', label: 'Todas' },
-  { value: 'Junín', label: 'Junín' },
-  { value: 'Loreto', label: 'Loreto' },
-  { value: 'Huancavelica', label: 'Huancavelica' },
-  { value: 'Cusco', label: 'Cusco' },
-  { value: 'Pasco', label: 'Pasco' },
-];
-
-const FASES_OPTIONS = [
-  { value: 'Todas', label: 'Todas las fases' },
-  { value: 'Planificación', label: 'Planificación y CDL' },
-  { value: 'Gestión de almacenes', label: 'Gestión de Almacenes' },
-  { value: 'Registro MC SIGA', label: 'Registro MC SIGA (RAR / NEA)' },
-  { value: 'Distribución y Transporte', label: 'Distribución a II.EE.' },
-  { value: 'Liquidación', label: 'Liquidación y Cierre' },
-];
-
-const REGIONAL_UGEL_STATS = [
-  { name: 'UGEL Chupaca', progress: 100, status: 'Cumple', tasks: '4/4', sede: 'Chupaca', gestor: 'María Salazar' },
-  { name: 'UGEL Concepción', progress: 85, status: 'En curso', tasks: '3/4', sede: 'Concepción', gestor: 'María Salazar' },
-  { name: 'UGEL Huancayo', progress: 55, status: 'En proceso', tasks: '5/13', sede: 'Huancayo', gestor: 'Carlos Mendoza' },
-  { name: 'UGEL Jauja', progress: 50, status: 'En curso', tasks: '2/4', sede: 'Jauja', gestor: 'Carlos Mendoza' },
-  { name: 'UGEL Junín', progress: 50, status: 'En curso', tasks: '2/4', sede: 'Junín', gestor: 'María Salazar' },
-  { name: 'UGEL Tarma', progress: 45, status: 'En proceso', tasks: '2/5', sede: 'Tarma', gestor: 'Carlos Mendoza' },
-  { name: 'UGEL Chanchamayo', progress: 35, status: 'En proceso', tasks: '2/6', sede: 'La Merced', gestor: 'Lucía Ramos' },
-  { name: 'UGEL Yauli', progress: 30, status: 'En proceso', tasks: '1/4', sede: 'La Oroya', gestor: 'Carlos Mendoza' },
-  { name: 'UGEL Satipo', progress: 20, status: 'Con retraso', tasks: '1/5', sede: 'Satipo', gestor: 'María Salazar' },
-  { name: 'UGEL Pichanaki', progress: 20, status: 'En proceso', tasks: '1/5', sede: 'Pichanaki', gestor: 'Lucía Ramos' },
-  { name: 'UGEL Perené', progress: 15, status: 'En proceso', tasks: '1/6', sede: 'Perené', gestor: 'Lucía Ramos' },
-  { name: 'UGEL Río Tambo', progress: 10, status: 'Con retraso', tasks: '0/4', sede: 'Puerto Prado', gestor: 'Javier Ruiz' },
-  { name: 'UGEL Pangoa', progress: 10, status: 'Pendiente', tasks: '0/4', sede: 'San Martín', gestor: 'Javier Ruiz' },
+  { value: 'Todas', label: 'Todas las Zonas' },
+  { value: 'Zona Central', label: 'Zona Central' },
+  { value: 'Selva Central', label: 'Selva Central' },
+  { value: 'Lima Moderna', label: 'Lima Moderna' },
+  { value: 'Zona Norte', label: 'Zona Norte' },
+  { value: 'Zona Sur', label: 'Zona Sur' },
 ];
 
 const GESTOR_OPTIONS = [
-  { value: 'Todos', label: 'Todos' },
-  { value: 'María Salazar', label: 'María Salazar (Junín)' },
-  { value: 'Carlos Mendoza', label: 'Carlos Mendoza (Centro)' },
-  { value: 'Lucía Ramos', label: 'Lucía Ramos (Loreto)' },
-  { value: 'Javier Ruiz', label: 'Javier Ruiz (Transporte)' },
+  { value: 'Todos', label: 'Todos los Responsables' },
+  { value: 'Carlos Mendoza', label: 'Carlos Mendoza' },
+  { value: 'María Salazar', label: 'María Salazar' },
+  { value: 'Lucía Ramos', label: 'Lucía Ramos' },
+  { value: 'Javier Ruiz', label: 'Javier Ruiz' },
 ];
 
 const GESTOR_COLORS: Record<string, string> = {
@@ -442,10 +417,10 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'progress', label: 'Avance' },
   { key: 'status', label: 'Estado' },
   { key: 'gestor', label: 'Responsable' },
-  { key: 'region', label: 'Región' },
+  { key: 'region', label: 'Zona / Frente' },
 ];
 
-const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status'];
+const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region'];
 
 const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
@@ -1682,7 +1657,7 @@ export default function CronogramaGanttView({
               )}
             </label>
 
-            {/* Macro-filtro Región (Custom Popover 12px) */}
+            {/* Filtro Zona / Frente */}
             <div className="filter-dropdown-wrap">
               <button
                 type="button"
@@ -1692,14 +1667,14 @@ export default function CronogramaGanttView({
                 onClick={() => toggleMenu('region')}
               >
                 <div className="filter-card-copy">
-                  <small>Región / Macro</small>
+                  <small>Zona / Frente</small>
                   <span>{regionFilter === 'Todas' ? 'Todas' : regionFilter}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
               {activeMenu === 'region' && (
                 <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Filtrar por Región</div>
+                  <div className="filter-popover-title">Filtrar por Zona o Frente</div>
                   <div className="filter-popover-list">
                     {REGION_OPTIONS.map((opt) => (
                       <button
@@ -1720,7 +1695,7 @@ export default function CronogramaGanttView({
               )}
             </div>
 
-            {/* Macro-filtro Gestor (Custom Popover 12px) */}
+            {/* Filtro Responsable */}
             <div className="filter-dropdown-wrap">
               <button
                 type="button"
@@ -1730,14 +1705,14 @@ export default function CronogramaGanttView({
                 onClick={() => toggleMenu('gestor')}
               >
                 <div className="filter-card-copy">
-                  <small>Gestor Territorial</small>
+                  <small>Responsable</small>
                   <span>{gestorFilter === 'Todos' ? 'Todos' : gestorFilter}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
               {activeMenu === 'gestor' && (
                 <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Gestor Asignado</div>
+                  <div className="filter-popover-title">Responsable Asignado</div>
                   <div className="filter-popover-list">
                     {GESTOR_OPTIONS.map((opt) => (
                       <button
@@ -1751,131 +1726,6 @@ export default function CronogramaGanttView({
                       >
                         <span>{opt.label}</span>
                         {gestorFilter === opt.value && <Check size={14} className="item-check" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Macro-filtro Estado (Custom Popover 12px) */}
-            <div className="filter-dropdown-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
-                  stateFilter !== 'Todos' ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('state')}
-              >
-                <div className="filter-card-copy">
-                  <small>Estado</small>
-                  <span>{stateFilter === 'Todos' ? 'Todos' : stateFilter}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'state' && (
-                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Estado del Cronograma</div>
-                  <div className="filter-popover-list">
-                    <button
-                      type="button"
-                      className={`filter-item-btn ${stateFilter === 'Todos' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setStateFilter('Todos');
-                        closeMenus();
-                      }}
-                    >
-                      <span>Todos</span>
-                      {stateFilter === 'Todos' && <Check size={14} className="item-check" />}
-                    </button>
-                    {STATUS_OPTIONS.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        className={`filter-item-btn ${stateFilter === s ? 'selected' : ''}`}
-                        onClick={() => {
-                          setStateFilter(s);
-                          closeMenus();
-                        }}
-                      >
-                        <span className={'status ' + STATUS_CLASS[s]}>{s}</span>
-                        {stateFilter === s && <Check size={14} className="item-check" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Macro-filtro Tipo (Custom Popover 12px) */}
-            <div className="filter-dropdown-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'type' ? 'active' : ''} ${
-                  typeFilter !== 'Todos' ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('type')}
-              >
-                <div className="filter-card-copy">
-                  <small>Tipo</small>
-                  <span>{typeFilter === 'Todos' ? 'Todos' : typeFilter}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'type' && (
-                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Jerarquía de Actividad</div>
-                  <div className="filter-popover-list">
-                    {TYPE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={`filter-item-btn ${typeFilter === opt.value ? 'selected' : ''}`}
-                        onClick={() => {
-                          setTypeFilter(opt.value);
-                          closeMenus();
-                        }}
-                      >
-                        <span>{opt.label}</span>
-                        {typeFilter === opt.value && <Check size={14} className="item-check" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Macro-filtro Fase Territorial (Rescate Vista María Salazar) */}
-            <div className="filter-dropdown-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'phase' ? 'active' : ''} ${
-                  phaseFilter !== 'Todas' ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('phase')}
-              >
-                <div className="filter-card-copy">
-                  <small>Fase Normativa</small>
-                  <span>{phaseFilter === 'Todas' ? 'Todas' : phaseFilter}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'phase' && (
-                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Fase de Dotación 2027</div>
-                  <div className="filter-popover-list">
-                    {FASES_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={`filter-item-btn ${phaseFilter === opt.value ? 'selected' : ''}`}
-                        onClick={() => {
-                          setPhaseFilter(opt.value);
-                          closeMenus();
-                        }}
-                      >
-                        <span>{opt.label}</span>
-                        {phaseFilter === opt.value && <Check size={14} className="item-check" />}
                       </button>
                     ))}
                   </div>
