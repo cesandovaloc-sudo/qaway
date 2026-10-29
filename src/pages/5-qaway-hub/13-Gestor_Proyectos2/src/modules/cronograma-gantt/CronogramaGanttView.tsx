@@ -1964,10 +1964,12 @@ export default function CronogramaGanttView({
   const todayPos = calcPosition(currentTodayIso);
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
-  const add = (kind: Kind, parentHitoId?: string) => {
+  const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false) => {
     const id = 'new-' + Date.now();
     const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
     let code = `${hitos.length + 1}.`;
+    let defaultStart = '2026-10-26';
+    let defaultEnd = '2026-11-30';
     if (kind === 'subproceso') {
       const parent = items.find((x) => x.id === pId);
       if (parent) {
@@ -1975,6 +1977,8 @@ export default function CronogramaGanttView({
         const childIndex = siblings.length + 1;
         const parentCodeClean = parent.code.endsWith('.') ? parent.code.slice(0, -1) : parent.code;
         code = `${parentCodeClean}.${childIndex}`;
+        defaultStart = parent.start;
+        defaultEnd = parent.end;
       } else {
         code = `1.${subs.length + 1}`;
       }
@@ -1985,8 +1989,8 @@ export default function CronogramaGanttView({
       name: kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso',
       kind,
       parentId: pId,
-      start: '2026-10-26',
-      end: '2026-11-30',
+      start: defaultStart,
+      end: defaultEnd,
       progress: 0,
       status: 'Pendiente',
       expanded: true,
@@ -1995,6 +1999,33 @@ export default function CronogramaGanttView({
       reportType: 'Línea de tiempo',
       region: 'Todas',
       gestor: 'Sin asignar',
+    };
+
+    if (openInline) {
+      commitChange((old) => {
+        if (pId) {
+          const withExpanded = old.map((it) => (it.id === pId ? { ...it, expanded: true } : it));
+          const parentIdx = withExpanded.findIndex((it) => it.id === pId);
+          if (parentIdx >= 0) {
+            let lastChildIdx = parentIdx;
+            for (let idx = parentIdx + 1; idx < withExpanded.length; idx++) {
+              if (withExpanded[idx].parentId === pId) {
+                lastChildIdx = idx;
+              } else if (withExpanded[idx].kind === 'hito') {
+                break;
+              }
+            }
+            const copy = [...withExpanded];
+            copy.splice(lastChildIdx + 1, 0, draftItem);
+            return copy;
+          }
+        }
+        return [...old, draftItem];
+      });
+      setSelectedId(id);
+      toggleEdit(draftItem, 'name');
+      notify(`Nuevo ${kind} creado. Escribe el nombre y pulsa Enter.`);
+      return;
     };
 
     setSelectedId(id);
@@ -3348,6 +3379,17 @@ export default function CronogramaGanttView({
                       >
                         {x.name}
                       </span>
+                      <button
+                        type="button"
+                        className="quick-inline-add-btn"
+                        title={x.kind === 'hito' ? "Agregar subproceso a este hito" : "Agregar subproceso hermano"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          add('subproceso', x.kind === 'hito' ? x.id : x.parentId, true);
+                        }}
+                      >
+                        <Plus size={13} />
+                      </button>
                     )}
                   </div>
 
@@ -3771,6 +3813,31 @@ export default function CronogramaGanttView({
               </div>
             </div>
           ))}
+
+              {/* Fila interactiva para creación rápida de nuevo Hito Rector al pie */}
+              <div
+                className="row quick-add-row"
+                onClick={() => add('hito', undefined, true)}
+                title="Haz clic para agregar un nuevo Hito Rector al cronograma"
+              >
+                <div
+                  className="fixed-cols"
+                  style={{
+                    width: `${fixedWidth}px`,
+                    minWidth: `${fixedWidth}px`,
+                    maxWidth: `${fixedWidth}px`,
+                    gridTemplateColumns: fixedGridCols,
+                  }}
+                >
+                  <div className="name-cell quick-add-cell">
+                    <span className="indent" />
+                    <div className="quick-add-icon-box">
+                      <Plus size={14} />
+                    </div>
+                    <span className="quick-add-text">+ Agregar nuevo hito rector</span>
+                  </div>
+                </div>
+              </div>
 
               {/* Capa Overlay de Línea de Tiempo (Mismas dimensiones y alineación absoluta que las barras del timeline) */}
               <div
