@@ -17,6 +17,8 @@ import {
   Clock3,
   Download,
   ExternalLink,
+  Eye,
+  EyeOff,
   FileSpreadsheet,
   FileText,
   FileUp,
@@ -1301,6 +1303,7 @@ export default function CronogramaGanttView({
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
+  const [colFilterOpen, setColFilterOpen] = useState<ColKey | null>(null);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
 
@@ -1586,6 +1589,9 @@ export default function CronogramaGanttView({
       }
       if (!t.closest('.name-head')) {
         setColsMenuOpen(false);
+      }
+      if (!t.closest('.th-col-header')) {
+        setColFilterOpen(null);
       }
       if (!t.closest('.filter-dropdown-wrap')) {
         setActiveMenu(null);
@@ -2486,9 +2492,10 @@ export default function CronogramaGanttView({
               onClick={() => {
                 setShowBarLabels((prev) => !prev);
               }}
+              title="Mostrar u ocultar porcentaje de avance en barras"
             >
               <Percent size={13} />
-              <span>Avance</span>
+              <span className="btn-label-text">Avance</span>
             </button>
 
             {/* Botón Filtros Personalizados Avanzados */}
@@ -2496,9 +2503,10 @@ export default function CronogramaGanttView({
               type="button"
               className={`btn secondary custom-filter-trigger-btn ${advancedFiltersOpen || customRules.length > 0 ? 'active' : ''}`}
               onClick={() => setAdvancedFiltersOpen((v) => !v)}
+              title="Condiciones de filtrado avanzado"
             >
               <Filter size={13} />
-              <span>Filtro avanzado</span>
+              <span className="btn-label-text">Filtro avanzado</span>
               {customRules.length > 0 && (
                 <span className="custom-filter-counter-badge">{customRules.length}</span>
               )}
@@ -2814,44 +2822,314 @@ export default function CronogramaGanttView({
               </div>
 
               {visibleCols.includes('start') && (
-                <div>
-                  Inicio
+                <div className="th-col-header">
+                  <span className="th-label">Inicio</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('start');
+                        notify('Columna "Inicio" ocultada. Recupérala desde el icono de columnas.');
+                      }}
+                      title="Ocultar columna Inicio"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
                 </div>
               )}
               {visibleCols.includes('end') && (
-                <div>
-                  Fin
+                <div className="th-col-header">
+                  <span className="th-label">Fin</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('end');
+                        notify('Columna "Fin" ocultada. Recupérala desde el icono de columnas.');
+                      }}
+                      title="Ocultar columna Fin"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
                 </div>
               )}
               {visibleCols.includes('duration') && (
-                <div>
-                  Duración
+                <div className="th-col-header">
+                  <span className="th-label">Duración</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('duration');
+                        notify('Columna "Duración" ocultada.');
+                      }}
+                      title="Ocultar columna Duración"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
                 </div>
               )}
               {visibleCols.includes('progress') && (
-                <div>
-                  Avance
+                <div className="th-col-header">
+                  <span className="th-label">Avance</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className={`th-action-btn ${customRules.some((r) => r.field === 'progress') ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'progress' ? null : 'progress'));
+                      }}
+                      title="Filtrar por avance"
+                    >
+                      <Filter size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('progress');
+                        notify('Columna "Avance" ocultada.');
+                      }}
+                      title="Ocultar columna Avance"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
+                  {colFilterOpen === 'progress' && (
+                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
+                      <div className="th-filter-pop-title">Filtrar por Avance</div>
+                      <div className="th-filter-pop-options">
+                        <button
+                          type="button"
+                          className="th-filter-opt-btn"
+                          onClick={() => {
+                            setCustomRules((prev) => [
+                              ...prev.filter((r) => r.field !== 'progress'),
+                              { id: 'prog-0', field: 'progress', op: 'eq', val: '0' }
+                            ]);
+                            setColFilterOpen(null);
+                            notify('Filtro aplicado: Avance 0% (Sin iniciar)');
+                          }}
+                        >
+                          Sin iniciar (0%)
+                        </button>
+                        <button
+                          type="button"
+                          className="th-filter-opt-btn"
+                          onClick={() => {
+                            setCustomRules((prev) => [
+                              ...prev.filter((r) => r.field !== 'progress'),
+                              { id: 'prog-50', field: 'progress', op: 'gte', val: '50' }
+                            ]);
+                            setColFilterOpen(null);
+                            notify('Filtro aplicado: Avance ≥ 50%');
+                          }}
+                        >
+                          Medio avance (≥ 50%)
+                        </button>
+                        <button
+                          type="button"
+                          className="th-filter-opt-btn"
+                          onClick={() => {
+                            setCustomRules((prev) => [
+                              ...prev.filter((r) => r.field !== 'progress'),
+                              { id: 'prog-100', field: 'progress', op: 'eq', val: '100' }
+                            ]);
+                            setColFilterOpen(null);
+                            notify('Filtro aplicado: Avance 100% (Completados)');
+                          }}
+                        >
+                          Completado (100%)
+                        </button>
+                        {customRules.some((r) => r.field === 'progress') && (
+                          <button
+                            type="button"
+                            className="th-filter-opt-clear"
+                            onClick={() => {
+                              setCustomRules((prev) => prev.filter((r) => r.field !== 'progress'));
+                              setColFilterOpen(null);
+                              notify('Filtro de avance eliminado');
+                            }}
+                          >
+                            Limpiar filtro de avance
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
                 </div>
               )}
               {visibleCols.includes('status') && (
-                <div>
-                  Estado
+                <div className="th-col-header">
+                  <span className="th-label">Estado</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className={`th-action-btn ${stateFilter !== 'Todos' ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'status' ? null : 'status'));
+                      }}
+                      title="Filtrar por estado"
+                    >
+                      <Filter size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('status');
+                        notify('Columna "Estado" ocultada.');
+                      }}
+                      title="Ocultar columna Estado"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
+                  {colFilterOpen === 'status' && (
+                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
+                      <div className="th-filter-pop-title">Filtrar por Estado</div>
+                      <div className="th-filter-pop-options">
+                        {['Todos', 'En proceso', 'Pendiente', 'Con retraso', 'Completado'].map((st) => (
+                          <button
+                            key={st}
+                            type="button"
+                            className={`th-filter-opt-btn ${stateFilter === st ? 'active' : ''}`}
+                            onClick={() => {
+                              setStateFilter(st);
+                              setColFilterOpen(null);
+                              notify(st === 'Todos' ? 'Todos los estados' : `Filtrado por: ${st}`);
+                            }}
+                          >
+                            <span>{st}</span>
+                            {stateFilter === st && <Check size={12} />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
                 </div>
               )}
               {visibleCols.includes('gestor') && (
-                <div>
-                  Responsable
+                <div className="th-col-header">
+                  <span className="th-label">Responsable</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className={`th-action-btn ${gestorFilter !== 'Todos' ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'gestor' ? null : 'gestor'));
+                      }}
+                      title="Filtrar por responsable"
+                    >
+                      <Filter size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('gestor');
+                        notify('Columna "Responsable" ocultada.');
+                      }}
+                      title="Ocultar columna Responsable"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
+                  {colFilterOpen === 'gestor' && (
+                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
+                      <div className="th-filter-pop-title">Filtrar por Responsable</div>
+                      <div className="th-filter-pop-options" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        {GESTOR_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            className={`th-filter-opt-btn ${gestorFilter === opt.value ? 'active' : ''}`}
+                            onClick={() => {
+                              setGestorFilter(opt.value);
+                              setColFilterOpen(null);
+                              notify(opt.value === 'Todos' ? 'Todos los responsables' : `Filtrado por: ${opt.label}`);
+                            }}
+                          >
+                            <span>{opt.label}</span>
+                            {gestorFilter === opt.value && <Check size={12} />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'gestor')} />
                 </div>
               )}
               {visibleCols.includes('region') && (
-                <div>
-                  Región
+                <div className="th-col-header">
+                  <span className="th-label">Región</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className={`th-action-btn ${regionFilter !== 'Todas' ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'region' ? null : 'region'));
+                      }}
+                      title="Filtrar por región"
+                    >
+                      <Filter size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('region');
+                        notify('Columna "Región" ocultada.');
+                      }}
+                      title="Ocultar columna Región"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
+                  {colFilterOpen === 'region' && (
+                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
+                      <div className="th-filter-pop-title">Filtrar por Región</div>
+                      <div className="th-filter-pop-options" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        {REGION_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            className={`th-filter-opt-btn ${regionFilter === opt.value ? 'active' : ''}`}
+                            onClick={() => {
+                              setRegionFilter(opt.value);
+                              setColFilterOpen(null);
+                              notify(opt.value === 'Todas' ? 'Todas las regiones' : `Filtrado por: ${opt.label}`);
+                            }}
+                          >
+                            <span>{opt.label}</span>
+                            {regionFilter === opt.value && <Check size={12} />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="col-resizer" onMouseDown={(e) => startResize(e, 'region')} />
                 </div>
               )}

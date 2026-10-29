@@ -1289,6 +1289,37 @@
   font-weight: 700;
 }
 
+/* Responsividad inteligente en botones de barra de filtros */
+@media (max-width: 1540px) {
+  .gantt-v2 .btn-toggle-labels .btn-label-text,
+  .gantt-v2 .custom-filter-trigger-btn .btn-label-text {
+    display: none;
+  }
+  .gantt-v2 .btn-toggle-labels,
+  .gantt-v2 .custom-filter-trigger-btn {
+    padding: 0 10px;
+    min-width: 38px;
+  }
+}
+
+@media (max-width: 1360px) {
+  .gantt-v2 .filters {
+    gap: 6px;
+    padding: 8px 12px;
+  }
+  .gantt-v2 .search {
+    min-width: 130px;
+    max-width: 200px;
+  }
+  .gantt-v2 .filter-card-btn {
+    min-width: 95px;
+    padding: 3px 8px;
+  }
+  .gantt-v2 .today-pill {
+    padding: 0 10px;
+  }
+}
+
 /* Fila extra expandible de Filtros Avanzados Personalizados */
 .gantt-v2 .advanced-filter-row {
   background: #ffffff;
@@ -1631,17 +1662,160 @@
 .gantt-v2 .table-head .fixed-cols > div {
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 8px;
   border-right: 1px solid #e2e8f0;
   position: relative;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .gantt-v2 .table-head .fixed-cols > div:last-child {
   border-right: none;
+}
+
+/* Encabezados con acciones de columna (Ojito para ocultar y Micro-filtro contextual) */
+.gantt-v2 .th-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.gantt-v2 .th-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.gantt-v2 .th-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0.25;
+  transition: opacity 0.15s ease;
+  margin-left: 4px;
+}
+
+.gantt-v2 .table-head .fixed-cols > div:hover .th-actions,
+.gantt-v2 .th-actions:focus-within {
+  opacity: 1;
+}
+
+.gantt-v2 .th-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .th-action-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.gantt-v2 .th-action-btn.filtered {
+  background: #eff6ff;
+  color: #0066ff;
+  border-color: #bfdbfe;
+  opacity: 1;
+}
+
+/* Micro-desplegable de filtro contextual sobre la columna */
+.gantt-v2 .th-filter-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 260;
+  min-width: 170px;
+  max-width: 240px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.16), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: afEntrance 0.12s ease-out;
+}
+
+.gantt-v2 .th-filter-pop-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  padding: 2px 6px 6px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.gantt-v2 .th-filter-pop-options {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gantt-v2 .th-filter-opt-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .th-filter-opt-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.gantt-v2 .th-filter-opt-btn.active {
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 700;
+}
+
+.gantt-v2 .th-filter-opt-clear {
+  margin-top: 4px;
+  padding: 5px 8px;
+  border: 1px dashed #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .th-filter-opt-clear:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
 }
 
 .gantt-v2 .name-head {
