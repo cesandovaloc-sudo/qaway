@@ -20,7 +20,10 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
   Clock3,
+  PanelLeftClose,
+  PanelLeftOpen,
   CornerDownRight,
   Download,
   ExternalLink,
@@ -808,6 +811,21 @@ export default function CronogramaGanttView({
     }
   }, [items, projectId]);
 
+  const [resizingCol, setResizingCol] = useState<ColKey | null>(null);
+  const prevVisibleColsRef = useRef<ColKey[]>([...DEFAULT_VISIBLE_COLS]);
+
+  const toggleCompactColumns = () => {
+    if (visibleCols.length > 1) {
+      prevVisibleColsRef.current = [...visibleCols];
+      setVisibleCols(['name']);
+      notify('Vista compacta: solo Hito/Subproceso y lienzo Gantt visible');
+    } else {
+      const restored = prevVisibleColsRef.current.length > 1 ? prevVisibleColsRef.current : [...DEFAULT_VISIBLE_COLS];
+      setVisibleCols(restored);
+      notify('Todas las columnas del cronograma restauradas');
+    }
+  };
+
   const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v1') || 'null');
@@ -1463,6 +1481,7 @@ export default function CronogramaGanttView({
     const onUp = () => {
       if (!dragRef.current) return;
       dragRef.current = null;
+      setResizingCol(null);
       document.body.classList.remove('gantt-resizing');
       try {
         localStorage.setItem('qaway-gantt-cols-v1', JSON.stringify(colRef.current));
@@ -1482,7 +1501,8 @@ export default function CronogramaGanttView({
   const startResize = (e: React.MouseEvent, key: ColKey) => {
     e.preventDefault();
     e.stopPropagation();
-    dragRef.current = { key, startX: e.clientX, startW: colRef.current[key] };
+    setResizingCol(key);
+    dragRef.current = { key, startX: e.clientX, startW: colRef.current[key] || DEFAULT_COLS[key] };
     document.body.classList.add('gantt-resizing');
   };
 
@@ -2846,8 +2866,20 @@ export default function CronogramaGanttView({
                       e.stopPropagation();
                       toggleAllHitosExpand();
                     }}
+                    title={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
                   >
-                    {allHitosExpanded ? <FolderMinus size={13} /> : <FolderPlus size={13} />}
+                    <ChevronsUpDown size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCompactColumns();
+                    }}
+                    title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
+                  >
+                    {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
                   </button>
                   <button
                     type="button"
@@ -2856,6 +2888,7 @@ export default function CronogramaGanttView({
                       e.stopPropagation();
                       setColsMenuOpen((v) => !v);
                     }}
+                    title="Configurar columnas visibles"
                   >
                     <SlidersHorizontal size={13} />
                   </button>
@@ -2910,7 +2943,7 @@ export default function CronogramaGanttView({
                     </div>
                   </div>
                 )}
-                <div className="col-resizer" onMouseDown={(e) => startResize(e, 'name')} />
+                <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} />
               </div>
 
               {visibleCols.includes('start') && (
@@ -2930,7 +2963,7 @@ export default function CronogramaGanttView({
                       <EyeOff size={11} />
                     </button>
                   </div>
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'start')} />
+                  <div className={`col-resizer ${resizingCol === 'start' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'start')} />
                 </div>
               )}
               {visibleCols.includes('end') && (
@@ -2950,7 +2983,7 @@ export default function CronogramaGanttView({
                       <EyeOff size={11} />
                     </button>
                   </div>
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'end')} />
+                  <div className={`col-resizer ${resizingCol === 'end' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'end')} />
                 </div>
               )}
               {visibleCols.includes('duration') && (
@@ -2970,24 +3003,13 @@ export default function CronogramaGanttView({
                       <EyeOff size={11} />
                     </button>
                   </div>
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'duration')} />
+                  <div className={`col-resizer ${resizingCol === 'duration' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'duration')} />
                 </div>
               )}
               {visibleCols.includes('progress') && (
                 <div className="th-col-header">
                   <span className="th-label">Avance</span>
                   <div className="th-actions">
-                    <button
-                      type="button"
-                      className={`th-action-btn ${customRules.some((r) => r.field === 'progress') ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'progress' ? null : 'progress'));
-                      }}
-                      title="Filtrar por avance"
-                    >
-                      <Filter size={11} />
-                    </button>
                     <button
                       type="button"
                       className="th-action-btn"
@@ -2999,6 +3021,17 @@ export default function CronogramaGanttView({
                       title="Ocultar columna Avance"
                     >
                       <EyeOff size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`th-action-btn ${customRules.some((r) => r.field === 'progress') ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'progress' ? null : 'progress'));
+                      }}
+                      title="Filtrar por avance"
+                    >
+                      <Filter size={11} />
                     </button>
                   </div>
                   {colFilterOpen === 'progress' && (
@@ -3063,24 +3096,13 @@ export default function CronogramaGanttView({
                       </div>
                     </div>
                   )}
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'progress')} />
+                  <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} />
                 </div>
               )}
               {visibleCols.includes('status') && (
                 <div className="th-col-header">
                   <span className="th-label">Estado</span>
                   <div className="th-actions">
-                    <button
-                      type="button"
-                      className={`th-action-btn ${stateFilter !== 'Todos' ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'status' ? null : 'status'));
-                      }}
-                      title="Filtrar por estado"
-                    >
-                      <Filter size={11} />
-                    </button>
                     <button
                       type="button"
                       className="th-action-btn"
@@ -3092,6 +3114,17 @@ export default function CronogramaGanttView({
                       title="Ocultar columna Estado"
                     >
                       <EyeOff size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`th-action-btn ${stateFilter !== 'Todos' ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'status' ? null : 'status'));
+                      }}
+                      title="Filtrar por estado"
+                    >
+                      <Filter size={11} />
                     </button>
                   </div>
                   {colFilterOpen === 'status' && (
@@ -3116,24 +3149,13 @@ export default function CronogramaGanttView({
                       </div>
                     </div>
                   )}
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'status')} />
+                  <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} />
                 </div>
               )}
               {visibleCols.includes('gestor') && (
                 <div className="th-col-header">
                   <span className="th-label">Responsable</span>
                   <div className="th-actions">
-                    <button
-                      type="button"
-                      className={`th-action-btn ${gestorFilter !== 'Todos' ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'gestor' ? null : 'gestor'));
-                      }}
-                      title="Filtrar por responsable"
-                    >
-                      <Filter size={11} />
-                    </button>
                     <button
                       type="button"
                       className="th-action-btn"
@@ -3145,6 +3167,17 @@ export default function CronogramaGanttView({
                       title="Ocultar columna Responsable"
                     >
                       <EyeOff size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`th-action-btn ${gestorFilter !== 'Todos' ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'gestor' ? null : 'gestor'));
+                      }}
+                      title="Filtrar por responsable"
+                    >
+                      <Filter size={11} />
                     </button>
                   </div>
                   {colFilterOpen === 'gestor' && (
@@ -3169,24 +3202,13 @@ export default function CronogramaGanttView({
                       </div>
                     </div>
                   )}
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'gestor')} />
+                  <div className={`col-resizer ${resizingCol === 'gestor' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'gestor')} />
                 </div>
               )}
               {visibleCols.includes('region') && (
                 <div className="th-col-header">
                   <span className="th-label">Región</span>
                   <div className="th-actions">
-                    <button
-                      type="button"
-                      className={`th-action-btn ${regionFilter !== 'Todas' ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'region' ? null : 'region'));
-                      }}
-                      title="Filtrar por región"
-                    >
-                      <Filter size={11} />
-                    </button>
                     <button
                       type="button"
                       className="th-action-btn"
@@ -3198,6 +3220,17 @@ export default function CronogramaGanttView({
                       title="Ocultar columna Región"
                     >
                       <EyeOff size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`th-action-btn ${regionFilter !== 'Todas' ? 'filtered' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColFilterOpen((cur) => (cur === 'region' ? null : 'region'));
+                      }}
+                      title="Filtrar por región"
+                    >
+                      <Filter size={11} />
                     </button>
                   </div>
                   {colFilterOpen === 'region' && (
@@ -3222,7 +3255,7 @@ export default function CronogramaGanttView({
                       </div>
                     </div>
                   )}
-                  <div className="col-resizer" onMouseDown={(e) => startResize(e, 'region')} />
+                  <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} />
                 </div>
               )}
             </div>
@@ -3432,17 +3465,7 @@ export default function CronogramaGanttView({
                       <div className="quick-row-actions">
                         {x.kind === 'subproceso' ? (
                           <>
-                            <button
-                              type="button"
-                              className="quick-inline-icon-btn"
-                              title={`Agregar subproceso hijo / anidado bajo ${x.code}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                add('subproceso', x.id, true);
-                              }}
-                            >
-                              <CornerDownRight size={13} style={{ color: '#0284c7' }} />
-                            </button>
+                            {/* 1. Mismo nivel (+ Hermano) */}
                             <button
                               type="button"
                               className="quick-inline-icon-btn"
@@ -3454,41 +3477,82 @@ export default function CronogramaGanttView({
                             >
                               <Plus size={13} style={{ color: '#475569' }} />
                             </button>
+
+                            {/* 2. Nivel inferior (↳ Enter / Sub-hijo) */}
                             <button
                               type="button"
                               className="quick-inline-icon-btn"
-                              title="Agregar nuevo hito rector"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                add('hito', undefined, true);
-                              }}
-                            >
-                              <FolderPlus size={13} style={{ color: '#0f172a' }} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              className="quick-inline-icon-btn"
-                              title={`Agregar subproceso a este hito (${x.code})`}
+                              title={`Agregar sub-hijo / nivel inferior bajo ${x.code}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('subproceso', x.id, true);
                               }}
                             >
-                              <Plus size={13} style={{ color: '#0284c7' }} />
+                              <CornerDownRight size={13} style={{ color: '#0284c7' }} />
                             </button>
+
+                            {/* 3. Colapsador propio si tiene hijos anidados */}
+                            {items.some((c) => c.parentId === x.id) && (
+                              <button
+                                type="button"
+                                className="quick-inline-icon-btn"
+                                title={x.expanded ? "Colapsar sub-procesos hijos" : "Expandir sub-procesos hijos"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  update(x.id, { expanded: !x.expanded });
+                                }}
+                              >
+                                {x.expanded ? (
+                                  <ChevronDown size={13} style={{ color: '#0284c7' }} />
+                                ) : (
+                                  <ChevronRight size={13} style={{ color: '#64748b' }} />
+                                )}
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {/* 1. Mismo nivel (+ Hito Rector) */}
                             <button
                               type="button"
                               className="quick-inline-icon-btn"
-                              title="Agregar nuevo hito rector abajo"
+                              title="Agregar nuevo hito rector al mismo nivel"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('hito', undefined, true);
                               }}
                             >
-                              <FolderPlus size={13} style={{ color: '#0f172a' }} />
+                              <Plus size={13} style={{ color: '#0f172a' }} />
+                            </button>
+
+                            {/* 2. Nivel inferior (↳ Enter / Subproceso hijo) */}
+                            <button
+                              type="button"
+                              className="quick-inline-icon-btn"
+                              title={`Agregar subproceso hijo para este hito (${x.code})`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                add('subproceso', x.id, true);
+                              }}
+                            >
+                              <CornerDownRight size={13} style={{ color: '#0284c7' }} />
+                            </button>
+
+                            {/* 3. Colapsador de este hito */}
+                            <button
+                              type="button"
+                              className="quick-inline-icon-btn"
+                              title={x.expanded ? "Colapsar subprocesos de este hito" : "Expandir subprocesos de este hito"}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                update(x.id, { expanded: !x.expanded });
+                              }}
+                            >
+                              {x.expanded ? (
+                                <ChevronDown size={13} style={{ color: '#0284c7' }} />
+                              ) : (
+                                <ChevronRight size={13} style={{ color: '#64748b' }} />
+                              )}
                             </button>
                           </>
                         )}
