@@ -1,16 +1,22 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const env = (import.meta as any).env || {};
+const supabaseUrl = env.VITE_SUPABASE_URL || 'https://qrusdsqgygfolxfra.supabase.co';
+const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('[Gestor Proyectos] Credenciales de Supabase no encontradas en variables de entorno.');
+let client: SupabaseClient | null = null;
+try {
+  if (supabaseUrl && supabaseAnonKey) {
+    client = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storageKey: 'qaway_gestor_proyectos_auth',
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+  }
+} catch (e) {
+  console.warn('[Gestor Proyectos] Supabase no pudo inicializarse, usando modo local:', e);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storageKey: 'qaway_gestor_proyectos_auth',
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+export const supabase = client;

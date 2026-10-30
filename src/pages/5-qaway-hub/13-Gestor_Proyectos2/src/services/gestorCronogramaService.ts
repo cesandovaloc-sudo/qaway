@@ -84,6 +84,7 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
  * Si la tabla o conexión no está disponible, retorna null para activar el fallback local.
  */
 export async function fetchCronogramaFromSupabase(projectId: string): Promise<GanttItemData[] | null> {
+  if (!supabase) return null;
   try {
     const { data, error } = await supabase
       .from('gestor_cronograma_items')
@@ -117,6 +118,7 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
  * Sincroniza un ítem individual (creación o actualización) en Supabase.
  */
 export async function upsertCronogramaItemInSupabase(projectId: string, item: GanttItemData): Promise<boolean> {
+  if (!supabase) return false;
   try {
     const row = toSupabaseRow(projectId, item);
     const { error } = await supabase.from('gestor_cronograma_items').upsert(row);
@@ -136,7 +138,7 @@ export async function upsertCronogramaItemInSupabase(projectId: string, item: Ga
  * Sincroniza en lote toda la lista de ítems de un proyecto a Supabase.
  */
 export async function syncAllCronogramaItemsToSupabase(projectId: string, items: GanttItemData[]): Promise<boolean> {
-  if (!items || items.length === 0) return true;
+  if (!supabase || !items || items.length === 0) return true;
   try {
     const rows = items.map((it) => toSupabaseRow(projectId, it));
     const { error } = await supabase.from('gestor_cronograma_items').upsert(rows);
@@ -156,6 +158,7 @@ export async function syncAllCronogramaItemsToSupabase(projectId: string, items:
  * Elimina un ítem de Supabase (por id).
  */
 export async function deleteCronogramaItemFromSupabase(itemId: string): Promise<boolean> {
+  if (!supabase) return false;
   try {
     const { error } = await supabase.from('gestor_cronograma_items').delete().eq('id', itemId);
 
