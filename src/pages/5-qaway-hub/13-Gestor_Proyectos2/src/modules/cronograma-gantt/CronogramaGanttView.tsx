@@ -2,6 +2,9 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
 import './gantt.css';
+import CronogramaKanbanView from './CronogramaKanbanView';
+import CronogramaListaView from './CronogramaListaView';
+import CronogramaCalendarioView from './CronogramaCalendarioView';
 import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
@@ -41,6 +44,9 @@ import {
   Globe,
   HelpCircle,
   Layers3,
+  LayoutDashboard,
+  List,
+  FolderKanban,
   Link2,
   MapPin,
   Maximize2,
@@ -70,7 +76,7 @@ import {
   X
 } from 'lucide-react';
 
-type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
+export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
 type ColKey = 'name' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region';
 type EditField = ColKey;
@@ -93,7 +99,7 @@ export interface AttachmentItem {
   type?: string;
 }
 
-interface Item {
+export interface Item {
   id: string;
   code: string;
   name: string;
@@ -1497,6 +1503,7 @@ export default function CronogramaGanttView({
   const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
+  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario'>('gantt');
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -2514,24 +2521,65 @@ export default function CronogramaGanttView({
 
         {/* Workspace Central */}
         <main ref={workspaceRef} className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''}`}>
-          {/* Tabs Superiores */}
+          {/* Tabs Superiores con Switcher de Modos a la Derecha */}
           <nav className="tabs">
-            {[
-              { n: 'Todos', c: items.length },
-              { n: 'Hitos', c: hitos.length },
-              { n: 'Subprocesos', c: subs.length },
-              { n: 'En proceso', c: inprog },
-              { n: 'Con retraso', c: late },
-              { n: 'Completados', c: complete },
-            ].map((t) => (
+            <div className="tabs-list">
+              {[
+                { n: 'Todos', c: items.length },
+                { n: 'Hitos', c: hitos.length },
+                { n: 'Subprocesos', c: subs.length },
+                { n: 'En proceso', c: inprog },
+                { n: 'Con retraso', c: late },
+                { n: 'Completados', c: complete },
+              ].map((t) => (
+                <button
+                  key={t.n}
+                  className={tab === t.n ? 'active' : ''}
+                  onClick={() => setTab(t.n)}
+                >
+                  {t.n} <span>({t.c})</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
               <button
-                key={t.n}
-                className={tab === t.n ? 'active' : ''}
-                onClick={() => setTab(t.n)}
+                type="button"
+                className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
+                onClick={() => setViewMode('gantt')}
+                title="Vista Cronograma Gantt"
               >
-                {t.n} <span>({t.c})</span>
+                <FolderKanban size={14} />
+                <span>Gantt</span>
               </button>
-            ))}
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
+                onClick={() => setViewMode('lista')}
+                title="Vista Tabla Analítica"
+              >
+                <List size={14} />
+                <span>Lista</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                onClick={() => setViewMode('kanban')}
+                title="Vista Tablero Kanban"
+              >
+                <LayoutDashboard size={14} />
+                <span>Kanban</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
+                onClick={() => setViewMode('calendario')}
+                title="Vista Calendario Mensual"
+              >
+                <CalendarDays size={14} />
+                <span>Calendario</span>
+              </button>
+            </div>
           </nav>
 
           {/* Filtros Macro para Coordinador */}
@@ -2809,130 +2857,126 @@ export default function CronogramaGanttView({
               )}
             </div>
 
-            {/* Deslizador temporal / Navegador Hoy (Estándar Qaway de imagen 2) */}
-            <div className="timeline-nav" title="Navegar por la línea de tiempo">
-              <button
-                type="button"
-                className="nav-arrow"
-                onClick={() => scrollTimeline('left')}
-                title="Desplazar línea de tiempo a la izquierda"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                type="button"
-                className="today-pill"
-                onClick={scrollToToday}
-                title="Ir y centrar en la fecha actual (27 de octubre de 2026)"
-              >
-                Hoy
-              </button>
-              <button
-                type="button"
-                className="nav-arrow"
-                onClick={() => scrollTimeline('right')}
-                title="Desplazar línea de tiempo a la derecha"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
+            {/* Controles exclusivos de visualización Gantt */}
+            {viewMode === 'gantt' && (
+              <>
+                <div className="timeline-nav" title="Navegar por la línea de tiempo">
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={() => scrollTimeline('left')}
+                    title="Desplazar línea de tiempo a la izquierda"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="today-pill"
+                    onClick={scrollToToday}
+                    title="Ir y centrar en la fecha actual (27 de octubre de 2026)"
+                  >
+                    Hoy
+                  </button>
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={() => scrollTimeline('right')}
+                    title="Desplazar línea de tiempo a la derecha"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
 
-            <div className="zoom">
-              {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
+                <div className="zoom">
+                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
+                    <button
+                      type="button"
+                      key={x}
+                      className={zoom === x ? 'active' : ''}
+                      onClick={() => handleZoomChange(x)}
+                    >
+                      {x}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="filter-group-divider" aria-hidden="true" />
+
                 <button
                   type="button"
-                  key={x}
-                  className={zoom === x ? 'active' : ''}
-                  onClick={() => handleZoomChange(x)}
+                  className={`btn-toggle-labels qm-btn-icon ${showBarLabels ? "active" : ""}`}
+                  onClick={() => setShowBarLabels((prev) => !prev)}
+                  data-tooltip="Mostrar % en barras"
+                  aria-label="Mostrar u ocultar porcentaje de avance en barras"
                 >
-                  {x}
+                  <Percent size={14} />
                 </button>
-              ))}
-            </div>
 
-            {/* Separador vertical: Tiempo Gantt | Visualización y Herramientas */}
-            <div className="filter-group-divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
+                  onClick={toggleFullscreen}
+                  data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                  aria-label="Alternar modo pantalla completa"
+                >
+                  {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                </button>
 
-            {/* Zona 3: Visualización de Barras y Herramientas Pro (Benchmark Imagen 2) */}
-            <button
-              type="button"
-              className={`btn-toggle-labels qm-btn-icon ${showBarLabels ? "active" : ""}`}
-              onClick={() => setShowBarLabels((prev) => !prev)}
-              data-tooltip="Mostrar % en barras"
-              aria-label="Mostrar u ocultar porcentaje de avance en barras"
-            >
-              <Percent size={14} />
-            </button>
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${showBaseline ? "active" : ""}`}
+                  onClick={() => {
+                    setShowBaseline((v) => !v);
+                    notify(showBaseline ? "Línea base oculta" : "Línea base oficial visible");
+                  }}
+                  data-tooltip="Línea base"
+                  aria-label="Mostrar u ocultar línea base oficial"
+                >
+                  <Layers3 size={15} />
+                </button>
 
-            {/* Pantalla completa (Benchmark imagen 2) */}
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
-              onClick={toggleFullscreen}
-              data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-              aria-label="Alternar modo pantalla completa"
-            >
-              {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-            </button>
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${showCriticalPath ? "active" : ""}`}
+                  onClick={() => {
+                    setShowCriticalPath((v) => !v);
+                    notify(showCriticalPath ? "Ruta crítica desactivada" : "Ruta crítica resaltada");
+                  }}
+                  data-tooltip="Ruta crítica"
+                  aria-label="Resaltar ruta crítica del proyecto"
+                >
+                  <Link2 size={15} />
+                </button>
 
-            {/* Línea base oficial (Benchmark imagen 2) */}
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${showBaseline ? "active" : ""}`}
-              onClick={() => {
-                setShowBaseline((v) => !v);
-                notify(showBaseline ? "Línea base oculta" : "Línea base oficial visible");
-              }}
-              data-tooltip="Línea base"
-              aria-label="Mostrar u ocultar línea base oficial"
-            >
-              <Layers3 size={15} />
-            </button>
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleAllHitosExpand();
+                  }}
+                  data-tooltip={allHitosExpanded ? "Colapsar hitos" : "Expandir hitos"}
+                  aria-label={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
+                >
+                  <ChevronsUpDown size={15} />
+                </button>
 
-            {/* Ruta crítica (Benchmark imagen 2) */}
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${showCriticalPath ? "active" : ""}`}
-              onClick={() => {
-                setShowCriticalPath((v) => !v);
-                notify(showCriticalPath ? "Ruta crítica desactivada" : "Ruta crítica resaltada");
-              }}
-              data-tooltip="Ruta crítica"
-              aria-label="Resaltar ruta crítica del proyecto"
-            >
-              <Link2 size={15} />
-            </button>
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setColsMenuOpen((v) => !v);
+                  }}
+                  data-tooltip="Más opciones"
+                  aria-label="Configurar columnas y opciones"
+                >
+                  <MoreHorizontal size={15} />
+                </button>
 
-            {/* Expandir / Colapsar todos los hitos (Benchmark imagen 2) */}
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleAllHitosExpand();
-              }}
-              data-tooltip={allHitosExpanded ? "Colapsar hitos" : "Expandir hitos"}
-              aria-label={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
-            >
-              <ChevronsUpDown size={15} />
-            </button>
-
-            {/* Más opciones / Configurar columnas (Benchmark imagen 2) */}
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setColsMenuOpen((v) => !v);
-              }}
-              data-tooltip="Más opciones"
-              aria-label="Configurar columnas y opciones"
-            >
-              <MoreHorizontal size={15} />
-            </button>
-
-            {/* Separador vertical: Herramientas | Acción global */}
-            <div className="filter-group-divider" aria-hidden="true" />
+                <div className="filter-group-divider" aria-hidden="true" />
+              </>
+            )}
 
             {/* Zona 4: Restablecimiento Integral de Filtros y Orden */}
             <button
@@ -3155,6 +3199,10 @@ export default function CronogramaGanttView({
             </div>
           )}
 
+
+          {/* Presentación 1: Gantt Interactivo Oficial */}
+          {viewMode === 'gantt' && (
+            <>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head">
             <div
@@ -4230,6 +4278,40 @@ export default function CronogramaGanttView({
                 )}
               </div>
             </div>
+          )}
+
+
+            </>
+          )}
+
+          {/* Presentación 2: Tabla Plana Analítica (Lista) */}
+          {viewMode === 'lista' && (
+            <CronogramaListaView
+              items={shown}
+              allItems={items}
+              onSelectItem={openEditorForItem}
+              formatDatePE={formatDatePE}
+            />
+          )}
+
+          {/* Presentación 3: Tablero Visual Kanban */}
+          {viewMode === 'kanban' && (
+            <CronogramaKanbanView
+              items={shown}
+              allItems={items}
+              onSelectItem={openEditorForItem}
+              onAddItem={() => openNewHitoModal()}
+              formatDatePE={formatDatePE}
+            />
+          )}
+
+          {/* Presentación 4: Calendario Mensual */}
+          {viewMode === 'calendario' && (
+            <CronogramaCalendarioView
+              items={shown}
+              onSelectItem={openEditorForItem}
+              formatDatePE={formatDatePE}
+            />
           )}
 
           {/* Footer de Paginación */}
