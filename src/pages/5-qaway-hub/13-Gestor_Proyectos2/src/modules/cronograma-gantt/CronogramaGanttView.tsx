@@ -2,6 +2,12 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import './gantt.css';
 import {
+  fetchCronogramaFromSupabase,
+  syncAllCronogramaItemsToSupabase,
+  deleteCronogramaItemFromSupabase,
+  GanttItemData
+} from '../../services/gestorCronogramaService';
+import {
   AlertTriangle,
   ArrowLeftRight,
   ArrowRight,
@@ -774,13 +780,29 @@ export default function CronogramaGanttView({
     }
   }, [projectId]);
 
-  // Persistencia segura por proyecto activo
+  // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
+  useEffect(() => {
+    let isCancelled = false;
+    fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
+      if (!isCancelled && cloudItems && cloudItems.length > 0) {
+        setItems(cloudItems as Item[]);
+      }
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, [projectId]);
+
+  // Persistencia segura por proyecto activo (Doble capa: LocalStorage inmediato + Sincronización Supabase)
   useEffect(() => {
     if (currentPidRef.current === projectId) {
       try {
         localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(items));
       } catch {
         /* fallback */
+      }
+      if (items.length > 0) {
+        syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
       }
     }
   }, [items, projectId]);
@@ -2073,6 +2095,7 @@ export default function CronogramaGanttView({
 
   const handleConfirmDelete = () => {
     if (!activeItem) return;
+    deleteCronogramaItemFromSupabase(activeItem.id);
     commitChange((old) => old.filter((x) => x.id !== activeItem.id && x.parentId !== activeItem.id));
     setDrawerDraft(null);
     setSelectedId(null);
