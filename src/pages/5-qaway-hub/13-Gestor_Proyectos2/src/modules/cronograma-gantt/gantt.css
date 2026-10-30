@@ -1280,6 +1280,25 @@
   box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
 }
 
+/* Badge flotante en esquina superior derecha para botones compactos de solo icono */
+.gantt-v2 .qm-btn-icon .custom-filter-counter-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #0066ff;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 102, 255, 0.35);
+  pointer-events: none;
+  z-index: 10;
+}
+
 .gantt-v2 .custom-filter-counter-badge {
   display: inline-flex;
   align-items: center;
@@ -4671,4 +4690,25 @@ body.gantt-resizing {
 .gantt-v2 .status-cell .status {
   justify-content: flex-start !important;
   text-align: left !important;
+}
+
+
+/* --- Estilos para Línea Base y Ruta Crítica (Benchmark Imagen 2) --- */
+.gantt-v2 .baseline-shadow-bar {
+  position: absolute;
+  height: 6px;
+  bottom: 2px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(45deg, #94a3b8, #94a3b8 4px, #cbd5e1 4px, #cbd5e1 8px);
+  opacity: 0.75;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.gantt-v2 .row-critical-path {
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+
+.gantt-v2 .bar-critical-path {
+  box-shadow: 0 0 0 2px #ef4444, 0 2px 8px rgba(239, 68, 68, 0.35) !important;
 }

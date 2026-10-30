@@ -1514,6 +1514,8 @@ export default function CronogramaGanttView({
     y: number;
   } | null>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
+  const [showBaseline, setShowBaseline] = useState(false);
+  const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
   const [resizeTempWidth, setResizeTempWidth] = useState<number | null>(null);
   const [resizeTempEndDate, setResizeTempEndDate] = useState<string | null>(null);
@@ -2851,20 +2853,57 @@ export default function CronogramaGanttView({
             {/* Separador vertical: Tiempo Gantt | Visualización y Herramientas */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Zona 3: Visualización de Barras (% Avance) */}
+            {/* Zona 3: Visualización de Barras y Herramientas Pro (Benchmark Imagen 2) */}
             <button
               type="button"
               className={`btn-toggle-labels qm-btn-icon ${showBarLabels ? "active" : ""}`}
-              onClick={() => {
-                setShowBarLabels((prev) => !prev);
-              }}
+              onClick={() => setShowBarLabels((prev) => !prev)}
               data-tooltip="Mostrar % en barras"
               aria-label="Mostrar u ocultar porcentaje de avance en barras"
             >
               <Percent size={14} />
             </button>
 
-            {/* Herramienta Pro: Expandir / Colapsar todos los hitos (Benchmark imagen 2) */}
+            {/* Pantalla completa (Benchmark imagen 2) */}
+            <button
+              type="button"
+              className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
+              onClick={toggleFullscreen}
+              data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+              aria-label="Alternar modo pantalla completa"
+            >
+              {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+
+            {/* Línea base oficial (Benchmark imagen 2) */}
+            <button
+              type="button"
+              className={`btn secondary qm-btn-icon ${showBaseline ? "active" : ""}`}
+              onClick={() => {
+                setShowBaseline((v) => !v);
+                notify(showBaseline ? "Línea base oculta" : "Línea base oficial visible");
+              }}
+              data-tooltip="Línea base"
+              aria-label="Mostrar u ocultar línea base oficial"
+            >
+              <Layers3 size={15} />
+            </button>
+
+            {/* Ruta crítica (Benchmark imagen 2) */}
+            <button
+              type="button"
+              className={`btn secondary qm-btn-icon ${showCriticalPath ? "active" : ""}`}
+              onClick={() => {
+                setShowCriticalPath((v) => !v);
+                notify(showCriticalPath ? "Ruta crítica desactivada" : "Ruta crítica resaltada");
+              }}
+              data-tooltip="Ruta crítica"
+              aria-label="Resaltar ruta crítica del proyecto"
+            >
+              <Link2 size={15} />
+            </button>
+
+            {/* Expandir / Colapsar todos los hitos (Benchmark imagen 2) */}
             <button
               type="button"
               className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
@@ -2876,6 +2915,20 @@ export default function CronogramaGanttView({
               aria-label={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
             >
               <ChevronsUpDown size={15} />
+            </button>
+
+            {/* Más opciones / Configurar columnas (Benchmark imagen 2) */}
+            <button
+              type="button"
+              className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setColsMenuOpen((v) => !v);
+              }}
+              data-tooltip="Más opciones"
+              aria-label="Configurar columnas y opciones"
+            >
+              <MoreHorizontal size={15} />
             </button>
 
             {/* Separador vertical: Herramientas | Acción global */}
@@ -2896,6 +2949,8 @@ export default function CronogramaGanttView({
                 setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
                 setCustomRules([]);
+                setShowBaseline(false);
+                setShowCriticalPath(false);
                 engine.clearAllFilters();
                 engine.clearAllSort();
                 closeMenus();
@@ -4002,6 +4057,14 @@ export default function CronogramaGanttView({
                               borderBottomRightRadius: x.progress >= 98 ? 'inherit' : 0,
                             }}
                           />
+
+                          {showBaseline && (
+                            <div
+                              className="baseline-shadow-bar"
+                              style={{ left: 0, width: "100%" }}
+                              title={`Línea base contractual: ${formatDatePE(x.start)} – ${formatDatePE(x.end)}`}
+                            />
+                          )}
 
                           {/* Avance limpio embebido (conmutable a través del botón superior) */}
                           {showBarLabels && (

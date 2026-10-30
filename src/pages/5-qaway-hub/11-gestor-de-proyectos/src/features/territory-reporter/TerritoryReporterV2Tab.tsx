@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import {
   AlertCircle,
   BarChart3,
@@ -660,6 +660,42 @@ export function sanitizePascoUgels(list: UgelMonitoringV2Row[]): UgelMonitoringV
   }))
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DATASETS Y LLAVES DE PERSISTENCIA INDEPENDIENTES PARA HITO 1.7
+// ─────────────────────────────────────────────────────────────────────────────
+export const STORAGE_KEY_HITO_17_JUNIN = 'qaway_territory_reporter_v2_hito17_junin_v1'
+export const STORAGE_KEY_HITO_17_PASCO = 'qaway_territory_reporter_v2_hito17_pasco_v1'
+
+export const INITIAL_JUNIN_UGELS_V2_HITO_17: UgelMonitoringV2Row[] = INITIAL_JUNIN_UGELS_V2.map((u, idx) => ({
+  ...u,
+  phase1Files: idx % 3 === 0 ? 3 : 2,
+  phase1Total: 3,
+  phase1Date: idx % 3 === 0 ? '02/11/2026 11:30' : 'En proceso',
+  driveStatus: (idx % 3 === 0 ? 'completado' : idx % 3 === 1 ? 'en_proceso' : 'pendiente') as TerritoryStatus,
+  driveFiles: idx % 3 === 0 ? 1 : 0,
+  driveTotal: 1,
+  driveDate: idx % 3 === 0 ? '10/11/2026 09:00' : 'Sin evidencia',
+  phase2Files: idx === 0 ? 3 : 0,
+  phase2Total: 3,
+  phase2Date: idx === 0 ? '12/11/2026 16:00' : 'En plazo hasta 25/11',
+  observation: `Hito 1.7: Acondicionamiento de almacenes y contratos de transporte para UGEL ${u.name}.`,
+}))
+
+export const INITIAL_PASCO_UGELS_V2_HITO_17: UgelMonitoringV2Row[] = INITIAL_PASCO_UGELS_V2.map((u, idx) => ({
+  ...u,
+  phase1Files: idx % 2 === 0 ? 3 : 1,
+  phase1Total: 3,
+  phase1Date: idx % 2 === 0 ? '03/11/2026 10:00' : 'En proceso',
+  driveStatus: (idx % 2 === 0 ? 'completado' : 'pendiente') as TerritoryStatus,
+  driveFiles: idx % 2 === 0 ? 1 : 0,
+  driveTotal: 1,
+  driveDate: idx % 2 === 0 ? '11/11/2026 08:30' : 'Sin evidencia',
+  phase2Files: 0,
+  phase2Total: 3,
+  phase2Date: 'En plazo hasta 25/11',
+  observation: `Hito 1.7: Acondicionamiento de almacenes y contratos de transporte en ${u.name}.`,
+}))
+
 function computePhaseStatus(files: number, total: number): TerritoryStatus {
   if (files >= total) return 'completado'
   if (files > 0) return 'en_proceso'
@@ -733,6 +769,28 @@ export function TerritoryReporterV2Tab({
   const brand = useHubBrand()
   const { workItems } = useProjectsDataset()
   const { perspective, currentPersona, setPerspective, isCoordinador, isGestor, isSuperAdmin } = useProjectPerspective()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+
+  // Sincronización bidireccional de Hito (1.6 vs 1.7)
+  const initialHito = (searchParams.get('hito') === '1.7' || location.pathname.includes('hito-1-7')) ? '1.7' : '1.6'
+  const [selectedHito, setSelectedHito] = useState<'1.6' | '1.7'>(initialHito)
+
+  useEffect(() => {
+    const urlHito = (searchParams.get('hito') === '1.7' || location.pathname.includes('hito-1-7')) ? '1.7' : '1.6'
+    if (urlHito !== selectedHito) {
+      setSelectedHito(urlHito)
+    }
+  }, [searchParams, location.pathname])
+
+  const handleSelectHito = (newHito: '1.6' | '1.7') => {
+    setSelectedHito(newHito)
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set('hito', newHito)
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  const is17 = selectedHito === '1.7'
   const [selectedMacrorregion, setSelectedMacrorregion] = useState('Centro')
   const [selectedRegion, setSelectedRegion] = useState('Región Junín (13 UGEL)')
   const [selectedGestorFilter, setSelectedGestorFilter] = useState('todos')
@@ -740,7 +798,8 @@ export function TerritoryReporterV2Tab({
 
   const isPasco = selectedRegion.includes('Pasco')
 
-  const [juninUgels, setJuninUgels] = useState<UgelMonitoringV2Row[]>(() => {
+  // DATASET HITO 1.6 - JUNIN
+  const [juninUgels16, setJuninUgels16] = useState<UgelMonitoringV2Row[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_V2)
       if (saved) {
@@ -756,9 +815,9 @@ export function TerritoryReporterV2Tab({
     return INITIAL_JUNIN_UGELS_V2
   })
 
-  const [pascoUgels, setPascoUgels] = useState<UgelMonitoringV2Row[]>(() => {
+  // DATASET HITO 1.6 - PASCO
+  const [pascoUgels16, setPascoUgels16] = useState<UgelMonitoringV2Row[]>(() => {
     try {
-      // Limpiar claves corruptas anteriores
       localStorage.removeItem('qaway_territory_reporter_v2_pasco_v1')
       localStorage.removeItem('qaway_territory_reporter_v2_pasco_v2')
       localStorage.removeItem('qaway_territory_reporter_v2_pasco_v3')
@@ -775,50 +834,85 @@ export function TerritoryReporterV2Tab({
     return INITIAL_PASCO_UGELS_V2
   })
 
-  // Purga reactiva inmediata en caso de Fast Refresh / HMR
+  // DATASET HITO 1.7 - JUNIN (100% INDEPENDIENTE)
+  const [juninUgels17, setJuninUgels17] = useState<UgelMonitoringV2Row[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_HITO_17_JUNIN)
+      if (saved) {
+        const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
+        if (parsed.length === 13) return parsed
+      }
+    } catch {
+      // ignore
+    }
+    return INITIAL_JUNIN_UGELS_V2_HITO_17
+  })
+
+  // DATASET HITO 1.7 - PASCO (100% INDEPENDIENTE)
+  const [pascoUgels17, setPascoUgels17] = useState<UgelMonitoringV2Row[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_HITO_17_PASCO)
+      if (saved) {
+        const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
+        if (parsed.length === INITIAL_PASCO_UGELS_V2_HITO_17.length) return sanitizePascoUgels(parsed)
+      }
+    } catch {
+      // ignore
+    }
+    return INITIAL_PASCO_UGELS_V2_HITO_17
+  })
+
+  // Purga reactiva inmediata para Pasco Hito 1.6
   useEffect(() => {
     const expectedIds = INITIAL_PASCO_UGELS_V2.map((u) => u.id)
     const isCorrupt =
-      pascoUgels.some((u) => u.id.includes('rio-ene') || u.id.includes('coar') || u.name.toUpperCase().includes('COAR')) ||
-      pascoUgels.length !== INITIAL_PASCO_UGELS_V2.length ||
-      pascoUgels.some((u, idx) => u.id !== expectedIds[idx]) ||
-      pascoUgels.some((u, idx) => u.name !== INITIAL_PASCO_UGELS_V2[idx]?.name)
+      pascoUgels16.some((u) => u.id.includes('rio-ene') || u.id.includes('coar') || u.name.toUpperCase().includes('COAR')) ||
+      pascoUgels16.length !== INITIAL_PASCO_UGELS_V2.length ||
+      pascoUgels16.some((u, idx) => u.id !== expectedIds[idx]) ||
+      pascoUgels16.some((u, idx) => u.name !== INITIAL_PASCO_UGELS_V2[idx]?.name)
 
     if (isCorrupt) {
-      const cleaned = sanitizePascoUgels(pascoUgels)
-      setPascoUgels(cleaned)
+      const cleaned = sanitizePascoUgels(pascoUgels16)
+      setPascoUgels16(cleaned)
       try {
         localStorage.setItem(STORAGE_KEY_PASCO_V6, JSON.stringify(cleaned))
-        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v1')
-        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v2')
-        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v3')
-        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v4')
-        localStorage.removeItem('qaway_territory_reporter_v2_pasco_v5')
       } catch {
         // ignore
       }
     }
-  }, [pascoUgels])
+  }, [pascoUgels16])
 
-  const ugels = isPasco ? pascoUgels : juninUgels
+  // Datos reactivos según Hito y Región
+  const ugels = isPasco
+    ? (is17 ? pascoUgels17 : pascoUgels16)
+    : (is17 ? juninUgels17 : juninUgels16)
+
   const activeDirectionCodes = isPasco ? PASCO_DIRECTION_CODES : JUNIN_DIRECTION_CODES
 
   const setUgels = (updater: React.SetStateAction<UgelMonitoringV2Row[]>) => {
-    if (isPasco) {
-      setPascoUgels(updater)
+    if (is17) {
+      if (isPasco) {
+        setPascoUgels17(updater)
+      } else {
+        setJuninUgels17(updater)
+      }
     } else {
-      setJuninUgels(updater)
+      if (isPasco) {
+        setPascoUgels16(updater)
+      } else {
+        setJuninUgels16(updater)
+      }
     }
   }
 
-  // Sincronización inicial y reactiva desde Supabase (Fuente de verdad definitiva para Junín)
+  // Sincronización inicial y reactiva desde Supabase (Exclusiva para Junín Hito 1.6)
   useEffect(() => {
     let isMounted = true
     territoryMonitoringService
       .fetchJuninUgels()
       .then((remoteUgels) => {
         if (isMounted && remoteUgels.length > 0) {
-          setJuninUgels(remoteUgels)
+          setJuninUgels16(remoteUgels)
           try {
             localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(remoteUgels))
           } catch {
@@ -834,21 +928,38 @@ export function TerritoryReporterV2Tab({
     }
   }, [])
 
+  // Persistencia reactiva local para cada dataset por separado
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(juninUgels))
+      localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(juninUgels16))
     } catch {
       // ignore
     }
-  }, [juninUgels])
+  }, [juninUgels16])
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_PASCO_V6, JSON.stringify(pascoUgels))
+      localStorage.setItem(STORAGE_KEY_PASCO_V6, JSON.stringify(pascoUgels16))
     } catch {
       // ignore
     }
-  }, [pascoUgels])
+  }, [pascoUgels16])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_HITO_17_JUNIN, JSON.stringify(juninUgels17))
+    } catch {
+      // ignore
+    }
+  }, [juninUgels17])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_HITO_17_PASCO, JSON.stringify(pascoUgels17))
+    } catch {
+      // ignore
+    }
+  }, [pascoUgels17])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterDirection, setFilterDirection] = useState<'Todas' | DirectionCode>('Todas')
@@ -913,12 +1024,16 @@ export function TerritoryReporterV2Tab({
   const handleCreateTaskForUgel = (ugel: UgelMonitoringV2Row, customTitle?: string) => {
     const titleToUse =
       (customTitle ?? newTaskTitle).trim() ||
-      `Asistencia técnica CdD - MC SIGA en UGEL ${ugel.name} (Hito 1.6)`
+      (is17
+        ? `Asistencia técnica Acondicionamiento y Transporte en UGEL ${ugel.name} (Hito 1.7)`
+        : `Asistencia técnica CdD - MC SIGA en UGEL ${ugel.name} (Hito 1.6)`)
 
     const genStatus = computeUgelGeneralStatusV2(ugel)
     const created = projectsService.createWorkItem({
       projectId: _projectId,
-      milestoneRef: 'Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA',
+      milestoneRef: is17
+        ? 'Hito 1.7 · Acondicionamiento de Almacenes y Contratos de Transporte'
+        : 'Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA',
       originType: 'accion_emergente',
       taskNature: 'contingencia_operativa',
       threatensMilestone: genStatus === 'pendiente',
@@ -927,16 +1042,16 @@ export function TerritoryReporterV2Tab({
           ? `UGEL ${ugel.name} en estado Pendiente (${ugel.observation})`
           : undefined,
       title: titleToUse,
-      description: `Tarea generada desde el Reporteador Territorial V2 para UGEL ${ugel.name} (Región Junín). Estado Fase 1: ${ugel.phase1Files}/${ugel.phase1Total}, Drive: ${ugel.driveStatus}, Fase 2: ${ugel.phase2Files}/${ugel.phase2Total}. Observación: ${ugel.observation}.`,
+      description: `Tarea generada desde el Reporteador Territorial V2 para UGEL ${ugel.name} (${isPasco ? 'Región Pasco' : 'Región Junín'}). Hito: ${selectedHito}. Estado Fase 1: ${ugel.phase1Files}/${ugel.phase1Total}, Drive: ${ugel.driveStatus}, Fase 2: ${ugel.phase2Files}/${ugel.phase2Total}. Observación: ${ugel.observation}.`,
       state: 'todo',
       priority: genStatus === 'pendiente' ? 'URGENTE' : 'MEDIA',
       assignee: {
         name: ugel.gestorName,
-        role: 'Gestor Territorial Región Junín',
+        role: `Gestor Territorial ${isPasco ? 'Región Pasco' : 'Región Junín'}`,
         phone: ugel.gestorPhone,
       },
       storyPoints: 3,
-      followUpDate: '2026-10-26',
+      followUpDate: is17 ? '2026-11-25' : '2026-10-26',
       scopeTag: `UGEL ${ugel.name}`,
     })
     setInspectedUgel(null)
@@ -1091,8 +1206,8 @@ export function TerritoryReporterV2Tab({
             phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'En plazo técnico',
           }
         }
-        // Persistir a Supabase solo para Junín (Pasco usa almacenamiento local aislado)
-        if (!isPasco) {
+        // Persistir a Supabase solo para Junín en Hito 1.6 (Hito 1.7 usa almacenamiento local independiente)
+        if (!isPasco && !is17) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
@@ -1122,8 +1237,8 @@ export function TerritoryReporterV2Tab({
                 ? 'En proceso'
                 : 'Sin evidencia',
         }
-        // Persistir a Supabase solo para Junín
-        if (!isPasco) {
+        // Persistir a Supabase solo para Junín en Hito 1.6
+        if (!isPasco && !is17) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
@@ -1155,8 +1270,8 @@ export function TerritoryReporterV2Tab({
           driveStatus: nextDriveStatus,
           driveFiles: nextDriveStatus === 'completado' ? 1 : 0,
         }
-        // Persistir a Supabase solo para Junín
-        if (!isPasco) {
+        // Persistir a Supabase solo para Junín en Hito 1.6
+        if (!isPasco && !is17) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
@@ -1178,8 +1293,8 @@ export function TerritoryReporterV2Tab({
           driveStatus: st,
           driveFiles: st === 'completado' ? 1 : 0,
         }
-        // Persistir a Supabase solo para Junín
-        if (!isPasco) {
+        // Persistir a Supabase solo para Junín en Hito 1.6
+        if (!isPasco && !is17) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
