@@ -3470,12 +3470,14 @@ body.gantt-resizing {
   box-shadow: inset 0 0 0 1px #cbd5e1;
 }
 
-.gantt-v2 .progress,
 .gantt-v2 .status-cell {
   position: relative;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* --- E) Editores inline en celda --- */
