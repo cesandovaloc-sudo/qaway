@@ -3219,9 +3219,9 @@ export default function CronogramaGanttView({
             <div
               className="fixed-cols"
               style={{
-                width: `${fixedWidth}px`,
-                minWidth: `${fixedWidth}px`,
-                maxWidth: `${fixedWidth}px`,
+                width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                minWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                maxWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
                 gridTemplateColumns: fixedGridCols,
               }}
             >
@@ -3463,30 +3463,32 @@ export default function CronogramaGanttView({
               )}
             </div>
 
-            <div className="timeline-head-viewport" ref={headScrollRef}>
-              <div className="timeline-head" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
-                <div
-                  className="years"
-                  style={{
-                    gridTemplateColumns: zoom === 'Día' || zoom === 'Semana' ? monthCols : yearCols,
-                  }}
-                >
-                  {zoom === 'Día' || zoom === 'Semana' ? (
-                    MONTH_NAMES.map((name, idx) => <span key={idx}>{name}</span>)
-                  ) : (
-                    <>
-                      <span>2026</span>
-                      <span>2027</span>
-                    </>
-                  )}
-                </div>
-                <div className="months" style={{ gridTemplateColumns: segCols }}>
-                  {segments.map((s) => (
-                    <span key={s.key}>{s.label}</span>
-                  ))}
+            {viewMode === 'gantt' && (
+              <div className="timeline-head-viewport" ref={headScrollRef}>
+                <div className="timeline-head" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
+                  <div
+                    className="years"
+                    style={{
+                      gridTemplateColumns: zoom === 'Día' || zoom === 'Semana' ? monthCols : yearCols,
+                    }}
+                  >
+                    {zoom === 'Día' || zoom === 'Semana' ? (
+                      MONTH_NAMES.map((name, idx) => <span key={idx}>{name}</span>)
+                    ) : (
+                      <>
+                        <span>2026</span>
+                        <span>2027</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="months" style={{ gridTemplateColumns: segCols }}>
+                    {segments.map((s) => (
+                      <span key={s.key}>{s.label}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Tabla Gantt con Timeline (Filas operativas con scroll 2D) */}
@@ -3552,11 +3554,13 @@ export default function CronogramaGanttView({
             <div
               className="gantt"
               style={
-                {
-                  '--fixed': `${fixedWidth}px`,
-                  width: `calc(var(--fixed) + ${timelineMinWidth})`,
-                  minWidth: `calc(var(--fixed) + ${timelineMinWidth})`,
-                } as React.CSSProperties
+                viewMode === 'lista'
+                  ? ({ width: '100%', minWidth: '100%' } as React.CSSProperties)
+                  : ({
+                      '--fixed': `${fixedWidth}px`,
+                      width: `calc(var(--fixed) + ${timelineMinWidth})`,
+                      minWidth: `calc(var(--fixed) + ${timelineMinWidth})`,
+                    } as React.CSSProperties)
               }
             >
               {/* Filas */}
@@ -3576,9 +3580,9 @@ export default function CronogramaGanttView({
                   <div
                     className="fixed-cols"
                     style={{
-                      width: `${fixedWidth}px`,
-                      minWidth: `${fixedWidth}px`,
-                      maxWidth: `${fixedWidth}px`,
+                      width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                      minWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                      maxWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
                       gridTemplateColumns: fixedGridCols,
                     }}
                   >
@@ -4064,7 +4068,8 @@ export default function CronogramaGanttView({
                   )}
                 </div>
 
-                <div className="timeline" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
+                {viewMode === 'gantt' && (
+                  <div className="timeline" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
                     <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
                       {segments.map((s) => (
                         <span key={s.key} />
@@ -4167,6 +4172,7 @@ export default function CronogramaGanttView({
                   );
                 })()}
               </div>
+            )}
             </div>
           ))}
 
@@ -4179,9 +4185,9 @@ export default function CronogramaGanttView({
                 <div
                   className="fixed-cols"
                   style={{
-                    width: `${fixedWidth}px`,
-                    minWidth: `${fixedWidth}px`,
-                    maxWidth: `${fixedWidth}px`,
+                    width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                    minWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                    maxWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
                     gridTemplateColumns: fixedGridCols,
                   }}
                 >
@@ -4196,6 +4202,7 @@ export default function CronogramaGanttView({
               </div>
 
               {/* Capa Overlay de Línea de Tiempo (Mismas dimensiones y alineación absoluta que las barras del timeline) */}
+              {viewMode === 'gantt' && (
               <div
                 className="timeline-grid-overlay"
                 style={{
@@ -4265,6 +4272,7 @@ export default function CronogramaGanttView({
                   <span>Hoy</span>
                 </div>
               </div>
+            )}
             </div>
             )}
           </div>

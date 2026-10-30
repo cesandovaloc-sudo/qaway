@@ -4792,6 +4792,10 @@ body.gantt-resizing {
 /* ==========================================================================
    VISTA LISTA CON TABLERO MAESTRO (100% ANCHO, TIMELINE OCULTO)
    ========================================================================== */
+.gantt-v2 .view-lista-fullwidth {
+  width: 100% !important;
+}
+
 .gantt-v2 .view-lista-fullwidth .table-head {
   width: 100% !important;
 }
@@ -4817,29 +4821,33 @@ body.gantt-resizing {
   min-width: 100% !important;
 }
 
-.gantt-v2 .view-lista-fullwidth .row .fixed {
+.gantt-v2 .view-lista-fullwidth .row .fixed-cols {
   width: 100% !important;
   min-width: 100% !important;
   max-width: 100% !important;
   border-right: none !important;
 }
 
-.gantt-v2 .view-lista-fullwidth .row .track {
+.gantt-v2 .view-lista-fullwidth .row .timeline {
   display: none !important;
 }
 
-.gantt-v2 .view-lista-fullwidth .today-line {
+.gantt-v2 .view-lista-fullwidth .timeline-grid-overlay {
   display: none !important;
 }
 
-.gantt-v2 .view-lista-fullwidth .quick-add-row .fixed {
+.gantt-v2 .view-lista-fullwidth .today {
+  display: none !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .quick-add-row .fixed-cols {
   width: 100% !important;
   min-width: 100% !important;
   max-width: 100% !important;
   border-right: none !important;
 }
 
-.gantt-v2 .view-lista-fullwidth .quick-add-row .track {
+.gantt-v2 .view-lista-fullwidth .quick-add-row .timeline {
   display: none !important;
 }
 
