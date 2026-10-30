@@ -430,6 +430,8 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
+const CANONICAL_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region'];
+
 const DEFAULT_COLS: Record<ColKey, number> = {
   name: 360,
   start: 95,
@@ -1518,7 +1520,7 @@ export default function CronogramaGanttView({
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('qaway-gantt-visible-cols-v1') || 'null');
-      if (Array.isArray(saved) && saved.includes('name')) return saved;
+      if (Array.isArray(saved) && saved.includes('name')) return CANONICAL_COLS.filter((k) => saved.includes(k));
     } catch {
       /* almacenamiento no disponible */
     }
@@ -3058,17 +3060,6 @@ export default function CronogramaGanttView({
                   </button>
                   <button
                     type="button"
-                    className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCompactColumns();
-                    }}
-                    title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
-                  >
-                    {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
-                  </button>
-                  <button
-                    type="button"
                     className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -3078,17 +3069,20 @@ export default function CronogramaGanttView({
                   >
                     <SlidersHorizontal size={13} />
                   </button>
-                  <button
-                    type="button"
-                    className="cols-reset-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      resetColWidths();
-                    }}
-                  >
-                    <ArrowLeftRight size={12} />
-                  </button>
                 </div>
+
+                {/* Botón colapsador de panel al borde derecho antes de la columna Inicio */}
+                <button
+                  type="button"
+                  className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleCompactColumns();
+                  }}
+                  title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
+                >
+                  {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
+                </button>
                 {colsMenuOpen && (
                   <div className="cols-popover" onClick={(e) => e.stopPropagation()}>
                     <div className="cols-pop-head">

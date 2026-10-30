@@ -4506,3 +4506,74 @@ body.gantt-resizing {
   border-radius: 0 !important;
   z-index: 99999 !important;
 }
+
+
+/* ==========================================================================
+   Ajustes Críticos: Reubicación Colapsador y Aprovechamiento Total de Ancho
+   ========================================================================== */
+
+/* Cabecera name-head: Colapsador de panel al borde derecho */
+.gantt-v2 .name-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding-left: 14px !important;
+  padding-right: 4px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.gantt-v2 .name-head .head-col-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  margin-left: auto !important;
+  margin-right: 4px !important;
+  flex-shrink: 0 !important;
+}
+
+.gantt-v2 .name-head .panel-collapse-btn {
+  margin-left: 0 !important;
+  margin-right: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Celda name-cell: El texto aprovecha el 100% del ancho disponible */
+.gantt-v2 .name-cell {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  padding-left: 14px !important;
+  padding-right: 8px !important;
+  width: 100% !important;
+}
+
+.gantt-v2 .name-cell .name {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Botones rápidos de fila: En reposo NO ocupan espacio en el flujo (cero hueco en blanco) */
+.gantt-v2 .quick-row-actions {
+  position: absolute !important;
+  right: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  display: none !important;
+  align-items: center !important;
+  gap: 3px !important;
+  background: #ffffff !important;
+  padding: 2px 4px !important;
+  border-radius: 6px !important;
+  box-shadow: -6px 0 10px rgba(255, 255, 255, 0.98), 0 1px 3px rgba(15, 23, 42, 0.1) !important;
+  z-index: 25 !important;
+}
+
+.gantt-v2 .row:hover .quick-row-actions {
+  display: inline-flex !important;
+}
