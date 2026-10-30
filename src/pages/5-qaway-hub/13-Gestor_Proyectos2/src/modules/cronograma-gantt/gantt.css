@@ -493,7 +493,7 @@
   display: none; /* Chrome/Safari */
 }
 
-.gantt-v2 .tabs button {
+.gantt-v2 .tabs-list button {
   position: relative;
   display: flex;
   align-items: center;
@@ -507,17 +507,17 @@
   padding: 0 4px;
 }
 
-.gantt-v2 .tabs button span {
+.gantt-v2 .tabs-list button span {
   color: #94a3b8;
   font-size: 11px;
 }
 
-.gantt-v2 .tabs button.active {
+.gantt-v2 .tabs-list button.active {
   font-weight: 700;
   color: #0066ff;
 }
 
-.gantt-v2 .tabs button.active:after {
+.gantt-v2 .tabs-list button.active:after {
   content: "";
   position: absolute;
   bottom: -1px;
@@ -4738,38 +4738,109 @@ body.gantt-resizing {
 .gantt-v2 .view-mode-switcher {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.gantt-v2 .view-mode-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px;
+  gap: 2px;
+  background: #f1f5f9;
+  padding: 3px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #475569;
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
-.gantt-v2 .view-mode-btn:hover {
-  background: #f8fafc;
-  color: #0f172a;
-  border-color: #94a3b8;
+.gantt-v2 .view-mode-switcher .view-mode-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 11px !important;
+  border-radius: 6px !important;
+  border: none !important;
+  background: transparent !important;
+  color: #64748b !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: none !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
 }
 
-.gantt-v2 .view-mode-btn.active {
-  background: #0066ff;
-  color: #ffffff;
-  border-color: #0066ff;
-  box-shadow: 0 1px 3px rgba(0, 102, 255, 0.25);
+.gantt-v2 .view-mode-switcher .view-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.75) !important;
+  color: #0f172a !important;
+}
+
+.gantt-v2 .view-mode-switcher .view-mode-btn.active {
+  background: #0066ff !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 102, 255, 0.28) !important;
+}
+
+.gantt-v2 .view-mode-switcher .view-mode-btn.active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.gantt-v2 .view-mode-switcher .view-mode-btn:after {
+  display: none !important;
+}
+
+/* ==========================================================================
+   VISTA LISTA CON TABLERO MAESTRO (100% ANCHO, TIMELINE OCULTO)
+   ========================================================================== */
+.gantt-v2 .view-lista-fullwidth .table-head {
+  width: 100% !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .table-head .fixed-cols {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  border-right: none !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .timeline-head-viewport {
+  display: none !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .gantt-scroll {
+  width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .gantt {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .row .fixed {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  border-right: none !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .row .track {
+  display: none !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .today-line {
+  display: none !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .quick-add-row .fixed {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  border-right: none !important;
+}
+
+.gantt-v2 .view-lista-fullwidth .quick-add-row .track {
+  display: none !important;
 }
 
 /* --------------------------------------------------------------------------

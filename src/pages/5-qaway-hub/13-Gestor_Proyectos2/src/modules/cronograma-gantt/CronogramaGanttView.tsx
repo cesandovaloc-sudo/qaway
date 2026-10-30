@@ -1752,10 +1752,14 @@ export default function CronogramaGanttView({
     return '1200px';
   }, [zoom]);
 
-  const fixedGridCols = useMemo(
-    () => visibleCols.map((k) => `${colWidths[k] || DEFAULT_COLS[k]}px`).join(' '),
-    [visibleCols, colWidths]
-  );
+  const fixedGridCols = useMemo(() => {
+    if (viewMode === 'lista') {
+      return visibleCols
+        .map((k) => (k === 'name' ? 'minmax(280px, 1fr)' : `${colWidths[k] || DEFAULT_COLS[k]}px`))
+        .join(' ');
+    }
+    return visibleCols.map((k) => `${colWidths[k] || DEFAULT_COLS[k]}px`).join(' ');
+  }, [visibleCols, colWidths, viewMode]);
 
   const rowGridCols = useMemo(
     () => `var(--fixed) minmax(${timelineMinWidth}, 1fr)`,
@@ -2857,7 +2861,7 @@ export default function CronogramaGanttView({
               )}
             </div>
 
-            {/* Controles exclusivos de visualización Gantt */}
+            {/* Controles exclusivos de visualización Gantt (Línea de tiempo y zoom) */}
             {viewMode === 'gantt' && (
               <>
                 <div className="timeline-nav" title="Navegar por la línea de tiempo">
@@ -2914,16 +2918,6 @@ export default function CronogramaGanttView({
 
                 <button
                   type="button"
-                  className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
-                  onClick={toggleFullscreen}
-                  data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-                  aria-label="Alternar modo pantalla completa"
-                >
-                  {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-                </button>
-
-                <button
-                  type="button"
                   className={`btn secondary qm-btn-icon ${showBaseline ? "active" : ""}`}
                   onClick={() => {
                     setShowBaseline((v) => !v);
@@ -2948,6 +2942,23 @@ export default function CronogramaGanttView({
                   <Link2 size={15} />
                 </button>
 
+                <div className="filter-group-divider" aria-hidden="true" />
+              </>
+            )}
+
+            {/* Controles compartidos para tabla (Gantt y Lista) */}
+            {(viewMode === 'gantt' || viewMode === 'lista') && (
+              <>
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
+                  onClick={toggleFullscreen}
+                  data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                  aria-label="Alternar modo pantalla completa"
+                >
+                  {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                </button>
+
                 <button
                   type="button"
                   className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
@@ -2968,7 +2979,7 @@ export default function CronogramaGanttView({
                     e.stopPropagation();
                     setColsMenuOpen((v) => !v);
                   }}
-                  data-tooltip="Más opciones"
+                  data-tooltip="Configurar columnas"
                   aria-label="Configurar columnas y opciones"
                 >
                   <MoreHorizontal size={15} />
@@ -3200,9 +3211,9 @@ export default function CronogramaGanttView({
           )}
 
 
-          {/* Presentación 1: Gantt Interactivo Oficial */}
-          {viewMode === 'gantt' && (
-            <>
+          {/* Presentación Maestro: Gantt y Lista comparten 100% el mismo tablero unificado */}
+          {(viewMode === 'gantt' || viewMode === 'lista') && (
+            <div className={`gantt-master-view-wrap ${viewMode === 'lista' ? 'view-lista-fullwidth' : ''}`}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head">
             <div
@@ -4280,18 +4291,7 @@ export default function CronogramaGanttView({
             </div>
           )}
 
-
-            </>
-          )}
-
-          {/* Presentación 2: Tabla Plana Analítica (Lista) */}
-          {viewMode === 'lista' && (
-            <CronogramaListaView
-              items={shown}
-              allItems={items}
-              onSelectItem={openEditorForItem}
-              formatDatePE={formatDatePE}
-            />
+            </div>
           )}
 
           {/* Presentación 3: Tablero Visual Kanban */}
