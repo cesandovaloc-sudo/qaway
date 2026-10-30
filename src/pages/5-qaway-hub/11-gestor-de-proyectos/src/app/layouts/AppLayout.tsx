@@ -5,6 +5,7 @@ import Sidebar from '@/components/sidebar/Sidebar'
 import Header from '@/components/header/Header'
 
 const BASE_PREFIXES = [
+  '/gestor_proyectos0',
   '/hub/proyectos',
   '/hub/gestor-proyectos-app',
   '/hub/inventario',

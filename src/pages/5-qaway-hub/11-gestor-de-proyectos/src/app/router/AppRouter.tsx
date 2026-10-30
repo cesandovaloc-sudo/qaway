@@ -71,8 +71,9 @@ export default function AppRouter() {
       <Route element={<RequireAuth />}>
         {/* Rutas admin (con layout) */}
         <Route element={<AppLayout />}>
-          {/* Dashboard de Cartera: cualquier autenticado */}
+          {/* Dashboard de Cartera / Resumen General */}
           <Route index element={<DashboardPage />} />
+          <Route path="resumen" element={<DashboardPage />} />
 
           {/* Directorio de Proyectos (Task 3.2): ruta estática que gana a ":id" */}
           <Route path="proyectos" element={<ProjectsListPage />} />
@@ -83,18 +84,19 @@ export default function AppRouter() {
           {/* Bandeja de Tareas dedicada (Task Inbox): ruta estática canónica */}
           <Route path="bandeja" element={<TasksInboxPage />} />
 
-          {/* Módulo Autónomo de Seguimiento y Monitoreo Territorial (CdD - MC SIGA / UGEL) */}
+          {/* Reporteador Territorial y Monitoreo */}
+          <Route path="reporteador" element={<TerritoryReporterV2Page />} />
+          <Route path="reporteador/hito-1-6" element={<TerritoryReporterV2Page />} />
           <Route path="monitoreo-territorial" element={<TerritoryReporterPage />} />
-          <Route path="monitoreo" element={<Navigate to="/monitoreo-territorial" replace />} />
-          {/* Módulo Autónomo V2: 3 Fases (Carga Inicial · Drive Regional 22/10 · Cierre RAR 26/10) */}
-          <Route path="monitoreo-v2" element={<TerritoryReporterV2Page />} />
-          <Route path="monitoreo-territorial-v2" element={<TerritoryReporterV2Page />} />
-          {/* Módulo Autónomo Fase 2: Exclusivo Cierre RAR (Región Junín y Región Pasco) */}
-          <Route path="monitoreo-fase-2" element={<TerritoryReporterPhase2Page />} />
-          {/* Módulo Autónomo de Resumen Regional HubPro (Modelo Visual) */}
+          <Route path="monitoreo" element={<Navigate to="/reporteador" replace />} />
+          <Route path="monitoreo-v2" element={<Navigate to="/reporteador" replace />} />
+          <Route path="monitoreo-territorial-v2" element={<Navigate to="/reporteador" replace />} />
+          <Route path="monitoreo-fase-2" element={<Navigate to="/reporteador" replace />} />
+
+          {/* Resumen Regional HubPro (Modelo Visual) */}
           <Route path="resumen-regional" element={<HubProResumenPage />} />
 
-          {/* Nueva Arquitectura: Motor WBS en Cascada Fractal con Roll-up e integración 100% funcional */}
+          {/* Cascada Fractal WBS con Roll-up */}
           <Route path="cascada" element={<CascadeFractalPage />} />
 
           {/* Productos / Inventario — lectura: cualquier autenticado */}

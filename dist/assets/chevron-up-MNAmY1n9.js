@@ -1,0 +1,1 @@
+import{t as e}from"./createLucideIcon-sxi1kBjp.js";var t=e(`chevron-up`,[[`path`,{d:`m18 15-6-6-6 6`,key:`153udz`}]]);export{t};

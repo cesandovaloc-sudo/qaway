@@ -84,6 +84,7 @@ export default function Sidebar({
   }, [workItems])
 
   const BASE_PREFIXES = [
+    '/gestor_proyectos0',
     '/hub/proyectos',
     '/hub/gestor-proyectos',
     '/hub/gestor-proyectos-app',
@@ -135,36 +136,29 @@ export default function Sidebar({
 
   const sections: NavSection[] = [
     {
-      title: 'OPERACIÓN',
+      title: 'OPERACIÓN Y RESUMEN',
       items: [
         {
-          to: '/',
+          to: '/resumen',
           label: 'Resumen General',
           icon: <LayoutDashboard size={18} />,
           end: true,
         },
         {
           to: activeProjectObj ? `/proyectos/${activeProjectObj.id}` : '/proyectos',
-          label: 'Resumen del Proyecto',
+          label: 'Espacio de Trabajo (Gantt/Kanban)',
           icon: <FolderKanban size={18} />,
         },
         {
-          to: '/monitoreo-v2',
-          label: 'Reporteador Territorial',
+          to: '/reporteador',
+          label: 'Reporteador Territorial (CDL / 1.6)',
           icon: <BarChart3 size={18} />,
           badge: 'ACTIVO',
           badgeVariant: 'urgent',
         },
         {
-          to: '/monitoreo-fase-2',
-          label: 'Reporteador Fase 2',
-          icon: <BarChart3 size={18} />,
-          badge: 'PASCO/JUNÍN',
-          badgeVariant: 'neutral',
-        },
-        {
           to: '/resumen-regional',
-          label: 'Resumen Regional',
+          label: 'Resumen Regional (HubPro)',
           icon: <LayoutDashboard size={18} />,
           badge: 'MODELO',
           badgeVariant: 'neutral',
@@ -172,11 +166,11 @@ export default function Sidebar({
       ],
     },
     {
-      title: 'MÓDULOS EN ESPERA',
+      title: 'PLANIFICACIÓN Y CONTROL',
       items: [
         {
           to: '/proyectos',
-          label: 'Proyectos & Hitos',
+          label: 'Directorio de Proyectos',
           icon: <FolderKanban size={18} />,
           badge: scopedProjects.length,
           badgeVariant: 'neutral',
@@ -204,7 +198,7 @@ export default function Sidebar({
         },
         {
           to: '/monitoreo-territorial',
-          label: 'Monitoreo Territorial v1',
+          label: 'Monitoreo Territorial (v1 Base)',
           icon: <BarChart3 size={18} />,
           badge: 'v1',
         },

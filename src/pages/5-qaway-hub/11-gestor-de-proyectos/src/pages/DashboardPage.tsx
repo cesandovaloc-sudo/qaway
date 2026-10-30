@@ -88,7 +88,7 @@ function formatShortDate(value: string): string {
 function getHref(to: string): string {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
   const basePrefix =
-    ['/hub/proyectos', '/hub/gestor-proyectos-app', '/hub/inventario', '/inventario'].find(
+    ['/gestor_proyectos0', '/hub/proyectos', '/hub/gestor-proyectos-app', '/hub/inventario', '/inventario'].find(
       (prefix) => pathname.startsWith(prefix),
     ) ?? ''
   if (!basePrefix) return to.startsWith('/') ? to : `/${to}`
