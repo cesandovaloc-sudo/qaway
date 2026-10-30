@@ -439,21 +439,21 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['name', 'code', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
+  code: 90,
   name: 320,
-  code: 72,
-  kind: 105,
-  parent: 155,
-  start: 95,
-  end: 95,
-  duration: 85,
+  kind: 100,
+  parent: 140,
+  start: 100,
+  end: 100,
+  duration: 90,
   progress: 115,
-  status: 105,
+  status: 110,
   gestor: 135,
-  region: 110,
-  actions: 72,
+  region: 120,
+  actions: 80,
 };
 
 const MIN_COLS: Record<ColKey, number> = {
@@ -487,7 +487,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 ];
 
 const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
-const LISTA_VISIBLE_COLS: ColKey[] = ['name', 'code', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
+const LISTA_VISIBLE_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
 const getDays = (a?: string, b?: string) => {
   if (!a || !b) return 1;
   const da = new Date(a).getTime();
@@ -1644,13 +1644,20 @@ export default function CronogramaGanttView({
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const headScrollRef = useRef<HTMLDivElement>(null);
+  const tableHeadRef = useRef<HTMLDivElement>(null);
   const colRef = useRef(colWidths);
   const dragRef = useRef<{ key: ColKey; startX: number; startW: number } | null>(null);
   colRef.current = colWidths;
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (headScrollRef.current) {
-      headScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
+    if (viewMode === 'gantt') {
+      if (headScrollRef.current) {
+        headScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
+      }
+    } else {
+      if (tableHeadRef.current) {
+        tableHeadRef.current.scrollLeft = e.currentTarget.scrollLeft;
+      }
     }
   };
 
@@ -2978,8 +2985,8 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Controles compartidos para tabla (Gantt y Lista) */}
-            {(viewMode === 'gantt' || viewMode === 'lista') && (
+            {/* Controles exclusivos para modo Gantt */}
+            {viewMode === 'gantt' && (
               <>
                 <button
                   type="button"
@@ -3247,27 +3254,45 @@ export default function CronogramaGanttView({
           {(viewMode === 'gantt' || viewMode === 'lista') && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' ? 'view-lista-fullwidth' : ''}`}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
-          <div className="table-head">
+          <div className="table-head" ref={tableHeadRef} style={{ overflowX: viewMode === 'lista' ? 'hidden' : undefined }}>
             <div
               className="fixed-cols"
               style={{
-                width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
-                minWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
-                maxWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                width: `${fixedWidth}px`,
+                minWidth: `${fixedWidth}px`,
                 gridTemplateColumns: fixedGridCols,
               }}
             >
+              {/* ── Columna Código (Primera en modo lista) ── */}
+              {visibleCols.includes('code') && (
+                <div className="th-col-header th-col-code">
+                  <input
+                    type="checkbox"
+                    aria-label="Seleccionar todos los registros visibles"
+                    onChange={(e) =>
+                      notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
+                    }
+                  />
+                  <span className="th-label">Código</span>
+                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} />
+                </div>
+              )}
+
+              {/* ── Columna Nombre (Segunda en lista, primera en Gantt) ── */}
               <div className="name-head">
-                <input
-                  type="checkbox"
-                  onChange={(e) =>
-                    notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
-                  }
-                />
+                {viewMode === 'gantt' && (
+                  <input
+                    type="checkbox"
+                    aria-label="Seleccionar todos los registros visibles"
+                    onChange={(e) =>
+                      notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
+                    }
+                  />
+                )}
                 <span>{viewMode === 'lista' ? 'Nombre' : 'Hito / Subproceso'}</span>
-                <div className="head-col-actions">
-                    {viewMode === 'gantt' && <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />}
-                  {viewMode === 'gantt' && (
+                {viewMode === 'gantt' && (
+                  <div className="head-col-actions">
+                    <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
                     <button
                       type="button"
                       className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
@@ -3279,33 +3304,29 @@ export default function CronogramaGanttView({
                     >
                       <ChevronsUpDown size={13} />
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setColsMenuOpen((v) => !v);
-                    }}
-                    title="Configurar columnas visibles"
-                  >
-                    <SlidersHorizontal size={13} />
-                  </button>
-                </div>
-
-                {/* Botón colapsador de panel – solo en Gantt */}
-                {viewMode === 'gantt' && (
-                  <button
-                    type="button"
-                    className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCompactColumns();
-                    }}
-                    title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
-                  >
-                    {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
-                  </button>
+                    <button
+                      type="button"
+                      className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setColsMenuOpen((v) => !v);
+                      }}
+                      title="Configurar columnas visibles"
+                    >
+                      <SlidersHorizontal size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCompactColumns();
+                      }}
+                      title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
+                    >
+                      {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
+                    </button>
+                  </div>
                 )}
                 {colsMenuOpen && (
                   <div className="cols-popover" onClick={(e) => e.stopPropagation()}>
@@ -3349,29 +3370,6 @@ export default function CronogramaGanttView({
                 )}
                 <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} />
               </div>
-
-
-              {visibleCols.includes('code') && (
-                <div className="th-col-header">
-                  <span className="th-label">Código</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('code');
-                        notify('Columna "Código" ocultada.');
-                      }}
-                      title="Ocultar columna Código"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    <ColumnHeaderMenu engine={engine} columnId="code" buttonClassName="th-action-btn" />
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} />
-                </div>
-              )}
               {visibleCols.includes('kind') && (
                 <div className="th-col-header">
                   <span className="th-label">Tipo</span>
@@ -3685,12 +3683,28 @@ export default function CronogramaGanttView({
                   <div
                     className="fixed-cols"
                     style={{
-                      width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
-                      minWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
-                      maxWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                      width: `${fixedWidth}px`,
+                      minWidth: `${fixedWidth}px`,
                       gridTemplateColumns: fixedGridCols,
                     }}
                   >
+                    {/* ── Columna Código (Primera en modo lista) ── */}
+                    {visibleCols.includes('code') && (
+                      <div className="code-cell-col" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          aria-label={`Seleccionar ${x.code} ${x.name}`}
+                          onChange={(e) => e.stopPropagation()}
+                        />
+                        {x.kind === 'hito' ? (
+                          <Flag size={13} className="code-icon-flag is-hito" />
+                        ) : (
+                          <FileText size={13} className="code-icon-flag is-sub" />
+                        )}
+                        <span className="code-num">{x.code}</span>
+                      </div>
+                    )}
+
                     <div className="name-cell">
                     {/* Sangría proporcional limpia y alineada: exactamente 20px por nivel de jerarquía */}
                     {viewMode === 'gantt' && getItemDepth(x) > 0 && (
@@ -3709,30 +3723,30 @@ export default function CronogramaGanttView({
                     ) : (
                       viewMode === 'gantt' && <span className="indent" />
                     )}
-                    {x.kind === 'hito' ? (
-                      <button
-                        type="button"
-                        className="row-icon-action"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditorForItem(x);
-                        }}
-                      >
-                        {viewMode === 'lista'
-                          ? <Flag size={14} className="folder" />
-                          : <FolderOpen size={16} className="folder" />}
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="row-icon-action"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditorForItem(x);
-                        }}
-                      >
-                        <FileText size={15} className="file" />
-                      </button>
+                    {viewMode === 'gantt' && (
+                      x.kind === 'hito' ? (
+                        <button
+                          type="button"
+                          className="row-icon-action"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditorForItem(x);
+                          }}
+                        >
+                          <FolderOpen size={16} className="folder" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="row-icon-action"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditorForItem(x);
+                          }}
+                        >
+                          <FileText size={15} className="file" />
+                        </button>
+                      )
                     )}
                     {viewMode === 'gantt' && (
                       <b className="code">
@@ -3777,7 +3791,7 @@ export default function CronogramaGanttView({
                       </span>
                     )}
 
-                    {!isEditing(x, 'name') && (
+                    {viewMode === 'gantt' && !isEditing(x, 'name') && (
                       <div className="quick-row-actions">
                         {x.kind === 'subproceso' ? (
                           <>
@@ -3877,12 +3891,7 @@ export default function CronogramaGanttView({
                   </div>
 
 
-                  {/* ── Columna Código ── */}
-                  {visibleCols.includes('code') && (
-                    <div className="code-cell-col" title={x.code}>
-                      <span className="code-text-pill">{x.code}</span>
-                    </div>
-                  )}
+
 
                   {/* ── Columna Tipo ── */}
                   {visibleCols.includes('kind') && (
@@ -3915,7 +3924,7 @@ export default function CronogramaGanttView({
                         toggleEdit(x, 'start');
                       }}
                     >
-                      <span className="cell-text">{formatDate(x.start)}</span>
+                      <span className="cell-text">{viewMode === 'lista' ? formatDatePE(x.start) : formatDate(x.start)}</span>
                       {isEditing(x, 'start') && (
                         <MiniCalendar
                           value={x.start}
@@ -3940,7 +3949,7 @@ export default function CronogramaGanttView({
                         toggleEdit(x, 'end');
                       }}
                     >
-                      <span className="cell-text">{formatDate(x.end)}</span>
+                      <span className="cell-text">{viewMode === 'lista' ? formatDatePE(x.end) : formatDate(x.end)}</span>
                       {isEditing(x, 'end') && (
                         <MiniCalendar
                           value={x.end}
