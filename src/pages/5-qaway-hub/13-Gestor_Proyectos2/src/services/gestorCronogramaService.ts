@@ -2,7 +2,7 @@
  * QAWAY LAB · Servicio de Persistencia en Supabase para el Gestor de Proyectos
  * Maneja la sincronización bidireccional entre la base de datos Supabase y el estado local.
  */
-import { supabase } from '../../../../config/supabase.js';
+import { supabase } from './supabaseClient';
 
 export interface GanttItemData {
   id: string;
