@@ -160,40 +160,6 @@ export default function AppLayout() {
           </div>
         </main>
       </div>
-
-      {/* SWITCHER FLOTANTE INFERIOR: Alterna en 1 clic entre Versión Actual (Fase 17) y Vista Cascada Fractal (Oculto en PDF/Print y en vistas de Monitoreo Territorial para no tapar la tabla) */}
-      {!isMonitoring && (
-        <div
-          role="region"
-          aria-label="Selector de versión de arquitectura"
-          className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-950/95 p-1.5 shadow-2xl backdrop-blur-md print:hidden"
-        >
-          <button
-            type="button"
-            onClick={() => navigate(getHref(lastLegacyPathRef.current || '/proyectos/proj-minedu-2027'))}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-              !isCascadeView
-                ? 'bg-white text-slate-950 shadow-sm'
-                : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            <Layers size={14} />
-            <span>Versión Anterior (Fase 17)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(getHref('/cascada'))}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-              isCascadeView
-                ? 'bg-[#1e3a8a] text-white shadow-sm ring-1 ring-blue-400/50'
-                : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            <Sparkles size={14} className={isCascadeView ? 'text-amber-300' : 'text-blue-400'} />
-            <span>Versión Actual · Cascada Fractal</span>
-          </button>
-        </div>
-      )}
     </div>
   )
 }
