@@ -73,31 +73,41 @@ export default function AppRouter() {
         <Route element={<AppLayout />}>
           {/* Dashboard de Cartera / Resumen General */}
           <Route index element={<DashboardPage />} />
+          <Route path="gestor_proyectos0" element={<DashboardPage />} />
+          <Route path="gestor_proyectos0/resumen" element={<DashboardPage />} />
           <Route path="resumen" element={<DashboardPage />} />
 
-          {/* Directorio de Proyectos (Task 3.2): ruta estática que gana a ":id" */}
+          {/* Directorio de Proyectos */}
+          <Route path="gestor_proyectos0/proyectos" element={<ProjectsListPage />} />
           <Route path="proyectos" element={<ProjectsListPage />} />
 
-          {/* Espacio de Trabajo del Proyecto (Fase 4, 5 y 6): gana a ":id" por segmento estático */}
+          {/* Espacio de Trabajo del Proyecto */}
+          <Route path="gestor_proyectos0/proyectos/:id" element={<ProjectWorkspacePage />} />
           <Route path="proyectos/:id" element={<ProjectWorkspacePage />} />
 
-          {/* Bandeja de Tareas dedicada (Task Inbox): ruta estática canónica */}
+          {/* Bandeja de Tareas dedicada */}
+          <Route path="gestor_proyectos0/bandeja" element={<TasksInboxPage />} />
           <Route path="bandeja" element={<TasksInboxPage />} />
 
           {/* Reporteador Territorial y Monitoreo */}
-          <Route path="reporteador" element={<TerritoryReporterV2Page />} />
-          <Route path="reporteador/hito-1-6" element={<TerritoryReporterV2Page />} />
-          <Route path="monitoreo-territorial" element={<TerritoryReporterPage />} />
-          <Route path="monitoreo" element={<Navigate to="/reporteador" replace />} />
-          <Route path="monitoreo-v2" element={<Navigate to="/reporteador" replace />} />
-          <Route path="monitoreo-territorial-v2" element={<Navigate to="/reporteador" replace />} />
-          <Route path="monitoreo-fase-2" element={<Navigate to="/reporteador" replace />} />
+          <Route path="gestor_proyectos0/reporteador" element={<TerritoryReporterV2Page />} />
+          <Route path="gestor_proyectos0/reporteador/hito-1-6" element={<TerritoryReporterV2Page />} />
+          <Route path="reporteador" element={<Navigate to="/gestor_proyectos0/reporteador" replace />} />
+          <Route path="reporteador/hito-1-6" element={<Navigate to="/gestor_proyectos0/reporteador/hito-1-6" replace />} />
+          <Route path="monitoreo-territorial" element={<Navigate to="/gestor_proyectos0/monitoreo-territorial" replace />} />
+          <Route path="gestor_proyectos0/monitoreo-territorial" element={<TerritoryReporterPage />} />
+          <Route path="monitoreo" element={<Navigate to="/gestor_proyectos0/reporteador" replace />} />
+          <Route path="monitoreo-v2" element={<Navigate to="/gestor_proyectos0/reporteador" replace />} />
+          <Route path="monitoreo-territorial-v2" element={<Navigate to="/gestor_proyectos0/reporteador" replace />} />
+          <Route path="monitoreo-fase-2" element={<Navigate to="/gestor_proyectos0/reporteador" replace />} />
 
           {/* Resumen Regional HubPro (Modelo Visual) */}
-          <Route path="resumen-regional" element={<HubProResumenPage />} />
+          <Route path="gestor_proyectos0/resumen-regional" element={<HubProResumenPage />} />
+          <Route path="resumen-regional" element={<Navigate to="/gestor_proyectos0/resumen-regional" replace />} />
 
           {/* Cascada Fractal WBS con Roll-up */}
-          <Route path="cascada" element={<CascadeFractalPage />} />
+          <Route path="gestor_proyectos0/cascada" element={<CascadeFractalPage />} />
+          <Route path="cascada" element={<Navigate to="/gestor_proyectos0/cascada" replace />} />
 
           {/* Productos / Inventario — lectura: cualquier autenticado */}
           <Route path="productos" element={<RequirePlanFeature feature="products"><ProductsPage /></RequirePlanFeature>} />

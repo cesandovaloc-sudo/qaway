@@ -139,25 +139,25 @@ export default function Sidebar({
       title: 'OPERACIÓN Y RESUMEN',
       items: [
         {
-          to: '/resumen',
+          to: '/gestor_proyectos0/resumen',
           label: 'Resumen General',
           icon: <LayoutDashboard size={18} />,
           end: true,
         },
         {
-          to: activeProjectObj ? `/proyectos/${activeProjectObj.id}` : '/proyectos',
+          to: activeProjectObj ? `/gestor_proyectos0/proyectos/${activeProjectObj.id}` : '/gestor_proyectos0/proyectos',
           label: 'Espacio de Trabajo (Gantt/Kanban)',
           icon: <FolderKanban size={18} />,
         },
         {
-          to: '/reporteador',
+          to: '/gestor_proyectos0/reporteador',
           label: 'Reporteador Territorial (CDL / 1.6)',
           icon: <BarChart3 size={18} />,
           badge: 'ACTIVO',
           badgeVariant: 'urgent',
         },
         {
-          to: '/resumen-regional',
+          to: '/gestor_proyectos0/resumen-regional',
           label: 'Resumen Regional (HubPro)',
           icon: <LayoutDashboard size={18} />,
           badge: 'MODELO',
@@ -169,7 +169,7 @@ export default function Sidebar({
       title: 'PLANIFICACIÓN Y CONTROL',
       items: [
         {
-          to: '/proyectos',
+          to: '/gestor_proyectos0/proyectos',
           label: 'Directorio de Proyectos',
           icon: <FolderKanban size={18} />,
           badge: scopedProjects.length,
@@ -177,27 +177,27 @@ export default function Sidebar({
           end: true,
         },
         {
-          to: '/bandeja',
+          to: '/gestor_proyectos0/bandeja',
           label: isGestor ? 'Mi Bandeja' : 'Bandeja de Tareas',
           icon: <Inbox size={18} />,
           badge: myTaskCount,
           badgeVariant: 'neutral',
         },
         {
-          to: '/proyectos?view=criticas',
+          to: '/gestor_proyectos0/proyectos?view=criticas',
           label: 'Alertas Críticas',
           icon: <AlertCircle size={18} />,
           badge: urgentCount,
           badgeVariant: 'urgent',
         },
         {
-          to: '/cascada',
+          to: '/gestor_proyectos0/cascada',
           label: 'Cascada Fractal (WBS)',
           icon: <Workflow size={18} />,
           badge: 'WBS',
         },
         {
-          to: '/monitoreo-territorial',
+          to: '/gestor_proyectos0/monitoreo-territorial',
           label: 'Monitoreo Territorial (v1 Base)',
           icon: <BarChart3 size={18} />,
           badge: 'v1',
@@ -214,7 +214,13 @@ export default function Sidebar({
     if (to === '/' && (barePath === '/' || barePath === '')) {
       return true
     }
-    if (to.startsWith('/proyectos/') && barePath.startsWith('/proyectos/')) {
+    if (to === '/gestor_proyectos0/resumen' && (barePath === '/' || barePath === '' || barePath === '/resumen' || barePath === '/gestor_proyectos0/resumen')) {
+      return true
+    }
+    if (
+      (to.startsWith('/gestor_proyectos0/proyectos/') && barePath.startsWith('/gestor_proyectos0/proyectos/')) ||
+      (to.startsWith('/proyectos/') && barePath.startsWith('/proyectos/'))
+    ) {
       return true
     }
     return barePath === to
