@@ -110,6 +110,47 @@ export const territoryMonitoringService = {
   },
 
   /**
+   * Upsert universal para cualquier Hito y Región (Junín, Pasco, etc.)
+   */
+  async upsertUgel(row: UgelMonitoringV2Row, milestoneCode: string = 'H1.6', regionName: string = 'Junín'): Promise<void> {
+    const cleanMilestone = milestoneCode.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
+    const dbId = milestoneCode === 'H1.6' && regionName === 'Junín'
+      ? row.id
+      : `${row.id}_${cleanMilestone}`
+
+    const dbPayload = {
+      ...mapUgelRowToDb(row),
+      id: dbId,
+      region: regionName,
+      milestone_code: milestoneCode,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { error } = await supabase
+      .from('territory_ugel_monitoring')
+      .upsert(dbPayload, { onConflict: 'id' })
+
+    if (error) {
+      console.error(`[TerritoryService] Error upserting UGEL ${row.name} in Supabase:`, error)
+    }
+  },
+
+  /**
+   * Cargar UGELs de un Hito y Región específicos desde Supabase
+   */
+  async fetchUgelsByMilestoneAndRegion(milestoneCode: string, regionName: string): Promise<UgelMonitoringV2Row[]> {
+    const { data, error } = await supabase
+      .from('territory_ugel_monitoring')
+      .select('*')
+      .eq('region', regionName)
+      .eq('milestone_code', milestoneCode)
+      .order('number', { ascending: true })
+
+    if (error || !data || data.length === 0) return []
+    return (data as unknown as TerritoryUgelDbRecord[]).map(mapDbToUgelRow)
+  },
+
+  /**
    * Actualizar campo específico de una UGEL en Supabase
    */
   async updateUgelFields(id: string, fields: Partial<TerritoryUgelDbRecord>): Promise<void> {
