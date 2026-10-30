@@ -2172,10 +2172,6 @@ export function TerritoryReporterV2Tab({
               Haz clic directamente en cualquier celda para actualizar los datos al instante en campo.
             </p>
           </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Haz clic directamente en cualquier celda para actualizar los datos al instante en campo.
-            </p>
-          </div>
 
           {/* Filtros */}
           <div className="flex flex-wrap items-center gap-2.5">
