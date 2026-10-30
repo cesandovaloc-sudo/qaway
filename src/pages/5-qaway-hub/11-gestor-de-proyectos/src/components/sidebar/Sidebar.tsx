@@ -147,7 +147,7 @@ export default function Sidebar({
         },
         {
           to: '/gestor_proyectos0/reporteador',
-          label: 'Reporteador Territorial (CDL / 1.6)',
+          label: 'Reporteador Territorial (Hito 1.6 / 1.7)',
           icon: <BarChart3 size={18} />,
           badge: 'ACTIVO',
           badgeVariant: 'urgent',
