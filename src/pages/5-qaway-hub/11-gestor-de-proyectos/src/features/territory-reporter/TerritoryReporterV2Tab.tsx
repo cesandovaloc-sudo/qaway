@@ -2088,41 +2088,80 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* Card 3: Avance por dirección pedagógica (o Medios de Difusión en Hito 5.1a) */}
+        {/* Card 3: Avance por dirección pedagógica (o Brecha Operativa en Hito 5.1a) */}
         <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
               <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">
-                {is51a ? 'Medios de Difusión Reportados' : 'Avance por Direcciones en 3 Fases'}
+                {is51a ? 'Brecha y Diagnóstico Operativo' : 'Avance por Direcciones en 3 Fases'}
               </h3>
               <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">
                 {is51a
-                  ? 'Canales de socialización acreditados en Drive'
+                  ? 'Estado combinado de los 2 criterios exigidos'
                   : `Progreso de las ${ugelStats.directionStats.length} líneas pedagógicas en las 3 fases`}
               </p>
             </div>
             <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 shrink-0">
-              {is51a ? 'Difusión · Drive' : 'Líneas · 3 Fases'}
+              {is51a ? 'Diagnóstico · 5.1a' : 'Líneas · 3 Fases'}
             </span>
           </div>
 
           <div className="my-auto space-y-3 py-3">
             {is51a ? (
               [
-                { channel: 'Redes Sociales (Facebook / X)', count: ugels.filter((u) => u.observation.toLowerCase().includes('facebook') || u.observation.toLowerCase().includes('redes')).length },
-                { channel: 'Portales Web Institucionales', count: ugels.filter((u) => u.observation.toLowerCase().includes('web') || u.observation.toLowerCase().includes('portal')).length },
-                { channel: 'Grupos de WhatsApp / Comunicados', count: ugels.filter((u) => u.observation.toLowerCase().includes('whatsapp') || u.observation.toLowerCase().includes('comunicado')).length },
-                { channel: 'Oficio / Correo Electrónico', count: ugels.filter((u) => u.observation.toLowerCase().includes('correo') || u.observation.toLowerCase().includes('masivo')).length },
+                {
+                  label: 'Ambos Requisitos OK',
+                  sub: 'Oficio cursado y difusión acreditada',
+                  count: ugels.filter((u) => u.phase1Files >= 1 && u.driveStatus === 'completado').length,
+                  barColor: 'bg-emerald-600',
+                  textColor: 'text-emerald-700',
+                  badge: 'Completado',
+                  badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                },
+                {
+                  label: 'Solo Oficio Múltiple',
+                  sub: 'Falta adjuntar evidencia de difusión',
+                  count: ugels.filter((u) => u.phase1Files >= 1 && u.driveStatus !== 'completado').length,
+                  barColor: 'bg-amber-500',
+                  textColor: 'text-amber-700',
+                  badge: 'En proceso',
+                  badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+                },
+                {
+                  label: 'Solo Difusión Acreditada',
+                  sub: 'Falta remitir documento del Oficio',
+                  count: ugels.filter((u) => u.phase1Files < 1 && u.driveStatus === 'completado').length,
+                  barColor: 'bg-sky-500',
+                  textColor: 'text-sky-700',
+                  badge: 'En proceso',
+                  badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+                },
+                {
+                  label: 'Sin Evidencias Registradas',
+                  sub: 'Brecha crítica: 0 de 2 requisitos',
+                  count: ugels.filter((u) => u.phase1Files < 1 && u.driveStatus !== 'completado').length,
+                  barColor: 'bg-rose-600',
+                  textColor: 'text-rose-700',
+                  badge: 'Pendiente',
+                  badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
+                },
               ].map((item) => {
                 const pct = ugels.length > 0 ? Math.round((item.count / ugels.length) * 100) : 0
                 return (
-                  <div key={item.channel} className="space-y-1 text-xs">
-                    <div className="flex items-center justify-between font-bold text-slate-700">
-                      <span className="truncate">{item.channel}</span>
-                      <span className="tabular-nums text-slate-900">{item.count} / {ugels.length} ({pct}%)</span>
+                  <div key={item.label} className="space-y-1 text-xs">
+                    <div className="flex items-center justify-between font-bold">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="text-slate-800 font-extrabold">{item.label}</span>
+                        <span className={`hidden sm:inline-block rounded px-1.5 py-0.2 text-[10px] font-black border ${item.badgeColor}`}>
+                          {item.badge}
+                        </span>
+                      </div>
+                      <span className="tabular-nums text-slate-900 font-black shrink-0">
+                        {item.count} / {ugels.length} ({pct}%)
+                      </span>
                     </div>
-                    <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100 shadow-inner">
-                      <div style={{ width: `${pct}%` }} className="h-full bg-blue-600 rounded-full transition-all" />
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 shadow-inner">
+                      <div style={{ width: `${pct}%` }} className={`h-full rounded-full transition-all ${item.barColor}`} />
                     </div>
                   </div>
                 )
@@ -2150,8 +2189,12 @@ export function TerritoryReporterV2Tab({
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px] text-slate-500 font-bold">
-            <span>{is51a ? 'Sustento en Drive Regional' : `${ugelStats.directionStats.length} Direcciones evaluadas`}</span>
-            <span>{ugelStats.total} {isPasco ? 'unidades Pasco' : 'UGEL Junín'}</span>
+            <span>{is51a ? 'Cuello de Botella Operativo' : `${ugelStats.directionStats.length} Direcciones evaluadas`}</span>
+            <span>
+              {is51a
+                ? `${ugels.filter((u) => u.phase1Files < 1 && u.driveStatus !== 'completado').length} críticas sin avance`
+                : `${ugelStats.total} ${isPasco ? 'unidades Pasco' : 'UGEL Junín'}`}
+            </span>
           </div>
         </div>
       </section>
