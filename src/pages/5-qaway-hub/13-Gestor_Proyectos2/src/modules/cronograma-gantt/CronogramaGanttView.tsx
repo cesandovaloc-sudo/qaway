@@ -78,7 +78,7 @@ import {
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
-type ColKey = 'name' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region';
+type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'actions';
 type EditField = ColKey;
 
 export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
@@ -438,10 +438,13 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region'];
+const CANONICAL_COLS: ColKey[] = ['name', 'code', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
-  name: 360,
+  name: 320,
+  code: 72,
+  kind: 105,
+  parent: 155,
   start: 95,
   end: 95,
   duration: 85,
@@ -449,10 +452,14 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   status: 105,
   gestor: 135,
   region: 110,
+  actions: 72,
 };
 
 const MIN_COLS: Record<ColKey, number> = {
   name: 180,
+  code: 50,
+  kind: 70,
+  parent: 90,
   start: 70,
   end: 70,
   duration: 60,
@@ -460,20 +467,26 @@ const MIN_COLS: Record<ColKey, number> = {
   status: 50,
   gestor: 85,
   region: 75,
+  actions: 50,
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'name', label: 'Hito Rector / Subproceso Oficial', fixed: true },
+  { key: 'code', label: 'Código' },
+  { key: 'kind', label: 'Tipo' },
+  { key: 'parent', label: 'Hito padre' },
   { key: 'start', label: 'Inicio' },
   { key: 'end', label: 'Fin' },
   { key: 'duration', label: 'Duración' },
   { key: 'progress', label: 'Avance' },
   { key: 'status', label: 'Estado' },
   { key: 'gestor', label: 'Responsable' },
-  { key: 'region', label: 'Zona / Frente' },
+  { key: 'region', label: 'Ámbito' },
+  { key: 'actions', label: 'Acciones' },
 ];
 
 const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
+const LISTA_VISIBLE_COLS: ColKey[] = ['name', 'code', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
 const getDays = (a?: string, b?: string) => {
   if (!a || !b) return 1;
   const da = new Date(a).getTime();
@@ -504,7 +517,10 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
     options: STATUS_FLOW.map((s) => ({ value: s, label: s })),
   },
   { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
-  { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
+  { id: 'region', label: 'Ámbito', type: 'select', accessor: (r) => r?.region },
+  { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
+  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => r?.kind === 'hito' ? 'Hito' : 'Subproceso' },
+  { id: 'parent', label: 'Hito padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
 
 const formatDate = (s: string) =>
@@ -1563,6 +1579,25 @@ export default function CronogramaGanttView({
     }
     return DEFAULT_VISIBLE_COLS;
   });
+
+  // Sync visibleCols when switching between gantt and lista modes
+  const prevViewModeRef = useRef<string>('gantt');
+  useEffect(() => {
+    if (viewMode === prevViewModeRef.current) return;
+    prevViewModeRef.current = viewMode;
+    if (viewMode === 'lista') {
+      setVisibleCols([...LISTA_VISIBLE_COLS]);
+    } else if (viewMode === 'gantt') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('qaway-gantt-visible-cols-v2') || 'null');
+        if (Array.isArray(saved) && saved.includes('name')) {
+          setVisibleCols(CANONICAL_COLS.filter((k) => saved.includes(k)));
+          return;
+        }
+      } catch { /* ignore */ }
+      setVisibleCols([...DEFAULT_VISIBLE_COLS]);
+    }
+  }, [viewMode]);
 
   useEffect(() => {
     try {
@@ -3442,7 +3477,7 @@ export default function CronogramaGanttView({
               )}
               {visibleCols.includes('region') && (
                 <div className="th-col-header">
-                  <span className="th-label">Región</span>
+                  <span className="th-label">Ámbito</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -3450,15 +3485,87 @@ export default function CronogramaGanttView({
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleColVisibility('region');
-                        notify('Columna "Región" ocultada.');
+                        notify('Columna "Ámbito" ocultada.');
                       }}
-                      title="Ocultar columna Región"
+                      title="Ocultar columna Ámbito"
                     >
                       <EyeOff size={11} />
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="region" buttonClassName="th-action-btn" />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} />
+                </div>
+              )}
+
+              {visibleCols.includes('code') && (
+                <div className="th-col-header">
+                  <span className="th-label">Código</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('code');
+                        notify('Columna "Código" ocultada.');
+                      }}
+                      title="Ocultar columna Código"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="code" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} />
+                </div>
+              )}
+
+              {visibleCols.includes('kind') && (
+                <div className="th-col-header">
+                  <span className="th-label">Tipo</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('kind');
+                        notify('Columna "Tipo" ocultada.');
+                      }}
+                      title="Ocultar columna Tipo"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="kind" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} />
+                </div>
+              )}
+
+              {visibleCols.includes('parent') && (
+                <div className="th-col-header">
+                  <span className="th-label">Hito padre</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('parent');
+                        notify('Columna "Hito padre" ocultada.');
+                      }}
+                      title="Ocultar columna Hito padre"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="parent" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} />
+                </div>
+              )}
+
+              {visibleCols.includes('actions') && (
+                <div className="th-col-header th-col-actions">
+                  <span className="th-label">Acciones</span>
                 </div>
               )}
             </div>
@@ -4064,6 +4171,55 @@ export default function CronogramaGanttView({
                       ) : (
                         <span className="region-badge-pill">{x.region || 'Nacional'}</span>
                       )}
+                    </div>
+                  )}
+
+                  {/* ── Columna Código ── */}
+                  {visibleCols.includes('code') && (
+                    <div className="code-cell-col" title={x.code}>
+                      <span className="code-text-pill">{x.code}</span>
+                    </div>
+                  )}
+
+                  {/* ── Columna Tipo ── */}
+                  {visibleCols.includes('kind') && (
+                    <div className="kind-cell-col">
+                      <span className={`type-badge-pill ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
+                        {x.kind === 'hito' ? 'Hito' : 'Subproceso'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* ── Columna Hito padre ── */}
+                  {visibleCols.includes('parent') && (
+                    <div className="parent-cell-col" title={x.parentId ? (items.find(p => p.id === x.parentId)?.name ?? '—') : '—'}>
+                      {x.parentId ? (
+                        <span className="parent-text-pill">
+                          {items.find(p => p.id === x.parentId)?.code ?? ''} {items.find(p => p.id === x.parentId)?.name ?? '—'}
+                        </span>
+                      ) : (
+                        <span className="parent-none-dash">—</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── Columna Acciones ── */}
+                  {visibleCols.includes('actions') && (
+                    <div
+                      className="actions-cell-col"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        className="row-action-btn"
+                        title="Ver detalle del registro"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditorForItem(x);
+                        }}
+                      >
+                        <MoreHorizontal size={14} />
+                      </button>
                     </div>
                   )}
                 </div>

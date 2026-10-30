@@ -5528,3 +5528,101 @@ body.gantt-resizing {
   font-weight: 600;
   padding-left: 2px;
 }
+
+
+/* ==========================================================================
+   COLUMNAS EXTRA MODO LISTA: Código · Tipo · Hito padre · Acciones
+   ========================================================================== */
+
+/* -- shared cell base -- */
+.gantt-v2 .code-cell-col,
+.gantt-v2 .kind-cell-col,
+.gantt-v2 .parent-cell-col,
+.gantt-v2 .actions-cell-col {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* -- Código pill -- */
+.gantt-v2 .code-text-pill {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0066ff;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 5px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* -- Tipo badge -- */
+.gantt-v2 .type-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 5px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.gantt-v2 .type-badge-pill.is-hito {
+  color: #1e40af;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+}
+.gantt-v2 .type-badge-pill.is-sub {
+  color: #6d28d9;
+  background: #ede9fe;
+  border: 1px solid #ddd6fe;
+}
+
+/* -- Hito padre text -- */
+.gantt-v2 .parent-text-pill {
+  font-size: 12px;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+}
+.gantt-v2 .parent-none-dash {
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+/* -- Acciones button -- */
+.gantt-v2 .actions-cell-col {
+  justify-content: center;
+}
+.gantt-v2 .row-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+  flex-shrink: 0;
+}
+.gantt-v2 .row-action-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* -- Column header for Acciones (no actions inside) -- */
+.gantt-v2 .th-col-actions {
+  justify-content: center;
+}
