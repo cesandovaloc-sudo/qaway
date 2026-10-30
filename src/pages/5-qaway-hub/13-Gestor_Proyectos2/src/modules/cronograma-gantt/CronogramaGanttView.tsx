@@ -467,6 +467,13 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 ];
 
 const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
+const getDays = (a?: string, b?: string) => {
+  if (!a || !b) return 1;
+  const da = new Date(a).getTime();
+  const db = new Date(b).getTime();
+  if (isNaN(da) || isNaN(db)) return 1;
+  return Math.max(1, Math.round((db - da) / 86400000) + 1);
+};
 
 /* Definición de columnas para el motor universal: el tipo determina filtros, orden y controles. */
 const STATUS_FLOW: Status[] = ['Pendiente', 'En proceso', 'En curso', 'Con retraso', 'Completado', 'Cumple'];
@@ -477,20 +484,20 @@ const GANTT_HIERARCHY: Hierarchy<Item> = {
 };
 
 const GANTT_COLUMNS: ColumnDef<Item>[] = [
-  { id: 'name', label: 'Hito / Subproceso', type: 'text', accessor: (r) => `${r.code} ${r.name}` },
-  { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r.start },
-  { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r.end },
-  { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r.start, r.end) },
-  { id: 'progress', label: 'Avance', type: 'percent', accessor: (r) => r.progress },
+  { id: 'name', label: 'Hito / Subproceso', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
+  { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r?.start },
+  { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r?.end },
+  { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r?.start, r?.end) },
+  { id: 'progress', label: 'Avance', type: 'percent', accessor: (r) => r?.progress ?? 0 },
   {
     id: 'status',
     label: 'Estado',
     type: 'processState',
-    accessor: (r) => r.status,
+    accessor: (r) => r?.status,
     options: STATUS_FLOW.map((s) => ({ value: s, label: s })),
   },
-  { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => getItemGestores(r), emptyLabel: 'Sin asignar' },
-  { id: 'region', label: 'Región', type: 'select', accessor: (r) => r.region },
+  { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
+  { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
 ];
 
 const formatDate = (s: string) =>
@@ -652,8 +659,6 @@ function MiniCalendar({
   );
 }
 
-const getDays = (a: string, b: string) =>
-  Math.max(1, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000) + 1);
 
 const monthDays = (iso: string) => {
   const y = Number(iso.slice(0, 4));
