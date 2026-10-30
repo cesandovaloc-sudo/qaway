@@ -696,6 +696,64 @@ export const INITIAL_PASCO_UGELS_V2_HITO_17: UgelMonitoringV2Row[] = INITIAL_PAS
   observation: `Hito 1.7: Acondicionamiento de almacenes y contratos de transporte en ${u.name}.`,
 }))
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DATASETS Y LLAVES DE PERSISTENCIA INDEPENDIENTES PARA HITO 5.1a
+// OM 00032-2026-MINEDU / Solicitud Personal de Apoyo a COGECO (Periodo Vacacional)
+// Plazo de corte: 30 de octubre de 2026
+// Drive Oficial: https://drive.google.com/drive/folders/1PET25rsk8Aa-N_Wh7tPpyu5iK_kieCUF
+// ─────────────────────────────────────────────────────────────────────────────
+export const STORAGE_KEY_HITO_51A_JUNIN = 'qaway_territory_reporter_v2_hito51a_junin_v1'
+export const STORAGE_KEY_HITO_51A_PASCO = 'qaway_territory_reporter_v2_hito51a_pasco_v1'
+export const DRIVE_URL_HITO_51A = 'https://drive.google.com/drive/folders/1PET25rsk8Aa-N_Wh7tPpyu5iK_kieCUF'
+
+export const INITIAL_JUNIN_UGELS_V2_HITO_51A: UgelMonitoringV2Row[] = INITIAL_JUNIN_UGELS_V2.map((u, idx) => {
+  const hasOficio = idx % 2 === 0 || idx === 1 || idx === 5
+  const hasDifusion = idx % 3 === 0
+  const difusionMedia = idx % 4 === 0 ? 'Facebook / Redes Sociales' : idx % 4 === 1 ? 'Grupos de WhatsApp' : idx % 4 === 2 ? 'Portal Web Institucional' : 'Correo electrónico masivo'
+
+  return {
+    ...u,
+    phase1Files: hasOficio ? 1 : 0,
+    phase1Total: 1,
+    phase1Date: hasOficio ? '29/10/2026 14:20' : 'Pendiente de emisión',
+    driveStatus: (hasDifusion ? 'completado' : 'pendiente') as TerritoryStatus,
+    driveFiles: hasDifusion ? 1 : 0,
+    driveTotal: 1,
+    driveDate: hasDifusion ? '30/10/2026 09:15' : 'Sin evidencia de difusión',
+    phase2Files: 0,
+    phase2Total: 0,
+    phase2Date: 'No aplica en 5.1a',
+    observation: hasOficio && hasDifusion
+      ? `Oficio cursado y sustento en Drive (${difusionMedia}).`
+      : hasOficio
+        ? `Oficio cargado al Drive; pendiente captura de socialización (${difusionMedia}).`
+        : 'Pendiente de emisión y carga de Oficio Múltiple.',
+  }
+})
+
+export const INITIAL_PASCO_UGELS_V2_HITO_51A: UgelMonitoringV2Row[] = INITIAL_PASCO_UGELS_V2.map((u, idx) => {
+  const hasOficio = idx !== 1
+  const hasDifusion = idx === 0 || idx === 2
+  return {
+    ...u,
+    phase1Files: hasOficio ? 1 : 0,
+    phase1Total: 1,
+    phase1Date: hasOficio ? '29/10/2026 11:00' : 'Pendiente de emisión',
+    driveStatus: (hasDifusion ? 'completado' : 'pendiente') as TerritoryStatus,
+    driveFiles: hasDifusion ? 1 : 0,
+    driveTotal: 1,
+    driveDate: hasDifusion ? '30/10/2026 10:30' : 'Sin evidencia de difusión',
+    phase2Files: 0,
+    phase2Total: 0,
+    phase2Date: 'No aplica en 5.1a',
+    observation: hasOficio && hasDifusion
+      ? 'Oficio y sustento de difusión cargados en Drive.'
+      : hasOficio
+        ? 'Oficio remitido; pendiente captura de difusión.'
+        : 'Pendiente carga en Drive Regional.',
+  }
+})
+
 function computePhaseStatus(files: number, total: number): TerritoryStatus {
   if (files >= total) return 'completado'
   if (files > 0) return 'en_proceso'
@@ -738,7 +796,15 @@ export function computeUgelDirectionStatus(row: UgelMonitoringV2Row): {
   return { pct, status, okCount, totalDirs }
 }
 
-function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row): TerritoryStatus {
+function computeUgelGeneralStatusV2(row: UgelMonitoringV2Row, is51a?: boolean): TerritoryStatus {
+  if (is51a) {
+    const hasOficio = row.phase1Files >= 1
+    const hasDifusion = row.driveStatus === 'completado'
+    if (hasOficio && hasDifusion) return 'completado'
+    if (hasOficio || hasDifusion) return 'en_proceso'
+    return 'pendiente'
+  }
+
   const isP1Done = row.phase1Files >= row.phase1Total
   const isP2Done = row.phase2Files >= row.phase2Total
   const dirStatus = computeUgelDirectionStatus(row).status
@@ -772,24 +838,35 @@ export function TerritoryReporterV2Tab({
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
 
-  // Sincronización bidireccional de Hito (1.6 vs 1.7)
-  const initialHito = (searchParams.get('hito') === '1.7' || location.pathname.includes('hito-1-7')) ? '1.7' : '1.6'
-  const [selectedHito, setSelectedHito] = useState<'1.6' | '1.7'>(initialHito)
+  // Sincronización bidireccional de Hito (1.6 vs 1.7 vs 5.1a)
+  const getHitoFromUrl = (): '1.6' | '1.7' | '5.1a' => {
+    const q = searchParams.get('hito')
+    if (q === '5.1a' || q === '5-1a' || location.pathname.includes('hito-5-1a') || location.pathname.includes('hito-5.1a')) {
+      return '5.1a'
+    }
+    if (q === '1.7' || location.pathname.includes('hito-1-7')) {
+      return '1.7'
+    }
+    return '1.6'
+  }
+
+  const [selectedHito, setSelectedHito] = useState<'1.6' | '1.7' | '5.1a'>(getHitoFromUrl)
 
   useEffect(() => {
-    const urlHito = (searchParams.get('hito') === '1.7' || location.pathname.includes('hito-1-7')) ? '1.7' : '1.6'
+    const urlHito = getHitoFromUrl()
     if (urlHito !== selectedHito) {
       setSelectedHito(urlHito)
     }
   }, [searchParams, location.pathname])
 
-  const handleSelectHito = (newHito: '1.6' | '1.7') => {
+  const handleSelectHito = (newHito: '1.6' | '1.7' | '5.1a') => {
     setSelectedHito(newHito)
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('hito', newHito)
     setSearchParams(nextParams, { replace: true })
   }
 
+  const is51a = selectedHito === '5.1a'
   const is17 = selectedHito === '1.7'
   const [selectedMacrorregion, setSelectedMacrorregion] = useState('Centro')
   const [selectedRegion, setSelectedRegion] = useState('Región Junín (13 UGEL)')
@@ -862,6 +939,34 @@ export function TerritoryReporterV2Tab({
     return INITIAL_PASCO_UGELS_V2_HITO_17
   })
 
+  // DATASET HITO 5.1a - JUNIN (100% INDEPENDIENTE - OM 00032-2026 / 30 OCT)
+  const [juninUgels51a, setJuninUgels51a] = useState<UgelMonitoringV2Row[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_HITO_51A_JUNIN)
+      if (saved) {
+        const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
+        if (parsed.length === 13) return parsed
+      }
+    } catch {
+      // ignore
+    }
+    return INITIAL_JUNIN_UGELS_V2_HITO_51A
+  })
+
+  // DATASET HITO 5.1a - PASCO (100% INDEPENDIENTE)
+  const [pascoUgels51a, setPascoUgels51a] = useState<UgelMonitoringV2Row[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_HITO_51A_PASCO)
+      if (saved) {
+        const parsed = JSON.parse(saved) as UgelMonitoringV2Row[]
+        if (parsed.length === INITIAL_PASCO_UGELS_V2_HITO_51A.length) return sanitizePascoUgels(parsed)
+      }
+    } catch {
+      // ignore
+    }
+    return INITIAL_PASCO_UGELS_V2_HITO_51A
+  })
+
   // Purga reactiva inmediata para Pasco Hito 1.6
   useEffect(() => {
     const expectedIds = INITIAL_PASCO_UGELS_V2.map((u) => u.id)
@@ -884,13 +989,19 @@ export function TerritoryReporterV2Tab({
 
   // Datos reactivos según Hito y Región
   const ugels = isPasco
-    ? (is17 ? pascoUgels17 : pascoUgels16)
-    : (is17 ? juninUgels17 : juninUgels16)
+    ? (is51a ? pascoUgels51a : is17 ? pascoUgels17 : pascoUgels16)
+    : (is51a ? juninUgels51a : is17 ? juninUgels17 : juninUgels16)
 
   const activeDirectionCodes = isPasco ? PASCO_DIRECTION_CODES : JUNIN_DIRECTION_CODES
 
   const setUgels = (updater: React.SetStateAction<UgelMonitoringV2Row[]>) => {
-    if (is17) {
+    if (is51a) {
+      if (isPasco) {
+        setPascoUgels51a(updater)
+      } else {
+        setJuninUgels51a(updater)
+      }
+    } else if (is17) {
       if (isPasco) {
         setPascoUgels17(updater)
       } else {
@@ -961,6 +1072,22 @@ export function TerritoryReporterV2Tab({
     }
   }, [pascoUgels17])
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_HITO_51A_JUNIN, JSON.stringify(juninUgels51a))
+    } catch {
+      // ignore
+    }
+  }, [juninUgels51a])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_HITO_51A_PASCO, JSON.stringify(pascoUgels51a))
+    } catch {
+      // ignore
+    }
+  }, [pascoUgels51a])
+
   const [searchQuery, setSearchQuery] = useState('')
   const [filterDirection, setFilterDirection] = useState<'Todas' | DirectionCode>('Todas')
   const [filterStatus, setFilterStatus] = useState<'Todos' | 'Completado' | 'En proceso' | 'Pendiente'>('Todos')
@@ -1024,16 +1151,20 @@ export function TerritoryReporterV2Tab({
   const handleCreateTaskForUgel = (ugel: UgelMonitoringV2Row, customTitle?: string) => {
     const titleToUse =
       (customTitle ?? newTaskTitle).trim() ||
-      (is17
-        ? `Asistencia técnica Acondicionamiento y Transporte en UGEL ${ugel.name} (Hito 1.7)`
-        : `Asistencia técnica CdD - MC SIGA en UGEL ${ugel.name} (Hito 1.6)`)
+      (is51a
+        ? `Asistencia técnica Solicitud Personal Apoyo en UGEL ${ugel.name} (Hito 5.1a)`
+        : is17
+          ? `Asistencia técnica Acondicionamiento y Transporte en UGEL ${ugel.name} (Hito 1.7)`
+          : `Asistencia técnica CdD - MC SIGA en UGEL ${ugel.name} (Hito 1.6)`)
 
-    const genStatus = computeUgelGeneralStatusV2(ugel)
+    const genStatus = computeUgelGeneralStatusV2(ugel, is51a)
     const created = projectsService.createWorkItem({
       projectId: _projectId,
-      milestoneRef: is17
-        ? 'Hito 1.7 · Acondicionamiento de Almacenes y Contratos de Transporte'
-        : 'Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA',
+      milestoneRef: is51a
+        ? 'Hito 5.1a · Solicitud Personal de Apoyo a COGECO en II.EE. (Periodo Vacacional)'
+        : is17
+          ? 'Hito 1.7 · Acondicionamiento de Almacenes y Contratos de Transporte'
+          : 'Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA',
       originType: 'accion_emergente',
       taskNature: 'contingencia_operativa',
       threatensMilestone: genStatus === 'pendiente',
@@ -1051,7 +1182,7 @@ export function TerritoryReporterV2Tab({
         phone: ugel.gestorPhone,
       },
       storyPoints: 3,
-      followUpDate: is17 ? '2026-11-25' : '2026-10-26',
+      followUpDate: is51a ? '2026-10-30' : is17 ? '2026-11-25' : '2026-10-26',
       scopeTag: `UGEL ${ugel.name}`,
     })
     setInspectedUgel(null)
@@ -1079,23 +1210,33 @@ export function TerritoryReporterV2Tab({
     let p2Pending = 0
 
     for (const u of ugels) {
-      const gen = computeUgelGeneralStatusV2(u)
+      const gen = computeUgelGeneralStatusV2(u, is51a)
       if (gen === 'completado') completed++
       else if (gen === 'en_proceso') inProgress++
       else pending++
 
-      const isP1Done = u.phase1Files >= u.phase1Total
-      if (isP1Done) p1Completed++
-      else p1Pending++
+      if (is51a) {
+        const hasOficio = u.phase1Files >= 1
+        if (hasOficio) p1Completed++
+        else p1Pending++
 
-      const dirStatus = computeUgelDirectionStatus(u).status
-      if (dirStatus === 'completado') driveCompleted++
-      else if (dirStatus === 'en_proceso') driveInProgress++
-      else drivePending++
+        const hasDifusion = u.driveStatus === 'completado'
+        if (hasDifusion) driveCompleted++
+        else drivePending++
+      } else {
+        const isP1Done = u.phase1Files >= u.phase1Total
+        if (isP1Done) p1Completed++
+        else p1Pending++
 
-      const isP2Done = u.phase2Files >= u.phase2Total
-      if (isP2Done) p2Completed++
-      else p2InProgress++ // En plazo técnico regular hasta el 26/10 (cero alarma roja)
+        const dirStatus = computeUgelDirectionStatus(u).status
+        if (dirStatus === 'completado') driveCompleted++
+        else if (dirStatus === 'en_proceso') driveInProgress++
+        else drivePending++
+
+        const isP2Done = u.phase2Files >= u.phase2Total
+        if (isP2Done) p2Completed++
+        else p2InProgress++ // En plazo técnico regular hasta el 26/10 (cero alarma roja)
+      }
     }
 
     const total = ugels.length
@@ -1148,7 +1289,7 @@ export function TerritoryReporterV2Tab({
       p2Pending,
       directionStats,
     }
-  }, [ugels])
+  }, [ugels, is51a, activeDirectionCodes])
 
   const filteredUgels = useMemo(() => {
     return ugels.filter((u) => {
@@ -1166,7 +1307,7 @@ export function TerritoryReporterV2Tab({
       }
 
       if (filterStatus !== 'Todos') {
-        const gen = computeUgelGeneralStatusV2(u)
+        const gen = computeUgelGeneralStatusV2(u, is51a)
         const statusMap = {
           Completado: 'completado',
           'En proceso': 'en_proceso',
@@ -1181,7 +1322,7 @@ export function TerritoryReporterV2Tab({
 
       return true
     })
-  }, [ugels, searchQuery, filterStatus, filterDirection, selectedUgelFilter, selectedGestorFilter])
+  }, [ugels, searchQuery, filterStatus, filterDirection, selectedUgelFilter, selectedGestorFilter, is51a])
 
   // Alternador binario en Fase 1 y Fase 2 (2 opciones: o cumplen o no)
   const handleCycleUgelFiles = (ugelId: string, phase: 1 | 2) => {
@@ -1190,12 +1331,13 @@ export function TerritoryReporterV2Tab({
         if (u.id !== ugelId) return u
         let updated: UgelMonitoringV2Row
         if (phase === 1) {
-          const isDone = u.phase1Files >= u.phase1Total
-          const nextFiles = isDone ? 0 : u.phase1Total
+          const isDone = u.phase1Files >= (is51a ? 1 : u.phase1Total)
+          const nextFiles = isDone ? 0 : (is51a ? 1 : u.phase1Total)
           updated = {
             ...u,
             phase1Files: nextFiles,
-            phase1Date: nextFiles > 0 ? 'Actualizado hoy' : 'Sin carga',
+            phase1Total: is51a ? 1 : u.phase1Total,
+            phase1Date: nextFiles > 0 ? (is51a ? 'Oficio emitido y en Drive' : 'Actualizado hoy') : (is51a ? 'Pendiente de emisión' : 'Sin carga'),
           }
         } else {
           const isDone = u.phase2Files >= u.phase2Total
@@ -1206,8 +1348,8 @@ export function TerritoryReporterV2Tab({
             phase2Date: nextFiles > 0 ? 'Actualizado hoy' : 'En plazo técnico',
           }
         }
-        // Persistir a Supabase solo para Junín en Hito 1.6 (Hito 1.7 usa almacenamiento local independiente)
-        if (!isPasco && !is17) {
+        // Persistir a Supabase solo para Junín en Hito 1.6
+        if (!isPasco && !is17 && !is51a) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
@@ -1220,25 +1362,25 @@ export function TerritoryReporterV2Tab({
     setUgels((prev) =>
       prev.map((u) => {
         if (u.id !== ugelId) return u
-        const nextStatus: TerritoryStatus =
-          u.driveStatus === 'completado'
+        const nextStatus: TerritoryStatus = is51a
+          ? (u.driveStatus === 'completado' ? 'pendiente' : 'completado')
+          : (u.driveStatus === 'completado'
             ? 'pendiente'
             : u.driveStatus === 'pendiente'
               ? 'en_proceso'
-              : 'completado'
+              : 'completado')
+
         const updated: UgelMonitoringV2Row = {
           ...u,
           driveStatus: nextStatus,
           driveFiles: nextStatus === 'completado' ? 1 : 0,
           driveDate:
             nextStatus === 'completado'
-              ? 'Evidencia cargada'
-              : nextStatus === 'en_proceso'
-                ? 'En proceso'
-                : 'Sin evidencia',
+              ? (is51a ? 'Difusión acreditada en Drive' : 'Evidencia cargada')
+              : (is51a ? 'Sin evidencia de difusión' : nextStatus === 'en_proceso' ? 'En proceso' : 'Sin evidencia'),
         }
         // Persistir a Supabase solo para Junín en Hito 1.6
-        if (!isPasco && !is17) {
+        if (!isPasco && !is17 && !is51a) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
@@ -1271,7 +1413,7 @@ export function TerritoryReporterV2Tab({
           driveFiles: nextDriveStatus === 'completado' ? 1 : 0,
         }
         // Persistir a Supabase solo para Junín en Hito 1.6
-        if (!isPasco && !is17) {
+        if (!isPasco && !is17 && !is51a) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
@@ -1294,7 +1436,7 @@ export function TerritoryReporterV2Tab({
           driveFiles: st === 'completado' ? 1 : 0,
         }
         // Persistir a Supabase solo para Junín en Hito 1.6
-        if (!isPasco && !is17) {
+        if (!isPasco && !is17 && !is51a) {
           territoryMonitoringService.updateUgel(updated).catch(console.error)
         }
         return updated
@@ -1321,13 +1463,13 @@ export function TerritoryReporterV2Tab({
               Reporte regional de cumplimiento
             </h2>
             <p className="text-[13px] font-semibold text-slate-600 mt-0.5">
-              DRE {isPasco ? 'Pasco' : 'Junín'} – {is17 ? 'Acondicionamiento de Almacenes y Contratos de Transporte (Actividad 1.7)' : 'Elaboración del CDL en MC SIGA (Actividad 1.6)'}
+              DRE {isPasco ? 'Pasco' : 'Junín'} – {is51a ? 'Solicitud de Personal de Apoyo a COGECO en II.EE. (Hito 5.1a - OM 00032-2026-MINEDU)' : is17 ? 'Acondicionamiento de Almacenes y Contratos de Transporte (Actividad 1.7)' : 'Elaboración del CDL en MC SIGA (Actividad 1.6)'}
             </p>
           </div>
 
           <div className="text-right text-[11px] text-slate-400 font-medium">
             <span>Última actualización: </span>
-            <strong className="text-slate-700 font-bold">{is17 ? '15 nov. 2026' : '22 oct. 2026'}</strong>
+            <strong className="text-slate-700 font-bold">{is51a ? '30 oct. 2026' : is17 ? '15 nov. 2026' : '22 oct. 2026'}</strong>
           </div>
         </div>
 
@@ -1392,15 +1534,16 @@ export function TerritoryReporterV2Tab({
 
           <span className="text-slate-300">/</span>
 
-          {/* N4: Hito (Selector para Hito 1.6 vs Hito 1.7) */}
+          {/* N4: Hito (Selector para Hito 1.6 vs Hito 5.1a vs Hito 1.7) */}
           <div className="flex items-center gap-1.5">
             <span className="text-[10.5px] font-bold text-slate-500">Hito:</span>
             <select
               value={selectedHito}
-              onChange={(e) => handleSelectHito(e.target.value as '1.6' | '1.7')}
+              onChange={(e) => handleSelectHito(e.target.value as '1.6' | '1.7' | '5.1a')}
               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-900 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
             >
               <option value="1.6">Hito 1.6 – Elaboración del CDL en MC SIGA</option>
+              <option value="5.1a">Hito 5.1a – Personal de Apoyo II.EE. (Oficio y Difusión)</option>
               <option value="1.7">Hito 1.7 – Acondicionamiento y Transporte</option>
             </select>
           </div>
@@ -1419,20 +1562,33 @@ export function TerritoryReporterV2Tab({
         {/* Hito Banner sutil */}
         <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-100/70 border border-slate-200/80 px-3 py-2 text-[12px]">
           <span className="inline-flex items-center rounded-md bg-slate-900 px-2 py-0.5 text-[11px] font-black text-white">
-            {is17 ? 'HITO 1.7' : 'HITO 1.6'}
+            {is51a ? 'HITO 5.1a' : is17 ? 'HITO 1.7' : 'HITO 1.6'}
           </span>
           <span className="font-bold text-slate-800">
-            {is17
-              ? 'Acondicionamiento de Almacenes y Contratos de Transporte'
-              : 'Elaboración del Cuadro de Distribución Local en el MC SIGA'}
+            {is51a
+              ? 'Envío de oficio de UGEL solicitando listado de personal de apoyo a COGECO en II.EE. (Periodo Vacacional)'
+              : is17
+                ? 'Acondicionamiento de Almacenes y Contratos de Transporte'
+                : 'Elaboración del Cuadro de Distribución Local en el MC SIGA'}
           </span>
           <span className="hidden sm:inline text-slate-300">|</span>
           <span className="text-slate-600 font-medium text-[11.5px]">
-            Drive preliminar: <strong className="text-slate-900">{is17 ? 'Corte 15/11/2026' : 'Corte 22/10/2026'}</strong>
+            {is51a ? 'Fecha de Corte:' : 'Drive preliminar:'} <strong className="text-slate-900">{is51a ? '30/10/2026' : is17 ? 'Corte 15/11/2026' : 'Corte 22/10/2026'}</strong>
           </span>
           <span className="hidden sm:inline text-slate-300">·</span>
           <span className="text-slate-600 font-medium text-[11.5px]">
-            Cierre RAR: <strong className="text-slate-900">{is17 ? 'Hasta 25/11/2026' : 'Hasta 26/10/2026'}</strong>
+            {is51a ? (
+              <a
+                href={DRIVE_URL_HITO_51A}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-bold text-blue-700 hover:underline"
+              >
+                Carpeta Drive Regional Hito 5.1a <ExternalLink size={12} />
+              </a>
+            ) : (
+              <span>Cierre RAR: <strong className="text-slate-900">{is17 ? 'Hasta 25/11/2026' : 'Hasta 26/10/2026'}</strong></span>
+            )}
           </span>
         </div>
       </section>
@@ -1463,107 +1619,185 @@ export function TerritoryReporterV2Tab({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {/* FILA 1: FASE 1 (REGISTRO MC SIGA - 100% CUMPLIDA EN TODAS LAS UGEL) */}
-              <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
-                  <div className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
-                      1
-                    </span>
-                    <div className="min-w-0">
-                      <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 1</span>
-                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Registro MC SIGA</span>
-                    </div>
-                  </div>
-                </td>
-                {ugels.map((u) => {
-                  const isDone = u.phase1Files >= u.phase1Total
-                  return (
-                    <td key={`f1-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
-                      <button
-                        type="button"
-                        onClick={() => handleCycleUgelFiles(u.id, 1)}
-                        className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
-                        title={`Fase 1: ${u.name} · ${isDone ? 'Carga inicial completada' : 'Pendiente de carga'} (Clic para alternar)`}
-                      >
-                        <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
-                          isDone ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
-                        }`}>
-                          {isDone ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
+              {is51a ? (
+                <>
+                  {/* FILA 1 HITO 5.1a: OFICIO MÚLTIPLE DIRIGIDO A II.EE. */}
+                  <tr className="hover:bg-slate-50/70 transition-colors">
+                    <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                          1
                         </span>
-                      </button>
-                    </td>
-                  )
-                })}
-              </tr>
-
-              {/* FILA 2: DRIVE (EVIDENCIA DECLARATIVA - CORTE HOY 22/10) */}
-              <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
-                  <div className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
-                      2
-                    </span>
-                    <div className="min-w-0">
-                      <span className="block text-[17px] font-black text-slate-900 leading-tight">Drive</span>
-                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Evidencia declarativa</span>
-                    </div>
-                  </div>
-                </td>
-                {ugels.map((u) => {
-                  const dirInfo = computeUgelDirectionStatus(u)
-                  const st = dirInfo.status
-                  const ratioText = st === 'completado' ? 'Completado' : st === 'en_proceso' ? 'En proceso' : 'Pendiente'
-                  return (
-                    <td key={`dr-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
-                      <div
-                        className="mx-auto flex items-center justify-center p-1"
-                        title={`Drive: ${u.name} · ${ratioText} (${dirInfo.pct}% de direcciones)`}
-                      >
-                        <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs ${
-                          st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
-                        }`}>
-                          {st === 'completado' ? <Check size={24} strokeWidth={3.2} /> : st === 'en_proceso' ? <Clock size={23} strokeWidth={2.8} /> : <X size={24} strokeWidth={3.2} />}
-                        </span>
+                        <div className="min-w-0">
+                          <span className="block text-[16px] font-black text-slate-900 leading-tight">Oficio Múltiple</span>
+                          <span className="block text-[12px] font-bold text-slate-600 leading-tight mt-0.5 truncate" title="Solicitud personal de apoyo a II.EE.">
+                            A directores II.EE.
+                          </span>
+                        </div>
                       </div>
                     </td>
-                  )
-                })}
-              </tr>
+                    {ugels.map((u) => {
+                      const hasOficio = u.phase1Files >= 1
+                      return (
+                        <td key={`om-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleCycleUgelFiles(u.id, 1)}
+                            className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
+                            title={`Oficio Múltiple: ${u.name} · ${hasOficio ? 'Oficio emitido y subido (SÍ)' : 'Pendiente de emisión (NO)'} (Clic para alternar)`}
+                          >
+                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
+                              hasOficio ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                            }`}>
+                              {hasOficio ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
+                            </span>
+                          </button>
+                        </td>
+                      )
+                    })}
+                  </tr>
 
-              {/* FILA 3: FASE 2 (RAR OFICIAL) */}
-              <tr className="hover:bg-slate-50/70 transition-colors">
-                <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
-                  <div className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
-                      3
-                    </span>
-                    <div className="min-w-0">
-                      <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 2</span>
-                      <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial</span>
-                    </div>
-                  </div>
-                </td>
-                {ugels.map((u) => {
-                  const isDone = u.phase2Files >= u.phase2Total
-                  return (
-                    <td key={`f2-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
-                      <button
-                        type="button"
-                        onClick={() => handleCycleUgelFiles(u.id, 2)}
-                        className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
-                        title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado' : 'En plazo técnico'} (Clic para cambiar)`}
-                      >
-                        <span className={`grid h-11 w-11 place-items-center rounded-full shadow-xs transition-transform group-hover:scale-110 ${
-                          isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
-                        }`}>
-                          {isDone ? <Check size={24} strokeWidth={3.2} /> : <Clock size={23} strokeWidth={2.8} />}
+                  {/* FILA 2 HITO 5.1a: SUSTENTO DE MEDIOS DE DIFUSIÓN */}
+                  <tr className="hover:bg-slate-50/70 transition-colors">
+                    <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                          2
                         </span>
-                      </button>
+                        <div className="min-w-0">
+                          <span className="block text-[16px] font-black text-slate-900 leading-tight">Sustento Difusión</span>
+                          <span className="block text-[12px] font-bold text-slate-600 leading-tight mt-0.5 truncate" title="Socialización en redes, web, WhatsApp">
+                            Redes / WA / Web
+                          </span>
+                        </div>
+                      </div>
                     </td>
-                  )
-                })}
-              </tr>
+                    {ugels.map((u) => {
+                      const hasDifusion = u.driveStatus === 'completado'
+                      return (
+                        <td key={`dif-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleCycleDriveStatus(u.id)}
+                            className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
+                            title={`Sustento Difusión: ${u.name} · ${hasDifusion ? 'Difusión acreditada en Drive (SÍ)' : 'Sin evidencia en Drive (NO)'} (Clic para alternar)`}
+                          >
+                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
+                              hasDifusion ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                            }`}>
+                              {hasDifusion ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
+                            </span>
+                          </button>
+                        </td>
+                      )
+                    })}
+                  </tr>
+                </>
+              ) : (
+                <>
+                  {/* FILA 1: FASE 1 (REGISTRO MC SIGA) */}
+                  <tr className="hover:bg-slate-50/70 transition-colors">
+                    <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                          1
+                        </span>
+                        <div className="min-w-0">
+                          <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 1</span>
+                          <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Registro MC SIGA</span>
+                        </div>
+                      </div>
+                    </td>
+                    {ugels.map((u) => {
+                      const isDone = u.phase1Files >= u.phase1Total
+                      return (
+                        <td key={`f1-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleCycleUgelFiles(u.id, 1)}
+                            className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
+                            title={`Fase 1: ${u.name} · ${isDone ? 'Carga inicial completada' : 'Pendiente de carga'} (Clic para alternar)`}
+                          >
+                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
+                              isDone ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                            }`}>
+                              {isDone ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
+                            </span>
+                          </button>
+                        </td>
+                      )
+                    })}
+                  </tr>
+
+                  {/* FILA 2: DRIVE (EVIDENCIA DECLARATIVA) */}
+                  <tr className="hover:bg-slate-50/70 transition-colors">
+                    <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                          2
+                        </span>
+                        <div className="min-w-0">
+                          <span className="block text-[17px] font-black text-slate-900 leading-tight">Drive</span>
+                          <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Evidencia declarativa</span>
+                        </div>
+                      </div>
+                    </td>
+                    {ugels.map((u) => {
+                      const dirInfo = computeUgelDirectionStatus(u)
+                      const st = dirInfo.status
+                      const ratioText = st === 'completado' ? 'Completado' : st === 'en_proceso' ? 'En proceso' : 'Pendiente'
+                      return (
+                        <td key={`dr-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
+                          <div
+                            className="mx-auto flex items-center justify-center p-1"
+                            title={`Drive: ${u.name} · ${ratioText} (${dirInfo.pct}% de direcciones)`}
+                          >
+                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs ${
+                              st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
+                            }`}>
+                              {st === 'completado' ? <Check size={24} strokeWidth={3.2} /> : st === 'en_proceso' ? <Clock size={23} strokeWidth={2.8} /> : <X size={24} strokeWidth={3.2} />}
+                            </span>
+                          </div>
+                        </td>
+                      )
+                    })}
+                  </tr>
+
+                  {/* FILA 3: FASE 2 (RAR OFICIAL) */}
+                  <tr className="hover:bg-slate-50/70 transition-colors">
+                    <td className="bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 w-44 min-w-[176px] max-w-[176px]">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                          3
+                        </span>
+                        <div className="min-w-0">
+                          <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 2</span>
+                          <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial</span>
+                        </div>
+                      </div>
+                    </td>
+                    {ugels.map((u) => {
+                      const isDone = u.phase2Files >= u.phase2Total
+                      return (
+                        <td key={`f2-${u.id}`} className={`py-3.5 px-1 text-center border-l border-slate-100 ${ugels.length <= 6 ? 'w-auto' : 'w-[92px] min-w-[92px] max-w-[92px]'}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleCycleUgelFiles(u.id, 2)}
+                            className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
+                            title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado' : 'En plazo técnico'} (Clic para cambiar)`}
+                          >
+                            <span className={`grid h-11 w-11 place-items-center rounded-full shadow-xs transition-transform group-hover:scale-110 ${
+                              isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
+                            }`}>
+                              {isDone ? <Check size={24} strokeWidth={3.2} /> : <Clock size={23} strokeWidth={2.8} />}
+                            </span>
+                          </button>
+                        </td>
+                      )
+                    })}
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>
@@ -1587,7 +1821,7 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* UGEL QUE COMPLETAN LAS 3 ETAPAS */}
+        {/* UGEL QUE COMPLETAN LAS ETAPAS */}
         <div className="flex items-center gap-3.5 rounded-2xl border border-emerald-200/90 bg-[#f4fbf7] p-4.5 shadow-2xs">
           <div className="grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-700">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[#16a34a] text-white">
@@ -1596,7 +1830,7 @@ export function TerritoryReporterV2Tab({
           </div>
           <div>
             <span className="text-[11.5px] font-bold uppercase tracking-wider text-emerald-800">
-              UGEL QUE COMPLETAN LAS 3 ETAPAS
+              {is51a ? 'UGEL QUE COMPLETAN LAS 2 ETAPAS' : 'UGEL QUE COMPLETAN LAS 3 ETAPAS'}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.completed}</span>
@@ -1614,7 +1848,7 @@ export function TerritoryReporterV2Tab({
           </div>
           <div>
             <span className="text-[11.5px] font-bold uppercase tracking-wider text-amber-800">
-              UGEL EN PROCESO
+              {is51a ? 'UGEL EN PROCESO (1 DE 2)' : 'UGEL EN PROCESO'}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.inProgress}</span>
@@ -1632,7 +1866,7 @@ export function TerritoryReporterV2Tab({
           </div>
           <div>
             <span className="text-[11.5px] font-bold uppercase tracking-wider text-rose-800">
-              UGEL PENDIENTES
+              {is51a ? 'UGEL PENDIENTES (0 DE 2)' : 'UGEL PENDIENTES'}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.pending}</span>
@@ -1644,42 +1878,66 @@ export function TerritoryReporterV2Tab({
 
       {/* ── 3. FILA DE 3 GRÁFICOS EJECUTIVOS ── */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 print:grid-cols-3 print:gap-2.5">
-        {/* Card 1: Avance por fase (3 FILAS) */}
+        {/* Card 1: Avance por fase / criterios */}
         <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
-              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Avance de 3 Fases por {isPasco ? 'Unidad' : 'UGEL'}</h3>
-              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Distribución de las {ugelStats.total} {isPasco ? 'unidades' : 'UGEL'} en Fase 1, Drive y Fase 2</p>
+              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">
+                {is51a ? `Avance de 2 Criterios por ${isPasco ? 'Unidad' : 'UGEL'}` : `Avance de 3 Fases por ${isPasco ? 'Unidad' : 'UGEL'}`}
+              </h3>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">
+                {is51a
+                  ? `Distribución de las ${ugelStats.total} ${isPasco ? 'unidades' : 'UGEL'} en Oficio y Sustento Drive`
+                  : `Distribución de las ${ugelStats.total} ${isPasco ? 'unidades' : 'UGEL'} en Fase 1, Drive y Fase 2`}
+              </p>
             </div>
             <span className="rounded-md bg-blue-100 px-2.5 py-1 text-[11px] font-black text-blue-700 shrink-0">
-              3 Fases de Control
+              {is51a ? '2 Criterios Hito 5.1a' : '3 Fases de Control'}
             </span>
           </div>
 
           <div className="my-auto space-y-4 py-4">
-            {[
-              {
-                label: 'Fase 1',
-                sublabel: 'MC SIGA',
-                ok: ugelStats.p1Completed,
-                prog: ugelStats.p1InProgress,
-                pend: ugelStats.p1Pending,
-              },
-              {
-                label: 'Drive Reg.',
-                sublabel: 'Excel 22/10',
-                ok: ugelStats.driveCompleted,
-                prog: ugelStats.driveInProgress,
-                pend: ugelStats.drivePending,
-              },
-              {
-                label: 'Fase 2',
-                sublabel: 'RAR Oficial',
-                ok: ugelStats.p2Completed,
-                prog: ugelStats.p2InProgress,
-                pend: ugelStats.p2Pending,
-              },
-            ].map((f) => (
+            {(is51a
+              ? [
+                  {
+                    label: 'Oficio M.',
+                    sublabel: 'Personal Apoyo',
+                    ok: ugelStats.p1Completed,
+                    prog: 0,
+                    pend: ugelStats.p1Pending,
+                  },
+                  {
+                    label: 'Sustento',
+                    sublabel: 'Difusión Drive',
+                    ok: ugelStats.driveCompleted,
+                    prog: 0,
+                    pend: ugelStats.drivePending,
+                  },
+                ]
+              : [
+                  {
+                    label: 'Fase 1',
+                    sublabel: 'MC SIGA',
+                    ok: ugelStats.p1Completed,
+                    prog: ugelStats.p1InProgress,
+                    pend: ugelStats.p1Pending,
+                  },
+                  {
+                    label: 'Drive Reg.',
+                    sublabel: is17 ? 'Almacén 15/11' : 'Excel 22/10',
+                    ok: ugelStats.driveCompleted,
+                    prog: ugelStats.driveInProgress,
+                    pend: ugelStats.drivePending,
+                  },
+                  {
+                    label: 'Fase 2',
+                    sublabel: is17 ? 'Contratos 25/11' : 'RAR Oficial',
+                    ok: ugelStats.p2Completed,
+                    prog: ugelStats.p2InProgress,
+                    pend: ugelStats.p2Pending,
+                  },
+                ]
+            ).map((f) => (
               <div key={f.label} className="flex items-center gap-3">
                 <div className="w-20 shrink-0 text-left">
                   <span className="block text-[13.5px] font-black text-slate-900 leading-none">
@@ -1732,10 +1990,12 @@ export function TerritoryReporterV2Tab({
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
               <span>Completado</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-              <span>En proceso</span>
-            </div>
+            {!is51a && (
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                <span>En proceso</span>
+              </div>
+            )}
             <div className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-rose-600" />
               <span>Pendiente</span>
@@ -1747,11 +2007,15 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
-              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Consolidado Global de 3 Fases</h3>
-              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Cumplimiento regional integrado de las {ugelStats.total} {isPasco ? 'unidades' : 'UGEL'}</p>
+              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">
+                {is51a ? 'Consolidado Global Hito 5.1a' : 'Consolidado Global de 3 Fases'}
+              </h3>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">
+                Cumplimiento regional integrado de las {ugelStats.total} {isPasco ? 'unidades' : 'UGEL'}
+              </p>
             </div>
             <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 shrink-0">
-              Total 3 Fases
+              {is51a ? 'Hito 5.1a' : 'Total 3 Fases'}
             </span>
           </div>
 
@@ -1824,41 +2088,69 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* Card 3: Avance por dirección pedagógica (Con más altura y aire vertical) */}
+        {/* Card 3: Avance por dirección pedagógica (o Medios de Difusión en Hito 5.1a) */}
         <div className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs min-h-[340px]">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
             <div>
-              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">Avance por Direcciones en 3 Fases</h3>
-              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">Progreso de las {ugelStats.directionStats.length} líneas pedagógicas en las 3 fases</p>
+              <h3 className="text-[16px] font-black text-slate-900 tracking-tight leading-snug">
+                {is51a ? 'Medios de Difusión Reportados' : 'Avance por Direcciones en 3 Fases'}
+              </h3>
+              <p className="text-[13px] font-semibold text-slate-500 mt-0.5 leading-normal">
+                {is51a
+                  ? 'Canales de socialización acreditados en Drive'
+                  : `Progreso de las ${ugelStats.directionStats.length} líneas pedagógicas en las 3 fases`}
+              </p>
             </div>
             <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-extrabold text-slate-600 shrink-0">
-              Líneas · 3 Fases
+              {is51a ? 'Difusión · Drive' : 'Líneas · 3 Fases'}
             </span>
           </div>
 
-          <div className="my-auto space-y-2.5 py-3">
-            {ugelStats.directionStats.map((d) => (
-              <div key={d.code} className="flex items-center gap-2.5 text-xs">
-                <span className="w-13 font-black text-slate-800 text-[12.5px]">{d.code}</span>
-                <div className="relative flex-1">
-                  <div className="flex h-4 overflow-hidden rounded-full bg-slate-100 shadow-inner">
-                    <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
-                    <div style={{ width: `${(d.prog / d.total) * 100}%` }} className="bg-amber-400" />
-                    <div style={{ width: `${(d.pend / d.total) * 100}%` }} className="bg-rose-600" />
+          <div className="my-auto space-y-3 py-3">
+            {is51a ? (
+              [
+                { channel: 'Redes Sociales (Facebook / X)', count: ugels.filter((u) => u.observation.toLowerCase().includes('facebook') || u.observation.toLowerCase().includes('redes')).length },
+                { channel: 'Portales Web Institucionales', count: ugels.filter((u) => u.observation.toLowerCase().includes('web') || u.observation.toLowerCase().includes('portal')).length },
+                { channel: 'Grupos de WhatsApp / Comunicados', count: ugels.filter((u) => u.observation.toLowerCase().includes('whatsapp') || u.observation.toLowerCase().includes('comunicado')).length },
+                { channel: 'Oficio / Correo Electrónico', count: ugels.filter((u) => u.observation.toLowerCase().includes('correo') || u.observation.toLowerCase().includes('masivo')).length },
+              ].map((item) => {
+                const pct = ugels.length > 0 ? Math.round((item.count / ugels.length) * 100) : 0
+                return (
+                  <div key={item.channel} className="space-y-1 text-xs">
+                    <div className="flex items-center justify-between font-bold text-slate-700">
+                      <span className="truncate">{item.channel}</span>
+                      <span className="tabular-nums text-slate-900">{item.count} / {ugels.length} ({pct}%)</span>
+                    </div>
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100 shadow-inner">
+                      <div style={{ width: `${pct}%` }} className="h-full bg-blue-600 rounded-full transition-all" />
+                    </div>
                   </div>
+                )
+              })
+            ) : (
+              ugelStats.directionStats.map((d) => (
+                <div key={d.code} className="flex items-center gap-2.5 text-xs">
+                  <span className="w-13 font-black text-slate-800 text-[12.5px]">{d.code}</span>
+                  <div className="relative flex-1">
+                    <div className="flex h-4 overflow-hidden rounded-full bg-slate-100 shadow-inner">
+                      <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
+                      <div style={{ width: `${(d.prog / d.total) * 100}%` }} className="bg-amber-400" />
+                      <div style={{ width: `${(d.pend / d.total) * 100}%` }} className="bg-rose-600" />
+                    </div>
+                  </div>
+                  <span className="w-11 text-right font-black text-slate-900 tabular-nums text-[12.5px]">
+                    {d.pct}%
+                  </span>
+                  <span className="text-[11px] font-semibold text-slate-400 tabular-nums">
+                    {d.ok}/{d.total}
+                  </span>
                 </div>
-                <span className="w-11 text-right font-black text-slate-900 tabular-nums text-[12.5px]">
-                  {d.pct}%
-                </span>
-                <span className="text-[11px] font-semibold text-slate-400 tabular-nums">
-                  {d.ok}/{d.total}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-[12px] text-slate-500 font-bold">
-            <span>{ugelStats.directionStats.length} Direcciones evaluadas</span>
+            <span>{is51a ? 'Sustento en Drive Regional' : `${ugelStats.directionStats.length} Direcciones evaluadas`}</span>
             <span>{ugelStats.total} {isPasco ? 'unidades Pasco' : 'UGEL Junín'}</span>
           </div>
         </div>
@@ -1873,9 +2165,13 @@ export function TerritoryReporterV2Tab({
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-blue-600 animate-pulse" />
               <h3 className="text-base font-extrabold text-slate-900">
-                Tablero de Control por UGEL – Región {isPasco ? 'Pasco' : 'Junín'} (3 Etapas)
+                Tablero de Control por UGEL – Región {isPasco ? 'Pasco' : 'Junín'} ({is51a ? 'Hito 5.1a: 2 Criterios' : '3 Etapas'})
               </h3>
             </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Haz clic directamente en cualquier celda para actualizar los datos al instante en campo.
+            </p>
+          </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Haz clic directamente en cualquier celda para actualizar los datos al instante en campo.
             </p>

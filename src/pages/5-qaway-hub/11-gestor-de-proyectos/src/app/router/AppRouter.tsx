@@ -93,9 +93,11 @@ export default function AppRouter() {
           <Route path="gestor_proyectos0/reporteador" element={<TerritoryReporterV2Page />} />
           <Route path="gestor_proyectos0/reporteador/hito-1-6" element={<TerritoryReporterV2Page />} />
           <Route path="gestor_proyectos0/reporteador/hito-1-7" element={<TerritoryReporterV2Page />} />
+          <Route path="gestor_proyectos0/reporteador/hito-5-1a" element={<TerritoryReporterV2Page />} />
           <Route path="reporteador" element={<Navigate to="/gestor_proyectos0/reporteador" replace />} />
           <Route path="reporteador/hito-1-6" element={<Navigate to="/gestor_proyectos0/reporteador/hito-1-6" replace />} />
           <Route path="reporteador/hito-1-7" element={<Navigate to="/gestor_proyectos0/reporteador/hito-1-7" replace />} />
+          <Route path="reporteador/hito-5-1a" element={<Navigate to="/gestor_proyectos0/reporteador/hito-5-1a" replace />} />
           <Route path="monitoreo-territorial" element={<Navigate to="/gestor_proyectos0/monitoreo-territorial" replace />} />
           <Route path="gestor_proyectos0/monitoreo-territorial" element={<TerritoryReporterPage />} />
           <Route path="monitoreo" element={<Navigate to="/gestor_proyectos0/reporteador" replace />} />
