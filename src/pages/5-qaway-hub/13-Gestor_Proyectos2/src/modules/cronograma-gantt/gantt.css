@@ -2560,11 +2560,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 9px;
+  padding: 4px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 
 .gantt-v2 .status.complete {
@@ -3470,6 +3474,8 @@ body.gantt-resizing {
 .gantt-v2 .status-cell {
   position: relative;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* --- E) Editores inline en celda --- */
