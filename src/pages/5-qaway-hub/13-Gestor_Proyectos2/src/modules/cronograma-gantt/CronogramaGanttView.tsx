@@ -3347,9 +3347,9 @@ export default function CronogramaGanttView({
                     }}
                   >
                     <div className="name-cell">
-                    {/* Sangría proporcional según nivel de anidamiento (Sub-subprocesos) */}
+                    {/* Sangría proporcional limpia y alineada: exactamente 20px por nivel de jerarquía */}
                     {getItemDepth(x) > 0 && (
-                      <span style={{ width: `${(getItemDepth(x) - (items.some((c) => c.parentId === x.id) ? 1 : 0)) * 18}px`, flexShrink: 0 }} />
+                      <span style={{ width: `${getItemDepth(x) * 20}px`, flexShrink: 0 }} />
                     )}
                     {items.some((c) => c.parentId === x.id) ? (
                       <button
@@ -3499,35 +3499,24 @@ export default function CronogramaGanttView({
                   {visibleCols.includes('start') && (
                     <div
                       className="date editable"
-                      title="Clic para cambiar la fecha de inicio"
+                      style={{ position: 'relative' }}
+                      title="Clic para cambiar la fecha de inicio con calendario institucional"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleEdit(x, 'start');
                       }}
                     >
-                      {isEditing(x, 'start') ? (
-                        <input
-                          className="cell-editor cell-input date-edit"
-                          type="date"
-                          autoFocus
+                      <span className="cell-text">{formatDate(x.start)}</span>
+                      {isEditing(x, 'start') && (
+                        <MiniCalendar
                           value={x.start}
-                          onClick={(e) => e.stopPropagation()}
-                          onFocus={(e) => {
-                            try {
-                              (e.target as HTMLInputElement).showPicker?.();
-                            } catch {
-                              /* navegador sin soporte */
-                            }
+                          onChange={(newDate) => {
+                            setStart(x, newDate);
+                            closeEdit();
                           }}
-                          onChange={(e) => setStart(x, e.target.value)}
-                          onBlur={closeEdit}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') e.currentTarget.blur();
-                            if (e.key === 'Escape') closeEdit();
-                          }}
+                          onClose={closeEdit}
+                          align="left"
                         />
-                      ) : (
-                        <span className="cell-text">{formatDate(x.start)}</span>
                       )}
                     </div>
                   )}
@@ -3535,36 +3524,25 @@ export default function CronogramaGanttView({
                   {visibleCols.includes('end') && (
                     <div
                       className="date editable"
-                      title="Clic para cambiar la fecha de fin"
+                      style={{ position: 'relative' }}
+                      title="Clic para cambiar la fecha de fin con calendario institucional"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleEdit(x, 'end');
                       }}
                     >
-                      {isEditing(x, 'end') ? (
-                        <input
-                          className="cell-editor cell-input date-edit"
-                          type="date"
-                          autoFocus
+                      <span className="cell-text">{formatDate(x.end)}</span>
+                      {isEditing(x, 'end') && (
+                        <MiniCalendar
                           value={x.end}
                           min={x.start}
-                          onClick={(e) => e.stopPropagation()}
-                          onFocus={(e) => {
-                            try {
-                              (e.target as HTMLInputElement).showPicker?.();
-                            } catch {
-                              /* navegador sin soporte */
-                            }
+                          onChange={(newDate) => {
+                            setEnd(x, newDate);
+                            closeEdit();
                           }}
-                          onChange={(e) => setEnd(x, e.target.value)}
-                          onBlur={closeEdit}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') e.currentTarget.blur();
-                            if (e.key === 'Escape') closeEdit();
-                          }}
+                          onClose={closeEdit}
+                          align="right"
                         />
-                      ) : (
-                        <span className="cell-text">{formatDate(x.end)}</span>
                       )}
                     </div>
                   )}
