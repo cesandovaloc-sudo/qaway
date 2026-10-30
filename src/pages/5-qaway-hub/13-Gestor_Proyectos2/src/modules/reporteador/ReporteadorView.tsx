@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import './reporteador.css';
+import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import {
   Activity, ArrowLeft, BarChart3, Bell, CalendarDays, Check, CheckCircle2, ChevronDown, ChevronRight,
   Clock3, Download, Ellipsis, ExternalLink, FileCheck2, FileText, Filter, Flag, FolderKanban,
@@ -272,10 +273,25 @@ function RoundedDropdown({
   );
 }
 
+const REPORTEADOR_STATUS = [
+  { value: 'Cumple', label: 'Cumple' },
+  { value: 'En proceso', label: 'En proceso' },
+  { value: 'Pendiente', label: 'Pendiente' },
+];
+
+const REPORTEADOR_COLUMNS: ColumnDef<Milestone>[] = [
+  { id: 'name', label: 'Hito / Subproceso', type: 'text', accessor: (m) => `${m.id} ${m.name} ${m.description}` },
+  { id: 'dates', label: 'Periodo', type: 'text', accessor: (m) => m.dates },
+  { id: 'progress', label: 'Avance', type: 'percent', accessor: (m) => m.progress },
+  { id: 'status', label: 'Estado', type: 'processState', accessor: (m) => m.status, options: REPORTEADOR_STATUS },
+  { id: 'presentation', label: 'Formato de reporte', type: 'select', accessor: (m) => m.presentation },
+];
+
 export default function ReporteadorView({ onActions }: { onActions?: (h: ReportBinds) => void }) {
   const [viewMode, setViewMode] = useState<'overview' | 'hito'>('overview');
   const [selectedHitoId, setSelectedHitoId] = useState<string>('1.6');
   const [milestones] = useState<Milestone[]>(initialMilestones);
+  const engine = useTableEngine<Milestone>({ tableId: 'reporteador-hitos', columns: REPORTEADOR_COLUMNS, rows: milestones });
   const [expanded, setExpanded] = useState<string[]>(['1.6', '1.6.1', '1.6.2']);
   const [search, setSearch] = useState('');
   const [regionFilter, setRegionFilter] = useState('Región Junín (13 UGEL)');
@@ -301,7 +317,7 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
 
   const selectedMilestone = milestones.find((m) => m.id === selectedHitoId) || milestones[1];
 
-  const filteredMilestones = useMemo(
+  const filteredMilestonesBase = useMemo(
     () =>
       milestones.filter(
         (m) =>
@@ -310,6 +326,11 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
           (typeFilter === 'Todos' || m.presentation === typeFilter)
       ),
     [milestones, search, statusFilter, typeFilter]
+  );
+
+  const filteredMilestones = useMemo(
+    () => engine.apply(filteredMilestonesBase),
+    [engine.apply, filteredMilestonesBase]
   );
 
   const toggleExpand = (id: string) => {
@@ -619,14 +640,17 @@ export default function ReporteadorView({ onActions }: { onActions?: (h: ReportB
               </div>
 
               <div className="table-scroll">
+                <TableEngineStatus engine={engine} />
                 <table>
                   <thead>
                     <tr>
-                      <th style={{ paddingLeft: '24px' }}>Hito / Subproceso</th>
-                      <th>Periodo</th>
-                      <th>Avance</th>
-                      <th>Estado</th>
-                      <th>Formato de reporte</th>
+                      <th style={{ paddingLeft: '24px' }}>
+                        <ColumnHeader engine={engine} columnId="name" label="Hito / Subproceso" />
+                      </th>
+                      <th><ColumnHeader engine={engine} columnId="dates" label="Periodo" /></th>
+                      <th><ColumnHeader engine={engine} columnId="progress" label="Avance" /></th>
+                      <th><ColumnHeader engine={engine} columnId="status" label="Estado" /></th>
+                      <th><ColumnHeader engine={engine} columnId="presentation" label="Formato de reporte" /></th>
                       <th>Acción</th>
                     </tr>
                   </thead>

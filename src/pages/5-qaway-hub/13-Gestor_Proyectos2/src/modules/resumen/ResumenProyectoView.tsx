@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import './resumen.css';
+import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import {
   Activity, AlertTriangle, ArrowRight, Bell, Building2, Calendar, Check,
   ChevronDown, ChevronRight, Download, FileText, Filter, Plus, RefreshCw, Search,
@@ -36,6 +37,19 @@ const PHASES = [
   { nombre: 'DEI — Validación Nivel Inicial', avance: 23, inicio: 34, fin: 66, estado: 'red' },
 ];
 
+const RESUMEN_ESTADOS = [
+  { value: 'proceso', label: 'En proceso' },
+  { value: 'incumple', label: 'No cumple' },
+  { value: 'cumple', label: 'Cumple' },
+];
+
+const RESUMEN_COLUMNS: ColumnDef<(typeof DEMO_UGEL)[0]>[] = [
+  { id: 'nombre', label: 'UGEL', type: 'select', accessor: (r) => r.nombre },
+  { id: 'estado', label: 'Estado', type: 'processState', accessor: (r) => r.estado, options: RESUMEN_ESTADOS },
+  { id: 'avance', label: 'Avance', type: 'percent', accessor: (r) => r.avance },
+  { id: 'hito', label: 'Próximo hito', type: 'text', accessor: (r) => r.hito },
+];
+
 export default function ResumenProyectoView({
   onActions,
   userRole = 'gestor',
@@ -45,6 +59,7 @@ export default function ResumenProyectoView({
   userRole?: 'gestor' | 'coordinador';
   onOpenCreateProject?: () => void;
 }) {
+  const engine = useTableEngine<(typeof DEMO_UGEL)[0]>({ tableId: 'resumen-ugel', columns: RESUMEN_COLUMNS, rows: DEMO_UGEL });
   const [fase, setFase] = useState('Todas');
   const [ugel, setUgel] = useState('Todas');
   const [periodo, setPeriodo] = useState('01/10/2026 – 15/10/2026');
@@ -59,14 +74,15 @@ export default function ResumenProyectoView({
   };
 
   const rows = useMemo(() => {
-    return DEMO_UGEL.filter((row) => {
+    const base = DEMO_UGEL.filter((row) => {
       const matchesUgel = ugel === 'Todas' || row.nombre === ugel;
       const matchesSearch = row.nombre.toLowerCase().includes(busqueda.toLowerCase());
       const matchesStatus = filtroEstado === 'todos' || row.estado === filtroEstado;
       const matchesPhase = fase === 'Todas' || (fase === 'Fase 1' ? row.fase1 : fase === 'Fase 2' ? row.fase2 : row.dei);
       return matchesUgel && matchesSearch && matchesStatus && matchesPhase;
     });
-  }, [ugel, busqueda, filtroEstado, fase]);
+    return engine.apply(base);
+  }, [ugel, busqueda, filtroEstado, fase, engine.apply]);
 
   const total = DEMO_UGEL.length;
   const cumple = DEMO_UGEL.filter((x) => x.estado === 'cumple').length;
@@ -360,13 +376,14 @@ export default function ResumenProyectoView({
             </div>
 
             <div style={{ overflowX: 'auto' }}>
+              <TableEngineStatus engine={engine} />
               <table>
                 <thead>
                   <tr>
-                    <th>UGEL</th>
-                    <th>Estado</th>
-                    <th>Avance</th>
-                    <th>Próximo hito</th>
+                    <th><ColumnHeader engine={engine} columnId="nombre" label="UGEL" /></th>
+                    <th><ColumnHeader engine={engine} columnId="estado" label="Estado" /></th>
+                    <th><ColumnHeader engine={engine} columnId="avance" label="Avance" /></th>
+                    <th><ColumnHeader engine={engine} columnId="hito" label="Próximo hito" /></th>
                   </tr>
                 </thead>
                 <tbody>

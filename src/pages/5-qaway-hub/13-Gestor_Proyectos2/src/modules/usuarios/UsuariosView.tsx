@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import './usuarios.css';
+import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import {
   Bell, BriefcaseBusiness, Building2, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleHelp, ContactRound, Copy, Download, History, Mail, MapPin, MoreVertical,
@@ -66,10 +67,23 @@ const tabs: { label: string; type?: UserType }[] = [
   { label: 'Equipo UGEL', type: 'Equipo UGEL' },
 ];
 
+const USER_STATUS_FLOW: UserStatus[] = ['Activo', 'Pendiente', 'Inactivo'];
+const USER_TYPES: UserType[] = ['Equipo interno', 'Gestor', 'Coordinador', 'Equipo UGEL'];
+
+const USER_COLUMNS: ColumnDef<Person>[] = [
+  { id: 'user', label: 'Usuario', type: 'person', accessor: (p) => `${p.name} ${p.email}` },
+  { id: 'role', label: 'Cargo / rol', type: 'text', accessor: (p) => p.role },
+  { id: 'type', label: 'Tipo de usuario', type: 'select', accessor: (p) => p.type, options: USER_TYPES.map((t) => ({ value: t, label: t })) },
+  { id: 'org', label: 'DRE / UGEL / Área', type: 'select', accessor: (p) => p.org },
+  { id: 'status', label: 'Estado', type: 'processState', accessor: (p) => p.status, options: USER_STATUS_FLOW.map((s) => ({ value: s, label: s })) },
+  { id: 'lastAccess', label: 'Último acceso', type: 'text', accessor: (p) => p.lastAccess },
+];
+
 export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds) => void }) {
   const [currentMode, setCurrentMode] = useState<'directorio' | 'organigrama'>('directorio');
   const [organigramaTipo, setOrganigramaTipo] = useState<'tradicional' | 'matricial' | 'territorial' | 'circular'>('tradicional');
   const [people, setPeople] = useState<Person[]>(initialPeople);
+  const engine = useTableEngine<Person>({ tableId: 'usuarios-directorio', columns: USER_COLUMNS, rows: people });
   const [selectedId, setSelectedId] = useState<number | null>(1);
   const [activeTab, setActiveTab] = useState('Todos');
   const [query, setQuery] = useState('');
@@ -115,8 +129,9 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
   );
 
   const pageSize = 8;
-  const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const shown = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const tableItems = useMemo(() => engine.apply(filtered), [engine.apply, filtered]);
+  const pages = Math.max(1, Math.ceil(tableItems.length / pageSize));
+  const shown = tableItems.slice((page - 1) * pageSize, page * pageSize);
 
   const count = (s?: UserStatus) => people.filter((p) => !s || p.status === s).length;
   const countType = (t?: UserType) => people.filter((p) => !t || p.type === t).length;
@@ -127,6 +142,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
     setStatusFilter('Todos');
     setOrgFilter('Todas');
     setActiveTab('Todos');
+    engine.clearAllFilters();
     setPage(1);
   };
 
@@ -477,18 +493,19 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
           </div>
 
           <div className="table-wrap">
+            <TableEngineStatus engine={engine} />
             <table>
               <thead>
                 <tr>
                   <th style={{ width: '40px', paddingLeft: '20px' }}>
                     <input type="checkbox" aria-label="Seleccionar todos" />
                   </th>
-                  <th>Usuario</th>
-                  <th>Cargo / rol</th>
-                  <th>Tipo de usuario</th>
-                  <th>DRE / UGEL / Área</th>
-                  <th>Estado</th>
-                  <th>Último acceso</th>
+                  <th><ColumnHeader engine={engine} columnId="user" label="Usuario" /></th>
+                  <th><ColumnHeader engine={engine} columnId="role" label="Cargo / rol" /></th>
+                  <th><ColumnHeader engine={engine} columnId="type" label="Tipo de usuario" /></th>
+                  <th><ColumnHeader engine={engine} columnId="org" label="DRE / UGEL / Área" /></th>
+                  <th><ColumnHeader engine={engine} columnId="status" label="Estado" /></th>
+                  <th><ColumnHeader engine={engine} columnId="lastAccess" label="Último acceso" /></th>
                   <th style={{ textAlign: 'center' }}>Acciones</th>
                 </tr>
               </thead>
@@ -565,7 +582,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
 
           <div className="table-footer">
             <span>
-              Mostrando {filtered.length ? (page - 1) * pageSize + 1 : 0}–{Math.min(page * pageSize, filtered.length)} de {filtered.length} usuarios
+              Mostrando {tableItems.length ? (page - 1) * pageSize + 1 : 0}–{Math.min(page * pageSize, tableItems.length)} de {tableItems.length} usuarios
             </span>
             <div className="pagination">
               <button disabled={page === 1} onClick={() => setPage((v) => Math.max(1, v - 1))}>

@@ -1,0 +1,539 @@
+/* Sistema universal de columnas — reutiliza los tokens visuales de Gawey (Slate/Navy, popover Excel del Gantt). */
+
+.te-th {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.te-th-label {
+  min-width: 0;
+}
+
+.te-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: all 0.12s ease;
+}
+
+.te-trigger:hover,
+.te-trigger:focus-visible,
+.te-trigger.te-active {
+  opacity: 1;
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.te-trigger.filtered,
+.th-action-btn.filtered {
+  background: #eff6ff;
+  color: #0066ff;
+  border-color: #bfdbfe;
+}
+
+.te-sorted {
+  color: #1e293b;
+}
+
+/* Un indicador de orden nunca se confunde con el de filtro: flecha slate vs. relleno azul */
+.te-sort-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 11px;
+  height: 11px;
+  padding: 0 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: 6px;
+  background: #334155;
+  color: #ffffff;
+  font-size: 8px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.te-sort-badge b {
+  font-weight: 700;
+}
+
+.th-actions:has(.te-active) {
+  opacity: 1;
+}
+
+/* Menú desplegable */
+.te-menu {
+  position: fixed;
+  z-index: 9999;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.16), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #334155;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  animation: teEntrance 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes teEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.te-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.te-sep {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 2px 0;
+}
+
+.te-row-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #334155;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+}
+
+.te-row-btn span {
+  flex: 1;
+}
+
+.te-row-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.te-row-btn.active {
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 700;
+}
+
+.te-combine {
+  padding: 4px 8px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Criterios de orden múltiples */
+.te-criteria {
+  padding: 4px 6px;
+  border: 1px dashed #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.te-crit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #334155;
+}
+
+.te-crit b {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #334155;
+  color: #fff;
+  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.te-crit-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.te-crit button {
+  display: inline-flex;
+  padding: 1px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.te-crit button:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.te-crit button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Búsqueda / campos */
+.te-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #64748b;
+  transition: border-color 0.12s ease;
+}
+
+.te-search:focus-within {
+  border-color: #0066ff;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.12);
+}
+
+.te-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.te-search button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.te-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #1e293b;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+
+.te-field:focus {
+  border-color: #0066ff;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.12);
+}
+
+/* Segmentado Incluir / Excluir */
+.te-seg {
+  display: flex;
+  padding: 2px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  gap: 2px;
+}
+
+.te-seg button {
+  flex: 1;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.te-seg button.on {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+}
+
+/* Chips rápidos */
+.te-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.te-chip {
+  padding: 3px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #475569;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.te-chip:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #0066ff;
+}
+
+.te-chip.on {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #0066ff;
+}
+
+.te-chip-all {
+  border-style: dashed;
+}
+
+/* Lista de valores */
+.te-selectall {
+  padding: 2px 4px 6px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.te-check-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.te-check-label small {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.te-list {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.te-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s ease;
+}
+
+.te-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.te-item.checked {
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 600;
+}
+
+.te-item-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.te-count {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.te-item.checked .te-count {
+  background: #bfdbfe;
+  color: #0066ff;
+}
+
+.te-empty {
+  padding: 12px 6px;
+  font-size: 11.5px;
+  color: #94a3b8;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Pie y botones */
+.te-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.te-foot-end {
+  justify-content: flex-end;
+  border-top: 0;
+  padding-top: 2px;
+}
+
+.te-selected-count {
+  font-size: 10.5px;
+  color: #94a3b8;
+}
+
+.te-foot-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.te-btn {
+  padding: 5px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #64748b;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.te-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.te-btn-primary {
+  padding: 5px 14px;
+  border: 0;
+  background: #0066ff;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 102, 255, 0.25);
+}
+
+.te-btn-primary:hover:not(:disabled) {
+  background: #0052cc;
+  color: #ffffff;
+}
+
+.te-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.te-clears {
+  gap: 4px;
+}
+
+.te-clear {
+  padding: 5px 8px;
+  border: 1px dashed #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #ef4444;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s ease;
+}
+
+.te-clear:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* Resumen discreto (solo existe cuando hay filtros u orden activos) */
+.te-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #475569;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.te-status button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0066ff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.te-status button:hover {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .te-menu {
+    animation: none;
+  }
+}

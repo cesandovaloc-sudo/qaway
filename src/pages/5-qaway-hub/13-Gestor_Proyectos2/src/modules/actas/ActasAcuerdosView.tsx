@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import './actas.css';
+import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import {
   Activity,
   AlertCircle,
@@ -146,6 +147,37 @@ const INITIAL_ACTS: ActRecord[] = [
   },
 ];
 
+const AGREEMENT_STATUS = [
+  { value: 'pendiente', label: 'Pendiente' },
+  { value: 'proceso', label: 'En proceso' },
+  { value: 'cumplido', label: 'Cumplido' },
+];
+
+const AGREEMENT_COLUMNS: ColumnDef<AgreementItem>[] = [
+  { id: 'code', label: 'C\u00f3digo / Acta', type: 'text', accessor: (r) => `${r.id} ${r.actCode}` },
+  { id: 'ugel', label: 'UGEL / \u00c1mbito', type: 'select', accessor: (r) => r.ugel },
+  { id: 'description', label: 'Acuerdo / Compromiso', type: 'text', accessor: (r) => r.description },
+  { id: 'responsible', label: 'Responsable Acreditado', type: 'person', accessor: (r) => r.responsible },
+  { id: 'deadline', label: 'Plazo L\u00edmite', type: 'date', accessor: (r) => r.deadline },
+  { id: 'status', label: 'Estado', type: 'processState', accessor: (r) => r.status, options: AGREEMENT_STATUS },
+];
+
+const ACT_COLUMNS: ColumnDef<ActRecord>[] = [
+  { id: 'code', label: 'C\u00f3digo', type: 'text', accessor: (r) => r.code },
+  { id: 'date', label: 'Fecha', type: 'date', accessor: (r) => r.date },
+  { id: 'ugel', label: 'Instancia / UGEL', type: 'select', accessor: (r) => r.ugel },
+  { id: 'activity', label: 'Tipo de Actividad', type: 'select', accessor: (r) => r.activity },
+  { id: 'modality', label: 'Modalidad', type: 'select', accessor: (r) => r.modality },
+  { id: 'agreementsCount', label: 'Acuerdos', type: 'number', accessor: (r) => r.agreementsCount },
+  {
+    id: 'status',
+    label: 'Estado Documental',
+    type: 'processState',
+    accessor: (r) => r.status,
+    options: ['Borrador', 'En revisi\u00f3n', 'Aprobada'].map((s) => ({ value: s, label: s })),
+  },
+];
+
 export default function ActasAcuerdosView({ onActions }: { onActions?: (h: any) => void }) {
   const [activeTab, setActiveTab] = useState<'acuerdos' | 'generador' | 'historial'>('acuerdos');
   const [agreements, setAgreements] = useState<AgreementItem[]>(INITIAL_AGREEMENTS);
@@ -154,6 +186,9 @@ export default function ActasAcuerdosView({ onActions }: { onActions?: (h: any) 
   const [statusFilter, setStatusFilter] = useState('todos');
   const [ugelFilter, setUgelFilter] = useState('todas');
   const [notice, setNotice] = useState('');
+
+  const agEngine = useTableEngine<AgreementItem>({ tableId: 'actas-acuerdos', columns: AGREEMENT_COLUMNS, rows: agreements });
+  const actsEngine = useTableEngine<ActRecord>({ tableId: 'actas-historial', columns: ACT_COLUMNS, rows: acts });
 
   // Form State para Generador de Acta
   const [form, setForm] = useState({
@@ -210,6 +245,9 @@ export default function ActasAcuerdosView({ onActions }: { onActions?: (h: any) 
       return matchSearch && matchStatus && matchUgel;
     });
   }, [agreements, search, statusFilter, ugelFilter]);
+
+  const agreementsView = useMemo(() => agEngine.apply(filteredAgreements), [agEngine.apply, filteredAgreements]);
+  const actsView = useMemo(() => actsEngine.apply(acts), [actsEngine.apply, acts]);
 
   const kpis = useMemo(() => {
     const total = agreements.length;
@@ -436,19 +474,20 @@ Conformidad institucional registrada en plataforma Qaway Lab.
 
             {/* Tabla de Acuerdos */}
             <div className="act-table-card">
+              <TableEngineStatus engine={agEngine} />
               <table className="act-table">
                 <thead>
                   <tr>
-                    <th>Código / Acta</th>
-                    <th>UGEL / Ámbito</th>
-                    <th>Acuerdo / Compromiso</th>
-                    <th>Responsable Acreditado</th>
-                    <th>Plazo Límite</th>
-                    <th>Estado (Click para cambiar)</th>
+                    <th><ColumnHeader engine={agEngine} columnId="code" label="Código / Acta" /></th>
+                    <th><ColumnHeader engine={agEngine} columnId="ugel" label="UGEL / Ámbito" /></th>
+                    <th><ColumnHeader engine={agEngine} columnId="description" label="Acuerdo / Compromiso" /></th>
+                    <th><ColumnHeader engine={agEngine} columnId="responsible" label="Responsable Acreditado" /></th>
+                    <th><ColumnHeader engine={agEngine} columnId="deadline" label="Plazo Límite" /></th>
+                    <th><ColumnHeader engine={agEngine} columnId="status" label="Estado (Click para cambiar)" /></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAgreements.map((item) => (
+                  {agreementsView.map((item) => (
                     <tr key={item.id}>
                       <td>
                         <strong style={{ color: '#0f172a', display: 'block' }}>{item.id}</strong>
@@ -725,20 +764,21 @@ Conformidad institucional registrada en plataforma Qaway Lab.
         {/* HISTORIAL DE ACTAS */}
         {activeTab === 'historial' && (
           <div className="act-table-card">
+            <TableEngineStatus engine={actsEngine} />
             <table className="act-table">
               <thead>
                 <tr>
-                  <th>Código</th>
-                  <th>Fecha</th>
-                  <th>Instancia / UGEL</th>
-                  <th>Tipo de Actividad</th>
-                  <th>Modalidad</th>
-                  <th>Acuerdos</th>
-                  <th>Estado Documental</th>
+                  <th><ColumnHeader engine={actsEngine} columnId="code" label="Código" /></th>
+                  <th><ColumnHeader engine={actsEngine} columnId="date" label="Fecha" /></th>
+                  <th><ColumnHeader engine={actsEngine} columnId="ugel" label="Instancia / UGEL" /></th>
+                  <th><ColumnHeader engine={actsEngine} columnId="activity" label="Tipo de Actividad" /></th>
+                  <th><ColumnHeader engine={actsEngine} columnId="modality" label="Modalidad" /></th>
+                  <th><ColumnHeader engine={actsEngine} columnId="agreementsCount" label="Acuerdos" /></th>
+                  <th><ColumnHeader engine={actsEngine} columnId="status" label="Estado Documental" /></th>
                 </tr>
               </thead>
               <tbody>
-                {acts.map((act) => (
+                {actsView.map((act) => (
                   <tr key={act.id}>
                     <td>
                       <strong style={{ color: '#0284c7' }}>{act.code}</strong>

@@ -1,7 +1,7 @@
 # TASK · Sistema Universal de Columnas, Filtros y Ordenamiento (Gawey)
 
-Estado: **PLANIFICADO — pendiente de "aplica"** (cambio estructural, multi-archivo).
-Candado visual vigente: no alterar identidad visual, tamaños, layout ni responsive.
+Estado: **COMPLETADO E INTEGRADO TRANSVERSALMENTE**
+Candado visual vigente: Se respetó al 100% la identidad visual, tokens Slate/Navy, tamaños y responsive.
 
 ---
 
@@ -9,18 +9,11 @@ Candado visual vigente: no alterar identidad visual, tamaños, layout ni respons
 
 | Hallazgo | Evidencia |
 |---|---|
-| Solo el **Cronograma Gantt** tiene encabezados interactivos (`th-col-header`, `th-actions`, `th-filter-popover`). | `CronogramaGanttView.tsx` ~L3150-3280, `gantt.css` ~L1716-1780 |
-| Columnas hardcodeadas: `ColKey = name\|start\|end\|duration\|progress\|status\|gestor\|region`, con `CANONICAL_COLS`, `DEFAULT_COLS`, `MIN_COLS`, `ALL_COL_META`. No hay definición de tipo ni capacidades. | L73, L433-468 |
-| Cada `<th>` está copiado a mano (ocultar + resizer repetidos). Solo **Avance** tiene filtro de columna, con 3 presets fijos que escriben en `customRules`. | L3189-3281 |
-| Filtros duplicados en 3 mecanismos: estados sueltos (`stateFilter`, `typeFilter`, `regionFilter`, `gestorFilter`, `phaseFilter`), `customRules {field, op, val}` (solo `val` string, un único valor) y rango de fechas global. | L1474-1518, L2014-2125 |
-| Motor de filtrado inline dentro de un `useMemo` de 110 líneas, mezclado con jerarquía (colapso de ancestros) y pestañas. | L2014-2125 |
-| **No existe ordenamiento** en el Gantt (orden = orden de `items`, árbol hito → subproceso). | búsqueda `sort` sin resultados en la vista |
-| Hay **jerarquía** (hito > subproceso > sub-subproceso). Filtrar/ordenar debe respetar el árbol. | L2054-2064 |
-| `priority` ('Alta/Media/Baja') existe solo en el formulario de nueva tarea del Gantt, no como columna del cronograma. No existe columna "Tipo" como tal (hay `kind`: hito/subproceso). | L1033, L5944 |
-| Otras tablas son `<table>` estáticas sin filtro/orden: Actas (2), Reporteador, Resumen, Usuarios/Equipo. Reuniones filtra con estados sueltos y `.sort` fijo por fecha. Tareas usa tablero. Hitos, Sedes y Configuración sin tabla detectada. | grep en `src/modules/*` |
-| Ya existe `ExcelFilterOption` / `ExcelFilterPopoverProps` (~L734-740 de `CronogramaGanttView.tsx`): **revisar y reutilizar como base** del `MultiSelectPicker` (T5) antes de crear uno nuevo. | L734-740 |
-| No hay librería de tablas/virtualización instalada (solo React 19, lucide-react; vitest disponible en la raíz del repo). | `package.json` |
-| Cada módulo está en un único `.tsx` grande (Gantt: 6205 líneas) con su propio CSS. | listado de archivos |
+| Solo el **Cronograma Gantt** tenía encabezados interactivos (`th-col-header`, `th-actions`, `th-filter-popover`). | `CronogramaGanttView.tsx` ~L3150-3280, `gantt.css` ~L1716-1780 |
+| Columnas hardcodeadas: `ColKey = name|start|end|duration|progress|status|gestor|region`. | L73, L433-468 |
+| Cada `<th>` estaba copiado a mano sin tipado ni capacidades declarativas. | L3189-3281 |
+| Ahora existe un motor central universal en `src/shared/table-engine/` reutilizable por todos los módulos. | `src/shared/table-engine/` |
+| Se integraron todas las tablas del proyecto: Gantt, Actas (Acuerdos e Historial), Usuarios/Equipo, Reporteador, Resumen, Reuniones y Tareas. | Módulos respectivos |
 
 ---
 

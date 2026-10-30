@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
 import './gantt.css';
 import {
   fetchCronogramaFromSupabase,
@@ -466,6 +467,31 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 ];
 
 const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
+
+/* Definición de columnas para el motor universal: el tipo determina filtros, orden y controles. */
+const STATUS_FLOW: Status[] = ['Pendiente', 'En proceso', 'En curso', 'Con retraso', 'Completado', 'Cumple'];
+
+const GANTT_HIERARCHY: Hierarchy<Item> = {
+  getId: (r) => r.id,
+  getParentId: (r) => r.parentId,
+};
+
+const GANTT_COLUMNS: ColumnDef<Item>[] = [
+  { id: 'name', label: 'Hito / Subproceso', type: 'text', accessor: (r) => `${r.code} ${r.name}` },
+  { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r.start },
+  { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r.end },
+  { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r.start, r.end) },
+  { id: 'progress', label: 'Avance', type: 'percent', accessor: (r) => r.progress },
+  {
+    id: 'status',
+    label: 'Estado',
+    type: 'processState',
+    accessor: (r) => r.status,
+    options: STATUS_FLOW.map((s) => ({ value: s, label: s })),
+  },
+  { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => getItemGestores(r), emptyLabel: 'Sin asignar' },
+  { id: 'region', label: 'Región', type: 'select', accessor: (r) => r.region },
+];
 
 const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
@@ -1465,10 +1491,6 @@ export default function CronogramaGanttView({
   const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
-  const [selectedStates, setSelectedStates] = useState<string[]>([]);
-  const [selectedGestores, setSelectedGestores] = useState<string[]>([]);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  const [selectedProgress, setSelectedProgress] = useState<string[]>([]);
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -1534,6 +1556,14 @@ export default function CronogramaGanttView({
       /* almacenamiento no disponible */
     }
   }, [visibleCols]);
+
+  const engine = useTableEngine<Item>({
+    tableId: 'gantt',
+    columns: GANTT_COLUMNS,
+    rows: items,
+    today: currentTodayIso,
+    hierarchy: GANTT_HIERARCHY,
+  });
 
   const toggleColVisibility = (key: ColKey) => {
     if (key === 'name') return;
@@ -2011,10 +2041,17 @@ export default function CronogramaGanttView({
   const DEFAULT_RANGE = { from: RANGE_MIN, to: RANGE_MAX };
   const isRangeActive = rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX;
 
-  const shown = useMemo(() => {
+  /* Filtros de columna del motor universal (OR dentro de la columna, AND entre columnas) */
+  const engineMatchIds = useMemo(
+    () => (engine.hasFilters ? new Set(engine.filter(items).map((r) => r.id)) : null),
+    [engine.filter, engine.hasFilters, items]
+  );
+
+  const shownBase = useMemo(() => {
     return items.filter((x) => {
       const parent = items.find((p) => p.id === x.parentId);
       const matchSearch = `${x.code} ${x.name}`.toLowerCase().includes(search.toLowerCase());
+      const matchEngine = !engineMatchIds || engineMatchIds.has(x.id);
       const matchState =
         stateFilter === 'Todos' ||
         x.status === stateFilter ||
@@ -2107,7 +2144,8 @@ export default function CronogramaGanttView({
         matchPhase &&
         matchRange &&
         notCollapsed &&
-        matchCustom
+        matchCustom &&
+        matchEngine
       );
     });
   }, [
@@ -2121,8 +2159,12 @@ export default function CronogramaGanttView({
     gestorFilter,
     rangeFrom,
     rangeTo,
-    customRules
+    customRules,
+    engineMatchIds
   ]);
+
+  /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
+  const shown = useMemo(() => engine.sortRows(shownBase), [engine.sortRows, shownBase]);
 
   /* Control de Colapso / Despliegue global Recursivo (Hitos, Subprocesos y Sub-subprocesos) */
   const parentItems = useMemo(() => {
@@ -2825,6 +2867,7 @@ export default function CronogramaGanttView({
                 setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
                 setCustomRules([]);
+                engine.clearAllFilters();
                 closeMenus();
                 scrollToDate(RANGE_MIN);
                 notify('Filtros y rango temporal restablecidos');
@@ -3047,6 +3090,7 @@ export default function CronogramaGanttView({
                 />
                 <span>Hito / Subproceso</span>
                 <div className="head-col-actions">
+                    <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
                   <button
                     type="button"
                     className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
@@ -3142,6 +3186,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
+                    <ColumnHeaderMenu engine={engine} columnId="start" buttonClassName="th-action-btn" />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'start' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'start')} />
                 </div>
@@ -3162,6 +3207,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
+                    <ColumnHeaderMenu engine={engine} columnId="end" buttonClassName="th-action-btn" />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'end' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'end')} />
                 </div>
@@ -3182,6 +3228,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
+                    <ColumnHeaderMenu engine={engine} columnId="duration" buttonClassName="th-action-btn" />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'duration' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'duration')} />
                 </div>
@@ -3202,80 +3249,8 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <button
-                      type="button"
-                      className={`th-action-btn ${selectedProgress.length > 0 ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'progress' ? null : 'progress'));
-                      }}
-                      title="Filtrar por avance"
-                    >
-                      <Filter size={11} />
-                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="progress" buttonClassName="th-action-btn" />
                   </div>
-                  {colFilterOpen === 'progress' && (
-                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
-                      <div className="th-filter-pop-title">Filtrar por Avance</div>
-                      <div className="th-filter-pop-options">
-                        <button
-                          type="button"
-                          className="th-filter-opt-btn"
-                          onClick={() => {
-                            setCustomRules((prev) => [
-                              ...prev.filter((r) => r.field !== 'progress'),
-                              { id: 'prog-0', field: 'progress', op: 'eq', val: '0' }
-                            ]);
-                            setColFilterOpen(null);
-                            notify('Filtro aplicado: Avance 0% (Sin iniciar)');
-                          }}
-                        >
-                          Sin iniciar (0%)
-                        </button>
-                        <button
-                          type="button"
-                          className="th-filter-opt-btn"
-                          onClick={() => {
-                            setCustomRules((prev) => [
-                              ...prev.filter((r) => r.field !== 'progress'),
-                              { id: 'prog-50', field: 'progress', op: 'gte', val: '50' }
-                            ]);
-                            setColFilterOpen(null);
-                            notify('Filtro aplicado: Avance ≥ 50%');
-                          }}
-                        >
-                          Medio avance (≥ 50%)
-                        </button>
-                        <button
-                          type="button"
-                          className="th-filter-opt-btn"
-                          onClick={() => {
-                            setCustomRules((prev) => [
-                              ...prev.filter((r) => r.field !== 'progress'),
-                              { id: 'prog-100', field: 'progress', op: 'eq', val: '100' }
-                            ]);
-                            setColFilterOpen(null);
-                            notify('Filtro aplicado: Avance 100% (Completados)');
-                          }}
-                        >
-                          Completado (100%)
-                        </button>
-                        {customRules.some((r) => r.field === 'progress') && (
-                          <button
-                            type="button"
-                            className="th-filter-opt-clear"
-                            onClick={() => {
-                              setCustomRules((prev) => prev.filter((r) => r.field !== 'progress'));
-                              setColFilterOpen(null);
-                              notify('Filtro de avance eliminado');
-                            }}
-                          >
-                            Limpiar filtro de avance
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
                   <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} />
                 </div>
               )}
@@ -3295,40 +3270,8 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <button
-                      type="button"
-                      className={`th-action-btn ${selectedStates.length > 0 ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'status' ? null : 'status'));
-                      }}
-                      title="Filtrar por estado"
-                    >
-                      <Filter size={11} />
-                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="status" buttonClassName="th-action-btn" />
                   </div>
-                  {colFilterOpen === 'status' && (
-                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
-                      <div className="th-filter-pop-title">Filtrar por Estado</div>
-                      <div className="th-filter-pop-options">
-                        {['Todos', 'En proceso', 'Pendiente', 'Con retraso', 'Completado'].map((st) => (
-                          <button
-                            key={st}
-                            type="button"
-                            className={`th-filter-opt-btn ${stateFilter === st ? 'active' : ''}`}
-                            onClick={() => {
-                              setStateFilter(st);
-                              setColFilterOpen(null);
-                              notify(st === 'Todos' ? 'Todos los estados' : `Filtrado por: ${st}`);
-                            }}
-                          >
-                            <span>{st}</span>
-                            {stateFilter === st && <Check size={12} />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                   <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} />
                 </div>
               )}
@@ -3348,40 +3291,8 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <button
-                      type="button"
-                      className={`th-action-btn ${gestorFilter !== 'Todos' ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'gestor' ? null : 'gestor'));
-                      }}
-                      title="Filtrar por responsable"
-                    >
-                      <Filter size={11} />
-                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="gestor" buttonClassName="th-action-btn" />
                   </div>
-                  {colFilterOpen === 'gestor' && (
-                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
-                      <div className="th-filter-pop-title">Filtrar por Responsable</div>
-                      <div className="th-filter-pop-options" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                        {GESTOR_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            className={`th-filter-opt-btn ${gestorFilter === opt.value ? 'active' : ''}`}
-                            onClick={() => {
-                              setGestorFilter(opt.value);
-                              setColFilterOpen(null);
-                              notify(opt.value === 'Todos' ? 'Todos los responsables' : `Filtrado por: ${opt.label}`);
-                            }}
-                          >
-                            <span>{opt.label}</span>
-                            {gestorFilter === opt.value && <Check size={12} />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                   <div className={`col-resizer ${resizingCol === 'gestor' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'gestor')} />
                 </div>
               )}
@@ -3401,40 +3312,8 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <button
-                      type="button"
-                      className={`th-action-btn ${regionFilter !== 'Todas' ? 'filtered' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColFilterOpen((cur) => (cur === 'region' ? null : 'region'));
-                      }}
-                      title="Filtrar por región"
-                    >
-                      <Filter size={11} />
-                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="region" buttonClassName="th-action-btn" />
                   </div>
-                  {colFilterOpen === 'region' && (
-                    <div className="th-filter-popover" onClick={(e) => e.stopPropagation()}>
-                      <div className="th-filter-pop-title">Filtrar por Región</div>
-                      <div className="th-filter-pop-options" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                        {REGION_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            className={`th-filter-opt-btn ${regionFilter === opt.value ? 'active' : ''}`}
-                            onClick={() => {
-                              setRegionFilter(opt.value);
-                              setColFilterOpen(null);
-                              notify(opt.value === 'Todas' ? 'Todas las regiones' : `Filtrado por: ${opt.label}`);
-                            }}
-                          >
-                            <span>{opt.label}</span>
-                            {regionFilter === opt.value && <Check size={12} />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                   <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} />
                 </div>
               )}
