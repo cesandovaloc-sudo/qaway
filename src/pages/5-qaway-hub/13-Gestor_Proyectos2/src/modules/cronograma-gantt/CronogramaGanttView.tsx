@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock3,
+  CornerDownRight,
   Download,
   ExternalLink,
   Eye,
@@ -825,6 +826,24 @@ export default function CronogramaGanttView({
 
   const [selectedId, setSelectedId] = useState<string | null>('h1');
   const selected = items.find((x) => x.id === selectedId);
+  const [inlineMenuRowId, setInlineMenuRowId] = useState<string | null>(null);
+
+  const getItemDepth = (item: Item): number => {
+    let d = 0;
+    let curr = item.parentId;
+    while (curr) {
+      d++;
+      const p = items.find((it) => it.id === curr);
+      curr = p?.parentId;
+    }
+    return d;
+  };
+
+  useEffect(() => {
+    const handleDocClick = () => setInlineMenuRowId(null);
+    document.addEventListener('click', handleDocClick);
+    return () => document.removeEventListener('click', handleDocClick);
+  }, []);
 
   // Estados del editor y panel lateral (Drawer de Coordinador)
   const [drawerDraft, setDrawerDraft] = useState<Item | null>(null);
@@ -2022,9 +2041,18 @@ export default function CronogramaGanttView({
           const withExpanded = old.map((it) => (it.id === pId ? { ...it, expanded: true } : it));
           const parentIdx = withExpanded.findIndex((it) => it.id === pId);
           if (parentIdx >= 0) {
+            const isDescendant = (itemId: string, ancestorId: string): boolean => {
+              let curr = withExpanded.find((x) => x.id === itemId)?.parentId;
+              while (curr) {
+                if (curr === ancestorId) return true;
+                curr = withExpanded.find((x) => x.id === curr)?.parentId;
+              }
+              return false;
+            };
+
             let lastChildIdx = parentIdx;
             for (let idx = parentIdx + 1; idx < withExpanded.length; idx++) {
-              if (withExpanded[idx].parentId === pId) {
+              if (withExpanded[idx].parentId === pId || isDescendant(withExpanded[idx].id, pId)) {
                 lastChildIdx = idx;
               } else if (withExpanded[idx].kind === 'hito') {
                 break;
@@ -3326,6 +3354,10 @@ export default function CronogramaGanttView({
                     }}
                   >
                     <div className="name-cell">
+                    {/* Sangría proporcional según nivel de anidamiento (Sub-subprocesos) */}
+                    {getItemDepth(x) > 0 && (
+                      <span style={{ width: `${(getItemDepth(x) - (items.some((c) => c.parentId === x.id) ? 1 : 0)) * 18}px`, flexShrink: 0 }} />
+                    )}
                     {items.some((c) => c.parentId === x.id) ? (
                       <button
                         className="expand"
@@ -3379,7 +3411,13 @@ export default function CronogramaGanttView({
                           closeEdit();
                         }}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') e.currentTarget.blur();
+                          if (e.key === 'Enter') {
+                            update(x.id, { name: e.currentTarget.value.trim() || x.name });
+                            closeEdit();
+                            setTimeout(() => {
+                              add(x.kind, x.parentId, true);
+                            }, 50);
+                          }
                           if (e.key === 'Escape') closeEdit();
                         }}
                       />
@@ -3396,18 +3434,147 @@ export default function CronogramaGanttView({
                         {x.name}
                       </span>
                     )}
+
                     {!isEditing(x, 'name') && (
-                      <button
-                        type="button"
-                        className="quick-inline-add-btn"
-                        title={x.kind === 'hito' ? "Agregar subproceso a este hito" : "Agregar subproceso hermano"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          add('subproceso', x.kind === 'hito' ? x.id : x.parentId, true);
-                        }}
-                      >
-                        <Plus size={13} />
-                      </button>
+                      <div className="quick-row-actions">
+                        {x.kind === 'subproceso' ? (
+                          <>
+                            <button
+                              type="button"
+                              className="quick-inline-btn-pill"
+                              title="Crear subproceso hijo / sub-subproceso (nivel inferior)"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                add('subproceso', x.id, true);
+                              }}
+                            >
+                              <CornerDownRight size={12} style={{ color: '#0284c7' }} />
+                              <span>Sub-hijo</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="quick-inline-btn-pill"
+                              title="Crear fila al mismo nivel (hermano)"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                add('subproceso', x.parentId, true);
+                              }}
+                            >
+                              <Plus size={12} style={{ color: '#475569' }} />
+                              <span>Hermano</span>
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="quick-inline-btn-pill"
+                              title="Agregar subproceso a este hito"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                add('subproceso', x.id, true);
+                              }}
+                            >
+                              <Plus size={12} style={{ color: '#0284c7' }} />
+                              <span>Subproceso</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="quick-inline-btn-pill"
+                              title="Agregar nuevo hito rector abajo"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                add('hito', undefined, true);
+                              }}
+                            >
+                              <FolderPlus size={12} style={{ color: '#0f172a' }} />
+                              <span>Hito</span>
+                            </button>
+                          </>
+                        )}
+
+                        <button
+                          type="button"
+                          className="quick-inline-add-btn"
+                          title="Más opciones de creación desde esta fila"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInlineMenuRowId((cur) => (cur === x.id ? null : x.id));
+                          }}
+                        >
+                          <MoreHorizontal size={13} />
+                        </button>
+
+                        {inlineMenuRowId === x.id && (
+                          <div className="inline-row-menu" onClick={(e) => e.stopPropagation()}>
+                            <div className="inline-row-menu-title">
+                              Crear desde {x.code} {x.name}
+                            </div>
+                            {x.kind === 'subproceso' ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className="inline-row-menu-btn"
+                                  onClick={() => {
+                                    setInlineMenuRowId(null);
+                                    add('subproceso', x.id, true);
+                                  }}
+                                >
+                                  <CornerDownRight size={14} className="icon" />
+                                  <span>Subproceso hijo (nivel {x.code}.1)</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="inline-row-menu-btn"
+                                  onClick={() => {
+                                    setInlineMenuRowId(null);
+                                    add('subproceso', x.parentId, true);
+                                  }}
+                                >
+                                  <Plus size={14} className="icon" />
+                                  <span>Fila al mismo nivel (hermano)</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="inline-row-menu-btn"
+                                  onClick={() => {
+                                    setInlineMenuRowId(null);
+                                    add('hito', undefined, true);
+                                  }}
+                                >
+                                  <FolderPlus size={14} className="icon" />
+                                  <span>Nuevo Hito Rector</span>
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  className="inline-row-menu-btn"
+                                  onClick={() => {
+                                    setInlineMenuRowId(null);
+                                    add('subproceso', x.id, true);
+                                  }}
+                                >
+                                  <CornerDownRight size={14} className="icon" />
+                                  <span>Subproceso hijo</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="inline-row-menu-btn"
+                                  onClick={() => {
+                                    setInlineMenuRowId(null);
+                                    add('hito', undefined, true);
+                                  }}
+                                >
+                                  <FolderPlus size={14} className="icon" />
+                                  <span>Nuevo Hito Rector (abajo)</span>
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 
