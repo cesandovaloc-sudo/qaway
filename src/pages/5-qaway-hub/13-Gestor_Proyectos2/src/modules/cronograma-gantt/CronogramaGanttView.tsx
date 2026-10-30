@@ -2552,7 +2552,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
-                  selectedRegions.length > 0 ? 'filtered' : ''
+                  regionFilter !== 'Todas' ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('region')}
               >
@@ -2590,7 +2590,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`filter-card-btn ${activeMenu === 'gestor' ? 'active' : ''} ${
-                  selectedGestores.length > 0 ? 'filtered' : ''
+                  gestorFilter !== 'Todos' ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('gestor')}
               >
