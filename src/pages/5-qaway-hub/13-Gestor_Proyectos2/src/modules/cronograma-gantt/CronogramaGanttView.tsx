@@ -37,6 +37,7 @@ import {
   FileText,
   FileUp,
   Filter,
+  Flag,
   Folder,
   FolderMinus,
   FolderOpen,
@@ -486,7 +487,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 ];
 
 const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
-const LISTA_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'code', 'kind', 'parent', 'actions'];
+const LISTA_VISIBLE_COLS: ColKey[] = ['name', 'code', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
 const getDays = (a?: string, b?: string) => {
   if (!a || !b) return 1;
   const da = new Date(a).getTime();
@@ -3349,6 +3350,70 @@ export default function CronogramaGanttView({
                 <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} />
               </div>
 
+
+              {visibleCols.includes('code') && (
+                <div className="th-col-header">
+                  <span className="th-label">Código</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('code');
+                        notify('Columna "Código" ocultada.');
+                      }}
+                      title="Ocultar columna Código"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="code" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} />
+                </div>
+              )}
+              {visibleCols.includes('kind') && (
+                <div className="th-col-header">
+                  <span className="th-label">Tipo</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('kind');
+                        notify('Columna "Tipo" ocultada.');
+                      }}
+                      title="Ocultar columna Tipo"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="kind" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} />
+                </div>
+              )}
+              {visibleCols.includes('parent') && (
+                <div className="th-col-header">
+                  <span className="th-label">Hito padre</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('parent');
+                        notify('Columna "Hito padre" ocultada.');
+                      }}
+                      title="Ocultar columna Hito padre"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="parent" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} />
+                </div>
+              )}
               {visibleCols.includes('start') && (
                 <div className="th-col-header">
                   <span className="th-label">Inicio</span>
@@ -3496,73 +3561,6 @@ export default function CronogramaGanttView({
                   <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} />
                 </div>
               )}
-
-              {visibleCols.includes('code') && (
-                <div className="th-col-header">
-                  <span className="th-label">Código</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('code');
-                        notify('Columna "Código" ocultada.');
-                      }}
-                      title="Ocultar columna Código"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    <ColumnHeaderMenu engine={engine} columnId="code" buttonClassName="th-action-btn" />
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} />
-                </div>
-              )}
-
-              {visibleCols.includes('kind') && (
-                <div className="th-col-header">
-                  <span className="th-label">Tipo</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('kind');
-                        notify('Columna "Tipo" ocultada.');
-                      }}
-                      title="Ocultar columna Tipo"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    <ColumnHeaderMenu engine={engine} columnId="kind" buttonClassName="th-action-btn" />
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} />
-                </div>
-              )}
-
-              {visibleCols.includes('parent') && (
-                <div className="th-col-header">
-                  <span className="th-label">Hito padre</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('parent');
-                        notify('Columna "Hito padre" ocultada.');
-                      }}
-                      title="Ocultar columna Hito padre"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    <ColumnHeaderMenu engine={engine} columnId="parent" buttonClassName="th-action-btn" />
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} />
-                </div>
-              )}
-
               {visibleCols.includes('actions') && (
                 <div className="th-col-header th-col-actions">
                   <span className="th-label">Acciones</span>
@@ -3878,6 +3876,35 @@ export default function CronogramaGanttView({
                     )}
                   </div>
 
+
+                  {/* ── Columna Código ── */}
+                  {visibleCols.includes('code') && (
+                    <div className="code-cell-col" title={x.code}>
+                      <span className="code-text-pill">{x.code}</span>
+                    </div>
+                  )}
+
+                  {/* ── Columna Tipo ── */}
+                  {visibleCols.includes('kind') && (
+                    <div className="kind-cell-col">
+                      <span className={`type-badge-pill ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
+                        {x.kind === 'hito' ? 'Hito' : 'Subproceso'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* ── Columna Hito padre ── */}
+                  {visibleCols.includes('parent') && (
+                    <div className="parent-cell-col" title={x.parentId ? (items.find(p => p.id === x.parentId)?.name ?? '—') : '—'}>
+                      {x.parentId ? (
+                        <span className="parent-text-pill">
+                          {items.find(p => p.id === x.parentId)?.code ?? ''} {items.find(p => p.id === x.parentId)?.name ?? '—'}
+                        </span>
+                      ) : (
+                        <span className="parent-none-dash">—</span>
+                      )}
+                    </div>
+                  )}
                   {visibleCols.includes('start') && (
                     <div
                       className="date editable"
@@ -4178,35 +4205,6 @@ export default function CronogramaGanttView({
                     </div>
                   )}
 
-                  {/* ── Columna Código ── */}
-                  {visibleCols.includes('code') && (
-                    <div className="code-cell-col" title={x.code}>
-                      <span className="code-text-pill">{x.code}</span>
-                    </div>
-                  )}
-
-                  {/* ── Columna Tipo ── */}
-                  {visibleCols.includes('kind') && (
-                    <div className="kind-cell-col">
-                      <span className={`type-badge-pill ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
-                        {x.kind === 'hito' ? 'Hito' : 'Subproceso'}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* ── Columna Hito padre ── */}
-                  {visibleCols.includes('parent') && (
-                    <div className="parent-cell-col" title={x.parentId ? (items.find(p => p.id === x.parentId)?.name ?? '—') : '—'}>
-                      {x.parentId ? (
-                        <span className="parent-text-pill">
-                          {items.find(p => p.id === x.parentId)?.code ?? ''} {items.find(p => p.id === x.parentId)?.name ?? '—'}
-                        </span>
-                      ) : (
-                        <span className="parent-none-dash">—</span>
-                      )}
-                    </div>
-                  )}
-
                   {/* ── Columna Acciones ── */}
                   {visibleCols.includes('actions') && (
                     <div
@@ -4226,6 +4224,14 @@ export default function CronogramaGanttView({
                       </button>
                     </div>
                   )}
+
+                  {/* ── Columna Código ── */}
+
+                  {/* ── Columna Tipo ── */}
+
+                  {/* ── Columna Hito padre ── */}
+
+                  {/* ── Columna Acciones ── */}
                 </div>
 
                 {viewMode === 'gantt' && (
