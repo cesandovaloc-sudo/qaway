@@ -826,7 +826,6 @@ export default function CronogramaGanttView({
 
   const [selectedId, setSelectedId] = useState<string | null>('h1');
   const selected = items.find((x) => x.id === selectedId);
-  const [inlineMenuRowId, setInlineMenuRowId] = useState<string | null>(null);
 
   const getItemDepth = (item: Item): number => {
     let d = 0;
@@ -838,12 +837,6 @@ export default function CronogramaGanttView({
     }
     return d;
   };
-
-  useEffect(() => {
-    const handleDocClick = () => setInlineMenuRowId(null);
-    document.addEventListener('click', handleDocClick);
-    return () => document.removeEventListener('click', handleDocClick);
-  }, []);
 
   // Estados del editor y panel lateral (Drawer de Coordinador)
   const [drawerDraft, setDrawerDraft] = useState<Item | null>(null);
@@ -3441,138 +3434,63 @@ export default function CronogramaGanttView({
                           <>
                             <button
                               type="button"
-                              className="quick-inline-btn-pill"
-                              title="Crear subproceso hijo / sub-subproceso (nivel inferior)"
+                              className="quick-inline-icon-btn"
+                              title={`Agregar subproceso hijo / anidado bajo ${x.code}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('subproceso', x.id, true);
                               }}
                             >
-                              <CornerDownRight size={12} style={{ color: '#0284c7' }} />
-                              <span>Sub-hijo</span>
+                              <CornerDownRight size={13} style={{ color: '#0284c7' }} />
                             </button>
                             <button
                               type="button"
-                              className="quick-inline-btn-pill"
-                              title="Crear fila al mismo nivel (hermano)"
+                              className="quick-inline-icon-btn"
+                              title="Agregar fila al mismo nivel (hermano)"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('subproceso', x.parentId, true);
                               }}
                             >
-                              <Plus size={12} style={{ color: '#475569' }} />
-                              <span>Hermano</span>
+                              <Plus size={13} style={{ color: '#475569' }} />
+                            </button>
+                            <button
+                              type="button"
+                              className="quick-inline-icon-btn"
+                              title="Agregar nuevo hito rector"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                add('hito', undefined, true);
+                              }}
+                            >
+                              <FolderPlus size={13} style={{ color: '#0f172a' }} />
                             </button>
                           </>
                         ) : (
                           <>
                             <button
                               type="button"
-                              className="quick-inline-btn-pill"
-                              title="Agregar subproceso a este hito"
+                              className="quick-inline-icon-btn"
+                              title={`Agregar subproceso a este hito (${x.code})`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('subproceso', x.id, true);
                               }}
                             >
-                              <Plus size={12} style={{ color: '#0284c7' }} />
-                              <span>Subproceso</span>
+                              <Plus size={13} style={{ color: '#0284c7' }} />
                             </button>
                             <button
                               type="button"
-                              className="quick-inline-btn-pill"
+                              className="quick-inline-icon-btn"
                               title="Agregar nuevo hito rector abajo"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('hito', undefined, true);
                               }}
                             >
-                              <FolderPlus size={12} style={{ color: '#0f172a' }} />
-                              <span>Hito</span>
+                              <FolderPlus size={13} style={{ color: '#0f172a' }} />
                             </button>
                           </>
-                        )}
-
-                        <button
-                          type="button"
-                          className="quick-inline-add-btn"
-                          title="Más opciones de creación desde esta fila"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setInlineMenuRowId((cur) => (cur === x.id ? null : x.id));
-                          }}
-                        >
-                          <MoreHorizontal size={13} />
-                        </button>
-
-                        {inlineMenuRowId === x.id && (
-                          <div className="inline-row-menu" onClick={(e) => e.stopPropagation()}>
-                            <div className="inline-row-menu-title">
-                              Crear desde {x.code} {x.name}
-                            </div>
-                            {x.kind === 'subproceso' ? (
-                              <>
-                                <button
-                                  type="button"
-                                  className="inline-row-menu-btn"
-                                  onClick={() => {
-                                    setInlineMenuRowId(null);
-                                    add('subproceso', x.id, true);
-                                  }}
-                                >
-                                  <CornerDownRight size={14} className="icon" />
-                                  <span>Subproceso hijo (nivel {x.code}.1)</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  className="inline-row-menu-btn"
-                                  onClick={() => {
-                                    setInlineMenuRowId(null);
-                                    add('subproceso', x.parentId, true);
-                                  }}
-                                >
-                                  <Plus size={14} className="icon" />
-                                  <span>Fila al mismo nivel (hermano)</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  className="inline-row-menu-btn"
-                                  onClick={() => {
-                                    setInlineMenuRowId(null);
-                                    add('hito', undefined, true);
-                                  }}
-                                >
-                                  <FolderPlus size={14} className="icon" />
-                                  <span>Nuevo Hito Rector</span>
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <button
-                                  type="button"
-                                  className="inline-row-menu-btn"
-                                  onClick={() => {
-                                    setInlineMenuRowId(null);
-                                    add('subproceso', x.id, true);
-                                  }}
-                                >
-                                  <CornerDownRight size={14} className="icon" />
-                                  <span>Subproceso hijo</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  className="inline-row-menu-btn"
-                                  onClick={() => {
-                                    setInlineMenuRowId(null);
-                                    add('hito', undefined, true);
-                                  }}
-                                >
-                                  <FolderPlus size={14} className="icon" />
-                                  <span>Nuevo Hito Rector (abajo)</span>
-                                </button>
-                              </>
-                            )}
-                          </div>
                         )}
                       </div>
                     )}
