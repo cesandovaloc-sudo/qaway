@@ -5,7 +5,7 @@ import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
   deleteCronogramaItemFromSupabase,
-  GanttItemData
+  type GanttItemData
 } from '../../services/gestorCronogramaService';
 import {
   AlertTriangle,
