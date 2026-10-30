@@ -4214,3 +4214,289 @@ body.gantt-resizing {
 .gantt-v2 .row.quick-add-row:hover .quick-add-text {
   color: #0066ff;
 }
+
+
+/* ==========================================================================
+   Mejoras Estándar Excel / Buildern: Colapsador derecho, Multiselección y Fullscreen
+   ========================================================================== */
+
+/* Posicionamiento del colapsador de panel al borde derecho de la columna principal */
+.gantt-v2 .name-head .panel-collapse-btn {
+  margin-left: auto !important;
+  margin-right: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Grupo de herramientas Buildern (Deshacer / Rehacer / Pantalla Completa) */
+.gantt-v2 .toolbar-buildern-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.gantt-v2 .toolbar-buildern-group .tool-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .toolbar-buildern-group .tool-action-btn:hover:not(:disabled) {
+  border-color: #94a3b8;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.gantt-v2 .toolbar-buildern-group .tool-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+}
+
+.gantt-v2 .toolbar-buildern-group .tool-action-btn.active {
+  border-color: #0066ff;
+  background: #eff6ff;
+  color: #0066ff;
+}
+
+/* Popover de Filtro Estilo Excel (Buscador reactivo + Multiselección) */
+.gantt-v2 .excel-filter-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 280;
+  min-width: 240px;
+  max-width: 280px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.16), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: afEntrance 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gantt-v2 .excel-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.gantt-v2 .excel-filter-head strong {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.gantt-v2 .excel-filter-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .excel-filter-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.gantt-v2 .excel-filter-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #64748b;
+  transition: border-color 0.12s ease;
+}
+
+.gantt-v2 .excel-filter-search:focus-within {
+  border-color: #0066ff;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.12);
+}
+
+.gantt-v2 .excel-filter-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.gantt-v2 .excel-filter-search button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.gantt-v2 .excel-filter-select-all {
+  padding: 2px 4px;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 6px;
+}
+
+.gantt-v2 .excel-filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.gantt-v2 .excel-filter-checkbox-label small {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.gantt-v2 .excel-filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.gantt-v2 .excel-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s ease;
+}
+
+.gantt-v2 .excel-filter-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.gantt-v2 .excel-filter-item.checked {
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 600;
+}
+
+.gantt-v2 .excel-filter-item-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-v2 .excel-filter-count {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.gantt-v2 .excel-filter-item.checked .excel-filter-count {
+  background: #bfdbfe;
+  color: #0066ff;
+}
+
+.gantt-v2 .excel-filter-empty {
+  padding: 12px 6px;
+  font-size: 11.5px;
+  color: #94a3b8;
+  text-align: center;
+  font-style: italic;
+}
+
+.gantt-v2 .excel-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.gantt-v2 .excel-btn-clear {
+  padding: 5px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .excel-btn-clear:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.gantt-v2 .excel-btn-apply {
+  padding: 5px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #0066ff;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 102, 255, 0.25);
+  transition: all 0.12s ease;
+}
+
+.gantt-v2 .excel-btn-apply:hover {
+  background: #0052cc;
+}
+
+/* Modo Pantalla Completa Expandido */
+.gantt-v2 .workspace.fullscreen-mode {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  z-index: 99999 !important;
+}

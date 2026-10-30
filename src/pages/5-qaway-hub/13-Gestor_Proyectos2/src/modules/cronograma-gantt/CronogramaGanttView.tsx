@@ -42,6 +42,8 @@ import {
   Layers3,
   Link2,
   MapPin,
+  Maximize2,
+  Minimize2,
   MoreHorizontal,
   Package,
   PanelRightOpen,
@@ -57,6 +59,8 @@ import {
   SlidersHorizontal,
   Target,
   Trash2,
+  Undo2,
+  Redo2,
   Upload,
   UserCheck,
   UserPlus,
@@ -724,6 +728,143 @@ const buildSegments = (zoom: string) => {
   return MONTHS.map((m, i) => ({ label: m.label, days: monthDays(m.start), key: `m${i}` }));
 };
 
+
+interface ExcelFilterOption {
+  value: string;
+  label: string;
+  count?: number;
+}
+
+interface ExcelFilterPopoverProps {
+  title: string;
+  placeholder?: string;
+  options: ExcelFilterOption[];
+  selectedValues: string[];
+  onApply: (selected: string[]) => void;
+  onClear: () => void;
+  onClose: () => void;
+}
+
+const ExcelFilterPopover: React.FC<ExcelFilterPopoverProps> = ({
+  title,
+  placeholder = 'Buscar...',
+  options,
+  selectedValues,
+  onApply,
+  onClear,
+  onClose,
+}) => {
+  const [query, setQuery] = useState('');
+  const [tempSelected, setTempSelected] = useState<string[]>(() => [...selectedValues]);
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return options;
+    const q = query.toLowerCase();
+    return options.filter((o) => o.label.toLowerCase().includes(q));
+  }, [options, query]);
+
+  const isAllSelected = filtered.length > 0 && filtered.every((o) => tempSelected.includes(o.value));
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      const filteredValues = new Set(filtered.map((o) => o.value));
+      setTempSelected((prev) => prev.filter((v) => !filteredValues.has(v)));
+    } else {
+      const currentSet = new Set(tempSelected);
+      filtered.forEach((o) => currentSet.add(o.value));
+      setTempSelected(Array.from(currentSet));
+    }
+  };
+
+  const toggleOption = (val: string) => {
+    setTempSelected((prev) =>
+      prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
+    );
+  };
+
+  return (
+    <div className="th-filter-popover excel-filter-popover" onClick={(e) => e.stopPropagation()}>
+      <div className="excel-filter-head">
+        <strong>{title}</strong>
+        <button type="button" className="excel-filter-close" onClick={onClose} title="Cerrar filtro">
+          <X size={13} />
+        </button>
+      </div>
+
+      <div className="excel-filter-search">
+        <Search size={13} />
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoFocus
+        />
+        {query && (
+          <button type="button" onClick={() => setQuery('')}>
+            <X size={12} />
+          </button>
+        )}
+      </div>
+
+      <div className="excel-filter-select-all">
+        <label className="excel-filter-checkbox-label">
+          <input
+            type="checkbox"
+            checked={isAllSelected}
+            onChange={toggleSelectAll}
+          />
+          <span>(Seleccionar todo)</span>
+          <small>({filtered.length})</small>
+        </label>
+      </div>
+
+      <div className="excel-filter-list">
+        {filtered.length === 0 ? (
+          <div className="excel-filter-empty">Sin resultados para "{query}"</div>
+        ) : (
+          filtered.map((opt) => {
+            const isChecked = tempSelected.includes(opt.value);
+            return (
+              <label key={opt.value} className={`excel-filter-item ${isChecked ? 'checked' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => toggleOption(opt.value)}
+                />
+                <span className="excel-filter-item-text">{opt.label}</span>
+                {opt.count !== undefined && <span className="excel-filter-count">{opt.count}</span>}
+              </label>
+            );
+          })
+        )}
+      </div>
+
+      <div className="excel-filter-actions">
+        <button
+          type="button"
+          className="excel-btn-clear"
+          onClick={() => {
+            setTempSelected([]);
+            onClear();
+          }}
+        >
+          Limpiar
+        </button>
+        <button
+          type="button"
+          className="excel-btn-apply"
+          onClick={() => {
+            onApply(tempSelected);
+          }}
+        >
+          Aplicar
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function CronogramaGanttView({
   onActions,
   onSwitchPerspective,
@@ -1319,6 +1460,13 @@ export default function CronogramaGanttView({
     window.open(blobUrl, '_blank');
   };
   const [history, setHistory] = useState<Item[][]>([]);
+  const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const [selectedGestores, setSelectedGestores] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [selectedProgress, setSelectedProgress] = useState<string[]>([]);
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -1433,12 +1581,13 @@ export default function CronogramaGanttView({
     onActions?.({ notify: (m: string) => notify(m) });
   }, [onActions]);
 
-  /* ---------- Historial de Deshacer (Undo / Retroceder) ---------- */
+  /* ---------- Historial de Deshacer y Rehacer (Buildern standard) ---------- */
   const commitChange = (nextOrUpdater: Item[] | ((prev: Item[]) => Item[])) => {
     setItems((prev) => {
       const next = typeof nextOrUpdater === 'function' ? nextOrUpdater(prev) : nextOrUpdater;
       if (JSON.stringify(prev) !== JSON.stringify(next)) {
         setHistory((h) => [prev, ...h].slice(0, 30));
+        setRedoHistory([]);
       }
       return next;
     });
@@ -1450,10 +1599,47 @@ export default function CronogramaGanttView({
       return;
     }
     const [previous, ...rest] = history;
+    setRedoHistory((r) => [items, ...r].slice(0, 30));
     setItems(previous);
     setHistory(rest);
     notify('Cambio deshecho con éxito');
   };
+
+  const handleRedo = () => {
+    if (redoHistory.length === 0) {
+      notify('No hay cambios posteriores para rehacer');
+      return;
+    }
+    const [next, ...rest] = redoHistory;
+    setHistory((h) => [items, ...h].slice(0, 30));
+    setItems(next);
+    setRedoHistory(rest);
+    notify('Cambio rehecho con éxito');
+  };
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      if (workspaceRef.current?.requestFullscreen) {
+        workspaceRef.current.requestFullscreen().catch(() => {});
+      }
+      setIsFullscreen(true);
+      notify('Modo pantalla completa activado');
+    } else {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+      notify('Modo pantalla completa desactivado');
+    }
+  };
+
+  useEffect(() => {
+    const onFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -2275,7 +2461,7 @@ export default function CronogramaGanttView({
         </section>
 
         {/* Workspace Central */}
-        <main className="workspace">
+        <main ref={workspaceRef} className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''}`}>
           {/* Tabs Superiores */}
           <nav className="tabs">
             {[
@@ -2317,7 +2503,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
-                  regionFilter !== 'Todas' ? 'filtered' : ''
+                  selectedRegions.length > 0 ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('region')}
               >
@@ -2355,7 +2541,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`filter-card-btn ${activeMenu === 'gestor' ? 'active' : ''} ${
-                  gestorFilter !== 'Todos' ? 'filtered' : ''
+                  selectedGestores.length > 0 ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('gestor')}
               >
@@ -3024,7 +3210,7 @@ export default function CronogramaGanttView({
                     </button>
                     <button
                       type="button"
-                      className={`th-action-btn ${customRules.some((r) => r.field === 'progress') ? 'filtered' : ''}`}
+                      className={`th-action-btn ${selectedProgress.length > 0 ? 'filtered' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setColFilterOpen((cur) => (cur === 'progress' ? null : 'progress'));
@@ -3117,7 +3303,7 @@ export default function CronogramaGanttView({
                     </button>
                     <button
                       type="button"
-                      className={`th-action-btn ${stateFilter !== 'Todos' ? 'filtered' : ''}`}
+                      className={`th-action-btn ${selectedStates.length > 0 ? 'filtered' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setColFilterOpen((cur) => (cur === 'status' ? null : 'status'));
