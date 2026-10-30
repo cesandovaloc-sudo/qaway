@@ -95,11 +95,7 @@ export default function Sidebar({
     BASE_PREFIXES.find((prefix) => pathname.startsWith(prefix)) ?? ''
 
   const getHref = (to: string) => {
-    const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
-    const basePrefix = detectBase(pathname)
-    if (!basePrefix) return to
-    if (to === '/') return basePrefix
-    return `${basePrefix}${to.startsWith('/') ? to : `/${to}`}`
+    return to.startsWith('/') ? to : `/${to}`
   }
 
   const location = useLocation()
@@ -208,22 +204,16 @@ export default function Sidebar({
 
   const currentUrl = `${location.pathname}${location.search}`
   const isHrefActive = (to: string) => {
-    const targetHref = getHref(to)
-    if (targetHref === currentUrl) return true
-    const barePath = location.pathname.slice(detectBase(location.pathname).length) || '/'
-    if (to === '/' && (barePath === '/' || barePath === '')) {
+    const current = location.pathname.replace(/\/+$/, '') || '/'
+    const target = to.replace(/\/+$/, '') || '/'
+    if (target === current) return true
+    if (target === '/gestor_proyectos0/resumen' && (current === '/' || current === '/resumen' || current === '/gestor_proyectos0')) {
       return true
     }
-    if (to === '/gestor_proyectos0/resumen' && (barePath === '/' || barePath === '' || barePath === '/resumen' || barePath === '/gestor_proyectos0/resumen')) {
+    if (target.startsWith('/gestor_proyectos0/proyectos/') && current.startsWith('/gestor_proyectos0/proyectos/')) {
       return true
     }
-    if (
-      (to.startsWith('/gestor_proyectos0/proyectos/') && barePath.startsWith('/gestor_proyectos0/proyectos/')) ||
-      (to.startsWith('/proyectos/') && barePath.startsWith('/proyectos/'))
-    ) {
-      return true
-    }
-    return barePath === to
+    return false
   }
 
   const handleSelectProjectInCascade = (projectId: string) => {
