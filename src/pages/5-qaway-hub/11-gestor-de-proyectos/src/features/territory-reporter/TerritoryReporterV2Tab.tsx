@@ -1321,13 +1321,13 @@ export function TerritoryReporterV2Tab({
               Reporte regional de cumplimiento
             </h2>
             <p className="text-[13px] font-semibold text-slate-600 mt-0.5">
-              DRE {isPasco ? 'Pasco' : 'Junín'} – Elaboración del CDL en MC SIGA (Actividad 1.6)
+              DRE {isPasco ? 'Pasco' : 'Junín'} – {is17 ? 'Acondicionamiento de Almacenes y Contratos de Transporte (Actividad 1.7)' : 'Elaboración del CDL en MC SIGA (Actividad 1.6)'}
             </p>
           </div>
 
           <div className="text-right text-[11px] text-slate-400 font-medium">
             <span>Última actualización: </span>
-            <strong className="text-slate-700 font-bold">22 oct. 2026</strong>
+            <strong className="text-slate-700 font-bold">{is17 ? '15 nov. 2026' : '22 oct. 2026'}</strong>
           </div>
         </div>
 
@@ -1392,7 +1392,22 @@ export function TerritoryReporterV2Tab({
 
           <span className="text-slate-300">/</span>
 
-          {/* N4: Gestor asignado */}
+          {/* N4: Hito (Selector para Hito 1.6 vs Hito 1.7) */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10.5px] font-bold text-slate-500">Hito:</span>
+            <select
+              value={selectedHito}
+              onChange={(e) => handleSelectHito(e.target.value as '1.6' | '1.7')}
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-900 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
+            >
+              <option value="1.6">Hito 1.6 – Elaboración del CDL en MC SIGA</option>
+              <option value="1.7">Hito 1.7 – Acondicionamiento y Transporte</option>
+            </select>
+          </div>
+
+          <span className="text-slate-300">/</span>
+
+          {/* N5: Gestor asignado */}
           <div className="flex items-center gap-1.5">
             <span className="text-[10.5px] font-bold text-slate-500">Gestor de Campo:</span>
             <span className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 shadow-2xs">
@@ -1401,21 +1416,23 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* Hito 1.6 Banner sutil */}
+        {/* Hito Banner sutil */}
         <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-100/70 border border-slate-200/80 px-3 py-2 text-[12px]">
           <span className="inline-flex items-center rounded-md bg-slate-900 px-2 py-0.5 text-[11px] font-black text-white">
-            HITO 1.6
+            {is17 ? 'HITO 1.7' : 'HITO 1.6'}
           </span>
           <span className="font-bold text-slate-800">
-            Elaboración del Cuadro de Distribución Local en el MC SIGA
+            {is17
+              ? 'Acondicionamiento de Almacenes y Contratos de Transporte'
+              : 'Elaboración del Cuadro de Distribución Local en el MC SIGA'}
           </span>
           <span className="hidden sm:inline text-slate-300">|</span>
           <span className="text-slate-600 font-medium text-[11.5px]">
-            Drive preliminar: <strong className="text-slate-900">Corte 22/10/2026</strong>
+            Drive preliminar: <strong className="text-slate-900">{is17 ? 'Corte 15/11/2026' : 'Corte 22/10/2026'}</strong>
           </span>
           <span className="hidden sm:inline text-slate-300">·</span>
           <span className="text-slate-600 font-medium text-[11.5px]">
-            Cierre RAR: <strong className="text-slate-900">Hasta 26/10/2026</strong>
+            Cierre RAR: <strong className="text-slate-900">{is17 ? 'Hasta 25/11/2026' : 'Hasta 26/10/2026'}</strong>
           </span>
         </div>
       </section>
@@ -2152,7 +2169,7 @@ export function TerritoryReporterV2Tab({
                     : `UGEL ${formatUgelDisplayName(inspectedUgel.name)}`}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Amarrado a: Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA
+                  Amarrado a: {is17 ? 'Hito 1.7 · Acondicionamiento de Almacenes y Contratos de Transporte' : 'Hito 1.6 · Elaboración del Cuadro de Distribución Local en el MC SIGA'}
                 </p>
               </div>
               <button
