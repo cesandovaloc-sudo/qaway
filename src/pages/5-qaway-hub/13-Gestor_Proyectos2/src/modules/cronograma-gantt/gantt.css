@@ -4133,18 +4133,15 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .quick-row-actions {
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 4px;
   margin-left: 6px;
-  opacity: 0;
-  transition: opacity 0.14s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  z-index: 20;
+  flex-shrink: 0;
 }
 
 .gantt-v2 .row:hover .quick-row-actions {
-  opacity: 1;
+  display: inline-flex;
 }
 
 .gantt-v2 .quick-inline-icon-btn {
@@ -4560,22 +4557,4 @@ body.gantt-resizing {
   white-space: nowrap !important;
 }
 
-/* Botones rápidos de fila: En reposo NO ocupan espacio en el flujo (cero hueco en blanco) */
-.gantt-v2 .quick-row-actions {
-  position: absolute !important;
-  right: 6px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  display: none !important;
-  align-items: center !important;
-  gap: 3px !important;
-  background: #ffffff !important;
-  padding: 2px 4px !important;
-  border-radius: 6px !important;
-  box-shadow: -6px 0 10px rgba(255, 255, 255, 0.98), 0 1px 3px rgba(15, 23, 42, 0.1) !important;
-  z-index: 25 !important;
-}
 
-.gantt-v2 .row:hover .quick-row-actions {
-  display: inline-flex !important;
-}

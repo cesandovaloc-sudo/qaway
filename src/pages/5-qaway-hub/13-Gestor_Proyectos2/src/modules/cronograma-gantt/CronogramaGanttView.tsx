@@ -465,7 +465,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'region', label: 'Zona / Frente' },
 ];
 
-const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region'];
+const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 
 const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
@@ -1519,7 +1519,7 @@ export default function CronogramaGanttView({
 
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-gantt-visible-cols-v1') || 'null');
+      const saved = JSON.parse(localStorage.getItem('qaway-gantt-visible-cols-v2') || 'null');
       if (Array.isArray(saved) && saved.includes('name')) return CANONICAL_COLS.filter((k) => saved.includes(k));
     } catch {
       /* almacenamiento no disponible */
@@ -1529,7 +1529,7 @@ export default function CronogramaGanttView({
 
   useEffect(() => {
     try {
-      localStorage.setItem('qaway-gantt-visible-cols-v1', JSON.stringify(visibleCols));
+      localStorage.setItem('qaway-gantt-visible-cols-v2', JSON.stringify(visibleCols));
     } catch {
       /* almacenamiento no disponible */
     }
