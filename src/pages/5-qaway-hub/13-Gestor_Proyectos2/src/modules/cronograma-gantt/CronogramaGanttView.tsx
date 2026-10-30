@@ -449,7 +449,7 @@ const MIN_COLS: Record<ColKey, number> = {
   end: 70,
   duration: 60,
   progress: 75,
-  status: 75,
+  status: 50,
   gestor: 85,
   region: 75,
 };
