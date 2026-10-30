@@ -1294,6 +1294,106 @@
   font-weight: 700;
 }
 
+/* --- Divisores verticales de zonificación funcional de filtros --- */
+.gantt-v2 .filter-group-divider {
+  width: 1px;
+  height: 24px;
+  background: #cbd5e1;
+  margin: 0 4px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* --- Botones compactos de solo icono (respiro visual) --- */
+.gantt-v2 .qm-btn-icon {
+  width: 38px;
+  min-width: 38px;
+  height: 42px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.gantt-v2 .qm-btn-icon:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.gantt-v2 .qm-btn-icon.active {
+  background: #eff6ff;
+  color: #0066ff;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+}
+
+.gantt-v2 .qm-btn-icon.collapsed {
+  color: #0066ff;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+/* Micro-tooltip institucional en hover (concreto, sobrio, estilo Qaway) */
+.gantt-v2 [data-tooltip] {
+  position: relative;
+}
+
+.gantt-v2 [data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+}
+
+.gantt-v2 [data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border-width: 5px 5px 0 5px;
+  border-style: solid;
+  border-color: #0f172a transparent transparent transparent;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+}
+
+.gantt-v2 [data-tooltip]:hover::after,
+.gantt-v2 [data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+
 /* Responsividad inteligente en botones de barra de filtros */
 @media (max-width: 1540px) {
   .gantt-v2 .btn-toggle-labels .btn-label-text,

@@ -54,6 +54,7 @@ import {
   Plus,
   Presentation,
   RefreshCw,
+  RotateCcw,
   Save,
   Search,
   ShieldCheck,
@@ -2623,6 +2624,22 @@ export default function CronogramaGanttView({
               )}
             </div>
 
+            {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
+            <button
+              type="button"
+              className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
+              onClick={() => setAdvancedFiltersOpen((v) => !v)}
+              data-tooltip="Filtros avanzados"
+              aria-label="Condiciones de filtrado avanzado"
+            >
+              <Filter size={15} />
+              {customRules.length > 0 && (
+                <span className="custom-filter-counter-badge">{customRules.length}</span>
+              )}
+            </button>
+
+            {/* Separador vertical: Filtros de datos | Tiempo Gantt */}
+            <div className="filter-group-divider" aria-hidden="true" />
             {/* Rango de Fechas Operativo con Popover Redondeado Moderno (Cero calendarios nativos rectos) */}
             <div className="filter-dropdown-wrap date-range-wrap">
               <button
@@ -2831,36 +2848,43 @@ export default function CronogramaGanttView({
               ))}
             </div>
 
-            {/* Alternar avance en barras (limpio por defecto, activable a demanda) */}
+            {/* Separador vertical: Tiempo Gantt | Visualización y Herramientas */}
+            <div className="filter-group-divider" aria-hidden="true" />
+
+            {/* Zona 3: Visualización de Barras (% Avance) */}
             <button
               type="button"
-              className={`btn-toggle-labels ${showBarLabels ? 'active' : ''}`}
+              className={`btn-toggle-labels qm-btn-icon ${showBarLabels ? "active" : ""}`}
               onClick={() => {
                 setShowBarLabels((prev) => !prev);
               }}
-              title="Mostrar u ocultar porcentaje de avance en barras"
+              data-tooltip="Mostrar % en barras"
+              aria-label="Mostrar u ocultar porcentaje de avance en barras"
             >
-              <Percent size={13} />
-              <span className="btn-label-text">Avance</span>
+              <Percent size={14} />
             </button>
 
-            {/* Botón Filtros Personalizados Avanzados */}
+            {/* Herramienta Pro: Expandir / Colapsar todos los hitos (Benchmark imagen 2) */}
             <button
               type="button"
-              className={`btn secondary custom-filter-trigger-btn ${advancedFiltersOpen || customRules.length > 0 ? 'active' : ''}`}
-              onClick={() => setAdvancedFiltersOpen((v) => !v)}
-              title="Condiciones de filtrado avanzado"
+              className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleAllHitosExpand();
+              }}
+              data-tooltip={allHitosExpanded ? "Colapsar hitos" : "Expandir hitos"}
+              aria-label={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
             >
-              <Filter size={13} />
-              <span className="btn-label-text">Filtro avanzado</span>
-              {customRules.length > 0 && (
-                <span className="custom-filter-counter-badge">{customRules.length}</span>
-              )}
+              <ChevronsUpDown size={15} />
             </button>
 
+            {/* Separador vertical: Herramientas | Acción global */}
+            <div className="filter-group-divider" aria-hidden="true" />
+
+            {/* Zona 4: Restablecimiento Integral de Filtros y Orden */}
             <button
               type="button"
-              className="btn secondary clear-btn"
+              className="btn secondary clear-btn qm-btn-icon"
               onClick={() => {
                 setSearch('');
                 setStateFilter('Todos');
@@ -2873,14 +2897,15 @@ export default function CronogramaGanttView({
                 setTab('Todos');
                 setCustomRules([]);
                 engine.clearAllFilters();
+                engine.clearAllSort();
                 closeMenus();
                 scrollToDate(RANGE_MIN);
-                notify('Filtros y rango temporal restablecidos');
+                notify('Filtros, orden y visualización restablecidos');
               }}
-              title="Restablecer filtros y rango temporal"
+              data-tooltip="Restablecer filtros y orden"
+              aria-label="Restablecer filtros, orden y rango temporal"
             >
-              <RefreshCw size={14} />
-              <span className="btn-label-text">Limpiar</span>
+              <RotateCcw size={15} />
             </button>
           </div>
 
