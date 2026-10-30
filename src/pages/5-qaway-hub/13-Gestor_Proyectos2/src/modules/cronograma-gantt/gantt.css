@@ -4558,3 +4558,17 @@ body.gantt-resizing {
 }
 
 
+
+/* ==========================================================================
+   Columna Estado: el texto siempre se lee desde la primera letra.
+   Con justify-content:center el desborde se recortaba por ambos lados
+   ("proce", "ndien"); alineado a la izquierda solo se recorta al final.
+   ========================================================================== */
+.gantt-v2 .row .fixed-cols > .status-cell {
+  justify-content: flex-start !important;
+}
+
+.gantt-v2 .status-cell .status {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}

@@ -3870,7 +3870,7 @@ export default function CronogramaGanttView({
                   {visibleCols.includes('status') && (
                     <div
                       className="status-cell editable"
-                      title="Clic para cambiar el estado"
+                      title={`Estado: ${x.status} · Clic para cambiar`}
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleEdit(x, 'status');
