@@ -4302,11 +4302,15 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .quick-add-cell {
+  grid-column: 1 / -1 !important;
   display: flex;
   align-items: center;
   gap: 8px;
   padding-left: 18px !important;
   color: #64748b;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
 }
 
 .gantt-v2 .quick-add-icon-box {

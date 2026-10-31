@@ -442,18 +442,18 @@ const RANGE_MAX = '2027-04-30';
 const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
-  code: 90,
-  name: 320,
-  kind: 105,
-  parent: 150,
-  start: 110,
-  end: 110,
-  duration: 100,
-  progress: 130,
-  status: 125,
-  gestor: 155,
-  region: 130,
-  actions: 80,
+  code: 75,
+  name: 360,
+  kind: 100,
+  parent: 140,
+  start: 105,
+  end: 105,
+  duration: 90,
+  progress: 115,
+  status: 110,
+  gestor: 135,
+  region: 120,
+  actions: 75,
 };
 
 const MIN_COLS: Record<ColKey, number> = {
@@ -1738,13 +1738,47 @@ export default function CronogramaGanttView({
   };
 
   const resetColWidths = () => {
-    setColWidths({ ...DEFAULT_COLS });
+    const isLista = viewMode === 'lista';
+    const calibratedWidths: Record<string, number> = {
+      code: 75,
+      name: isLista ? 360 : 280,
+      kind: 100,
+      parent: 140,
+      start: 105,
+      end: 105,
+      duration: 90,
+      progress: 115,
+      status: 110,
+      gestor: 135,
+      region: 120,
+      actions: 75,
+    };
+
+    customCols.forEach((col) => {
+      calibratedWidths[col.key] = 130;
+    });
+
+    const pristineCols: ColKey[] = isLista ? [...LISTA_PRESET_COLS] : [...GANTT_PRESET_COLS];
+    customCols.forEach((col) => {
+      if (visibleCols.includes(col.key as ColKey)) {
+        pristineCols.push(col.key as ColKey);
+      }
+    });
+
+    setColWidths(calibratedWidths as any);
+    setVisibleCols(pristineCols);
+
     try {
-      localStorage.setItem('qaway-gantt-cols-v3', JSON.stringify(DEFAULT_COLS));
+      const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      localStorage.setItem(storageKey, JSON.stringify(pristineCols));
+      localStorage.setItem('qaway-gantt-cols-v3', JSON.stringify(calibratedWidths));
     } catch {
       /* almacenamiento no disponible */
     }
-    notify('Anchos de columnas reordenados de acuerdo al contenido óptimo');
+
+    notify(
+      `Columnas y anchos ajustados perfectamente para ${isLista ? 'Modo Lista' : 'Modo Gantt'}`
+    );
   };
   const toggleMenu = (key: FilterMenuKey) => {
     setActiveMenu((cur) => (cur === key ? null : key));
@@ -4592,13 +4626,12 @@ export default function CronogramaGanttView({
                 <div
                   className="fixed-cols"
                   style={{
-                    width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
-                    minWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
-                    maxWidth: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                    width: `${fixedWidth}px`,
+                    minWidth: `${fixedWidth}px`,
                     gridTemplateColumns: fixedGridCols,
                   }}
                 >
-                  <div className="name-cell quick-add-cell">
+                  <div className="name-cell quick-add-cell" style={{ gridColumn: '1 / -1' }}>
                     <span className="indent" />
                     <div className="quick-add-icon-box">
                       <Plus size={14} />
