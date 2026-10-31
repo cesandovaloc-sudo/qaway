@@ -444,31 +444,31 @@ const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'en
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 90,
   name: 320,
-  kind: 100,
-  parent: 140,
-  start: 100,
-  end: 100,
-  duration: 90,
-  progress: 115,
-  status: 110,
-  gestor: 135,
-  region: 120,
+  kind: 105,
+  parent: 150,
+  start: 110,
+  end: 110,
+  duration: 100,
+  progress: 130,
+  status: 125,
+  gestor: 155,
+  region: 130,
   actions: 80,
 };
 
 const MIN_COLS: Record<ColKey, number> = {
-  name: 180,
-  code: 50,
-  kind: 70,
+  code: 60,
+  name: 200,
+  kind: 80,
   parent: 90,
-  start: 70,
-  end: 70,
-  duration: 60,
-  progress: 75,
-  status: 50,
-  gestor: 85,
-  region: 75,
-  actions: 50,
+  start: 90,
+  end: 90,
+  duration: 80,
+  progress: 100,
+  status: 90,
+  gestor: 110,
+  region: 90,
+  actions: 60,
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
@@ -486,8 +486,12 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'actions', label: 'Acciones' },
 ];
 
-const DEFAULT_VISIBLE_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
-const LISTA_VISIBLE_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
+// Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
+const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
+// Preset inicial y predeterminado para vista Lista (12 columnas completas ordenadas)
+const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
+const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
+const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
   if (!a || !b) return 1;
   const da = new Date(a).getTime();
@@ -1026,7 +1030,7 @@ export default function CronogramaGanttView({
 
   const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v1') || 'null');
+      const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v3') || 'null');
       if (saved && typeof saved === 'object') {
         const merged: Record<ColKey, number> = { ...DEFAULT_COLS };
         (Object.keys(DEFAULT_COLS) as ColKey[]).forEach((k) => {
@@ -1571,42 +1575,47 @@ export default function CronogramaGanttView({
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
 
-  const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => {
+  // Arquitectura Notion: Cada vista (Gantt o Lista) tiene su propio preset de columnas visibles
+  const loadSavedCols = (mode: string): ColKey[] => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-gantt-visible-cols-v2') || 'null');
-      if (Array.isArray(saved) && saved.includes('name')) return CANONICAL_COLS.filter((k) => saved.includes(k));
+      const storageKey = mode === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+      if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
+        return CANONICAL_COLS.filter((k) => saved.includes(k));
+      }
     } catch {
       /* almacenamiento no disponible */
     }
-    return DEFAULT_VISIBLE_COLS;
-  });
+    return mode === 'lista' ? [...LISTA_PRESET_COLS] : [...GANTT_PRESET_COLS];
+  };
 
-  // Sync visibleCols when switching between gantt and lista modes
-  const prevViewModeRef = useRef<string>('gantt');
+  const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => loadSavedCols(viewMode));
+
+  // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
+  const prevViewModeRef = useRef<string>(viewMode);
   useEffect(() => {
     if (viewMode === prevViewModeRef.current) return;
+    // Guardar estado de la vista saliente
+    try {
+      const prevKey = prevViewModeRef.current === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      localStorage.setItem(prevKey, JSON.stringify(visibleCols));
+    } catch {}
+
     prevViewModeRef.current = viewMode;
-    if (viewMode === 'lista') {
-      setVisibleCols([...LISTA_VISIBLE_COLS]);
-    } else if (viewMode === 'gantt') {
-      try {
-        const saved = JSON.parse(localStorage.getItem('qaway-gantt-visible-cols-v2') || 'null');
-        if (Array.isArray(saved) && saved.includes('name')) {
-          setVisibleCols(CANONICAL_COLS.filter((k) => saved.includes(k)));
-          return;
-        }
-      } catch { /* ignore */ }
-      setVisibleCols([...DEFAULT_VISIBLE_COLS]);
-    }
+    // Cargar estado de la vista entrante
+    const nextCols = loadSavedCols(viewMode);
+    setVisibleCols(nextCols);
   }, [viewMode]);
 
+  // Persistir cambios de columnas en la vista actualmente activa
   useEffect(() => {
     try {
-      localStorage.setItem('qaway-gantt-visible-cols-v2', JSON.stringify(visibleCols));
+      const storageKey = viewMode === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      localStorage.setItem(storageKey, JSON.stringify(visibleCols));
     } catch {
       /* almacenamiento no disponible */
     }
-  }, [visibleCols]);
+  }, [visibleCols, viewMode]);
 
   const engine = useTableEngine<Item>({
     tableId: 'gantt',
@@ -1618,15 +1627,19 @@ export default function CronogramaGanttView({
 
   const toggleColVisibility = (key: ColKey) => {
     if (key === 'name') return;
-    setVisibleCols((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+    setVisibleCols((prev) => {
+      if (prev.includes(key)) {
+        return prev.filter((k) => k !== key);
+      }
+      // Reinsertar respetando el orden canónico de la tabla matriz
+      return CANONICAL_COLS.filter((k) => prev.includes(k) || k === key);
+    });
   };
 
   const resetColWidths = () => {
     setColWidths({ ...DEFAULT_COLS });
     try {
-      localStorage.setItem('qaway-gantt-cols-v1', JSON.stringify(DEFAULT_COLS));
+      localStorage.setItem('qaway-gantt-cols-v3', JSON.stringify(DEFAULT_COLS));
     } catch {
       /* almacenamiento no disponible */
     }
@@ -1760,7 +1773,7 @@ export default function CronogramaGanttView({
       setResizingCol(null);
       document.body.classList.remove('gantt-resizing');
       try {
-        localStorage.setItem('qaway-gantt-cols-v1', JSON.stringify(colRef.current));
+        localStorage.setItem('qaway-gantt-cols-v3', JSON.stringify(colRef.current));
       } catch {
         /* almacenamiento no disponible */
       }
@@ -2985,7 +2998,7 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Controles exclusivos para modo Gantt */}
+            {/* Controles para modo Gantt */}
             {viewMode === 'gantt' && (
               <>
                 <button
@@ -3018,10 +3031,30 @@ export default function CronogramaGanttView({
                     e.stopPropagation();
                     setColsMenuOpen((v) => !v);
                   }}
-                  data-tooltip="Configurar columnas"
-                  aria-label="Configurar columnas y opciones"
+                  data-tooltip="Configurar columnas visibles"
+                  aria-label="Configurar columnas visibles de la tabla"
                 >
-                  <MoreHorizontal size={15} />
+                  <SlidersHorizontal size={14} />
+                </button>
+
+                <div className="filter-group-divider" aria-hidden="true" />
+              </>
+            )}
+
+            {/* Configurar columnas en Modo Lista */}
+            {viewMode === 'lista' && (
+              <>
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setColsMenuOpen((v) => !v);
+                  }}
+                  data-tooltip="Configurar columnas visibles de la lista"
+                  aria-label="Configurar columnas visibles de la lista"
+                >
+                  <SlidersHorizontal size={14} />
                 </button>
 
                 <div className="filter-group-divider" aria-hidden="true" />
