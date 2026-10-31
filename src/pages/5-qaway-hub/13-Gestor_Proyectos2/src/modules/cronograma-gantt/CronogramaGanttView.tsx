@@ -1669,11 +1669,45 @@ export default function CronogramaGanttView({
       localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updated));
     } catch {}
 
-    setVisibleCols((prev) => [...prev, key as ColKey]);
-    setColWidths((prev) => ({ ...prev, [key]: 130 }));
+    const isLista = viewMode === 'lista';
+    const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+
+    setVisibleCols((prev) => {
+      const next = [...prev, key as ColKey];
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    setColWidths((prev) => {
+      const next = { ...prev, [key]: 140 };
+      colRef.current = next;
+      try {
+        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
     setNewColLabel('');
     setNewColFormOpen(false);
     notify(`Columna "${newCol.label}" creada e incorporada a la vista actual`);
+  };
+
+  const resetSingleColWidth = (key: ColKey) => {
+    const isLista = viewMode === 'lista';
+    const defaultW = isLista
+      ? (DEFAULT_COLS[key] || 140)
+      : (key === 'name' ? 300 : (DEFAULT_COLS[key] || 115));
+    setColWidths((prev) => {
+      const next = { ...prev, [key]: defaultW };
+      colRef.current = next;
+      try {
+        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    notify(`Columna restablecida a ancho óptimo (${defaultW}px)`);
   };
 
   // Arquitectura Notion: Cada vista (Gantt o Lista) tiene su propio preset de columnas visibles
@@ -1682,7 +1716,9 @@ export default function CronogramaGanttView({
       const storageKey = mode === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
       if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
-        return CANONICAL_COLS.filter((k) => saved.includes(k));
+        const canonicalPart = CANONICAL_COLS.filter((k) => saved.includes(k));
+        const customPart = saved.filter((k) => typeof k === 'string' && k.startsWith('c_'));
+        return [...canonicalPart, ...customPart] as ColKey[];
       }
     } catch {
       /* almacenamiento no disponible */
@@ -1765,6 +1801,7 @@ export default function CronogramaGanttView({
       }
     });
 
+    colRef.current = { ...(calibratedWidths as any) };
     setColWidths(calibratedWidths as any);
     setVisibleCols(pristineCols);
 
@@ -1904,7 +1941,7 @@ export default function CronogramaGanttView({
     const onMove = (e: MouseEvent) => {
       const d = dragRef.current;
       if (!d) return;
-      const w = Math.max(MIN_COLS[d.key], Math.min(800, d.startW + (e.clientX - d.startX)));
+      const w = Math.max(MIN_COLS[d.key] || 60, Math.min(800, d.startW + (e.clientX - d.startX)));
       setColWidths((c) => ({ ...c, [d.key]: w }));
     };
     const onUp = () => {
@@ -1931,12 +1968,12 @@ export default function CronogramaGanttView({
     e.preventDefault();
     e.stopPropagation();
     setResizingCol(key);
-    dragRef.current = { key, startX: e.clientX, startW: colRef.current[key] || DEFAULT_COLS[key] };
+    dragRef.current = { key, startX: e.clientX, startW: colRef.current[key] || DEFAULT_COLS[key] || 140 };
     document.body.classList.add('gantt-resizing');
   };
 
   const fixedWidth = useMemo(
-    () => visibleCols.reduce((acc, k) => acc + (colWidths[k] || DEFAULT_COLS[k]), 0),
+    () => visibleCols.reduce((acc, k) => acc + (colWidths[k] || DEFAULT_COLS[k] || 140), 0),
     [visibleCols, colWidths]
   );
 
@@ -1949,7 +1986,7 @@ export default function CronogramaGanttView({
   }, [zoom]);
 
   const fixedGridCols = useMemo(
-    () => visibleCols.map((k) => `${colWidths[k] || DEFAULT_COLS[k]}px`).join(' '),
+    () => visibleCols.map((k) => `${colWidths[k] || DEFAULT_COLS[k] || 140}px`).join(' '),
     [visibleCols, colWidths]
   );
 
@@ -2078,7 +2115,7 @@ export default function CronogramaGanttView({
       if (!t.closest('.cell-editor, .col-resizer, .editable, .cell-pop')) {
         setEdit(null);
       }
-      if (!t.closest('.name-head')) {
+      if (!t.closest('.name-head, .cols-dropdown-wrap, .cols-popover, .cols-trigger-btn')) {
         setColsMenuOpen(false);
       }
       if (!t.closest('.th-col-header')) {
@@ -3166,6 +3203,20 @@ export default function CronogramaGanttView({
               </>
             )}
 
+            {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
+            <button
+              type="button"
+              className="btn secondary qm-btn-icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetColWidths();
+              }}
+              data-tooltip="Ajustar anchos de columnas automáticamente"
+              aria-label="Ajustar anchos de columnas al contenido"
+            >
+              <ArrowLeftRight size={14} />
+            </button>
+
             {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion) */}
             <div className="filter-dropdown-wrap cols-dropdown-wrap">
               <button
@@ -3182,7 +3233,7 @@ export default function CronogramaGanttView({
               </button>
 
               {colsMenuOpen && (
-                <div className="cols-popover" onClick={(e) => e.stopPropagation()}>
+                <div className="cols-popover" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                   <div className="cols-pop-head">
                     <strong>Columnas de la Tabla</strong>
                     <button type="button" onClick={() => setColsMenuOpen(false)}>
@@ -3219,7 +3270,7 @@ export default function CronogramaGanttView({
                         onClick={() => setNewColFormOpen(true)}
                       >
                         <Plus size={13} />
-                        <span>+ Nueva columna personalizada</span>
+                        <span>Nueva columna personalizada</span>
                       </button>
                     ) : (
                       <div className="cols-new-col-form">
@@ -3304,6 +3355,7 @@ export default function CronogramaGanttView({
                 setShowCriticalPath(false);
                 engine.clearAllFilters();
                 engine.clearAllSort();
+                resetColWidths();
                 closeMenus();
                 scrollToDate(RANGE_MIN);
                 notify('Filtros, orden y visualización restablecidos');
@@ -3524,7 +3576,7 @@ export default function CronogramaGanttView({
                     }
                   />
                   <span className="th-label">Código</span>
-                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} />
+                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('code'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
 
@@ -3579,7 +3631,7 @@ export default function CronogramaGanttView({
                   </div>
                 )}
 
-                <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} />
+                <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('name'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
               </div>
               {visibleCols.includes('kind') && (
                 <div className="th-col-header">
@@ -3599,7 +3651,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="kind" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} />
+                  <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('kind'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('parent') && (
@@ -3620,7 +3672,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="parent" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} />
+                  <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('parent'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('start') && (
@@ -3641,7 +3693,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="start" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'start' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'start')} />
+                  <div className={`col-resizer ${resizingCol === 'start' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'start')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('start'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('end') && (
@@ -3662,7 +3714,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="end" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'end' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'end')} />
+                  <div className={`col-resizer ${resizingCol === 'end' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'end')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('end'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('duration') && (
@@ -3683,7 +3735,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="duration" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'duration' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'duration')} />
+                  <div className={`col-resizer ${resizingCol === 'duration' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'duration')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('duration'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('progress') && (
@@ -3704,7 +3756,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="progress" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} />
+                  <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('progress'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('status') && (
@@ -3725,7 +3777,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="status" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} />
+                  <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('status'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('gestor') && (
@@ -3746,7 +3798,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="gestor" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'gestor' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'gestor')} />
+                  <div className={`col-resizer ${resizingCol === 'gestor' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'gestor')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('gestor'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('region') && (
@@ -3767,7 +3819,7 @@ export default function CronogramaGanttView({
                     </button>
                     <ColumnHeaderMenu engine={engine} columnId="region" buttonClassName="th-action-btn" />
                   </div>
-                  <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} />
+                  <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('region'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('actions') && (
@@ -3793,7 +3845,7 @@ export default function CronogramaGanttView({
                       <EyeOff size={11} />
                     </button>
                   </div>
-                  <div className={`col-resizer ${resizingCol === cCol.key ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, cCol.key as ColKey)} />
+                  <div className={`col-resizer ${resizingCol === cCol.key ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, cCol.key as ColKey)} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth(cCol.key as ColKey); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               ))}
             </div>
