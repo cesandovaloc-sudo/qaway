@@ -4733,6 +4733,14 @@ body.gantt-resizing {
   gap: 20px;
   height: 48px;
   overflow-x: auto;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.gantt-v2 .tabs-list::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .gantt-v2 .view-mode-switcher {
@@ -5664,4 +5672,210 @@ body.gantt-resizing {
 /* -- Column header for Acciones (no actions inside) -- */
 .gantt-v2 .th-col-actions {
   justify-content: center;
+}
+
+/* ==========================================================================
+   DESPLEGABLES CUSTOM INSTITUCIONALES (FILTROS AVANZADOS Y NOTION)
+   ========================================================================== */
+.gantt-v2 .qm-custom-select-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.gantt-v2 .qm-custom-select-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.gantt-v2 .qm-custom-select-btn:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+.gantt-v2 .qm-custom-select-btn.active {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.12);
+}
+.gantt-v2 .qm-select-chevron {
+  color: #64748b;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.gantt-v2 .qm-select-chevron.is-open {
+  transform: rotate(180deg);
+}
+.gantt-v2 .qm-custom-select-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 190px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 14px 30px -4px rgba(15, 23, 42, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  padding: 5px;
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: fadeInPop 0.12s ease-out;
+}
+.gantt-v2 .qm-custom-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.1s ease, color 0.1s ease;
+  text-align: left;
+  width: 100%;
+}
+.gantt-v2 .qm-custom-select-option:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+.gantt-v2 .qm-custom-select-option.selected {
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 600;
+}
+.gantt-v2 .qm-opt-icon {
+  display: inline-flex;
+  align-items: center;
+  color: #64748b;
+}
+.gantt-v2 .qm-check-icon {
+  color: #0066ff;
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   POPOVER CONFIGURAR COLUMNAS EN TOOLBAR & CREADOR NOTION
+   ========================================================================== */
+.gantt-v2 .cols-dropdown-wrap {
+  position: relative;
+}
+.gantt-v2 .cols-dropdown-wrap .cols-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: auto;
+  width: 290px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+  padding: 12px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gantt-v2 .cols-new-col-section {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+.gantt-v2 .cols-new-col-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 7px;
+  color: #0066ff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.gantt-v2 .cols-new-col-toggle-btn:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+.gantt-v2 .cols-new-col-form {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.gantt-v2 .cols-new-col-input {
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+.gantt-v2 .cols-new-col-input:focus {
+  border-color: #0066ff;
+}
+.gantt-v2 .cols-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
+.gantt-v2 .cols-type-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 7px;
+  border-radius: 5px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 11px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+.gantt-v2 .cols-type-chip:hover {
+  border-color: #94a3b8;
+}
+.gantt-v2 .cols-type-chip.active {
+  border-color: #0066ff;
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 600;
+}
+.gantt-v2 .cols-create-btn {
+  height: 29px;
+  background: #0066ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  margin-top: 4px;
+}
+.gantt-v2 .cols-create-btn:hover {
+  background: #0052cc;
 }

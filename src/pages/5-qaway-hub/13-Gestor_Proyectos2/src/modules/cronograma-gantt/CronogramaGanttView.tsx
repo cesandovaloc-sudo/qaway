@@ -926,6 +926,66 @@ const ExcelFilterPopover: React.FC<ExcelFilterPopoverProps> = ({
   );
 };
 
+/* Componente de Desplegable Institucional Estilizado (Cero menús nativos rectos de Windows) */
+interface CustomSelectOption {
+  value: string;
+  label: string;
+}
+
+const CustomSelect = ({
+  value,
+  options,
+  onChange,
+  className,
+}: {
+  value: string;
+  options: CustomSelectOption[];
+  onChange: (v: string) => void;
+  className?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.value === value) || options[0];
+
+  return (
+    <div className={`qm-custom-select-wrap ${className || ''}`} onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        className={`qm-custom-select-btn ${open ? 'active' : ''}`}
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <span>{selected ? selected.label : 'Seleccionar...'}</span>
+        <ChevronDown size={13} className={`qm-select-chevron ${open ? 'is-open' : ''}`} />
+      </button>
+
+      {open && (
+        <>
+          <div
+            className="qm-select-backdrop"
+            onClick={() => setOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 599 }}
+          />
+          <div className="qm-custom-select-menu">
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`qm-custom-select-option ${opt.value === value ? 'selected' : ''}`}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+              >
+                <span>{opt.label}</span>
+                {opt.value === value && <Check size={13} className="qm-check-icon" />}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 export default function CronogramaGanttView({
   onActions,
   onSwitchPerspective,
@@ -1574,6 +1634,47 @@ export default function CronogramaGanttView({
   const [colFilterOpen, setColFilterOpen] = useState<ColKey | null>(null);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
+
+  // Columnas dinámicas estilo Notion (matriz de base de datos extendible)
+  interface CustomColDef {
+    key: string;
+    label: string;
+    type: 'text' | 'percent' | 'number' | 'select' | 'date' | 'person';
+  }
+
+  const [customCols, setCustomCols] = useState<CustomColDef[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-custom-cols-v1') || '[]');
+      return Array.isArray(saved) ? saved : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [newColFormOpen, setNewColFormOpen] = useState(false);
+  const [newColLabel, setNewColLabel] = useState('');
+  const [newColType, setNewColType] = useState<CustomColDef['type']>('text');
+
+  const handleCreateCustomCol = () => {
+    if (!newColLabel.trim()) return;
+    const key = 'c_' + Date.now().toString(36);
+    const newCol: CustomColDef = {
+      key,
+      label: newColLabel.trim(),
+      type: newColType,
+    };
+    const updated = [...customCols, newCol];
+    setCustomCols(updated);
+    try {
+      localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updated));
+    } catch {}
+
+    setVisibleCols((prev) => [...prev, key as ColKey]);
+    setColWidths((prev) => ({ ...prev, [key]: 130 }));
+    setNewColLabel('');
+    setNewColFormOpen(false);
+    notify(`Columna "${newCol.label}" creada e incorporada a la vista actual`);
+  };
 
   // Arquitectura Notion: Cada vista (Gantt o Lista) tiene su propio preset de columnas visibles
   const loadSavedCols = (mode: string): ColKey[] => {
@@ -2998,7 +3099,7 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Controles para modo Gantt */}
+            {/* Controles exclusivos para modo Gantt */}
             {viewMode === 'gantt' && (
               <>
                 <button
@@ -3023,43 +3124,127 @@ export default function CronogramaGanttView({
                 >
                   <ChevronsUpDown size={15} />
                 </button>
-
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setColsMenuOpen((v) => !v);
-                  }}
-                  data-tooltip="Configurar columnas visibles"
-                  aria-label="Configurar columnas visibles de la tabla"
-                >
-                  <SlidersHorizontal size={14} />
-                </button>
-
-                <div className="filter-group-divider" aria-hidden="true" />
               </>
             )}
 
-            {/* Configurar columnas en Modo Lista */}
-            {viewMode === 'lista' && (
-              <>
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setColsMenuOpen((v) => !v);
-                  }}
-                  data-tooltip="Configurar columnas visibles de la lista"
-                  aria-label="Configurar columnas visibles de la lista"
-                >
-                  <SlidersHorizontal size={14} />
-                </button>
+            {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion) */}
+            <div className="filter-dropdown-wrap cols-dropdown-wrap">
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setColsMenuOpen((v) => !v);
+                }}
+                data-tooltip={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
+                aria-label="Configurar columnas visibles de la tabla"
+              >
+                <SlidersHorizontal size={14} />
+              </button>
 
-                <div className="filter-group-divider" aria-hidden="true" />
-              </>
-            )}
+              {colsMenuOpen && (
+                <div className="cols-popover" onClick={(e) => e.stopPropagation()}>
+                  <div className="cols-pop-head">
+                    <strong>Columnas de la Tabla</strong>
+                    <button type="button" onClick={() => setColsMenuOpen(false)}>
+                      <X size={13} />
+                    </button>
+                  </div>
+                  <div className="cols-pop-list">
+                    {[
+                      ...ALL_COL_META,
+                      ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
+                    ].map((col) => {
+                      const isVisible = visibleCols.includes(col.key);
+                      return (
+                        <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={isVisible}
+                            disabled={col.fixed}
+                            onChange={() => toggleColVisibility(col.key)}
+                          />
+                          <span>{col.label}</span>
+                          {col.fixed && <small className="fixed-pill">Fija</small>}
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {/* Creador de Columna Personalizada estilo Notion */}
+                  <div className="cols-new-col-section">
+                    {!newColFormOpen ? (
+                      <button
+                        type="button"
+                        className="cols-new-col-toggle-btn"
+                        onClick={() => setNewColFormOpen(true)}
+                      >
+                        <Plus size={13} />
+                        <span>+ Nueva columna personalizada</span>
+                      </button>
+                    ) : (
+                      <div className="cols-new-col-form">
+                        <input
+                          type="text"
+                          className="cols-new-col-input"
+                          placeholder="Nombre de columna..."
+                          value={newColLabel}
+                          onChange={(e) => setNewColLabel(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleCreateCustomCol();
+                            if (e.key === 'Escape') setNewColFormOpen(false);
+                          }}
+                          autoFocus
+                        />
+                        <div className="cols-type-grid">
+                          {[
+                            { t: 'text', l: '📝 Texto' },
+                            { t: 'percent', l: '📊 Gráfico %' },
+                            { t: 'number', l: '🔢 Número' },
+                            { t: 'select', l: '🏷️ Etiqueta' },
+                            { t: 'date', l: '📅 Fecha' },
+                            { t: 'person', l: '👤 Persona' },
+                          ].map((chip) => (
+                            <button
+                              key={chip.t}
+                              type="button"
+                              className={`cols-type-chip ${newColType === chip.t ? 'active' : ''}`}
+                              onClick={() => setNewColType(chip.t as any)}
+                            >
+                              {chip.l}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          className="cols-create-btn"
+                          onClick={handleCreateCustomCol}
+                          disabled={!newColLabel.trim()}
+                        >
+                          Crear columna
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="cols-pop-foot">
+                    <button
+                      type="button"
+                      className="cols-reorder-btn"
+                      onClick={() => {
+                        resetColWidths();
+                        setColsMenuOpen(false);
+                      }}
+                    >
+                      <ArrowLeftRight size={12} />
+                      <span>Ajustar anchos al contenido</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="filter-group-divider" aria-hidden="true" />
 
             {/* Zona 4: Restablecimiento Integral de Filtros y Orden */}
             <button
@@ -3146,11 +3331,16 @@ export default function CronogramaGanttView({
                   {customRules.map((rule, idx) => (
                     <div key={rule.id} className="af-rule-item">
                       <span className="af-rule-badge">{idx === 0 ? 'Donde' : 'Y'}</span>
-                      <select
-                        className="af-select"
+                      <CustomSelect
                         value={rule.field}
-                        onChange={(e) => {
-                          const newField = e.target.value;
+                        options={[
+                          { value: 'name', label: 'Hito / Subproceso (Nombre o Código)' },
+                          { value: 'status', label: 'Estado Oficial' },
+                          { value: 'progress', label: 'Avance (%)' },
+                          { value: 'gestor', label: 'Responsable' },
+                          { value: 'region', label: 'Zona / Frente' },
+                        ]}
+                        onChange={(newField) => {
                           setCustomRules((prev) =>
                             prev.map((r) =>
                               r.id === rule.id
@@ -3164,69 +3354,57 @@ export default function CronogramaGanttView({
                             )
                           );
                         }}
-                      >
-                        <option value="name">Hito / Subproceso (Nombre o Código)</option>
-                        <option value="status">Estado Oficial</option>
-                        <option value="progress">Avance (%)</option>
-                        <option value="gestor">Responsable</option>
-                        <option value="region">Zona / Frente</option>
-                      </select>
+                      />
 
-                      <select
-                        className="af-select af-select-op"
+                      <CustomSelect
+                        className="af-select-op"
                         value={rule.op}
-                        onChange={(e) => {
-                          const newOp = e.target.value;
+                        options={
+                          rule.field === 'name'
+                            ? [
+                                { value: 'contains', label: 'Contiene' },
+                                { value: 'not_contains', label: 'No contiene' },
+                              ]
+                            : rule.field === 'status'
+                            ? [
+                                { value: 'eq', label: 'Es igual a' },
+                                { value: 'neq', label: 'No es igual a' },
+                              ]
+                            : rule.field === 'progress'
+                            ? [
+                                { value: 'gte', label: 'Mayor o igual a (≥)' },
+                                { value: 'lte', label: 'Menor o igual a (≤)' },
+                                { value: 'eq', label: 'Exactamente igual a (=)' },
+                              ]
+                            : [
+                                { value: 'contains', label: 'Contiene / Es' },
+                                { value: 'neq', label: 'No contiene' },
+                              ]
+                        }
+                        onChange={(newOp) => {
                           setCustomRules((prev) =>
                             prev.map((r) => (r.id === rule.id ? { ...r, op: newOp } : r))
                           );
                         }}
-                      >
-                        {rule.field === 'name' && (
-                          <>
-                            <option value="contains">Contiene</option>
-                            <option value="not_contains">No contiene</option>
-                          </>
-                        )}
-                        {rule.field === 'status' && (
-                          <>
-                            <option value="eq">Es igual a</option>
-                            <option value="neq">No es igual a</option>
-                          </>
-                        )}
-                        {rule.field === 'progress' && (
-                          <>
-                            <option value="gte">Mayor o igual a (&ge;)</option>
-                            <option value="lte">Menor o igual a (&le;)</option>
-                            <option value="eq">Exactamente igual a (=)</option>
-                          </>
-                        )}
-                        {(rule.field === 'gestor' || rule.field === 'region') && (
-                          <>
-                            <option value="contains">Contiene / Es</option>
-                            <option value="neq">No contiene</option>
-                          </>
-                        )}
-                      </select>
+                      />
 
                       {rule.field === 'status' ? (
-                        <select
-                          className="af-select af-select-val"
+                        <CustomSelect
+                          className="af-select-val"
                           value={rule.val}
-                          onChange={(e) => {
-                            const v = e.target.value;
+                          options={[
+                            { value: '', label: 'Seleccionar estado...' },
+                            ...STATUS_OPTIONS.map((st) => ({
+                              value: st.toLowerCase(),
+                              label: st,
+                            })),
+                          ]}
+                          onChange={(v) => {
                             setCustomRules((prev) =>
                               prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
                             );
                           }}
-                        >
-                          <option value="">Seleccionar estado...</option>
-                          {STATUS_OPTIONS.map((st) => (
-                            <option key={st} value={st.toLowerCase()}>
-                              {st}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       ) : rule.field === 'progress' ? (
                         <div className="af-input-group">
                           <input
@@ -3361,46 +3539,7 @@ export default function CronogramaGanttView({
                     </button>
                   </div>
                 )}
-                {colsMenuOpen && (
-                  <div className="cols-popover" onClick={(e) => e.stopPropagation()}>
-                    <div className="cols-pop-head">
-                      <strong>Columnas Visibles</strong>
-                      <button type="button" onClick={() => setColsMenuOpen(false)}>
-                        <X size={13} />
-                      </button>
-                    </div>
-                    <div className="cols-pop-list">
-                      {ALL_COL_META.map((col) => {
-                        const isVisible = visibleCols.includes(col.key);
-                        return (
-                          <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
-                            <input
-                              type="checkbox"
-                              checked={isVisible}
-                              disabled={col.fixed}
-                              onChange={() => toggleColVisibility(col.key)}
-                            />
-                            <span>{col.label}</span>
-                            {col.fixed && <small className="fixed-pill">Fija</small>}
-                          </label>
-                        );
-                      })}
-                    </div>
-                    <div className="cols-pop-foot">
-                      <button
-                        type="button"
-                        className="cols-reorder-btn"
-                        onClick={() => {
-                          resetColWidths();
-                          setColsMenuOpen(false);
-                        }}
-                      >
-                        <ArrowLeftRight size={12} />
-                        <span>Ajustar anchos al contenido</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
+
                 <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} />
               </div>
               {visibleCols.includes('kind') && (
@@ -3597,6 +3736,27 @@ export default function CronogramaGanttView({
                   <span className="th-label">Acciones</span>
                 </div>
               )}
+
+              {/* Columnas personalizadas Notion en cabecera */}
+              {customCols.map((cCol) => visibleCols.includes(cCol.key as ColKey) && (
+                <div key={cCol.key} className="th-col-header" style={{ width: colWidths[cCol.key as ColKey] || 130 }}>
+                  <span className="th-label">{cCol.label}</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility(cCol.key as ColKey);
+                      }}
+                      title={`Ocultar ${cCol.label}`}
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                  </div>
+                  <div className={`col-resizer ${resizingCol === cCol.key ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, cCol.key as ColKey)} />
+                </div>
+              ))}
             </div>
 
             {viewMode === 'gantt' && (
@@ -4266,6 +4426,45 @@ export default function CronogramaGanttView({
                       </button>
                     </div>
                   )}
+
+                  {/* Celdas de columnas personalizadas Notion */}
+                  {customCols.map((cCol) => visibleCols.includes(cCol.key as ColKey) && (
+                    <div
+                      key={cCol.key}
+                      className="custom-cell-col"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0 10px',
+                        overflow: 'hidden',
+                        height: '100%',
+                      }}
+                    >
+                      {cCol.type === 'percent' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}>
+                          <div style={{ flex: 1, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ width: `${Math.min(100, Math.max(0, x.progress || 0))}%`, height: '100%', background: '#0066ff' }} />
+                          </div>
+                          <small style={{ fontSize: 11, fontWeight: 600, color: '#475569' }}>{x.progress || 0}%</small>
+                        </div>
+                      ) : cCol.type === 'select' ? (
+                        <span style={{ fontSize: 11.5, fontWeight: 600, background: '#eff6ff', color: '#1e40af', padding: '2px 8px', borderRadius: 4, border: '1px solid #bfdbfe' }}>
+                          {x.status || 'General'}
+                        </span>
+                      ) : cCol.type === 'person' ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#475569' }}>
+                          <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#0066ff', color: '#fff', fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {x.gestor ? x.gestor.substring(0, 2).toUpperCase() : 'CM'}
+                          </span>
+                          <span>{x.gestor || 'Sin asignar'}</span>
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: 12, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {(x as any)[cCol.key] || '—'}
+                        </span>
+                      )}
+                    </div>
+                  ))}
 
                   {/* ── Columna Código ── */}
 
