@@ -442,18 +442,18 @@ const RANGE_MAX = '2027-04-30';
 const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
-  code: 75,
-  name: 360,
-  kind: 100,
-  parent: 140,
-  start: 105,
-  end: 105,
-  duration: 90,
-  progress: 115,
-  status: 110,
-  gestor: 135,
-  region: 120,
-  actions: 75,
+  code: 80,
+  name: 440,
+  kind: 110,
+  parent: 160,
+  start: 125,
+  end: 125,
+  duration: 105,
+  progress: 130,
+  status: 125,
+  gestor: 165,
+  region: 140,
+  actions: 80,
 };
 
 const MIN_COLS: Record<ColKey, number> = {
@@ -1090,7 +1090,7 @@ export default function CronogramaGanttView({
 
   const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v3') || 'null');
+      const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v4') || 'null');
       if (saved && typeof saved === 'object') {
         const merged: Record<ColKey, number> = { ...DEFAULT_COLS };
         (Object.keys(DEFAULT_COLS) as ColKey[]).forEach((k) => {
@@ -1740,22 +1740,22 @@ export default function CronogramaGanttView({
   const resetColWidths = () => {
     const isLista = viewMode === 'lista';
     const calibratedWidths: Record<string, number> = {
-      code: 75,
-      name: isLista ? 360 : 280,
-      kind: 100,
-      parent: 140,
-      start: 105,
-      end: 105,
-      duration: 90,
-      progress: 115,
-      status: 110,
-      gestor: 135,
-      region: 120,
-      actions: 75,
+      code: 80,
+      name: isLista ? 440 : 300,
+      kind: 110,
+      parent: 160,
+      start: 125,
+      end: 125,
+      duration: 105,
+      progress: 130,
+      status: 125,
+      gestor: 165,
+      region: 140,
+      actions: 80,
     };
 
     customCols.forEach((col) => {
-      calibratedWidths[col.key] = 130;
+      calibratedWidths[col.key] = 140;
     });
 
     const pristineCols: ColKey[] = isLista ? [...LISTA_PRESET_COLS] : [...GANTT_PRESET_COLS];
@@ -1768,16 +1768,21 @@ export default function CronogramaGanttView({
     setColWidths(calibratedWidths as any);
     setVisibleCols(pristineCols);
 
+    // Reiniciar scroll horizontal para que la primera columna jamás quede fuera de vista
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+    if (tableHeadRef.current) tableHeadRef.current.scrollLeft = 0;
+    if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
+
     try {
       const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
       localStorage.setItem(storageKey, JSON.stringify(pristineCols));
-      localStorage.setItem('qaway-gantt-cols-v3', JSON.stringify(calibratedWidths));
+      localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(calibratedWidths));
     } catch {
       /* almacenamiento no disponible */
     }
 
     notify(
-      `Columnas y anchos ajustados perfectamente para ${isLista ? 'Modo Lista' : 'Modo Gantt'}`
+      `Columnas ordenadas y anchos ajustados al contenido óptimo (${isLista ? 'Modo Lista' : 'Modo Gantt'})`
     );
   };
   const toggleMenu = (key: FilterMenuKey) => {
@@ -1908,7 +1913,7 @@ export default function CronogramaGanttView({
       setResizingCol(null);
       document.body.classList.remove('gantt-resizing');
       try {
-        localStorage.setItem('qaway-gantt-cols-v3', JSON.stringify(colRef.current));
+        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(colRef.current));
       } catch {
         /* almacenamiento no disponible */
       }
