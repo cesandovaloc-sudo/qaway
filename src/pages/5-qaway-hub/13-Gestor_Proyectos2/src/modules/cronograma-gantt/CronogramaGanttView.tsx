@@ -43,6 +43,7 @@ import {
   FolderOpen,
   FolderPlus,
   Globe,
+  Hash,
   HelpCircle,
   Layers3,
   LayoutDashboard,
@@ -66,11 +67,13 @@ import {
   Search,
   ShieldCheck,
   SlidersHorizontal,
+  Tag,
   Target,
   Trash2,
   Undo2,
   Redo2,
   Upload,
+  User,
   UserCheck,
   UserPlus,
   Users,
@@ -3288,20 +3291,24 @@ export default function CronogramaGanttView({
                         />
                         <div className="cols-type-grid">
                           {[
-                            { t: 'text', l: '📝 Texto' },
-                            { t: 'percent', l: '📊 Gráfico %' },
-                            { t: 'number', l: '🔢 Número' },
-                            { t: 'select', l: '🏷️ Etiqueta' },
-                            { t: 'date', l: '📅 Fecha' },
-                            { t: 'person', l: '👤 Persona' },
+                            { t: 'text', l: 'Texto', icon: <FileText size={12} /> },
+                            { t: 'percent', l: 'Gráfico %', icon: <Percent size={12} /> },
+                            { t: 'number', l: 'Número', icon: <Hash size={12} /> },
+                            { t: 'select', l: 'Etiqueta', icon: <Tag size={12} /> },
+                            { t: 'date', l: 'Fecha', icon: <CalendarDays size={12} /> },
+                            { t: 'person', l: 'Persona', icon: <User size={12} /> },
                           ].map((chip) => (
                             <button
                               key={chip.t}
                               type="button"
                               className={`cols-type-chip ${newColType === chip.t ? 'active' : ''}`}
-                              onClick={() => setNewColType(chip.t as any)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNewColType(chip.t as any);
+                              }}
                             >
-                              {chip.l}
+                              {chip.icon}
+                              <span>{chip.l}</span>
                             </button>
                           ))}
                         </div>
