@@ -66,7 +66,7 @@ import {
   Save,
   Search,
   ShieldCheck,
-  SlidersHorizontal,
+  Columns3,
   Tag,
   Target,
   Trash2,
@@ -3298,7 +3298,7 @@ export default function CronogramaGanttView({
                 data-tooltip={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
                 aria-label="Configurar columnas visibles de la tabla"
               >
-                <SlidersHorizontal size={14} />
+                <Columns3 size={14} />
               </button>
 
               {colsMenuOpen && (
@@ -3687,7 +3687,7 @@ export default function CronogramaGanttView({
                     }}
                     title="Configurar columnas visibles"
                   >
-                    <SlidersHorizontal size={13} />
+                    <Columns3 size={13} />
                   </button>
                   <button
                     type="button"
