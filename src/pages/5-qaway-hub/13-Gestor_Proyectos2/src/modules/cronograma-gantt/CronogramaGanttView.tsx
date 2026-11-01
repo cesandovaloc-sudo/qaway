@@ -1878,6 +1878,94 @@ export default function CronogramaGanttView({
   };
 
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // --- Estado y Navegación para Vista Calendario Institucional ---
+  const [calYear, setCalYear] = useState(2026);
+  const [calMonth, setCalMonth] = useState(9); // 0-indexed: 9 = Octubre
+  const [calDay, setCalDay] = useState(27);
+  const [calSubView, setCalSubView] = useState<'Mes' | 'Semana' | 'Día' | 'Agenda'>('Mes');
+
+  const CAL_MONTH_NAMES = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+  const CAL_SHORT_MONTHS = [
+    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+    'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'
+  ];
+
+  const calPeriodLabel = useMemo(() => {
+    if (calSubView === 'Mes' || calSubView === 'Agenda') {
+      return `${CAL_MONTH_NAMES[calMonth]} ${calYear}`;
+    }
+    if (calSubView === 'Semana') {
+      const current = new Date(calYear, calMonth, calDay);
+      const dayOfWeek = (current.getDay() + 6) % 7;
+      const monday = new Date(current);
+      monday.setDate(current.getDate() - dayOfWeek);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${pad(monday.getDate())} – ${pad(sunday.getDate())} ${CAL_SHORT_MONTHS[sunday.getMonth()]}, ${sunday.getFullYear()}`;
+    }
+    if (calSubView === 'Día') {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${pad(calDay)} ${CAL_SHORT_MONTHS[calMonth]} ${calYear}`;
+    }
+    return `${CAL_MONTH_NAMES[calMonth]} ${calYear}`;
+  }, [calSubView, calYear, calMonth, calDay]);
+
+  const handlePrevCalPeriod = () => {
+    if (calSubView === 'Mes' || calSubView === 'Agenda') {
+      if (calMonth === 0) {
+        setCalMonth(11);
+        setCalYear((y) => y - 1);
+      } else {
+        setCalMonth((m) => m - 1);
+      }
+    } else if (calSubView === 'Semana') {
+      const cur = new Date(calYear, calMonth, calDay);
+      cur.setDate(cur.getDate() - 7);
+      setCalYear(cur.getFullYear());
+      setCalMonth(cur.getMonth());
+      setCalDay(cur.getDate());
+    } else if (calSubView === 'Día') {
+      const cur = new Date(calYear, calMonth, calDay);
+      cur.setDate(cur.getDate() - 1);
+      setCalYear(cur.getFullYear());
+      setCalMonth(cur.getMonth());
+      setCalDay(cur.getDate());
+    }
+  };
+
+  const handleNextCalPeriod = () => {
+    if (calSubView === 'Mes' || calSubView === 'Agenda') {
+      if (calMonth === 11) {
+        setCalMonth(0);
+        setCalYear((y) => y + 1);
+      } else {
+        setCalMonth((m) => m + 1);
+      }
+    } else if (calSubView === 'Semana') {
+      const cur = new Date(calYear, calMonth, calDay);
+      cur.setDate(cur.getDate() + 7);
+      setCalYear(cur.getFullYear());
+      setCalMonth(cur.getMonth());
+      setCalDay(cur.getDate());
+    } else if (calSubView === 'Día') {
+      const cur = new Date(calYear, calMonth, calDay);
+      cur.setDate(cur.getDate() + 1);
+      setCalYear(cur.getFullYear());
+      setCalMonth(cur.getMonth());
+      setCalDay(cur.getDate());
+    }
+  };
+
+  const handleTodayCal = () => {
+    setCalYear(2026);
+    setCalMonth(9);
+    setCalDay(27);
+  };
   const scrollRef = useRef<HTMLDivElement>(null);
   const headScrollRef = useRef<HTMLDivElement>(null);
   const tableHeadRef = useRef<HTMLDivElement>(null);
@@ -3034,23 +3122,153 @@ export default function CronogramaGanttView({
               )}
             </div>
 
+            {/* Filtro Estado (Específico Vista Calendario Institucional) */}
+            {viewMode === 'calendario' && (
+              <div className="filter-dropdown-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
+                    stateFilter !== 'Todos' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('state')}
+                >
+                  <div className="filter-card-copy">
+                    <small>Estado</small>
+                    <span>{stateFilter === 'Todos' ? 'Todos' : stateFilter}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'state' && (
+                  <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                    <div className="filter-popover-title">Filtrar por Estado</div>
+                    <div className="filter-popover-list">
+                      {[
+                        { value: 'Todos', label: 'Todos los Estados' },
+                        { value: 'Pendiente', label: 'Pendiente' },
+                        { value: 'En proceso', label: 'En proceso' },
+                        { value: 'Con retraso', label: 'Con retraso' },
+                        { value: 'Completado', label: 'Completado' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={`filter-item-btn ${stateFilter === opt.value ? 'selected' : ''}`}
+                          onClick={() => {
+                            setStateFilter(opt.value);
+                            closeMenus();
+                          }}
+                        >
+                          <span>{opt.label}</span>
+                          {stateFilter === opt.value && <Check size={14} className="item-check" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Botón Limpiar para Calendario */}
+            {viewMode === 'calendario' && (
+              <button
+                type="button"
+                className="btn secondary clear-btn"
+                onClick={() => {
+                  setSearch('');
+                  setStateFilter('Todos');
+                  setRegionFilter('Todas');
+                  setGestorFilter('Todos');
+                  handleTodayCal();
+                  closeMenus();
+                  notify('Filtros del calendario restablecidos');
+                }}
+                style={{
+                  height: '42px',
+                  padding: '0 12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  color: '#475569',
+                  borderRadius: '10px',
+                }}
+                title="Limpiar filtros del calendario"
+              >
+                <RotateCcw size={14} />
+                <span>Limpiar</span>
+              </button>
+            )}
+
+            {/* Navegación temporal y selector de subvista para Calendario */}
+            {viewMode === 'calendario' && (
+              <>
+                <div className="filter-group-divider" aria-hidden="true" />
+                <div className="timeline-nav" title="Navegar por el calendario">
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={handlePrevCalPeriod}
+                    title="Período anterior"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="cal-nav-label" style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a', padding: '0 8px', whiteSpace: 'nowrap' }}>
+                    {calPeriodLabel}
+                  </span>
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={handleNextCalPeriod}
+                    title="Período siguiente"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="today-pill"
+                    onClick={handleTodayCal}
+                    title="Ir a hoy (Octubre 2026)"
+                  >
+                    Hoy
+                  </button>
+                </div>
+
+                <div className="zoom">
+                  {(['Mes', 'Semana', 'Día', 'Agenda'] as const).map((v) => (
+                    <button
+                      type="button"
+                      key={v}
+                      className={calSubView === v ? 'active' : ''}
+                      onClick={() => setCalSubView(v)}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
-            <button
-              type="button"
-              className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
-              onClick={() => setAdvancedFiltersOpen((v) => !v)}
-              data-tooltip="Filtros avanzados"
-              aria-label="Condiciones de filtrado avanzado"
-            >
-              <Filter size={15} />
-              {customRules.length > 0 && (
-                <span className="custom-filter-counter-badge">{customRules.length}</span>
-              )}
-            </button>
+            {viewMode !== 'calendario' && (
+              <button
+                type="button"
+                className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
+                onClick={() => setAdvancedFiltersOpen((v) => !v)}
+                data-tooltip="Filtros avanzados"
+                aria-label="Condiciones de filtrado avanzado"
+              >
+                <Filter size={15} />
+                {customRules.length > 0 && (
+                  <span className="custom-filter-counter-badge">{customRules.length}</span>
+                )}
+              </button>
+            )}
 
             {/* Separador vertical: Filtros de datos | Tiempo Gantt */}
-            <div className="filter-group-divider" aria-hidden="true" />
+            {viewMode !== 'calendario' && <div className="filter-group-divider" aria-hidden="true" />}
             {/* Rango de Fechas Operativo con Popover Redondeado Moderno (Cero calendarios nativos rectos) */}
+            {viewMode !== 'calendario' && (
             <div className="filter-dropdown-wrap date-range-wrap">
               <button
                 type="button"
@@ -3216,6 +3434,7 @@ export default function CronogramaGanttView({
                 </div>
               )}
             </div>
+            )}
 
             {/* Controles exclusivos de visualización Gantt (Línea de tiempo y zoom) */}
             {viewMode === 'gantt' && (
@@ -3330,186 +3549,191 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
-            <button
-              type="button"
-              className="btn secondary qm-btn-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                resetColWidths();
-              }}
-              data-tooltip="Ajustar anchos de columnas automáticamente"
-              aria-label="Ajustar anchos de columnas al contenido"
-            >
-              <ArrowLeftRight size={14} />
-            </button>
+            {/* Controles de columnas y restablecimiento exclusivo para Gantt y Lista */}
+            {viewMode !== 'calendario' && (
+              <>
+                {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
+                <button
+                  type="button"
+                  className="btn secondary qm-btn-icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetColWidths();
+                  }}
+                  data-tooltip="Ajustar anchos de columnas automáticamente"
+                  aria-label="Ajustar anchos de columnas al contenido"
+                >
+                  <ArrowLeftRight size={14} />
+                </button>
 
-            {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base */}
-            <button
-              type="button"
-              className="btn secondary qm-btn-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                freezeBaselines();
-              }}
-              data-tooltip="Fijar línea base (fechas actuales) en registros sin línea base"
-              aria-label="Fijar línea base del cronograma"
-            >
-              <Anchor size={14} />
-            </button>
+                {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base */}
+                <button
+                  type="button"
+                  className="btn secondary qm-btn-icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    freezeBaselines();
+                  }}
+                  data-tooltip="Fijar línea base (fechas actuales) en registros sin línea base"
+                  aria-label="Fijar línea base del cronograma"
+                >
+                  <Anchor size={14} />
+                </button>
 
-            {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion) */}
-            <div className="filter-dropdown-wrap cols-dropdown-wrap">
-              <button
-                type="button"
-                className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setColsMenuOpen((v) => !v);
-                }}
-                data-tooltip={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
-                aria-label="Configurar columnas visibles de la tabla"
-              >
-                <Columns3 size={14} />
-              </button>
+                {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion) */}
+                <div className="filter-dropdown-wrap cols-dropdown-wrap">
+                  <button
+                    type="button"
+                    className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setColsMenuOpen((v) => !v);
+                    }}
+                    data-tooltip={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
+                    aria-label="Configurar columnas visibles de la tabla"
+                  >
+                    <Columns3 size={14} />
+                  </button>
 
-              {colsMenuOpen && (
-                <div className="cols-popover" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-                  <div className="cols-pop-head">
-                    <strong>Columnas de la Tabla</strong>
-                    <button type="button" onClick={() => setColsMenuOpen(false)}>
-                      <X size={13} />
-                    </button>
-                  </div>
-                  <div className="cols-pop-list">
-                    {[
-                      ...ALL_COL_META,
-                      ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
-                    ].map((col) => {
-                      const isVisible = visibleCols.includes(col.key);
-                      return (
-                        <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
-                          <input
-                            type="checkbox"
-                            checked={isVisible}
-                            disabled={col.fixed}
-                            onChange={() => toggleColVisibility(col.key)}
-                          />
-                          <span>{col.label}</span>
-                          {col.fixed && <small className="fixed-pill">Fija</small>}
-                        </label>
-                      );
-                    })}
-                  </div>
-
-                  {/* Creador de Columna Personalizada estilo Notion */}
-                  <div className="cols-new-col-section">
-                    {!newColFormOpen ? (
-                      <button
-                        type="button"
-                        className="cols-new-col-toggle-btn"
-                        onClick={() => setNewColFormOpen(true)}
-                      >
-                        <Plus size={13} />
-                        <span>Nueva columna personalizada</span>
-                      </button>
-                    ) : (
-                      <div className="cols-new-col-form">
-                        <input
-                          type="text"
-                          className="cols-new-col-input"
-                          placeholder="Nombre de columna..."
-                          value={newColLabel}
-                          onChange={(e) => setNewColLabel(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleCreateCustomCol();
-                            if (e.key === 'Escape') setNewColFormOpen(false);
-                          }}
-                          autoFocus
-                        />
-                        <div className="cols-type-grid">
-                          {[
-                            { t: 'text', l: 'Texto', icon: <FileText size={12} /> },
-                            { t: 'percent', l: 'Gráfico %', icon: <Percent size={12} /> },
-                            { t: 'number', l: 'Número', icon: <Hash size={12} /> },
-                            { t: 'select', l: 'Etiqueta', icon: <Tag size={12} /> },
-                            { t: 'date', l: 'Fecha', icon: <CalendarDays size={12} /> },
-                            { t: 'person', l: 'Persona', icon: <User size={12} /> },
-                          ].map((chip) => (
-                            <button
-                              key={chip.t}
-                              type="button"
-                              className={`cols-type-chip ${newColType === chip.t ? 'active' : ''}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setNewColType(chip.t as any);
-                              }}
-                            >
-                              {chip.icon}
-                              <span>{chip.l}</span>
-                            </button>
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          className="cols-create-btn"
-                          onClick={handleCreateCustomCol}
-                          disabled={!newColLabel.trim()}
-                        >
-                          Crear columna
+                  {colsMenuOpen && (
+                    <div className="cols-popover" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                      <div className="cols-pop-head">
+                        <strong>Columnas de la Tabla</strong>
+                        <button type="button" onClick={() => setColsMenuOpen(false)}>
+                          <X size={13} />
                         </button>
                       </div>
-                    )}
-                  </div>
+                      <div className="cols-pop-list">
+                        {[
+                          ...ALL_COL_META,
+                          ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
+                        ].map((col) => {
+                          const isVisible = visibleCols.includes(col.key);
+                          return (
+                            <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
+                              <input
+                                type="checkbox"
+                                checked={isVisible}
+                                disabled={col.fixed}
+                                onChange={() => toggleColVisibility(col.key)}
+                              />
+                              <span>{col.label}</span>
+                              {col.fixed && <small className="fixed-pill">Fija</small>}
+                            </label>
+                          );
+                        })}
+                      </div>
 
-                  <div className="cols-pop-foot">
-                    <button
-                      type="button"
-                      className="cols-reorder-btn"
-                      onClick={() => {
-                        resetColWidths();
-                        setColsMenuOpen(false);
-                      }}
-                    >
-                      <ArrowLeftRight size={12} />
-                      <span>Ajustar anchos al contenido</span>
-                    </button>
-                  </div>
+                      {/* Creador de Columna Personalizada estilo Notion */}
+                      <div className="cols-new-col-section">
+                        {!newColFormOpen ? (
+                          <button
+                            type="button"
+                            className="cols-new-col-toggle-btn"
+                            onClick={() => setNewColFormOpen(true)}
+                          >
+                            <Plus size={13} />
+                            <span>Nueva columna personalizada</span>
+                          </button>
+                        ) : (
+                          <div className="cols-new-col-form">
+                            <input
+                              type="text"
+                              className="cols-new-col-input"
+                              placeholder="Nombre de columna..."
+                              value={newColLabel}
+                              onChange={(e) => setNewColLabel(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleCreateCustomCol();
+                                if (e.key === 'Escape') setNewColFormOpen(false);
+                              }}
+                              autoFocus
+                            />
+                            <div className="cols-type-grid">
+                              {[
+                                { t: 'text', l: 'Texto', icon: <FileText size={12} /> },
+                                { t: 'percent', l: 'Gráfico %', icon: <Percent size={12} /> },
+                                { t: 'number', l: 'Número', icon: <Hash size={12} /> },
+                                { t: 'select', l: 'Etiqueta', icon: <Tag size={12} /> },
+                                { t: 'date', l: 'Fecha', icon: <CalendarDays size={12} /> },
+                                { t: 'person', l: 'Persona', icon: <User size={12} /> },
+                              ].map((chip) => (
+                                <button
+                                  key={chip.t}
+                                  type="button"
+                                  className={`cols-type-chip ${newColType === chip.t ? 'active' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setNewColType(chip.t as any);
+                                  }}
+                                >
+                                  {chip.icon}
+                                  <span>{chip.l}</span>
+                                </button>
+                              ))}
+                            </div>
+                            <button
+                              type="button"
+                              className="cols-create-btn"
+                              onClick={handleCreateCustomCol}
+                              disabled={!newColLabel.trim()}
+                            >
+                              Crear columna
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="cols-pop-foot">
+                        <button
+                          type="button"
+                          className="cols-reorder-btn"
+                          onClick={() => {
+                            resetColWidths();
+                            setColsMenuOpen(false);
+                          }}
+                        >
+                          <ArrowLeftRight size={12} />
+                          <span>Ajustar anchos al contenido</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="filter-group-divider" aria-hidden="true" />
+                <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Zona 4: Restablecimiento Integral de Filtros y Orden */}
-            <button
-              type="button"
-              className="btn secondary clear-btn qm-btn-icon"
-              onClick={() => {
-                setSearch('');
-                setStateFilter('Todos');
-                setTypeFilter('Todos');
-                setRegionFilter('Todas');
-                setPhaseFilter('Todas');
-                setGestorFilter('Todos');
-                setRangeFrom(DEFAULT_RANGE.from);
-                setRangeTo(DEFAULT_RANGE.to);
-                setTab('Todos');
-                setCustomRules([]);
-                setShowBaseline(false);
-                setShowCriticalPath(false);
-                engine.clearAllFilters();
-                engine.clearAllSort();
-                resetColWidths();
-                closeMenus();
-                scrollToDate(RANGE_MIN);
-                notify('Filtros, orden y visualización restablecidos');
-              }}
-              data-tooltip="Restablecer filtros y orden"
-              aria-label="Restablecer filtros, orden y rango temporal"
-            >
-              <RotateCcw size={15} />
-            </button>
+                {/* Zona 4: Restablecimiento Integral de Filtros y Orden */}
+                <button
+                  type="button"
+                  className="btn secondary clear-btn qm-btn-icon"
+                  onClick={() => {
+                    setSearch('');
+                    setStateFilter('Todos');
+                    setTypeFilter('Todos');
+                    setRegionFilter('Todas');
+                    setPhaseFilter('Todas');
+                    setGestorFilter('Todos');
+                    setRangeFrom(DEFAULT_RANGE.from);
+                    setRangeTo(DEFAULT_RANGE.to);
+                    setTab('Todos');
+                    setCustomRules([]);
+                    setShowBaseline(false);
+                    setShowCriticalPath(false);
+                    engine.clearAllFilters();
+                    engine.clearAllSort();
+                    resetColWidths();
+                    closeMenus();
+                    scrollToDate(RANGE_MIN);
+                    notify('Filtros, orden y visualización restablecidos');
+                  }}
+                  data-tooltip="Restablecer filtros y orden"
+                  aria-label="Restablecer filtros, orden y rango temporal"
+                >
+                  <RotateCcw size={15} />
+                </button>
+              </>
+            )}
           </div>
 
           {/* Fila extra expandible de Filtros Personalizados */}
@@ -5145,6 +5369,14 @@ export default function CronogramaGanttView({
               items={shown}
               onSelectItem={openEditorForItem}
               formatDatePE={formatDatePE}
+              calYear={calYear}
+              calMonth={calMonth}
+              calDay={calDay}
+              calSubView={calSubView}
+              onNavPrev={handlePrevCalPeriod}
+              onNavNext={handleNextCalPeriod}
+              onNavToday={handleTodayCal}
+              onSubViewChange={setCalSubView}
             />
           )}
 
