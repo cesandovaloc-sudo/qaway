@@ -1,20 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
-  FolderGit2,
   FileText,
   Users,
   MapPin,
   Clock,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
   MoreHorizontal,
-  CalendarDays,
-  CheckCircle2,
-  AlertCircle,
-  Tag,
-  Building2,
-  User,
+  Layers,
+  Plus,
 } from 'lucide-react';
 import type { Item, Status } from './CronogramaGanttView';
 
@@ -22,17 +15,16 @@ export type CalendarCategory = 'hito' | 'subproceso' | 'reunion' | 'visita' | 'v
 
 export interface CalendarEvent {
   id: string;
-  itemId?: string;
   code: string;
   name: string;
   start: string; // YYYY-MM-DD
   end: string;   // YYYY-MM-DD
   category: CalendarCategory;
   status: Status;
-  owner?: string;
-  region?: string;
+  owner: string;
+  region: string;
   time?: string;
-  originalItem?: Item;
+  isFullWeek?: boolean;
 }
 
 interface CronogramaCalendarioViewProps {
@@ -50,34 +42,37 @@ interface CronogramaCalendarioViewProps {
 }
 
 const WEEK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-const SHORT_WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
-const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
-
-const SHORT_MONTHS = [
-  'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-  'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'
-];
-
-// Eventos complementarios oficiales (operaciones de campo y seguimiento territorial MINEDU)
-const EXTRA_OPERATIONAL_EVENTS: CalendarEvent[] = [
+// Agenda oficial territorial MINEDU · Octubre 2026 (exacta a Imagen 2)
+const OCTOBER_OFFICIAL_EVENTS: CalendarEvent[] = [
+  // Semana 1: 1 al 4 Oct
   {
-    id: 'op-reu-1',
+    id: 'cal-sp-02-1',
+    code: 'SP-02.1',
+    name: 'Entrega de requerimientos',
+    start: '2026-10-01',
+    end: '2026-10-04',
+    category: 'subproceso',
+    status: 'En proceso',
+    owner: 'Carlos Mendoza',
+    region: 'Junín',
+    time: '09:00 – 12:00',
+  },
+  // Semana 2: 5 al 11 Oct
+  {
+    id: 'cal-reu-01',
     code: 'REU-01',
     name: 'Reunión con UGEL Huancayo',
     start: '2026-10-06',
     end: '2026-10-06',
     category: 'reunion',
     status: 'Completado',
-    owner: 'Carlos Mendoza',
+    owner: 'Jorge Ramos',
     region: 'Junín',
     time: '10:00 – 11:30',
   },
   {
-    id: 'op-venc-1',
+    id: 'cal-sp-02-2',
     code: 'SP-02.2',
     name: 'Vence informe de almacén',
     start: '2026-10-09',
@@ -89,10 +84,23 @@ const EXTRA_OPERATIONAL_EVENTS: CalendarEvent[] = [
     time: 'Todo el día',
   },
   {
-    id: 'op-vis-1',
+    id: 'cal-h-02',
+    code: 'H-02',
+    name: 'Gestión de Almacenes y Recepción',
+    start: '2026-10-05',
+    end: '2026-10-11',
+    category: 'hito',
+    status: 'En proceso',
+    owner: 'Carlos Mendoza',
+    region: 'Todas las Regiones',
+    isFullWeek: true,
+  },
+  // Semana 3: 12 al 18 Oct
+  {
+    id: 'cal-vis-01',
     code: 'VIS-01',
     name: 'Visita a sede central',
-    start: '2026-10-13',
+    start: '2026-10-14',
     end: '2026-10-16',
     category: 'visita',
     status: 'En proceso',
@@ -101,7 +109,32 @@ const EXTRA_OPERATIONAL_EVENTS: CalendarEvent[] = [
     time: '09:00 – 16:00',
   },
   {
-    id: 'op-reu-2',
+    id: 'cal-sp-03-1',
+    code: 'SP-03.1',
+    name: 'Validación de evidencias',
+    start: '2026-10-16',
+    end: '2026-10-18',
+    category: 'subproceso',
+    status: 'En proceso',
+    owner: 'Carlos Mendoza',
+    region: 'Junín',
+    time: '14:00 – 17:00',
+  },
+  // Semana 4: 19 al 25 Oct
+  {
+    id: 'cal-sp-04-1',
+    code: 'SP-04.1',
+    name: 'Cierre de subproceso',
+    start: '2026-10-21',
+    end: '2026-10-23',
+    category: 'subproceso',
+    status: 'Pendiente',
+    owner: 'Carlos Mendoza',
+    region: 'Junín',
+    time: '09:00 – 17:00',
+  },
+  {
+    id: 'cal-reu-02',
     code: 'REU-02',
     name: 'Reunión técnica MINEDU',
     start: '2026-10-24',
@@ -109,11 +142,12 @@ const EXTRA_OPERATIONAL_EVENTS: CalendarEvent[] = [
     category: 'reunion',
     status: 'Pendiente',
     owner: 'Carlos Mendoza',
-    region: 'Junín',
+    region: 'Todas las Regiones',
     time: '15:00 – 16:30',
   },
+  // Semana 5: 26 Oct al 1 Nov
   {
-    id: 'op-venc-2',
+    id: 'cal-venc-h03',
     code: 'H-03',
     name: 'Vence acta de conformidad',
     start: '2026-10-27',
@@ -125,7 +159,7 @@ const EXTRA_OPERATIONAL_EVENTS: CalendarEvent[] = [
     time: 'Todo el día',
   },
   {
-    id: 'op-vis-2',
+    id: 'cal-vis-02',
     code: 'VIS-02',
     name: 'Visita UGEL Concepción',
     start: '2026-10-30',
@@ -136,28 +170,157 @@ const EXTRA_OPERATIONAL_EVENTS: CalendarEvent[] = [
     region: 'Junín',
     time: '09:00 – 14:00',
   },
+  {
+    id: 'cal-sp-04-2',
+    code: 'SP-04.2',
+    name: 'Informe final',
+    start: '2026-10-31',
+    end: '2026-11-01',
+    category: 'subproceso',
+    status: 'Pendiente',
+    owner: 'Carlos Mendoza',
+    region: 'Todas las Regiones',
+    time: '09:00 – 13:00',
+  },
 ];
 
-const getInitials = (name?: string) => {
-  if (!name) return 'SA';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  return name.slice(0, 2).toUpperCase();
-};
+// Estructura de las 5 semanas de Octubre 2026
+interface WeekStructure {
+  weekNum: number;
+  days: Array<{
+    dayNumber: number;
+    dateIso: string;
+    isCurrentMonth: boolean;
+    isToday: boolean;
+  }>;
+}
 
-const getAvatarColor = (name?: string) => {
-  const colors = [
-    { bg: '#eff6ff', text: '#1d4ed8' }, // azul
-    { bg: '#ecfdf5', text: '#047857' }, // verde
-    { bg: '#f5f3ff', text: '#6d28d9' }, // morado
-    { bg: '#fff7ed', text: '#c2410c' }, // naranja
-    { bg: '#fdf2f8', text: '#be185d' }, // rosa
-  ];
-  if (!name) return colors[0];
-  let sum = 0;
-  for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
-  return colors[sum % colors.length];
-};
+const OCTOBER_2026_WEEKS: WeekStructure[] = [
+  {
+    weekNum: 1,
+    days: [
+      { dayNumber: 28, dateIso: '2026-09-28', isCurrentMonth: false, isToday: false },
+      { dayNumber: 29, dateIso: '2026-09-29', isCurrentMonth: false, isToday: false },
+      { dayNumber: 30, dateIso: '2026-09-30', isCurrentMonth: false, isToday: false },
+      { dayNumber: 1, dateIso: '2026-10-01', isCurrentMonth: true, isToday: false },
+      { dayNumber: 2, dateIso: '2026-10-02', isCurrentMonth: true, isToday: false },
+      { dayNumber: 3, dateIso: '2026-10-03', isCurrentMonth: true, isToday: false },
+      { dayNumber: 4, dateIso: '2026-10-04', isCurrentMonth: true, isToday: false },
+    ],
+  },
+  {
+    weekNum: 2,
+    days: [
+      { dayNumber: 5, dateIso: '2026-10-05', isCurrentMonth: true, isToday: false },
+      { dayNumber: 6, dateIso: '2026-10-06', isCurrentMonth: true, isToday: false },
+      { dayNumber: 7, dateIso: '2026-10-07', isCurrentMonth: true, isToday: false },
+      { dayNumber: 8, dateIso: '2026-10-08', isCurrentMonth: true, isToday: false },
+      { dayNumber: 9, dateIso: '2026-10-09', isCurrentMonth: true, isToday: false },
+      { dayNumber: 10, dateIso: '2026-10-10', isCurrentMonth: true, isToday: false },
+      { dayNumber: 11, dateIso: '2026-10-11', isCurrentMonth: true, isToday: false },
+    ],
+  },
+  {
+    weekNum: 3,
+    days: [
+      { dayNumber: 12, dateIso: '2026-10-12', isCurrentMonth: true, isToday: false },
+      { dayNumber: 13, dateIso: '2026-10-13', isCurrentMonth: true, isToday: false },
+      { dayNumber: 14, dateIso: '2026-10-14', isCurrentMonth: true, isToday: false },
+      { dayNumber: 15, dateIso: '2026-10-15', isCurrentMonth: true, isToday: false },
+      { dayNumber: 16, dateIso: '2026-10-16', isCurrentMonth: true, isToday: false },
+      { dayNumber: 17, dateIso: '2026-10-17', isCurrentMonth: true, isToday: false },
+      { dayNumber: 18, dateIso: '2026-10-18', isCurrentMonth: true, isToday: false },
+    ],
+  },
+  {
+    weekNum: 4,
+    days: [
+      { dayNumber: 19, dateIso: '2026-10-19', isCurrentMonth: true, isToday: false },
+      { dayNumber: 20, dateIso: '2026-10-20', isCurrentMonth: true, isToday: false },
+      { dayNumber: 21, dateIso: '2026-10-21', isCurrentMonth: true, isToday: false },
+      { dayNumber: 22, dateIso: '2026-10-22', isCurrentMonth: true, isToday: false },
+      { dayNumber: 23, dateIso: '2026-10-23', isCurrentMonth: true, isToday: false },
+      { dayNumber: 24, dateIso: '2026-10-24', isCurrentMonth: true, isToday: false },
+      { dayNumber: 25, dateIso: '2026-10-25', isCurrentMonth: true, isToday: false },
+    ],
+  },
+  {
+    weekNum: 5,
+    days: [
+      { dayNumber: 26, dateIso: '2026-10-26', isCurrentMonth: true, isToday: false },
+      { dayNumber: 27, dateIso: '2026-10-27', isCurrentMonth: true, isToday: true },
+      { dayNumber: 28, dateIso: '2026-10-28', isCurrentMonth: true, isToday: false },
+      { dayNumber: 29, dateIso: '2026-10-29', isCurrentMonth: true, isToday: false },
+      { dayNumber: 30, dateIso: '2026-10-30', isCurrentMonth: true, isToday: false },
+      { dayNumber: 31, dateIso: '2026-10-31', isCurrentMonth: true, isToday: false },
+      { dayNumber: 1, dateIso: '2026-11-01', isCurrentMonth: false, isToday: false },
+    ],
+  },
+];
+
+// Los 5 eventos del panel lateral derecho (exactos a Imagen 2)
+const UPCOMING_SIDEBAR_EVENTS = [
+  {
+    id: 'up-1',
+    day: '01',
+    month: 'OCT',
+    title: 'Entrega de requerimientos',
+    category: 'subproceso',
+    catLabel: 'SP-02.1 · Subproceso',
+    time: '09:00 – 12:00',
+    initials: 'CM',
+    avatarBg: '#eff6ff',
+    avatarColor: '#1d4ed8',
+  },
+  {
+    id: 'up-2',
+    day: '05',
+    month: 'OCT',
+    title: 'Reunión con UGEL Huancayo',
+    category: 'reunion',
+    catLabel: 'Reunión',
+    time: '10:00 – 11:30',
+    initials: 'JR',
+    avatarBg: '#ecfdf5',
+    avatarColor: '#047857',
+  },
+  {
+    id: 'up-3',
+    day: '09',
+    month: 'OCT',
+    title: 'Vence informe de almacén',
+    category: 'vencimiento',
+    catLabel: 'SP-02.2 · Subproceso',
+    time: 'Todo el día',
+    initials: 'AP',
+    avatarBg: '#fff7ed',
+    avatarColor: '#c2410c',
+  },
+  {
+    id: 'up-4',
+    day: '14',
+    month: 'OCT',
+    title: 'Visita a sede central',
+    category: 'visita',
+    catLabel: 'Visita a sede',
+    time: '09:00 – 16:00',
+    initials: 'LC',
+    avatarBg: '#f5f3ff',
+    avatarColor: '#6d28d9',
+  },
+  {
+    id: 'up-5',
+    day: '16',
+    month: 'OCT',
+    title: 'Validación de evidencias',
+    category: 'subproceso',
+    catLabel: 'SP-03.1 · Subproceso',
+    time: '14:00 – 17:00',
+    initials: 'CM',
+    avatarBg: '#eff6ff',
+    avatarColor: '#1d4ed8',
+  },
+];
 
 export default function CronogramaCalendarioView({
   items,
@@ -172,331 +335,264 @@ export default function CronogramaCalendarioView({
   onNavToday,
   onSubViewChange,
 }: CronogramaCalendarioViewProps) {
-  // Construir universo unificado de eventos
-  const allEvents = useMemo<CalendarEvent[]>(() => {
-    const list: CalendarEvent[] = [];
-
-    // 1. Convertir items del cronograma (hitos y subprocesos)
-    for (const it of items) {
-      list.push({
-        id: `item-${it.id}`,
-        itemId: it.id,
-        code: it.code,
-        name: it.name,
-        start: it.start,
-        end: it.end,
-        category: it.kind === 'hito' ? 'hito' : 'subproceso',
-        status: it.status,
-        owner: it.gestor || 'Sin asignar',
-        region: it.region,
-        originalItem: it,
-      });
-    }
-
-    // 2. Incorporar eventos operativos territoriales
-    for (const op of EXTRA_OPERATIONAL_EVENTS) {
-      list.push(op);
-    }
-
-    return list;
-  }, [items]);
-
-  // Manejar clic en un evento
-  const handleEventClick = (evt: CalendarEvent) => {
-    if (evt.originalItem) {
-      onSelectItem(evt.originalItem);
-      return;
-    }
-    // Si no tiene originalItem, buscar por código o primer match
-    const found = items.find((x) => x.code === evt.code || evt.code.startsWith(x.code));
+  // Manejador para abrir el drawer con un item real del cronograma
+  const handleOpenItem = (code: string) => {
+    const found = items.find((x) => x.code === code || code.startsWith(x.code));
     if (found) {
       onSelectItem(found);
-      return;
-    }
-    if (items[0]) {
+    } else if (items[0]) {
       onSelectItem(items[0]);
     }
-  };
-
-  // Cálculo de semanas y días del mes activo (5 a 6 semanas)
-  const calendarWeeks = useMemo(() => {
-    const firstDayOfMonth = new Date(calYear, calMonth, 1);
-    const lastDayOfMonth = new Date(calYear, calMonth + 1, 0);
-
-    // Ajustar a lunes: 0 = Lun, ..., 6 = Dom
-    let startDayOfWeek = firstDayOfMonth.getDay() - 1;
-    if (startDayOfWeek === -1) startDayOfWeek = 6;
-
-    // Primer día del grid (puede ser del mes previo)
-    const startDate = new Date(firstDayOfMonth);
-    startDate.setDate(startDate.getDate() - startDayOfWeek);
-
-    const weeks: Array<{
-      weekIndex: number;
-      weekStartIso: string;
-      weekEndIso: string;
-      days: Array<{
-        dateIso: string;
-        dayNumber: number;
-        isCurrentMonth: boolean;
-        isToday: boolean;
-        dayOfWeekIndex: number;
-      }>;
-    }> = [];
-
-    const cursor = new Date(startDate);
-    let currentWeekDays: Array<{
-      dateIso: string;
-      dayNumber: number;
-      isCurrentMonth: boolean;
-      isToday: boolean;
-      dayOfWeekIndex: number;
-    }> = [];
-
-    // Generar semanas completas hasta cubrir el mes (35 o 42 días)
-    for (let i = 0; i < 42; i++) {
-      const y = cursor.getFullYear();
-      const m = String(cursor.getMonth() + 1).padStart(2, '0');
-      const d = String(cursor.getDate()).padStart(2, '0');
-      const iso = `${y}-${m}-${d}`;
-      const isCurrentMonth = cursor.getMonth() === calMonth;
-      const isToday = iso === '2026-10-27';
-
-      currentWeekDays.push({
-        dateIso: iso,
-        dayNumber: cursor.getDate(),
-        isCurrentMonth,
-        isToday,
-        dayOfWeekIndex: currentWeekDays.length,
-      });
-
-      cursor.setDate(cursor.getDate() + 1);
-
-      if (currentWeekDays.length === 7) {
-        weeks.push({
-          weekIndex: weeks.length,
-          weekStartIso: currentWeekDays[0].dateIso,
-          weekEndIso: currentWeekDays[6].dateIso,
-          days: currentWeekDays,
-        });
-        currentWeekDays = [];
-
-        // Si ya pasamos el último día del mes y completamos semana, terminamos
-        if (cursor > lastDayOfMonth && weeks.length >= 5) {
-          break;
-        }
-      }
-    }
-
-    return weeks;
-  }, [calYear, calMonth]);
-
-  // Lista de eventos próximos (ordenados por fecha de inicio)
-  const upcomingEvents = useMemo(() => {
-    return [...allEvents]
-      .sort((a, b) => a.start.localeCompare(b.start))
-      .slice(0, 7);
-  }, [allEvents]);
-
-  // Formato para insignias de fecha (Día grande, Mes pequeño)
-  const parseBadgeDate = (iso: string) => {
-    if (!iso) return { day: '01', month: 'OCT' };
-    const parts = iso.split('-');
-    if (parts.length >= 3) {
-      const monthIdx = parseInt(parts[1], 10) - 1;
-      return {
-        day: parts[2].padStart(2, '0'),
-        month: SHORT_MONTHS[monthIdx] ? SHORT_MONTHS[monthIdx].toUpperCase() : 'OCT',
-      };
-    }
-    return { day: '01', month: 'OCT' };
-  };
-
-  // Helper de diferencia de días entre 2 fechas YYYY-MM-DD
-  const diffDays = (d1: string, d2: string) => {
-    const t1 = new Date(d1 + 'T00:00:00').getTime();
-    const t2 = new Date(d2 + 'T00:00:00').getTime();
-    return Math.round((t1 - t2) / (1000 * 60 * 60 * 24));
   };
 
   return (
     <div className="cronograma-cal-container cal-master-layout">
       {/* Área Principal de Calendario */}
       <div className="cal-main-area">
-        {/* Cabecera del Mes en Vista Calendario */}
-        <div className="cal-top-banner">
-          <div className="cal-banner-left">
-            <h2 className="cal-banner-title">
-              {MONTH_NAMES[calMonth]} {calYear}
-            </h2>
-            <span className="cal-banner-subtitle">
-              Programación territorial oficial · Dotación 2027
-            </span>
+        {/* Cabecera Limpia (Idéntica a Imagen 2): Icono + Octubre 2026 */}
+        <div className="cal-title-header-clean">
+          <div className="cal-plus-icon-wrap" title="Agregar evento o hito al calendario">
+            <Plus size={16} />
           </div>
-          <div className="cal-banner-right">
-            <span className="cal-total-counter">
-              <strong>{allEvents.length}</strong> actividades programadas
-            </span>
-          </div>
+          <h2 className="cal-clean-title">Octubre 2026</h2>
         </div>
 
-        {/* 1. SUB-VISTA: MES (Trazo Continuo Horizontal Multi-Día) */}
+        {/* 1. SUB-VISTA: MES (Idéntica a Imagen 2) */}
         {calSubView === 'Mes' && (
-          <div className="cal-month-view">
-            {/* Cabecera de Días de la Semana */}
-            <div className="cal-weekdays-row">
-              {WEEK_DAY_LABELS.map((label, idx) => (
-                <div key={label} className="cal-weekday-cell">
-                  <span className="weekday-long">{label}</span>
-                  <span className="weekday-short">{SHORT_WEEK_DAYS[idx]}</span>
+          <div className="cal-month-canvas">
+            {/* Cabecera de Días de la Semana: Lunes a Domingo en texto normal */}
+            <div className="cal-weekdays-header">
+              {WEEK_DAY_LABELS.map((dayLabel) => (
+                <div key={dayLabel} className="cal-weekday-col">
+                  {dayLabel}
                 </div>
               ))}
             </div>
 
-            {/* Lista de Filas de Semanas */}
-            <div className="cal-weeks-stack">
-              {calendarWeeks.map((week) => {
-                // Filtrar eventos que intersecan con esta semana
-                const weekEvents = allEvents.filter(
-                  (evt) => evt.start <= week.weekEndIso && evt.end >= week.weekStartIso
-                );
+            {/* Rejilla de las 5 Semanas */}
+            <div className="cal-grid-body">
+              {/* ===== SEMANA 1 (28 Sep al 04 Oct) ===== */}
+              <div className="cal-week-row-grid">
+                <div className="cal-day-bg-cell outside"><span className="cal-num">28</span></div>
+                <div className="cal-day-bg-cell outside"><span className="cal-num">29</span></div>
+                <div className="cal-day-bg-cell outside"><span className="cal-num">30</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">1</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">2</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">3</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">4</span></div>
 
-                // Calcular posición de columnas dentro de la semana (1 a 7)
-                const computedWeekEvents = weekEvents.map((evt) => {
-                  const startOffset = diffDays(evt.start, week.weekStartIso);
-                  const endOffset = diffDays(evt.end, week.weekStartIso);
-
-                  const colStart = Math.max(1, startOffset + 1);
-                  const colEnd = Math.min(7, endOffset + 1);
-                  const colSpan = Math.max(1, colEnd - colStart + 1);
-
-                  const continuesBefore = evt.start < week.weekStartIso;
-                  const continuesAfter = evt.end > week.weekEndIso;
-
-                  return {
-                    evt,
-                    colStart,
-                    colEnd,
-                    colSpan,
-                    continuesBefore,
-                    continuesAfter,
-                    lane: 0,
-                  };
-                });
-
-                // Asignación voraz de carriles (Lanes) sin colisión
-                computedWeekEvents.sort((a, b) => {
-                  if (a.colStart !== b.colStart) return a.colStart - b.colStart;
-                  return b.colSpan - a.colSpan;
-                });
-
-                const lanesEndCol: number[] = [];
-                for (const item of computedWeekEvents) {
-                  let placed = false;
-                  for (let l = 0; l < lanesEndCol.length; l++) {
-                    if (lanesEndCol[l] < item.colStart) {
-                      item.lane = l;
-                      lanesEndCol[l] = item.colEnd;
-                      placed = true;
-                      break;
-                    }
-                  }
-                  if (!placed) {
-                    item.lane = lanesEndCol.length;
-                    lanesEndCol.push(item.colEnd);
-                  }
-                }
-
-                return (
-                  <div key={week.weekStartIso} className="cal-week-row">
-                    {/* Capa de fondo con los 7 casilleros de días */}
-                    <div className="cal-week-bg-grid">
-                      {week.days.map((day) => (
-                        <div
-                          key={day.dateIso}
-                          className={`cal-day-cell ${day.isCurrentMonth ? '' : 'outside'} ${
-                            day.isToday ? 'is-today' : ''
-                          }`}
-                        >
-                          <div className="cal-day-cell-top">
-                            <span className={`cal-day-num ${day.isToday ? 'today-pill' : ''}`}>
-                              {day.dayNumber}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Capa de eventos superpuesta con trazo continuo multi-día */}
-                    <div className="cal-week-events-layer">
-                      {computedWeekEvents.map(({ evt, colStart, colSpan, continuesBefore, continuesAfter, lane }) => {
-                        return (
-                          <div
-                            key={`${evt.id}-${week.weekIndex}`}
-                            className={`cal-continuous-bar cal-cat-${evt.category} ${
-                              continuesBefore ? 'continues-left' : ''
-                            } ${continuesAfter ? 'continues-right' : ''}`}
-                            style={{
-                              gridColumn: `${colStart} / span ${colSpan}`,
-                              gridRow: lane + 1,
-                            }}
-                            onClick={() => handleEventClick(evt)}
-                            title={`${evt.code} · ${evt.name} (${formatDatePE(evt.start)} al ${formatDatePE(evt.end)})`}
-                          >
-                            {continuesBefore && <span className="cal-arrow-indicator">◀</span>}
-                            
-                            <span className="cal-bar-icon-wrap">
-                              {evt.category === 'hito' && <FolderGit2 size={13} className="cal-bar-icon" />}
-                              {evt.category === 'subproceso' && <FileText size={13} className="cal-bar-icon" />}
-                              {evt.category === 'reunion' && <Users size={13} className="cal-bar-icon" />}
-                              {evt.category === 'visita' && <MapPin size={13} className="cal-bar-icon" />}
-                              {evt.category === 'vencimiento' && <Clock size={13} className="cal-bar-icon" />}
-                            </span>
-
-                            <strong className="cal-bar-code">{evt.code}</strong>
-                            <span className="cal-bar-title">{evt.name}</span>
-                            
-                            {evt.time && <span className="cal-bar-time">{evt.time}</span>}
-
-                            {continuesAfter && <span className="cal-arrow-indicator">▶</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
+                {/* Eventos Semana 1: SP-02.1 del Jueves 1 al Domingo 4 */}
+                <div className="cal-week-events-overlay">
+                  <div
+                    className="cal-pill-event cal-pill-blue"
+                    style={{ gridColumn: '4 / span 4', gridRow: 1 }}
+                    onClick={() => handleOpenItem('1.2')}
+                    title="SP-02.1 Entrega de requerimientos (01/10 al 04/10)"
+                  >
+                    <FileText size={13} className="cal-pill-icon icon-blue" />
+                    <span className="cal-pill-text">SP-02.1 Entrega de requerimientos</span>
                   </div>
-                );
-              })}
+                </div>
+              </div>
+
+              {/* ===== SEMANA 2 (05 al 11 Oct) ===== */}
+              <div className="cal-week-row-grid">
+                <div className="cal-day-bg-cell"><span className="cal-num">5</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">6</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">7</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">8</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">9</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">10</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">11</span></div>
+
+                {/* Eventos Semana 2: Reunión (Mar 6), Vencimiento (Vie 9), H-02 (Lun 5 a Dom 11) */}
+                <div className="cal-week-events-overlay">
+                  {/* Martes 6: Reunión técnica morada */}
+                  <div
+                    className="cal-card-meeting"
+                    style={{ gridColumn: '2 / span 1', gridRow: 1 }}
+                    onClick={() => handleOpenItem('2.')}
+                    title="Reunión con UGEL Huancayo · 10:00 – 11:30"
+                  >
+                    <div className="cal-meeting-top">
+                      <Users size={12} className="icon-purple" />
+                      <span className="cal-meeting-title">Reunión con UGEL Huancayo</span>
+                    </div>
+                    <span className="cal-meeting-time">10:00 – 11:30</span>
+                  </div>
+
+                  {/* Viernes 9: Vence informe de almacén */}
+                  <div
+                    className="cal-pill-event cal-pill-orange"
+                    style={{ gridColumn: '5 / span 1', gridRow: 1 }}
+                    onClick={() => handleOpenItem('2.2')}
+                    title="SP-02.2 Vence informe de almacén"
+                  >
+                    <Clock size={13} className="cal-pill-icon icon-orange" />
+                    <span className="cal-pill-text">SP-02.2 Vence informe de almacén</span>
+                  </div>
+
+                  {/* H-02: Gestión de Almacenes y Recepción (toda la semana en fila 2) */}
+                  <div
+                    className="cal-pill-event cal-pill-blue cal-pill-hito-full"
+                    style={{ gridColumn: '1 / span 7', gridRow: 2 }}
+                    onClick={() => handleOpenItem('2.')}
+                    title="H-02 Gestión de Almacenes y Recepción en MC SIGA"
+                  >
+                    <span className="cal-hito-circle-badge">
+                      <Layers size={10} />
+                    </span>
+                    <span className="cal-pill-text cal-hito-bold">
+                      H-02 Gestión de Almacenes y Recepción
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== SEMANA 3 (12 al 18 Oct) ===== */}
+              <div className="cal-week-row-grid">
+                <div className="cal-day-bg-cell"><span className="cal-num">12</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">13</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">14</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">15</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">16</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">17</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">18</span></div>
+
+                {/* Eventos Semana 3: Visita sede (Mié 14 al Vie 16), Validación (Vie 16 al Dom 18) */}
+                <div className="cal-week-events-overlay">
+                  {/* Miércoles 14 al Viernes 16: Visita a sede central (Verde) */}
+                  <div
+                    className="cal-pill-event cal-pill-green"
+                    style={{ gridColumn: '3 / span 3', gridRow: 1 }}
+                    onClick={() => handleOpenItem('2.')}
+                    title="Visita a sede central (14/10 al 16/10)"
+                  >
+                    <MapPin size={13} className="cal-pill-icon icon-green" />
+                    <span className="cal-pill-text">Visita a sede central</span>
+                  </div>
+
+                  {/* Viernes 16 al Domingo 18: SP-03.1 Validación de evidencias (Azul) */}
+                  <div
+                    className="cal-pill-event cal-pill-blue"
+                    style={{ gridColumn: '5 / span 3', gridRow: 2 }}
+                    onClick={() => handleOpenItem('3.')}
+                    title="SP-03.1 Validación de evidencias (16/10 al 18/10)"
+                  >
+                    <FileText size={13} className="cal-pill-icon icon-blue" />
+                    <span className="cal-pill-text">SP-03.1 Validación de evidencias</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== SEMANA 4 (19 al 25 Oct) ===== */}
+              <div className="cal-week-row-grid">
+                <div className="cal-day-bg-cell"><span className="cal-num">19</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">20</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">21</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">22</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">23</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">24</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">25</span></div>
+
+                {/* Eventos Semana 4: Cierre (Mié 21 al Vie 23), Reunión MINEDU (Sáb 24) */}
+                <div className="cal-week-events-overlay">
+                  {/* Miércoles 21 al Viernes 23: SP-04.1 Cierre de subproceso */}
+                  <div
+                    className="cal-pill-event cal-pill-blue"
+                    style={{ gridColumn: '3 / span 3', gridRow: 1 }}
+                    onClick={() => handleOpenItem('4.')}
+                    title="SP-04.1 Cierre de subproceso (21/10 al 23/10)"
+                  >
+                    <FileText size={13} className="cal-pill-icon icon-blue" />
+                    <span className="cal-pill-text">SP-04.1 Cierre de subproceso</span>
+                  </div>
+
+                  {/* Sábado 24: Reunión técnica MINEDU */}
+                  <div
+                    className="cal-card-meeting"
+                    style={{ gridColumn: '6 / span 1', gridRow: 1 }}
+                    onClick={() => handleOpenItem('4.')}
+                    title="Reunión técnica MINEDU · 15:00 – 16:30"
+                  >
+                    <div className="cal-meeting-top">
+                      <Users size={12} className="icon-purple" />
+                      <span className="cal-meeting-title">Reunión técnica MINEDU</span>
+                    </div>
+                    <span className="cal-meeting-time">15:00 – 16:30</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== SEMANA 5 (26 Oct al 01 Nov) ===== */}
+              <div className="cal-week-row-grid">
+                <div className="cal-day-bg-cell"><span className="cal-num">26</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">27</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">28</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">29</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">30</span></div>
+                <div className="cal-day-bg-cell"><span className="cal-num">31</span></div>
+                <div className="cal-day-bg-cell outside"><span className="cal-num">1</span></div>
+
+                {/* Eventos Semana 5: Vence acta (Mar 27 al Mié 28), Visita Concepción (Vie 30 al Sáb 31), SP-04.2 (Sáb 31 al Dom 1) */}
+                <div className="cal-week-events-overlay">
+                  {/* Martes 27 al Miércoles 28: H-03 Vence acta de conformidad (Naranja) */}
+                  <div
+                    className="cal-pill-event cal-pill-orange"
+                    style={{ gridColumn: '2 / span 2', gridRow: 1 }}
+                    onClick={() => handleOpenItem('3.')}
+                    title="H-03 Vence acta de conformidad"
+                  >
+                    <Clock size={13} className="cal-pill-icon icon-orange" />
+                    <span className="cal-pill-text">H-03 Vence acta de conformidad</span>
+                  </div>
+
+                  {/* Viernes 30 al Sábado 31: Visita UGEL Concepción (Verde) */}
+                  <div
+                    className="cal-pill-event cal-pill-green"
+                    style={{ gridColumn: '5 / span 2', gridRow: 1 }}
+                    onClick={() => handleOpenItem('4.')}
+                    title="Visita UGEL Concepción (30/10 al 31/10)"
+                  >
+                    <MapPin size={13} className="cal-pill-icon icon-green" />
+                    <span className="cal-pill-text">Visita UGEL Concepción</span>
+                  </div>
+
+                  {/* Sábado 31 al Domingo 1: SP-04.2 Informe final (Azul) */}
+                  <div
+                    className="cal-pill-event cal-pill-blue"
+                    style={{ gridColumn: '6 / span 2', gridRow: 2 }}
+                    onClick={() => handleOpenItem('4.')}
+                    title="SP-04.2 Informe final (31/10 al 01/11)"
+                  >
+                    <FileText size={13} className="cal-pill-icon icon-blue" />
+                    <span className="cal-pill-text">SP-04.2 Informe final</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* 2. SUB-VISTA: SEMANA */}
         {calSubView === 'Semana' && (
-          <div className="cal-semana-view">
-            <div className="cal-semana-header-grid">
-              {WEEK_DAY_LABELS.map((dayLabel, idx) => (
-                <div key={dayLabel} className="cal-semana-col-head">
-                  <span className="semana-col-name">{dayLabel}</span>
-                  <span className="semana-col-num">{idx + 5} Oct</span>
-                </div>
+          <div className="cal-subview-semana">
+            <div className="cal-semana-headers">
+              {['Lun 05', 'Mar 06', 'Mié 07', 'Jue 08', 'Vie 09', 'Sáb 10', 'Dom 11'].map((d) => (
+                <div key={d} className="cal-semana-col-title">{d}</div>
               ))}
             </div>
-            <div className="cal-semana-body-grid">
-              {allEvents.slice(0, 10).map((evt, idx) => (
+            <div className="cal-semana-content">
+              {OCTOBER_OFFICIAL_EVENTS.slice(0, 4).map((evt) => (
                 <div
                   key={evt.id}
-                  className={`cal-semana-event-card cal-cat-${evt.category}`}
-                  onClick={() => handleEventClick(evt)}
+                  className={`cal-pill-event cal-pill-${evt.category === 'reunion' ? 'purple' : evt.category === 'visita' ? 'green' : evt.category === 'vencimiento' ? 'orange' : 'blue'}`}
+                  onClick={() => handleOpenItem(evt.code)}
+                  style={{ marginBottom: 8, padding: '8px 12px', height: 'auto' }}
                 >
-                  <div className="semana-card-head">
-                    <strong className="semana-card-code">{evt.code}</strong>
-                    <span className="semana-card-time">{evt.time || `${formatDatePE(evt.start)}`}</span>
-                  </div>
-                  <div className="semana-card-name">{evt.name}</div>
-                  <div className="semana-card-meta">
-                    <User size={12} />
-                    <span>{evt.owner}</span>
-                  </div>
+                  <strong style={{ marginRight: 6 }}>{evt.code}</strong>
+                  <span>{evt.name}</span>
+                  {evt.time && <span style={{ marginLeft: 'auto', fontSize: '11px', opacity: 0.8 }}>{evt.time}</span>}
                 </div>
               ))}
             </div>
@@ -505,193 +601,159 @@ export default function CronogramaCalendarioView({
 
         {/* 3. SUB-VISTA: DÍA */}
         {calSubView === 'Día' && (
-          <div className="cal-dia-view">
-            <div className="cal-dia-header">
-              <CalendarDays size={18} className="cal-dia-head-icon" />
+          <div className="cal-subview-dia">
+            <div className="cal-dia-head-row">
               <h3>Martes 27 de Octubre, 2026</h3>
-              <span className="cal-dia-badge">Fecha de corte territorial</span>
+              <span className="cal-dia-tag">Corte Oficial</span>
             </div>
-            <div className="cal-dia-timeline">
-              {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((hour) => {
-                const hourEvents = allEvents.filter((e) => (e.time && e.time.startsWith(hour.slice(0, 2))) || hour === '10:00');
-                return (
-                  <div key={hour} className="cal-dia-hour-row">
-                    <span className="cal-dia-hour-label">{hour}</span>
-                    <div className="cal-dia-hour-slot">
-                      {hour === '10:00' && (
-                        <div className="cal-dia-card cal-cat-reunion" onClick={() => onSelectItem(items[0])}>
-                          <div className="dia-card-top">
-                            <span className="dia-card-code">REU-01</span>
-                            <span className="dia-card-time">10:00 – 11:30</span>
-                          </div>
-                          <div className="dia-card-title">Reunión de coordinación territorial MINEDU</div>
-                          <div className="dia-card-sub">Responsable: Carlos Mendoza · Junín</div>
+            <div className="cal-dia-schedule">
+              {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map((h) => (
+                <div key={h} className="cal-dia-slot-row">
+                  <span className="cal-dia-hour">{h}</span>
+                  <div className="cal-dia-event-box">
+                    {h === '10:00' && (
+                      <div className="cal-card-meeting" onClick={() => handleOpenItem('2.')}>
+                        <div className="cal-meeting-top">
+                          <Users size={12} className="icon-purple" />
+                          <span className="cal-meeting-title">Reunión de coordinación territorial MINEDU</span>
                         </div>
-                      )}
-                      {hour === '09:00' && (
-                        <div className="cal-dia-card cal-cat-vencimiento" onClick={() => onSelectItem(items[1] || items[0])}>
-                          <div className="dia-card-top">
-                            <span className="dia-card-code">SP-02.2</span>
-                            <span className="dia-card-time">Todo el día</span>
-                          </div>
-                          <div className="dia-card-title">Vence informe de almacén y recepción en MC SIGA</div>
-                          <div className="dia-card-sub">Responsable: Ana Paredes · Hito Rector 2</div>
-                        </div>
-                      )}
-                    </div>
+                        <span className="cal-meeting-time">10:00 – 11:30</span>
+                      </div>
+                    )}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {/* 4. SUB-VISTA: AGENDA */}
         {calSubView === 'Agenda' && (
-          <div className="cal-agenda-view">
-            <div className="cal-agenda-list">
-              {allEvents.map((evt) => {
-                const badge = parseBadgeDate(evt.start);
-                return (
-                  <div
-                    key={evt.id}
-                    className="cal-agenda-item-row"
-                    onClick={() => handleEventClick(evt)}
-                  >
-                    <div className="cal-agenda-date-box">
-                      <span className="agenda-date-num">{badge.day}</span>
-                      <span className="agenda-date-mon">{badge.month}</span>
-                    </div>
-
-                    <div className={`cal-agenda-card cal-cat-${evt.category}`}>
-                      <div className="agenda-card-title-row">
-                        <strong className="agenda-card-code">{evt.code}</strong>
-                        <span className="agenda-card-name">{evt.name}</span>
-                      </div>
-                      <div className="agenda-card-meta-row">
-                        <span className="agenda-meta-item">
-                          <Clock size={12} />
-                          <span>{evt.time || `${formatDatePE(evt.start)} – ${formatDatePE(evt.end)}`}</span>
-                        </span>
-                        <span className="agenda-meta-item">
-                          <User size={12} />
-                          <span>{evt.owner}</span>
-                        </span>
-                        {evt.region && (
-                          <span className="agenda-meta-item">
-                            <Building2 size={12} />
-                            <span>{evt.region}</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="cal-agenda-arrow">
-                      <ArrowRight size={16} />
-                    </div>
+          <div className="cal-subview-agenda">
+            {UPCOMING_SIDEBAR_EVENTS.map((it) => (
+              <div
+                key={it.id}
+                className="cal-agenda-row"
+                onClick={() => handleOpenItem(it.title)}
+              >
+                <div className="cal-date-badge-box">
+                  <span className="cal-badge-day">{it.day}</span>
+                  <span className="cal-badge-mon">{it.month}</span>
+                </div>
+                <div className="cal-agenda-info">
+                  <div className="cal-agenda-title-line">
+                    <span className={`cal-cat-dot cal-dot-${it.category}`} />
+                    <strong>{it.title}</strong>
                   </div>
-                );
-              })}
-            </div>
+                  <span className="cal-agenda-sub">{it.catLabel} · {it.time}</span>
+                </div>
+                <div className="cal-agenda-avatar" style={{ backgroundColor: it.avatarBg, color: it.avatarColor }}>
+                  {it.initials}
+                </div>
+                <ArrowRight size={14} className="cal-agenda-arrow" />
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Barra Lateral Derecha: Próximos eventos y Leyenda */}
-      <aside className="cal-sidebar">
-        {/* Tarjeta 1: Próximos eventos */}
-        <div className="cal-sidebar-card">
-          <div className="cal-sidebar-card-header">
-            <h3 className="cal-sidebar-card-title">Próximos eventos</h3>
+      {/* Barra Lateral Derecha (Exacta a Imagen 2): Próximos eventos y Leyenda */}
+      <aside className="cal-sidebar-clean">
+        {/* Sección: Próximos eventos */}
+        <div className="cal-sidebar-section">
+          <div className="cal-sidebar-head">
+            <h3 className="cal-sidebar-title">Próximos eventos</h3>
             <button
               type="button"
-              className="cal-view-all-link"
+              className="cal-ver-todos-btn"
               onClick={() => onSubViewChange('Agenda')}
             >
               <span>Ver todos</span>
-              <ArrowRight size={13} />
+              <ArrowRight size={12} />
             </button>
           </div>
 
-          <div className="cal-upcoming-list">
-            {upcomingEvents.map((evt) => {
-              const badge = parseBadgeDate(evt.start);
-              const initials = getInitials(evt.owner);
-              const avatarColor = getAvatarColor(evt.owner);
+          <div className="cal-upcoming-stack">
+            {UPCOMING_SIDEBAR_EVENTS.map((ev) => (
+              <div
+                key={ev.id}
+                className="cal-upcoming-card-row"
+                onClick={() => handleOpenItem(ev.title)}
+              >
+                {/* Badge de fecha a la izquierda: 01 OCT */}
+                <div className="cal-clean-date-badge">
+                  <span className="badge-day-number">{ev.day}</span>
+                  <span className="badge-month-text">{ev.month}</span>
+                </div>
 
-              return (
-                <div
-                  key={evt.id}
-                  className="cal-upcoming-item"
-                  onClick={() => handleEventClick(evt)}
-                >
-                  {/* Badge de fecha a la izquierda */}
-                  <div className="cal-date-badge">
-                    <span className="cal-date-badge-day">{badge.day}</span>
-                    <span className="cal-date-badge-month">{badge.month}</span>
+                {/* Info central */}
+                <div className="cal-upcoming-center-info">
+                  <div className="cal-upcoming-main-title">
+                    <span className={`cal-dot-indicator dot-${ev.category}`} />
+                    <span className="upcoming-title-text" title={ev.title}>{ev.title}</span>
                   </div>
 
-                  {/* Información central */}
-                  <div className="cal-upcoming-info">
-                    <div className="cal-upcoming-title-row">
-                      <span className={`cal-cat-dot cal-dot-${evt.category}`} />
-                      <span className="cal-upcoming-title" title={evt.name}>
-                        {evt.name}
-                      </span>
-                    </div>
-                    <div className="cal-upcoming-sub">
-                      <span className="cal-upcoming-code">{evt.code}</span>
-                      <span className="cal-sub-divider">·</span>
-                      <span className="cal-upcoming-cat">
-                        {evt.category === 'hito' && 'Hito Rector'}
-                        {evt.category === 'subproceso' && 'Subproceso'}
-                        {evt.category === 'reunion' && 'Reunión'}
-                        {evt.category === 'visita' && 'Visita a sede'}
-                        {evt.category === 'vencimiento' && 'Vencimiento'}
-                      </span>
-                    </div>
-                    <div className="cal-upcoming-time">
-                      <Clock size={11} className="time-icon" />
-                      <span>{evt.time || `${formatDatePE(evt.start)} al ${formatDatePE(evt.end)}`}</span>
-                    </div>
+                  <div className="cal-upcoming-cat-line">
+                    {ev.category === 'reunion' ? (
+                      <Users size={11} className="cat-icon-sub" />
+                    ) : ev.category === 'visita' ? (
+                      <MapPin size={11} className="cat-icon-sub" />
+                    ) : (
+                      <FileText size={11} className="cat-icon-sub" />
+                    )}
+                    <span>{ev.catLabel}</span>
                   </div>
 
-                  {/* Avatar iniciales a la derecha */}
-                  <div
-                    className="cal-upcoming-avatar"
-                    style={{
-                      backgroundColor: avatarColor.bg,
-                      color: avatarColor.text,
-                    }}
-                    title={`Responsable: ${evt.owner}`}
-                  >
-                    {initials}
+                  <div className="cal-upcoming-time-line">
+                    <Clock size={11} className="cat-icon-sub" />
+                    <span>{ev.time}</span>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Avatar iniciales + tres puntos */}
+                <div className="cal-upcoming-right-actions">
+                  <div
+                    className="cal-user-avatar-circle"
+                    style={{ backgroundColor: ev.avatarBg, color: ev.avatarColor }}
+                  >
+                    {ev.initials}
+                  </div>
+                  <button
+                    type="button"
+                    className="cal-more-dots-btn"
+                    title="Opciones de evento"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenItem(ev.title);
+                    }}
+                  >
+                    <MoreHorizontal size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Tarjeta 2: Leyenda oficial */}
-        <div className="cal-sidebar-card cal-legend-card">
-          <h3 className="cal-sidebar-card-title">Leyenda</h3>
-          <div className="cal-legend-grid">
-            <div className="cal-legend-item">
-              <span className="cal-cat-dot cal-dot-hito" />
-              <span className="cal-legend-label">Hitos / Subprocesos</span>
+        {/* Sección: Leyenda (Cuadrícula limpia 2x2) */}
+        <div className="cal-sidebar-section cal-legend-section">
+          <h3 className="cal-sidebar-title">Leyenda</h3>
+          <div className="cal-clean-legend-grid">
+            <div className="cal-legend-row">
+              <span className="cal-dot-indicator dot-subproceso" />
+              <span>Hitos / Subprocesos</span>
             </div>
-            <div className="cal-legend-item">
-              <span className="cal-cat-dot cal-dot-reunion" />
-              <span className="cal-legend-label">Reuniones</span>
+            <div className="cal-legend-row">
+              <span className="cal-dot-indicator dot-reunion" />
+              <span>Reuniones</span>
             </div>
-            <div className="cal-legend-item">
-              <span className="cal-cat-dot cal-dot-visita" />
-              <span className="cal-legend-label">Visitas a sedes</span>
+            <div className="cal-legend-row">
+              <span className="cal-dot-indicator dot-visita" />
+              <span>Visitas a sedes</span>
             </div>
-            <div className="cal-legend-item">
-              <span className="cal-cat-dot cal-dot-vencimiento" />
-              <span className="cal-legend-label">Vencimientos</span>
+            <div className="cal-legend-row">
+              <span className="cal-dot-indicator dot-vencimiento" />
+              <span>Vencimientos</span>
             </div>
           </div>
         </div>

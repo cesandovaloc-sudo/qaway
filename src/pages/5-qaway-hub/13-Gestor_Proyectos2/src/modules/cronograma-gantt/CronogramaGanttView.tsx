@@ -1969,7 +1969,6 @@ export default function CronogramaGanttView({
   const scrollRef = useRef<HTMLDivElement>(null);
   const headScrollRef = useRef<HTMLDivElement>(null);
   const tableHeadRef = useRef<HTMLDivElement>(null);
-  const floatingHScrollRef = useRef<HTMLDivElement>(null);
   const colRef = useRef(colWidths);
   const dragRef = useRef<{ key: ColKey; startX: number; startW: number } | null>(null);
   colRef.current = colWidths;
@@ -1984,9 +1983,7 @@ export default function CronogramaGanttView({
         tableHeadRef.current.scrollLeft = e.currentTarget.scrollLeft;
       }
     }
-    if (floatingHScrollRef.current && Math.abs(floatingHScrollRef.current.scrollLeft - e.currentTarget.scrollLeft) > 1) {
-      floatingHScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
-    }
+
   };
 
 
@@ -5332,22 +5329,6 @@ export default function CronogramaGanttView({
             </div>
           )}
 
-            {/* Barra de scroll horizontal persistente sincronizada al pie de la tabla */}
-            <div
-              className="floating-hscroll-track"
-              ref={floatingHScrollRef}
-              onScroll={(e) => {
-                const sl = e.currentTarget.scrollLeft;
-                if (scrollRef.current && Math.abs(scrollRef.current.scrollLeft - sl) > 1) {
-                  scrollRef.current.scrollLeft = sl;
-                }
-                if (viewMode === 'lista' && tableHeadRef.current && Math.abs(tableHeadRef.current.scrollLeft - sl) > 1) {
-                  tableHeadRef.current.scrollLeft = sl;
-                }
-              }}
-            >
-              <div style={{ width: `${fixedWidth}px`, height: 1 }} />
-            </div>
             </div>
           )}
 
