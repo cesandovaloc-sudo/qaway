@@ -2338,13 +2338,13 @@ export default function CronogramaGanttView({
         }
       }
 
-      // Ocultar si cualquiera de sus ancestros en la jerarquía (padre, abuelo, etc.) está colapsado
+      // Ocultar si cualquiera de sus ancestros en la jerarquía (padre, abuelo, etc.) está colapsado (independiente por vista)
       let notCollapsed = true;
       let currParentId = x.parentId;
       while (currParentId) {
         const pNode = items.find((p) => p.id === currParentId);
         if (!pNode) break;
-        if (pNode.expanded === false) {
+        if (!isItemExpanded(pNode.id, pNode.expanded !== false)) {
           notCollapsed = false;
           break;
         }
@@ -2417,25 +2417,71 @@ export default function CronogramaGanttView({
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
   const shown = useMemo(() => engine.sortRows(shownBase), [engine.sortRows, shownBase]);
 
-  /* Control de Colapso / Despliegue global Recursivo (Hitos, Subprocesos y Sub-subprocesos) */
+  /* Control de Colapso / Despliegue 100% INDEPENDIENTE por vista (Gantt vs Lista) */
   const parentItems = useMemo(() => {
     return items.filter((it) => items.some((child) => child.parentId === it.id));
   }, [items]);
 
+  const [collapsedByMode, setCollapsedByMode] = useState<{
+    gantt: Record<string, boolean>;
+    lista: Record<string, boolean>;
+  }>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-collapsed-by-mode-v1') || 'null');
+      if (saved && typeof saved === 'object') return saved;
+    } catch {}
+    return { gantt: {}, lista: {} };
+  });
+
+  const isItemExpanded = (id: string, defaultExpanded: boolean = true): boolean => {
+    const mode = viewMode === 'lista' ? 'lista' : 'gantt';
+    const modeMap = collapsedByMode[mode];
+    if (modeMap && id in modeMap) {
+      return !modeMap[id];
+    }
+    return defaultExpanded;
+  };
+
+  const toggleItemExpand = (id: string, defaultExpanded: boolean = true) => {
+    const mode = viewMode === 'lista' ? 'lista' : 'gantt';
+    setCollapsedByMode((prev) => {
+      const currentExpanded = isItemExpanded(id, defaultExpanded);
+      const next = {
+        ...prev,
+        [mode]: {
+          ...(prev[mode] || {}),
+          [id]: currentExpanded,
+        },
+      };
+      try {
+        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const allHitosExpanded = useMemo(() => {
-    return parentItems.length > 0 && parentItems.every((h) => h.expanded !== false);
-  }, [parentItems]);
+    return parentItems.length > 0 && parentItems.every((h) => isItemExpanded(h.id, h.expanded !== false));
+  }, [parentItems, collapsedByMode, viewMode]);
 
   const toggleAllHitosExpand = () => {
     const nextState = !allHitosExpanded;
-    commitChange((old) => {
-      const parentIds = new Set(old.filter((it) => old.some((c) => c.parentId === it.id)).map((p) => p.id));
-      return old.map((x) => (parentIds.has(x.id) ? { ...x, expanded: nextState } : x));
+    const mode = viewMode === 'lista' ? 'lista' : 'gantt';
+    setCollapsedByMode((prev) => {
+      const nextModeMap: Record<string, boolean> = { ...(prev[mode] || {}) };
+      parentItems.forEach((p) => {
+        nextModeMap[p.id] = !nextState;
+      });
+      const next = { ...prev, [mode]: nextModeMap };
+      try {
+        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+      } catch {}
+      return next;
     });
     notify(
       nextState
-        ? 'Todos los niveles desplegados recursivamente'
-        : 'Vista colapsada a niveles principales'
+        ? `Todos los niveles desplegados en ${viewMode === 'lista' ? 'Modo Lista' : 'Modo Gantt'}`
+        : `Vista colapsada a niveles principales en ${viewMode === 'lista' ? 'Modo Lista' : 'Modo Gantt'}`
     );
   };
 
@@ -3599,44 +3645,42 @@ export default function CronogramaGanttView({
                   />
                 )}
                 <span>{viewMode === 'lista' ? 'Nombre' : 'Hito / Subproceso'}</span>
-                {viewMode === 'gantt' && (
-                  <div className="head-col-actions">
-                    <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
-                    <button
-                      type="button"
-                      className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleAllHitosExpand();
-                      }}
-                      title={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
-                    >
-                      <ChevronsUpDown size={13} />
-                    </button>
-                    <button
-                      type="button"
-                      className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setColsMenuOpen((v) => !v);
-                      }}
-                      title="Configurar columnas visibles"
-                    >
-                      <SlidersHorizontal size={13} />
-                    </button>
-                    <button
-                      type="button"
-                      className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCompactColumns();
-                      }}
-                      title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
-                    >
-                      {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
-                    </button>
-                  </div>
-                )}
+                <div className="head-col-actions">
+                  <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
+                  <button
+                    type="button"
+                    className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleAllHitosExpand();
+                    }}
+                    title={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
+                  >
+                    <ChevronsUpDown size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setColsMenuOpen((v) => !v);
+                    }}
+                    title="Configurar columnas visibles"
+                  >
+                    <SlidersHorizontal size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCompactColumns();
+                    }}
+                    title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
+                  >
+                    {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
+                  </button>
+                </div>
 
                 <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('name'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
               </div>
@@ -3998,46 +4042,44 @@ export default function CronogramaGanttView({
 
                     <div className="name-cell">
                     {/* Sangría proporcional limpia y alineada: exactamente 20px por nivel de jerarquía */}
-                    {viewMode === 'gantt' && getItemDepth(x) > 0 && (
+                    {getItemDepth(x) > 0 && (
                       <span style={{ width: `${getItemDepth(x) * 20}px`, flexShrink: 0 }} />
                     )}
-                    {viewMode === 'gantt' && items.some((c) => c.parentId === x.id) ? (
+                    {items.some((c) => c.parentId === x.id) ? (
                       <button
                         className="expand"
                         onClick={(e) => {
                           e.stopPropagation();
-                          update(x.id, { expanded: !x.expanded });
+                          toggleItemExpand(x.id, x.expanded !== false);
                         }}
                       >
-                        {x.expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                        {isItemExpanded(x.id, x.expanded !== false) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                       </button>
                     ) : (
-                      viewMode === 'gantt' && <span className="indent" />
+                      <span className="indent" />
                     )}
-                    {viewMode === 'gantt' && (
-                      x.kind === 'hito' ? (
-                        <button
-                          type="button"
-                          className="row-icon-action"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditorForItem(x);
-                          }}
-                        >
-                          <FolderOpen size={16} className="folder" />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="row-icon-action"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditorForItem(x);
-                          }}
-                        >
-                          <FileText size={15} className="file" />
-                        </button>
-                      )
+                    {x.kind === 'hito' ? (
+                      <button
+                        type="button"
+                        className="row-icon-action"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditorForItem(x);
+                        }}
+                      >
+                        <FolderOpen size={16} className="folder" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="row-icon-action"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditorForItem(x);
+                        }}
+                      >
+                        <FileText size={15} className="file" />
+                      </button>
                     )}
                     {viewMode === 'gantt' && (
                       <b className="code">
@@ -4082,7 +4124,7 @@ export default function CronogramaGanttView({
                       </span>
                     )}
 
-                    {viewMode === 'gantt' && !isEditing(x, 'name') && (
+                    {!isEditing(x, 'name') && (
                       <div className="quick-row-actions">
                         {x.kind === 'subproceso' ? (
                           <>
@@ -4117,13 +4159,13 @@ export default function CronogramaGanttView({
                               <button
                                 type="button"
                                 className="quick-inline-icon-btn"
-                                title={x.expanded ? "Colapsar sub-procesos hijos" : "Expandir sub-procesos hijos"}
+                                title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar sub-procesos hijos" : "Expandir sub-procesos hijos"}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  update(x.id, { expanded: !x.expanded });
+                                  toggleItemExpand(x.id, x.expanded !== false);
                                 }}
                               >
-                                {x.expanded ? (
+                                {isItemExpanded(x.id, x.expanded !== false) ? (
                                   <ChevronDown size={13} style={{ color: '#0284c7' }} />
                                 ) : (
                                   <ChevronRight size={13} style={{ color: '#64748b' }} />
@@ -4163,13 +4205,13 @@ export default function CronogramaGanttView({
                             <button
                               type="button"
                               className="quick-inline-icon-btn"
-                              title={x.expanded ? "Colapsar subprocesos de este hito" : "Expandir subprocesos de este hito"}
+                              title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar subprocesos de este hito" : "Expandir subprocesos de este hito"}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                update(x.id, { expanded: !x.expanded });
+                                toggleItemExpand(x.id, x.expanded !== false);
                               }}
                             >
-                              {x.expanded ? (
+                              {isItemExpanded(x.id, x.expanded !== false) ? (
                                 <ChevronDown size={13} style={{ color: '#0284c7' }} />
                               ) : (
                                 <ChevronRight size={13} style={{ color: '#64748b' }} />
