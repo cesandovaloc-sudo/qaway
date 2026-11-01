@@ -41,6 +41,7 @@ interface CronogramaCalendarioViewProps {
   typeFilter?: string;
   tab?: string;
   stateFilter?: string;
+  regionFilter?: string;
   search?: string;
 }
 
@@ -393,6 +394,7 @@ export default function CronogramaCalendarioView({
   typeFilter = 'Todos',
   tab = 'Todos',
   stateFilter = 'Todos',
+  regionFilter = 'Todas',
   search = '',
 }: CronogramaCalendarioViewProps) {
   // Manejador para abrir el drawer con un item real del cronograma
@@ -405,7 +407,7 @@ export default function CronogramaCalendarioView({
     }
   };
 
-  // Filtrado reactivo de eventos según Filtro Tipo, Tab, Estado y Búsqueda
+  // Filtrado reactivo de eventos según Filtro Tipo, Tab, Estado, Ubicación y Búsqueda
   const filteredEvents = useMemo(() => {
     return OCTOBER_PROJECT_EVENTS.filter((ev) => {
       // 1. Filtro Tipo (Todos / Hitos / Subprocesos)
@@ -429,7 +431,12 @@ export default function CronogramaCalendarioView({
         if (ev.status !== stateFilter) return false;
       }
 
-      // 4. Búsqueda por texto
+      // 4. Filtro Ubicación (Región territorial)
+      if (regionFilter && regionFilter !== 'Todas') {
+        if (ev.region !== 'Todas las Regiones' && ev.region !== regionFilter) return false;
+      }
+
+      // 5. Búsqueda por texto
       if (search && search.trim()) {
         const q = search.trim().toLowerCase();
         const match = `${ev.code} ${ev.name}`.toLowerCase().includes(q);
@@ -438,7 +445,7 @@ export default function CronogramaCalendarioView({
 
       return true;
     });
-  }, [typeFilter, tab, stateFilter, search]);
+  }, [typeFilter, tab, stateFilter, regionFilter, search]);
 
   // Agrupación de eventos por semana para la cuadrícula del mes
   const weekEvents = useMemo(() => {
@@ -500,18 +507,22 @@ export default function CronogramaCalendarioView({
                       const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
                       const isLate = ev.status === 'Con retraso';
 
+                      // Si es Hito Rector, su barra es SIEMPRE bar-major (Azul Oficial Gantt con Rombo ◆).
+                      // Si no es Hito Rector, toma el color según su estado operativo (verde, naranja, rojo o gris).
+                      const barColorClass = isMajor
+                        ? 'bar-major'
+                        : isComplete
+                        ? 'bar-complete'
+                        : isProgress
+                        ? 'bar-progress'
+                        : isLate
+                        ? 'bar-late'
+                        : 'bar-pending';
+
                       return (
                         <div
                           key={ev.id}
-                          className={`cal-gantt-bar ${isMajor ? 'bar-major' : ''} ${
-                            isComplete
-                              ? 'bar-complete'
-                              : isProgress
-                              ? 'bar-progress'
-                              : isLate
-                              ? 'bar-late'
-                              : 'bar-pending'
-                          }`}
+                          className={`cal-gantt-bar ${barColorClass}`}
                           style={{
                             gridColumn: `${ev.colStart} / span ${ev.colSpan}`,
                             gridRow: ev.row,
@@ -564,21 +575,28 @@ export default function CronogramaCalendarioView({
               ))}
             </div>
             <div className="cal-semana-content">
-              {filteredEvents.slice(0, 5).map((ev) => (
-                <div
-                  key={ev.id}
-                  className={`cal-gantt-bar ${ev.kind === 'hito' ? 'bar-major' : ''} ${
-                    ev.status === 'Completado'
-                      ? 'bar-complete'
-                      : ev.status === 'En proceso'
-                      ? 'bar-progress'
-                      : ev.status === 'Con retraso'
-                      ? 'bar-late'
-                      : 'bar-pending'
-                  }`}
-                  onClick={() => handleOpenItem(ev.code)}
-                  style={{ marginBottom: 8, height: '32px' }}
-                >
+              {filteredEvents.slice(0, 5).map((ev) => {
+                const isMajor = ev.kind === 'hito';
+                const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
+                const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
+                const isLate = ev.status === 'Con retraso';
+                const barColorClass = isMajor
+                  ? 'bar-major'
+                  : isComplete
+                  ? 'bar-complete'
+                  : isProgress
+                  ? 'bar-progress'
+                  : isLate
+                  ? 'bar-late'
+                  : 'bar-pending';
+
+                return (
+                  <div
+                    key={ev.id}
+                    className={`cal-gantt-bar ${barColorClass}`}
+                    onClick={() => handleOpenItem(ev.code)}
+                    style={{ marginBottom: 8, height: '32px' }}
+                  >
                   <div
                     className="cal-gantt-progress-fill"
                     style={{ width: `${ev.progress}%` }}

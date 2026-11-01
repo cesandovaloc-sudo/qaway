@@ -395,12 +395,12 @@ const STATUS_CLASS: Record<Status, string> = {
 const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
 const REGION_OPTIONS = [
-  { value: 'Todas', label: 'Todas las Zonas' },
-  { value: 'Zona Central', label: 'Zona Central' },
-  { value: 'Selva Central', label: 'Selva Central' },
-  { value: 'Lima Moderna', label: 'Lima Moderna' },
-  { value: 'Zona Norte', label: 'Zona Norte' },
-  { value: 'Zona Sur', label: 'Zona Sur' },
+  { value: 'Todas', label: 'Todas las Ubicaciones' },
+  { value: 'Junín', label: 'Junín' },
+  { value: 'Huancavelica', label: 'Huancavelica' },
+  { value: 'Loreto', label: 'Loreto' },
+  { value: 'Lima Provincias', label: 'Lima Provincias' },
+  { value: 'Todas las Regiones', label: 'Multi-región / Nacional' },
 ];
 
 const GESTOR_OPTIONS = [
@@ -3044,7 +3044,7 @@ export default function CronogramaGanttView({
               )}
             </label>
 
-            {/* Filtro Zona / Frente */}
+            {/* Filtro Ubicación */}
             <div className="filter-dropdown-wrap">
               <button
                 type="button"
@@ -3054,14 +3054,14 @@ export default function CronogramaGanttView({
                 onClick={() => toggleMenu('region')}
               >
                 <div className="filter-card-copy">
-                  <small>Zona / Frente</small>
+                  <small>Ubicación</small>
                   <span>{regionFilter === 'Todas' ? 'Todas' : regionFilter}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
               {activeMenu === 'region' && (
                 <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Filtrar por Zona o Frente</div>
+                  <div className="filter-popover-title">Filtrar por Ubicación</div>
                   <div className="filter-popover-list">
                     {REGION_OPTIONS.map((opt) => (
                       <button
@@ -3114,37 +3114,37 @@ export default function CronogramaGanttView({
                 >
                   <div className="filter-popover-title">Filtrar por Nivel Jerárquico</div>
 
-                  {/* Chips rápidos inspirados en TableEngine */}
-                  <div className="te-quick" style={{ padding: '8px 10px 6px', borderBottom: '1px solid #f1f5f9' }}>
+                  {/* Chips rápidos en una sola fila proporcional */}
+                  <div className="hierarchy-quick-chips">
                     <button
                       type="button"
-                      className={`te-chip ${typeFilter === 'Hitos' ? 'on' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Hitos');
-                        closeMenus();
-                      }}
-                    >
-                      Solo hitos
-                    </button>
-                    <button
-                      type="button"
-                      className={`te-chip ${typeFilter === 'Subprocesos' ? 'on' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Subprocesos');
-                        closeMenus();
-                      }}
-                    >
-                      Solo subprocesos
-                    </button>
-                    <button
-                      type="button"
-                      className={`te-chip te-chip-all ${typeFilter === 'Todos' ? 'on' : ''}`}
+                      className={`hierarchy-chip ${typeFilter === 'Todos' ? 'active' : ''}`}
                       onClick={() => {
                         setTypeFilter('Todos');
                         closeMenus();
                       }}
                     >
-                      Mostrar todos
+                      Todos
+                    </button>
+                    <button
+                      type="button"
+                      className={`hierarchy-chip ${typeFilter === 'Hitos' ? 'active' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Hitos');
+                        closeMenus();
+                      }}
+                    >
+                      Solo Hitos
+                    </button>
+                    <button
+                      type="button"
+                      className={`hierarchy-chip ${typeFilter === 'Subprocesos' ? 'active' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Subprocesos');
+                        closeMenus();
+                      }}
+                    >
+                      Subprocesos
                     </button>
                   </div>
 
@@ -3902,7 +3902,7 @@ export default function CronogramaGanttView({
                           { value: 'status', label: 'Estado Oficial' },
                           { value: 'progress', label: 'Avance (%)' },
                           { value: 'gestor', label: 'Responsable' },
-                          { value: 'region', label: 'Zona / Frente' },
+                          { value: 'region', label: 'Ubicación / Región' },
                         ]}
                         onChange={(newField) => {
                           setCustomRules((prev) =>
@@ -5467,6 +5467,7 @@ export default function CronogramaGanttView({
               typeFilter={typeFilter}
               tab={tab}
               stateFilter={stateFilter}
+              regionFilter={regionFilter}
               search={search}
             />
           )}

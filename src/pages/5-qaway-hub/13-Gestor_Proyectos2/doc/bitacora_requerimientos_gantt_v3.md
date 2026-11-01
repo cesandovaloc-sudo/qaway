@@ -53,3 +53,21 @@
 * **Archivos a intervenir tras confirmación:**
   * `src/modules/cronograma-gantt/CronogramaGanttView.tsx`
   * `src/modules/cronograma-gantt/gantt.css`
+
+---
+
+## 4. Iteración A323: Calibración de Ubicación, Chips de Nivel y Blindaje de Color Azul en Hitos
+
+### Requerimientos abordados:
+1. **Nomenclatura y Jerarquía Territorial Universal (`Región`, `Distrito`, `Sede`)**:
+   - Reemplazo de terminología rígida `"Zona / Frente"` por `"Ubicación"` en la barra de filtros y metadata.
+   - Sincronización con las regiones reales del proyecto (`Junín`, `Loreto`, `Huancavelica`, `Lima Provincias`, `Multi-región / Nacional`).
+   - Propagación reactiva de `regionFilter` hacia `CronogramaCalendarioView`.
+
+2. **Calibración y Proporción de Chips Rápidos de Nivel Jerárquico**:
+   - Reemplazo de botones redondeados a 999px que rompían a dos filas por una grilla técnica en una sola fila `display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: 6px;`.
+   - Altura compacta calibrada a `25px`, radio de borde `6px`, fuente `11px`, etiquetas concisas (`Todos`, `Solo Hitos`, `Subprocesos`).
+
+3. **Blindaje de Color Azul Oficial en Hitos Rectores (Vista Calendario)**:
+   - Diagnóstico: Conflicto de especificidad en CSS donde `.cal-gantt-bar.bar-progress` (declarado después) sobreescribía a `.cal-gantt-bar.bar-major` dejando la barra en naranja.
+   - Solución: En `CronogramaCalendarioView.tsx`, si `ev.kind === 'hito'`, la clase asignada es estrictamente `bar-major`. En `gantt.css`, se blindó `.cal-gantt-bar.bar-major` con degradado azul `#0052cc` ➔ `#0066ff` y diamante `◆`.
