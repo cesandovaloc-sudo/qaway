@@ -71,3 +71,29 @@
 3. **Blindaje de Color Azul Oficial en Hitos Rectores (Vista Calendario)**:
    - Diagnóstico: Conflicto de especificidad en CSS donde `.cal-gantt-bar.bar-progress` (declarado después) sobreescribía a `.cal-gantt-bar.bar-major` dejando la barra en naranja.
    - Solución: En `CronogramaCalendarioView.tsx`, si `ev.kind === 'hito'`, la clase asignada es estrictamente `bar-major`. En `gantt.css`, se blindó `.cal-gantt-bar.bar-major` con degradado azul `#0052cc` ➔ `#0066ff` y diamante `◆`.
+
+---
+
+## 5. Iteración A325: Restauración de Cápsulas Nativas de Gantt, Multi-selección de Regiones y Encabezados Adaptables
+
+### Requerimientos abordados:
+1. **Restauración de Cápsulas Nativas de Gantt**:
+   - Eliminación del botón y popover artificial `NIVEL / TIPO` de la barra de herramientas inferior.
+   - Reincorporación de las cápsulas oficiales en la botonera superior de pestañas:
+     `[ Todos (36) ]  [ Hitos (9) ]  [ Subprocesos (27) ]  [ En proceso (3) ]  [ Con retraso (0) ]  [ Completados (3) ]`.
+   - Filtrado instantáneo a un solo clic con contadores vivos de entregables y línea azul activa.
+
+2. **Filtro Multi-Región con Árbol Territorial en Cascada**:
+   - Selector multirregión con checkboxes individuales que permite seleccionar una, varias o todas las regiones concurrentemente (`selectedRegions: string[]`).
+   - Mapeo territorial coherente con expansión interactiva:
+     - Junín (Tarma · UGEL Tarma, Concepción · UGEL Concepción, Huancayo · UGEL Huancayo).
+     - Lima (San Juan de Miraflores · UGEL 01, Huaral · UGEL 10, Breña · UGEL 03).
+     - Tumbes (Tumbes · UGEL Tumbes, Zarumilla · UGEL Zarumilla).
+     - Loreto (Maynas · UGEL Maynas).
+     - Huancavelica (Tayacaja · UGEL Tayacaja).
+   - Acción rápida `Limpiar (N)` y botón `Todas las Ubicaciones`.
+
+3. **Encabezados Adaptables y Columnas en Tablero**:
+   - Integración de columnas `Región`, `Distrito` y `UGEL / Sede` en `ALL_COL_META`, `MIN_COLS` y `GANTT_COLUMNS`.
+   - Soporte para etiquetas adaptables según el contexto del proyecto (Edificación: `Edificio / Frente`, MINEDU: `UGEL / Sede`, Servicios: `Sede / Local`).
+   - Sincronización transparente con vista Calendario mensual.

@@ -41,6 +41,7 @@ interface CronogramaCalendarioViewProps {
   typeFilter?: string;
   tab?: string;
   stateFilter?: string;
+  selectedRegions?: string[];
   regionFilter?: string;
   search?: string;
 }
@@ -394,6 +395,7 @@ export default function CronogramaCalendarioView({
   typeFilter = 'Todos',
   tab = 'Todos',
   stateFilter = 'Todos',
+  selectedRegions = [],
   regionFilter = 'Todas',
   search = '',
 }: CronogramaCalendarioViewProps) {
@@ -407,7 +409,7 @@ export default function CronogramaCalendarioView({
     }
   };
 
-  // Filtrado reactivo de eventos según Filtro Tipo, Tab, Estado, Ubicación y Búsqueda
+  // Filtrado reactivo de eventos según Filtro Tipo, Tab, Estado, Ubicación (Multi-región) y Búsqueda
   const filteredEvents = useMemo(() => {
     return OCTOBER_PROJECT_EVENTS.filter((ev) => {
       // 1. Filtro Tipo (Todos / Hitos / Subprocesos)
@@ -416,7 +418,7 @@ export default function CronogramaCalendarioView({
         if (typeFilter === 'Subprocesos' && ev.kind !== 'subproceso') return false;
       }
 
-      // 2. Filtro Tab general
+      // 2. Filtro Tab general (Cápsulas de Gantt)
       if (tab && tab !== 'Todos') {
         if (tab === 'Hitos' && ev.kind !== 'hito') return false;
         if (tab === 'Subprocesos' && ev.kind !== 'subproceso') return false;
@@ -431,8 +433,10 @@ export default function CronogramaCalendarioView({
         if (ev.status !== stateFilter) return false;
       }
 
-      // 4. Filtro Ubicación (Región territorial)
-      if (regionFilter && regionFilter !== 'Todas') {
+      // 4. Filtro Ubicación (Multi-región y territorial)
+      if (selectedRegions && selectedRegions.length > 0) {
+        if (ev.region !== 'Todas las Regiones' && !selectedRegions.includes(ev.region)) return false;
+      } else if (regionFilter && regionFilter !== 'Todas') {
         if (ev.region !== 'Todas las Regiones' && ev.region !== regionFilter) return false;
       }
 
@@ -445,7 +449,7 @@ export default function CronogramaCalendarioView({
 
       return true;
     });
-  }, [typeFilter, tab, stateFilter, regionFilter, search]);
+  }, [typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
 
   // Agrupación de eventos por semana para la cuadrícula del mes
   const weekEvents = useMemo(() => {

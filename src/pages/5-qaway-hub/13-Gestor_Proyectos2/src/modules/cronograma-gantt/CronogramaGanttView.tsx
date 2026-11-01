@@ -93,7 +93,7 @@ import {
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
+type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
 type EditField = ColKey;
 
 export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
@@ -131,6 +131,8 @@ export interface Item {
   attachments?: AttachmentItem[];
   reportType?: string;
   region?: string;
+  distrito?: string;
+  sede?: string;
   gestor?: string;
   gestores?: string[];
   tasks?: number;
@@ -159,6 +161,8 @@ const INITIAL_ITEMS: Item[] = [
     description: 'Conformación de comités y elaboración del plan de distribución de materiales a nivel regional.',
     reportType: 'Línea de tiempo',
     region: 'Junín',
+    distrito: 'Tarma',
+    sede: 'UGEL Tarma',
     gestor: 'Carlos Mendoza',
     gestores: ['Carlos Mendoza', 'María Salazar'],
   },
@@ -173,6 +177,8 @@ const INITIAL_ITEMS: Item[] = [
     progress: 100,
     status: 'Completado',
     region: 'Junín',
+    distrito: 'Tarma',
+    sede: 'UGEL Tarma',
     gestor: 'María Salazar',
     gestores: ['María Salazar'],
   },
@@ -187,6 +193,8 @@ const INITIAL_ITEMS: Item[] = [
     progress: 55,
     status: 'En proceso',
     region: 'Junín',
+    distrito: 'Concepción',
+    sede: 'UGEL Concepción',
     gestor: 'María Salazar',
     gestores: ['María Salazar', 'Carlos Mendoza'],
   },
@@ -203,6 +211,8 @@ const INITIAL_ITEMS: Item[] = [
     description: 'Organización de almacenes territoriales y control de recepción de materiales educativos.',
     reportType: 'Matriz de entregables',
     region: 'Junín',
+    distrito: 'Huancayo',
+    sede: 'UGEL Huancayo',
     gestor: 'Carlos Mendoza',
     gestores: ['Carlos Mendoza', 'Lucía Ramos', 'Javier Ruiz'],
   },
@@ -216,7 +226,9 @@ const INITIAL_ITEMS: Item[] = [
     end: '2026-10-20',
     progress: 100,
     status: 'Completado',
-    region: 'Junín',
+    region: 'Lima',
+    distrito: 'San Juan de Miraflores',
+    sede: 'UGEL 01 San Juan',
     gestor: 'María Salazar',
   },
   {
@@ -229,7 +241,9 @@ const INITIAL_ITEMS: Item[] = [
     end: '2027-01-30',
     progress: 18,
     status: 'En proceso',
-    region: 'Junín',
+    region: 'Lima',
+    distrito: 'Huaral',
+    sede: 'UGEL 10 Huaral',
     gestor: 'María Salazar',
   },
   {
@@ -244,7 +258,9 @@ const INITIAL_ITEMS: Item[] = [
     expanded: true,
     description: 'Coordinación y contratación de transporte para distribución de materiales a instituciones educativas.',
     reportType: 'Registro de entregas',
-    region: 'Todas las Regiones',
+    region: 'Tumbes',
+    distrito: 'Tumbes',
+    sede: 'UGEL Tumbes',
     gestor: 'Javier Ruiz',
   },
   {
@@ -257,7 +273,9 @@ const INITIAL_ITEMS: Item[] = [
     end: '2026-11-30',
     progress: 0,
     status: 'Pendiente',
-    region: 'Loreto',
+    region: 'Tumbes',
+    distrito: 'Zarumilla',
+    sede: 'UGEL Zarumilla',
     gestor: 'Lucía Ramos',
   },
   {
@@ -271,6 +289,8 @@ const INITIAL_ITEMS: Item[] = [
     progress: 0,
     status: 'Pendiente',
     region: 'Loreto',
+    distrito: 'Maynas',
+    sede: 'UGEL Maynas',
     gestor: 'Lucía Ramos',
   },
   {
@@ -284,6 +304,8 @@ const INITIAL_ITEMS: Item[] = [
     progress: 0,
     status: 'Pendiente',
     region: 'Huancavelica',
+    distrito: 'Tayacaja',
+    sede: 'UGEL Tayacaja',
     gestor: 'Carlos Mendoza',
   },
   {
@@ -299,6 +321,8 @@ const INITIAL_ITEMS: Item[] = [
     description: 'Validación de actas PECOSA y consolidación regional en SIAGIE.',
     reportType: 'Consolidado de datos',
     region: 'Todas las Regiones',
+    distrito: 'Consolidado',
+    sede: 'Todas las UGEL',
     gestor: 'Carlos Mendoza',
   },
   {
@@ -311,7 +335,9 @@ const INITIAL_ITEMS: Item[] = [
     end: '2027-03-15',
     progress: 0,
     status: 'Pendiente',
-    region: 'Todas las Regiones',
+    region: 'Lima',
+    distrito: 'Breña',
+    sede: 'UGEL 03 Breña',
     gestor: 'Carlos Mendoza',
   },
   {
@@ -324,7 +350,9 @@ const INITIAL_ITEMS: Item[] = [
     end: '2027-03-30',
     progress: 0,
     status: 'Pendiente',
-    region: 'Todas las Regiones',
+    region: 'Junín',
+    distrito: 'Tarma',
+    sede: 'UGEL Tarma',
     gestor: 'Carlos Mendoza',
   },
   {
@@ -340,6 +368,8 @@ const INITIAL_ITEMS: Item[] = [
     description: 'Elaboración y presentación del informe final de cumplimiento normativo Dotación 2027.',
     reportType: 'Informe de cierre',
     region: 'Todas las Regiones',
+    distrito: 'Sede Central',
+    sede: 'MINEDU - DIGERE',
     gestor: 'Carlos Mendoza',
   },
   {
@@ -352,7 +382,9 @@ const INITIAL_ITEMS: Item[] = [
     end: '2027-04-20',
     progress: 0,
     status: 'Pendiente',
-    region: 'Todas las Regiones',
+    region: 'Lima',
+    distrito: 'San Borja',
+    sede: 'Sede Central MINEDU',
     gestor: 'Carlos Mendoza',
   },
   {
@@ -365,7 +397,9 @@ const INITIAL_ITEMS: Item[] = [
     end: '2027-04-30',
     progress: 0,
     status: 'Pendiente',
-    region: 'Todas las Regiones',
+    region: 'Lima',
+    distrito: 'San Borja',
+    sede: 'DIGERE - MINEDU',
     gestor: 'Carlos Mendoza',
   },
 ];
@@ -394,12 +428,65 @@ const STATUS_CLASS: Record<Status, string> = {
    como señal de retrocompatibilidad para datos persistidos previos. */
 const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
+export interface LocationHierarchyNode {
+  name: string;
+  count: number;
+  distritos: {
+    distrito: string;
+    sede: string;
+    count: number;
+  }[];
+}
+
+const LOCATION_HIERARCHY: LocationHierarchyNode[] = [
+  {
+    name: 'Junín',
+    count: 18,
+    distritos: [
+      { distrito: 'Tarma', sede: 'UGEL Tarma', count: 8 },
+      { distrito: 'Concepción', sede: 'UGEL Concepción', count: 6 },
+      { distrito: 'Huancayo', sede: 'UGEL Huancayo', count: 4 },
+    ],
+  },
+  {
+    name: 'Lima',
+    count: 10,
+    distritos: [
+      { distrito: 'San Juan de Miraflores', sede: 'UGEL 01 San Juan', count: 6 },
+      { distrito: 'Huaral', sede: 'UGEL 10 Huaral', count: 4 },
+    ],
+  },
+  {
+    name: 'Tumbes',
+    count: 8,
+    distritos: [
+      { distrito: 'Tumbes', sede: 'UGEL Tumbes', count: 5 },
+      { distrito: 'Zarumilla', sede: 'UGEL Zarumilla', count: 3 },
+    ],
+  },
+  {
+    name: 'Loreto',
+    count: 2,
+    distritos: [
+      { distrito: 'Maynas', sede: 'UGEL Maynas', count: 2 },
+    ],
+  },
+  {
+    name: 'Huancavelica',
+    count: 1,
+    distritos: [
+      { distrito: 'Tayacaja', sede: 'UGEL Tayacaja', count: 1 },
+    ],
+  },
+];
+
 const REGION_OPTIONS = [
   { value: 'Todas', label: 'Todas las Ubicaciones' },
   { value: 'Junín', label: 'Junín' },
-  { value: 'Huancavelica', label: 'Huancavelica' },
+  { value: 'Lima', label: 'Lima' },
+  { value: 'Tumbes', label: 'Tumbes' },
   { value: 'Loreto', label: 'Loreto' },
-  { value: 'Lima Provincias', label: 'Lima Provincias' },
+  { value: 'Huancavelica', label: 'Huancavelica' },
   { value: 'Todas las Regiones', label: 'Multi-región / Nacional' },
 ];
 
@@ -489,7 +576,9 @@ const MIN_COLS: Record<string, number> = {
   progress: 100,
   status: 90,
   gestor: 110,
-  region: 90,
+  region: 95,
+  distrito: 110,
+  sede: 130,
   deviation: 90,
   actualEnd: 100,
   actions: 60,
@@ -507,15 +596,17 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'deviation', label: 'Desviación' },
   { key: 'status', label: 'Estado' },
   { key: 'gestor', label: 'Responsable' },
-  { key: 'region', label: 'Ámbito' },
+  { key: 'region', label: 'Región' },
+  { key: 'distrito', label: 'Distrito' },
+  { key: 'sede', label: 'UGEL / Sede' },
   { key: 'actualEnd', label: 'Fecha real' },
   { key: 'actions', label: 'Acciones' },
 ];
 
 // Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
-// Preset inicial y predeterminado para vista Lista (12 columnas completas ordenadas)
-const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'gestor', 'region', 'actions'];
+// Preset inicial y predeterminado para vista Lista (14 columnas completas ordenadas)
+const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'gestor', 'region', 'distrito', 'sede', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -548,7 +639,9 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
     options: STATUS_FLOW.map((s) => ({ value: s, label: s })),
   },
   { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
-  { id: 'region', label: 'Ámbito', type: 'select', accessor: (r) => r?.region },
+  { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
+  { id: 'distrito', label: 'Distrito', type: 'select', accessor: (r) => r?.distrito },
+  { id: 'sede', label: 'UGEL / Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
   { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => r?.kind === 'hito' ? 'Hito' : 'Subproceso' },
   { id: 'parent', label: 'Hito padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
@@ -1619,7 +1712,25 @@ export default function CronogramaGanttView({
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
   const [typeFilter, setTypeFilter] = useState('Todos');
-  const [regionFilter, setRegionFilter] = useState('Todas');
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
+
+  const toggleRegion = (regionName: string) => {
+    setSelectedRegions((prev) => {
+      if (prev.includes(regionName)) {
+        return prev.filter((r) => r !== regionName);
+      } else {
+        return [...prev, regionName];
+      }
+    });
+  };
+
+  const regionButtonText = useMemo(() => {
+    if (selectedRegions.length === 0) return 'Todas';
+    if (selectedRegions.length === 1) return selectedRegions[0];
+    if (selectedRegions.length === 2) return `${selectedRegions[0]}, ${selectedRegions[1]}`;
+    return `${selectedRegions.length} regiones`;
+  }, [selectedRegions]);
   const [phaseFilter, setPhaseFilter] = useState('Todas');
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
@@ -2502,7 +2613,9 @@ export default function CronogramaGanttView({
         (tab === 'En proceso' && (x.status === 'En proceso' || x.status === 'En curso')) ||
         x.status === tab;
       const matchRegion =
-        regionFilter === 'Todas' || x.region === 'Todas las Regiones' || x.region === regionFilter;
+        selectedRegions.length === 0 ||
+        x.region === 'Todas las Regiones' ||
+        (x.region && selectedRegions.includes(x.region));
       const matchGestor =
         gestorFilter === 'Todos' || x.gestor === gestorFilter || getItemGestores(x).includes(gestorFilter);
       const matchPhase =
@@ -2591,7 +2704,7 @@ export default function CronogramaGanttView({
     stateFilter,
     typeFilter,
     tab,
-    regionFilter,
+    selectedRegions,
     phaseFilter,
     gestorFilter,
     rangeFrom,
@@ -2974,6 +3087,8 @@ export default function CronogramaGanttView({
             <div className="tabs-list">
               {[
                 { n: 'Todos', c: items.length },
+                { n: 'Hitos', c: hitos.length },
+                { n: 'Subprocesos', c: items.length - hitos.length },
                 { n: 'En proceso', c: inprog },
                 { n: 'Con retraso', c: late },
                 { n: 'Completados', c: complete },
@@ -3044,227 +3159,148 @@ export default function CronogramaGanttView({
               )}
             </label>
 
-            {/* Filtro Ubicación */}
+            {/* Filtro Ubicación Multirregión con Árbol de Sedes */}
             <div className="filter-dropdown-wrap">
               <button
                 type="button"
                 className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
-                  regionFilter !== 'Todas' ? 'filtered' : ''
+                  selectedRegions.length > 0 ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('region')}
+                title="Filtrar por una o varias regiones y sedes"
               >
                 <div className="filter-card-copy">
                   <small>Ubicación</small>
-                  <span>{regionFilter === 'Todas' ? 'Todas' : regionFilter}</span>
+                  <span>{regionButtonText}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
               {activeMenu === 'region' && (
-                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Filtrar por Ubicación</div>
-                  <div className="filter-popover-list">
-                    {REGION_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={`filter-item-btn ${regionFilter === opt.value ? 'selected' : ''}`}
-                        onClick={() => {
-                          setRegionFilter(opt.value);
-                          closeMenus();
-                        }}
-                      >
-                        <span>{opt.label}</span>
-                        {regionFilter === opt.value && <Check size={14} className="item-check" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Filtro Nivel Jerárquico / Tipo (Escalable multinivel estilo TableEngine) */}
-            <div className="filter-dropdown-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'type' ? 'active' : ''} ${
-                  typeFilter !== 'Todos' ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('type')}
-                title="Filtrar por Nivel Jerárquico o Tipo de Actividad"
-              >
-                <div className="filter-card-copy">
-                  <small>Nivel / Tipo</small>
-                  <span>
-                    {typeFilter === 'Todos'
-                      ? 'Todos los niveles'
-                      : typeFilter === 'Hitos'
-                      ? 'Nivel 1: Hitos Rectores'
-                      : typeFilter === 'Subprocesos'
-                      ? 'Nivel 2: Subprocesos'
-                      : typeFilter}
-                  </span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'type' && (
                 <div
-                  className="filter-card-popover hierarchy-tree-popover"
+                  className="filter-card-popover"
                   onClick={(e) => e.stopPropagation()}
-                  style={{ minWidth: 290, width: 310 }}
+                  style={{ minWidth: 260, maxWidth: 320 }}
                 >
-                  <div className="filter-popover-title">Filtrar por Nivel Jerárquico</div>
-
-                  {/* Chips rápidos en una sola fila proporcional */}
-                  <div className="hierarchy-quick-chips">
-                    <button
-                      type="button"
-                      className={`hierarchy-chip ${typeFilter === 'Todos' ? 'active' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Todos');
-                        closeMenus();
-                      }}
-                    >
-                      Todos
-                    </button>
-                    <button
-                      type="button"
-                      className={`hierarchy-chip ${typeFilter === 'Hitos' ? 'active' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Hitos');
-                        closeMenus();
-                      }}
-                    >
-                      Solo Hitos
-                    </button>
-                    <button
-                      type="button"
-                      className={`hierarchy-chip ${typeFilter === 'Subprocesos' ? 'active' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Subprocesos');
-                        closeMenus();
-                      }}
-                    >
-                      Subprocesos
-                    </button>
+                  <div className="filter-popover-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Filtrar por Ubicación</span>
+                    {selectedRegions.length > 0 && (
+                      <button
+                        type="button"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#0066ff',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                        onClick={() => setSelectedRegions([])}
+                      >
+                        Limpiar ({selectedRegions.length})
+                      </button>
+                    )}
                   </div>
-
-                  {/* Árbol jerárquico estructurado */}
-                  <div className="hierarchy-tree-list" style={{ padding: '6px 8px' }}>
-                    {/* Todos los niveles */}
+                  <div className="filter-popover-list" style={{ maxHeight: 290 }}>
+                    {/* Opción Todas las Ubicaciones */}
                     <button
                       type="button"
-                      className={`filter-item-btn hierarchy-tree-item ${typeFilter === 'Todos' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Todos');
-                        closeMenus();
-                      }}
+                      className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
+                      onClick={() => setSelectedRegions([])}
                     >
-                      <Layers size={14} style={{ color: '#0066ff', flexShrink: 0 }} />
-                      <span className="hierarchy-label">Todos los niveles</span>
-                      <span className="hierarchy-badge-count">{items.length}</span>
-                      {typeFilter === 'Todos' && <Check size={14} className="item-check" />}
+                      <span style={{ fontWeight: selectedRegions.length === 0 ? 700 : 500 }}>
+                        Todas las Ubicaciones
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#94a3b8' }}>({items.length})</span>
                     </button>
 
-                    {/* Nivel 1: Hitos Rectores */}
-                    <button
-                      type="button"
-                      className={`filter-item-btn hierarchy-tree-item level-1 ${typeFilter === 'Hitos' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Hitos');
-                        closeMenus();
-                      }}
-                    >
-                      <span className="hierarchy-diamond-icon">◆</span>
-                      <span className="hierarchy-label">Nivel 1 · Hitos Rectores</span>
-                      <span className="hierarchy-badge-count">{hitos.length}</span>
-                      {typeFilter === 'Hitos' && <Check size={14} className="item-check" />}
-                    </button>
+                    <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
 
-                    {/* Nivel 2: Subprocesos */}
-                    <button
-                      type="button"
-                      className={`filter-item-btn hierarchy-tree-item level-2 ${typeFilter === 'Subprocesos' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setTypeFilter('Subprocesos');
-                        closeMenus();
-                      }}
-                    >
-                      <span className="hierarchy-tree-branch">└─</span>
-                      <FileText size={13} style={{ color: '#64748b', flexShrink: 0 }} />
-                      <span className="hierarchy-label">Nivel 2 · Subprocesos</span>
-                      <span className="hierarchy-badge-count">{subs.length}</span>
-                      {typeFilter === 'Subprocesos' && <Check size={14} className="item-check" />}
-                    </button>
+                    {/* Regiones con selección múltiple y árbol de distritos/sedes */}
+                    {LOCATION_HIERARCHY.map((reg) => {
+                      const isChecked = selectedRegions.includes(reg.name);
+                      const isExpanded = expandedRegion === reg.name;
+                      return (
+                        <div key={reg.name} className="location-tree-group">
+                          <div
+                            className={`filter-item-btn ${isChecked ? 'selected' : ''}`}
+                            style={{ gap: 8, padding: '6px 8px', display: 'flex', alignItems: 'center' }}
+                            onClick={() => toggleRegion(reg.name)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}}
+                              style={{ cursor: 'pointer', accentColor: '#0066ff', width: 14, height: 14, margin: 0 }}
+                            />
+                            <span style={{ flex: 1, fontWeight: isChecked ? 600 : 500 }}>
+                              {reg.name}
+                            </span>
+                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>({reg.count})</span>
+                            {reg.distritos && reg.distritos.length > 0 && (
+                              <button
+                                type="button"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: '2px 4px',
+                                  cursor: 'pointer',
+                                  color: '#64748b',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setExpandedRegion(isExpanded ? null : reg.name);
+                                }}
+                                title={isExpanded ? 'Contraer distritos y sedes' : 'Ver distritos y sedes'}
+                              >
+                                {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                              </button>
+                            )}
+                          </div>
 
-                    {/* Nivel 3: Sub-subprocesos / Tareas (escalable para niveles futuros) */}
-                    <div
-                      className="filter-item-btn hierarchy-tree-item level-3 disabled-level"
-                      title="Nivel preparado para tareas operativas detalladas"
-                    >
-                      <span className="hierarchy-tree-branch">　└─</span>
-                      <Clock size={12} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                      <span className="hierarchy-label" style={{ color: '#94a3b8' }}>Nivel 3 · Sub-subprocesos / Tareas</span>
-                      <span className="hierarchy-badge-count" style={{ opacity: 0.6 }}>0</span>
-                    </div>
-
-                    {/* Nivel 4: Entregables / Evidencias (escalable) */}
-                    <div
-                      className="filter-item-btn hierarchy-tree-item level-4 disabled-level"
-                      title="Nivel preparado para evidencias y actas"
-                    >
-                      <span className="hierarchy-tree-branch">　　└─</span>
-                      <Check size={12} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                      <span className="hierarchy-label" style={{ color: '#94a3b8' }}>Nivel 4 · Entregables / Evidencias</span>
-                      <span className="hierarchy-badge-count" style={{ opacity: 0.6 }}>0</span>
-                    </div>
-                  </div>
-
-                  {/* Pie de popover */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '8px 12px',
-                      borderTop: '1px solid #f1f5f9',
-                      background: '#f8fafc',
-                      borderRadius: '0 0 10px 10px',
-                    }}
-                  >
-                    <button
-                      type="button"
-                      style={{
-                        border: 0,
-                        background: 'transparent',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        color: '#64748b',
-                        cursor: 'pointer',
-                        padding: '4px 6px',
-                      }}
-                      onClick={() => {
-                        setTypeFilter('Todos');
-                        closeMenus();
-                      }}
-                    >
-                      Restablecer
-                    </button>
-                    <button
-                      type="button"
-                      style={{
-                        border: 0,
-                        background: '#0066ff',
-                        color: '#ffffff',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        padding: '5px 12px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={closeMenus}
-                    >
-                      Listo
-                    </button>
+                          {/* Sub-lista en cascada de distritos y sedes del proyecto */}
+                          {isExpanded && reg.distritos && (
+                            <div
+                              className="location-sub-tree"
+                              style={{
+                                paddingLeft: 26,
+                                paddingRight: 8,
+                                paddingTop: 3,
+                                paddingBottom: 5,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 3,
+                                background: '#f8fafc',
+                                borderRadius: 6,
+                                margin: '2px 0 4px',
+                              }}
+                            >
+                              {reg.distritos.map((dist) => (
+                                <div
+                                  key={dist.distrito}
+                                  style={{
+                                    fontSize: '11.5px',
+                                    color: '#475569',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '2px 4px',
+                                  }}
+                                >
+                                  <span>
+                                    <strong style={{ fontWeight: 600 }}>{dist.distrito}</strong> ·{' '}
+                                    <span style={{ color: '#64748b' }}>{dist.sede}</span>
+                                  </span>
+                                  <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>({dist.count})</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -3279,7 +3315,7 @@ export default function CronogramaGanttView({
                   setSearch('');
                   setTypeFilter('Todos');
                   setStateFilter('Todos');
-                  setRegionFilter('Todas');
+                  setSelectedRegions([]);
                   setGestorFilter('Todos');
                   setTab('Todos');
                   handleTodayCal();
@@ -3815,7 +3851,7 @@ export default function CronogramaGanttView({
                     setSearch('');
                     setStateFilter('Todos');
                     setTypeFilter('Todos');
-                    setRegionFilter('Todas');
+                    setSelectedRegions([]);
                     setPhaseFilter('Todas');
                     setGestorFilter('Todos');
                     setRangeFrom(DEFAULT_RANGE.from);
@@ -5467,7 +5503,7 @@ export default function CronogramaGanttView({
               typeFilter={typeFilter}
               tab={tab}
               stateFilter={stateFilter}
-              regionFilter={regionFilter}
+              selectedRegions={selectedRegions}
               search={search}
             />
           )}
