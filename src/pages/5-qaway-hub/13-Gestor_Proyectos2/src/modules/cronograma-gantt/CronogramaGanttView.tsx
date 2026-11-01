@@ -5332,8 +5332,6 @@ export default function CronogramaGanttView({
             </div>
           )}
 
-            </div>
-
             {/* Barra de scroll horizontal persistente sincronizada al pie de la tabla */}
             <div
               className="floating-hscroll-track"
@@ -5349,6 +5347,7 @@ export default function CronogramaGanttView({
               }}
             >
               <div style={{ width: `${fixedWidth}px`, height: 1 }} />
+            </div>
             </div>
           )}
 
