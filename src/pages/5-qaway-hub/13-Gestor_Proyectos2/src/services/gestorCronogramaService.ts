@@ -27,6 +27,11 @@ export interface GanttItemData {
   done?: number;
   unit?: string;
   phase?: string;
+  /** Línea base aprobada y fechas reales (Fase 1 de control de plazos). */
+  baselineStart?: string;
+  baselineEnd?: string;
+  actualStart?: string;
+  actualEnd?: string;
 }
 
 // Convertidor de modelo de frontend hacia columnas de base de datos Supabase
@@ -52,6 +57,10 @@ const toSupabaseRow = (projectId: string, item: GanttItemData) => ({
   gestores: item.gestores || [],
   tasks: item.tasks || 0,
   done: item.done || 0,
+  baseline_start: item.baselineStart || null,
+  baseline_end: item.baselineEnd || null,
+  actual_start: item.actualStart || null,
+  actual_end: item.actualEnd || null,
   updated_at: new Date().toISOString(),
 });
 
@@ -77,7 +86,36 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
   gestores: row.gestores || [],
   tasks: row.tasks || 0,
   done: row.done || 0,
+  baselineStart: row.baseline_start || undefined,
+  baselineEnd: row.baseline_end || undefined,
+  actualStart: row.actual_start || undefined,
+  actualEnd: row.actual_end || undefined,
 });
+
+/* Columnas de la Fase 1 (supabase/02_gestor_cronograma_linea_base.sql). */
+const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end'] as const;
+const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd'] as const;
+
+/**
+ * Upsert tolerante al esquema: si la BD aún no tiene las columnas de línea base/fechas reales,
+ * reintenta sin ellas para no romper la sincronización del resto de campos
+ * (esos datos siguen en el respaldo local hasta ejecutar el SQL).
+ */
+async function upsertRows(rows: Record<string, any>[]): Promise<{ message: string } | null> {
+  const first = await supabase!.from('gestor_cronograma_items').upsert(rows);
+  if (!first.error) return null;
+  if (SCHEDULE_COLUMNS.some((col) => first.error!.message.includes(col))) {
+    console.warn('[Supabase Cronograma] Falta ejecutar supabase/02_gestor_cronograma_linea_base.sql; se sincroniza sin línea base ni fechas reales.');
+    const stripped = rows.map((r) => {
+      const copy = { ...r };
+      SCHEDULE_COLUMNS.forEach((col) => delete copy[col]);
+      return copy;
+    });
+    const retry = await supabase!.from('gestor_cronograma_items').upsert(stripped);
+    return retry.error ? { message: retry.error.message } : null;
+  }
+  return { message: first.error.message };
+}
 
 /**
  * Carga los ítems del cronograma desde Supabase para el proyecto dado.
@@ -99,6 +137,22 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
 
     if (Array.isArray(data) && data.length > 0) {
       const mapped = data.map(fromSupabaseRow);
+      // Si la BD aún no guarda línea base/fechas reales, se conservan las del respaldo local.
+      try {
+        const local = JSON.parse(localStorage.getItem(`qaway-gantt-items-${projectId}`) || '[]');
+        if (Array.isArray(local)) {
+          const byId = new Map(local.map((l: any) => [l.id, l]));
+          mapped.forEach((m: any) => {
+            const l: any = byId.get(m.id);
+            if (!l) return;
+            SCHEDULE_FIELDS.forEach((f) => {
+              if (!m[f] && l[f]) m[f] = l[f];
+            });
+          });
+        }
+      } catch {
+        /* respaldo local no disponible */
+      }
       try {
         localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(mapped));
       } catch {
@@ -121,7 +175,7 @@ export async function upsertCronogramaItemInSupabase(projectId: string, item: Ga
   if (!supabase) return false;
   try {
     const row = toSupabaseRow(projectId, item);
-    const { error } = await supabase.from('gestor_cronograma_items').upsert(row);
+    const error = await upsertRows([row]);
 
     if (error) {
       console.warn('[Supabase Cronograma] No se pudo sincronizar ítem en BD:', error.message);
@@ -141,7 +195,7 @@ export async function syncAllCronogramaItemsToSupabase(projectId: string, items:
   if (!supabase || !items || items.length === 0) return true;
   try {
     const rows = items.map((it) => toSupabaseRow(projectId, it));
-    const { error } = await supabase.from('gestor_cronograma_items').upsert(rows);
+    const error = await upsertRows(rows);
 
     if (error) {
       console.warn('[Supabase Cronograma] No se pudo sincronizar lote en BD:', error.message);

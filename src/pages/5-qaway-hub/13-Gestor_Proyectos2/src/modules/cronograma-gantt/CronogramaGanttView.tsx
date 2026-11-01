@@ -1,6 +1,14 @@
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
+import {
+  applyActuals,
+  formatDeviation,
+  freezeBaseline,
+  getDeviationDays,
+  getDeviationTone,
+  hasBaseline,
+} from './scheduleMetrics';
 import './gantt.css';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
@@ -66,6 +74,7 @@ import {
   Save,
   Search,
   ShieldCheck,
+  Anchor,
   Columns3,
   Tag,
   Target,
@@ -82,7 +91,7 @@ import {
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'actions';
+type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'deviation' | 'actualEnd' | 'actions';
 type EditField = ColKey;
 
 export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
@@ -126,6 +135,12 @@ export interface Item {
   done?: number;
   unit?: string;
   phase?: string;
+  /** Línea base aprobada (fechas originales contra las que se mide la desviación). */
+  baselineStart?: string;
+  baselineEnd?: string;
+  /** Fechas reales de ejecución (se registran al iniciar/completar; editables). */
+  actualStart?: string;
+  actualEnd?: string;
 }
 
 const INITIAL_ITEMS: Item[] = [
@@ -442,7 +457,7 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'gestor', 'region', 'actualEnd', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
@@ -456,6 +471,8 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   status: 125,
   gestor: 165,
   region: 140,
+  deviation: 120,
+  actualEnd: 130,
   actions: 80,
 };
 
@@ -471,6 +488,8 @@ const MIN_COLS: Record<ColKey, number> = {
   status: 90,
   gestor: 110,
   region: 90,
+  deviation: 90,
+  actualEnd: 100,
   actions: 60,
 };
 
@@ -483,16 +502,18 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'end', label: 'Fin' },
   { key: 'duration', label: 'Duración' },
   { key: 'progress', label: 'Avance' },
+  { key: 'deviation', label: 'Desviación' },
   { key: 'status', label: 'Estado' },
   { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Ámbito' },
+  { key: 'actualEnd', label: 'Fecha real' },
   { key: 'actions', label: 'Acciones' },
 ];
 
 // Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista (12 columnas completas ordenadas)
-const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'status', 'gestor', 'region', 'actions'];
+const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'gestor', 'region', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -1187,6 +1208,10 @@ export default function CronogramaGanttView({
       deliverables: item.deliverables || [],
       attachments: item.attachments || [],
       parentId: item.parentId || '',
+      baselineStart: item.baselineStart || '',
+      baselineEnd: item.baselineEnd || '',
+      actualStart: item.actualStart || '',
+      actualEnd: item.actualEnd || '',
     });
   };
 
@@ -1284,7 +1309,7 @@ export default function CronogramaGanttView({
       );
       notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'hito' : 'subproceso'} guardado con éxito en el cronograma maestro`);
     } else {
-      commitChange((old) => old.map((x) => (x.id === drawerDraft.id ? drawerDraft : x)));
+      commitChange((old) => old.map((x) => (x.id === drawerDraft.id ? applyActuals(x, drawerDraft, currentTodayIso) : x)));
       notify('Cambios guardados con éxito en el cronograma maestro');
     }
     setEditorInitialSnapshot('');
@@ -1757,9 +1782,18 @@ export default function CronogramaGanttView({
     }
   }, [visibleCols, viewMode]);
 
+  const ganttColumns = useMemo<ColumnDef<Item>[]>(
+    () => [
+      ...GANTT_COLUMNS,
+      { id: 'deviation', label: 'Desviación', type: 'number', accessor: (r) => (r ? getDeviationDays(r, currentTodayIso) : undefined) },
+      { id: 'actualEnd', label: 'Fecha real', type: 'date', accessor: (r) => r?.actualEnd },
+    ],
+    [currentTodayIso]
+  );
+
   const engine = useTableEngine<Item>({
     tableId: 'gantt',
-    columns: GANTT_COLUMNS,
+    columns: ganttColumns,
     rows: items,
     today: currentTodayIso,
     hierarchy: GANTT_HIERARCHY,
@@ -1790,6 +1824,8 @@ export default function CronogramaGanttView({
       status: 125,
       gestor: 165,
       region: 140,
+      deviation: 120,
+      actualEnd: 130,
       actions: 80,
     };
 
@@ -2171,7 +2207,18 @@ export default function CronogramaGanttView({
 
   /* ---------- Mutaciones de datos (retroalimentan Duración, barras e Historial) ---------- */
   const update = (id: string, p: Partial<Item>) => {
-    commitChange((old) => old.map((x) => (x.id === id ? { ...x, ...p } : x)));
+    commitChange((old) => old.map((x) => (x.id === id ? applyActuals(x, { ...x, ...p }, currentTodayIso) : x)));
+  };
+
+  /* Fija la línea base solo en registros que aún no la tienen (nunca pisa una existente). */
+  const freezeBaselines = () => {
+    const pending = items.filter((x) => !hasBaseline(x)).length;
+    if (pending === 0) {
+      notify('Todos los registros ya tienen línea base');
+      return;
+    }
+    commitChange((old) => old.map((x) => (hasBaseline(x) ? x : freezeBaseline(x))));
+    notify(`Línea base fijada en ${pending} registro${pending === 1 ? '' : 's'} (Ctrl+Z para deshacer)`);
   };
 
   const setStart = (x: Item, v: string) => {
@@ -3286,6 +3333,20 @@ export default function CronogramaGanttView({
               <ArrowLeftRight size={14} />
             </button>
 
+            {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base */}
+            <button
+              type="button"
+              className="btn secondary qm-btn-icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                freezeBaselines();
+              }}
+              data-tooltip="Fijar línea base (fechas actuales) en registros sin línea base"
+              aria-label="Fijar línea base del cronograma"
+            >
+              <Anchor size={14} />
+            </button>
+
             {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion) */}
             <div className="filter-dropdown-wrap cols-dropdown-wrap">
               <button
@@ -3830,6 +3891,27 @@ export default function CronogramaGanttView({
                   <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('progress'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
+              {visibleCols.includes('deviation') && (
+                <div className="th-col-header">
+                  <span className="th-label">Desviación</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('deviation');
+                        notify('Columna "Desviación" ocultada.');
+                      }}
+                      title="Ocultar columna Desviación"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="deviation" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'deviation' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'deviation')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('deviation'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
+                </div>
+              )}
               {visibleCols.includes('status') && (
                 <div className="th-col-header">
                   <span className="th-label">Estado</span>
@@ -3891,6 +3973,27 @@ export default function CronogramaGanttView({
                     <ColumnHeaderMenu engine={engine} columnId="region" buttonClassName="th-action-btn" />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('region'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
+                </div>
+              )}
+              {visibleCols.includes('actualEnd') && (
+                <div className="th-col-header">
+                  <span className="th-label">Fecha real</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('actualEnd');
+                        notify('Columna "Fecha real" ocultada.');
+                      }}
+                      title="Ocultar columna Fecha real"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="actualEnd" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'actualEnd' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'actualEnd')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('actualEnd'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('actions') && (
@@ -4393,6 +4496,23 @@ export default function CronogramaGanttView({
                       )}
                     </div>
                   )}
+                  {visibleCols.includes('deviation') && (() => {
+                    const dev = getDeviationDays(x, currentTodayIso);
+                    const tone = getDeviationTone(dev);
+                    return (
+                      <div
+                        className="deviation-cell"
+                        title={
+                          dev === undefined
+                            ? 'Sin línea base: fíjala desde el botón ancla de la barra o desde el panel del registro'
+                            : `Desviación respecto a la línea base (fin aprobado: ${formatDate(x.baselineEnd)})`
+                        }
+                      >
+                        <span className={`dev-pill ${tone}`}>{formatDeviation(dev)}</span>
+                      </div>
+                    );
+                  })()}
+
 
                   {visibleCols.includes('status') && (
                     <div
@@ -4564,6 +4684,12 @@ export default function CronogramaGanttView({
                       ) : (
                         <span className="region-badge-pill">{x.region || 'Nacional'}</span>
                       )}
+                    </div>
+                  )}
+
+                  {visibleCols.includes('actualEnd') && (
+                    <div className="date" title={x.actualEnd ? 'Fecha real de cumplimiento' : 'Aún sin cumplir'}>
+                      <span className="cell-text">{x.actualEnd ? formatDate(x.actualEnd) : '—'}</span>
                     </div>
                   )}
 
@@ -5604,6 +5730,92 @@ export default function CronogramaGanttView({
                         align="right"
                       />
                     )}
+                  </div>
+                </div>
+
+                {/* 4b. Línea base y cumplimiento real */}
+                <div className="baseline-box">
+                  <div className="baseline-head">
+                    <b>Línea base y cumplimiento</b>
+                    {(() => {
+                      const dev = getDeviationDays(activeItem, currentTodayIso);
+                      return <span className={`dev-pill ${getDeviationTone(dev)}`}>{formatDeviation(dev)}</span>;
+                    })()}
+                  </div>
+                  <div className="baseline-row">
+                    <span className="baseline-label">Línea base</span>
+                    <span className="baseline-value">
+                      {hasBaseline(activeItem)
+                        ? `${formatDatePE(activeItem.baselineStart)} — ${formatDatePE(activeItem.baselineEnd)}`
+                        : 'Sin línea base'}
+                    </span>
+                    <button
+                      type="button"
+                      className="baseline-btn"
+                      onClick={() => updateDraft({ baselineStart: activeItem.start, baselineEnd: activeItem.end })}
+                      title="Congela las fechas de inicio y fin actuales como planificación aprobada"
+                    >
+                      <Anchor size={12} />
+                      {hasBaseline(activeItem) ? 'Actualizar con fechas actuales' : 'Fijar con fechas actuales'}
+                    </button>
+                  </div>
+                  <div className="date-fields">
+                    <div className="field relative">
+                      <span>Inicio real</span>
+                      <button
+                        type="button"
+                        className={`custom-date-btn ${editorCalOpen === 'actualStart' ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditorReportTypeOpen(false);
+                          setEditorStatusOpen(false);
+                          setEditorCalOpen((p) => (p === 'actualStart' ? null : 'actualStart'));
+                        }}
+                        title="Fecha en que realmente comenzó (se registra sola al iniciar)"
+                      >
+                        <span>{activeItem.actualStart ? formatDatePE(activeItem.actualStart) : '—'}</span>
+                        <CalendarDays size={14} className="date-btn-icon" />
+                      </button>
+                      {editorCalOpen === 'actualStart' && (
+                        <MiniCalendar
+                          value={activeItem.actualStart || activeItem.start}
+                          onChange={(newDate) => {
+                            updateDraft({ actualStart: newDate || undefined });
+                            setEditorCalOpen(null);
+                          }}
+                          onClose={() => setEditorCalOpen(null)}
+                          align="left"
+                        />
+                      )}
+                    </div>
+                    <div className="field relative">
+                      <span>Fin real</span>
+                      <button
+                        type="button"
+                        className={`custom-date-btn ${editorCalOpen === 'actualEnd' ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditorReportTypeOpen(false);
+                          setEditorStatusOpen(false);
+                          setEditorCalOpen((p) => (p === 'actualEnd' ? null : 'actualEnd'));
+                        }}
+                        title="Fecha en que realmente se cumplió (se registra sola al completar)"
+                      >
+                        <span>{activeItem.actualEnd ? formatDatePE(activeItem.actualEnd) : '—'}</span>
+                        <CalendarDays size={14} className="date-btn-icon" />
+                      </button>
+                      {editorCalOpen === 'actualEnd' && (
+                        <MiniCalendar
+                          value={activeItem.actualEnd || activeItem.end}
+                          onChange={(newDate) => {
+                            updateDraft({ actualEnd: newDate || undefined });
+                            setEditorCalOpen(null);
+                          }}
+                          onClose={() => setEditorCalOpen(null)}
+                          align="right"
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
 

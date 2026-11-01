@@ -5895,3 +5895,117 @@ body.gantt-resizing {
 .gantt-v2 .cols-create-btn:hover {
   background: #0052cc;
 }
+
+/* ==========================================================================
+   Fase 1 · Control de plazos: Desviación, Fecha real y bloque de línea base
+   ========================================================================== */
+.gantt-v2 .deviation-cell {
+  display: flex;
+  align-items: center;
+}
+
+.gantt-v2 .dev-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+}
+
+.gantt-v2 .dev-pill.ontime {
+  background: #e6f7ef;
+  color: #00a854;
+  border-color: #b7eb8f;
+}
+
+.gantt-v2 .dev-pill.late {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.gantt-v2 .dev-pill.early {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.gantt-v2 .dev-pill.none {
+  background: transparent;
+  color: #94a3b8;
+  border-color: transparent;
+  padding-left: 0;
+}
+
+/* Bloque "Línea base y cumplimiento" del panel de detalle */
+.gantt-v2 .baseline-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.gantt-v2 .baseline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gantt-v2 .baseline-head b {
+  font-size: 12.5px;
+  color: #0f172a;
+}
+
+.gantt-v2 .baseline-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gantt-v2 .baseline-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.gantt-v2 .baseline-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.gantt-v2 .baseline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 4px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gantt-v2 .baseline-btn:hover {
+  border-color: #0066ff;
+  color: #0066ff;
+  background: #f0f7ff;
+}
