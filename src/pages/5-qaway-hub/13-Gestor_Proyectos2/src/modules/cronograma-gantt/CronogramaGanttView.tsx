@@ -2971,8 +2971,6 @@ export default function CronogramaGanttView({
             <div className="tabs-list">
               {[
                 { n: 'Todos', c: items.length },
-                { n: 'Hitos', c: hitos.length },
-                { n: 'Subprocesos', c: subs.length },
                 { n: 'En proceso', c: inprog },
                 { n: 'Con retraso', c: late },
                 { n: 'Completados', c: complete },
@@ -3081,133 +3079,193 @@ export default function CronogramaGanttView({
               )}
             </div>
 
-            {/* Filtro Responsable */}
+            {/* Filtro Nivel Jerárquico / Tipo (Escalable multinivel estilo TableEngine) */}
             <div className="filter-dropdown-wrap">
               <button
                 type="button"
-                className={`filter-card-btn ${activeMenu === 'gestor' ? 'active' : ''} ${
-                  gestorFilter !== 'Todos' ? 'filtered' : ''
+                className={`filter-card-btn ${activeMenu === 'type' ? 'active' : ''} ${
+                  typeFilter !== 'Todos' ? 'filtered' : ''
                 }`}
-                onClick={() => toggleMenu('gestor')}
+                onClick={() => toggleMenu('type')}
+                title="Filtrar por Nivel Jerárquico o Tipo de Actividad"
               >
                 <div className="filter-card-copy">
-                  <small>Responsable</small>
-                  <span>{gestorFilter === 'Todos' ? 'Todos' : gestorFilter}</span>
+                  <small>Nivel / Tipo</small>
+                  <span>
+                    {typeFilter === 'Todos'
+                      ? 'Todos los niveles'
+                      : typeFilter === 'Hitos'
+                      ? 'Nivel 1: Hitos Rectores'
+                      : typeFilter === 'Subprocesos'
+                      ? 'Nivel 2: Subprocesos'
+                      : typeFilter}
+                  </span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
-              {activeMenu === 'gestor' && (
-                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="filter-popover-title">Responsable Asignado</div>
-                  <div className="filter-popover-list">
-                    {GESTOR_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={`filter-item-btn ${gestorFilter === opt.value ? 'selected' : ''}`}
-                        onClick={() => {
-                          setGestorFilter(opt.value);
-                          closeMenus();
-                        }}
-                      >
-                        <span>{opt.label}</span>
-                        {gestorFilter === opt.value && <Check size={14} className="item-check" />}
-                      </button>
-                    ))}
+              {activeMenu === 'type' && (
+                <div
+                  className="filter-card-popover hierarchy-tree-popover"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ minWidth: 290, width: 310 }}
+                >
+                  <div className="filter-popover-title">Filtrar por Nivel Jerárquico</div>
+
+                  {/* Chips rápidos inspirados en TableEngine */}
+                  <div className="te-quick" style={{ padding: '8px 10px 6px', borderBottom: '1px solid #f1f5f9' }}>
+                    <button
+                      type="button"
+                      className={`te-chip ${typeFilter === 'Hitos' ? 'on' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Hitos');
+                        closeMenus();
+                      }}
+                    >
+                      Solo hitos
+                    </button>
+                    <button
+                      type="button"
+                      className={`te-chip ${typeFilter === 'Subprocesos' ? 'on' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Subprocesos');
+                        closeMenus();
+                      }}
+                    >
+                      Solo subprocesos
+                    </button>
+                    <button
+                      type="button"
+                      className={`te-chip te-chip-all ${typeFilter === 'Todos' ? 'on' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Todos');
+                        closeMenus();
+                      }}
+                    >
+                      Mostrar todos
+                    </button>
+                  </div>
+
+                  {/* Árbol jerárquico estructurado */}
+                  <div className="hierarchy-tree-list" style={{ padding: '6px 8px' }}>
+                    {/* Todos los niveles */}
+                    <button
+                      type="button"
+                      className={`filter-item-btn hierarchy-tree-item ${typeFilter === 'Todos' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Todos');
+                        closeMenus();
+                      }}
+                    >
+                      <Layers size={14} style={{ color: '#0066ff', flexShrink: 0 }} />
+                      <span className="hierarchy-label">Todos los niveles</span>
+                      <span className="hierarchy-badge-count">{items.length}</span>
+                      {typeFilter === 'Todos' && <Check size={14} className="item-check" />}
+                    </button>
+
+                    {/* Nivel 1: Hitos Rectores */}
+                    <button
+                      type="button"
+                      className={`filter-item-btn hierarchy-tree-item level-1 ${typeFilter === 'Hitos' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Hitos');
+                        closeMenus();
+                      }}
+                    >
+                      <span className="hierarchy-diamond-icon">◆</span>
+                      <span className="hierarchy-label">Nivel 1 · Hitos Rectores</span>
+                      <span className="hierarchy-badge-count">{hitos.length}</span>
+                      {typeFilter === 'Hitos' && <Check size={14} className="item-check" />}
+                    </button>
+
+                    {/* Nivel 2: Subprocesos */}
+                    <button
+                      type="button"
+                      className={`filter-item-btn hierarchy-tree-item level-2 ${typeFilter === 'Subprocesos' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setTypeFilter('Subprocesos');
+                        closeMenus();
+                      }}
+                    >
+                      <span className="hierarchy-tree-branch">└─</span>
+                      <FileText size={13} style={{ color: '#64748b', flexShrink: 0 }} />
+                      <span className="hierarchy-label">Nivel 2 · Subprocesos</span>
+                      <span className="hierarchy-badge-count">{subs.length}</span>
+                      {typeFilter === 'Subprocesos' && <Check size={14} className="item-check" />}
+                    </button>
+
+                    {/* Nivel 3: Sub-subprocesos / Tareas (escalable para niveles futuros) */}
+                    <div
+                      className="filter-item-btn hierarchy-tree-item level-3 disabled-level"
+                      title="Nivel preparado para tareas operativas detalladas"
+                    >
+                      <span className="hierarchy-tree-branch">　└─</span>
+                      <Clock size={12} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                      <span className="hierarchy-label" style={{ color: '#94a3b8' }}>Nivel 3 · Sub-subprocesos / Tareas</span>
+                      <span className="hierarchy-badge-count" style={{ opacity: 0.6 }}>0</span>
+                    </div>
+
+                    {/* Nivel 4: Entregables / Evidencias (escalable) */}
+                    <div
+                      className="filter-item-btn hierarchy-tree-item level-4 disabled-level"
+                      title="Nivel preparado para evidencias y actas"
+                    >
+                      <span className="hierarchy-tree-branch">　　└─</span>
+                      <Check size={12} style={{ color: '#94a3b8', flexShrink: 0 }} />
+                      <span className="hierarchy-label" style={{ color: '#94a3b8' }}>Nivel 4 · Entregables / Evidencias</span>
+                      <span className="hierarchy-badge-count" style={{ opacity: 0.6 }}>0</span>
+                    </div>
+                  </div>
+
+                  {/* Pie de popover */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 12px',
+                      borderTop: '1px solid #f1f5f9',
+                      background: '#f8fafc',
+                      borderRadius: '0 0 10px 10px',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      style={{
+                        border: 0,
+                        background: 'transparent',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        padding: '4px 6px',
+                      }}
+                      onClick={() => {
+                        setTypeFilter('Todos');
+                        closeMenus();
+                      }}
+                    >
+                      Restablecer
+                    </button>
+                    <button
+                      type="button"
+                      style={{
+                        border: 0,
+                        background: '#0066ff',
+                        color: '#ffffff',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        padding: '5px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                      onClick={closeMenus}
+                    >
+                      Listo
+                    </button>
                   </div>
                 </div>
               )}
             </div>
-
-            {/* Filtro Tipo (Específico Vista Calendario Institucional) */}
-            {viewMode === 'calendario' && (
-              <div className="filter-dropdown-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn ${activeMenu === 'type' ? 'active' : ''} ${
-                    typeFilter !== 'Todos' ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('type')}
-                >
-                  <div className="filter-card-copy">
-                    <small>Tipo</small>
-                    <span>{typeFilter === 'Todos' ? 'Todos' : typeFilter === 'Hitos' ? 'Solo Hitos' : 'Solo Subprocesos'}</span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'type' && (
-                  <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                    <div className="filter-popover-title">Filtrar por Tipo de Actividad</div>
-                    <div className="filter-popover-list">
-                      {[
-                        { value: 'Todos', label: 'Todos (Hitos y Subprocesos)' },
-                        { value: 'Hitos', label: 'Solo Hitos Rectores' },
-                        { value: 'Subprocesos', label: 'Solo Subprocesos' },
-                      ].map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          className={`filter-item-btn ${typeFilter === opt.value ? 'selected' : ''}`}
-                          onClick={() => {
-                            setTypeFilter(opt.value);
-                            closeMenus();
-                          }}
-                        >
-                          <span>{opt.label}</span>
-                          {typeFilter === opt.value && <Check size={14} className="item-check" />}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Filtro Estado (Específico Vista Calendario Institucional) */}
-            {viewMode === 'calendario' && (
-              <div className="filter-dropdown-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
-                    stateFilter !== 'Todos' ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('state')}
-                >
-                  <div className="filter-card-copy">
-                    <small>Estado</small>
-                    <span>{stateFilter === 'Todos' ? 'Todos' : stateFilter}</span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'state' && (
-                  <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                    <div className="filter-popover-title">Filtrar por Estado</div>
-                    <div className="filter-popover-list">
-                      {[
-                        { value: 'Todos', label: 'Todos los Estados' },
-                        { value: 'Pendiente', label: 'Pendiente' },
-                        { value: 'En proceso', label: 'En proceso' },
-                        { value: 'Con retraso', label: 'Con retraso' },
-                        { value: 'Completado', label: 'Completado' },
-                      ].map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          className={`filter-item-btn ${stateFilter === opt.value ? 'selected' : ''}`}
-                          onClick={() => {
-                            setStateFilter(opt.value);
-                            closeMenus();
-                          }}
-                        >
-                          <span>{opt.label}</span>
-                          {stateFilter === opt.value && <Check size={14} className="item-check" />}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Botón Limpiar para Calendario */}
             {viewMode === 'calendario' && (
@@ -3220,6 +3278,7 @@ export default function CronogramaGanttView({
                   setStateFilter('Todos');
                   setRegionFilter('Todas');
                   setGestorFilter('Todos');
+                  setTab('Todos');
                   handleTodayCal();
                   closeMenus();
                   notify('Filtros del calendario restablecidos');

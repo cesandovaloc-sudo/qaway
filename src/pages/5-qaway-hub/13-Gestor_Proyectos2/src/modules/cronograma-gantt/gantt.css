@@ -4751,10 +4751,11 @@ body.gantt-resizing {
 .gantt-v2 .view-mode-switcher {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   background: #f1f5f9;
-  padding: 3px;
-  border-radius: 8px;
+  padding: 3px 4px;
+  height: 40px; /* Calibración de altura ergonómica alineada a la fila inferior */
+  border-radius: 9px;
   border: 1px solid #e2e8f0;
   flex-shrink: 0;
   box-sizing: border-box;
@@ -4764,16 +4765,16 @@ body.gantt-resizing {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
-  height: 28px !important;
-  min-height: 28px !important;
-  padding: 0 11px !important;
-  border-radius: 6px !important;
+  gap: 7px !important;
+  height: 34px !important; /* Calibrado de 28px a 34px para presencia ergonómica */
+  min-height: 34px !important;
+  padding: 0 13px !important;
+  border-radius: 7px !important;
   border: none !important;
   background: transparent !important;
   color: #64748b !important;
-  font-size: 12.5px !important;
-  font-weight: 500 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
   box-shadow: none !important;
@@ -4782,7 +4783,7 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .view-mode-switcher .view-mode-btn:hover {
-  background: rgba(255, 255, 255, 0.75) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
   color: #0f172a !important;
 }
 
@@ -4800,6 +4801,111 @@ body.gantt-resizing {
 
 .gantt-v2 .view-mode-switcher .view-mode-btn:after {
   display: none !important;
+}
+
+/* Popover de Nivel Jerárquico Avanzado (Escalable Multinivel) */
+.hierarchy-tree-popover {
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.04);
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.hierarchy-tree-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hierarchy-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+  box-sizing: border-box;
+}
+
+.hierarchy-tree-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.hierarchy-tree-item.selected {
+  background: #eff6ff;
+  color: #0066ff;
+  font-weight: 600;
+}
+
+.hierarchy-tree-item.level-1 {
+  padding-left: 10px;
+}
+
+.hierarchy-tree-item.level-2 {
+  padding-left: 14px;
+}
+
+.hierarchy-tree-item.level-3 {
+  padding-left: 20px;
+}
+
+.hierarchy-tree-item.level-4 {
+  padding-left: 26px;
+}
+
+.hierarchy-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hierarchy-badge-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.hierarchy-tree-item.selected .hierarchy-badge-count {
+  background: #bfdbfe;
+  color: #0066ff;
+}
+
+.hierarchy-diamond-icon {
+  color: #0066ff;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.hierarchy-tree-branch {
+  color: #94a3b8;
+  font-size: 11px;
+  font-family: monospace;
+  flex-shrink: 0;
+}
+
+.hierarchy-tree-item.disabled-level {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.hierarchy-tree-item.disabled-level:hover {
+  background: transparent;
 }
 
 /* ==========================================================================
