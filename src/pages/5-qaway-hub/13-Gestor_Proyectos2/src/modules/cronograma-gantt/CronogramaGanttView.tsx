@@ -91,7 +91,7 @@ import {
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'deviation' | 'actualEnd' | 'actions';
+type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
 type EditField = ColKey;
 
 export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
@@ -459,7 +459,7 @@ const RANGE_MAX = '2027-04-30';
 
 const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'gestor', 'region', 'actualEnd', 'actions'];
 
-const DEFAULT_COLS: Record<ColKey, number> = {
+const DEFAULT_COLS: Record<string, number> = {
   code: 80,
   name: 440,
   kind: 110,
@@ -476,7 +476,7 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   actions: 80,
 };
 
-const MIN_COLS: Record<ColKey, number> = {
+const MIN_COLS: Record<string, number> = {
   code: 60,
   name: 200,
   kind: 80,
@@ -1787,8 +1787,14 @@ export default function CronogramaGanttView({
       ...GANTT_COLUMNS,
       { id: 'deviation', label: 'Desviación', type: 'number', accessor: (r) => (r ? getDeviationDays(r, currentTodayIso) : undefined) },
       { id: 'actualEnd', label: 'Fecha real', type: 'date', accessor: (r) => r?.actualEnd },
+      ...customCols.map((c) => ({
+        id: c.key,
+        label: c.label,
+        type: (c.type === 'percent' ? 'percent' : c.type === 'number' ? 'number' : c.type === 'date' ? 'date' : c.type === 'person' ? 'person' : c.type === 'select' ? 'select' : 'text') as any,
+        accessor: (r: Item) => (r as any)?.[c.key],
+      })),
     ],
-    [currentTodayIso]
+    [currentTodayIso, customCols]
   );
 
   const engine = useTableEngine<Item>({
@@ -1805,8 +1811,9 @@ export default function CronogramaGanttView({
       if (prev.includes(key)) {
         return prev.filter((k) => k !== key);
       }
-      // Reinsertar respetando el orden canónico de la tabla matriz
-      return CANONICAL_COLS.filter((k) => prev.includes(k) || k === key);
+      // Reinsertar respetando el orden canónico de la tabla matriz + columnas custom
+      const allAllowed = [...CANONICAL_COLS, ...customCols.map((c) => c.key as ColKey)];
+      return allAllowed.filter((k) => prev.includes(k) || k === key);
     });
   };
 
@@ -1874,6 +1881,7 @@ export default function CronogramaGanttView({
   const scrollRef = useRef<HTMLDivElement>(null);
   const headScrollRef = useRef<HTMLDivElement>(null);
   const tableHeadRef = useRef<HTMLDivElement>(null);
+  const floatingHScrollRef = useRef<HTMLDivElement>(null);
   const colRef = useRef(colWidths);
   const dragRef = useRef<{ key: ColKey; startX: number; startW: number } | null>(null);
   colRef.current = colWidths;
@@ -1887,6 +1895,9 @@ export default function CronogramaGanttView({
       if (tableHeadRef.current) {
         tableHeadRef.current.scrollLeft = e.currentTarget.scrollLeft;
       }
+    }
+    if (floatingHScrollRef.current && Math.abs(floatingHScrollRef.current.scrollLeft - e.currentTarget.scrollLeft) > 1) {
+      floatingHScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
     }
   };
 
@@ -4002,9 +4013,9 @@ export default function CronogramaGanttView({
                 </div>
               )}
 
-              {/* Columnas personalizadas Notion en cabecera */}
+              {/* Columnas personalizadas Notion en cabecera con micro-filtro y resizer sincronizado */}
               {customCols.map((cCol) => visibleCols.includes(cCol.key as ColKey) && (
-                <div key={cCol.key} className="th-col-header" style={{ width: colWidths[cCol.key as ColKey] || 130 }}>
+                <div key={cCol.key} className="th-col-header">
                   <span className="th-label">{cCol.label}</span>
                   <div className="th-actions">
                     <button
@@ -4013,11 +4024,13 @@ export default function CronogramaGanttView({
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleColVisibility(cCol.key as ColKey);
+                        notify(`Columna "${cCol.label}" ocultada.`);
                       }}
                       title={`Ocultar ${cCol.label}`}
                     >
                       <EyeOff size={11} />
                     </button>
+                    <ColumnHeaderMenu engine={engine} columnId={cCol.key} buttonClassName="th-action-btn" />
                   </div>
                   <div className={`col-resizer ${resizingCol === cCol.key ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, cCol.key as ColKey)} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth(cCol.key as ColKey); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -4713,44 +4726,148 @@ export default function CronogramaGanttView({
                     </div>
                   )}
 
-                  {/* Celdas de columnas personalizadas Notion */}
-                  {customCols.map((cCol) => visibleCols.includes(cCol.key as ColKey) && (
-                    <div
-                      key={cCol.key}
-                      className="custom-cell-col"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '0 10px',
-                        overflow: 'hidden',
-                        height: '100%',
-                      }}
-                    >
-                      {cCol.type === 'percent' ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}>
-                          <div style={{ flex: 1, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
-                            <div style={{ width: `${Math.min(100, Math.max(0, x.progress || 0))}%`, height: '100%', background: '#0066ff' }} />
-                          </div>
-                          <small style={{ fontSize: 11, fontWeight: 600, color: '#475569' }}>{x.progress || 0}%</small>
-                        </div>
-                      ) : cCol.type === 'select' ? (
-                        <span style={{ fontSize: 11.5, fontWeight: 600, background: '#eff6ff', color: '#1e40af', padding: '2px 8px', borderRadius: 4, border: '1px solid #bfdbfe' }}>
-                          {x.status || 'General'}
-                        </span>
-                      ) : cCol.type === 'person' ? (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#475569' }}>
-                          <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#0066ff', color: '#fff', fontSize: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {x.gestor ? x.gestor.substring(0, 2).toUpperCase() : 'CM'}
-                          </span>
-                          <span>{x.gestor || 'Sin asignar'}</span>
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: 12, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {(x as any)[cCol.key] || '—'}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                  {/* Celdas interactivas editables de columnas personalizadas */}
+                  {customCols.map((cCol) => visibleCols.includes(cCol.key as ColKey) && (() => {
+                    const cellVal = (x as any)[cCol.key];
+                    const isEditingCol = isEditing(x, cCol.key as ColKey);
+                    return (
+                      <div
+                        key={cCol.key}
+                        className="custom-cell-col editable"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '0 10px',
+                          overflow: 'hidden',
+                          height: '100%',
+                          position: 'relative',
+                          cursor: 'pointer',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleEdit(x, cCol.key as ColKey);
+                        }}
+                        title={`Clic para editar ${cCol.label}`}
+                      >
+                        {isEditingCol ? (
+                          cCol.type === 'number' ? (
+                            <input
+                              className="cell-editor cell-input num-edit"
+                              type="number"
+                              autoFocus
+                              defaultValue={cellVal ?? ''}
+                              onClick={(e) => e.stopPropagation()}
+                              onBlur={(e) => {
+                                const val = e.target.value === '' ? undefined : Number(e.target.value);
+                                update(x.id, { [cCol.key]: val } as any);
+                                closeEdit();
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') e.currentTarget.blur();
+                                if (e.key === 'Escape') closeEdit();
+                              }}
+                            />
+                          ) : cCol.type === 'percent' ? (
+                            <div className="cell-editor cell-pop progress-pop" onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="range"
+                                min={0}
+                                max={100}
+                                step={5}
+                                value={Number(cellVal) || 0}
+                                onChange={(e) => update(x.id, { [cCol.key]: +e.target.value } as any)}
+                              />
+                              <b>{cellVal || 0}%</b>
+                              <button type="button" className="btn primary" style={{ height: 22, fontSize: 10.5, padding: '0 6px', marginLeft: 6 }} onClick={closeEdit}>OK</button>
+                            </div>
+                          ) : cCol.type === 'date' ? (
+                            <MiniCalendar
+                              value={cellVal || ''}
+                              onChange={(newDate) => {
+                                update(x.id, { [cCol.key]: newDate } as any);
+                                closeEdit();
+                              }}
+                              onClose={closeEdit}
+                              align="left"
+                            />
+                          ) : cCol.type === 'select' ? (
+                            <div className="cell-editor cell-pop" style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 6, minWidth: 150 }} onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="text"
+                                autoFocus
+                                className="cell-input"
+                                placeholder="Etiqueta personalizada..."
+                                defaultValue={cellVal || ''}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    update(x.id, { [cCol.key]: e.currentTarget.value.trim() } as any);
+                                    closeEdit();
+                                  }
+                                  if (e.key === 'Escape') closeEdit();
+                                }}
+                              />
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                                {['Prioritario', 'En revisión', 'Aprobado', 'Observado'].map((tag) => (
+                                  <button
+                                    key={tag}
+                                    type="button"
+                                    style={{ fontSize: 10.5, padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', background: cellVal === tag ? '#dbeafe' : '#f8fafc', cursor: 'pointer' }}
+                                    onClick={() => {
+                                      update(x.id, { [cCol.key]: tag } as any);
+                                      closeEdit();
+                                    }}
+                                  >
+                                    {tag}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <input
+                              className="cell-editor cell-input"
+                              type="text"
+                              autoFocus
+                              defaultValue={cellVal || ''}
+                              onClick={(e) => e.stopPropagation()}
+                              onBlur={(e) => {
+                                update(x.id, { [cCol.key]: e.target.value.trim() } as any);
+                                closeEdit();
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') e.currentTarget.blur();
+                                if (e.key === 'Escape') closeEdit();
+                              }}
+                            />
+                          )
+                        ) : (
+                          cCol.type === 'percent' ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}>
+                              <div style={{ flex: 1, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+                                <div style={{ width: `${Math.min(100, Math.max(0, Number(cellVal) || 0))}%`, height: '100%', background: '#0066ff' }} />
+                              </div>
+                              <small style={{ fontSize: 11, fontWeight: 600, color: '#475569' }}>{cellVal !== undefined ? `${cellVal}%` : '0%'}</small>
+                            </div>
+                          ) : cCol.type === 'select' ? (
+                            cellVal ? (
+                              <span style={{ fontSize: 11.5, fontWeight: 600, background: '#eff6ff', color: '#1e40af', padding: '2px 8px', borderRadius: 4, border: '1px solid #bfdbfe' }}>
+                                {cellVal}
+                              </span>
+                            ) : (
+                              <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>
+                            )
+                          ) : cCol.type === 'date' ? (
+                            <span style={{ fontSize: 12, color: '#334155' }}>
+                              {cellVal ? formatDatePE(cellVal) : '—'}
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: 12, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {cellVal !== undefined && cellVal !== '' ? String(cellVal) : '—'}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    );
+                  })())}
 
                   {/* ── Columna Código ── */}
 
@@ -4991,6 +5108,23 @@ export default function CronogramaGanttView({
             </div>
           )}
 
+            </div>
+
+            {/* Barra de scroll horizontal persistente sincronizada al pie de la tabla */}
+            <div
+              className="floating-hscroll-track"
+              ref={floatingHScrollRef}
+              onScroll={(e) => {
+                const sl = e.currentTarget.scrollLeft;
+                if (scrollRef.current && Math.abs(scrollRef.current.scrollLeft - sl) > 1) {
+                  scrollRef.current.scrollLeft = sl;
+                }
+                if (viewMode === 'lista' && tableHeadRef.current && Math.abs(tableHeadRef.current.scrollLeft - sl) > 1) {
+                  tableHeadRef.current.scrollLeft = sl;
+                }
+              }}
+            >
+              <div style={{ width: `${fixedWidth}px`, height: 1 }} />
             </div>
           )}
 
