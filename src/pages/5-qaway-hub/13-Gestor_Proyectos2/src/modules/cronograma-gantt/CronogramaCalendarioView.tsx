@@ -451,8 +451,9 @@ export default function CronogramaCalendarioView({
   const weekEvents = useMemo(() => {
     const map: Record<number, CalendarProjectEvent[]> = { 0: [], 1: [], 2: [], 3: [], 4: [] };
     filteredEvents.forEach((ev) => {
-      if (map[ev.weekIndex]) {
-        map[ev.weekIndex].push(ev);
+      const bucket = map[ev.weekIndex];
+      if (bucket) {
+        bucket.push(ev);
       }
     });
     return map;
@@ -597,23 +598,24 @@ export default function CronogramaCalendarioView({
                     onClick={() => handleOpenItem(ev.code)}
                     style={{ marginBottom: 8, height: '32px' }}
                   >
-                  <div
-                    className="cal-gantt-progress-fill"
-                    style={{ width: `${ev.progress}%` }}
-                  />
-                  <div className="cal-gantt-content">
-                    {ev.kind === 'hito' && <span className="cal-gantt-hito-badge">◆</span>}
-                    <strong className="cal-gantt-code">{ev.code}</strong>
-                    <span className="cal-gantt-name">{ev.name}</span>
-                    <span className="cal-gantt-pct">{ev.progress}%</span>
+                    <div
+                      className="cal-gantt-progress-fill"
+                      style={{ width: `${ev.progress}%` }}
+                    />
+                    <div className="cal-gantt-content">
+                      {ev.kind === 'hito' && <span className="cal-gantt-hito-badge">◆</span>}
+                      <strong className="cal-gantt-code">{ev.code}</strong>
+                      <span className="cal-gantt-name">{ev.name}</span>
+                      <span className="cal-gantt-pct">{ev.progress}%</span>
+                    </div>
+                    {ev.kind === 'hito' && (
+                      <span className="cal-gantt-diamond-badge">
+                        <span className="cal-diamond-shape" />
+                      </span>
+                    )}
                   </div>
-                  {ev.kind === 'hito' && (
-                    <span className="cal-gantt-diamond-badge">
-                      <span className="cal-diamond-shape" />
-                    </span>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
