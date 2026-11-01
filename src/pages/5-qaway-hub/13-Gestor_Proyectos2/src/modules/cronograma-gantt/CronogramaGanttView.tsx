@@ -33,6 +33,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
+  Clock,
   Clock3,
   PanelLeftClose,
   PanelLeftOpen,
@@ -53,6 +54,7 @@ import {
   Globe,
   Hash,
   HelpCircle,
+  Layers,
   Layers3,
   LayoutDashboard,
   List,
@@ -2497,6 +2499,7 @@ export default function CronogramaGanttView({
         (tab === 'Hitos' && x.kind === 'hito') ||
         (tab === 'Subprocesos' && x.kind === 'subproceso') ||
         (tab === 'Completados' && (x.status === 'Completado' || x.status === 'Cumple')) ||
+        (tab === 'En proceso' && (x.status === 'En proceso' || x.status === 'En curso')) ||
         x.status === tab;
       const matchRegion =
         regionFilter === 'Todas' || x.region === 'Todas las Regiones' || x.region === regionFilter;
