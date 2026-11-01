@@ -2298,6 +2298,44 @@ export default function CronogramaGanttView({
     [engine.filter, engine.hasFilters, items]
   );
 
+  const [collapsedByMode, setCollapsedByMode] = useState<{
+    gantt: Record<string, boolean>;
+    lista: Record<string, boolean>;
+  }>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-collapsed-by-mode-v1') || 'null');
+      if (saved && typeof saved === 'object') return saved;
+    } catch {}
+    return { gantt: {}, lista: {} };
+  });
+
+  const isItemExpanded = (id: string, defaultExpanded: boolean = true): boolean => {
+    const mode = viewMode === 'lista' ? 'lista' : 'gantt';
+    const modeMap = collapsedByMode[mode];
+    if (modeMap && id in modeMap) {
+      return !modeMap[id];
+    }
+    return defaultExpanded;
+  };
+
+  const toggleItemExpand = (id: string, defaultExpanded: boolean = true) => {
+    const mode = viewMode === 'lista' ? 'lista' : 'gantt';
+    setCollapsedByMode((prev) => {
+      const currentExpanded = isItemExpanded(id, defaultExpanded);
+      const next = {
+        ...prev,
+        [mode]: {
+          ...(prev[mode] || {}),
+          [id]: currentExpanded,
+        },
+      };
+      try {
+        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const shownBase = useMemo(() => {
     return items.filter((x) => {
       const parent = items.find((p) => p.id === x.parentId);
@@ -2421,44 +2459,6 @@ export default function CronogramaGanttView({
   const parentItems = useMemo(() => {
     return items.filter((it) => items.some((child) => child.parentId === it.id));
   }, [items]);
-
-  const [collapsedByMode, setCollapsedByMode] = useState<{
-    gantt: Record<string, boolean>;
-    lista: Record<string, boolean>;
-  }>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('qaway-collapsed-by-mode-v1') || 'null');
-      if (saved && typeof saved === 'object') return saved;
-    } catch {}
-    return { gantt: {}, lista: {} };
-  });
-
-  const isItemExpanded = (id: string, defaultExpanded: boolean = true): boolean => {
-    const mode = viewMode === 'lista' ? 'lista' : 'gantt';
-    const modeMap = collapsedByMode[mode];
-    if (modeMap && id in modeMap) {
-      return !modeMap[id];
-    }
-    return defaultExpanded;
-  };
-
-  const toggleItemExpand = (id: string, defaultExpanded: boolean = true) => {
-    const mode = viewMode === 'lista' ? 'lista' : 'gantt';
-    setCollapsedByMode((prev) => {
-      const currentExpanded = isItemExpanded(id, defaultExpanded);
-      const next = {
-        ...prev,
-        [mode]: {
-          ...(prev[mode] || {}),
-          [id]: currentExpanded,
-        },
-      };
-      try {
-        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-  };
 
   const allHitosExpanded = useMemo(() => {
     return parentItems.length > 0 && parentItems.every((h) => isItemExpanded(h.id, h.expanded !== false));
