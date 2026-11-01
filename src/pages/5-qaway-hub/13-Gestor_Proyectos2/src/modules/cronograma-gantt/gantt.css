@@ -5429,6 +5429,17 @@ body.gantt-resizing {
   margin: 0;
 }
 
+.cal-total-count-badge {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0066ff;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
 /* Lienzo Mes */
 .cal-month-canvas {
   display: flex;
@@ -5506,139 +5517,172 @@ body.gantt-resizing {
   pointer-events: none;
 }
 
-/* Píldoras ergonómicas redondeadas (Exactas a Imagen 2) */
-.cal-pill-event {
+/* Barras de Calendario Oficiales · Estricto Estándar Gantt */
+.cal-gantt-bar {
   pointer-events: auto;
-  display: inline-flex;
+  position: relative;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  height: 26px;
+  border-radius: 4px; /* Candado Visual: Estilo Gantt, adiós píldoras */
+  font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  white-space: nowrap;
+  box-sizing: border-box;
   overflow: hidden;
-  text-overflow: ellipsis;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
-.cal-pill-event:hover {
+.cal-gantt-bar:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
   filter: brightness(0.98);
 }
 
-.cal-pill-blue {
-  background: #dbeafe;
-  border: 1px solid #bfdbfe;
-  color: #1e3a8a;
+/* 1. Hito Rector (Azul Oficial con Degradado y Diamante ◆) */
+.cal-gantt-bar.bar-major {
+  background: rgba(0, 102, 255, 0.16);
+  border: 1px solid rgba(0, 102, 255, 0.45);
+  border-radius: 5px;
 }
-
-.cal-pill-green {
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  color: #14532d;
+.cal-gantt-bar.bar-major .cal-gantt-progress-fill {
+  background: linear-gradient(90deg, #0052cc 0%, #0066ff 100%);
+  border-radius: 4px 0 0 4px;
 }
-
-.cal-pill-orange {
-  background: #ffedd5;
-  border: 1px solid #fed7aa;
-  color: #7c2d12;
-}
-
-.cal-pill-hito-full {
-  background: #dbeafe;
-  border: 1px solid #93c5fd;
-  color: #1e3a8a;
-  gap: 8px;
-  height: 32px;
-}
-
-.cal-hito-circle-badge {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #0066ff;
+.cal-gantt-bar.bar-major .cal-gantt-content {
   color: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.cal-hito-bold {
-  font-weight: 700;
-}
-
-.cal-pill-icon {
-  flex-shrink: 0;
-}
-
-.icon-blue {
-  color: #2563eb;
-}
-
-.icon-green {
-  color: #16a34a;
-}
-
-.icon-orange {
-  color: #ea580c;
-}
-
-.icon-purple {
-  color: #9333ea;
-}
-
-.cal-pill-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Tarjeta para Reuniones de 2 líneas */
-.cal-card-meeting {
-  pointer-events: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: #f3e8ff;
-  border: 1px solid #d8b4fe;
-  border-radius: 8px;
-  padding: 4px 10px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  height: 42px;
-  margin-top: -6px;
-}
-
-.cal-card-meeting:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-}
-
-.cal-meeting-top {
+/* Diamante característico en la punta del Hito Rector */
+.cal-gantt-diamond-badge {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  z-index: 4;
+}
+.cal-gantt-diamond-badge .cal-diamond-shape {
+  width: 11px;
+  height: 11px;
+  min-width: 11px;
+  min-height: 11px;
+  flex-shrink: 0;
+  background: #0066ff;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.cal-gantt-bar.bar-major:hover .cal-gantt-diamond-badge .cal-diamond-shape {
+  transform: rotate(45deg) scale(1.2);
+  background: #0052cc;
 }
 
-.cal-meeting-title {
-  font-size: 11.5px;
+/* 2. Completado (Verde Esmeralda Sólido / 100%) */
+.cal-gantt-bar.bar-complete {
+  background: rgba(0, 185, 107, 0.18);
+  border: 1px solid rgba(0, 185, 107, 0.5);
+}
+.cal-gantt-bar.bar-complete .cal-gantt-progress-fill {
+  background: #00b96b;
+  border-radius: 3px;
+}
+.cal-gantt-bar.bar-complete .cal-gantt-content {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* 3. En Proceso (Bicolor Naranja Gantt con Pista Suave) */
+.cal-gantt-bar.bar-progress {
+  background: rgba(250, 140, 22, 0.18);
+  border: 1px solid rgba(250, 140, 22, 0.45);
+}
+.cal-gantt-bar.bar-progress .cal-gantt-progress-fill {
+  background: #fa8c16;
+  border-radius: 3px 0 0 3px;
+}
+.cal-gantt-bar.bar-progress .cal-gantt-content {
+  color: #431407;
   font-weight: 600;
-  color: #581c87;
+}
+
+/* 4. Pendiente (Gris Neutro Gantt 0%) */
+.cal-gantt-bar.bar-pending {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+.cal-gantt-bar.bar-pending .cal-gantt-progress-fill {
+  display: none;
+}
+.cal-gantt-bar.bar-pending .cal-gantt-content {
+  color: #475569;
+}
+
+/* 5. Con Retraso (Alerta Roja) */
+.cal-gantt-bar.bar-late {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+}
+.cal-gantt-bar.bar-late .cal-gantt-progress-fill {
+  background: #ef4444;
+  border-radius: 3px 0 0 3px;
+}
+.cal-gantt-bar.bar-late .cal-gantt-content {
+  color: #7f1d1d;
+}
+
+/* Relleno y Contenido de Barras */
+.cal-gantt-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  transition: width 0.25s ease;
+}
+.cal-gantt-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.cal-meeting-time {
-  font-size: 10.5px;
-  color: #7e22ce;
-  margin-left: 17px;
+.cal-gantt-code {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.cal-gantt-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cal-gantt-pct {
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: auto;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.cal-gantt-check-icon {
+  flex-shrink: 0;
+}
+.cal-gantt-hito-badge {
+  font-size: 9px;
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
 /* --- Barra Lateral Derecha Limpia (Exacta a Imagen 2) --- */
@@ -5820,32 +5864,67 @@ body.gantt-resizing {
   background: #e2e8f0;
 }
 
-/* Indicadores de punto */
-.cal-dot-indicator {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+/* Píldoras de Estado Gantt para Entregables */
+.cal-status-pill-mini {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+.cal-status-pill-mini.pill-complete {
+  background: rgba(0, 185, 107, 0.15);
+  color: #00874e;
+  border: 1px solid rgba(0, 185, 107, 0.3);
+}
+.cal-status-pill-mini.pill-progress {
+  background: rgba(250, 140, 22, 0.15);
+  color: #c2410c;
+  border: 1px solid rgba(250, 140, 22, 0.3);
+}
+.cal-status-pill-mini.pill-pending {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+/* Barra de avance en tarjeta de entregables */
+.cal-upcoming-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+}
+.cal-mini-track {
+  flex: 1;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cal-mini-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.cal-mini-fill.fill-complete {
+  background: #00b96b;
+}
+.cal-mini-fill.fill-progress {
+  background: #fa8c16;
+}
+.cal-mini-fill.fill-pending {
+  background: #94a3b8;
+}
+.cal-mini-pct {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
   flex-shrink: 0;
 }
 
-.dot-hito,
-.dot-subproceso {
-  background: #0066ff;
-}
-
-.dot-reunion {
-  background: #9333ea;
-}
-
-.dot-visita {
-  background: #16a34a;
-}
-
-.dot-vencimiento {
-  background: #ea580c;
-}
-
-/* Leyenda Cuadrícula 2x2 */
+/* Leyenda Cuadrícula 2x2 · Estricto Estándar Gantt */
 .cal-legend-section {
   margin-top: auto;
   padding-top: 16px;
@@ -5866,6 +5945,35 @@ body.gantt-resizing {
   font-size: 12px;
   font-weight: 500;
   color: #334155;
+}
+
+.cal-legend-diamond {
+  color: #0066ff;
+  font-size: 13px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cal-legend-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.cal-legend-box.box-progress {
+  background: #fa8c16;
+  border: 1px solid rgba(250, 140, 22, 0.45);
+}
+.cal-legend-box.box-complete {
+  background: #00b96b;
+  border: 1px solid rgba(0, 185, 107, 0.45);
+}
+.cal-legend-box.box-pending {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
 }
 
 /* Subvistas */

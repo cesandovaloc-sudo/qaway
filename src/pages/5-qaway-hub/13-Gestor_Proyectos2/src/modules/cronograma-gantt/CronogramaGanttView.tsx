@@ -3119,6 +3119,50 @@ export default function CronogramaGanttView({
               )}
             </div>
 
+            {/* Filtro Tipo (Específico Vista Calendario Institucional) */}
+            {viewMode === 'calendario' && (
+              <div className="filter-dropdown-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'type' ? 'active' : ''} ${
+                    typeFilter !== 'Todos' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('type')}
+                >
+                  <div className="filter-card-copy">
+                    <small>Tipo</small>
+                    <span>{typeFilter === 'Todos' ? 'Todos' : typeFilter === 'Hitos' ? 'Solo Hitos' : 'Solo Subprocesos'}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'type' && (
+                  <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                    <div className="filter-popover-title">Filtrar por Tipo de Actividad</div>
+                    <div className="filter-popover-list">
+                      {[
+                        { value: 'Todos', label: 'Todos (Hitos y Subprocesos)' },
+                        { value: 'Hitos', label: 'Solo Hitos Rectores' },
+                        { value: 'Subprocesos', label: 'Solo Subprocesos' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={`filter-item-btn ${typeFilter === opt.value ? 'selected' : ''}`}
+                          onClick={() => {
+                            setTypeFilter(opt.value);
+                            closeMenus();
+                          }}
+                        >
+                          <span>{opt.label}</span>
+                          {typeFilter === opt.value && <Check size={14} className="item-check" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Filtro Estado (Específico Vista Calendario Institucional) */}
             {viewMode === 'calendario' && (
               <div className="filter-dropdown-wrap">
@@ -3172,6 +3216,7 @@ export default function CronogramaGanttView({
                 className="btn secondary clear-btn"
                 onClick={() => {
                   setSearch('');
+                  setTypeFilter('Todos');
                   setStateFilter('Todos');
                   setRegionFilter('Todas');
                   setGestorFilter('Todos');
@@ -5357,6 +5402,10 @@ export default function CronogramaGanttView({
               onNavNext={handleNextCalPeriod}
               onNavToday={handleTodayCal}
               onSubViewChange={setCalSubView}
+              typeFilter={typeFilter}
+              tab={tab}
+              stateFilter={stateFilter}
+              search={search}
             />
           )}
 

@@ -1,30 +1,29 @@
 import React, { useMemo } from 'react';
 import {
   FileText,
-  Users,
-  MapPin,
   Clock,
   ArrowRight,
   MoreHorizontal,
-  Layers,
+  Check,
   Plus,
 } from 'lucide-react';
 import type { Item, Status } from './CronogramaGanttView';
 
-export type CalendarCategory = 'hito' | 'subproceso' | 'reunion' | 'visita' | 'vencimiento';
-
-export interface CalendarEvent {
+export interface CalendarProjectEvent {
   id: string;
   code: string;
   name: string;
-  start: string; // YYYY-MM-DD
-  end: string;   // YYYY-MM-DD
-  category: CalendarCategory;
+  kind: 'hito' | 'subproceso';
   status: Status;
+  progress: number;
+  start: string;
+  end: string;
+  weekIndex: number; // 0 a 4 (Semana 1 a Semana 5)
+  colStart: number;  // 1 a 7 (Lunes = 1, Domingo = 7)
+  colSpan: number;   // 1 a 7
+  row: number;       // 1, 2, 3...
   owner: string;
   region: string;
-  time?: string;
-  isFullWeek?: boolean;
 }
 
 interface CronogramaCalendarioViewProps {
@@ -39,286 +38,343 @@ interface CronogramaCalendarioViewProps {
   onNavNext: () => void;
   onNavToday: () => void;
   onSubViewChange: (view: 'Mes' | 'Semana' | 'Día' | 'Agenda') => void;
+  typeFilter?: string;
+  tab?: string;
+  stateFilter?: string;
+  search?: string;
 }
 
 const WEEK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-// Agenda oficial territorial MINEDU · Octubre 2026 (exacta a Imagen 2)
-const OCTOBER_OFFICIAL_EVENTS: CalendarEvent[] = [
-  // Semana 1: 1 al 4 Oct
+// Programación Oficial de Hitos Rectores y Subprocesos · MINEDU Dotación 2027 (Octubre 2026)
+// Exclusivo para Hitos y Entregables del Proyecto (Reuniones pertenece a su propio módulo)
+const OCTOBER_PROJECT_EVENTS: CalendarProjectEvent[] = [
+  // SEMANA 1: 28 Sep al 04 Oct (Jueves 1 al Domingo 4)
   {
     id: 'cal-sp-02-1',
     code: 'SP-02.1',
-    name: 'Entrega de requerimientos',
+    name: 'Elaboración y entrega del plan de distribución',
+    kind: 'subproceso',
+    status: 'En proceso',
+    progress: 55,
     start: '2026-10-01',
     end: '2026-10-04',
-    category: 'subproceso',
-    status: 'En proceso',
+    weekIndex: 0,
+    colStart: 4,
+    colSpan: 4,
+    row: 1,
     owner: 'Carlos Mendoza',
     region: 'Junín',
-    time: '09:00 – 12:00',
   },
-  // Semana 2: 5 al 11 Oct
-  {
-    id: 'cal-reu-01',
-    code: 'REU-01',
-    name: 'Reunión con UGEL Huancayo',
-    start: '2026-10-06',
-    end: '2026-10-06',
-    category: 'reunion',
-    status: 'Completado',
-    owner: 'Jorge Ramos',
-    region: 'Junín',
-    time: '10:00 – 11:30',
-  },
+
+  // SEMANA 2: 05 al 11 Oct
   {
     id: 'cal-sp-02-2',
     code: 'SP-02.2',
-    name: 'Vence informe de almacén',
-    start: '2026-10-09',
-    end: '2026-10-09',
-    category: 'vencimiento',
+    name: 'Identificación y directorio de almacenes',
+    kind: 'subproceso',
+    status: 'Completado',
+    progress: 100,
+    start: '2026-10-05',
+    end: '2026-10-08',
+    weekIndex: 1,
+    colStart: 1,
+    colSpan: 4,
+    row: 1,
+    owner: 'María Salazar',
+    region: 'Junín',
+  },
+  {
+    id: 'cal-sp-02-3',
+    code: 'SP-02.3',
+    name: 'Registro y corte de stock inicial',
+    kind: 'subproceso',
     status: 'En proceso',
+    progress: 40,
+    start: '2026-10-09',
+    end: '2026-10-10',
+    weekIndex: 1,
+    colStart: 5,
+    colSpan: 2,
+    row: 1,
     owner: 'Ana Paredes',
     region: 'Junín',
-    time: 'Todo el día',
   },
   {
     id: 'cal-h-02',
     code: 'H-02',
-    name: 'Gestión de Almacenes y Recepción',
+    name: 'Gestión de Almacenes y Recepción en MC SIGA',
+    kind: 'hito',
+    status: 'En proceso',
+    progress: 42,
     start: '2026-10-05',
     end: '2026-10-11',
-    category: 'hito',
-    status: 'En proceso',
+    weekIndex: 1,
+    colStart: 1,
+    colSpan: 7,
+    row: 2,
     owner: 'Carlos Mendoza',
     region: 'Todas las Regiones',
-    isFullWeek: true,
   },
-  // Semana 3: 12 al 18 Oct
+
+  // SEMANA 3: 12 al 18 Oct
   {
-    id: 'cal-vis-01',
-    code: 'VIS-01',
-    name: 'Visita a sede central',
-    start: '2026-10-14',
-    end: '2026-10-16',
-    category: 'visita',
-    status: 'En proceso',
+    id: 'cal-sp-02-4',
+    code: 'SP-02.4',
+    name: 'Validación física de almacenes territoriales',
+    kind: 'subproceso',
+    status: 'Completado',
+    progress: 100,
+    start: '2026-10-13',
+    end: '2026-10-15',
+    weekIndex: 2,
+    colStart: 2,
+    colSpan: 3,
+    row: 1,
     owner: 'Lucía Castillo',
     region: 'Lima Provincias',
-    time: '09:00 – 16:00',
   },
   {
     id: 'cal-sp-03-1',
     code: 'SP-03.1',
-    name: 'Validación de evidencias',
+    name: 'Validación de evidencias y requerimientos',
+    kind: 'subproceso',
+    status: 'En proceso',
+    progress: 60,
     start: '2026-10-16',
     end: '2026-10-18',
-    category: 'subproceso',
-    status: 'En proceso',
+    weekIndex: 2,
+    colStart: 5,
+    colSpan: 3,
+    row: 1,
     owner: 'Carlos Mendoza',
     region: 'Junín',
-    time: '14:00 – 17:00',
   },
-  // Semana 4: 19 al 25 Oct
+
+  // SEMANA 4: 19 al 25 Oct
+  {
+    id: 'cal-sp-02-5',
+    code: 'SP-02.5',
+    name: 'Cierre de fase y conciliación de almacén',
+    kind: 'subproceso',
+    status: 'Pendiente',
+    progress: 0,
+    start: '2026-10-21',
+    end: '2026-10-23',
+    weekIndex: 3,
+    colStart: 3,
+    colSpan: 3,
+    row: 1,
+    owner: 'Carlos Mendoza',
+    region: 'Junín',
+  },
+  {
+    id: 'cal-sp-03-2',
+    code: 'SP-03.2',
+    name: 'Consolidado de requerimientos II.EE.',
+    kind: 'subproceso',
+    status: 'Pendiente',
+    progress: 0,
+    start: '2026-10-24',
+    end: '2026-10-25',
+    weekIndex: 3,
+    colStart: 6,
+    colSpan: 2,
+    row: 1,
+    owner: 'María Salazar',
+    region: 'Junín',
+  },
+
+  // SEMANA 5: 26 Oct al 01 Nov
+  {
+    id: 'cal-h-03',
+    code: 'H-03',
+    name: 'Acta de conformidad y asignación presupuestal',
+    kind: 'hito',
+    status: 'Pendiente',
+    progress: 0,
+    start: '2026-10-27',
+    end: '2026-10-29',
+    weekIndex: 4,
+    colStart: 2,
+    colSpan: 3,
+    row: 1,
+    owner: 'Carlos Mendoza',
+    region: 'Todas las Regiones',
+  },
   {
     id: 'cal-sp-04-1',
     code: 'SP-04.1',
-    name: 'Cierre de subproceso',
-    start: '2026-10-21',
-    end: '2026-10-23',
-    category: 'subproceso',
+    name: 'Informe técnico territorial consolidado',
+    kind: 'subproceso',
     status: 'Pendiente',
-    owner: 'Carlos Mendoza',
-    region: 'Junín',
-    time: '09:00 – 17:00',
-  },
-  {
-    id: 'cal-reu-02',
-    code: 'REU-02',
-    name: 'Reunión técnica MINEDU',
-    start: '2026-10-24',
-    end: '2026-10-24',
-    category: 'reunion',
-    status: 'Pendiente',
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-    time: '15:00 – 16:30',
-  },
-  // Semana 5: 26 Oct al 1 Nov
-  {
-    id: 'cal-venc-h03',
-    code: 'H-03',
-    name: 'Vence acta de conformidad',
-    start: '2026-10-27',
-    end: '2026-10-28',
-    category: 'vencimiento',
-    status: 'Pendiente',
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-    time: 'Todo el día',
-  },
-  {
-    id: 'cal-vis-02',
-    code: 'VIS-02',
-    name: 'Visita UGEL Concepción',
+    progress: 0,
     start: '2026-10-30',
-    end: '2026-10-31',
-    category: 'visita',
-    status: 'Pendiente',
-    owner: 'Jorge Ramos',
-    region: 'Junín',
-    time: '09:00 – 14:00',
-  },
-  {
-    id: 'cal-sp-04-2',
-    code: 'SP-04.2',
-    name: 'Informe final',
-    start: '2026-10-31',
     end: '2026-11-01',
-    category: 'subproceso',
-    status: 'Pendiente',
+    weekIndex: 4,
+    colStart: 5,
+    colSpan: 3,
+    row: 2,
     owner: 'Carlos Mendoza',
     region: 'Todas las Regiones',
-    time: '09:00 – 13:00',
   },
 ];
 
 // Estructura de las 5 semanas de Octubre 2026
-interface WeekStructure {
-  weekNum: number;
-  days: Array<{
-    dayNumber: number;
-    dateIso: string;
-    isCurrentMonth: boolean;
-    isToday: boolean;
-  }>;
-}
-
-const OCTOBER_2026_WEEKS: WeekStructure[] = [
+const OCTOBER_2026_WEEKS = [
   {
-    weekNum: 1,
+    weekIndex: 0,
     days: [
-      { dayNumber: 28, dateIso: '2026-09-28', isCurrentMonth: false, isToday: false },
-      { dayNumber: 29, dateIso: '2026-09-29', isCurrentMonth: false, isToday: false },
-      { dayNumber: 30, dateIso: '2026-09-30', isCurrentMonth: false, isToday: false },
-      { dayNumber: 1, dateIso: '2026-10-01', isCurrentMonth: true, isToday: false },
-      { dayNumber: 2, dateIso: '2026-10-02', isCurrentMonth: true, isToday: false },
-      { dayNumber: 3, dateIso: '2026-10-03', isCurrentMonth: true, isToday: false },
-      { dayNumber: 4, dateIso: '2026-10-04', isCurrentMonth: true, isToday: false },
+      { dayNumber: 28, isCurrentMonth: false },
+      { dayNumber: 29, isCurrentMonth: false },
+      { dayNumber: 30, isCurrentMonth: false },
+      { dayNumber: 1, isCurrentMonth: true },
+      { dayNumber: 2, isCurrentMonth: true },
+      { dayNumber: 3, isCurrentMonth: true },
+      { dayNumber: 4, isCurrentMonth: true },
     ],
   },
   {
-    weekNum: 2,
+    weekIndex: 1,
     days: [
-      { dayNumber: 5, dateIso: '2026-10-05', isCurrentMonth: true, isToday: false },
-      { dayNumber: 6, dateIso: '2026-10-06', isCurrentMonth: true, isToday: false },
-      { dayNumber: 7, dateIso: '2026-10-07', isCurrentMonth: true, isToday: false },
-      { dayNumber: 8, dateIso: '2026-10-08', isCurrentMonth: true, isToday: false },
-      { dayNumber: 9, dateIso: '2026-10-09', isCurrentMonth: true, isToday: false },
-      { dayNumber: 10, dateIso: '2026-10-10', isCurrentMonth: true, isToday: false },
-      { dayNumber: 11, dateIso: '2026-10-11', isCurrentMonth: true, isToday: false },
+      { dayNumber: 5, isCurrentMonth: true },
+      { dayNumber: 6, isCurrentMonth: true },
+      { dayNumber: 7, isCurrentMonth: true },
+      { dayNumber: 8, isCurrentMonth: true },
+      { dayNumber: 9, isCurrentMonth: true },
+      { dayNumber: 10, isCurrentMonth: true },
+      { dayNumber: 11, isCurrentMonth: true },
     ],
   },
   {
-    weekNum: 3,
+    weekIndex: 2,
     days: [
-      { dayNumber: 12, dateIso: '2026-10-12', isCurrentMonth: true, isToday: false },
-      { dayNumber: 13, dateIso: '2026-10-13', isCurrentMonth: true, isToday: false },
-      { dayNumber: 14, dateIso: '2026-10-14', isCurrentMonth: true, isToday: false },
-      { dayNumber: 15, dateIso: '2026-10-15', isCurrentMonth: true, isToday: false },
-      { dayNumber: 16, dateIso: '2026-10-16', isCurrentMonth: true, isToday: false },
-      { dayNumber: 17, dateIso: '2026-10-17', isCurrentMonth: true, isToday: false },
-      { dayNumber: 18, dateIso: '2026-10-18', isCurrentMonth: true, isToday: false },
+      { dayNumber: 12, isCurrentMonth: true },
+      { dayNumber: 13, isCurrentMonth: true },
+      { dayNumber: 14, isCurrentMonth: true },
+      { dayNumber: 15, isCurrentMonth: true },
+      { dayNumber: 16, isCurrentMonth: true },
+      { dayNumber: 17, isCurrentMonth: true },
+      { dayNumber: 18, isCurrentMonth: true },
     ],
   },
   {
-    weekNum: 4,
+    weekIndex: 3,
     days: [
-      { dayNumber: 19, dateIso: '2026-10-19', isCurrentMonth: true, isToday: false },
-      { dayNumber: 20, dateIso: '2026-10-20', isCurrentMonth: true, isToday: false },
-      { dayNumber: 21, dateIso: '2026-10-21', isCurrentMonth: true, isToday: false },
-      { dayNumber: 22, dateIso: '2026-10-22', isCurrentMonth: true, isToday: false },
-      { dayNumber: 23, dateIso: '2026-10-23', isCurrentMonth: true, isToday: false },
-      { dayNumber: 24, dateIso: '2026-10-24', isCurrentMonth: true, isToday: false },
-      { dayNumber: 25, dateIso: '2026-10-25', isCurrentMonth: true, isToday: false },
+      { dayNumber: 19, isCurrentMonth: true },
+      { dayNumber: 20, isCurrentMonth: true },
+      { dayNumber: 21, isCurrentMonth: true },
+      { dayNumber: 22, isCurrentMonth: true },
+      { dayNumber: 23, isCurrentMonth: true },
+      { dayNumber: 24, isCurrentMonth: true },
+      { dayNumber: 25, isCurrentMonth: true },
     ],
   },
   {
-    weekNum: 5,
+    weekIndex: 4,
     days: [
-      { dayNumber: 26, dateIso: '2026-10-26', isCurrentMonth: true, isToday: false },
-      { dayNumber: 27, dateIso: '2026-10-27', isCurrentMonth: true, isToday: true },
-      { dayNumber: 28, dateIso: '2026-10-28', isCurrentMonth: true, isToday: false },
-      { dayNumber: 29, dateIso: '2026-10-29', isCurrentMonth: true, isToday: false },
-      { dayNumber: 30, dateIso: '2026-10-30', isCurrentMonth: true, isToday: false },
-      { dayNumber: 31, dateIso: '2026-10-31', isCurrentMonth: true, isToday: false },
-      { dayNumber: 1, dateIso: '2026-11-01', isCurrentMonth: false, isToday: false },
+      { dayNumber: 26, isCurrentMonth: true },
+      { dayNumber: 27, isCurrentMonth: true },
+      { dayNumber: 28, isCurrentMonth: true },
+      { dayNumber: 29, isCurrentMonth: true },
+      { dayNumber: 30, isCurrentMonth: true },
+      { dayNumber: 31, isCurrentMonth: true },
+      { dayNumber: 1, isCurrentMonth: false },
     ],
   },
 ];
 
-// Los 5 eventos del panel lateral derecho (exactos a Imagen 2)
-const UPCOMING_SIDEBAR_EVENTS = [
+// Próximos Entregables y Fechas Clave del Proyecto (Sidebar Derecho)
+const UPCOMING_PROJECT_DELIVERABLES = [
   {
     id: 'up-1',
     day: '01',
     month: 'OCT',
-    title: 'Entrega de requerimientos',
-    category: 'subproceso',
-    catLabel: 'SP-02.1 · Subproceso',
-    time: '09:00 – 12:00',
+    code: 'SP-02.1',
+    title: 'Elaboración y entrega del plan de distribución',
+    kind: 'subproceso' as const,
+    status: 'En proceso' as Status,
+    progress: 55,
+    time: 'Plazo oficial',
     initials: 'CM',
     avatarBg: '#eff6ff',
     avatarColor: '#1d4ed8',
+    owner: 'Carlos Mendoza',
   },
   {
     id: 'up-2',
     day: '05',
     month: 'OCT',
-    title: 'Reunión con UGEL Huancayo',
-    category: 'reunion',
-    catLabel: 'Reunión',
-    time: '10:00 – 11:30',
-    initials: 'JR',
+    code: 'SP-02.2',
+    title: 'Identificación y directorio de almacenes',
+    kind: 'subproceso' as const,
+    status: 'Completado' as Status,
+    progress: 100,
+    time: 'Entregado',
+    initials: 'MS',
     avatarBg: '#ecfdf5',
     avatarColor: '#047857',
+    owner: 'María Salazar',
   },
   {
     id: 'up-3',
     day: '09',
     month: 'OCT',
-    title: 'Vence informe de almacén',
-    category: 'vencimiento',
-    catLabel: 'SP-02.2 · Subproceso',
-    time: 'Todo el día',
+    code: 'SP-02.3',
+    title: 'Registro y corte de stock inicial',
+    kind: 'subproceso' as const,
+    status: 'En proceso' as Status,
+    progress: 40,
+    time: 'En verificación',
     initials: 'AP',
     avatarBg: '#fff7ed',
     avatarColor: '#c2410c',
+    owner: 'Ana Paredes',
   },
   {
     id: 'up-4',
-    day: '14',
+    day: '13',
     month: 'OCT',
-    title: 'Visita a sede central',
-    category: 'visita',
-    catLabel: 'Visita a sede',
-    time: '09:00 – 16:00',
+    code: 'SP-02.4',
+    title: 'Validación física de almacenes territoriales',
+    kind: 'subproceso' as const,
+    status: 'Completado' as Status,
+    progress: 100,
+    time: 'Entregado',
     initials: 'LC',
-    avatarBg: '#f5f3ff',
-    avatarColor: '#6d28d9',
+    avatarBg: '#ecfdf5',
+    avatarColor: '#047857',
+    owner: 'Lucía Castillo',
   },
   {
     id: 'up-5',
     day: '16',
     month: 'OCT',
-    title: 'Validación de evidencias',
-    category: 'subproceso',
-    catLabel: 'SP-03.1 · Subproceso',
-    time: '14:00 – 17:00',
+    code: 'SP-03.1',
+    title: 'Validación de evidencias y requerimientos',
+    kind: 'subproceso' as const,
+    status: 'En proceso' as Status,
+    progress: 60,
+    time: 'En curso',
     initials: 'CM',
     avatarBg: '#eff6ff',
     avatarColor: '#1d4ed8',
+    owner: 'Carlos Mendoza',
+  },
+  {
+    id: 'up-6',
+    day: '27',
+    month: 'OCT',
+    code: 'H-03',
+    title: 'Acta de conformidad y asignación presupuestal',
+    kind: 'hito' as const,
+    status: 'Pendiente' as Status,
+    progress: 0,
+    time: 'Programado',
+    initials: 'CM',
+    avatarBg: '#f1f5f9',
+    avatarColor: '#475569',
+    owner: 'Carlos Mendoza',
   },
 ];
 
@@ -334,6 +390,10 @@ export default function CronogramaCalendarioView({
   onNavNext,
   onNavToday,
   onSubViewChange,
+  typeFilter = 'Todos',
+  tab = 'Todos',
+  stateFilter = 'Todos',
+  search = '',
 }: CronogramaCalendarioViewProps) {
   // Manejador para abrir el drawer con un item real del cronograma
   const handleOpenItem = (code: string) => {
@@ -345,22 +405,71 @@ export default function CronogramaCalendarioView({
     }
   };
 
+  // Filtrado reactivo de eventos según Filtro Tipo, Tab, Estado y Búsqueda
+  const filteredEvents = useMemo(() => {
+    return OCTOBER_PROJECT_EVENTS.filter((ev) => {
+      // 1. Filtro Tipo (Todos / Hitos / Subprocesos)
+      if (typeFilter && typeFilter !== 'Todos') {
+        if (typeFilter === 'Hitos' && ev.kind !== 'hito') return false;
+        if (typeFilter === 'Subprocesos' && ev.kind !== 'subproceso') return false;
+      }
+
+      // 2. Filtro Tab general
+      if (tab && tab !== 'Todos') {
+        if (tab === 'Hitos' && ev.kind !== 'hito') return false;
+        if (tab === 'Subprocesos' && ev.kind !== 'subproceso') return false;
+        if (tab === 'Completados' && ev.status !== 'Completado' && ev.status !== 'Cumple') return false;
+        if (tab === 'En proceso' && ev.status !== 'En proceso' && ev.status !== 'En curso') return false;
+        if (tab === 'Con retraso' && ev.status !== 'Con retraso') return false;
+        if (tab === 'Pendiente' && ev.status !== 'Pendiente') return false;
+      }
+
+      // 3. Filtro Estado
+      if (stateFilter && stateFilter !== 'Todos') {
+        if (ev.status !== stateFilter) return false;
+      }
+
+      // 4. Búsqueda por texto
+      if (search && search.trim()) {
+        const q = search.trim().toLowerCase();
+        const match = `${ev.code} ${ev.name}`.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+
+      return true;
+    });
+  }, [typeFilter, tab, stateFilter, search]);
+
+  // Agrupación de eventos por semana para la cuadrícula del mes
+  const weekEvents = useMemo(() => {
+    const map: Record<number, CalendarProjectEvent[]> = { 0: [], 1: [], 2: [], 3: [], 4: [] };
+    filteredEvents.forEach((ev) => {
+      if (map[ev.weekIndex]) {
+        map[ev.weekIndex].push(ev);
+      }
+    });
+    return map;
+  }, [filteredEvents]);
+
   return (
     <div className="cronograma-cal-container cal-master-layout">
       {/* Área Principal de Calendario */}
       <div className="cal-main-area">
-        {/* Cabecera Limpia (Idéntica a Imagen 2): Icono + Octubre 2026 */}
+        {/* Cabecera Limpia Institucional: Icono + Octubre 2026 */}
         <div className="cal-title-header-clean">
           <div className="cal-plus-icon-wrap" title="Agregar evento o hito al calendario">
             <Plus size={16} />
           </div>
           <h2 className="cal-clean-title">Octubre 2026</h2>
+          <span className="cal-total-count-badge">
+            {filteredEvents.length} {filteredEvents.length === 1 ? 'actividad programada' : 'actividades programadas'}
+          </span>
         </div>
 
-        {/* 1. SUB-VISTA: MES (Idéntica a Imagen 2) */}
+        {/* 1. SUB-VISTA: MES (Cuadrícula Mensual con Barras de Gantt) */}
         {calSubView === 'Mes' && (
           <div className="cal-month-canvas">
-            {/* Cabecera de Días de la Semana: Lunes a Domingo en texto normal */}
+            {/* Cabecera de Días de la Semana: Lunes a Domingo */}
             <div className="cal-weekdays-header">
               {WEEK_DAY_LABELS.map((dayLabel) => (
                 <div key={dayLabel} className="cal-weekday-col">
@@ -369,207 +478,79 @@ export default function CronogramaCalendarioView({
               ))}
             </div>
 
-            {/* Rejilla de las 5 Semanas */}
+            {/* Rejilla de las 5 Semanas de Octubre */}
             <div className="cal-grid-body">
-              {/* ===== SEMANA 1 (28 Sep al 04 Oct) ===== */}
-              <div className="cal-week-row-grid">
-                <div className="cal-day-bg-cell outside"><span className="cal-num">28</span></div>
-                <div className="cal-day-bg-cell outside"><span className="cal-num">29</span></div>
-                <div className="cal-day-bg-cell outside"><span className="cal-num">30</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">1</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">2</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">3</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">4</span></div>
-
-                {/* Eventos Semana 1: SP-02.1 del Jueves 1 al Domingo 4 */}
-                <div className="cal-week-events-overlay">
-                  <div
-                    className="cal-pill-event cal-pill-blue"
-                    style={{ gridColumn: '4 / span 4', gridRow: 1 }}
-                    onClick={() => handleOpenItem('1.2')}
-                    title="SP-02.1 Entrega de requerimientos (01/10 al 04/10)"
-                  >
-                    <FileText size={13} className="cal-pill-icon icon-blue" />
-                    <span className="cal-pill-text">SP-02.1 Entrega de requerimientos</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ===== SEMANA 2 (05 al 11 Oct) ===== */}
-              <div className="cal-week-row-grid">
-                <div className="cal-day-bg-cell"><span className="cal-num">5</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">6</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">7</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">8</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">9</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">10</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">11</span></div>
-
-                {/* Eventos Semana 2: Reunión (Mar 6), Vencimiento (Vie 9), H-02 (Lun 5 a Dom 11) */}
-                <div className="cal-week-events-overlay">
-                  {/* Martes 6: Reunión técnica morada */}
-                  <div
-                    className="cal-card-meeting"
-                    style={{ gridColumn: '2 / span 1', gridRow: 1 }}
-                    onClick={() => handleOpenItem('2.')}
-                    title="Reunión con UGEL Huancayo · 10:00 – 11:30"
-                  >
-                    <div className="cal-meeting-top">
-                      <Users size={12} className="icon-purple" />
-                      <span className="cal-meeting-title">Reunión con UGEL Huancayo</span>
+              {OCTOBER_2026_WEEKS.map((week) => (
+                <div key={week.weekIndex} className="cal-week-row-grid">
+                  {/* Celdas de fondo con número de día */}
+                  {week.days.map((day, idx) => (
+                    <div
+                      key={idx}
+                      className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''}`}
+                    >
+                      <span className="cal-num">{day.dayNumber}</span>
                     </div>
-                    <span className="cal-meeting-time">10:00 – 11:30</span>
-                  </div>
+                  ))}
 
-                  {/* Viernes 9: Vence informe de almacén */}
-                  <div
-                    className="cal-pill-event cal-pill-orange"
-                    style={{ gridColumn: '5 / span 1', gridRow: 1 }}
-                    onClick={() => handleOpenItem('2.2')}
-                    title="SP-02.2 Vence informe de almacén"
-                  >
-                    <Clock size={13} className="cal-pill-icon icon-orange" />
-                    <span className="cal-pill-text">SP-02.2 Vence informe de almacén</span>
-                  </div>
+                  {/* Capa de Barras de Gantt Oficiales sobre los días */}
+                  <div className="cal-week-events-overlay">
+                    {weekEvents[week.weekIndex]?.map((ev) => {
+                      const isMajor = ev.kind === 'hito';
+                      const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
+                      const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
+                      const isLate = ev.status === 'Con retraso';
 
-                  {/* H-02: Gestión de Almacenes y Recepción (toda la semana en fila 2) */}
-                  <div
-                    className="cal-pill-event cal-pill-blue cal-pill-hito-full"
-                    style={{ gridColumn: '1 / span 7', gridRow: 2 }}
-                    onClick={() => handleOpenItem('2.')}
-                    title="H-02 Gestión de Almacenes y Recepción en MC SIGA"
-                  >
-                    <span className="cal-hito-circle-badge">
-                      <Layers size={10} />
-                    </span>
-                    <span className="cal-pill-text cal-hito-bold">
-                      H-02 Gestión de Almacenes y Recepción
-                    </span>
-                  </div>
-                </div>
-              </div>
+                      return (
+                        <div
+                          key={ev.id}
+                          className={`cal-gantt-bar ${isMajor ? 'bar-major' : ''} ${
+                            isComplete
+                              ? 'bar-complete'
+                              : isProgress
+                              ? 'bar-progress'
+                              : isLate
+                              ? 'bar-late'
+                              : 'bar-pending'
+                          }`}
+                          style={{
+                            gridColumn: `${ev.colStart} / span ${ev.colSpan}`,
+                            gridRow: ev.row,
+                          }}
+                          onClick={() => handleOpenItem(ev.code)}
+                          title={`${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status})`}
+                        >
+                          {/* Barra de avance interior con física y color Gantt */}
+                          <div
+                            className="cal-gantt-progress-fill"
+                            style={{
+                              width: `${Math.min(100, Math.max(0, ev.progress))}%`,
+                            }}
+                          />
 
-              {/* ===== SEMANA 3 (12 al 18 Oct) ===== */}
-              <div className="cal-week-row-grid">
-                <div className="cal-day-bg-cell"><span className="cal-num">12</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">13</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">14</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">15</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">16</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">17</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">18</span></div>
+                          {/* Contenido legible del entregable */}
+                          <div className="cal-gantt-content">
+                            {isMajor ? (
+                              <span className="cal-gantt-hito-badge">◆</span>
+                            ) : isComplete ? (
+                              <Check size={11} strokeWidth={3} className="cal-gantt-check-icon" />
+                            ) : null}
+                            <strong className="cal-gantt-code">{ev.code}</strong>
+                            <span className="cal-gantt-name">{ev.name}</span>
+                            <span className="cal-gantt-pct">{ev.progress}%</span>
+                          </div>
 
-                {/* Eventos Semana 3: Visita sede (Mié 14 al Vie 16), Validación (Vie 16 al Dom 18) */}
-                <div className="cal-week-events-overlay">
-                  {/* Miércoles 14 al Viernes 16: Visita a sede central (Verde) */}
-                  <div
-                    className="cal-pill-event cal-pill-green"
-                    style={{ gridColumn: '3 / span 3', gridRow: 1 }}
-                    onClick={() => handleOpenItem('2.')}
-                    title="Visita a sede central (14/10 al 16/10)"
-                  >
-                    <MapPin size={13} className="cal-pill-icon icon-green" />
-                    <span className="cal-pill-text">Visita a sede central</span>
-                  </div>
-
-                  {/* Viernes 16 al Domingo 18: SP-03.1 Validación de evidencias (Azul) */}
-                  <div
-                    className="cal-pill-event cal-pill-blue"
-                    style={{ gridColumn: '5 / span 3', gridRow: 2 }}
-                    onClick={() => handleOpenItem('3.')}
-                    title="SP-03.1 Validación de evidencias (16/10 al 18/10)"
-                  >
-                    <FileText size={13} className="cal-pill-icon icon-blue" />
-                    <span className="cal-pill-text">SP-03.1 Validación de evidencias</span>
+                          {/* Diamante característico al final del Hito Rector (idéntico a Gantt) */}
+                          {isMajor && (
+                            <span className="cal-gantt-diamond-badge" title="Hito Rector MINEDU">
+                              <span className="cal-diamond-shape" />
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
-
-              {/* ===== SEMANA 4 (19 al 25 Oct) ===== */}
-              <div className="cal-week-row-grid">
-                <div className="cal-day-bg-cell"><span className="cal-num">19</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">20</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">21</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">22</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">23</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">24</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">25</span></div>
-
-                {/* Eventos Semana 4: Cierre (Mié 21 al Vie 23), Reunión MINEDU (Sáb 24) */}
-                <div className="cal-week-events-overlay">
-                  {/* Miércoles 21 al Viernes 23: SP-04.1 Cierre de subproceso */}
-                  <div
-                    className="cal-pill-event cal-pill-blue"
-                    style={{ gridColumn: '3 / span 3', gridRow: 1 }}
-                    onClick={() => handleOpenItem('4.')}
-                    title="SP-04.1 Cierre de subproceso (21/10 al 23/10)"
-                  >
-                    <FileText size={13} className="cal-pill-icon icon-blue" />
-                    <span className="cal-pill-text">SP-04.1 Cierre de subproceso</span>
-                  </div>
-
-                  {/* Sábado 24: Reunión técnica MINEDU */}
-                  <div
-                    className="cal-card-meeting"
-                    style={{ gridColumn: '6 / span 1', gridRow: 1 }}
-                    onClick={() => handleOpenItem('4.')}
-                    title="Reunión técnica MINEDU · 15:00 – 16:30"
-                  >
-                    <div className="cal-meeting-top">
-                      <Users size={12} className="icon-purple" />
-                      <span className="cal-meeting-title">Reunión técnica MINEDU</span>
-                    </div>
-                    <span className="cal-meeting-time">15:00 – 16:30</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ===== SEMANA 5 (26 Oct al 01 Nov) ===== */}
-              <div className="cal-week-row-grid">
-                <div className="cal-day-bg-cell"><span className="cal-num">26</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">27</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">28</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">29</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">30</span></div>
-                <div className="cal-day-bg-cell"><span className="cal-num">31</span></div>
-                <div className="cal-day-bg-cell outside"><span className="cal-num">1</span></div>
-
-                {/* Eventos Semana 5: Vence acta (Mar 27 al Mié 28), Visita Concepción (Vie 30 al Sáb 31), SP-04.2 (Sáb 31 al Dom 1) */}
-                <div className="cal-week-events-overlay">
-                  {/* Martes 27 al Miércoles 28: H-03 Vence acta de conformidad (Naranja) */}
-                  <div
-                    className="cal-pill-event cal-pill-orange"
-                    style={{ gridColumn: '2 / span 2', gridRow: 1 }}
-                    onClick={() => handleOpenItem('3.')}
-                    title="H-03 Vence acta de conformidad"
-                  >
-                    <Clock size={13} className="cal-pill-icon icon-orange" />
-                    <span className="cal-pill-text">H-03 Vence acta de conformidad</span>
-                  </div>
-
-                  {/* Viernes 30 al Sábado 31: Visita UGEL Concepción (Verde) */}
-                  <div
-                    className="cal-pill-event cal-pill-green"
-                    style={{ gridColumn: '5 / span 2', gridRow: 1 }}
-                    onClick={() => handleOpenItem('4.')}
-                    title="Visita UGEL Concepción (30/10 al 31/10)"
-                  >
-                    <MapPin size={13} className="cal-pill-icon icon-green" />
-                    <span className="cal-pill-text">Visita UGEL Concepción</span>
-                  </div>
-
-                  {/* Sábado 31 al Domingo 1: SP-04.2 Informe final (Azul) */}
-                  <div
-                    className="cal-pill-event cal-pill-blue"
-                    style={{ gridColumn: '6 / span 2', gridRow: 2 }}
-                    onClick={() => handleOpenItem('4.')}
-                    title="SP-04.2 Informe final (31/10 al 01/11)"
-                  >
-                    <FileText size={13} className="cal-pill-icon icon-blue" />
-                    <span className="cal-pill-text">SP-04.2 Informe final</span>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         )}
@@ -583,16 +564,36 @@ export default function CronogramaCalendarioView({
               ))}
             </div>
             <div className="cal-semana-content">
-              {OCTOBER_OFFICIAL_EVENTS.slice(0, 4).map((evt) => (
+              {filteredEvents.slice(0, 5).map((ev) => (
                 <div
-                  key={evt.id}
-                  className={`cal-pill-event cal-pill-${evt.category === 'reunion' ? 'purple' : evt.category === 'visita' ? 'green' : evt.category === 'vencimiento' ? 'orange' : 'blue'}`}
-                  onClick={() => handleOpenItem(evt.code)}
-                  style={{ marginBottom: 8, padding: '8px 12px', height: 'auto' }}
+                  key={ev.id}
+                  className={`cal-gantt-bar ${ev.kind === 'hito' ? 'bar-major' : ''} ${
+                    ev.status === 'Completado'
+                      ? 'bar-complete'
+                      : ev.status === 'En proceso'
+                      ? 'bar-progress'
+                      : ev.status === 'Con retraso'
+                      ? 'bar-late'
+                      : 'bar-pending'
+                  }`}
+                  onClick={() => handleOpenItem(ev.code)}
+                  style={{ marginBottom: 8, height: '32px' }}
                 >
-                  <strong style={{ marginRight: 6 }}>{evt.code}</strong>
-                  <span>{evt.name}</span>
-                  {evt.time && <span style={{ marginLeft: 'auto', fontSize: '11px', opacity: 0.8 }}>{evt.time}</span>}
+                  <div
+                    className="cal-gantt-progress-fill"
+                    style={{ width: `${ev.progress}%` }}
+                  />
+                  <div className="cal-gantt-content">
+                    {ev.kind === 'hito' && <span className="cal-gantt-hito-badge">◆</span>}
+                    <strong className="cal-gantt-code">{ev.code}</strong>
+                    <span className="cal-gantt-name">{ev.name}</span>
+                    <span className="cal-gantt-pct">{ev.progress}%</span>
+                  </div>
+                  {ev.kind === 'hito' && (
+                    <span className="cal-gantt-diamond-badge">
+                      <span className="cal-diamond-shape" />
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -607,17 +608,22 @@ export default function CronogramaCalendarioView({
               <span className="cal-dia-tag">Corte Oficial</span>
             </div>
             <div className="cal-dia-schedule">
-              {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map((h) => (
+              {['08:00', '10:00', '12:00', '14:00', '16:00'].map((h, i) => (
                 <div key={h} className="cal-dia-slot-row">
                   <span className="cal-dia-hour">{h}</span>
                   <div className="cal-dia-event-box">
-                    {h === '10:00' && (
-                      <div className="cal-card-meeting" onClick={() => handleOpenItem('2.')}>
-                        <div className="cal-meeting-top">
-                          <Users size={12} className="icon-purple" />
-                          <span className="cal-meeting-title">Reunión de coordinación territorial MINEDU</span>
+                    {i === 1 && (
+                      <div
+                        className="cal-gantt-bar bar-progress"
+                        onClick={() => handleOpenItem('SP-02.1')}
+                        style={{ height: '30px' }}
+                      >
+                        <div className="cal-gantt-progress-fill" style={{ width: '55%' }} />
+                        <div className="cal-gantt-content">
+                          <strong className="cal-gantt-code">SP-02.1</strong>
+                          <span className="cal-gantt-name">Elaboración y validación del plan de distribución</span>
+                          <span className="cal-gantt-pct">55%</span>
                         </div>
-                        <span className="cal-meeting-time">10:00 – 11:30</span>
                       </div>
                     )}
                   </div>
@@ -630,11 +636,11 @@ export default function CronogramaCalendarioView({
         {/* 4. SUB-VISTA: AGENDA */}
         {calSubView === 'Agenda' && (
           <div className="cal-subview-agenda">
-            {UPCOMING_SIDEBAR_EVENTS.map((it) => (
+            {UPCOMING_PROJECT_DELIVERABLES.map((it) => (
               <div
                 key={it.id}
                 className="cal-agenda-row"
-                onClick={() => handleOpenItem(it.title)}
+                onClick={() => handleOpenItem(it.code)}
               >
                 <div className="cal-date-badge-box">
                   <span className="cal-badge-day">{it.day}</span>
@@ -642,12 +648,28 @@ export default function CronogramaCalendarioView({
                 </div>
                 <div className="cal-agenda-info">
                   <div className="cal-agenda-title-line">
-                    <span className={`cal-cat-dot cal-dot-${it.category}`} />
-                    <strong>{it.title}</strong>
+                    <span
+                      className={`cal-status-pill-mini ${
+                        it.status === 'Completado'
+                          ? 'pill-complete'
+                          : it.status === 'En proceso'
+                          ? 'pill-progress'
+                          : 'pill-pending'
+                      }`}
+                    >
+                      {it.status}
+                    </span>
+                    <strong>{it.code} · {it.title}</strong>
                   </div>
-                  <span className="cal-agenda-sub">{it.catLabel} · {it.time}</span>
+                  <span className="cal-agenda-sub">
+                    {it.kind === 'hito' ? 'Hito Rector' : 'Subproceso'} · Responsable: {it.owner}
+                  </span>
                 </div>
-                <div className="cal-agenda-avatar" style={{ backgroundColor: it.avatarBg, color: it.avatarColor }}>
+                <div
+                  className="cal-agenda-avatar"
+                  style={{ backgroundColor: it.avatarBg, color: it.avatarColor }}
+                  title={it.owner}
+                >
                   {it.initials}
                 </div>
                 <ArrowRight size={14} className="cal-agenda-arrow" />
@@ -657,12 +679,12 @@ export default function CronogramaCalendarioView({
         )}
       </div>
 
-      {/* Barra Lateral Derecha (Exacta a Imagen 2): Próximos eventos y Leyenda */}
+      {/* Barra Lateral Derecha Institucional: Próximos Entregables y Leyenda de Gantt */}
       <aside className="cal-sidebar-clean">
-        {/* Sección: Próximos eventos */}
+        {/* Sección: Próximos Entregables */}
         <div className="cal-sidebar-section">
           <div className="cal-sidebar-head">
-            <h3 className="cal-sidebar-title">Próximos eventos</h3>
+            <h3 className="cal-sidebar-title">Próximos entregables</h3>
             <button
               type="button"
               className="cal-ver-todos-btn"
@@ -674,11 +696,11 @@ export default function CronogramaCalendarioView({
           </div>
 
           <div className="cal-upcoming-stack">
-            {UPCOMING_SIDEBAR_EVENTS.map((ev) => (
+            {UPCOMING_PROJECT_DELIVERABLES.map((ev) => (
               <div
                 key={ev.id}
                 className="cal-upcoming-card-row"
-                onClick={() => handleOpenItem(ev.title)}
+                onClick={() => handleOpenItem(ev.code)}
               >
                 {/* Badge de fecha a la izquierda: 01 OCT */}
                 <div className="cal-clean-date-badge">
@@ -689,24 +711,40 @@ export default function CronogramaCalendarioView({
                 {/* Info central */}
                 <div className="cal-upcoming-center-info">
                   <div className="cal-upcoming-main-title">
-                    <span className={`cal-dot-indicator dot-${ev.category}`} />
+                    <span
+                      className={`cal-status-pill-mini ${
+                        ev.status === 'Completado'
+                          ? 'pill-complete'
+                          : ev.status === 'En proceso'
+                          ? 'pill-progress'
+                          : 'pill-pending'
+                      }`}
+                    >
+                      {ev.status}
+                    </span>
                     <span className="upcoming-title-text" title={ev.title}>{ev.title}</span>
                   </div>
 
                   <div className="cal-upcoming-cat-line">
-                    {ev.category === 'reunion' ? (
-                      <Users size={11} className="cat-icon-sub" />
-                    ) : ev.category === 'visita' ? (
-                      <MapPin size={11} className="cat-icon-sub" />
-                    ) : (
-                      <FileText size={11} className="cat-icon-sub" />
-                    )}
-                    <span>{ev.catLabel}</span>
+                    <FileText size={11} className="cat-icon-sub" />
+                    <span>{ev.code} · {ev.kind === 'hito' ? 'Hito Rector' : 'Subproceso'}</span>
                   </div>
 
-                  <div className="cal-upcoming-time-line">
-                    <Clock size={11} className="cat-icon-sub" />
-                    <span>{ev.time}</span>
+                  {/* Barra de progreso estilo Gantt */}
+                  <div className="cal-upcoming-progress-row">
+                    <div className="cal-mini-track">
+                      <div
+                        className={`cal-mini-fill ${
+                          ev.status === 'Completado'
+                            ? 'fill-complete'
+                            : ev.status === 'En proceso'
+                            ? 'fill-progress'
+                            : 'fill-pending'
+                        }`}
+                        style={{ width: `${ev.progress}%` }}
+                      />
+                    </div>
+                    <span className="cal-mini-pct">{ev.progress}%</span>
                   </div>
                 </div>
 
@@ -715,16 +753,17 @@ export default function CronogramaCalendarioView({
                   <div
                     className="cal-user-avatar-circle"
                     style={{ backgroundColor: ev.avatarBg, color: ev.avatarColor }}
+                    title={ev.owner}
                   >
                     {ev.initials}
                   </div>
                   <button
                     type="button"
                     className="cal-more-dots-btn"
-                    title="Opciones de evento"
+                    title="Opciones de entregable"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleOpenItem(ev.title);
+                      handleOpenItem(ev.code);
                     }}
                   >
                     <MoreHorizontal size={14} />
@@ -735,25 +774,25 @@ export default function CronogramaCalendarioView({
           </div>
         </div>
 
-        {/* Sección: Leyenda (Cuadrícula limpia 2x2) */}
+        {/* Sección: Leyenda (Estricto Sistema Gantt) */}
         <div className="cal-sidebar-section cal-legend-section">
           <h3 className="cal-sidebar-title">Leyenda</h3>
           <div className="cal-clean-legend-grid">
-            <div className="cal-legend-row">
-              <span className="cal-dot-indicator dot-subproceso" />
-              <span>Hitos / Subprocesos</span>
+            <div className="cal-legend-row" title="Hito Rector oficial con rombo característico de Gantt">
+              <span className="cal-legend-diamond">◆</span>
+              <span>Hito Rector</span>
             </div>
-            <div className="cal-legend-row">
-              <span className="cal-dot-indicator dot-reunion" />
-              <span>Reuniones</span>
+            <div className="cal-legend-row" title="Subproceso en curso con avance parcial">
+              <span className="cal-legend-box box-progress" />
+              <span>En proceso</span>
             </div>
-            <div className="cal-legend-row">
-              <span className="cal-dot-indicator dot-visita" />
-              <span>Visitas a sedes</span>
+            <div className="cal-legend-row" title="Subproceso cumplido al 100%">
+              <span className="cal-legend-box box-complete" />
+              <span>Completado</span>
             </div>
-            <div className="cal-legend-row">
-              <span className="cal-dot-indicator dot-vencimiento" />
-              <span>Vencimientos</span>
+            <div className="cal-legend-row" title="Subproceso pendiente de inicio">
+              <span className="cal-legend-box box-pending" />
+              <span>Pendiente</span>
             </div>
           </div>
         </div>
