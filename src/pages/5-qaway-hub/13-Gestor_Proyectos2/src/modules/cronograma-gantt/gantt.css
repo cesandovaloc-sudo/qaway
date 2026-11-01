@@ -4802,6 +4802,18 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
+   TABLERO MAESTRO UNIFICADO (Gantt y Lista) - Flex Container y Scroll 2D
+   ========================================================================== */
+.gantt-v2 .gantt-master-view-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ==========================================================================
    VISTA LISTA CON TABLERO MAESTRO (100% ANCHO, TIMELINE OCULTO)
    ========================================================================== */
 .gantt-v2 .view-lista-fullwidth {
@@ -4829,7 +4841,7 @@ body.gantt-resizing {
 
 .gantt-v2 .view-lista-fullwidth .gantt-scroll {
   width: 100% !important;
-  overflow-x: auto !important;
+  overflow: auto !important;
 }
 
 .gantt-v2 .view-lista-fullwidth .gantt {
