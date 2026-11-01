@@ -2321,12 +2321,14 @@ export default function CronogramaGanttView({
   const toggleItemExpand = (id: string, defaultExpanded: boolean = true) => {
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
     setCollapsedByMode((prev) => {
-      const currentExpanded = isItemExpanded(id, defaultExpanded);
+      const modeMap = prev[mode] || {};
+      const currentlyCollapsed = typeof modeMap[id] === 'boolean' ? modeMap[id] : !defaultExpanded;
+      const nextCollapsed = !currentlyCollapsed;
       const next = {
         ...prev,
         [mode]: {
-          ...(prev[mode] || {}),
-          [id]: currentExpanded,
+          ...modeMap,
+          [id]: nextCollapsed,
         },
       };
       try {
@@ -2449,7 +2451,9 @@ export default function CronogramaGanttView({
     rangeFrom,
     rangeTo,
     customRules,
-    engineMatchIds
+    engineMatchIds,
+    collapsedByMode,
+    viewMode
   ]);
 
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
@@ -2576,6 +2580,22 @@ export default function CronogramaGanttView({
     };
 
     if (openInline) {
+      if (pId) {
+        const mode = viewMode === 'lista' ? 'lista' : 'gantt';
+        setCollapsedByMode((prev) => {
+          const next = {
+            ...prev,
+            [mode]: {
+              ...(prev[mode] || {}),
+              [pId]: false,
+            },
+          };
+          try {
+            localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
+      }
       commitChange((old) => {
         if (pId) {
           const withExpanded = old.map((it) => (it.id === pId ? { ...it, expanded: true } : it));
