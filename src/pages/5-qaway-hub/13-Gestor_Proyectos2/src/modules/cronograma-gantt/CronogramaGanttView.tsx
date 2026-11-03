@@ -4205,7 +4205,7 @@ export default function CronogramaGanttView({
           {(viewMode === 'gantt' || viewMode === 'lista') && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' ? 'view-lista-fullwidth' : ''}`}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
-          <div className="table-head" ref={tableHeadRef} style={{ overflowX: viewMode === 'lista' ? 'hidden' : undefined }}>
+          <div className="table-head" ref={tableHeadRef}>
             <div
               className="fixed-cols"
               style={{

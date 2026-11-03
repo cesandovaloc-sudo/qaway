@@ -130,3 +130,15 @@
    - Pie con botones ergonómicos `Cancelar` y `Crear campo` primario azul.
 3. **Homogeneización Tipográfica**:
    - Eliminación de estilos mixtos y herencia directa de la fuente oficial `--font-sans: 'Inter', system-ui, sans-serif;` con jerarquía tipográfica uniforme.
+
+---
+
+## 8. Iteración A329: Restauración de Scroll Fluido y Altura de Viewport en Workspace
+
+### Requerimientos abordados:
+1. **Restauración de Altura Original en `.workspace` (`gantt.css`)**:
+   - Se removió la compresión a `calc(100vh - 435px)` y se regresó al estándar funcional original `calc(100vh - 275px)`.
+   - Permite que el calendario mensual y las tablas se visualicen completos verticalmente y permitan el scroll fluido sin trabarse ni recortarse.
+2. **Scroll Horizontal Fluido y Sincronizado en Vista Lista**:
+   - Se eliminó el estilo restrictivo `overflowX: hidden` en línea en `<div className="table-head">`.
+   - Preserva la barra de desplazamiento horizontal inferior (`.gantt-scroll`) para navegar entre todas las columnas libremente.

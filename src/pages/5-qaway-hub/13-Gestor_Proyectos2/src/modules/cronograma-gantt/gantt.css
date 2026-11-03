@@ -3496,9 +3496,8 @@
 .gantt-v2 .workspace {
   position: sticky;
   top: 12px;
-  height: calc(100vh - 435px);
-  max-height: calc(100vh - 435px);
-  min-height: 320px;
+  height: calc(100vh - 275px);
+  max-height: calc(100vh - 275px);
   z-index: 25;
 }
 
