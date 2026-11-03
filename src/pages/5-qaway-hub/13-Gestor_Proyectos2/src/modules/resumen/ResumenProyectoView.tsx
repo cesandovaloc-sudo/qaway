@@ -44,7 +44,7 @@ const RESUMEN_ESTADOS = [
 ];
 
 const RESUMEN_COLUMNS: ColumnDef<(typeof DEMO_UGEL)[0]>[] = [
-  { id: 'nombre', label: 'UGEL', type: 'select', accessor: (r) => r.nombre },
+  { id: 'nombre', label: 'Sede', type: 'select', accessor: (r) => r.nombre },
   { id: 'estado', label: 'Estado', type: 'processState', accessor: (r) => r.estado, options: RESUMEN_ESTADOS },
   { id: 'avance', label: 'Avance', type: 'percent', accessor: (r) => r.avance },
   { id: 'hito', label: 'Próximo hito', type: 'text', accessor: (r) => r.hito },
@@ -205,7 +205,7 @@ export default function ResumenProyectoView({
             </select>
           </label>
           <label>
-            <span>Unidad ejecutora</span>
+            <span>Sede operativa</span>
             <select value={ugel} onChange={(e) => setUgel(e.target.value)}>
               <option>Todas</option>
               {DEMO_UGEL.map((x) => (
@@ -241,7 +241,7 @@ export default function ResumenProyectoView({
           <div className="kpi-card">
             <div className="kpi-icon blue"><Building2 size={22} /></div>
             <div className="kpi-info">
-              <span>UGEL monitoreadas</span>
+              <span>Sedes monitoreadas</span>
               <strong>{total}</strong>
               <small>En la región Junín</small>
             </div>
@@ -360,11 +360,11 @@ export default function ResumenProyectoView({
             </div>
           </article>
 
-          {/* UGEL que requieren atención */}
+          {/* Sedes que requieren atención */}
           <article className="section-card">
             <div className="section-head">
               <div>
-                <h2>UGEL en atención</h2>
+                <h2>Sedes en atención</h2>
                 <p>Prioridad según avance</p>
               </div>
               <button
@@ -380,7 +380,7 @@ export default function ResumenProyectoView({
               <table>
                 <thead>
                   <tr>
-                    <th><ColumnHeader engine={engine} columnId="nombre" label="UGEL" /></th>
+                    <th><ColumnHeader engine={engine} columnId="nombre" label="Sede" /></th>
                     <th><ColumnHeader engine={engine} columnId="estado" label="Estado" /></th>
                     <th><ColumnHeader engine={engine} columnId="avance" label="Avance" /></th>
                     <th><ColumnHeader engine={engine} columnId="hito" label="Próximo hito" /></th>

@@ -585,7 +585,7 @@ const MIN_COLS: Record<string, number> = {
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
-  { key: 'name', label: 'Hito Rector / Subproceso Oficial', fixed: true },
+  { key: 'name', label: 'Hito Principal / Subproceso', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
   { key: 'parent', label: 'Hito padre' },
@@ -3001,7 +3001,7 @@ export default function CronogramaGanttView({
                     }}
                   >
                     <Folder size={15} />
-                    <span>Nuevo hito rector</span>
+                    <span>Nuevo hito principal</span>
                   </button>
                   <button
                     onClick={() => {
@@ -5319,7 +5319,7 @@ export default function CronogramaGanttView({
                           )}
 
                           {x.kind === 'hito' ? (
-                            <span className="hito-diamond-badge" title="Hito Rector Oficial">
+                            <span className="hito-diamond-badge" title="Hito Principal">
                               <span className="diamond-shape" />
                             </span>
                           ) : null}
@@ -5353,11 +5353,11 @@ export default function CronogramaGanttView({
             </div>
           ))}
 
-              {/* Fila interactiva para creación rápida de nuevo Hito Rector al pie */}
+              {/* Fila interactiva para creación rápida de nuevo Hito Principal al pie */}
               <div
                 className="row quick-add-row"
                 onClick={() => add('hito', undefined, true)}
-                title="Haz clic para agregar un nuevo Hito Rector al cronograma"
+                title="Haz clic para agregar un nuevo hito principal al cronograma"
               >
                 <div
                   className="fixed-cols"
@@ -5372,7 +5372,7 @@ export default function CronogramaGanttView({
                     <div className="quick-add-icon-box">
                       <Plus size={14} />
                     </div>
-                    <span className="quick-add-text">+ Agregar nuevo hito rector</span>
+                    <span className="quick-add-text">+ Agregar nuevo hito principal</span>
                   </div>
                 </div>
               </div>
