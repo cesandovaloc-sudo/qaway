@@ -105,9 +105,9 @@
 ### Requerimientos abordados:
 1. **Eliminación definitiva de "UGEL" en encabezados y modales**:
    - Modificación de la etiqueta en `ALL_COL_META` y `GANTT_COLUMNS`: cambiada de `"UGEL / Sede"` a `"Sede"` universal sin forzar nombres educativos ni institucionales.
-2. **Homologación de Toolbar en Vista Lista**:
+2. **Homologación de Toolbar en Vista Lista y todas las vistas**:
+   - Integración transversal del bloque temporal unificado `[ < ] [ Hoy ] [ > ]` y la botonera de zoom `[ Día │ Semana │ Mes │ Trimestre ]` en **todas las vistas** (`Gantt`, `Lista`, `Kanban`, `Calendario`).
    - Incorporación de los controles compartidos (`ChevronsUpDown`, `Maximize2`, `ArrowLeftRight`, `Anchor`, `Columns3`, `RotateCcw`) con divisores `" | "` claros.
    - Ocultamiento del botón de colapso de panel lateral (`PanelLeftClose / PanelLeftOpen`) en vista Lista, ya que solo aplica a la vista Gantt con panel dividido.
-   - Respeto del mapeo de navegación temporal confirmado por el usuario: `Hoy` y escalas temporales (`Día | Semana | Mes | Trimestre`) activos en Gantt y Calendario, y ocultos en Lista y Kanban.
 3. **Calibración Ergonómica de Botones de Cabecera**:
    - Ajuste de `.head-col-actions button` en `gantt.css` de 20px a 26px x 26px con iconos de 13px y border-radius de 6px, garantizando un área de toque ergonómica según el protocolo de diseño.

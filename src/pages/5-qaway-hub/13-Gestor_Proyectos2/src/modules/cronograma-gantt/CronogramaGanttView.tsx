@@ -3340,8 +3340,8 @@ export default function CronogramaGanttView({
               </button>
             )}
 
-            {/* Navegación temporal y selector de subvista para Calendario */}
-            {viewMode === 'calendario' && (
+            {/* Navegación temporal y selector de escala para todas las vistas */}
+            {viewMode === 'calendario' ? (
               <>
                 <div className="filter-group-divider" aria-hidden="true" />
                 <div className="timeline-nav" title="Navegar por el calendario">
@@ -3383,6 +3383,49 @@ export default function CronogramaGanttView({
                       onClick={() => setCalSubView(v)}
                     >
                       {v}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="filter-group-divider" aria-hidden="true" />
+                <div className="timeline-nav" title="Navegar por la línea de tiempo">
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={() => scrollTimeline('left')}
+                    title="Desplazar línea de tiempo a la izquierda"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="today-pill"
+                    onClick={scrollToToday}
+                    title="Ir y centrar en la fecha actual (27 de octubre de 2026)"
+                  >
+                    Hoy
+                  </button>
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={() => scrollTimeline('right')}
+                    title="Desplazar línea de tiempo a la derecha"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+
+                <div className="zoom">
+                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
+                    <button
+                      type="button"
+                      key={x}
+                      className={zoom === x ? 'active' : ''}
+                      onClick={() => handleZoomChange(x)}
+                    >
+                      {x}
                     </button>
                   ))}
                 </div>
@@ -3576,51 +3619,9 @@ export default function CronogramaGanttView({
             </div>
             )}
 
-            {/* Controles exclusivos de visualización Gantt (Línea de tiempo y zoom) */}
+            {/* Controles exclusivos de visualización Gantt (Capas y dependencias) */}
             {viewMode === 'gantt' && (
               <>
-                <div className="timeline-nav" title="Navegar por la línea de tiempo">
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={() => scrollTimeline('left')}
-                    title="Desplazar línea de tiempo a la izquierda"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="today-pill"
-                    onClick={scrollToToday}
-                    title="Ir y centrar en la fecha actual (27 de octubre de 2026)"
-                  >
-                    Hoy
-                  </button>
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={() => scrollTimeline('right')}
-                    title="Desplazar línea de tiempo a la derecha"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-
-                <div className="zoom">
-                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
-                    <button
-                      type="button"
-                      key={x}
-                      className={zoom === x ? 'active' : ''}
-                      onClick={() => handleZoomChange(x)}
-                    >
-                      {x}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="filter-group-divider" aria-hidden="true" />
-
                 <button
                   type="button"
                   className={`btn-toggle-labels qm-btn-icon ${showBarLabels ? "active" : ""}`}
