@@ -39,8 +39,8 @@ export interface ProjectItem {
 const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 'p1',
-    code: 'PRJ-MIN-2027-01',
-    name: 'MINEDU · Dotación 2027',
+    code: 'PRJ-OPS-2027-01',
+    name: 'Programa Maestro Operativo 2027',
     region: 'Junín',
     subtext: 'Seguimiento de operaciones',
     budget: 'S/ 850,000',
