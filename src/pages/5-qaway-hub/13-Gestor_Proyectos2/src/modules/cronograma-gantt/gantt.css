@@ -2781,6 +2781,42 @@
   filter: brightness(1.04);
 }
 
+/* Avatar redondo incrustado en la esquina inicial de la barra */
+.gantt-v2 .gantt-bar-avatar {
+  position: absolute;
+  left: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 8.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 1.5px #ffffff;
+  z-index: 5;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Flechas y líneas SVG de Dependencia */
+.gantt-v2 .gantt-dependency-svg {
+  pointer-events: none;
+}
+
+.gantt-v2 .gantt-dependency-svg path {
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.gantt-v2 .gantt-dependency-svg path:hover {
+  stroke: #0284c7;
+  stroke-width: 2.2px;
+}
+
 /* Fondos base que representan el 100% del plazo planificado */
 .gantt-v2 .bar.complete {
   background: rgba(0, 185, 107, 0.18);

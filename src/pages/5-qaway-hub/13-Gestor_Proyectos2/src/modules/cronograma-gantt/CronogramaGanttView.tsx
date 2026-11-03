@@ -146,6 +146,8 @@ export interface Item {
   /** Fechas reales de ejecución (se registran al iniciar/completar; editables). */
   actualStart?: string;
   actualEnd?: string;
+  /** Tareas o hitos predecesores en la cadena de prelación / ruta crítica. */
+  dependencies?: string[];
 }
 
 const INITIAL_ITEMS: Item[] = [
@@ -198,6 +200,7 @@ const INITIAL_ITEMS: Item[] = [
     sede: 'UGEL Concepción',
     gestor: 'María Salazar',
     gestores: ['María Salazar', 'Carlos Mendoza'],
+    dependencies: ['s11'],
   },
   {
     id: 'h2',
@@ -216,6 +219,7 @@ const INITIAL_ITEMS: Item[] = [
     sede: 'UGEL Huancayo',
     gestor: 'Carlos Mendoza',
     gestores: ['Carlos Mendoza', 'Lucía Ramos', 'Javier Ruiz'],
+    dependencies: ['h1'],
   },
   {
     id: 's21',
@@ -246,6 +250,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Huaral',
     sede: 'UGEL 10 Huaral',
     gestor: 'María Salazar',
+    dependencies: ['s21'],
   },
   {
     id: 'h3',
@@ -263,6 +268,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Tumbes',
     sede: 'UGEL Tumbes',
     gestor: 'Javier Ruiz',
+    dependencies: ['h2'],
   },
   {
     id: 's31',
@@ -1742,7 +1748,8 @@ export default function CronogramaGanttView({
   } | null>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
-  const [showCriticalPath, setShowCriticalPath] = useState(false);
+  const [showCriticalPath, setShowCriticalPath] = useState(true);
+  const [showBarAvatars, setShowBarAvatars] = useState(true);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
   const [resizeTempWidth, setResizeTempWidth] = useState<number | null>(null);
   const [resizeTempEndDate, setResizeTempEndDate] = useState<string | null>(null);
@@ -3808,12 +3815,25 @@ export default function CronogramaGanttView({
                   className={`btn secondary qm-btn-icon ${showCriticalPath ? "active" : ""}`}
                   onClick={() => {
                     setShowCriticalPath((v) => !v);
-                    notify(showCriticalPath ? "Ruta crítica desactivada" : "Ruta crítica resaltada");
+                    notify(!showCriticalPath ? "Líneas de dependencia y prelación visibles" : "Líneas de dependencia ocultas");
                   }}
-                  data-tooltip="Ruta crítica"
-                  aria-label="Resaltar ruta crítica del proyecto"
+                  data-tooltip={showCriticalPath ? "Ocultar dependencias" : "Mostrar líneas de dependencia"}
+                  aria-label="Conmutar líneas de dependencia y prelación entre tareas"
                 >
                   <Link2 size={15} />
+                </button>
+
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${showBarAvatars ? "active" : ""}`}
+                  onClick={() => {
+                    setShowBarAvatars((v) => !v);
+                    notify(!showBarAvatars ? "Responsables visibles en las barras" : "Responsables ocultos de las barras");
+                  }}
+                  data-tooltip={showBarAvatars ? "Ocultar responsables en barras" : "Mostrar responsables en barras"}
+                  aria-label="Conmutar avatares de responsables en barras de Gantt"
+                >
+                  <UserCheck size={15} />
                 </button>
 
                 <div className="filter-group-divider" aria-hidden="true" />
@@ -5463,6 +5483,24 @@ export default function CronogramaGanttView({
                             if (!resizingTaskId) setHoveredTask(null);
                           }}
                         >
+                          {/* Avatar redondo del responsable embebido en la esquina inicial de la barra */}
+                          {showBarAvatars && (() => {
+                            const gList = getItemGestores(x);
+                            const mainGestor = gList[0];
+                            if (!mainGestor || mainGestor === 'Sin asignar') return null;
+                            const initials = getGestorInitials(mainGestor);
+                            const bgColor = getGestorColor(mainGestor);
+                            return (
+                              <span
+                                className="gantt-bar-avatar"
+                                style={{ backgroundColor: bgColor }}
+                                title={`Responsable: ${gList.join(', ')}`}
+                              >
+                                {initials}
+                              </span>
+                            );
+                          })()}
+
                           {/* Relleno de avance proporcional (refleja el % real de cumplimiento) */}
                           <div
                             className="bar-progress-fill"
@@ -5610,6 +5648,110 @@ export default function CronogramaGanttView({
                       <span className="range-boundary-tag end-tag">Rango Fin</span>
                     </div>
                   </>
+                )}
+
+                {/* Capa SVG de Flechas y Líneas de Dependencia / Prelación */}
+                {showCriticalPath && (
+                  <svg
+                    className="gantt-dependency-svg"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: timelineMinWidth,
+                      height: `${shown.length * 48}px`,
+                      pointerEvents: 'none',
+                      zIndex: 8,
+                      overflow: 'visible',
+                    }}
+                  >
+                    <defs>
+                      <marker
+                        id="dep-arrow"
+                        viewBox="0 0 10 10"
+                        refX="8"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse"
+                      >
+                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+                      </marker>
+                      <marker
+                        id="dep-arrow-critical"
+                        viewBox="0 0 10 10"
+                        refX="8"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse"
+                      >
+                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
+                      </marker>
+                    </defs>
+
+                    {(() => {
+                      const itemIndexMap = new Map<string, number>();
+                      shown.forEach((it, idx) => itemIndexMap.set(it.id, idx));
+
+                      return shown.flatMap((item) => {
+                        const targetIndex = itemIndexMap.get(item.id);
+                        if (targetIndex === undefined) return [];
+
+                        // Predecesores: campo dependencies explícito O parentId si ambos están en el árbol
+                        const predecessorIds = new Set<string>();
+                        if (item.dependencies && item.dependencies.length > 0) {
+                          item.dependencies.forEach((d) => predecessorIds.add(d));
+                        }
+                        if (item.kind === 'hito' && item.parentId) {
+                          predecessorIds.add(item.parentId);
+                        }
+
+                        return Array.from(predecessorIds).flatMap((predId) => {
+                          const sourceIndex = itemIndexMap.get(predId);
+                          if (sourceIndex === undefined) return [];
+                          const sourceItem = shown[sourceIndex];
+                          if (!sourceItem) return [];
+
+                          const rowHeight = 48;
+                          const fromX = getDatePixelOffset(shiftDays(sourceItem.end, 1));
+                          const fromY = sourceIndex * rowHeight + rowHeight / 2;
+                          const toX = getDatePixelOffset(item.start);
+                          const toY = targetIndex * rowHeight + rowHeight / 2;
+
+                          // Trazo ortogonal tipo codo (elbow connector: ──┐ └──►)
+                          const isSuccessorAfter = toX >= fromX + 16;
+                          let pathD = '';
+
+                          if (isSuccessorAfter) {
+                            const midX = fromX + Math.max(12, (toX - fromX) / 2);
+                            pathD = `M ${fromX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
+                          } else {
+                            // Si se solapan o la sucesora inicia cerca
+                            const loopX = fromX + 14;
+                            const midY = fromY + (toY > fromY ? 24 : -24);
+                            const backX = Math.min(toX - 16, fromX - 10);
+                            pathD = `M ${fromX} ${fromY} L ${loopX} ${fromY} L ${loopX} ${midY} L ${backX} ${midY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
+                          }
+
+                          const isCritical = (sourceItem.progress < 100 && item.progress === 0) || item.status === 'Con retraso';
+
+                          return (
+                            <path
+                              key={`${predId}->${item.id}`}
+                              d={pathD}
+                              fill="none"
+                              stroke={isCritical ? '#ea580c' : '#64748b'}
+                              strokeWidth={isCritical ? '2' : '1.5'}
+                              strokeDasharray={isCritical ? undefined : '4 3'}
+                              markerEnd={isCritical ? 'url(#dep-arrow-critical)' : 'url(#dep-arrow)'}
+                              opacity={0.88}
+                            />
+                          );
+                        });
+                      });
+                    })()}
+                  </svg>
                 )}
 
                 {/* Indicador dinámico de "Hoy" */}
@@ -7037,8 +7179,9 @@ export default function CronogramaGanttView({
                         }}
                       >
                         {(() => {
-                          const dep = hitos.find((x) => x.id === activeItem.parentId);
-                          return dep ? `${dep.code} ${dep.name}` : 'Sin predecesor (Hito independiente o inicial)';
+                          const currentPredecessorId = activeItem.dependencies?.[0] || (activeItem.kind === 'hito' ? activeItem.parentId : undefined);
+                          const dep = items.find((x) => x.id === currentPredecessorId);
+                          return dep ? `${dep.code} ${dep.name}` : 'Sin predecesor (Actividad inicial o independiente)';
                         })()}
                       </span>
                       <ChevronDown
@@ -7072,30 +7215,33 @@ export default function CronogramaGanttView({
                         }}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="filter-popover-title">Predecesor en Ruta Crítica</div>
+                        <div className="filter-popover-title">Predecesor en Cadena / Ruta Crítica</div>
                         <button
                           type="button"
-                          className={`filter-item-btn ${!activeItem.parentId ? 'selected' : ''}`}
+                          className={`filter-item-btn ${!(activeItem.dependencies?.[0] || (activeItem.kind === 'hito' && activeItem.parentId)) ? 'selected' : ''}`}
                           onClick={() => {
-                            updateDraft({ parentId: undefined });
+                            updateDraft({ dependencies: [] });
                             setEditorDepSelectOpen(false);
                           }}
                           style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                         >
-                          <span style={{ fontSize: '12px' }}>Sin predecesor (Hito independiente o inicial)</span>
-                          {!activeItem.parentId && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                          <span style={{ fontSize: '12px' }}>Sin predecesor (Actividad inicial o independiente)</span>
+                          {!(activeItem.dependencies?.[0] || (activeItem.kind === 'hito' && activeItem.parentId)) && (
+                            <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />
+                          )}
                         </button>
-                        {hitos
+                        {items
                           .filter((h) => h.id !== activeItem.id)
                           .map((h) => {
-                            const isSelected = activeItem.parentId === h.id;
+                            const currentPredecessorId = activeItem.dependencies?.[0] || (activeItem.kind === 'hito' ? activeItem.parentId : undefined);
+                            const isSelected = currentPredecessorId === h.id;
                             return (
                               <button
                                 key={h.id}
                                 type="button"
                                 className={`filter-item-btn ${isSelected ? 'selected' : ''}`}
                                 onClick={() => {
-                                  updateDraft({ parentId: h.id });
+                                  updateDraft({ dependencies: [h.id] });
                                   setEditorDepSelectOpen(false);
                                 }}
                                 style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
@@ -7112,22 +7258,27 @@ export default function CronogramaGanttView({
                   </div>
                 </div>
 
-                {activeItem.parentId && (
-                  <div style={{ marginTop: 12, padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                    <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Flujo de Ejecución Configurado
-                    </small>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: 8 }}>
-                      <div style={{ padding: '6px 10px', background: '#e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#1e293b' }}>
-                        {items.find((x) => x.id === activeItem.parentId)?.name || 'Hito Predecesor'}
-                      </div>
-                      <ArrowRight size={16} color="#0284c7" />
-                      <div style={{ padding: '6px 10px', background: '#dbeafe', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '12px', fontWeight: 700, color: '#1d4ed8' }}>
-                        {activeItem.name}
+                {(() => {
+                  const currentPredecessorId = activeItem.dependencies?.[0] || (activeItem.kind === 'hito' ? activeItem.parentId : undefined);
+                  const predItem = currentPredecessorId ? items.find((x) => x.id === currentPredecessorId) : null;
+                  if (!predItem) return null;
+                  return (
+                    <div style={{ marginTop: 12, padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                      <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Flujo de Prelación Configurado
+                      </small>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: 8 }}>
+                        <div style={{ padding: '6px 10px', background: '#e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#1e293b' }}>
+                          {predItem.code} {predItem.name}
+                        </div>
+                        <ArrowRight size={16} color="#0284c7" />
+                        <div style={{ padding: '6px 10px', background: '#dbeafe', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '12px', fontWeight: 700, color: '#1d4ed8' }}>
+                          {activeItem.code} {activeItem.name}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             )}
 

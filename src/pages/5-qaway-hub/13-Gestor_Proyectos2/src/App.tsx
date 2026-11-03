@@ -16,7 +16,7 @@ import CronogramaView from './modules/cronograma/CronogramaView';
 import CronogramaGanttView from './modules/cronograma-gantt/CronogramaGanttView';
 import ReunionesView from './modules/reuniones/ReunionesView';
 import ReporteadorView from './modules/reporteador/ReporteadorView';
-import UsuariosView from './modules/usuarios/UsuariosView';
+import EquipoView from './modules/equipo/EquipoView';
 import HitosView from './modules/hitos/HitosView';
 import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
 import ConfiguracionView from './modules/configuracion/ConfiguracionView';
@@ -410,8 +410,11 @@ function App() {
           <div className={active === 'reportes' ? 'rep-v1 qm-pane-active' : 'rep-v1 qm-pane'}>
             <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
           </div>
-          <div className={active === 'usuarios' ? 'usr-v1 qm-pane-active' : 'usr-v1 qm-pane'}>
-            <UsuariosView onActions={(h) => { binds.current['usuarios'] = h; }} />
+          <div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+            <EquipoView
+              activeProject={activeProject}
+              onActions={(h) => { binds.current['usuarios'] = h; }}
+            />
           </div>
           <div className={active === 'actas' ? 'act-v1 qm-pane-active' : 'act-v1 qm-pane'}>
             <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
