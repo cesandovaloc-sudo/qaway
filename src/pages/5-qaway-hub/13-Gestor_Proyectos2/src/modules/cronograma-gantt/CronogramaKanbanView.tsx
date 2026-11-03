@@ -114,9 +114,9 @@ export default function CronogramaKanbanView({
                     className="kanban-add-btn"
                     onClick={() => onAddItem(col.id)}
                     title={`Agregar elemento en ${col.label}`}
+                    aria-label={`Agregar elemento en ${col.label}`}
                   >
-                    <Plus size={13} />
-                    <span>Agregar</span>
+                    <Plus size={14} />
                   </button>
                 )}
               </div>

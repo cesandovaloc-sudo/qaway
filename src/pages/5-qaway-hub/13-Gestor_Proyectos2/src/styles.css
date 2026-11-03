@@ -44,6 +44,7 @@
 }
 
 /* Layout base consolidado (shell maestro, Sidebar + Canvas keep-alive) */
+body,
 .qm-root {
   height: 100vh;
   max-height: 100vh;
@@ -51,6 +52,7 @@
   display: flex;
   align-items: stretch;
   background: var(--bg-canvas);
+  font-family: var(--font-sans);
 }
 .qm-side,
 .qm-side.qt-v2 {
