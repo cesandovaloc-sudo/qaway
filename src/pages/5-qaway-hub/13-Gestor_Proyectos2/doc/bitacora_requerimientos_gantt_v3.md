@@ -97,3 +97,17 @@
    - Integración de columnas `Región`, `Distrito` y `UGEL / Sede` en `ALL_COL_META`, `MIN_COLS` y `GANTT_COLUMNS`.
    - Soporte para etiquetas adaptables según el contexto del proyecto (Edificación: `Edificio / Frente`, MINEDU: `UGEL / Sede`, Servicios: `Sede / Local`).
    - Sincronización transparente con vista Calendario mensual.
+
+---
+
+## 6. Iteración A326: Homologación de Toolbar en Vista Lista, Eliminación de "UGEL" en Encabezados y Calibración Ergonómica de Botones
+
+### Requerimientos abordados:
+1. **Eliminación definitiva de "UGEL" en encabezados y modales**:
+   - Modificación de la etiqueta en `ALL_COL_META` y `GANTT_COLUMNS`: cambiada de `"UGEL / Sede"` a `"Sede"` universal sin forzar nombres educativos ni institucionales.
+2. **Homologación de Toolbar en Vista Lista**:
+   - Incorporación de los controles compartidos (`ChevronsUpDown`, `Maximize2`, `ArrowLeftRight`, `Anchor`, `Columns3`, `RotateCcw`) con divisores `" | "` claros.
+   - Ocultamiento del botón de colapso de panel lateral (`PanelLeftClose / PanelLeftOpen`) en vista Lista, ya que solo aplica a la vista Gantt con panel dividido.
+   - Respeto del mapeo de navegación temporal confirmado por el usuario: `Hoy` y escalas temporales (`Día | Semana | Mes | Trimestre`) activos en Gantt y Calendario, y ocultos en Lista y Kanban.
+3. **Calibración Ergonómica de Botones de Cabecera**:
+   - Ajuste de `.head-col-actions button` en `gantt.css` de 20px a 26px x 26px con iconos de 13px y border-radius de 6px, garantizando un área de toque ergonómica según el protocolo de diseño.

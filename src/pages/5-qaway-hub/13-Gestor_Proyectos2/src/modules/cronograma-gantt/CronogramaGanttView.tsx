@@ -598,7 +598,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Región' },
   { key: 'distrito', label: 'Distrito' },
-  { key: 'sede', label: 'UGEL / Sede' },
+  { key: 'sede', label: 'Sede' },
   { key: 'actualEnd', label: 'Fecha real' },
   { key: 'actions', label: 'Acciones' },
 ];
@@ -641,7 +641,7 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
   { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
   { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
   { id: 'distrito', label: 'Distrito', type: 'select', accessor: (r) => r?.distrito },
-  { id: 'sede', label: 'UGEL / Sede', type: 'select', accessor: (r) => r?.sede },
+  { id: 'sede', label: 'Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
   { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => r?.kind === 'hito' ? 'Hito' : 'Subproceso' },
   { id: 'parent', label: 'Hito padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
@@ -3661,8 +3661,8 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Controles exclusivos para modo Gantt */}
-            {viewMode === 'gantt' && (
+            {/* Controles de expansión y pantalla completa para modo Gantt y Lista */}
+            {(viewMode === 'gantt' || viewMode === 'lista') && (
               <>
                 <button
                   type="button"
@@ -3689,7 +3689,7 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Controles de columnas y restablecimiento exclusivo para Gantt y Lista */}
+            {/* Controles de columnas y línea base para Gantt y Lista */}
             {viewMode !== 'calendario' && (
               <>
                 {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
@@ -3706,7 +3706,7 @@ export default function CronogramaGanttView({
                   <ArrowLeftRight size={14} />
                 </button>
 
-                {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base */}
+                {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base (en Gantt y Lista) */}
                 <button
                   type="button"
                   className="btn secondary qm-btn-icon"
@@ -4125,17 +4125,19 @@ export default function CronogramaGanttView({
                   >
                     <Columns3 size={13} />
                   </button>
-                  <button
-                    type="button"
-                    className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCompactColumns();
-                    }}
-                    title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
-                  >
-                    {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
-                  </button>
+                  {viewMode === 'gantt' && (
+                    <button
+                      type="button"
+                      className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCompactColumns();
+                      }}
+                      title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
+                    >
+                      {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
+                    </button>
+                  )}
                 </div>
 
                 <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('name'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
