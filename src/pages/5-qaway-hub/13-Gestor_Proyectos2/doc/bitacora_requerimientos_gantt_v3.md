@@ -111,3 +111,22 @@
    - Ocultamiento del botón de colapso de panel lateral (`PanelLeftClose / PanelLeftOpen`) en vista Lista, ya que solo aplica a la vista Gantt con panel dividido.
 3. **Calibración Ergonómica de Botones de Cabecera**:
    - Ajuste de `.head-col-actions button` en `gantt.css` de 20px a 26px x 26px con iconos de 13px y border-radius de 6px, garantizando un área de toque ergonómica según el protocolo de diseño.
+
+---
+
+## 7. Iteración A328: Rediseño Ergonómico de "Columnas de la vista" y Modal Centrado "Crear campo personalizado" (Estándar HubPro)
+
+### Requerimientos abordados:
+1. **Popover "Columnas de la vista" (Alineado con Imagen de Referencia 1)**:
+   - Título `Columnas de la vista` y subtítulo descriptivo `Selecciona las columnas que deseas mostrar.`
+   - Checkboxes estilizados con texto nítido a 13px e icono de arrastre `GripVertical` (`:::`) a la derecha.
+   - Botón de llamado a la acción destacado: `+ Crear campo personalizado` con fondo azul suave `#eff6ff` y borde `#bfdbfe`.
+   - Pie con acciones ergonómicas: `Ajustar anchos al contenido` (`ArrowLeftRight`) y `Restablecer columnas` (`RotateCcw`).
+2. **Modal Centrado con Backdrop: "Crear campo personalizado"**:
+   - Cabecera con badge de icono azul, título y descripción.
+   - Grilla de inputs: `Nombre del campo *` (38px de altura) y selector dropdown de `Tipo de dato *` (Texto, Número, Porcentaje %, Etiqueta / Estado, Fecha, Persona / Responsable).
+   - Checkboxes independientes: `Obligatorio` y `Mostrar en la vista Lista`.
+   - Opciones de ámbito (`Aplica a *`): Radio buttons para `Hitos y subprocesos`, `Solo hitos` o `Solo subprocesos`.
+   - Pie con botones ergonómicos `Cancelar` y `Crear campo` primario azul.
+3. **Homogeneización Tipográfica**:
+   - Eliminación de estilos mixtos y herencia directa de la fuente oficial `--font-sans: 'Inter', system-ui, sans-serif;` con jerarquía tipográfica uniforme.

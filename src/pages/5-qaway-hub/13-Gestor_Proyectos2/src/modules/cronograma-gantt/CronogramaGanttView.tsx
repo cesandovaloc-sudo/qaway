@@ -59,6 +59,7 @@ import {
   LayoutDashboard,
   List,
   FolderKanban,
+  GripVertical,
   Link2,
   MapPin,
   Maximize2,
@@ -1731,6 +1732,7 @@ export default function CronogramaGanttView({
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
+  const [listaTemporalFilter, setListaTemporalFilter] = useState<'Todos' | 'Hoy' | 'Semana' | 'Mes' | 'Trimestre'>('Todos');
   const [zoom, setZoom] = useState('Mes');
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
   const [hoveredTask, setHoveredTask] = useState<{
@@ -1777,6 +1779,9 @@ export default function CronogramaGanttView({
     key: string;
     label: string;
     type: 'text' | 'percent' | 'number' | 'select' | 'date' | 'person';
+    required?: boolean;
+    showInList?: boolean;
+    appliesTo?: 'all' | 'hitos' | 'subprocesos';
   }
 
   const [customCols, setCustomCols] = useState<CustomColDef[]>(() => {
@@ -1788,9 +1793,12 @@ export default function CronogramaGanttView({
     }
   });
 
-  const [newColFormOpen, setNewColFormOpen] = useState(false);
+  const [newColModalOpen, setNewColModalOpen] = useState(false);
   const [newColLabel, setNewColLabel] = useState('');
   const [newColType, setNewColType] = useState<CustomColDef['type']>('text');
+  const [newColRequired, setNewColRequired] = useState(false);
+  const [newColShowInList, setNewColShowInList] = useState(true);
+  const [newColAppliesTo, setNewColAppliesTo] = useState<'all' | 'hitos' | 'subprocesos'>('all');
 
   const handleCreateCustomCol = () => {
     if (!newColLabel.trim()) return;
@@ -1799,6 +1807,9 @@ export default function CronogramaGanttView({
       key,
       label: newColLabel.trim(),
       type: newColType,
+      required: newColRequired,
+      showInList: newColShowInList,
+      appliesTo: newColAppliesTo,
     };
     const updated = [...customCols, newCol];
     setCustomCols(updated);
@@ -1827,8 +1838,12 @@ export default function CronogramaGanttView({
     });
 
     setNewColLabel('');
-    setNewColFormOpen(false);
-    notify(`Columna "${newCol.label}" creada e incorporada a la vista actual`);
+    setNewColType('text');
+    setNewColRequired(false);
+    setNewColShowInList(true);
+    setNewColAppliesTo('all');
+    setNewColModalOpen(false);
+    notify(`Campo personalizado "${newCol.label}" creado con éxito`);
   };
 
   const resetSingleColWidth = (key: ColKey) => {
@@ -2697,7 +2712,65 @@ export default function CronogramaGanttView({
         matchRange &&
         notCollapsed &&
         matchCustom &&
-        matchEngine
+        matchEngine &&
+        (() => {
+          if (viewMode !== 'lista' || listaTemporalFilter === 'Todos') return true;
+          const targetIso = currentTodayIso;
+          const curr = new Date(targetIso + 'T12:00:00');
+          if (isNaN(curr.getTime())) return true;
+
+          // Helper de solapamiento: la tarea o hito está activa/vigente dentro del rango [fStart, fEnd]
+          const isOverlapping = (itemStart: string, itemEnd: string, fStart: string, fEnd: string) => {
+            return itemStart <= fEnd && itemEnd >= fStart;
+          };
+
+          const checkItemMatch = (item: Item, fStart: string, fEnd: string) => {
+            const selfMatch = isOverlapping(item.start, item.end, fStart, fEnd);
+            if (selfMatch) return true;
+            if (item.kind === 'hito') {
+              return items.some((c) => c.parentId === item.id && isOverlapping(c.start, c.end, fStart, fEnd));
+            }
+            return false;
+          };
+
+          if (listaTemporalFilter === 'Hoy') {
+            return checkItemMatch(x, targetIso, targetIso);
+          }
+
+          if (listaTemporalFilter === 'Semana') {
+            const dayOfWeek = curr.getDay(); // 0 domingo, 1 lunes...
+            const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(curr);
+            monday.setDate(curr.getDate() + diffToMonday);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            const fStart = monday.toISOString().slice(0, 10);
+            const fEnd = sunday.toISOString().slice(0, 10);
+            return checkItemMatch(x, fStart, fEnd);
+          }
+
+          if (listaTemporalFilter === 'Mes') {
+            const y = curr.getFullYear();
+            const m = curr.getMonth();
+            const firstDay = new Date(y, m, 1);
+            const lastDay = new Date(y, m + 1, 0);
+            const fStart = firstDay.toISOString().slice(0, 10);
+            const fEnd = lastDay.toISOString().slice(0, 10);
+            return checkItemMatch(x, fStart, fEnd);
+          }
+
+          if (listaTemporalFilter === 'Trimestre') {
+            const y = curr.getFullYear();
+            const q = Math.floor(curr.getMonth() / 3);
+            const firstDay = new Date(y, q * 3, 1);
+            const lastDay = new Date(y, q * 3 + 3, 0);
+            const fStart = firstDay.toISOString().slice(0, 10);
+            const fEnd = lastDay.toISOString().slice(0, 10);
+            return checkItemMatch(x, fStart, fEnd);
+          }
+
+          return true;
+        })()
       );
     });
   }, [
@@ -2714,7 +2787,9 @@ export default function CronogramaGanttView({
     customRules,
     engineMatchIds,
     collapsedByMode,
-    viewMode
+    viewMode,
+    listaTemporalFilter,
+    currentTodayIso
   ]);
 
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
@@ -3084,6 +3159,25 @@ export default function CronogramaGanttView({
 
         {/* Workspace Central */}
         <main ref={workspaceRef} className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''}`}>
+          {/* Barra superior de salida en pantalla completa */}
+          {isFullscreen && (
+            <div className="fullscreen-exit-bar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
+                <span>Modo Pantalla Completa — Vista {viewMode === 'gantt' ? 'Gantt' : viewMode === 'lista' ? 'Lista' : viewMode === 'kanban' ? 'Kanban' : 'Calendario'}</span>
+              </div>
+              <button
+                type="button"
+                className="fullscreen-exit-btn"
+                onClick={toggleFullscreen}
+                title="Salir de pantalla completa (o pulsa Esc)"
+              >
+                <Minimize2 size={13} />
+                <span>Salir de pantalla completa (Esc)</span>
+              </button>
+            </div>
+          )}
+
           {/* Tabs Superiores con Switcher de Modos a la Derecha */}
           <nav className="tabs">
             <div className="tabs-list">
@@ -3389,7 +3483,69 @@ export default function CronogramaGanttView({
                   ))}
                 </div>
               </>
+            ) : viewMode === 'lista' ? (
+              /* En Modo Lista: Filtros Rápidos Semánticos de Fecha */
+              <>
+                <div className="filter-group-divider" aria-hidden="true" />
+                <div className="timeline-nav" title="Filtro rápido de actividades de Hoy">
+                  <button
+                    type="button"
+                    className={`today-pill ${listaTemporalFilter === 'Hoy' ? 'active' : ''}`}
+                    onClick={() => {
+                      const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
+                      setListaTemporalFilter(next);
+                      notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
+                    }}
+                    title={listaTemporalFilter === 'Hoy' ? 'Quitar filtro de Hoy' : `Filtrar actividades activas hoy (${formatDatePE(currentTodayIso)})`}
+                    style={{
+                      height: '36px',
+                      padding: '0 14px',
+                      borderRadius: '8px',
+                      fontSize: '12.5px',
+                      fontWeight: 650,
+                      cursor: 'pointer',
+                      border: listaTemporalFilter === 'Hoy' ? '1px solid #0066ff' : '1px solid #cbd5e1',
+                      background: listaTemporalFilter === 'Hoy' ? '#0066ff' : '#ffffff',
+                      color: listaTemporalFilter === 'Hoy' ? '#ffffff' : '#334155',
+                      boxShadow: listaTemporalFilter === 'Hoy' ? '0 2px 6px rgba(0, 102, 255, 0.25)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    Hoy
+                  </button>
+                </div>
+
+                <div className="zoom" title="Filtrar actividades por período de corte">
+                  {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
+                    const isActive = listaTemporalFilter === x;
+                    return (
+                      <button
+                        type="button"
+                        key={x}
+                        className={isActive ? 'active' : ''}
+                        onClick={() => {
+                          setListaTemporalFilter(x);
+                          notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
+                        }}
+                        style={{
+                          height: '100%',
+                          padding: '0 11px',
+                          fontSize: '12px',
+                          fontWeight: isActive ? 650 : 500,
+                          cursor: 'pointer',
+                          background: isActive ? '#e6f4ff' : '#ffffff',
+                          color: isActive ? '#0066ff' : '#475569',
+                          transition: 'all 0.12s ease'
+                        }}
+                      >
+                        {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
             ) : (
+              /* En Modo Gantt / Kanban: Control de Escala y Navegación Horizontal */
               <>
                 <div className="filter-group-divider" aria-hidden="true" />
                 <div className="timeline-nav" title="Navegar por la línea de tiempo">
@@ -3723,7 +3879,7 @@ export default function CronogramaGanttView({
                   <Anchor size={14} />
                 </button>
 
-                {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion) */}
+                {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion / HubPro) */}
                 <div className="filter-dropdown-wrap cols-dropdown-wrap">
                   <button
                     type="button"
@@ -3741,9 +3897,12 @@ export default function CronogramaGanttView({
                   {colsMenuOpen && (
                     <div className="cols-popover" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                       <div className="cols-pop-head">
-                        <strong>Columnas de la Tabla</strong>
-                        <button type="button" onClick={() => setColsMenuOpen(false)}>
-                          <X size={13} />
+                        <div>
+                          <strong>Columnas de la vista</strong>
+                          <span className="cols-pop-subtitle">Selecciona las columnas que deseas mostrar.</span>
+                        </div>
+                        <button type="button" onClick={() => setColsMenuOpen(false)} title="Cerrar panel">
+                          <X size={14} />
                         </button>
                       </div>
                       <div className="cols-pop-list">
@@ -3760,71 +3919,30 @@ export default function CronogramaGanttView({
                                 disabled={col.fixed}
                                 onChange={() => toggleColVisibility(col.key)}
                               />
-                              <span>{col.label}</span>
-                              {col.fixed && <small className="fixed-pill">Fija</small>}
+                              <span className="col-option-name">{col.label}</span>
+                              {col.fixed ? (
+                                <small className="fixed-pill">Fija</small>
+                              ) : (
+                                <GripVertical size={13} className="col-grip-icon" />
+                              )}
                             </label>
                           );
                         })}
                       </div>
 
-                      {/* Creador de Columna Personalizada estilo Notion */}
+                      {/* Botón Destacado: Crear campo personalizado (Abre Modal Centrado) */}
                       <div className="cols-new-col-section">
-                        {!newColFormOpen ? (
-                          <button
-                            type="button"
-                            className="cols-new-col-toggle-btn"
-                            onClick={() => setNewColFormOpen(true)}
-                          >
-                            <Plus size={13} />
-                            <span>Nueva columna personalizada</span>
-                          </button>
-                        ) : (
-                          <div className="cols-new-col-form">
-                            <input
-                              type="text"
-                              className="cols-new-col-input"
-                              placeholder="Nombre de columna..."
-                              value={newColLabel}
-                              onChange={(e) => setNewColLabel(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleCreateCustomCol();
-                                if (e.key === 'Escape') setNewColFormOpen(false);
-                              }}
-                              autoFocus
-                            />
-                            <div className="cols-type-grid">
-                              {[
-                                { t: 'text', l: 'Texto', icon: <FileText size={12} /> },
-                                { t: 'percent', l: 'Gráfico %', icon: <Percent size={12} /> },
-                                { t: 'number', l: 'Número', icon: <Hash size={12} /> },
-                                { t: 'select', l: 'Etiqueta', icon: <Tag size={12} /> },
-                                { t: 'date', l: 'Fecha', icon: <CalendarDays size={12} /> },
-                                { t: 'person', l: 'Persona', icon: <User size={12} /> },
-                              ].map((chip) => (
-                                <button
-                                  key={chip.t}
-                                  type="button"
-                                  className={`cols-type-chip ${newColType === chip.t ? 'active' : ''}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setNewColType(chip.t as any);
-                                  }}
-                                >
-                                  {chip.icon}
-                                  <span>{chip.l}</span>
-                                </button>
-                              ))}
-                            </div>
-                            <button
-                              type="button"
-                              className="cols-create-btn"
-                              onClick={handleCreateCustomCol}
-                              disabled={!newColLabel.trim()}
-                            >
-                              Crear columna
-                            </button>
-                          </div>
-                        )}
+                        <button
+                          type="button"
+                          className="cols-new-col-toggle-btn"
+                          onClick={() => {
+                            setColsMenuOpen(false);
+                            setNewColModalOpen(true);
+                          }}
+                        >
+                          <Plus size={14} />
+                          <span>Crear campo personalizado</span>
+                        </button>
                       </div>
 
                       <div className="cols-pop-foot">
@@ -3834,10 +3952,29 @@ export default function CronogramaGanttView({
                           onClick={() => {
                             resetColWidths();
                             setColsMenuOpen(false);
+                            notify('Anchos de columna auto-ajustados al contenido');
                           }}
                         >
-                          <ArrowLeftRight size={12} />
+                          <ArrowLeftRight size={13} />
                           <span>Ajustar anchos al contenido</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="cols-reset-defaults-btn"
+                          onClick={() => {
+                            const isLista = viewMode === 'lista';
+                            const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
+                            setVisibleCols(defaultCols);
+                            const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+                            try {
+                              localStorage.setItem(storageKey, JSON.stringify(defaultCols));
+                            } catch {}
+                            notify('Columnas restablecidas al orden predeterminado');
+                          }}
+                        >
+                          <RotateCcw size={12} />
+                          <span>Restablecer columnas</span>
                         </button>
                       </div>
                     </div>
@@ -7560,6 +7697,154 @@ export default function CronogramaGanttView({
                 >
                   <Check size={15} />
                   <span>Confirmar Referencia</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Centrado Ergonómico: Crear Campo Personalizado (Fiel a HubPro) */}
+        {newColModalOpen && (
+          <div className="custom-col-modal-backdrop" onClick={() => setNewColModalOpen(false)}>
+            <div className="custom-col-modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="custom-col-modal-header">
+                <div className="custom-col-modal-title-box">
+                  <div className="custom-col-modal-icon-badge">
+                    <FileSpreadsheet size={20} />
+                  </div>
+                  <div className="custom-col-modal-title-text">
+                    <h3>Crear campo personalizado</h3>
+                    <p>Agrega un nuevo campo al cronograma del proyecto.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="custom-col-modal-close-btn"
+                  onClick={() => setNewColModalOpen(false)}
+                  title="Cerrar ventana"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="custom-col-modal-body">
+                <div className="custom-col-form-row">
+                  <div className="custom-col-form-group">
+                    <label className="custom-col-label">
+                      Nombre del campo <span className="req">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="custom-col-input"
+                      placeholder="Código de referencia"
+                      value={newColLabel}
+                      onChange={(e) => setNewColLabel(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleCreateCustomCol();
+                        if (e.key === 'Escape') setNewColModalOpen(false);
+                      }}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="custom-col-form-group">
+                    <label className="custom-col-label">
+                      Tipo de dato <span className="req">*</span>
+                    </label>
+                    <div className="custom-col-select-wrap">
+                      <select
+                        className="custom-col-select"
+                        value={newColType}
+                        onChange={(e) => setNewColType(e.target.value as any)}
+                      >
+                        <option value="text">Texto</option>
+                        <option value="number">Número</option>
+                        <option value="percent">Porcentaje (%)</option>
+                        <option value="select">Etiqueta / Estado</option>
+                        <option value="date">Fecha</option>
+                        <option value="person">Persona / Responsable</option>
+                      </select>
+                      <ChevronDown size={14} className="custom-col-select-chevron" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="custom-col-checkbox-group">
+                  <label className="custom-col-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={newColRequired}
+                      onChange={(e) => setNewColRequired(e.target.checked)}
+                    />
+                    <span>Obligatorio</span>
+                  </label>
+
+                  <label className="custom-col-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={newColShowInList}
+                      onChange={(e) => setNewColShowInList(e.target.checked)}
+                    />
+                    <span>Mostrar en la vista Lista</span>
+                  </label>
+                </div>
+
+                <div className="custom-col-radio-section">
+                  <label className="custom-col-label">
+                    Aplica a <span className="req">*</span>
+                  </label>
+                  <div className="custom-col-radio-group">
+                    <label className="custom-col-radio-label">
+                      <input
+                        type="radio"
+                        name="colAppliesTo"
+                        value="all"
+                        checked={newColAppliesTo === 'all'}
+                        onChange={() => setNewColAppliesTo('all')}
+                      />
+                      <span>Hitos y subprocesos</span>
+                    </label>
+
+                    <label className="custom-col-radio-label">
+                      <input
+                        type="radio"
+                        name="colAppliesTo"
+                        value="hitos"
+                        checked={newColAppliesTo === 'hitos'}
+                        onChange={() => setNewColAppliesTo('hitos')}
+                      />
+                      <span>Solo hitos</span>
+                    </label>
+
+                    <label className="custom-col-radio-label">
+                      <input
+                        type="radio"
+                        name="colAppliesTo"
+                        value="subprocesos"
+                        checked={newColAppliesTo === 'subprocesos'}
+                        onChange={() => setNewColAppliesTo('subprocesos')}
+                      />
+                      <span>Solo subprocesos</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="custom-col-modal-footer">
+                <button
+                  type="button"
+                  className="btn secondary custom-col-btn-cancel"
+                  onClick={() => setNewColModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn primary custom-col-btn-submit"
+                  onClick={handleCreateCustomCol}
+                  disabled={!newColLabel.trim()}
+                >
+                  Crear campo
                 </button>
               </div>
             </div>
