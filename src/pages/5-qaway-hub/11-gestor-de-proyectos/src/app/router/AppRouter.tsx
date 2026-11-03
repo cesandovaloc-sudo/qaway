@@ -50,6 +50,7 @@ import TerritoryReporterPage from '@/pages/monitoring/TerritoryReporterPage'
 import TerritoryReporterV2Page from '@/pages/monitoring/TerritoryReporterV2Page'
 import TerritoryReporterPhase2Page from '@/pages/monitoring/TerritoryReporterPhase2Page'
 import HubProResumenPage from '@/pages/monitoring/HubProResumenPage'
+import ReporteIntervencionExcelPage from '@/pages/monitoring/ReporteIntervencionExcelPage'
 import CascadeFractalPage from '@/features/cascade-fractal/CascadeFractalPage'
 
 export default function AppRouter() {
@@ -108,6 +109,12 @@ export default function AppRouter() {
           {/* Resumen Regional HubPro (Modelo Visual) */}
           <Route path="gestor_proyectos0/resumen-regional" element={<HubProResumenPage />} />
           <Route path="resumen-regional" element={<Navigate to="/gestor_proyectos0/resumen-regional" replace />} />
+
+          {/* Reporte Gráfico de Intervención (Formato Excel Moderno - 4 Puntos) */}
+          <Route path="gestor_proyectos0/reporte-grafico-excel" element={<ReporteIntervencionExcelPage />} />
+          <Route path="reporte-grafico-excel" element={<Navigate to="/gestor_proyectos0/reporte-grafico-excel" replace />} />
+          <Route path="gestor_proyectos0/graficos-intervencion" element={<Navigate to="/gestor_proyectos0/reporte-grafico-excel" replace />} />
+          <Route path="graficos-intervencion" element={<Navigate to="/gestor_proyectos0/reporte-grafico-excel" replace />} />
 
           {/* Cascada Fractal WBS con Roll-up */}
           <Route path="gestor_proyectos0/cascada" element={<CascadeFractalPage />} />

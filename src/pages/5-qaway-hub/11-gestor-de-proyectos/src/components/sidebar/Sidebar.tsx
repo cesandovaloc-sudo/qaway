@@ -11,6 +11,7 @@ import {
   Plus,
   Check,
   Workflow,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { useProjectsDataset, useTenantFilteredProjects } from '@/hooks/useProjects'
@@ -150,6 +151,13 @@ export default function Sidebar({
           label: 'Reporteador Territorial (1.6 / 5.1a)',
           icon: <BarChart3 size={18} />,
           badge: 'ACTIVO',
+          badgeVariant: 'urgent',
+        },
+        {
+          to: '/gestor_proyectos0/reporte-grafico-excel',
+          label: 'Reporte Intervención (Excel)',
+          icon: <FileSpreadsheet size={18} />,
+          badge: 'NUEVO',
           badgeVariant: 'urgent',
         },
         {
