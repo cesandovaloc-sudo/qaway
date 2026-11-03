@@ -74,7 +74,7 @@ const USER_COLUMNS: ColumnDef<Person>[] = [
   { id: 'user', label: 'Usuario', type: 'person', accessor: (p) => `${p.name} ${p.email}` },
   { id: 'role', label: 'Cargo / rol', type: 'text', accessor: (p) => p.role },
   { id: 'type', label: 'Tipo de usuario', type: 'select', accessor: (p) => p.type, options: USER_TYPES.map((t) => ({ value: t, label: t })) },
-  { id: 'org', label: 'DRE / UGEL / Área', type: 'select', accessor: (p) => p.org },
+  { id: 'org', label: 'Sede / Área', type: 'select', accessor: (p) => p.org },
   { id: 'status', label: 'Estado', type: 'processState', accessor: (p) => p.status, options: USER_STATUS_FLOW.map((s) => ({ value: s, label: s })) },
   { id: 'lastAccess', label: 'Último acceso', type: 'text', accessor: (p) => p.lastAccess },
 ];
@@ -266,14 +266,14 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
 
   const exportCsv = () => {
     const csv = [
-      ['Nombre', 'Correo', 'Cargo', 'Tipo', 'DRE / UGEL / Área', 'Estado', 'Último acceso', 'Teléfono'],
+      ['Nombre', 'Correo', 'Cargo', 'Tipo', 'Sede / Área', 'Estado', 'Último acceso', 'Teléfono'],
       ...filtered.map((p) => [p.name, p.email, p.role, p.type, p.org, p.status, p.lastAccess, p.phone]),
     ]
       .map((row) => row.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(','))
       .join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'directorio-equipo-minedu.csv';
+    a.download = 'directorio-equipo.csv';
     a.click();
     URL.revokeObjectURL(a.href);
     notify('Directorio exportado en CSV');
@@ -477,7 +477,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
             </label>
 
             <label className="select-field">
-              <small>DRE / UGEL / Área</small>
+              <small>Sede / Área</small>
               <select value={orgFilter} onChange={(e) => { setOrgFilter(e.target.value); setPage(1); }}>
                 <option>Todas</option>
                 {organizations.map((o) => (
@@ -503,7 +503,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
                   <th><ColumnHeader engine={engine} columnId="user" label="Usuario" /></th>
                   <th><ColumnHeader engine={engine} columnId="role" label="Cargo / rol" /></th>
                   <th><ColumnHeader engine={engine} columnId="type" label="Tipo de usuario" /></th>
-                  <th><ColumnHeader engine={engine} columnId="org" label="DRE / UGEL / Área" /></th>
+                  <th><ColumnHeader engine={engine} columnId="org" label="Sede / Área" /></th>
                   <th><ColumnHeader engine={engine} columnId="status" label="Estado" /></th>
                   <th><ColumnHeader engine={engine} columnId="lastAccess" label="Último acceso" /></th>
                   <th style={{ textAlign: 'center' }}>Acciones</th>
@@ -893,11 +893,11 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
                 </select>
               </label>
               <label className="form-field">
-                <span>DRE / UGEL / Entidad</span>
+                <span>Sede / Entidad</span>
                 <input
                   name="org"
-                  defaultValue={editingUser?.org || 'DRE Junín'}
-                  placeholder="Ej. UGEL Huancayo"
+                  defaultValue={editingUser?.org || 'Sede Central'}
+                  placeholder="Ej. Sede Central"
                 />
               </label>
               {editingUser && (

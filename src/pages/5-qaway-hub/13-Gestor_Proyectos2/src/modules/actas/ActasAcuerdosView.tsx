@@ -154,18 +154,18 @@ const AGREEMENT_STATUS = [
 ];
 
 const AGREEMENT_COLUMNS: ColumnDef<AgreementItem>[] = [
-  { id: 'code', label: 'C\u00f3digo / Acta', type: 'text', accessor: (r) => `${r.id} ${r.actCode}` },
-  { id: 'ugel', label: 'UGEL / \u00c1mbito', type: 'select', accessor: (r) => r.ugel },
+  { id: 'code', label: 'Código / Acta', type: 'text', accessor: (r) => `${r.id} ${r.actCode}` },
+  { id: 'ugel', label: 'Sede / Ámbito', type: 'select', accessor: (r) => r.ugel },
   { id: 'description', label: 'Acuerdo / Compromiso', type: 'text', accessor: (r) => r.description },
   { id: 'responsible', label: 'Responsable Acreditado', type: 'person', accessor: (r) => r.responsible },
-  { id: 'deadline', label: 'Plazo L\u00edmite', type: 'date', accessor: (r) => r.deadline },
+  { id: 'deadline', label: 'Plazo Límite', type: 'date', accessor: (r) => r.deadline },
   { id: 'status', label: 'Estado', type: 'processState', accessor: (r) => r.status, options: AGREEMENT_STATUS },
 ];
 
 const ACT_COLUMNS: ColumnDef<ActRecord>[] = [
-  { id: 'code', label: 'C\u00f3digo', type: 'text', accessor: (r) => r.code },
+  { id: 'code', label: 'Código', type: 'text', accessor: (r) => r.code },
   { id: 'date', label: 'Fecha', type: 'date', accessor: (r) => r.date },
-  { id: 'ugel', label: 'Instancia / UGEL', type: 'select', accessor: (r) => r.ugel },
+  { id: 'ugel', label: 'Sede / Instancia', type: 'select', accessor: (r) => r.ugel },
   { id: 'activity', label: 'Tipo de Actividad', type: 'select', accessor: (r) => r.activity },
   { id: 'modality', label: 'Modalidad', type: 'select', accessor: (r) => r.modality },
   { id: 'agreementsCount', label: 'Acuerdos', type: 'number', accessor: (r) => r.agreementsCount },
@@ -424,7 +424,7 @@ Conformidad institucional registrada en plataforma Qaway Lab.
                 <Search size={17} color="#64748b" />
                 <input
                   type="text"
-                  placeholder="Buscar acuerdo, responsable o UGEL..."
+                  placeholder="Buscar acuerdo, responsable o sede..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -436,7 +436,7 @@ Conformidad institucional registrada en plataforma Qaway Lab.
                   value={ugelFilter}
                   onChange={(e) => setUgelFilter(e.target.value)}
                 >
-                  <option value="todas">Todas las UGEL</option>
+                  <option value="todas">Todas las sedes</option>
                   <option value="UGEL Huancavelica">UGEL Huancavelica</option>
                   <option value="UGEL Maynas">UGEL Maynas</option>
                   <option value="UGEL Satipo">UGEL Satipo</option>
@@ -479,7 +479,7 @@ Conformidad institucional registrada en plataforma Qaway Lab.
                 <thead>
                   <tr>
                     <th><ColumnHeader engine={agEngine} columnId="code" label="Código / Acta" /></th>
-                    <th><ColumnHeader engine={agEngine} columnId="ugel" label="UGEL / Ámbito" /></th>
+                    <th><ColumnHeader engine={agEngine} columnId="ugel" label="Sede / Ámbito" /></th>
                     <th><ColumnHeader engine={agEngine} columnId="description" label="Acuerdo / Compromiso" /></th>
                     <th><ColumnHeader engine={agEngine} columnId="responsible" label="Responsable Acreditado" /></th>
                     <th><ColumnHeader engine={agEngine} columnId="deadline" label="Plazo Límite" /></th>
@@ -546,7 +546,7 @@ Conformidad institucional registrada en plataforma Qaway Lab.
                     <FileCheck2 size={18} color="#0284c7" />
                     <span>01. Información General del Acta</span>
                   </div>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>Plantilla Institucional MINEDU</span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>Plantilla Corporativa Oficial</span>
                 </div>
                 <div className="act-panel-body">
                   <div className="act-form-grid">
@@ -731,7 +731,7 @@ Conformidad institucional registrada en plataforma Qaway Lab.
                 </div>
                 <div className="act-check-item">
                   <span className={`act-check-dot ${form.ugel ? 'ready' : 'waiting'}`}>✓</span>
-                  <span>UGEL identificada</span>
+                  <span>Sede identificada</span>
                 </div>
                 <div className="act-check-item">
                   <span className={`act-check-dot ${form.participants ? 'ready' : 'waiting'}`}>✓</span>
@@ -770,7 +770,7 @@ Conformidad institucional registrada en plataforma Qaway Lab.
                 <tr>
                   <th><ColumnHeader engine={actsEngine} columnId="code" label="Código" /></th>
                   <th><ColumnHeader engine={actsEngine} columnId="date" label="Fecha" /></th>
-                  <th><ColumnHeader engine={actsEngine} columnId="ugel" label="Instancia / UGEL" /></th>
+                  <th><ColumnHeader engine={actsEngine} columnId="ugel" label="Sede / Instancia" /></th>
                   <th><ColumnHeader engine={actsEngine} columnId="activity" label="Tipo de Actividad" /></th>
                   <th><ColumnHeader engine={actsEngine} columnId="modality" label="Modalidad" /></th>
                   <th><ColumnHeader engine={actsEngine} columnId="agreementsCount" label="Acuerdos" /></th>

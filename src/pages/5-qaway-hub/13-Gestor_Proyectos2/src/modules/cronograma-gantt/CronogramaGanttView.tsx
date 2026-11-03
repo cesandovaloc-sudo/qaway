@@ -577,8 +577,6 @@ const MIN_COLS: Record<string, number> = {
   status: 90,
   gestor: 110,
   region: 95,
-  distrito: 110,
-  sede: 130,
   deviation: 90,
   actualEnd: 100,
   actions: 60,
@@ -596,17 +594,15 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'deviation', label: 'Desviación' },
   { key: 'status', label: 'Estado' },
   { key: 'gestor', label: 'Responsable' },
-  { key: 'region', label: 'Región' },
-  { key: 'distrito', label: 'Distrito' },
-  { key: 'sede', label: 'Sede' },
+  { key: 'region', label: 'Ámbito' },
   { key: 'actualEnd', label: 'Fecha real' },
   { key: 'actions', label: 'Acciones' },
 ];
 
 // Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
-// Preset inicial y predeterminado para vista Lista (14 columnas completas ordenadas)
-const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'gestor', 'region', 'distrito', 'sede', 'actions'];
+// Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
+const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -2220,9 +2216,15 @@ export default function CronogramaGanttView({
     document.body.classList.add('gantt-resizing');
   };
 
+  const effectiveRenderedCols = useMemo(() => {
+    const validCanonical = CANONICAL_COLS.filter((k) => visibleCols.includes(k));
+    const validCustom = customCols.filter((c) => visibleCols.includes(c.key as ColKey)).map((c) => c.key as ColKey);
+    return [...validCanonical, ...validCustom];
+  }, [visibleCols, customCols]);
+
   const fixedWidth = useMemo(
-    () => visibleCols.reduce((acc, k) => acc + (colWidths[k] || DEFAULT_COLS[k] || 140), 0),
-    [visibleCols, colWidths]
+    () => effectiveRenderedCols.reduce((acc, k) => acc + (colWidths[k] || DEFAULT_COLS[k] || 140), 0),
+    [effectiveRenderedCols, colWidths]
   );
 
   const timelineMinWidth = useMemo(() => {
@@ -2234,8 +2236,8 @@ export default function CronogramaGanttView({
   }, [zoom]);
 
   const fixedGridCols = useMemo(
-    () => visibleCols.map((k) => `${colWidths[k] || DEFAULT_COLS[k] || 140}px`).join(' '),
-    [visibleCols, colWidths]
+    () => effectiveRenderedCols.map((k) => `${colWidths[k] || DEFAULT_COLS[k] || 140}px`).join(' '),
+    [effectiveRenderedCols, colWidths]
   );
 
   const rowGridCols = useMemo(
@@ -4496,7 +4498,7 @@ export default function CronogramaGanttView({
               className="gantt"
               style={
                 viewMode === 'lista'
-                  ? ({ width: '100%', minWidth: '100%' } as React.CSSProperties)
+                  ? ({ width: `${fixedWidth}px`, minWidth: '100%' } as React.CSSProperties)
                   : ({
                       '--fixed': `${fixedWidth}px`,
                       width: `calc(var(--fixed) + ${timelineMinWidth})`,
@@ -4879,16 +4881,51 @@ export default function CronogramaGanttView({
                   {visibleCols.includes('deviation') && (() => {
                     const dev = getDeviationDays(x, currentTodayIso);
                     const tone = getDeviationTone(dev);
+                    const isEditingDev = isEditing(x, 'deviation');
                     return (
                       <div
-                        className="deviation-cell"
+                        className="deviation-cell editable"
+                        style={{ cursor: 'pointer', position: 'relative' }}
                         title={
                           dev === undefined
-                            ? 'Sin línea base: fíjala desde el botón ancla de la barra o desde el panel del registro'
-                            : `Desviación respecto a la línea base (fin aprobado: ${formatDate(x.baselineEnd)})`
+                            ? 'Clic para fijar línea base y medir desviación'
+                            : `Desviación: ${formatDeviation(dev)} · Fin aprobado: ${formatDate(x.baselineEnd)} · Clic para ajustar fecha base`
                         }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleEdit(x, 'deviation');
+                        }}
                       >
-                        <span className={`dev-pill ${tone}`}>{formatDeviation(dev)}</span>
+                        {isEditingDev ? (
+                          <div className="cell-editor cell-pop" style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '160px' }} onClick={(e) => e.stopPropagation()}>
+                            <span style={{ fontSize: '11px', fontWeight: 650, color: '#334155' }}>Fin de Línea Base</span>
+                            <MiniCalendar
+                              value={x.baselineEnd || x.end}
+                              onChange={(newDate) => {
+                                update(x.id, { baselineEnd: newDate });
+                                closeEdit();
+                                notify(`Línea base fijada en ${formatDate(newDate)}`);
+                              }}
+                              onClose={closeEdit}
+                              align="left"
+                            />
+                            {x.baselineEnd && (
+                              <button
+                                type="button"
+                                style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626', cursor: 'pointer', marginTop: 4 }}
+                                onClick={() => {
+                                  update(x.id, { baselineEnd: undefined });
+                                  closeEdit();
+                                  notify('Línea base removida');
+                                }}
+                              >
+                                Quitar línea base
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <span className={`dev-pill ${tone}`}>{formatDeviation(dev)}</span>
+                        )}
                       </div>
                     );
                   })()}

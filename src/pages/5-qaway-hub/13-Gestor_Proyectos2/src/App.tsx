@@ -104,14 +104,14 @@ function App() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const minedu = DEFAULT_PROJECTS[0];
+          const defaultProject = DEFAULT_PROJECTS[0];
           const userProject = parsed.find((p: ProjectItem) => p.id !== 'p1');
           if (userProject) {
-            const twoOnly = [userProject, minedu];
+            const twoOnly = [userProject, defaultProject];
             localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(twoOnly));
             return twoOnly;
           }
-          return [minedu];
+          return [defaultProject];
         }
       }
     } catch {
