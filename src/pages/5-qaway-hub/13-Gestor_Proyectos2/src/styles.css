@@ -43,8 +43,12 @@
   --fs-body: 14.5px; --fs-body-sm: 14px; --fs-meta: 12.5px; --fs-meta-sm: 12px;
 }
 
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
 /* Layout base consolidado (shell maestro, Sidebar + Canvas keep-alive) */
-body,
 .qm-root {
   height: 100vh;
   max-height: 100vh;
