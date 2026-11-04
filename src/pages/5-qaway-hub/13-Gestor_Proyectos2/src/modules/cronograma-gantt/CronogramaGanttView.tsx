@@ -384,6 +384,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Sede Central',
     sede: 'MINEDU - DIGERE',
     gestor: 'Carlos Mendoza',
+    dependencies: ['h4'],
   },
   {
     id: 's51',
@@ -399,6 +400,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'San Borja',
     sede: 'Sede Central MINEDU',
     gestor: 'Carlos Mendoza',
+    dependencies: ['s42'],
   },
   {
     id: 's52',
@@ -414,6 +416,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'San Borja',
     sede: 'DIGERE - MINEDU',
     gestor: 'Carlos Mendoza',
+    dependencies: ['s51'],
   },
 ];
 
@@ -1145,7 +1148,18 @@ export default function CronogramaGanttView({
               return [];
             }
           }
-          return parsed;
+          // Sincronizar dependencias maestras para ítems persistidos sin campo dependencies
+          const initialMap = new Map(INITIAL_ITEMS.map((x) => [x.id, x]));
+          const upgraded = parsed.map((it: Item) => {
+            const init = initialMap.get(it.id);
+            return {
+              ...it,
+              dependencies: (it.dependencies && it.dependencies.length > 0)
+                ? it.dependencies
+                : (init?.dependencies || []),
+            };
+          });
+          return upgraded;
         }
       }
       if (pid === 'p1') {
@@ -1173,6 +1187,23 @@ export default function CronogramaGanttView({
       setSelectedId(null);
     }
   }, [projectId]);
+
+  // Autocuración y persistencia inmediata de dependencias si provienen de caché anterior sin dependencias
+  useEffect(() => {
+    const hasAnyDep = items.some((it) => it.dependencies && it.dependencies.length > 0);
+    if (!hasAnyDep && items.length > 0) {
+      const initialMap = new Map(INITIAL_ITEMS.map((x) => [x.id, x]));
+      setItems((prev) =>
+        prev.map((it) => {
+          const init = initialMap.get(it.id);
+          return {
+            ...it,
+            dependencies: it.dependencies && it.dependencies.length > 0 ? it.dependencies : (init?.dependencies || []),
+          };
+        })
+      );
+    }
+  }, [items]);
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
@@ -5700,19 +5731,19 @@ export default function CronogramaGanttView({
                     viewBox="0 0 10 10"
                     refX="8"
                     refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
+                    markerWidth="7"
+                    markerHeight="7"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
                   </marker>
                   <marker
                     id="dep-arrow-critical"
                     viewBox="0 0 10 10"
                     refX="8"
                     refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
+                    markerWidth="7"
+                    markerHeight="7"
                     orient="auto-start-reverse"
                   >
                     <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
@@ -5723,56 +5754,89 @@ export default function CronogramaGanttView({
                   const itemIndexMap = new Map<string, number>();
                   shown.forEach((it, idx) => itemIndexMap.set(it.id, idx));
 
+                  const allMap = new Map<string, Item>(items.map((it) => [it.id, it]));
+                  const shownSet = new Set<string>(shown.map((it) => it.id));
+
+                  // Resolver el nodo ancestro visible si el elemento específico está colapsado
+                  const resolveVisibleId = (id: string): string | null => {
+                    if (shownSet.has(id)) return id;
+                    let curr = allMap.get(id);
+                    while (curr && curr.parentId) {
+                      if (shownSet.has(curr.parentId)) return curr.parentId;
+                      curr = allMap.get(curr.parentId);
+                    }
+                    return null;
+                  };
+
+                  const renderedPairs = new Set<string>();
+
                   return shown.flatMap((item) => {
                     const targetIndex = itemIndexMap.get(item.id);
                     if (targetIndex === undefined) return [];
 
-                    // Predecesores: campo dependencies explícito O parentId si ambos están en el árbol
-                    const predecessorIds = new Set<string>();
+                    // 1. Predecesores directos del ítem
+                    const predecessorRawIds = new Set<string>();
                     if (item.dependencies && item.dependencies.length > 0) {
-                      item.dependencies.forEach((d) => predecessorIds.add(d));
+                      item.dependencies.forEach((d) => predecessorRawIds.add(d));
                     }
                     if (item.kind === 'hito' && item.parentId) {
-                      predecessorIds.add(item.parentId);
+                      predecessorRawIds.add(item.parentId);
                     }
 
-                    return Array.from(predecessorIds).flatMap((predId) => {
-                      const sourceIndex = itemIndexMap.get(predId);
+                    // 2. Si el ítem es un hito con hijos ocultos, recolectar dependencias de sus hijos
+                    items.forEach((subIt) => {
+                      if (subIt.parentId === item.id && subIt.dependencies) {
+                        subIt.dependencies.forEach((d) => predecessorRawIds.add(d));
+                      }
+                    });
+
+                    return Array.from(predecessorRawIds).flatMap((predRawId) => {
+                      const visiblePredId = resolveVisibleId(predRawId);
+                      if (!visiblePredId || visiblePredId === item.id) return [];
+
+                      const pairKey = `${visiblePredId}->${item.id}`;
+                      if (renderedPairs.has(pairKey)) return [];
+                      renderedPairs.add(pairKey);
+
+                      const sourceIndex = itemIndexMap.get(visiblePredId);
                       if (sourceIndex === undefined) return [];
                       const sourceItem = shown[sourceIndex];
                       if (!sourceItem) return [];
 
                       const rowHeight = 48;
-                      const fromX = getDatePixelOffset(shiftDays(sourceItem.end, 1));
+                      const fromEndX = getDatePixelOffset(shiftDays(sourceItem.end, 1));
+                      const fromStartX = getDatePixelOffset(sourceItem.start);
                       const fromY = sourceIndex * rowHeight + rowHeight / 2;
                       const toX = getDatePixelOffset(item.start);
                       const toY = targetIndex * rowHeight + rowHeight / 2;
 
-                      // Trazo ortogonal tipo codo (elbow connector: ──┐ └──►)
-                      const isSuccessorAfter = toX >= fromX + 16;
                       let pathD = '';
-
-                      if (isSuccessorAfter) {
-                        const midX = fromX + Math.max(12, (toX - fromX) / 2);
-                        pathD = `M ${fromX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
+                      if (toX >= fromEndX + 10) {
+                        // Trazo secuencial clásico (Fin a Inicio: ──┐ └──►)
+                        const midX = fromEndX + Math.max(10, (toX - fromEndX) / 2);
+                        pathD = `M ${fromEndX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
+                      } else if (toX >= fromStartX) {
+                        // Trazo paralelo o con solapamiento limpio
+                        const branchX = Math.max(fromStartX + 14, toX - 16);
+                        pathD = `M ${fromStartX + 14} ${fromY} L ${branchX} ${fromY} L ${branchX} ${toY} L ${toX - 2} ${toY}`;
                       } else {
-                        // Si se solapan o la sucesora inicia cerca
-                        const loopX = fromX + 14;
-                        const midY = fromY + (toY > fromY ? 24 : -24);
-                        const backX = Math.min(toX - 16, fromX - 10);
-                        pathD = `M ${fromX} ${fromY} L ${loopX} ${fromY} L ${loopX} ${midY} L ${backX} ${midY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
+                        // Bucle hacia atrás seguro
+                        const loopX = fromEndX + 12;
+                        const backX = Math.max(8, toX - 16);
+                        const interY = fromY + (toY > fromY ? 20 : -20);
+                        pathD = `M ${fromEndX} ${fromY} L ${loopX} ${fromY} L ${loopX} ${interY} L ${backX} ${interY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
                       }
 
                       const isCritical = (sourceItem.progress < 100 && item.progress === 0) || item.status === 'Con retraso';
 
                       return (
                         <path
-                          key={`${predId}->${item.id}`}
+                          key={pairKey}
                           d={pathD}
                           fill="none"
-                          stroke={isCritical ? '#ea580c' : '#64748b'}
-                          strokeWidth={isCritical ? '2' : '1.5'}
-                          strokeDasharray={isCritical ? undefined : '4 3'}
+                          stroke={isCritical ? '#ea580c' : '#2563eb'}
+                          strokeWidth={isCritical ? '2.2' : '1.8'}
+                          strokeDasharray={isCritical ? undefined : '5 3.5'}
                           markerEnd={isCritical ? 'url(#dep-arrow-critical)' : 'url(#dep-arrow)'}
                           opacity={0.92}
                         />

@@ -1976,7 +1976,7 @@
 
 .gantt-v2 .name-head {
   gap: 8px;
-  padding-left: 14px !important;
+  padding-left: 18px !important;
   position: relative;
   overflow: visible !important;
 }
@@ -4735,7 +4735,7 @@ body.gantt-resizing {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  padding-left: 14px !important;
+  padding-left: 18px !important;
   padding-right: 4px !important;
   position: relative !important;
   overflow: visible !important;
@@ -4763,7 +4763,7 @@ body.gantt-resizing {
   align-items: center !important;
   gap: 8px !important;
   overflow: hidden !important;
-  padding-left: 14px !important;
+  padding-left: 18px !important;
   padding-right: 8px !important;
   width: 100% !important;
 }
