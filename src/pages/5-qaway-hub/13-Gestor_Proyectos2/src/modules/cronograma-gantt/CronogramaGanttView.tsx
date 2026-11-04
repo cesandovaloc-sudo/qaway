@@ -1924,16 +1924,33 @@ export default function CronogramaGanttView({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
+  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol') => {
+    if (newMode === viewMode) return;
+    try {
+      const prevKey = viewMode === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      localStorage.setItem(prevKey, JSON.stringify(visibleCols));
+    } catch {}
+
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+    if (tableHeadRef.current) tableHeadRef.current.scrollLeft = 0;
+    if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
+
+    if (newMode === 'gantt' || newMode === 'lista') {
+      const nextCols = loadSavedCols(newMode);
+      setVisibleCols(nextCols);
+    }
+    prevViewModeRef.current = newMode;
+    setViewMode(newMode);
+  };
+
   useEffect(() => {
     if (viewMode === prevViewModeRef.current) return;
-    // Guardar estado de la vista saliente
     try {
       const prevKey = prevViewModeRef.current === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
       localStorage.setItem(prevKey, JSON.stringify(visibleCols));
     } catch {}
 
     prevViewModeRef.current = viewMode;
-    // Cargar estado de la vista entrante
     const nextCols = loadSavedCols(viewMode);
     setVisibleCols(nextCols);
   }, [viewMode]);
@@ -3257,7 +3274,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
-                onClick={() => setViewMode('gantt')}
+                onClick={() => handleViewModeChange('gantt')}
                 title="Vista Cronograma Gantt"
               >
                 <FolderKanban size={14} />
@@ -3266,7 +3283,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
-                onClick={() => setViewMode('lista')}
+                onClick={() => handleViewModeChange('lista')}
                 title="Vista Tabla Analítica"
               >
                 <List size={14} />
@@ -3275,7 +3292,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-                onClick={() => setViewMode('kanban')}
+                onClick={() => handleViewModeChange('kanban')}
                 title="Vista Tablero Kanban"
               >
                 <LayoutDashboard size={14} />
@@ -3284,7 +3301,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
-                onClick={() => setViewMode('calendario')}
+                onClick={() => handleViewModeChange('calendario')}
                 title="Vista Calendario Mensual"
               >
                 <CalendarDays size={14} />
@@ -3293,7 +3310,7 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className={`view-mode-btn ${viewMode === 'arbol' ? 'active' : ''}`}
-                onClick={() => setViewMode('arbol')}
+                onClick={() => handleViewModeChange('arbol')}
                 title="Vista Estructura Jerárquica WBS (Árbol de trabajo)"
               >
                 <GitFork size={14} />
