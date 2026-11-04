@@ -1,5 +1,6 @@
 // @ts-nocheck
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import '../cronograma-gantt/gantt.css';
 import './actas.css';
 import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import {
@@ -10,6 +11,7 @@ import {
   Calendar,
   Check,
   CheckCircle2,
+  ChevronDown,
   Clock,
   Download,
   FileCheck2,
@@ -25,7 +27,9 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
-  Users
+  Users,
+  X,
+  ChartNoAxesColumnIncreasing,
 } from 'lucide-react';
 
 interface AgreementItem {
@@ -174,7 +178,7 @@ const ACT_COLUMNS: ColumnDef<ActRecord>[] = [
     label: 'Estado Documental',
     type: 'processState',
     accessor: (r) => r.status,
-    options: ['Borrador', 'En revisi\u00f3n', 'Aprobada'].map((s) => ({ value: s, label: s })),
+    options: ['Borrador', 'En revisión', 'Aprobada'].map((s) => ({ value: s, label: s })),
   },
 ];
 
@@ -185,10 +189,17 @@ export default function ActasAcuerdosView({ onActions }: { onActions?: (h: any) 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
   const [ugelFilter, setUgelFilter] = useState('todas');
+  const [openDropdown, setOpenDropdown] = useState<'ugel' | 'status' | null>(null);
   const [notice, setNotice] = useState('');
 
   const agEngine = useTableEngine<AgreementItem>({ tableId: 'actas-acuerdos', columns: AGREEMENT_COLUMNS, rows: agreements });
   const actsEngine = useTableEngine<ActRecord>({ tableId: 'actas-historial', columns: ACT_COLUMNS, rows: acts });
+
+  useEffect(() => {
+    const handleClickOutside = () => setOpenDropdown(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
 
   // Form State para Generador de Acta
   const [form, setForm] = useState({
@@ -216,6 +227,14 @@ export default function ActasAcuerdosView({ onActions }: { onActions?: (h: any) 
     setNotice(msg);
     setTimeout(() => setNotice(''), 3000);
   };
+
+  useEffect(() => {
+    onActions?.({
+      notify,
+      setActiveTab,
+      exportDoc: handleExportDoc,
+    });
+  }, [onActions]);
 
   const cycleAgreementStatus = (id: string) => {
     setAgreements((prev) =>
@@ -318,503 +337,751 @@ Conformidad institucional registrada en plataforma Qaway Lab.
   };
 
   return (
-    <div className="act-v1">
-      <div className="act-workspace">
-        {/* Header */}
-        <div className="act-header">
-          <div>
-            <div className="act-eyebrow">
-              <span className="act-eyebrow-line" />
-              GESTIÓN DOCUMENTAL Y MONITOREO DE COMPROMISOS
+    <div className="gantt-v2">
+      <div className="app act-v1">
+        {/* Cabecera Principal Oficial (Estándar Cronograma Maestro) */}
+        <header className="header">
+          <div className="heading">
+            <span className="heading-icon">
+              <FileCheck2 size={26} />
+            </span>
+            <div>
+              <span className="super">GESTIÓN DOCUMENTAL Y MONITOREO DE COMPROMISOS · DOTACIÓN 2027</span>
+              <h1>Actas y Acuerdos Institucionales</h1>
+              <p>
+                Registro formal de reuniones territoriales, validación técnica de acuerdos y trazabilidad de compromisos por UGEL.
+              </p>
             </div>
-            <h1 className="act-title">Actas y Acuerdos Institucionales</h1>
-            <p className="act-subtitle">
-              Registro formal de reuniones, generación de actas con validez técnica y seguimiento exhaustivo de compromisos por UGEL.
-            </p>
           </div>
-          <div className="act-header-actions">
-            <button className="act-btn-secondary" onClick={() => window.print()}>
-              <Printer size={16} />
-              <span>Imprimir</span>
+          <div className="head-actions">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => window.print()}
+              title="Imprimir vista de actas y compromisos"
+            >
+              <Printer size={15} />
+              <span>Imprimir Vista Oficial</span>
             </button>
             <button
-              className="act-btn-primary"
+              type="button"
+              className="btn primary"
               onClick={() => {
                 setActiveTab('generador');
                 notify('Formulario de nueva acta desplegado');
               }}
+              title="Crear y formalizar una nueva acta"
             >
               <Plus size={16} />
               <span>Nueva Acta</span>
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Pestañas de Vista */}
-        <div className="act-nav-tabs">
-          <button
-            className={`act-tab-btn ${activeTab === 'acuerdos' ? 'active' : ''}`}
-            onClick={() => setActiveTab('acuerdos')}
+        {/* Tarjetas Métricas Directivas (Idénticas a Cronograma) */}
+        <section className="metrics">
+          <article
+            className="metric blue"
+            onClick={() => {
+              setActiveTab('acuerdos');
+              setStatusFilter('todos');
+            }}
+            style={{ cursor: 'pointer' }}
           >
-            <ListChecks size={16} />
-            <span>Tablero de Acuerdos ({agreements.length})</span>
-          </button>
-          <button
-            className={`act-tab-btn ${activeTab === 'generador' ? 'active' : ''}`}
-            onClick={() => setActiveTab('generador')}
-          >
-            <FileText size={16} />
-            <span>Generador de Acta</span>
-          </button>
-          <button
-            className={`act-tab-btn ${activeTab === 'historial' ? 'active' : ''}`}
-            onClick={() => setActiveTab('historial')}
-          >
-            <History size={16} />
-            <span>Historial de Actas ({acts.length})</span>
-          </button>
-        </div>
-
-        {/* KPIs Flotantes */}
-        <div className="act-kpis">
-          <div className="act-kpi-card">
-            <div className="act-kpi-icon blue">
+            <span className="metric-icon">
               <ListChecks size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(kpis.total).padStart(2, '0')}</b>
+              <strong>Compromisos Registrados</strong>
+              <small>acuerdos territoriales activos</small>
             </div>
-            <div className="act-kpi-content">
-              <div className="act-kpi-val">{kpis.total}</div>
-              <div className="act-kpi-label">Compromisos Registrados</div>
-            </div>
-          </div>
-          <div className="act-kpi-card">
-            <div className="act-kpi-icon green">
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
+
+          <article
+            className="metric green"
+            onClick={() => {
+              setActiveTab('acuerdos');
+              setStatusFilter('cumplido');
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="metric-icon">
               <CheckCircle2 size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(kpis.cumplidos).padStart(2, '0')}</b>
+              <strong>Cumplidos ({kpis.total > 0 ? Math.round((kpis.cumplidos / kpis.total) * 100) : 0}%)</strong>
+              <small>conforme a acta firmada</small>
             </div>
-            <div className="act-kpi-content">
-              <div className="act-kpi-val">{kpis.cumplidos}</div>
-              <div className="act-kpi-label">Compromisos Cumplidos</div>
-            </div>
-          </div>
-          <div className="act-kpi-card">
-            <div className="act-kpi-icon amber">
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
+
+          <article
+            className="metric amber"
+            onClick={() => {
+              setActiveTab('acuerdos');
+              setStatusFilter('proceso');
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="metric-icon">
               <Clock size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(kpis.proceso).padStart(2, '0')}</b>
+              <strong>En Proceso ({kpis.total > 0 ? Math.round((kpis.proceso / kpis.total) * 100) : 0}%)</strong>
+              <small>seguimiento territorial activo</small>
             </div>
-            <div className="act-kpi-content">
-              <div className="act-kpi-val">{kpis.proceso}</div>
-              <div className="act-kpi-label">En Proceso / Seguimiento</div>
-            </div>
-          </div>
-          <div className="act-kpi-card">
-            <div className="act-kpi-icon rose">
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
+
+          <article
+            className="metric red"
+            onClick={() => {
+              setActiveTab('acuerdos');
+              setStatusFilter('pendiente');
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="metric-icon">
               <AlertCircle size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(kpis.pendientes).padStart(2, '0')}</b>
+              <strong>Pendientes ({kpis.total > 0 ? Math.round((kpis.pendientes / kpis.total) * 100) : 0}%)</strong>
+              <small>alerta de vencimiento próxima</small>
             </div>
-            <div className="act-kpi-content">
-              <div className="act-kpi-val">{kpis.pendientes}</div>
-              <div className="act-kpi-label">Pendientes / Alerta Próxima</div>
-            </div>
-          </div>
-        </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
+        </section>
 
-        {/* CONTENIDO SEGÚN LA PESTAÑA */}
-        {activeTab === 'acuerdos' && (
-          <>
-            {/* Barra de Filtros */}
-            <div className="act-filter-bar">
-              <div className="act-search-box">
-                <Search size={17} color="#64748b" />
-                <input
-                  type="text"
-                  placeholder="Buscar acuerdo, responsable o sede..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-
-              <div className="act-filter-group">
-                <select
-                  className="act-filter-select"
-                  value={ugelFilter}
-                  onChange={(e) => setUgelFilter(e.target.value)}
-                >
-                  <option value="todas">Todas las sedes</option>
-                  <option value="UGEL Huancavelica">UGEL Huancavelica</option>
-                  <option value="UGEL Maynas">UGEL Maynas</option>
-                  <option value="UGEL Satipo">UGEL Satipo</option>
-                  <option value="UGEL Cusco">UGEL Cusco</option>
-                  <option value="UGEL Tarma">UGEL Tarma</option>
-                  <option value="UGEL Condorcanqui">UGEL Condorcanqui</option>
-                </select>
-
-                <button
-                  className={`act-pill ${statusFilter === 'todos' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('todos')}
-                >
-                  Todos
-                </button>
-                <button
-                  className={`act-pill ${statusFilter === 'cumplido' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('cumplido')}
-                >
-                  Cumplidos
-                </button>
-                <button
-                  className={`act-pill ${statusFilter === 'proceso' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('proceso')}
-                >
-                  En Proceso
-                </button>
-                <button
-                  className={`act-pill ${statusFilter === 'pendiente' ? 'active' : ''}`}
-                  onClick={() => setStatusFilter('pendiente')}
-                >
-                  Pendientes
-                </button>
-              </div>
+        {/* =========================================================================
+            LA CÁPSULA WORKSPACE CENTRAL
+           ========================================================================= */}
+        <main className="workspace">
+          {/* Tabs Superiores con Switcher de Modos */}
+          <nav className="tabs">
+            <div className="tabs-list">
+              <button
+                type="button"
+                className={activeTab === 'acuerdos' ? 'active' : ''}
+                onClick={() => setActiveTab('acuerdos')}
+              >
+                Tablero de Acuerdos <span>({agreements.length})</span>
+              </button>
+              <button
+                type="button"
+                className={activeTab === 'generador' ? 'active' : ''}
+                onClick={() => setActiveTab('generador')}
+              >
+                Generador de Acta
+              </button>
+              <button
+                type="button"
+                className={activeTab === 'historial' ? 'active' : ''}
+                onClick={() => setActiveTab('historial')}
+              >
+                Historial de Actas <span>({acts.length})</span>
+              </button>
             </div>
 
-            {/* Tabla de Acuerdos */}
-            <div className="act-table-card">
-              <TableEngineStatus engine={agEngine} />
-              <table className="act-table">
-                <thead>
-                  <tr>
-                    <th><ColumnHeader engine={agEngine} columnId="code" label="Código / Acta" /></th>
-                    <th><ColumnHeader engine={agEngine} columnId="ugel" label="Sede / Ámbito" /></th>
-                    <th><ColumnHeader engine={agEngine} columnId="description" label="Acuerdo / Compromiso" /></th>
-                    <th><ColumnHeader engine={agEngine} columnId="responsible" label="Responsable Acreditado" /></th>
-                    <th><ColumnHeader engine={agEngine} columnId="deadline" label="Plazo Límite" /></th>
-                    <th><ColumnHeader engine={agEngine} columnId="status" label="Estado (Click para cambiar)" /></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {agreementsView.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <strong style={{ color: '#0f172a', display: 'block' }}>{item.id}</strong>
-                        <small style={{ color: '#64748b' }}>{item.actCode}</small>
-                      </td>
-                      <td>
-                        <span style={{ fontWeight: 600, color: '#334155' }}>{item.ugel}</span>
-                      </td>
-                      <td style={{ maxWidth: 380, lineHeight: 1.45 }}>{item.description}</td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <Users size={14} color="#64748b" />
-                          <span>{item.responsible}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-                          <Calendar size={14} color="#64748b" />
-                          <span>{item.deadline}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`act-status-pill ${item.status}`}
-                          onClick={() => cycleAgreementStatus(item.id)}
-                          title="Click para alternar estado: Cumplido / En Proceso / Pendiente"
-                        >
-                          {item.status === 'cumplido' && '✓ Cumplido'}
-                          {item.status === 'proceso' && '● En Proceso'}
-                          {item.status === 'pendiente' && '○ Pendiente'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredAgreements.length === 0 && (
-                    <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
-                        No se encontraron acuerdos con los criterios seleccionados.
-                      </td>
-                    </tr>
+            {/* Switcher Rápido */}
+            <div className="view-mode-switcher" role="tablist">
+              <button
+                type="button"
+                className={`view-mode-btn ${activeTab === 'acuerdos' ? 'active' : ''}`}
+                onClick={() => setActiveTab('acuerdos')}
+                title="Ver Tablero de Acuerdos"
+              >
+                <ListChecks size={14} />
+                <span>Acuerdos</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${activeTab === 'historial' ? 'active' : ''}`}
+                onClick={() => setActiveTab('historial')}
+                title="Ver Historial de Actas"
+              >
+                <History size={14} />
+                <span>Historial</span>
+              </button>
+            </div>
+          </nav>
+
+          {/* =====================================================================
+              TAB 1: TABLERO DE ACUERDOS
+             ===================================================================== */}
+          {activeTab === 'acuerdos' && (
+            <>
+              {/* Barra de Filtros Homologada */}
+              <div className="filters">
+                {/* Buscador reactivo */}
+                <label className="search">
+                  <Search size={16} />
+                  <input
+                    type="text"
+                    placeholder="Buscar por acuerdo, responsable, sede o código..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  {search && (
+                    <button type="button" onClick={() => setSearch('')}>
+                      <X size={14} />
+                    </button>
                   )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
+                </label>
 
-        {/* FORMULARIO GENERADOR DE ACTA */}
-        {activeTab === 'generador' && (
-          <div className="act-form-container">
-            <div>
-              {/* Sección 1: Información General */}
-              <div className="act-panel">
-                <div className="act-panel-head">
-                  <div className="act-panel-title">
-                    <FileCheck2 size={18} color="#0284c7" />
-                    <span>01. Información General del Acta</span>
-                  </div>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>Plantilla Corporativa Oficial</span>
-                </div>
-                <div className="act-panel-body">
-                  <div className="act-form-grid">
-                    <div className="act-field">
-                      <label>Fecha de la Sesión</label>
-                      <input
-                        type="date"
-                        value={form.date}
-                        onChange={(e) => setForm({ ...form, date: e.target.value })}
-                      />
-                    </div>
-                    <div className="act-field">
-                      <label>Tipo de Actividad</label>
-                      <select
-                        value={form.activity}
-                        onChange={(e) => setForm({ ...form, activity: e.target.value })}
-                      >
-                        <option>Monitoreo y seguimiento</option>
-                        <option>Asistencia técnica</option>
-                        <option>Balance y rendición</option>
-                        <option>Reunión extraordinaria</option>
-                      </select>
-                    </div>
-                    <div className="act-field">
-                      <label>Hora de Inicio</label>
-                      <input
-                        type="text"
-                        value={form.startTime}
-                        onChange={(e) => setForm({ ...form, startTime: e.target.value })}
-                        placeholder="Ej. 09:00"
-                      />
-                    </div>
-                    <div className="act-field">
-                      <label>Hora de Cierre</label>
-                      <input
-                        type="text"
-                        value={form.endTime}
-                        onChange={(e) => setForm({ ...form, endTime: e.target.value })}
-                        placeholder="Ej. 11:30"
-                      />
-                    </div>
-                    <div className="act-field">
-                      <label>DRE / Entidad Rectora</label>
-                      <input
-                        type="text"
-                        value={form.dre}
-                        onChange={(e) => setForm({ ...form, dre: e.target.value })}
-                      />
-                    </div>
-                    <div className="act-field">
-                      <label>UGEL / Instancia de Gestión</label>
-                      <input
-                        type="text"
-                        value={form.ugel}
-                        onChange={(e) => setForm({ ...form, ugel: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="act-field">
-                    <label>Participantes Oficiales (Cargos e Instancias)</label>
-                    <textarea
-                      rows={2}
-                      value={form.participants}
-                      onChange={(e) => setForm({ ...form, participants: e.target.value })}
-                      placeholder="Indique los participantes acreditados..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Sección 2: Agenda y Acuerdos */}
-              <div className="act-panel">
-                <div className="act-panel-head">
-                  <div className="act-panel-title">
-                    <ListChecks size={18} color="#0284c7" />
-                    <span>02. Puntos de Agenda y Compromisos</span>
-                  </div>
-                </div>
-                <div className="act-panel-body">
-                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: 8 }}>
-                    Puntos de Agenda
-                  </label>
-                  {form.agenda.map((item, idx) => (
-                    <div key={idx} className="act-dynamic-row">
-                      <input
-                        type="text"
-                        value={item}
-                        onChange={(e) => {
-                          const next = [...form.agenda];
-                          next[idx] = e.target.value;
-                          setForm({ ...form, agenda: next });
-                        }}
-                        placeholder={`Punto ${idx + 1}`}
-                      />
-                      {form.agenda.length > 1 && (
-                        <button
-                          className="act-btn-icon-del"
-                          onClick={() => handleRemoveAgendaPoint(idx)}
-                          title="Eliminar punto"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                {/* Filtro Sede / Ámbito */}
+                <div className="filter-dropdown-wrap">
                   <button
-                    className="act-btn-secondary"
-                    style={{ marginBottom: 20, fontSize: '12px' }}
-                    onClick={handleAddAgendaPoint}
+                    type="button"
+                    className={`filter-card-btn ${openDropdown === 'ugel' ? 'active' : ''} ${
+                      ugelFilter !== 'todas' ? 'filtered' : ''
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenDropdown(openDropdown === 'ugel' ? null : 'ugel');
+                    }}
+                    title="Filtrar por sede territorial"
                   >
-                    + Agregar Punto de Agenda
+                    <div className="filter-card-copy">
+                      <small>Sede / Ámbito</small>
+                      <span>{ugelFilter === 'todas' ? 'Todas las sedes' : ugelFilter}</span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
                   </button>
 
-                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: 8 }}>
-                    Acuerdos y Compromisos con Plazo Límite
-                  </label>
-                  {form.newAgreements.map((item, idx) => (
-                    <div key={idx} className="act-dynamic-row">
+                  {openDropdown === 'ugel' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 220 }}>
+                      <div className="filter-popover-title">Filtrar por Sede</div>
+                      <div className="filter-popover-list">
+                        {[
+                          { id: 'todas', label: 'Todas las sedes' },
+                          { id: 'UGEL Huancavelica', label: 'UGEL Huancavelica' },
+                          { id: 'UGEL Maynas', label: 'UGEL Maynas' },
+                          { id: 'UGEL Satipo', label: 'UGEL Satipo' },
+                          { id: 'UGEL Cusco', label: 'UGEL Cusco' },
+                          { id: 'UGEL Tarma', label: 'UGEL Tarma' },
+                          { id: 'UGEL Condorcanqui', label: 'UGEL Condorcanqui' },
+                        ].map((u) => (
+                          <button
+                            key={u.id}
+                            type="button"
+                            className={`filter-item-btn ${ugelFilter === u.id ? 'selected' : ''}`}
+                            onClick={() => {
+                              setUgelFilter(u.id);
+                              setOpenDropdown(null);
+                            }}
+                          >
+                            <span>{u.label}</span>
+                            {ugelFilter === u.id && <Check size={14} className="item-check" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Filtro Estado del Compromiso */}
+                <div className="filter-dropdown-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${openDropdown === 'status' ? 'active' : ''} ${
+                      statusFilter !== 'todos' ? 'filtered' : ''
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenDropdown(openDropdown === 'status' ? null : 'status');
+                    }}
+                    title="Filtrar por estado del compromiso"
+                  >
+                    <div className="filter-card-copy">
+                      <small>Estado del Compromiso</small>
+                      <span>
+                        {statusFilter === 'todos'
+                          ? 'Todos los estados'
+                          : statusFilter === 'cumplido'
+                          ? 'Cumplidos'
+                          : statusFilter === 'proceso'
+                          ? 'En proceso'
+                          : 'Pendientes'}
+                      </span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
+                  </button>
+
+                  {openDropdown === 'status' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 200 }}>
+                      <div className="filter-popover-title">Filtrar por Estado</div>
+                      <div className="filter-popover-list">
+                        {[
+                          { id: 'todos', label: 'Todos los estados' },
+                          { id: 'cumplido', label: 'Cumplidos' },
+                          { id: 'proceso', label: 'En proceso' },
+                          { id: 'pendiente', label: 'Pendientes' },
+                        ].map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            className={`filter-item-btn ${statusFilter === s.id ? 'selected' : ''}`}
+                            onClick={() => {
+                              setStatusFilter(s.id);
+                              setOpenDropdown(null);
+                            }}
+                          >
+                            <span>{s.label}</span>
+                            {statusFilter === s.id && <Check size={14} className="item-check" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Badge de Sincronización */}
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748b', padding: '6px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <Calendar size={14} className="text-blue-600" />
+                  <span>Control de Compromisos: <b>Validez Oficial Activa</b></span>
+                </div>
+              </div>
+
+              {/* Tabla de Acuerdos Homologada */}
+              <div className="cronograma-lista-table" style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', background: '#f8fafc' }}>
+                  <div>
+                    <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Compromisos y Acuerdos Acreditados</h2>
+                    <p style={{ fontSize: '12.5px', color: '#64748b', margin: '2px 0 0' }}>
+                      Haz clic sobre la píldora de estado para alternar: Cumplido → En Proceso → Pendiente.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      onClick={() => {
+                        setSearch('');
+                        setStatusFilter('todos');
+                        setUgelFilter('todas');
+                        notify('Filtros restablecidos');
+                      }}
+                      style={{ padding: '6px 12px', fontSize: '12px' }}
+                    >
+                      Limpiar Filtros
+                    </button>
+                  </div>
+                </div>
+
+                <div className="table-scroll" style={{ overflowX: 'auto' }}>
+                  <TableEngineStatus engine={agEngine} />
+                  <table className="act-table">
+                    <thead>
+                      <tr>
+                        <th style={{ paddingLeft: '20px' }}>
+                          <ColumnHeader engine={agEngine} columnId="code" label="Código / Acta" />
+                        </th>
+                        <th><ColumnHeader engine={agEngine} columnId="ugel" label="Sede / Ámbito" /></th>
+                        <th><ColumnHeader engine={agEngine} columnId="description" label="Acuerdo / Compromiso" /></th>
+                        <th><ColumnHeader engine={agEngine} columnId="responsible" label="Responsable Acreditado" /></th>
+                        <th><ColumnHeader engine={agEngine} columnId="deadline" label="Plazo Límite" /></th>
+                        <th style={{ textAlign: 'right', paddingRight: '20px' }}>
+                          <ColumnHeader engine={agEngine} columnId="status" label="Estado (Click para cambiar)" />
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {agreementsView.map((item) => (
+                        <tr key={item.id}>
+                          <td style={{ paddingLeft: '20px' }}>
+                            <strong style={{ color: '#0f172a', display: 'block', fontSize: '13.5px' }}>{item.id}</strong>
+                            <small style={{ color: '#64748b', fontSize: '11.5px' }}>{item.actCode}</small>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600, color: '#334155', fontSize: '13px' }}>{item.ugel}</span>
+                          </td>
+                          <td style={{ maxWidth: 380, lineHeight: 1.45, fontSize: '13px', color: '#1e293b' }}>{item.description}</td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12.5px', color: '#475569' }}>
+                              <Users size={14} color="#64748b" />
+                              <span>{item.responsible}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: '12.5px', color: '#0f172a' }}>
+                              <Calendar size={14} color="#64748b" />
+                              <span>{item.deadline}</span>
+                            </div>
+                          </td>
+                          <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                            <button
+                              type="button"
+                              className={`act-status-pill ${item.status}`}
+                              onClick={() => cycleAgreementStatus(item.id)}
+                              title="Click para alternar estado: Cumplido / En Proceso / Pendiente"
+                              style={{ cursor: 'pointer', border: 'none', font: 'inherit' }}
+                            >
+                              {item.status === 'cumplido' && '✓ Cumplido'}
+                              {item.status === 'proceso' && '● En Proceso'}
+                              {item.status === 'pendiente' && '○ Pendiente'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredAgreements.length === 0 && (
+                        <tr>
+                          <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: '#94a3b8' }}>
+                            No se encontraron acuerdos con los criterios seleccionados.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* =====================================================================
+              TAB 2: FORMULARIO GENERADOR DE ACTA
+             ===================================================================== */}
+          {activeTab === 'generador' && (
+            <div className="act-form-container" style={{ marginTop: '4px' }}>
+              <div>
+                {/* Sección 1: Información General */}
+                <div className="act-panel">
+                  <div className="act-panel-head">
+                    <div className="act-panel-title">
+                      <FileCheck2 size={18} color="#2563eb" />
+                      <span>01. Información General del Acta</span>
+                    </div>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Plantilla Corporativa Oficial</span>
+                  </div>
+                  <div className="act-panel-body">
+                    <div className="act-form-grid">
+                      <div className="act-field">
+                        <label>Fecha de la Sesión</label>
+                        <input
+                          type="date"
+                          value={form.date}
+                          onChange={(e) => setForm({ ...form, date: e.target.value })}
+                        />
+                      </div>
+                      <div className="act-field">
+                        <label>Tipo de Actividad</label>
+                        <select
+                          value={form.activity}
+                          onChange={(e) => setForm({ ...form, activity: e.target.value })}
+                        >
+                          <option>Monitoreo y seguimiento</option>
+                          <option>Asistencia técnica</option>
+                          <option>Balance y rendición</option>
+                          <option>Reunión extraordinaria</option>
+                        </select>
+                      </div>
+                      <div className="act-field">
+                        <label>Hora de Inicio</label>
+                        <input
+                          type="text"
+                          value={form.startTime}
+                          onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+                          placeholder="Ej. 09:00"
+                        />
+                      </div>
+                      <div className="act-field">
+                        <label>Hora de Cierre</label>
+                        <input
+                          type="text"
+                          value={form.endTime}
+                          onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+                          placeholder="Ej. 11:30"
+                        />
+                      </div>
+                      <div className="act-field">
+                        <label>DRE / Entidad Rectora</label>
+                        <input
+                          type="text"
+                          value={form.dre}
+                          onChange={(e) => setForm({ ...form, dre: e.target.value })}
+                        />
+                      </div>
+                      <div className="act-field">
+                        <label>UGEL / Instancia de Gestión</label>
+                        <input
+                          type="text"
+                          value={form.ugel}
+                          onChange={(e) => setForm({ ...form, ugel: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="act-field">
+                      <label>Participantes Oficiales (Cargos e Instancias)</label>
                       <textarea
                         rows={2}
-                        value={item.text}
-                        onChange={(e) => {
-                          const next = [...form.newAgreements];
-                          next[idx].text = e.target.value;
-                          setForm({ ...form, newAgreements: next });
-                        }}
-                        placeholder={`Acuerdo ${idx + 1}`}
+                        value={form.participants}
+                        onChange={(e) => setForm({ ...form, participants: e.target.value })}
+                        placeholder="Indique los participantes acreditados..."
                       />
-                      <input
-                        type="text"
-                        style={{ width: '130px', flex: 'none' }}
-                        value={item.deadline}
-                        onChange={(e) => {
-                          const next = [...form.newAgreements];
-                          next[idx].deadline = e.target.value;
-                          setForm({ ...form, newAgreements: next });
-                        }}
-                        placeholder="Plazo: dd/mm/aaaa"
-                      />
-                      {form.newAgreements.length > 1 && (
-                        <button
-                          className="act-btn-icon-del"
-                          onClick={() => handleRemoveAgreementRow(idx)}
-                          title="Eliminar acuerdo"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      )}
                     </div>
-                  ))}
-                  <button
-                    className="act-btn-secondary"
-                    style={{ marginBottom: 20, fontSize: '12px' }}
-                    onClick={handleAddAgreementRow}
-                  >
-                    + Agregar Acuerdo
-                  </button>
+                  </div>
+                </div>
 
-                  <div className="act-field">
-                    <label>Observaciones y Conclusiones Finales</label>
-                    <textarea
-                      rows={3}
-                      value={form.observations}
-                      onChange={(e) => setForm({ ...form, observations: e.target.value })}
-                    />
+                {/* Sección 2: Agenda y Acuerdos */}
+                <div className="act-panel">
+                  <div className="act-panel-head">
+                    <div className="act-panel-title">
+                      <ListChecks size={18} color="#2563eb" />
+                      <span>02. Puntos de Agenda y Compromisos</span>
+                    </div>
+                  </div>
+                  <div className="act-panel-body">
+                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: 8 }}>
+                      Puntos de Agenda Tratados
+                    </label>
+                    {form.agenda.map((item, idx) => (
+                      <div key={idx} className="act-dynamic-row">
+                        <input
+                          type="text"
+                          value={item}
+                          onChange={(e) => {
+                            const next = [...form.agenda];
+                            next[idx] = e.target.value;
+                            setForm({ ...form, agenda: next });
+                          }}
+                          placeholder={`Punto ${idx + 1}`}
+                        />
+                        {form.agenda.length > 1 && (
+                          <button
+                            type="button"
+                            className="act-btn-icon-del"
+                            onClick={() => handleRemoveAgendaPoint(idx)}
+                            title="Eliminar punto"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      style={{ marginBottom: 20, fontSize: '12px' }}
+                      onClick={handleAddAgendaPoint}
+                    >
+                      + Agregar Punto de Agenda
+                    </button>
+
+                    <label style={{ fontSize: '13px', fontWeight: 700, color: '#475569', display: 'block', marginBottom: 8 }}>
+                      Acuerdos y Compromisos con Plazo Límite
+                    </label>
+                    {form.newAgreements.map((item, idx) => (
+                      <div key={idx} className="act-dynamic-row">
+                        <textarea
+                          rows={2}
+                          value={item.text}
+                          onChange={(e) => {
+                            const next = [...form.newAgreements];
+                            next[idx].text = e.target.value;
+                            setForm({ ...form, newAgreements: next });
+                          }}
+                          placeholder={`Acuerdo ${idx + 1}`}
+                        />
+                        <input
+                          type="text"
+                          style={{ width: '130px', flex: 'none' }}
+                          value={item.deadline}
+                          onChange={(e) => {
+                            const next = [...form.newAgreements];
+                            next[idx].deadline = e.target.value;
+                            setForm({ ...form, newAgreements: next });
+                          }}
+                          placeholder="Plazo: dd/mm/aaaa"
+                        />
+                        {form.newAgreements.length > 1 && (
+                          <button
+                            type="button"
+                            className="act-btn-icon-del"
+                            onClick={() => handleRemoveAgreementRow(idx)}
+                            title="Eliminar acuerdo"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      style={{ marginBottom: 20, fontSize: '12px' }}
+                      onClick={handleAddAgreementRow}
+                    >
+                      + Agregar Acuerdo
+                    </button>
+
+                    <div className="act-field">
+                      <label>Observaciones y Conclusiones Finales</label>
+                      <textarea
+                        rows={3}
+                        value={form.observations}
+                        onChange={(e) => setForm({ ...form, observations: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar lateral de Validación Técnica */}
+              <div className="act-summary-side">
+                <div className="act-summary-card" style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
+                  <h3 className="act-summary-title" style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ShieldCheck size={18} color="#16a34a" />
+                    <span>Validación Técnica</span>
+                  </h3>
+                  <div className="act-check-item">
+                    <span className={`act-check-dot ${form.date ? 'ready' : 'waiting'}`}>✓</span>
+                    <span>Fecha registrada</span>
+                  </div>
+                  <div className="act-check-item">
+                    <span className={`act-check-dot ${form.ugel ? 'ready' : 'waiting'}`}>✓</span>
+                    <span>Sede identificada</span>
+                  </div>
+                  <div className="act-check-item">
+                    <span className={`act-check-dot ${form.participants ? 'ready' : 'waiting'}`}>✓</span>
+                    <span>Participantes confirmados</span>
+                  </div>
+                  <div className="act-check-item">
+                    <span className={`act-check-dot ${form.agenda.some((a) => a.trim()) ? 'ready' : 'waiting'}`}>✓</span>
+                    <span>Agenda estructurada</span>
+                  </div>
+                  <div className="act-check-item">
+                    <span className={`act-check-dot ${form.newAgreements.some((a) => a.text.trim()) ? 'ready' : 'waiting'}`}>✓</span>
+                    <span>{form.newAgreements.filter((a) => a.text.trim()).length} acuerdos con plazo</span>
+                  </div>
+
+                  <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <button
+                      type="button"
+                      className="btn primary"
+                      style={{ width: '100%', justifyContent: 'center' }}
+                      onClick={handleExportDoc}
+                    >
+                      <Download size={16} />
+                      <span>Descargar Acta (.txt)</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      style={{ width: '100%', justifyContent: 'center' }}
+                      onClick={() => window.print()}
+                    >
+                      <Printer size={16} />
+                      <span>Imprimir Vista Oficial</span>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Sidebar lateral de Resumen y Acciones */}
-            <div className="act-summary-side">
-              <div className="act-summary-card">
-                <h3 className="act-summary-title">
-                  <ShieldCheck size={18} color="#16a34a" />
-                  <span>Validación Técnica</span>
-                </h3>
-                <div className="act-check-item">
-                  <span className={`act-check-dot ${form.date ? 'ready' : 'waiting'}`}>✓</span>
-                  <span>Fecha registrada</span>
-                </div>
-                <div className="act-check-item">
-                  <span className={`act-check-dot ${form.ugel ? 'ready' : 'waiting'}`}>✓</span>
-                  <span>Sede identificada</span>
-                </div>
-                <div className="act-check-item">
-                  <span className={`act-check-dot ${form.participants ? 'ready' : 'waiting'}`}>✓</span>
-                  <span>Participantes confirmados</span>
-                </div>
-                <div className="act-check-item">
-                  <span className={`act-check-dot ${form.agenda.some((a) => a.trim()) ? 'ready' : 'waiting'}`}>✓</span>
-                  <span>Agenda estructurada</span>
-                </div>
-                <div className="act-check-item">
-                  <span className={`act-check-dot ${form.newAgreements.some((a) => a.text.trim()) ? 'ready' : 'waiting'}`}>✓</span>
-                  <span>{form.newAgreements.filter((a) => a.text.trim()).length} acuerdos con plazo</span>
-                </div>
-
-                <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <button className="act-btn-primary" style={{ width: '100%' }} onClick={handleExportDoc}>
-                    <Download size={16} />
-                    <span>Descargar Acta (.txt)</span>
-                  </button>
-                  <button className="act-btn-secondary" style={{ width: '100%' }} onClick={() => window.print()}>
-                    <Printer size={16} />
-                    <span>Imprimir Vista Oficial</span>
-                  </button>
+          {/* =====================================================================
+              TAB 3: HISTORIAL DE ACTAS FORMALIZADAS
+             ===================================================================== */}
+          {activeTab === 'historial' && (
+            <div className="cronograma-lista-table" style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', background: '#f8fafc' }}>
+                <div>
+                  <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Historial de Actas Formalizadas</h2>
+                  <p style={{ fontSize: '12.5px', color: '#64748b', margin: '2px 0 0' }}>
+                    Registro histórico de sesiones de coordinación territorial con validez técnica y firmas acreditadas.
+                  </p>
                 </div>
               </div>
+
+              <div className="table-scroll" style={{ overflowX: 'auto' }}>
+                <TableEngineStatus engine={actsEngine} />
+                <table className="act-table">
+                  <thead>
+                    <tr>
+                      <th style={{ paddingLeft: '20px' }}><ColumnHeader engine={actsEngine} columnId="code" label="Código" /></th>
+                      <th><ColumnHeader engine={actsEngine} columnId="date" label="Fecha" /></th>
+                      <th><ColumnHeader engine={actsEngine} columnId="ugel" label="Sede / Instancia" /></th>
+                      <th><ColumnHeader engine={actsEngine} columnId="activity" label="Tipo de Actividad" /></th>
+                      <th><ColumnHeader engine={actsEngine} columnId="modality" label="Modalidad" /></th>
+                      <th><ColumnHeader engine={actsEngine} columnId="agreementsCount" label="Acuerdos" /></th>
+                      <th style={{ textAlign: 'right', paddingRight: '20px' }}>
+                        <ColumnHeader engine={actsEngine} columnId="status" label="Estado Documental" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {actsView.map((act) => (
+                      <tr key={act.id}>
+                        <td style={{ paddingLeft: '20px' }}>
+                          <strong style={{ color: '#2563eb', fontSize: '13.5px' }}>{act.code}</strong>
+                        </td>
+                        <td style={{ fontSize: '13px', color: '#475569' }}>{act.date}</td>
+                        <td>
+                          <strong style={{ color: '#0f172a', fontSize: '13px' }}>{act.ugel}</strong>
+                          <div style={{ fontSize: '11.5px', color: '#64748b' }}>{act.dre}</div>
+                        </td>
+                        <td style={{ fontSize: '13px', color: '#334155' }}>{act.activity}</td>
+                        <td>
+                          <span style={{ fontSize: '12px', background: '#f1f5f9', padding: '3px 8px', borderRadius: 6, color: '#475569', fontWeight: 500 }}>
+                            {act.modality}
+                          </span>
+                        </td>
+                        <td>
+                          <strong style={{ color: '#0f172a', fontSize: '13px' }}>{act.agreementsCount} acuerdos</strong>
+                        </td>
+                        <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                          <span className="act-status-pill cumplido">✓ {act.status}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* HISTORIAL DE ACTAS */}
-        {activeTab === 'historial' && (
-          <div className="act-table-card">
-            <TableEngineStatus engine={actsEngine} />
-            <table className="act-table">
-              <thead>
-                <tr>
-                  <th><ColumnHeader engine={actsEngine} columnId="code" label="Código" /></th>
-                  <th><ColumnHeader engine={actsEngine} columnId="date" label="Fecha" /></th>
-                  <th><ColumnHeader engine={actsEngine} columnId="ugel" label="Sede / Instancia" /></th>
-                  <th><ColumnHeader engine={actsEngine} columnId="activity" label="Tipo de Actividad" /></th>
-                  <th><ColumnHeader engine={actsEngine} columnId="modality" label="Modalidad" /></th>
-                  <th><ColumnHeader engine={actsEngine} columnId="agreementsCount" label="Acuerdos" /></th>
-                  <th><ColumnHeader engine={actsEngine} columnId="status" label="Estado Documental" /></th>
-                </tr>
-              </thead>
-              <tbody>
-                {actsView.map((act) => (
-                  <tr key={act.id}>
-                    <td>
-                      <strong style={{ color: '#0284c7' }}>{act.code}</strong>
-                    </td>
-                    <td>{act.date}</td>
-                    <td>
-                      <strong>{act.ugel}</strong>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>{act.dre}</div>
-                    </td>
-                    <td>{act.activity}</td>
-                    <td>
-                      <span style={{ fontSize: '12px', background: '#f1f5f9', padding: '3px 8px', borderRadius: 4 }}>
-                        {act.modality}
-                      </span>
-                    </td>
-                    <td>
-                      <strong style={{ color: '#0f172a' }}>{act.agreementsCount} acuerdos</strong>
-                    </td>
-                    <td>
-                      <span className="act-status-pill cumplido">✓ {act.status}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Toast */}
-        {notice && (
-          <div className="act-toast">
-            <CheckCircle2 size={18} color="#4ade80" />
-            <span>{notice}</span>
-          </div>
-        )}
+          {/* Footer Oficial de la Cápsula Workspace */}
+          <footer className="footer">
+            <span>
+              Mostrando {activeTab === 'acuerdos' ? filteredAgreements.length : activeTab === 'historial' ? acts.length : 1} registros institucionales
+            </span>
+            <div style={{ display: 'flex', gap: '14px', alignItems: 'center', fontSize: '12px', color: '#64748b' }}>
+              <span><i style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981', marginRight: 4 }} /> Cumplido</span>
+              <span><i style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#2563eb', marginRight: 4 }} /> En Proceso</span>
+              <span><i style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#ef4444', marginRight: 4 }} /> Pendiente / Alerta</span>
+            </div>
+          </footer>
+        </main>
       </div>
+
+      {/* Toast Notificación */}
+      {notice && (
+        <div
+          className="act-toast"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            background: '#0f172a',
+            color: '#ffffff',
+            padding: '12px 18px',
+            borderRadius: '8px',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+          }}
+        >
+          <CheckCircle2 size={16} className="text-green-400" />
+          <span>{notice}</span>
+        </div>
+      )}
     </div>
   );
 }
