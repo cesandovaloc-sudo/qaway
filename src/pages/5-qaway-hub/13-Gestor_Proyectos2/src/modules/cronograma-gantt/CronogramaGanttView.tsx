@@ -1906,8 +1906,18 @@ export default function CronogramaGanttView({
 
   // Arquitectura Notion: Cada vista (Gantt o Lista) tiene su propio preset de columnas visibles
   const loadSavedCols = (mode: string): ColKey[] => {
+    if (mode === 'gantt') {
+      try {
+        const saved = JSON.parse(localStorage.getItem('qaway-visible-cols-gantt-v3') || 'null');
+        if (Array.isArray(saved) && saved.length > 0 && saved.includes('name') && !saved.includes('code') && saved.length <= 6) {
+          return saved;
+        }
+      } catch {}
+      // En modo Gantt, el lienzo temporal es protagonista absoluto: inicia en vista compacta con solo 'name'
+      return ['name'];
+    }
     try {
-      const storageKey = mode === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      const storageKey = 'qaway-visible-cols-lista-v3';
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
       if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
         const canonicalPart = CANONICAL_COLS.filter((k) => saved.includes(k));
@@ -1917,7 +1927,7 @@ export default function CronogramaGanttView({
     } catch {
       /* almacenamiento no disponible */
     }
-    return mode === 'lista' ? [...LISTA_PRESET_COLS] : [...GANTT_PRESET_COLS];
+    return [...LISTA_PRESET_COLS];
   };
 
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => loadSavedCols(viewMode));
@@ -1927,18 +1937,19 @@ export default function CronogramaGanttView({
   const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol') => {
     if (newMode === viewMode) return;
     try {
-      const prevKey = viewMode === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
-      localStorage.setItem(prevKey, JSON.stringify(visibleCols));
+      if (viewMode === 'lista' && visibleCols.includes('code')) {
+        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+      } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
+        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+      }
     } catch {}
 
     if (scrollRef.current) scrollRef.current.scrollLeft = 0;
     if (tableHeadRef.current) tableHeadRef.current.scrollLeft = 0;
     if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
 
-    if (newMode === 'gantt' || newMode === 'lista') {
-      const nextCols = loadSavedCols(newMode);
-      setVisibleCols(nextCols);
-    }
+    const nextCols = loadSavedCols(newMode);
+    setVisibleCols(nextCols);
     prevViewModeRef.current = newMode;
     setViewMode(newMode);
   };
@@ -1946,8 +1957,11 @@ export default function CronogramaGanttView({
   useEffect(() => {
     if (viewMode === prevViewModeRef.current) return;
     try {
-      const prevKey = prevViewModeRef.current === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
-      localStorage.setItem(prevKey, JSON.stringify(visibleCols));
+      if (prevViewModeRef.current === 'lista') {
+        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+      } else if (prevViewModeRef.current === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
+        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+      }
     } catch {}
 
     prevViewModeRef.current = viewMode;
@@ -1958,8 +1972,11 @@ export default function CronogramaGanttView({
   // Persistir cambios de columnas en la vista actualmente activa
   useEffect(() => {
     try {
-      const storageKey = viewMode === 'lista' ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
-      localStorage.setItem(storageKey, JSON.stringify(visibleCols));
+      if (viewMode === 'lista' && visibleCols.includes('code')) {
+        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+      } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
+        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+      }
     } catch {
       /* almacenamiento no disponible */
     }
