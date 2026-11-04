@@ -5864,30 +5864,32 @@ export default function CronogramaGanttView({
                         pathD = `M ${fromEndX} ${fromY} L ${exitX} ${fromY} L ${exitX} ${interY} L ${backX} ${interY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
                       }
 
+                      // Solo resaltar la línea si el puntero se posiciona exactamente sobre ella
                       const isHighlighted =
-                        (hoveredDep && hoveredDep.sourceItem.id === visiblePredId && hoveredDep.targetItem.id === item.id) ||
-                        (hoveredTask && (hoveredTask.item.id === item.id || hoveredTask.item.id === visiblePredId));
+                        hoveredDep !== null &&
+                        hoveredDep.sourceItem.id === visiblePredId &&
+                        hoveredDep.targetItem.id === item.id;
 
                       const strokeColor = isHighlighted ? '#0066ff' : '#94a3b8';
                       const strokeWidth = isHighlighted ? '2' : '1.3';
                       const markerId = isHighlighted ? 'url(#dep-arrow-active)' : 'url(#dep-arrow)';
-                      const pathOpacity = (hoveredTask || hoveredDep) ? (isHighlighted ? 1 : 0.28) : 0.85;
+                      const pathOpacity = isHighlighted ? 1 : 0.85;
 
                       return (
                         <g key={pairKey}>
-                          {/* Hit area amplia transparente para facilitar hover interactivo con el puntero */}
+                          {/* Hit area precisa (6px) para interactuar solo al colocarse directamente sobre la línea sin parpadeos */}
                           <path
                             d={pathD}
                             fill="none"
                             stroke="transparent"
-                            strokeWidth="14"
+                            strokeWidth="6"
                             style={{ cursor: 'pointer', pointerEvents: 'stroke' }}
                             onMouseEnter={(e) => {
                               setHoveredDep({
                                 sourceItem,
                                 targetItem: item,
                                 x: e.clientX,
-                                y: e.clientY - 10,
+                                y: e.clientY - 12,
                               });
                             }}
                             onMouseLeave={() => setHoveredDep(null)}
@@ -5899,7 +5901,7 @@ export default function CronogramaGanttView({
                             strokeWidth={strokeWidth}
                             markerEnd={markerId}
                             opacity={pathOpacity}
-                            style={{ pointerEvents: 'none', transition: 'stroke 0.15s ease, opacity 0.15s ease' }}
+                            style={{ pointerEvents: 'none', transition: 'stroke 0.12s ease' }}
                           />
                         </g>
                       );
@@ -5932,26 +5934,34 @@ export default function CronogramaGanttView({
             </div>
           )}
 
-          {/* Tooltip de relación de dependencia interactiva en hover */}
+          {/* Tooltip Compacto y Sin Desborde para Dependencias */}
           {hoveredDep && !resizingTaskId && (
             <div
-              className="gantt-modern-tooltip"
+              className="gantt-dep-tooltip"
               style={{
                 left: `${hoveredDep.x}px`,
                 top: `${hoveredDep.y}px`,
-                position: 'fixed',
-                zIndex: 99999,
-                transform: 'translate(-50%, -100%)',
-                pointerEvents: 'none',
               }}
             >
-              <div className="tooltip-header" style={{ color: '#0066ff', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span>🔗 Relación Fin a Inicio</span>
+              <div className="dep-tip-head">
+                <span>🔗 Dependencia</span>
               </div>
-              <div className="tooltip-metric" style={{ fontSize: '11.5px', marginTop: 4 }}>
-                <b>{hoveredDep.sourceItem?.code || ''}</b> {(hoveredDep.sourceItem?.name || '').slice(0, 36)} (Fin: {formatDatePE(hoveredDep.sourceItem?.end || '')})
-                <div style={{ color: '#0066ff', fontWeight: 700, margin: '2px 0' }}>➔ habilita a:</div>
-                <b>{hoveredDep.targetItem?.code || ''}</b> {(hoveredDep.targetItem?.name || '').slice(0, 36)} (Inicio: {formatDatePE(hoveredDep.targetItem?.start || '')})
+              <div className="dep-tip-row">
+                <span className="dep-tip-badge">De</span>
+                <b className="dep-tip-code">{hoveredDep.sourceItem?.code || ''}</b>
+                <span className="dep-tip-desc" title={hoveredDep.sourceItem?.name || ''}>
+                  {(hoveredDep.sourceItem?.name || '').slice(0, 18)}…
+                </span>
+              </div>
+              <div className="dep-tip-arrow">
+                <span>↓ habilita</span>
+              </div>
+              <div className="dep-tip-row">
+                <span className="dep-tip-badge">A</span>
+                <b className="dep-tip-code">{hoveredDep.targetItem?.code || ''}</b>
+                <span className="dep-tip-desc" title={hoveredDep.targetItem?.name || ''}>
+                  {(hoveredDep.targetItem?.name || '').slice(0, 18)}…
+                </span>
               </div>
             </div>
           )}
