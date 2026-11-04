@@ -4963,7 +4963,6 @@ body.gantt-resizing {
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  padding-left: 18px; /* Sangrado coordinado idéntico a Kanban y Calendario */
 }
 
 /* ==========================================================================
@@ -4976,8 +4975,7 @@ body.gantt-resizing {
 .gantt-v2 .view-lista-fullwidth .table-head {
   width: 100% !important;
   overflow-x: hidden !important;
-  overflow-y: scroll !important;
-  scrollbar-color: transparent transparent;
+  overflow-y: hidden !important;
 }
 
 .gantt-v2 .view-lista-fullwidth .table-head::-webkit-scrollbar {
@@ -7148,7 +7146,6 @@ body.gantt-resizing {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding-left: 18px;
 }
 .gantt-v2 .tabs,
 .gantt-v2 .filter-bar,
