@@ -4285,9 +4285,9 @@ export default function CronogramaGanttView({
             <div
               className="fixed-cols"
               style={{
-                width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                width: `${fixedWidth}px`,
                 minWidth: `${fixedWidth}px`,
-                gridTemplateColumns: viewMode === 'lista' ? listaGridCols : fixedGridCols,
+                gridTemplateColumns: fixedGridCols,
               }}
             >
               {/* ── Columna Código (Primera en modo lista) ── */}
@@ -4711,7 +4711,7 @@ export default function CronogramaGanttView({
               className="gantt"
               style={
                 viewMode === 'lista'
-                  ? ({ width: '100%', minWidth: `${fixedWidth}px` } as React.CSSProperties)
+                  ? ({ width: `${fixedWidth}px`, minWidth: `${fixedWidth}px` } as React.CSSProperties)
                   : ({
                       '--fixed': `${fixedWidth}px`,
                       width: `calc(var(--fixed) + ${timelineMinWidth})`,
@@ -4736,9 +4736,9 @@ export default function CronogramaGanttView({
                   <div
                     className="fixed-cols"
                     style={{
-                      width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                      width: `${fixedWidth}px`,
                       minWidth: `${fixedWidth}px`,
-                      gridTemplateColumns: viewMode === 'lista' ? listaGridCols : fixedGridCols,
+                      gridTemplateColumns: fixedGridCols,
                     }}
                   >
                     {/* ── Columna Código (Primera en modo lista) ── */}
@@ -5640,9 +5640,9 @@ export default function CronogramaGanttView({
                 <div
                   className="fixed-cols"
                   style={{
-                    width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
+                    width: `${fixedWidth}px`,
                     minWidth: `${fixedWidth}px`,
-                    gridTemplateColumns: viewMode === 'lista' ? listaGridCols : fixedGridCols,
+                    gridTemplateColumns: fixedGridCols,
                   }}
                 >
                   <div className="name-cell quick-add-cell" style={{ gridColumn: '1 / -1' }}>

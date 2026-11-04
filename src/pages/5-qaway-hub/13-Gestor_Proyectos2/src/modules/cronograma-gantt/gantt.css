@@ -4963,6 +4963,7 @@ body.gantt-resizing {
   min-height: 0;
   min-width: 0;
   overflow: hidden;
+  padding-left: 18px; /* Sangrado coordinado idéntico a Kanban y Calendario */
 }
 
 /* ==========================================================================
@@ -4989,17 +4990,7 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .view-lista-fullwidth .table-head .fixed-cols {
-  min-width: 100%;
-  max-width: none !important;
   border-right: none !important;
-}
-
-.gantt-v2 .view-lista-fullwidth .name-head {
-  padding-left: 10px !important;
-}
-
-.gantt-v2 .view-lista-fullwidth .name-cell {
-  padding-left: 10px !important;
 }
 
 .gantt-v2 .view-lista-fullwidth .timeline-head-viewport {
@@ -5011,13 +5002,7 @@ body.gantt-resizing {
   overflow: auto !important;
 }
 
-.gantt-v2 .view-lista-fullwidth .gantt {
-  min-width: 100%;
-}
-
 .gantt-v2 .view-lista-fullwidth .row .fixed-cols {
-  min-width: 100%;
-  max-width: none !important;
   border-right: none !important;
 }
 
@@ -6307,7 +6292,7 @@ body.gantt-resizing {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 10px 0 18px;
+  padding: 0 10px;
 }
 .gantt-v2 .th-col-code input[type="checkbox"],
 .gantt-v2 .code-cell-col input[type="checkbox"] {
@@ -6323,7 +6308,7 @@ body.gantt-resizing {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 10px 0 18px;
+  padding: 0 10px;
   height: 100%;
 }
 .gantt-v2 .code-cell-col .code-icon-flag {
@@ -7163,6 +7148,7 @@ body.gantt-resizing {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  padding-left: 18px;
 }
 .gantt-v2 .tabs,
 .gantt-v2 .filter-bar,
