@@ -5625,7 +5625,7 @@ export default function CronogramaGanttView({
                   width: timelineMinWidth,
                   height: `${shown.length * 48}px`,
                   pointerEvents: 'none',
-                  zIndex: 2,
+                  zIndex: 12,
                   overflow: 'visible',
                 }}
               >
@@ -5682,6 +5682,21 @@ export default function CronogramaGanttView({
                     const predecessorRawIds = new Set<string>();
                     if (item.dependencies && item.dependencies.length > 0) {
                       item.dependencies.forEach((d) => predecessorRawIds.add(d));
+                    } else {
+                      // Fallback natural de prelación secuencial WBS (conecta con la actividad anterior)
+                      if (item.parentId) {
+                        const siblings = items.filter((s) => s.parentId === item.parentId);
+                        const sIdx = siblings.findIndex((s) => s.id === item.id);
+                        if (sIdx > 0) {
+                          predecessorRawIds.add(siblings[sIdx - 1].id);
+                        }
+                      } else if (item.kind === 'hito') {
+                        const rootComps = items.filter((c) => c.kind === 'hito' && !c.parentId);
+                        const cIdx = rootComps.findIndex((c) => c.id === item.id);
+                        if (cIdx > 0) {
+                          predecessorRawIds.add(rootComps[cIdx - 1].id);
+                        }
+                      }
                     }
                     if (item.kind === 'hito' && item.parentId) {
                       predecessorRawIds.add(item.parentId);
