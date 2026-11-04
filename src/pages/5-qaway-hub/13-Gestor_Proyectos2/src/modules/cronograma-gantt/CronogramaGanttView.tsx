@@ -1635,6 +1635,7 @@ export default function CronogramaGanttView({
     y: number;
   } | null>(null);
   const [inlineDraftCreatedId, setInlineDraftCreatedId] = useState<string | null>(null);
+  const depHoverTimeoutRef = useRef<any>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
@@ -5877,14 +5878,18 @@ export default function CronogramaGanttView({
 
                       return (
                         <g key={pairKey}>
-                          {/* Hit area precisa (6px) para interactuar solo al colocarse directamente sobre la línea sin parpadeos */}
+                          {/* Hit area con debounce de 140ms para máxima estabilidad sin parpadeos */}
                           <path
                             d={pathD}
                             fill="none"
                             stroke="transparent"
-                            strokeWidth="6"
+                            strokeWidth="8"
                             style={{ cursor: 'pointer', pointerEvents: 'stroke' }}
                             onMouseEnter={(e) => {
+                              if (depHoverTimeoutRef.current) {
+                                clearTimeout(depHoverTimeoutRef.current);
+                                depHoverTimeoutRef.current = null;
+                              }
                               setHoveredDep({
                                 sourceItem,
                                 targetItem: item,
@@ -5892,7 +5897,18 @@ export default function CronogramaGanttView({
                                 y: e.clientY - 12,
                               });
                             }}
-                            onMouseLeave={() => setHoveredDep(null)}
+                            onMouseMove={() => {
+                              if (depHoverTimeoutRef.current) {
+                                clearTimeout(depHoverTimeoutRef.current);
+                                depHoverTimeoutRef.current = null;
+                              }
+                            }}
+                            onMouseLeave={() => {
+                              if (depHoverTimeoutRef.current) clearTimeout(depHoverTimeoutRef.current);
+                              depHoverTimeoutRef.current = setTimeout(() => {
+                                setHoveredDep(null);
+                              }, 140);
+                            }}
                           />
                           <path
                             d={pathD}
@@ -5934,7 +5950,7 @@ export default function CronogramaGanttView({
             </div>
           )}
 
-          {/* Tooltip Compacto y Sin Desborde para Dependencias */}
+          {/* Tooltip Ultra-Minimalista de 2 Líneas para Dependencias */}
           {hoveredDep && !resizingTaskId && (
             <div
               className="gantt-dep-tooltip"
@@ -5943,25 +5959,12 @@ export default function CronogramaGanttView({
                 top: `${hoveredDep.y}px`,
               }}
             >
-              <div className="dep-tip-head">
-                <span>🔗 Dependencia</span>
+              <div className="dep-tip-source" title={`${hoveredDep.sourceItem?.code || ''} ${hoveredDep.sourceItem?.name || ''}`}>
+                <b>{hoveredDep.sourceItem?.code || ''}</b> {(hoveredDep.sourceItem?.name || '').slice(0, 22)}…
               </div>
-              <div className="dep-tip-row">
-                <span className="dep-tip-badge">De</span>
-                <b className="dep-tip-code">{hoveredDep.sourceItem?.code || ''}</b>
-                <span className="dep-tip-desc" title={hoveredDep.sourceItem?.name || ''}>
-                  {(hoveredDep.sourceItem?.name || '').slice(0, 18)}…
-                </span>
-              </div>
-              <div className="dep-tip-arrow">
-                <span>↓ habilita</span>
-              </div>
-              <div className="dep-tip-row">
-                <span className="dep-tip-badge">A</span>
-                <b className="dep-tip-code">{hoveredDep.targetItem?.code || ''}</b>
-                <span className="dep-tip-desc" title={hoveredDep.targetItem?.name || ''}>
-                  {(hoveredDep.targetItem?.name || '').slice(0, 18)}…
-                </span>
+              <div className="dep-tip-target" title={`${hoveredDep.targetItem?.code || ''} ${hoveredDep.targetItem?.name || ''}`}>
+                <CornerDownRight size={13} style={{ color: '#0066ff', flexShrink: 0 }} strokeWidth={2.5} />
+                <span><b>{hoveredDep.targetItem?.code || ''}</b> {(hoveredDep.targetItem?.name || '').slice(0, 22)}…</span>
               </div>
             </div>
           )}
