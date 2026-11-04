@@ -2262,6 +2262,7 @@ export default function CronogramaGanttView({
 
   /* Centrado fluido con física suave en la fecha actual al inicializar la vista o cambiar de escala (Día/Semana/Mes/Trimestre) */
   useEffect(() => {
+    if (viewMode !== 'gantt') return; // Bloqueo: Modo Lista y vistas tabulares jamás se desplazan horizontalmente
     const timer = setTimeout(() => {
       if (!scrollRef.current) return;
       const container = scrollRef.current;
@@ -2274,7 +2275,16 @@ export default function CronogramaGanttView({
       }
     }, 60);
     return () => clearTimeout(timer);
-  }, [zoom, currentTodayIso]);
+  }, [zoom, currentTodayIso, viewMode]);
+
+  /* Reencuadre instantáneo en Modo Lista a la posición inicial (columna 0) */
+  useEffect(() => {
+    if (viewMode === 'lista') {
+      if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+      if (tableHeadRef.current) tableHeadRef.current.scrollLeft = 0;
+      if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
+    }
+  }, [viewMode]);
 
   /* ---------- Cierre global de menús y editores (clic externo / Escape) ---------- */
   useEffect(() => {
@@ -3420,27 +3430,57 @@ export default function CronogramaGanttView({
                   ))}
                 </div>
               </>
-            ) : (
-              /* En Modo Gantt, Lista, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
+            ) : viewMode === 'lista' ? (
+              /* En Modo Lista: Filtros Rápidos Semánticos de Fecha con Diseño Oficial Homologado */
               <>
                 <div className="filter-group-divider" aria-hidden="true" />
                 <button
                   type="button"
-                  className={`today-pill ${viewMode === 'lista' && listaTemporalFilter === 'Hoy' ? 'active' : ''}`}
+                  className={`today-pill ${listaTemporalFilter === 'Hoy' ? 'active' : ''}`}
                   onClick={() => {
-                    if (viewMode === 'lista') {
-                      const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
-                      setListaTemporalFilter(next);
-                      notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
-                    } else {
-                      scrollToToday();
-                    }
+                    const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
+                    setListaTemporalFilter(next);
+                    notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
                   }}
-                  title={
-                    viewMode === 'lista'
-                      ? (listaTemporalFilter === 'Hoy' ? 'Quitar filtro de Hoy' : `Filtrar actividades activas hoy (${formatDatePE(currentTodayIso)})`)
-                      : 'Ir y centrar en la fecha actual de hoy'
-                  }
+                  title={listaTemporalFilter === 'Hoy' ? 'Quitar filtro de Hoy' : `Filtrar actividades activas hoy (${formatDatePE(currentTodayIso)})`}
+                  style={{
+                    background: listaTemporalFilter === 'Hoy' ? '#0066ff' : '#ffffff',
+                    color: listaTemporalFilter === 'Hoy' ? '#ffffff' : '#334155',
+                    border: listaTemporalFilter === 'Hoy' ? '1px solid #0066ff' : '1px solid #cbd5e1',
+                    boxShadow: listaTemporalFilter === 'Hoy' ? '0 2px 6px rgba(0, 102, 255, 0.28)' : 'none',
+                  }}
+                >
+                  Hoy
+                </button>
+
+                <div className="zoom" title="Filtrar actividades por período de corte">
+                  {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
+                    const isActive = listaTemporalFilter === x;
+                    return (
+                      <button
+                        type="button"
+                        key={x}
+                        className={isActive ? 'active' : ''}
+                        onClick={() => {
+                          setListaTemporalFilter(x);
+                          notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
+                        }}
+                      >
+                        {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              /* En Modo Gantt, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
+              <>
+                <div className="filter-group-divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="today-pill"
+                  onClick={scrollToToday}
+                  title="Ir y centrar en la fecha actual de hoy"
                 >
                   Hoy
                 </button>
@@ -3455,28 +3495,16 @@ export default function CronogramaGanttView({
                   >
                     <ChevronLeft size={15} />
                   </button>
-                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => {
-                    const isActive = viewMode === 'lista' ? listaTemporalFilter === x : zoom === x;
-                    return (
-                      <button
-                        type="button"
-                        key={x}
-                        className={isActive ? 'active' : ''}
-                        onClick={() => {
-                          if (viewMode === 'lista') {
-                            const next = listaTemporalFilter === x ? 'Todos' : x;
-                            setListaTemporalFilter(next);
-                            handleZoomChange(x);
-                            notify(next === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades por: ${x}`);
-                          } else {
-                            handleZoomChange(x);
-                          }
-                        }}
-                      >
-                        {x}
-                      </button>
-                    );
-                  })}
+                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
+                    <button
+                      type="button"
+                      key={x}
+                      className={zoom === x ? 'active' : ''}
+                      onClick={() => handleZoomChange(x)}
+                    >
+                      {x}
+                    </button>
+                  ))}
                   <button
                     type="button"
                     className="zoom-nav-arrow"
