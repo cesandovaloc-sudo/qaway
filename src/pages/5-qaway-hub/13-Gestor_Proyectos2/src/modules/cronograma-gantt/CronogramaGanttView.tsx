@@ -185,9 +185,8 @@ export interface Item {
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
   'pt-1.6': ['pt-1.4'],   // CDL depende de Plan de Distribución Local aprobado
-  'sub-1.7': ['pt-1.6'],  // Capacitación y difusión depende de CDL validado
-  'pt-1.7a': ['pt-1.6'],
-  'pt-1.7b': ['pt-1.7a'], // Capacitación a directores depende de Oficio de comunicación
+  'pt-1.7a': ['pt-1.6'],  // Comunicación a II.EE. depende de CDL validado
+  'pt-1.7b': ['pt-1.7a'], // Capacitación a directores depende de Comunicación inicial
 
   // Dependencias macro entre componentes rectores
   'comp-3': ['comp-2'],   // Recepción en DRE/UGEL depende de Habilitación de Almacenes
@@ -1037,6 +1036,26 @@ export default function CronogramaGanttView({
     }
   }, [items]);
 
+  // Purgar de inmediato borradores accidentales huérfanos generados por el antiguo comportamiento del Enter
+  useEffect(() => {
+    const hasJunkDrafts = items.some(
+      (it) =>
+        it.name.toLowerCase().includes('husyan') ||
+        it.name.toLowerCase().includes('adad') ||
+        (it.name === 'Nuevo componente' && it.id !== inlineDraftCreatedId)
+    );
+    if (hasJunkDrafts) {
+      commitChange((old) =>
+        old.filter(
+          (it) =>
+            !it.name.toLowerCase().includes('husyan') &&
+            !it.name.toLowerCase().includes('adad') &&
+            !(it.name === 'Nuevo componente' && it.id !== inlineDraftCreatedId)
+        )
+      );
+    }
+  }, [items, inlineDraftCreatedId]);
+
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
     let isCancelled = false;
@@ -1627,6 +1646,13 @@ export default function CronogramaGanttView({
     x: number;
     y: number;
   } | null>(null);
+  const [hoveredDep, setHoveredDep] = useState<{
+    sourceItem: Item;
+    targetItem: Item;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [inlineDraftCreatedId, setInlineDraftCreatedId] = useState<string | null>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
@@ -2923,8 +2949,9 @@ export default function CronogramaGanttView({
         return [...old, draftItem];
       });
       setSelectedId(id);
+      setInlineDraftCreatedId(id);
       toggleEdit(draftItem, 'name');
-      notify(`Nuevo ${kind === 'hito' ? 'componente' : 'subcomponente'} creado. Escribe el nombre y pulsa Enter.`);
+      notify(`Nuevo ${kind === 'hito' ? 'componente' : 'subcomponente'} creado. Escribe el nombre y pulsa Enter para guardar.`);
       return;
     };
 
@@ -4746,19 +4773,52 @@ export default function CronogramaGanttView({
                         autoFocus
                         onFocus={(e) => e.currentTarget.select()}
                         defaultValue={x.name}
+                        title="Enter para guardar · Shift+Enter para agregar otro · Esc para cancelar"
                         onBlur={(e) => {
-                          update(x.id, { name: e.target.value.trim() || x.name });
+                          const val = e.target.value.trim();
+                          if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                            commitChange((old) => old.filter((it) => it.id !== x.id));
+                            setInlineDraftCreatedId(null);
+                            closeEdit();
+                            notify('Borrador sin nombre descartado.');
+                            return;
+                          }
+                          update(x.id, { name: val || x.name });
+                          setInlineDraftCreatedId(null);
                           closeEdit();
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            update(x.id, { name: e.currentTarget.value.trim() || x.name });
+                            e.preventDefault();
+                            const val = e.currentTarget.value.trim();
+                            if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                              commitChange((old) => old.filter((it) => it.id !== x.id));
+                              setInlineDraftCreatedId(null);
+                              closeEdit();
+                              notify('Borrador sin nombre descartado.');
+                              return;
+                            }
+                            update(x.id, { name: val || x.name });
+                            setInlineDraftCreatedId(null);
                             closeEdit();
-                            setTimeout(() => {
-                              add(x.kind, x.parentId, true);
-                            }, 50);
+
+                            if (e.shiftKey) {
+                              setTimeout(() => {
+                                add(x.kind, x.parentId, true);
+                              }, 50);
+                            }
                           }
-                          if (e.key === 'Escape') closeEdit();
+                          if (e.key === 'Escape') {
+                            e.preventDefault();
+                            if (inlineDraftCreatedId === x.id) {
+                              commitChange((old) => old.filter((it) => it.id !== x.id));
+                              setInlineDraftCreatedId(null);
+                              closeEdit();
+                              notify('Creación cancelada.');
+                              return;
+                            }
+                            closeEdit();
+                          }
                         }}
                       />
                     ) : (
@@ -5715,11 +5775,22 @@ export default function CronogramaGanttView({
                     viewBox="0 0 10 10"
                     refX="7"
                     refY="5"
-                    markerWidth="5"
-                    markerHeight="5"
+                    markerWidth="6"
+                    markerHeight="6"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 2 L 7 5 L 0 8 z" fill="#94a3b8" />
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#475569" />
+                  </marker>
+                  <marker
+                    id="dep-arrow-active"
+                    viewBox="0 0 10 10"
+                    refX="7"
+                    refY="5"
+                    markerWidth="7"
+                    markerHeight="7"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0066ff" />
                   </marker>
                 </defs>
 
@@ -5753,12 +5824,20 @@ export default function CronogramaGanttView({
                       item.dependencies.forEach((d) => predecessorRawIds.add(d));
                     }
 
-                    // 2. Si el ítem es un hito con hijos ocultos, recolectar dependencias reales de sus hijos
-                    items.forEach((subIt) => {
-                      if (subIt.parentId === item.id && subIt.dependencies && subIt.dependencies.length > 0) {
-                        subIt.dependencies.forEach((d) => predecessorRawIds.add(d));
-                      }
-                    });
+                    // 2. Si el contenedor tiene hijos ocultos/colapsados (no mostrados en pantalla), recolectar dependencias externas
+                    const hasVisibleChildren = items.some((c) => c.parentId === item.id && shownSet.has(c.id));
+                    if (!hasVisibleChildren) {
+                      items.forEach((subIt) => {
+                        if (subIt.parentId === item.id && subIt.dependencies && subIt.dependencies.length > 0) {
+                          subIt.dependencies.forEach((d) => {
+                            const depItem = allMap.get(d);
+                            if (depItem && depItem.parentId !== item.id && d !== item.id) {
+                              predecessorRawIds.add(d);
+                            }
+                          });
+                        }
+                      });
+                    }
 
                     return Array.from(predecessorRawIds).flatMap((predRawId) => {
                       const visiblePredId = resolveVisibleId(predRawId);
@@ -5803,16 +5882,44 @@ export default function CronogramaGanttView({
                         pathD = `M ${fromEndX} ${fromY} L ${exitX} ${fromY} L ${exitX} ${interY} L ${backX} ${interY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
                       }
 
+                      const isHighlighted =
+                        (hoveredDep && hoveredDep.sourceItem.id === visiblePredId && hoveredDep.targetItem.id === item.id) ||
+                        (hoveredTask && (hoveredTask.item.id === item.id || hoveredTask.item.id === visiblePredId));
+
+                      const strokeColor = isHighlighted ? '#0066ff' : '#94a3b8';
+                      const strokeWidth = isHighlighted ? '2' : '1.3';
+                      const markerId = isHighlighted ? 'url(#dep-arrow-active)' : 'url(#dep-arrow)';
+                      const pathOpacity = (hoveredTask || hoveredDep) ? (isHighlighted ? 1 : 0.28) : 0.85;
+
                       return (
-                        <path
-                          key={pairKey}
-                          d={pathD}
-                          fill="none"
-                          stroke="#94a3b8"
-                          strokeWidth="1.3"
-                          markerEnd="url(#dep-arrow)"
-                          opacity={0.82}
-                        />
+                        <g key={pairKey}>
+                          {/* Hit area amplia transparente para facilitar hover interactivo con el puntero */}
+                          <path
+                            d={pathD}
+                            fill="none"
+                            stroke="transparent"
+                            strokeWidth="14"
+                            style={{ cursor: 'pointer', pointerEvents: 'stroke' }}
+                            onMouseEnter={(e) => {
+                              setHoveredDep({
+                                sourceItem,
+                                targetItem: item,
+                                x: e.clientX,
+                                y: e.clientY - 10,
+                              });
+                            }}
+                            onMouseLeave={() => setHoveredDep(null)}
+                          />
+                          <path
+                            d={pathD}
+                            fill="none"
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            markerEnd={markerId}
+                            opacity={pathOpacity}
+                            style={{ pointerEvents: 'none', transition: 'stroke 0.15s ease, opacity 0.15s ease' }}
+                          />
+                        </g>
                       );
                     });
                   });
@@ -5839,6 +5946,30 @@ export default function CronogramaGanttView({
                 {hoveredTask.item.kind === 'hito' && (
                   <span className="tooltip-sub"> · Corte: {formatDate(hoveredTask.item.end)}</span>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Tooltip de relación de dependencia interactiva en hover */}
+          {hoveredDep && !resizingTaskId && (
+            <div
+              className="gantt-modern-tooltip"
+              style={{
+                left: `${hoveredDep.x}px`,
+                top: `${hoveredDep.y}px`,
+                position: 'fixed',
+                zIndex: 99999,
+                transform: 'translate(-50%, -100%)',
+                pointerEvents: 'none',
+              }}
+            >
+              <div className="tooltip-header" style={{ color: '#0066ff', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>🔗 Relación Fin a Inicio</span>
+              </div>
+              <div className="tooltip-metric" style={{ fontSize: '11.5px', marginTop: 4 }}>
+                <b>{hoveredDep.sourceItem.code}</b> {hoveredDep.sourceItem.name.slice(0, 36)} (Fin: {formatDatePE(hoveredDep.sourceItem.end)})
+                <div style={{ color: '#0066ff', fontWeight: 700, margin: '2px 0' }}>➔ habilita a:</div>
+                <b>{hoveredDep.targetItem.code}</b> {hoveredDep.targetItem.name.slice(0, 36)} (Inicio: {formatDatePE(hoveredDep.targetItem.start)})
               </div>
             </div>
           )}
