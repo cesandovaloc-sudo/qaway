@@ -384,7 +384,7 @@ function App() {
               onActions={(h) => { binds.current['cronograma'] = h; }}
             />
           </div>
-          <div className={active === 'sedes' ? 'sd-v1 qm-pane-active' : 'sd-v1 qm-pane'}>
+          <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <SedesView
               activeProjectId={activeProjectId}
               onActions={(h) => { binds.current['sedes'] = h; }}
