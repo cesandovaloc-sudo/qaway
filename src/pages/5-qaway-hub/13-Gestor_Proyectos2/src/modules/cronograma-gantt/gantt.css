@@ -2908,13 +2908,8 @@
   pointer-events: none;
 }
 
-.gantt-v2 .gantt-dependency-svg path {
-  transition: stroke 0.2s ease, stroke-width 0.2s ease;
-}
-
-.gantt-v2 .gantt-dependency-svg path:hover {
-  stroke: #0284c7;
-  stroke-width: 2.2px;
+.gantt-v2 .gantt-dependency-svg .dep-line-visible {
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
 }
 
 /* Fondos base que representan el 100% del plazo planificado */
@@ -3946,25 +3941,35 @@ body.gantt-resizing {
   margin-left: 6px;
 }
 
-/* Estabilidad Total de Líneas de Dependencia (CSS Hardware-Accelerated) */
+/* Estabilidad Total de Líneas de Dependencia (Sin parpadeo, Hit-area estrictamente invisible) */
 .gantt-v2 .dep-line-group {
   cursor: pointer;
 }
 
-.gantt-v2 .dep-line-group .dep-line-hit {
-  cursor: pointer;
-  pointer-events: stroke;
+.gantt-v2 .dep-line-group .dep-line-hit,
+.gantt-v2 .gantt-dependency-svg path.dep-line-hit,
+.gantt-v2 .dep-line-group:hover .dep-line-hit,
+.gantt-v2 .dep-line-group.is-active .dep-line-hit,
+.gantt-v2 .gantt-dependency-svg path.dep-line-hit:hover {
+  stroke: rgba(0, 0, 0, 0.001) !important;
+  fill: none !important;
+  stroke-width: 14px !important;
+  opacity: 0.001 !important;
+  cursor: pointer !important;
+  pointer-events: stroke !important;
+  transition: none !important;
 }
 
-.gantt-v2 .dep-line-group .dep-line-visible {
+.gantt-v2 .dep-line-group .dep-line-visible,
+.gantt-v2 .gantt-dependency-svg path.dep-line-visible {
   transition: stroke 0.12s ease, stroke-width 0.12s ease;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 .gantt-v2 .dep-line-group:hover .dep-line-visible,
 .gantt-v2 .dep-line-group.is-active .dep-line-visible {
   stroke: #0066ff !important;
-  stroke-width: 2px !important;
+  stroke-width: 1.8px !important;
   marker-end: url(#dep-arrow-active) !important;
   opacity: 1 !important;
 }

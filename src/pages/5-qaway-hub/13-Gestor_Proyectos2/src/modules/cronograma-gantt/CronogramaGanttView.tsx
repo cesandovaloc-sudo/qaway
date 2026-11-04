@@ -5872,7 +5872,7 @@ export default function CronogramaGanttView({
                         hoveredDep.targetItem.id === item.id;
 
                       const strokeColor = isHighlighted ? '#0066ff' : '#94a3b8';
-                      const strokeWidth = isHighlighted ? '2' : '1.3';
+                      const strokeWidth = isHighlighted ? '1.8' : '1.3';
                       const markerId = isHighlighted ? 'url(#dep-arrow-active)' : 'url(#dep-arrow)';
                       const pathOpacity = isHighlighted ? 1 : 0.85;
 
@@ -5905,13 +5905,14 @@ export default function CronogramaGanttView({
                             }, 160);
                           }}
                         >
-                          {/* Hit area amplia (14px) para una interacción cómoda y sin tener que hacer malabares */}
+                          {/* Hit area amplia (14px) 100% invisible para interacción suave sin parpadeo */}
                           <path
                             d={pathD}
                             fill="none"
-                            stroke="transparent"
+                            stroke="rgba(0,0,0,0.001)"
                             strokeWidth="14"
                             className="dep-line-hit"
+                            style={{ pointerEvents: 'stroke', cursor: 'pointer' }}
                           />
                           <path
                             d={pathD}
@@ -5921,6 +5922,7 @@ export default function CronogramaGanttView({
                             markerEnd={markerId}
                             opacity={pathOpacity}
                             className="dep-line-visible"
+                            style={{ pointerEvents: 'none' }}
                           />
                         </g>
                       );
