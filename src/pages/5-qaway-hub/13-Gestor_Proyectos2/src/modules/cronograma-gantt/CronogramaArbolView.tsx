@@ -121,11 +121,11 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
             </div>
 
             <div className="arbol-card-right">
-              <span className="arbol-count-badge">{hitos.length} Hitos Rectores</span>
+              <span className="arbol-count-badge">{hitos.length} Componentes</span>
             </div>
           </div>
 
-          {/* ── Ramas del Nivel 1 (Hitos Principales) ── */}
+          {/* ── Ramas del Nivel 1 (Componentes Principales) ── */}
           <div className="arbol-branches-level1">
             {hitos.map((hito, hIdx) => {
               const isHitoCollapsed = collapsedNodes[hito.id];
@@ -141,7 +141,7 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
                   {/* Conector vertical y brazo hacia el nodo */}
                   <div className="arbol-connector-arm" />
 
-                  {/* Tarjeta del Hito */}
+                  {/* Tarjeta del Componente */}
                   <div
                     className={`arbol-card hito-card ${isSelected ? 'selected' : ''}`}
                     onClick={() => onSelectItem(hito)}
@@ -151,7 +151,7 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
                         type="button"
                         className="arbol-collapse-btn"
                         onClick={(e) => toggleCollapse(hito.id, e)}
-                        title={isHitoCollapsed ? 'Expandir subprocesos' : 'Colapsar subprocesos'}
+                        title={isHitoCollapsed ? 'Expandir subcomponentes' : 'Colapsar subcomponentes'}
                       >
                         {isHitoCollapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
                       </button>

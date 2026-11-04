@@ -170,18 +170,18 @@ export default function CronogramaKanbanView({
                           </button>
                         </div>
 
-                        {/* Hito Principal Padre (si es subproceso) */}
+                        {/* Componente Principal Padre (si es subcomponente) */}
                         {parentHito ? (
-                          <div className="kanban-card-parent" title={`Hito principal: ${parentHito.name}`}>
+                          <div className="kanban-card-parent" title={`Componente principal: ${parentHito.name}`}>
                             <Target size={12} className="kanban-card-icon" />
                             <span>
-                              {parentHito.code ? `H-${parentHito.code}` : 'Hito'} {parentHito.name}
+                              {parentHito.code ? `C-${parentHito.code}` : 'Componente'} {parentHito.name}
                             </span>
                           </div>
                         ) : (
-                          <div className="kanban-card-parent is-hito" title="Hito Principal">
+                          <div className="kanban-card-parent is-hito" title="Componente Principal">
                             <Flag size={12} className="kanban-card-icon" />
-                            <span>Hito Principal</span>
+                            <span>Componente Principal</span>
                           </div>
                         )}
 

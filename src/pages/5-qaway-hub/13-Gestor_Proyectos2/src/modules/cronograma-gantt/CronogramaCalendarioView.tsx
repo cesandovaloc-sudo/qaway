@@ -555,9 +555,9 @@ export default function CronogramaCalendarioView({
                             <span className="cal-gantt-pct">{ev.progress}%</span>
                           </div>
 
-                          {/* Diamante característico al final del Hito Principal (idéntico a Gantt) */}
+                          {/* Diamante característico al final del Componente Principal (idéntico a Gantt) */}
                           {isMajor && (
-                            <span className="cal-gantt-diamond-badge" title="Hito Principal">
+                            <span className="cal-gantt-diamond-badge" title="Componente Principal">
                               <span className="cal-diamond-shape" />
                             </span>
                           )}
@@ -686,7 +686,7 @@ export default function CronogramaCalendarioView({
                     <strong>{it.code} · {it.title}</strong>
                   </div>
                   <span className="cal-agenda-sub">
-                    {it.kind === 'hito' ? 'Hito Principal' : 'Subproceso'} · Responsable: {it.owner}
+                    {it.kind === 'hito' ? 'Componente Principal' : 'Subcomponente'} · Responsable: {it.owner}
                   </span>
                 </div>
                 <div
@@ -752,7 +752,7 @@ export default function CronogramaCalendarioView({
 
                   <div className="cal-upcoming-cat-line">
                     <FileText size={11} className="cat-icon-sub" />
-                    <span>{ev.code} · {ev.kind === 'hito' ? 'Hito Principal' : 'Subproceso'}</span>
+                    <span>{ev.code} · {ev.kind === 'hito' ? 'Componente Principal' : 'Subcomponente'}</span>
                   </div>
 
                   {/* Barra de progreso estilo Gantt */}
@@ -803,9 +803,9 @@ export default function CronogramaCalendarioView({
         <div className="cal-sidebar-section cal-legend-section">
           <h3 className="cal-sidebar-title">Leyenda</h3>
           <div className="cal-clean-legend-grid">
-            <div className="cal-legend-row" title="Hito Principal oficial con rombo característico de Gantt">
+            <div className="cal-legend-row" title="Componente Principal oficial con rombo característico de Gantt">
               <span className="cal-legend-diamond">◆</span>
-              <span>Hito Principal</span>
+              <span>Componente Principal</span>
             </div>
             <div className="cal-legend-row" title="Subproceso en curso con avance parcial">
               <span className="cal-legend-box box-progress" />

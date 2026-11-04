@@ -4,12 +4,33 @@
  */
 import { supabase } from './supabaseClient';
 
+export type EdtNodeType =
+  | 'FASE'
+  | 'COMPONENTE'
+  | 'SUBCOMPONENTE'
+  | 'PAQUETE_TRABAJO'
+  | 'ENTREGABLE'
+  | 'HITO';
+
+export interface Fase {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  order: number;
+}
+
 export interface GanttItemData {
   id: string;
   code: string;
   name: string;
   kind: 'hito' | 'subproceso';
+  /** Clasificación metodológica oficial PMI/PMBOK (EDT/WBS) */
+  edtType?: EdtNodeType;
+  /** Identificador opcional de la Fase del ciclo de vida (nullable) */
+  faseId?: string | null;
   parentId?: string;
+  children?: GanttItemData[];
   start: string;
   end: string;
   progress: number;
@@ -26,7 +47,7 @@ export interface GanttItemData {
   tasks?: number;
   done?: number;
   unit?: string;
-  phase?: string;
+  phase?: string | null;
   /** Línea base aprobada y fechas reales (Fase 1 de control de plazos). */
   baselineStart?: string;
   baselineEnd?: string;
@@ -94,7 +115,7 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
 
 /* Columnas de la Fase 1 (supabase/02_gestor_cronograma_linea_base.sql). */
 const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end'] as const;
-const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd'] as const;
+const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
 
 /**
  * Upsert tolerante al esquema: si la BD aún no tiene las columnas de línea base/fechas reales,

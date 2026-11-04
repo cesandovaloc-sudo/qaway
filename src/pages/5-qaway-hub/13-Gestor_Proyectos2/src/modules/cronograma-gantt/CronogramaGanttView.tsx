@@ -21,6 +21,25 @@ import {
   type GanttItemData
 } from '../../services/gestorCronogramaService';
 import {
+  type EdtNodeType,
+  type Fase,
+  PROJECT_PHASES_CATALOG,
+  EDT_NODE_LABELS,
+  resolveEdtNodeType,
+  getEdtNodeDisplayLabel,
+  DRE_JUNIN_DOTACION_2027_EDT,
+} from './edtPmbokModel';
+
+export {
+  type EdtNodeType,
+  type Fase,
+  PROJECT_PHASES_CATALOG,
+  EDT_NODE_LABELS,
+  resolveEdtNodeType,
+  getEdtNodeDisplayLabel,
+  DRE_JUNIN_DOTACION_2027_EDT,
+};
+import {
   AlertTriangle,
   ArrowLeftRight,
   ArrowRight,
@@ -122,7 +141,12 @@ export interface Item {
   code: string;
   name: string;
   kind: Kind;
+  /** Clasificación metodológica formal PMI/PMBOK de la EDT/WBS */
+  edtType?: EdtNodeType;
+  /** Contenedor macro de ciclo de vida temporal (opcional / nullable) */
+  faseId?: string | null;
   parentId?: string;
+  children?: Item[];
   start: string;
   end: string;
   progress: number;
@@ -141,7 +165,7 @@ export interface Item {
   tasks?: number;
   done?: number;
   unit?: string;
-  phase?: string;
+  phase?: string | null;
   /** Línea base aprobada (fechas originales contra las que se mide la desviación). */
   baselineStart?: string;
   baselineEnd?: string;
@@ -158,6 +182,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '1.',
     name: 'Planificación de la distribución y conformación de comités',
     kind: 'hito',
+    edtType: 'COMPONENTE',
+    faseId: null,
     start: '2026-09-04',
     end: '2026-11-30',
     progress: 67,
@@ -176,6 +202,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '1.1',
     name: 'Conformación de comités UGEL',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h1',
     start: '2026-09-04',
     end: '2026-09-25',
@@ -192,6 +220,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '1.2',
     name: 'Elaboración y validación del plan de distribución',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h1',
     start: '2026-09-26',
     end: '2026-11-30',
@@ -209,6 +239,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '2.',
     name: 'Gestión de Almacenes y Recepción en MC SIGA',
     kind: 'hito',
+    edtType: 'COMPONENTE',
+    faseId: null,
     start: '2026-09-11',
     end: '2027-01-30',
     progress: 42,
@@ -227,6 +259,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '2.1',
     name: 'Identificación y directorio de almacenes',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h2',
     start: '2026-09-11',
     end: '2026-10-20',
@@ -242,6 +276,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '2.2',
     name: 'Registro de recepción de materiales (RAR / NEA)',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h2',
     start: '2026-10-21',
     end: '2027-01-30',
@@ -258,6 +294,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '3.',
     name: 'Distribución y Transporte a II.EE.',
     kind: 'hito',
+    edtType: 'COMPONENTE',
+    faseId: null,
     start: '2026-11-05',
     end: '2027-02-28',
     progress: 18,
@@ -275,6 +313,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '3.1',
     name: 'Preparación de expedientes de contratación de transporte',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h3',
     start: '2026-11-05',
     end: '2026-11-30',
@@ -291,6 +331,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '3.2',
     name: 'Coordinación de rutas críticas y transporte fluvial',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h3',
     start: '2026-12-01',
     end: '2027-01-31',
@@ -307,6 +349,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '3.3',
     name: 'Entrega física y actas de recepción con directores',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h3',
     start: '2027-02-01',
     end: '2027-02-28',
@@ -323,6 +367,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '4.',
     name: 'Cierre, PECOSA y Consolidado Regional',
     kind: 'hito',
+    edtType: 'COMPONENTE',
+    faseId: null,
     start: '2027-03-01',
     end: '2027-03-30',
     progress: 0,
@@ -341,6 +387,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '4.1',
     name: 'Validación y registro de PECOSA en SIAGIE',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h4',
     start: '2027-03-01',
     end: '2027-03-15',
@@ -356,6 +404,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '4.2',
     name: 'Consolidado final y balance de contingencias',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h4',
     start: '2027-03-16',
     end: '2027-03-30',
@@ -371,6 +421,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '5.',
     name: 'Informe Técnico Final MINEDU - DIGERE',
     kind: 'hito',
+    edtType: 'COMPONENTE',
+    faseId: null,
     start: '2027-04-01',
     end: '2027-04-30',
     progress: 0,
@@ -389,6 +441,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '5.1',
     name: 'Consolidación de informes técnicos de gestores',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h5',
     start: '2027-04-01',
     end: '2027-04-20',
@@ -405,6 +459,8 @@ const INITIAL_ITEMS: Item[] = [
     code: '5.2',
     name: 'Elevación de informe a DIGERE y cierre de ciclo',
     kind: 'subproceso',
+    edtType: 'SUBCOMPONENTE',
+    faseId: null,
     parentId: 'h5',
     start: '2027-04-21',
     end: '2027-04-30',
@@ -542,8 +598,8 @@ const getItemGestores = (item: Item): string[] => {
 
 const TYPE_OPTIONS = [
   { value: 'Todos', label: 'Todos' },
-  { value: 'Hitos', label: 'Solo Hitos' },
-  { value: 'Subprocesos', label: 'Solo Subprocesos' },
+  { value: 'Hitos', label: 'Solo Componentes' },
+  { value: 'Subprocesos', label: 'Solo Subcomponentes' },
 ];
 
 const PROJECT_MONTHS = [
@@ -597,10 +653,10 @@ const MIN_COLS: Record<string, number> = {
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
-  { key: 'name', label: 'Hito Principal / Subproceso', fixed: true },
+  { key: 'name', label: 'Componente / Subcomponente', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
-  { key: 'parent', label: 'Hito padre' },
+  { key: 'parent', label: 'Componente padre' },
   { key: 'start', label: 'Inicio' },
   { key: 'end', label: 'Fin' },
   { key: 'duration', label: 'Duración' },
@@ -636,7 +692,7 @@ const GANTT_HIERARCHY: Hierarchy<Item> = {
 };
 
 const GANTT_COLUMNS: ColumnDef<Item>[] = [
-  { id: 'name', label: 'Hito / Subproceso', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
+  { id: 'name', label: 'Componente / Subcomponente', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
   { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r?.start },
   { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r?.end },
   { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r?.start, r?.end) },
@@ -653,8 +709,8 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
   { id: 'distrito', label: 'Distrito', type: 'select', accessor: (r) => r?.distrito },
   { id: 'sede', label: 'Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
-  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => r?.kind === 'hito' ? 'Hito' : 'Subproceso' },
-  { id: 'parent', label: 'Hito padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
+  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Subcomponente') },
+  { id: 'parent', label: 'Componente padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
 
 const formatDate = (s: string) =>
@@ -1152,6 +1208,8 @@ export default function CronogramaGanttView({
             const init = initialMap.get(it.id);
             return {
               ...it,
+              edtType: it.edtType || init?.edtType || resolveEdtNodeType(it, parsed),
+              faseId: it.faseId !== undefined ? it.faseId : (init?.faseId ?? null),
               dependencies: (it.dependencies && it.dependencies.length > 0)
                 ? it.dependencies
                 : (init?.dependencies || []),
@@ -1341,6 +1399,8 @@ export default function CronogramaGanttView({
       deliverables: item.deliverables || [],
       attachments: item.attachments || [],
       parentId: item.parentId || '',
+      edtType: item.edtType || '',
+      faseId: item.faseId || null,
       baselineStart: item.baselineStart || '',
       baselineEnd: item.baselineEnd || '',
       actualStart: item.actualStart || '',
@@ -1440,7 +1500,7 @@ export default function CronogramaGanttView({
           ? old.flatMap((x) => (x.id === drawerDraft.parentId ? [x, drawerDraft] : [x]))
           : [...old, drawerDraft]
       );
-      notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'hito' : 'subproceso'} guardado con éxito en el cronograma maestro`);
+      notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'componente' : 'subcomponente'} guardado con éxito en el cronograma maestro`);
     } else {
       commitChange((old) => old.map((x) => (x.id === drawerDraft.id ? applyActuals(x, drawerDraft, currentTodayIso) : x)));
       notify('Cambios guardados con éxito en el cronograma maestro');
@@ -2917,9 +2977,9 @@ export default function CronogramaGanttView({
   const exportExcelTemplate = () => {
     const headers = [
       'Código',
-      'Nombre de Tarea o Hito',
-      'Tipo (hito/subproceso)',
-      'Hito Padre (Código)',
+      'Nombre de Componente o Subcomponente',
+      'Tipo (COMPONENTE/SUBCOMPONENTE)',
+      'Componente Padre (Código)',
       'Fecha Inicio (YYYY-MM-DD)',
       'Fecha Fin (YYYY-MM-DD)',
       'Avance (%)',
@@ -2935,7 +2995,7 @@ export default function CronogramaGanttView({
       return [
         x.code,
         `"${x.name.replace(/"/g, '""')}"`,
-        x.kind,
+        resolveEdtNodeType(x, items),
         parent ? parent.code : '',
         x.start,
         x.end,
@@ -2988,8 +3048,10 @@ export default function CronogramaGanttView({
     const draftItem: Item = {
       id,
       code,
-      name: kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso',
+      name: kind === 'hito' ? 'Nuevo componente' : 'Nuevo subcomponente',
       kind,
+      edtType: kind === 'hito' ? 'COMPONENTE' : 'SUBCOMPONENTE',
+      faseId: null,
       parentId: pId,
       start: defaultStart,
       end: defaultEnd,
@@ -3051,7 +3113,7 @@ export default function CronogramaGanttView({
       });
       setSelectedId(id);
       toggleEdit(draftItem, 'name');
-      notify(`Nuevo ${kind} creado. Escribe el nombre y pulsa Enter.`);
+      notify(`Nuevo ${kind === 'hito' ? 'componente' : 'subcomponente'} creado. Escribe el nombre y pulsa Enter.`);
       return;
     };
 
@@ -3062,7 +3124,7 @@ export default function CronogramaGanttView({
     setEditorTab('info');
     setPanelOpen(true);
     setNewMenu(false);
-    notify(`Borrador de nuevo ${kind} abierto. Configura y pulsa "Guardar cambios".`);
+    notify(`Borrador de nuevo ${kind === 'hito' ? 'componente' : 'subcomponente'} abierto. Configura y pulsa "Guardar cambios".`);
   };
 
   const exportCSV = () => {
@@ -3071,7 +3133,7 @@ export default function CronogramaGanttView({
       ...items.map((x) => [
         x.code,
         x.name,
-        x.kind === 'hito' ? 'Hito' : 'Subproceso',
+        getEdtNodeDisplayLabel(x, items),
         x.start,
         x.end,
         getDays(x.start, x.end),
@@ -3154,7 +3216,7 @@ export default function CronogramaGanttView({
             <div className="menu-wrap">
               <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
                 <Plus size={16} />
-                <span>Agregar Hito</span>
+                <span>Agregar Componente</span>
                 <ChevronDown size={14} />
               </button>
               {newMenu && (
@@ -3166,7 +3228,7 @@ export default function CronogramaGanttView({
                     }}
                   >
                     <Folder size={15} />
-                    <span>Nuevo hito principal</span>
+                    <span>Nuevo componente principal</span>
                   </button>
                   <button
                     onClick={() => {
@@ -3175,7 +3237,7 @@ export default function CronogramaGanttView({
                     }}
                   >
                     <FileText size={15} />
-                    <span>Nuevo subproceso</span>
+                    <span>Nuevo subcomponente / subproceso</span>
                   </button>
                 </div>
               )}
@@ -3191,8 +3253,8 @@ export default function CronogramaGanttView({
             </span>
             <div className="metric-copy">
               <b>{hitos.length}</b>
-              <strong>Hitos Principales</strong>
-              <small>del proyecto</small>
+              <strong>Componentes Principales</strong>
+              <small>del proyecto (EDT Nivel 1)</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -3203,8 +3265,8 @@ export default function CronogramaGanttView({
             </span>
             <div className="metric-copy">
               <b>{subs.length}</b>
-              <strong>Subprocesos</strong>
-              <small>estructurados</small>
+              <strong>Subcomponentes</strong>
+              <small>y paquetes de trabajo</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -3270,19 +3332,19 @@ export default function CronogramaGanttView({
           <nav className="tabs">
             <div className="tabs-list">
               {[
-                { n: 'Todos', c: items.length },
-                { n: 'Hitos', c: hitos.length },
-                { n: 'Subprocesos', c: items.length - hitos.length },
-                { n: 'En proceso', c: inprog },
-                { n: 'Con retraso', c: late },
-                { n: 'Completados', c: complete },
+                { n: 'Todos', label: 'Todos', c: items.length },
+                { n: 'Hitos', label: 'Componentes', c: hitos.length },
+                { n: 'Subprocesos', label: 'Subcomponentes', c: items.length - hitos.length },
+                { n: 'En proceso', label: 'En proceso', c: inprog },
+                { n: 'Con retraso', label: 'Con retraso', c: late },
+                { n: 'Completados', label: 'Completados', c: complete },
               ].map((t) => (
                 <button
                   key={t.n}
                   className={tab === t.n ? 'active' : ''}
                   onClick={() => setTab(t.n)}
                 >
-                  {t.n} <span>({t.c})</span>
+                  {t.label} <span>({t.c})</span>
                 </button>
               ))}
             </div>
@@ -3341,7 +3403,7 @@ export default function CronogramaGanttView({
             <label className="search">
               <Search size={16} />
               <input
-                placeholder="Buscar hito, subproceso o código..."
+                placeholder="Buscar componente, subcomponente o código..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -3950,8 +4012,8 @@ export default function CronogramaGanttView({
                     e.stopPropagation();
                     toggleAllHitosExpand();
                   }}
-                  data-tooltip={allHitosExpanded ? "Colapsar hitos" : "Expandir hitos"}
-                  aria-label={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
+                  data-tooltip={allHitosExpanded ? "Colapsar componentes" : "Expandir componentes"}
+                  aria-label={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
                 >
                   <ChevronsUpDown size={15} />
                 </button>
@@ -4184,7 +4246,7 @@ export default function CronogramaGanttView({
                       <CustomSelect
                         value={rule.field}
                         options={[
-                          { value: 'name', label: 'Hito / Subproceso (Nombre o Código)' },
+                          { value: 'name', label: 'Componente / Subcomponente (Nombre o Código)' },
                           { value: 'status', label: 'Estado Oficial' },
                           { value: 'progress', label: 'Avance (%)' },
                           { value: 'gestor', label: 'Responsable' },
@@ -4350,7 +4412,7 @@ export default function CronogramaGanttView({
                     }
                   />
                 )}
-                <span>{viewMode === 'lista' ? 'Nombre' : 'Hito / Subproceso'}</span>
+                <span>{viewMode === 'lista' ? 'Nombre' : 'Componente / Subcomponente'}</span>
                 <div className="head-col-actions">
                   <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
                   <button
@@ -4360,7 +4422,7 @@ export default function CronogramaGanttView({
                       e.stopPropagation();
                       toggleAllHitosExpand();
                     }}
-                    title={allHitosExpanded ? "Colapsar todos los hitos y subprocesos" : "Expandir todos los hitos y subprocesos"}
+                    title={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
                   >
                     <ChevronsUpDown size={13} />
                   </button>
@@ -4415,7 +4477,7 @@ export default function CronogramaGanttView({
               )}
               {visibleCols.includes('parent') && (
                 <div className="th-col-header">
-                  <span className="th-label">Hito padre</span>
+                  <span className="th-label">Componente padre</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -4423,9 +4485,9 @@ export default function CronogramaGanttView({
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleColVisibility('parent');
-                        notify('Columna "Hito padre" ocultada.');
+                        notify('Columna "Componente padre" ocultada.');
                       }}
-                      title="Ocultar columna Hito padre"
+                      title="Ocultar columna Componente padre"
                     >
                       <EyeOff size={11} />
                     </button>
@@ -4714,7 +4776,7 @@ export default function CronogramaGanttView({
                   Cronograma nuevo · Listo para estructurar
                 </h3>
                 <p style={{ margin: 0, fontSize: '13px', color: '#64748b', maxWidth: '440px', textAlign: 'center', lineHeight: 1.45 }}>
-                  Este proyecto inicia desde cero (completamente en blanco). Agrega tu primer hito rector o importa un cronograma oficial para comenzar.
+                  Este proyecto inicia desde cero (completamente en blanco). Agrega tu primer componente o importa un cronograma oficial para comenzar.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
                   <button
@@ -4724,7 +4786,7 @@ export default function CronogramaGanttView({
                     style={{ height: '38px', padding: '0 18px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                   >
                     <Plus size={15} />
-                    <span>Agregar Primer Hito</span>
+                    <span>Agregar Primer Componente</span>
                   </button>
                   <button
                     type="button"
@@ -4927,11 +4989,11 @@ export default function CronogramaGanttView({
                           </>
                         ) : (
                           <>
-                            {/* 1. Mismo nivel (+ Hito Rector) */}
+                            {/* 1. Mismo nivel (+ Componente Principal) */}
                             <button
                               type="button"
                               className="quick-inline-icon-btn"
-                              title="Agregar nuevo hito rector al mismo nivel"
+                              title="Agregar nuevo componente al mismo nivel"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('hito', undefined, true);
@@ -4940,11 +5002,11 @@ export default function CronogramaGanttView({
                               <Plus size={13} style={{ color: '#0f172a' }} />
                             </button>
 
-                            {/* 2. Nivel inferior (↳ Enter / Subproceso hijo) */}
+                            {/* 2. Nivel inferior (↳ Enter / Subcomponente hijo) */}
                             <button
                               type="button"
                               className="quick-inline-icon-btn"
-                              title={`Agregar subproceso hijo para este hito (${x.code})`}
+                              title={`Agregar subcomponente hijo para este componente (${x.code})`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 add('subproceso', x.id, true);
@@ -4953,11 +5015,11 @@ export default function CronogramaGanttView({
                               <CornerDownRight size={13} style={{ color: '#0284c7' }} />
                             </button>
 
-                            {/* 3. Colapsador de este hito */}
+                            {/* 3. Colapsador de este componente */}
                             <button
                               type="button"
                               className="quick-inline-icon-btn"
-                              title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar subprocesos de este hito" : "Expandir subprocesos de este hito"}
+                              title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar subcomponentes de este componente" : "Expandir subcomponentes de este componente"}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleItemExpand(x.id, x.expanded !== false);
@@ -4982,7 +5044,7 @@ export default function CronogramaGanttView({
                   {visibleCols.includes('kind') && (
                     <div className="kind-cell-col">
                       <span className={`type-badge-pill ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
-                        {x.kind === 'hito' ? 'Hito' : 'Subproceso'}
+                        {getEdtNodeDisplayLabel(x, items)}
                       </span>
                     </div>
                   )}
@@ -5631,7 +5693,7 @@ export default function CronogramaGanttView({
                           )}
 
                           {x.kind === 'hito' ? (
-                            <span className="hito-diamond-badge" title="Hito Principal">
+                            <span className="hito-diamond-badge" title="Componente Principal">
                               <span className="diamond-shape" />
                             </span>
                           ) : null}
@@ -5665,11 +5727,11 @@ export default function CronogramaGanttView({
             </div>
           ))}
 
-              {/* Fila interactiva para creación rápida de nuevo Hito Principal al pie */}
+              {/* Fila interactiva para creación rápida de nuevo Componente Principal al pie */}
               <div
                 className="row quick-add-row"
                 onClick={() => add('hito', undefined, true)}
-                title="Haz clic para agregar un nuevo hito principal al cronograma"
+                title="Haz clic para agregar un nuevo componente principal al cronograma"
               >
                 <div
                   className="fixed-cols"
@@ -5684,7 +5746,7 @@ export default function CronogramaGanttView({
                     <div className="quick-add-icon-box">
                       <Plus size={14} />
                     </div>
-                    <span className="quick-add-text">+ Agregar nuevo hito principal</span>
+                    <span className="quick-add-text">+ Agregar nuevo componente principal</span>
                   </div>
                 </div>
               </div>
@@ -6033,7 +6095,7 @@ export default function CronogramaGanttView({
                 </button>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h2 style={{ fontSize: '15px', margin: 0, fontWeight: 700 }}>
-                    {isNewDraft ? 'Crear' : 'Editar'} {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}
+                    {isNewDraft ? 'Crear' : 'Editar'} {getEdtNodeDisplayLabel(activeItem, items)}
                   </h2>
                 </div>
               </div>
@@ -6048,7 +6110,7 @@ export default function CronogramaGanttView({
               </button>
             </div>
 
-            {/* Selector permanente de hito con diseño oficial de la página */}
+            {/* Selector permanente de componente con diseño oficial de la página */}
             {hitos.length > 0 && (
               <div
                 style={{
@@ -6070,7 +6132,7 @@ export default function CronogramaGanttView({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Hito:
+                  Componente:
                 </span>
                 <div className="filter-dropdown-wrap" style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                   <button
@@ -6108,10 +6170,10 @@ export default function CronogramaGanttView({
                       }}
                     >
                       {isNewDraft
-                        ? `+ ${activeItem.kind === 'hito' ? 'Nuevo hito' : 'Nuevo subproceso'} (en borrador)`
+                        ? `+ ${activeItem.kind === 'hito' ? 'Nuevo componente' : 'Nuevo subcomponente'} (en borrador)`
                         : activeItem.kind === 'hito'
                         ? `${activeItem.code} ${activeItem.name}`
-                        : `${hitos.find((h) => h.id === activeItem.parentId)?.code || ''} ${hitos.find((h) => h.id === activeItem.parentId)?.name || 'Hito padre'}`}
+                        : `${hitos.find((h) => h.id === activeItem.parentId)?.code || ''} ${hitos.find((h) => h.id === activeItem.parentId)?.name || 'Componente padre'}`}
                     </span>
                     <ChevronDown
                       size={14}
@@ -6144,7 +6206,7 @@ export default function CronogramaGanttView({
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="filter-popover-title">Hitos del Cronograma</div>
+                      <div className="filter-popover-title">Componentes del Cronograma</div>
                       {hitos.map((h) => {
                         const isSelected = activeItem.kind === 'hito' && !isNewDraft && activeItem.id === h.id;
                         return (
@@ -6177,14 +6239,14 @@ export default function CronogramaGanttView({
                 className={editorTab === 'info' ? 'active' : ''}
                 onClick={() => setEditorTab('info')}
               >
-                {activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'}
+                {activeItem.kind === 'hito' ? 'Componente' : 'Subcomponente'}
               </button>
               <button
                 type="button"
                 className={editorTab === 'subprocesos' ? 'active' : ''}
                 onClick={() => setEditorTab('subprocesos')}
               >
-                Subprocesos
+                Subcomponentes
               </button>
               <button
                 type="button"
@@ -6197,7 +6259,7 @@ export default function CronogramaGanttView({
 
             {editorTab === 'info' && (
               <div className="editor-body">
-                {/* Selector de Elemento Padre si es subproceso (admite Hitos y Subprocesos para multinivel) */}
+                {/* Selector de Elemento Padre si es subcomponente (admite Componentes y Subcomponentes para multinivel) */}
                 {activeItem.kind === 'subproceso' && (
                   <div className="field relative" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
                     <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em', display: 'block', marginBottom: '6px' }}>
@@ -6244,8 +6306,8 @@ export default function CronogramaGanttView({
                             const parent = items.find((x) => x.id === activeItem.parentId);
                             if (!parent) return 'Selecciona el elemento padre...';
                             return parent.kind === 'hito'
-                              ? `[Hito] ${parent.code} ${parent.name}`
-                              : `└ [Subproceso] ${parent.code} ${parent.name}`;
+                              ? `[Componente] ${parent.code} ${parent.name}`
+                              : `└ [Subcomponente] ${parent.code} ${parent.name}`;
                           })()}
                         </span>
                         <ChevronDown
@@ -6297,7 +6359,7 @@ export default function CronogramaGanttView({
                                 >
                                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>
                                     <b style={{ color: cand.kind === 'hito' ? '#0284c7' : '#64748b', marginRight: 5 }}>
-                                      {cand.kind === 'hito' ? `[Hito] ${cand.code}` : `└ ${cand.code}`}
+                                      {cand.kind === 'hito' ? `[Componente] ${cand.code}` : `└ ${cand.code}`}
                                     </b>
                                     {cand.name}
                                   </span>
@@ -6311,13 +6373,72 @@ export default function CronogramaGanttView({
                   </div>
                 )}
 
+                {/* Contenedor Opcional PMBOK: Fase del Ciclo de Vida y Clasificación EDT */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '4px' }}>
+                  <label className="field" style={{ margin: 0 }}>
+                    <span>Clasificación EDT (PMBOK)</span>
+                    <select
+                      value={activeItem.edtType || resolveEdtNodeType(activeItem, items)}
+                      onChange={(e) => updateDraft({ edtType: e.target.value as EdtNodeType })}
+                      style={{
+                        height: '34px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        padding: '0 8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        background: '#ffffff',
+                      }}
+                    >
+                      {activeItem.kind === 'hito' ? (
+                        <>
+                          <option value="COMPONENTE">Componente (Nivel 1 EDT)</option>
+                          <option value="HITO">Hito (Control Duración 0)</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="SUBCOMPONENTE">Subcomponente (Subdivisión EDT)</option>
+                          <option value="PAQUETE_TRABAJO">Paquete de Trabajo (Ejecutable)</option>
+                          <option value="ENTREGABLE">Entregable (Producto / Evidencia)</option>
+                          <option value="HITO">Hito (Control Duración 0)</option>
+                        </>
+                      )}
+                    </select>
+                  </label>
+                  <label className="field" style={{ margin: 0 }}>
+                    <span>Fase del Ciclo de Vida (Opcional)</span>
+                    <select
+                      value={activeItem.faseId || ''}
+                      onChange={(e) => updateDraft({ faseId: e.target.value ? e.target.value : null })}
+                      style={{
+                        height: '34px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        padding: '0 8px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        background: '#ffffff',
+                      }}
+                    >
+                      <option value="">Sin fase asignada (Directo en EDT)</option>
+                      {PROJECT_PHASES_CATALOG.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.code} · {f.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
                 {/* 1. Nombre */}
                 <label className="field">
-                  <span>Nombre ({activeItem.kind === 'hito' ? 'Hito' : 'Subproceso'})</span>
+                  <span>Nombre ({getEdtNodeDisplayLabel(activeItem, items)})</span>
                   <input
                     value={activeItem.name}
                     onChange={(e) => updateDraft({ name: e.target.value })}
-                    placeholder="Nombre del hito o subproceso..."
+                    placeholder="Nombre del componente o subcomponente..."
                   />
                 </label>
 
@@ -6363,7 +6484,7 @@ export default function CronogramaGanttView({
                   {showAddDeliverable && (
                     <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px', marginBottom: '8px' }}>
                       <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
-                        Nuevo Entregable de Hito
+                        Nuevo Entregable Oficial
                       </div>
                       <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
                         {[
@@ -6931,7 +7052,7 @@ export default function CronogramaGanttView({
                           onClick={() => handleOpenCreateTaskModal(activeItem.name)}
                         >
                           <Plus size={13} />
-                          <span>Crear tarea para este hito</span>
+                          <span>Crear tarea para este componente</span>
                         </button>
                       </div>
 
@@ -7014,7 +7135,7 @@ export default function CronogramaGanttView({
                           <span style={{ fontSize: '12px', color: '#64748b' }}>
                             {total > 0
                               ? `${total} tarea(s) sincronizadas con módulo Tareas Kanban`
-                              : 'Vincula tareas operativas con responsables y fechas para medir el avance del hito'}
+                              : 'Vincula tareas operativas con responsables y fechas para medir el avance del componente'}
                           </span>
                         </div>
                       </div>
@@ -7160,18 +7281,18 @@ export default function CronogramaGanttView({
               </div>
             )}
 
-            {/* Pestaña: Subprocesos del Hito */}
+            {/* Pestaña: Subcomponentes del Componente */}
             {editorTab === 'subprocesos' && (
               <div className="editor-body">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <div>
                     <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
-                      {activeItem.kind === 'hito' ? 'Subprocesos' : 'Sub-subprocesos'} ({items.filter((x) => x.parentId === activeItem.id).length})
+                      {activeItem.kind === 'hito' ? 'Subcomponentes' : 'Sub-elementos / Paquetes de trabajo'} ({items.filter((x) => x.parentId === activeItem.id).length})
                     </b>
                     <span style={{ fontSize: '12px', color: '#64748b' }}>
                       {activeItem.kind === 'hito'
-                        ? 'Desglose de entregables y etapas hijas.'
-                        : 'Sub-subprocesos y actividades vinculadas.'}
+                        ? 'Desglose de subcomponentes, paquetes de trabajo y entregables hijos.'
+                        : 'Subdivisiones y paquetes de trabajo vinculados.'}
                     </span>
                   </div>
                   <button
@@ -7181,7 +7302,7 @@ export default function CronogramaGanttView({
                     onClick={() => add('subproceso', activeItem.id)}
                   >
                     <Plus size={14} />
-                    <span>{activeItem.kind === 'hito' ? 'Agregar Subproceso' : 'Agregar Sub-subproceso'}</span>
+                    <span>{activeItem.kind === 'hito' ? 'Agregar Subcomponente' : 'Agregar Sub-elemento'}</span>
                   </button>
                 </div>
 
@@ -7234,12 +7355,12 @@ export default function CronogramaGanttView({
                     <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
                       <FileText size={28} style={{ color: '#94a3b8', margin: '0 auto 8px' }} />
                       <b style={{ fontSize: '13px', color: '#334155', display: 'block' }}>
-                        {activeItem.kind === 'hito' ? 'No hay subprocesos asignados' : 'No hay sub-subprocesos asignados'}
+                        {activeItem.kind === 'hito' ? 'No hay subcomponentes asignados' : 'No hay sub-elementos asignados'}
                       </b>
                       <span style={{ fontSize: '12px', color: '#64748b', display: 'block', margin: '4px 0 14px' }}>
                         {activeItem.kind === 'hito'
-                          ? 'Desglosa este hito en etapas o paquetes de trabajo estructurados.'
-                          : 'Desglosa este subproceso en niveles operativos de mayor detalle.'}
+                          ? 'Desglosa este componente en subcomponentes o paquetes de trabajo estructurados.'
+                          : 'Desglosa este subcomponente en niveles operativos de mayor detalle.'}
                       </span>
                       <button
                         type="button"
@@ -7248,7 +7369,7 @@ export default function CronogramaGanttView({
                         onClick={() => add('subproceso', activeItem.id)}
                       >
                         <Plus size={14} />
-                        <span>{activeItem.kind === 'hito' ? 'Crear primer subproceso' : 'Crear primer sub-subproceso'}</span>
+                        <span>{activeItem.kind === 'hito' ? 'Crear primer subcomponente' : 'Crear primer sub-elemento'}</span>
                       </button>
                     </div>
                   )}
@@ -7460,7 +7581,7 @@ export default function CronogramaGanttView({
                     ¿Salir sin guardar cambios?
                   </h3>
                   <small style={{ fontSize: '12px', color: '#64748b' }}>
-                    Hay modificaciones o datos pendientes en este {selected?.kind === 'hito' ? 'hito' : 'subproceso'}.
+                    Hay modificaciones o datos pendientes en este {selected?.kind === 'hito' ? 'componente' : 'subcomponente'}.
                   </small>
                 </div>
               </div>
@@ -7547,7 +7668,7 @@ export default function CronogramaGanttView({
                 </div>
                 <div>
                   <h3 style={{ margin: '2px 0 4px', fontSize: '16.5px', fontWeight: 750, color: '#0f172a' }}>
-                    ¿Eliminar {activeItem.kind === 'hito' ? 'hito' : 'subproceso'}?
+                    ¿Eliminar {activeItem.kind === 'hito' ? 'componente' : 'subcomponente'}?
                   </h3>
                   <small style={{ fontSize: '12px', color: '#64748b' }}>
                     Esta acción retirará el registro y sus dependencias directas del cronograma maestro.
@@ -7557,7 +7678,7 @@ export default function CronogramaGanttView({
               <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.55 }}>
                 Estás a punto de eliminar permanentemente <b>"{activeItem.code} {activeItem.name}"</b>.
                 {activeItem.kind === 'hito' && (
-                  <span> Todos los subprocesos y actividades vinculadas a este hito también serán removidos.</span>
+                  <span> Todos los subcomponentes y actividades vinculadas a este componente también serán removidos.</span>
                 )}
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
@@ -8092,7 +8213,7 @@ export default function CronogramaGanttView({
                         checked={newColAppliesTo === 'all'}
                         onChange={() => setNewColAppliesTo('all')}
                       />
-                      <span>Hitos y subprocesos</span>
+                      <span>Componentes y subcomponentes</span>
                     </label>
 
                     <label className="custom-col-radio-label">
@@ -8103,7 +8224,7 @@ export default function CronogramaGanttView({
                         checked={newColAppliesTo === 'hitos'}
                         onChange={() => setNewColAppliesTo('hitos')}
                       />
-                      <span>Solo hitos</span>
+                      <span>Solo componentes</span>
                     </label>
 
                     <label className="custom-col-radio-label">
@@ -8114,7 +8235,7 @@ export default function CronogramaGanttView({
                         checked={newColAppliesTo === 'subprocesos'}
                         onChange={() => setNewColAppliesTo('subprocesos')}
                       />
-                      <span>Solo subprocesos</span>
+                      <span>Solo subcomponentes</span>
                     </label>
                   </div>
                 </div>
