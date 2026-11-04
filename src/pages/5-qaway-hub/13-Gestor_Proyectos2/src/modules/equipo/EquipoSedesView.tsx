@@ -261,7 +261,9 @@ export default function EquipoSedesView({
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <b
                                   onClick={() => onSelectIntegrante(item.id)}
-                                  style={{ fontSize: '12.5px', color: '#0f172a', cursor: 'pointer', textDecoration: 'underline' }}
+                                  style={{ fontSize: '12.5px', color: '#0f172a', cursor: 'pointer', fontWeight: 650 }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.color = '#0066ff')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.color = '#0f172a')}
                                 >
                                   {item.nombreCompleto}
                                 </b>

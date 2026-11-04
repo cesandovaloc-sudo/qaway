@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { Integrante, AsignacionViva, SedeFrente } from './types';
 import {
   Activity,
@@ -7,6 +7,8 @@ import {
   Search,
   Building2,
   X,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
 
 interface EquipoCargaViewProps {
@@ -27,6 +29,14 @@ export default function EquipoCargaView({
   const [filtroSede, setFiltroSede] = useState('todas');
   const [filtroNivelCarga, setFiltroNivelCarga] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
+  const [openDropdown, setOpenDropdown] = useState<'sede' | 'nivel' | null>(null);
+
+  useEffect(() => {
+    const handleDocClick = () => setOpenDropdown(null);
+    document.addEventListener('mousedown', handleDocClick);
+    return () => document.removeEventListener('mousedown', handleDocClick);
+  }, []);
+
   const [modalRebalanceo, setModalRebalanceo] = useState<{
     integranteOrigen: Integrante;
     tarea: AsignacionViva;
@@ -104,46 +114,125 @@ export default function EquipoCargaView({
           )}
         </label>
 
+        {/* Filtro Ubicación con estilo oficial Cronograma */}
         <div className="filter-dropdown-wrap">
-          <select
-            value={filtroSede}
-            onChange={(e) => setFiltroSede(e.target.value)}
-            className="filter-card-btn"
-            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
+          <button
+            type="button"
+            className={`filter-card-btn ${openDropdown === 'sede' ? 'active' : ''} ${filtroSede !== 'todas' ? 'filtered' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(openDropdown === 'sede' ? null : 'sede');
+            }}
+            title="Filtrar por sede"
           >
-            <option value="todas">Ubicación: Todas las sedes</option>
-            {sedes.map((s) => (
-              <option key={s.id} value={s.id}>{s.nombre}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-dropdown-wrap">
-          <select
-            value={filtroNivelCarga}
-            onChange={(e) => setFiltroNivelCarga(e.target.value)}
-            className="filter-card-btn"
-            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
-          >
-            <option value="todos">Nivel: Toda la ocupación</option>
-            <option value="sobrecargado">Sobrecargados (&gt;100%)</option>
-            <option value="optimo">Carga Óptima (50% - 100%)</option>
-            <option value="disponible">Con Disponibilidad (&lt;50%)</option>
-          </select>
-        </div>
-
-        <div style={{ flex: 1 }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-          <span style={{ color: '#166534', background: '#dcfce7', padding: '3px 8px', borderRadius: '12px', fontWeight: 650 }}>
-            {resumenGlobal.disponibles} con disponibilidad
-          </span>
-          {resumenGlobal.sobrecargados > 0 && (
-            <span style={{ color: '#b91c1c', background: '#fee2e2', padding: '3px 8px', borderRadius: '12px', fontWeight: 650 }}>
-              {resumenGlobal.sobrecargados} sobrecargados
-            </span>
+            <div className="filter-card-copy">
+              <small>Ubicación</small>
+              <span>{sedes.find((s) => s.id === filtroSede)?.nombre || 'Todas las sedes'}</span>
+            </div>
+            <ChevronDown size={14} className="filter-chevron" />
+          </button>
+          {openDropdown === 'sede' && (
+            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 220 }}>
+              <div className="filter-popover-title">Filtrar por Ubicación</div>
+              <div className="filter-popover-list">
+                <button
+                  type="button"
+                  className={`filter-item-btn ${filtroSede === 'todas' ? 'selected' : ''}`}
+                  onClick={() => {
+                    setFiltroSede('todas');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>Todas las sedes</span>
+                  {filtroSede === 'todas' && <Check size={14} className="item-check" />}
+                </button>
+                {sedes.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={`filter-item-btn ${filtroSede === s.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      setFiltroSede(s.id);
+                      setOpenDropdown(null);
+                    }}
+                  >
+                    <span>{s.nombre}</span>
+                    {filtroSede === s.id && <Check size={14} className="item-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
+
+        {/* Filtro Nivel de Ocupación con estilo oficial Cronograma */}
+        <div className="filter-dropdown-wrap">
+          <button
+            type="button"
+            className={`filter-card-btn ${openDropdown === 'nivel' ? 'active' : ''} ${filtroNivelCarga !== 'todos' ? 'filtered' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(openDropdown === 'nivel' ? null : 'nivel');
+            }}
+            title="Filtrar por nivel de ocupación"
+          >
+            <div className="filter-card-copy">
+              <small>Nivel</small>
+              <span>
+                {filtroNivelCarga === 'todos'
+                  ? 'Toda la ocupación'
+                  : filtroNivelCarga === 'sobrecargado'
+                  ? 'Sobrecargados (>100%)'
+                  : filtroNivelCarga === 'optimo'
+                  ? 'Carga Óptima (50%-100%)'
+                  : 'Con Disponibilidad (<50%)'}
+              </span>
+            </div>
+            <ChevronDown size={14} className="filter-chevron" />
+          </button>
+          {openDropdown === 'nivel' && (
+            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 230 }}>
+              <div className="filter-popover-title">Filtrar por Nivel de Carga</div>
+              <div className="filter-popover-list">
+                {[
+                  { id: 'todos', label: 'Toda la ocupación' },
+                  { id: 'sobrecargado', label: 'Sobrecargados (>100%)' },
+                  { id: 'optimo', label: 'Carga Óptima (50% - 100%)' },
+                  { id: 'disponible', label: 'Con Disponibilidad (<50%)' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={`filter-item-btn ${filtroNivelCarga === opt.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      setFiltroNivelCarga(opt.id);
+                      setOpenDropdown(null);
+                    }}
+                  >
+                    <span>{opt.label}</span>
+                    {filtroNivelCarga === opt.id && <Check size={14} className="item-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {(busqueda || filtroSede !== 'todas' || filtroNivelCarga !== 'todos') && (
+          <button
+            className="clear-btn"
+            onClick={() => {
+              setBusqueda('');
+              setFiltroSede('todas');
+              setFiltroNivelCarga('todos');
+            }}
+            title="Limpiar todos los filtros"
+          >
+            Limpiar
+          </button>
+        )}
+
+        <div style={{ flex: 1 }} />
       </div>
 
       {/* Tabla de Capacidad dentro del Contenedor de Scroll */}
@@ -173,7 +262,9 @@ export default function EquipoCargaView({
                       <div>
                         <b
                           onClick={() => onSelectIntegrante(integrante.id)}
-                          style={{ fontSize: '13px', color: '#0f172a', cursor: 'pointer', textDecoration: 'underline' }}
+                          style={{ fontSize: '13px', color: '#0f172a', cursor: 'pointer', fontWeight: 650 }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = '#0066ff')}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = '#0f172a')}
                         >
                           {integrante.nombreCompleto}
                         </b>

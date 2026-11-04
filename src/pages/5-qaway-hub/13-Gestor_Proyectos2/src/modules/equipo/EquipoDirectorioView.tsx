@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { Integrante, SedeFrente, AsignacionViva, PresetVista, EstadoOperativo, EstadoCuenta } from './types';
 import {
   Search,
@@ -84,6 +84,13 @@ export default function EquipoDirectorioView({
   const [targetEstadoOp, setTargetEstadoOp] = useState<EstadoOperativo>('En funciones');
   const [sortField, setSortField] = useState<keyof Integrante>('nombreCompleto');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [openDropdown, setOpenDropdown] = useState<'sede' | 'estadoOp' | 'estadoCuenta' | null>(null);
+
+  useEffect(() => {
+    const handleDocClick = () => setOpenDropdown(null);
+    document.addEventListener('mousedown', handleDocClick);
+    return () => document.removeEventListener('mousedown', handleDocClick);
+  }, []);
 
   // Filtrado y ordenamiento en memoria
   const filteredIntegrantes = useMemo(() => {
@@ -206,49 +213,133 @@ export default function EquipoDirectorioView({
 
         {/* Filtro Sede */}
         <div className="filter-dropdown-wrap">
-          <select
-            value={sedeFilter}
-            onChange={(e) => setSedeFilter(e.target.value)}
-            className="filter-card-btn"
-            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
+          <button
+            type="button"
+            className={`filter-card-btn ${openDropdown === 'sede' ? 'active' : ''} ${sedeFilter !== 'todas' ? 'filtered' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(openDropdown === 'sede' ? null : 'sede');
+            }}
+            title="Filtrar por sede"
           >
-            <option value="todas">Ubicación: Todas las sedes</option>
-            {sedes.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nombre}
-              </option>
-            ))}
-          </select>
+            <div className="filter-card-copy">
+              <small>Ubicación</small>
+              <span>{sedes.find((s) => s.id === sedeFilter)?.nombre || 'Todas las sedes'}</span>
+            </div>
+            <ChevronDown size={14} className="filter-chevron" />
+          </button>
+          {openDropdown === 'sede' && (
+            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 220 }}>
+              <div className="filter-popover-title">Filtrar por Ubicación</div>
+              <div className="filter-popover-list">
+                <button
+                  type="button"
+                  className={`filter-item-btn ${sedeFilter === 'todas' ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSedeFilter('todas');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>Todas las sedes</span>
+                  {sedeFilter === 'todas' && <Check size={14} className="item-check" />}
+                </button>
+                {sedes.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={`filter-item-btn ${sedeFilter === s.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSedeFilter(s.id);
+                      setOpenDropdown(null);
+                    }}
+                  >
+                    <span>{s.nombre}</span>
+                    {sedeFilter === s.id && <Check size={14} className="item-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Filtro Estado Laboral */}
         <div className="filter-dropdown-wrap">
-          <select
-            value={estadoOpFilter}
-            onChange={(e) => setEstadoOpFilter(e.target.value)}
-            className="filter-card-btn"
-            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
+          <button
+            type="button"
+            className={`filter-card-btn ${openDropdown === 'estadoOp' ? 'active' : ''} ${estadoOpFilter !== 'todos' ? 'filtered' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(openDropdown === 'estadoOp' ? null : 'estadoOp');
+            }}
+            title="Filtrar por estado laboral"
           >
-            <option value="todos">Estado: Todos los estados</option>
-            <option value="En funciones">En funciones</option>
-            <option value="Licencia / Permiso">Licencia / Permiso</option>
-            <option value="Desvinculado">Desvinculado</option>
-          </select>
+            <div className="filter-card-copy">
+              <small>Estado</small>
+              <span>{estadoOpFilter === 'todos' ? 'Todos los estados' : estadoOpFilter}</span>
+            </div>
+            <ChevronDown size={14} className="filter-chevron" />
+          </button>
+          {openDropdown === 'estadoOp' && (
+            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
+              <div className="filter-popover-title">Filtrar por Estado Laboral</div>
+              <div className="filter-popover-list">
+                {['todos', 'En funciones', 'Licencia / Permiso', 'Desvinculado'].map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    className={`filter-item-btn ${estadoOpFilter === st ? 'selected' : ''}`}
+                    onClick={() => {
+                      setEstadoOpFilter(st);
+                      setOpenDropdown(null);
+                    }}
+                  >
+                    <span>{st === 'todos' ? 'Todos los estados' : st}</span>
+                    {estadoOpFilter === st && <Check size={14} className="item-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Filtro Cuenta de Acceso */}
         <div className="filter-dropdown-wrap">
-          <select
-            value={estadoCuentaFilter}
-            onChange={(e) => setEstadoCuentaFilter(e.target.value)}
-            className="filter-card-btn"
-            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
+          <button
+            type="button"
+            className={`filter-card-btn ${openDropdown === 'estadoCuenta' ? 'active' : ''} ${estadoCuentaFilter !== 'todos' ? 'filtered' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(openDropdown === 'estadoCuenta' ? null : 'estadoCuenta');
+            }}
+            title="Filtrar por acceso a cuenta"
           >
-            <option value="todos">Cuenta: Todos los accesos</option>
-            <option value="Habilitada">Habilitada</option>
-            <option value="Invitación Pendiente">Invitación Pendiente</option>
-            <option value="Suspendida">Suspendida</option>
-          </select>
+            <div className="filter-card-copy">
+              <small>Cuenta</small>
+              <span>{estadoCuentaFilter === 'todos' ? 'Todos los accesos' : estadoCuentaFilter}</span>
+            </div>
+            <ChevronDown size={14} className="filter-chevron" />
+          </button>
+          {openDropdown === 'estadoCuenta' && (
+            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
+              <div className="filter-popover-title">Filtrar por Acceso</div>
+              <div className="filter-popover-list">
+                {['todos', 'Habilitada', 'Invitación Pendiente', 'Suspendida'].map((acc) => (
+                  <button
+                    key={acc}
+                    type="button"
+                    className={`filter-item-btn ${estadoCuentaFilter === acc ? 'selected' : ''}`}
+                    onClick={() => {
+                      setEstadoCuentaFilter(acc);
+                      setOpenDropdown(null);
+                    }}
+                  >
+                    <span>{acc === 'todos' ? 'Todos los accesos' : acc}</span>
+                    {estadoCuentaFilter === acc && <Check size={14} className="item-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {(searchQuery || sedeFilter !== 'todas' || estadoOpFilter !== 'todos' || estadoCuentaFilter !== 'todos') && (
@@ -399,7 +490,13 @@ export default function EquipoDirectorioView({
                             </div>
                           )}
                           <div>
-                            <b style={{ display: 'block', fontSize: '13px', color: '#0f172a' }}>{item.nombreCompleto}</b>
+                            <b
+                              style={{ display: 'block', fontSize: '13px', color: '#0f172a', fontWeight: 650, cursor: 'pointer' }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = '#0066ff')}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = '#0f172a')}
+                            >
+                              {item.nombreCompleto}
+                            </b>
                             <small style={{ color: '#64748b', fontSize: '11px' }}>{item.email}</small>
                           </div>
                         </div>
