@@ -157,7 +157,39 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
     }
 
     if (Array.isArray(data) && data.length > 0) {
-      const mapped = data.map(fromSupabaseRow);
+      // Filtrar y purgar registros obsoletos o mocks residuales de pruebas previas
+      const legacyIds = data
+        .filter(
+          (row) =>
+            row.id === 'h1' ||
+            row.id === 'h2' ||
+            row.id === 's11' ||
+            row.name === 'Planificación de la distribución y conformación de comités' ||
+            (typeof row.name === 'string' &&
+              (row.name.toLowerCase().includes('nuevo hito') ||
+                row.name.toLowerCase().includes('nuevo subproceso'))) ||
+            (typeof row.id === 'string' && row.id.startsWith('h-'))
+        )
+        .map((r) => r.id);
+
+      if (legacyIds.length > 0) {
+        // Purgar de Supabase para que no vuelvan a contaminar la sincronización
+        supabase
+          .from('gestor_cronograma_items')
+          .delete()
+          .in('id', legacyIds)
+          .then(() => {})
+          .catch(() => {});
+      }
+
+      const validRows = data.filter((row) => !legacyIds.includes(row.id));
+
+      if (projectId === 'p1' && (validRows.length < 50 || !validRows.some((r) => r.id === 'comp-11'))) {
+        // En proyecto p1, si en BD faltan registros oficiales, retornar null para usar la matriz oficial de 62 registros
+        return null;
+      }
+
+      const mapped = validRows.map(fromSupabaseRow);
       // Si la BD aún no guarda línea base/fechas reales, se conservan las del respaldo local.
       try {
         const local = JSON.parse(localStorage.getItem(`qaway-gantt-items-${projectId}`) || '[]');

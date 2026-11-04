@@ -928,12 +928,27 @@ export default function CronogramaGanttView({
               localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify([]));
               return [];
             }
-          } else if (parsed.length < 30) {
-            // Migración automática del proyecto activo p1 a los 62 registros oficiales del Excel DRE Junín
-            try {
-              localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
-            } catch {}
-            return INITIAL_ITEMS;
+          } else {
+            // Detectar si el proyecto activo p1 contiene datos obsoletos de prueba (h1..h5, s11..s52, 'Nuevo hito', 'Nuevo subproceso', huérfanos)
+            const hasLegacyMocks = parsed.some(
+              (it) =>
+                it.id === 'h1' ||
+                it.id === 'h2' ||
+                it.id === 's11' ||
+                it.name === 'Planificación de la distribución y conformación de comités' ||
+                (typeof it.name === 'string' && it.name.toLowerCase().includes('nuevo hito')) ||
+                (typeof it.name === 'string' && it.name.toLowerCase().includes('nuevo subproceso')) ||
+                (it.id && typeof it.id === 'string' && it.id.startsWith('h-')) ||
+                (Boolean(it.parentId) && !parsed.some((p) => p.id === it.parentId))
+            );
+            if (hasLegacyMocks || parsed.length < 50 || !parsed.some((it) => it.id === 'comp-11')) {
+              // Limpieza y migración automática y definitiva a los 62 registros oficiales del Excel DRE Junín
+              try {
+                localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
+                localStorage.removeItem('qaway-collapsed-by-mode-v1');
+              } catch {}
+              return INITIAL_ITEMS;
+            }
           }
           // Sincronizar dependencias maestras para ítems persistidos sin campo dependencies
           const initialMap = new Map(INITIAL_ITEMS.map((x) => [x.id, x]));
@@ -954,6 +969,7 @@ export default function CronogramaGanttView({
       if (pid === 'p1') {
         try {
           localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
+          localStorage.removeItem('qaway-collapsed-by-mode-v1');
         } catch {
           /* fallback */
         }
@@ -999,7 +1015,20 @@ export default function CronogramaGanttView({
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
-        setItems(cloudItems as Item[]);
+        // Filtrar datos contaminados obsoletos si provienen de sesiones anteriores en BD
+        const cleanCloudItems = cloudItems.filter(
+          (it) =>
+            it.id !== 'h1' &&
+            it.id !== 'h2' &&
+            it.id !== 's11' &&
+            it.name !== 'Planificación de la distribución y conformación de comités' &&
+            !it.name.toLowerCase().includes('nuevo hito') &&
+            !it.name.toLowerCase().includes('nuevo subproceso') &&
+            !it.id.startsWith('h-')
+        );
+        if (cleanCloudItems.length >= 50) {
+          setItems(cleanCloudItems as Item[]);
+        }
       }
     });
     return () => {
@@ -1028,7 +1057,7 @@ export default function CronogramaGanttView({
     if (visibleCols.length > 1) {
       prevVisibleColsRef.current = [...visibleCols];
       setVisibleCols(['name']);
-      notify('Vista compacta: solo Hito/Subproceso y lienzo Gantt visible');
+      notify('Vista compacta: solo Componente/Subcomponente y lienzo Gantt visible');
     } else {
       const restored = prevVisibleColsRef.current.length > 1 ? prevVisibleColsRef.current : [...DEFAULT_VISIBLE_COLS];
       setVisibleCols(restored);
@@ -2760,7 +2789,7 @@ export default function CronogramaGanttView({
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
   const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false) => {
-    const id = (kind === 'hito' ? 'h-' : 'sub-') + Date.now();
+    const id = (kind === 'hito' ? 'comp-' : 'sub-') + Date.now();
     const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
     let code = `${hitos.length + 1}.`;
     let defaultStart = '2026-10-26';
@@ -5722,7 +5751,7 @@ export default function CronogramaGanttView({
               items={shown}
               allItems={items}
               onSelectItem={openEditorForItem}
-              onAddItem={() => openNewHitoModal()}
+              onAddItem={() => add('hito')}
               formatDatePE={formatDatePE}
             />
           )}
@@ -7133,7 +7162,7 @@ export default function CronogramaGanttView({
                 </div>
 
                 <div className="field relative">
-                  <span>Vincular Hito Predecesor (Requisito previo)</span>
+                  <span>Vincular Componente Predecesor (Requisito previo)</span>
                   <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
                     <button
                       type="button"
