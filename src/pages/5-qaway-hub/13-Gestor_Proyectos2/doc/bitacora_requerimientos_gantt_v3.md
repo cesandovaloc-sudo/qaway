@@ -142,3 +142,17 @@
 2. **Scroll Horizontal Fluido y Sincronizado en Vista Lista**:
    - Se eliminó el estilo restrictivo `overflowX: hidden` en línea en `<div className="table-head">`.
    - Preserva la barra de desplazamiento horizontal inferior (`.gantt-scroll`) para navegar entre todas las columnas libremente.
+
+
+---
+
+## 9. Iteración A340: Homologación de Guía Lateral y Ancho Fluido en Vista Lista y Gantt
+
+### Requerimientos abordados:
+1. **Homologación de Guía Lateral de Entrada a 18px (`gantt.css`)**:
+   - Corrección del desfase en primera columna: `.th-col-code` y `.code-cell-col` calibrados con `padding: 0 10px 0 18px;`.
+   - Los checkboxes y números de código se alinean exactamente con la guía de 18px de los tabs superiores (`.tabs`) y del buscador (`.filters`), eliminando el efecto de "pegado a la pared".
+   - En modo Gantt, `.name-head` y `.name-cell` calibrados a `padding-left: 18px !important;` (y `padding-left: 10px !important;` en Lista donde es segunda columna).
+2. **Distribución Fluida y Proporcional en Vista Lista (`CronogramaGanttView.tsx`)**:
+   - Creación de `listaGridCols` que aplica `minmax(280px, 1fr)` a la columna `Nombre` en modo lista, mientras preserva los anchos fijos de las columnas métricas.
+   - En modo lista, la tabla ocupa el `100%` del ancho del canvas sin dejar vacíos a la derecha ni comprimirse contra la pared izquierda en monitores anchos o modo zoom.

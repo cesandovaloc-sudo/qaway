@@ -2299,6 +2299,18 @@ export default function CronogramaGanttView({
     [effectiveRenderedCols, colWidths]
   );
 
+  const listaGridCols = useMemo(() => {
+    return effectiveRenderedCols
+      .map((k) => {
+        if (k === 'name') {
+          const userW = colWidths['name'] || DEFAULT_COLS['name'] || 280;
+          return `minmax(${userW}px, 1fr)`;
+        }
+        return `${colWidths[k] || DEFAULT_COLS[k] || 140}px`;
+      })
+      .join(' ');
+  }, [effectiveRenderedCols, colWidths]);
+
   const rowGridCols = useMemo(
     () => `var(--fixed) minmax(${timelineMinWidth}, 1fr)`,
     [timelineMinWidth]
@@ -4275,9 +4287,9 @@ export default function CronogramaGanttView({
             <div
               className="fixed-cols"
               style={{
-                width: `${fixedWidth}px`,
+                width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
                 minWidth: `${fixedWidth}px`,
-                gridTemplateColumns: fixedGridCols,
+                gridTemplateColumns: viewMode === 'lista' ? listaGridCols : fixedGridCols,
               }}
             >
               {/* ── Columna Código (Primera en modo lista) ── */}
@@ -4701,7 +4713,7 @@ export default function CronogramaGanttView({
               className="gantt"
               style={
                 viewMode === 'lista'
-                  ? ({ width: `${fixedWidth}px`, minWidth: '100%' } as React.CSSProperties)
+                  ? ({ width: '100%', minWidth: `${fixedWidth}px` } as React.CSSProperties)
                   : ({
                       '--fixed': `${fixedWidth}px`,
                       width: `calc(var(--fixed) + ${timelineMinWidth})`,
@@ -4726,9 +4738,9 @@ export default function CronogramaGanttView({
                   <div
                     className="fixed-cols"
                     style={{
-                      width: `${fixedWidth}px`,
+                      width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
                       minWidth: `${fixedWidth}px`,
-                      gridTemplateColumns: fixedGridCols,
+                      gridTemplateColumns: viewMode === 'lista' ? listaGridCols : fixedGridCols,
                     }}
                   >
                     {/* ── Columna Código (Primera en modo lista) ── */}
@@ -5620,9 +5632,9 @@ export default function CronogramaGanttView({
                 <div
                   className="fixed-cols"
                   style={{
-                    width: `${fixedWidth}px`,
+                    width: viewMode === 'lista' ? '100%' : `${fixedWidth}px`,
                     minWidth: `${fixedWidth}px`,
-                    gridTemplateColumns: fixedGridCols,
+                    gridTemplateColumns: viewMode === 'lista' ? listaGridCols : fixedGridCols,
                   }}
                 >
                   <div className="name-cell quick-add-cell" style={{ gridColumn: '1 / -1' }}>
