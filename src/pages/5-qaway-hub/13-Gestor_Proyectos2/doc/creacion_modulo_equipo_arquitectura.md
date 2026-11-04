@@ -20,7 +20,7 @@ El módulo **Equipo** constituye el centro de gobernanza y coordinación de pers
 
 ## 4. Estado de Avance por Fases
 - [x] **Fase 1: Modelo de Tipos, Estados y Almacenamiento Persistente** (Completada).
-- [ ] **Fase 2: Directorio Maestro y Motor de Tabla con Presets y Acciones Masivas**.
-- [ ] **Fase 3: Drawer Lateral de Ficha de Integrante y Expediente Completo**.
-- [ ] **Fase 4: Vista de Frentes Territoriales y Distribución de Sedes**.
+- [x] **Fase 2: Directorio Maestro y Motor de Tabla con Presets y Acciones Masivas** (Completada).
+- [x] **Fase 3: Drawer Lateral de Ficha de Integrante y Expediente Completo con Preservación de Estado** (Completada).
+- [x] **Fase 4: Vista de Frentes Territoriales y Distribución de Sedes** (Completada).
 - [ ] **Fase 5: Organigrama Jerárquico y Matriz de Capacidad**.

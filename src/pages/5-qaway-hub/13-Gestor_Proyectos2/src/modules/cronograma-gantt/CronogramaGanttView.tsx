@@ -5539,24 +5539,6 @@ export default function CronogramaGanttView({
                             if (!resizingTaskId) setHoveredTask(null);
                           }}
                         >
-                          {/* Avatar redondo del responsable embebido en la esquina inicial de la barra */}
-                          {showBarAvatars && (() => {
-                            const gList = getItemGestores(x);
-                            const mainGestor = gList[0];
-                            if (!mainGestor || mainGestor === 'Sin asignar') return null;
-                            const initials = getGestorInitials(mainGestor);
-                            const bgColor = getGestorColor(mainGestor);
-                            return (
-                              <span
-                                className="gantt-bar-avatar"
-                                style={{ backgroundColor: bgColor }}
-                                title={`Responsable: ${gList.join(', ')}`}
-                              >
-                                {initials}
-                              </span>
-                            );
-                          })()}
-
                           {/* Relleno de avance proporcional (refleja el % real de cumplimiento) */}
                           <div
                             className="bar-progress-fill"
@@ -5575,15 +5557,43 @@ export default function CronogramaGanttView({
                             />
                           )}
 
-                          {/* Avance limpio embebido (conmutable a través del botón superior) */}
-                          {showBarLabels && (
-                            <span
-                              className={`bar-label-inner ${fitsInsideBar ? 'in-bar' : 'after-bar'} ${
-                                x.kind === 'hito' ? 'is-hito' : ''
-                              }`}
-                            >
-                              {x.progress}%
-                            </span>
+                          {/* Contenido interior secuencial: 1° Porcentaje (%) + 2° Iconos de responsables (sin salir del nodo) */}
+                          {(showBarLabels || showBarAvatars) && (
+                            <div className={`bar-inner-content ${fitsInsideBar ? 'in-bar' : 'after-bar'}`}>
+                              {/* 1. Porcentaje de avance: espacio numérico natural (máx 100%) */}
+                              {showBarLabels && (
+                                <span className={`bar-percent-tag ${fitsInsideBar ? 'in-bar' : 'after-bar'}`}>
+                                  {x.progress}%
+                                </span>
+                              )}
+
+                              {/* 2. Iconos de responsables: a continuación del porcentaje sin solapar */}
+                              {showBarAvatars && (() => {
+                                const gList = getItemGestores(x);
+                                const mainGestor = gList[0];
+                                if (!mainGestor || mainGestor === 'Sin asignar') return null;
+                                return (
+                                  <div className="bar-avatars-group" title={`Responsable: ${gList.join(', ')}`}>
+                                    {gList.slice(0, 2).map((gName, idx) => (
+                                      <span
+                                        key={gName}
+                                        className="gantt-bar-avatar"
+                                        style={{
+                                          backgroundColor: getGestorColor(gName),
+                                          zIndex: 5 - idx,
+                                          marginLeft: idx > 0 ? -5 : 0,
+                                        }}
+                                      >
+                                        {getGestorInitials(gName)}
+                                      </span>
+                                    ))}
+                                    {gList.length > 2 && (
+                                      <span className="gantt-bar-avatar-more">+{gList.length - 2}</span>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                            </div>
                           )}
 
                           {x.kind === 'hito' ? (

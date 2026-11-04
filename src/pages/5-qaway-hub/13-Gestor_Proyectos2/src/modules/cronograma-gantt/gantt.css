@@ -2782,26 +2782,70 @@
   filter: brightness(1.04);
 }
 
-/* Avatar redondo incrustado en la esquina inicial de la barra */
-.gantt-v2 .gantt-bar-avatar {
+/* Contenedor unificado de porcentaje y avatares (100% interior al nodo, cero colisiones) */
+.gantt-v2 .bar-inner-content {
   position: absolute;
-  left: -9px;
   top: 50%;
   transform: translateY(-50%);
-  width: 19px;
-  height: 19px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.gantt-v2 .bar-inner-content.in-bar {
+  left: 8px; /* Espacio natural interior desde el borde donde toca la flecha */
+}
+
+.gantt-v2 .bar-inner-content.after-bar {
+  left: calc(100% + 6px);
+}
+
+.gantt-v2 .bar-percent-tag {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.gantt-v2 .bar-percent-tag.in-bar {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.gantt-v2 .bar-percent-tag.after-bar {
+  color: #1e293b;
+}
+
+.gantt-v2 .bar-avatars-group {
+  display: flex;
+  align-items: center;
+}
+
+.gantt-v2 .gantt-bar-avatar {
+  position: relative;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   color: #ffffff;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 1.5px #ffffff;
-  z-index: 5;
-  letter-spacing: -0.02em;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
-  pointer-events: none;
+  letter-spacing: -0.02em;
+}
+
+.gantt-v2 .gantt-bar-avatar-more {
+  font-size: 8px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-left: 2px;
 }
 
 /* Flechas y líneas SVG de Dependencia */
