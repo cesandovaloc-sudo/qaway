@@ -3946,6 +3946,29 @@ body.gantt-resizing {
   margin-left: 6px;
 }
 
+/* Estabilidad Total de Líneas de Dependencia (CSS Hardware-Accelerated) */
+.gantt-v2 .dep-line-group {
+  cursor: pointer;
+}
+
+.gantt-v2 .dep-line-group .dep-line-hit {
+  cursor: pointer;
+  pointer-events: stroke;
+}
+
+.gantt-v2 .dep-line-group .dep-line-visible {
+  transition: stroke 0.12s ease, stroke-width 0.12s ease;
+  pointer-events: none;
+}
+
+.gantt-v2 .dep-line-group:hover .dep-line-visible,
+.gantt-v2 .dep-line-group.is-active .dep-line-visible {
+  stroke: #0066ff !important;
+  stroke-width: 2px !important;
+  marker-end: url(#dep-arrow-active) !important;
+  opacity: 1 !important;
+}
+
 /* Tooltip Compacto y Sin Desborde para Dependencias (2 Filas Ultra-Limpias) */
 .gantt-v2 .gantt-dep-tooltip {
   position: fixed;

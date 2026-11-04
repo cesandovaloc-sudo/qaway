@@ -5877,38 +5877,41 @@ export default function CronogramaGanttView({
                       const pathOpacity = isHighlighted ? 1 : 0.85;
 
                       return (
-                        <g key={pairKey}>
-                          {/* Hit area con debounce de 140ms para máxima estabilidad sin parpadeos */}
+                        <g
+                          key={pairKey}
+                          className={`dep-line-group ${isHighlighted ? 'is-active' : ''}`}
+                          onMouseEnter={(e) => {
+                            if (depHoverTimeoutRef.current) {
+                              clearTimeout(depHoverTimeoutRef.current);
+                              depHoverTimeoutRef.current = null;
+                            }
+                            setHoveredDep({
+                              sourceItem,
+                              targetItem: item,
+                              x: e.clientX,
+                              y: e.clientY - 14,
+                            });
+                          }}
+                          onMouseMove={() => {
+                            if (depHoverTimeoutRef.current) {
+                              clearTimeout(depHoverTimeoutRef.current);
+                              depHoverTimeoutRef.current = null;
+                            }
+                          }}
+                          onMouseLeave={() => {
+                            if (depHoverTimeoutRef.current) clearTimeout(depHoverTimeoutRef.current);
+                            depHoverTimeoutRef.current = setTimeout(() => {
+                              setHoveredDep(null);
+                            }, 160);
+                          }}
+                        >
+                          {/* Hit area amplia (14px) para una interacción cómoda y sin tener que hacer malabares */}
                           <path
                             d={pathD}
                             fill="none"
                             stroke="transparent"
-                            strokeWidth="8"
-                            style={{ cursor: 'pointer', pointerEvents: 'stroke' }}
-                            onMouseEnter={(e) => {
-                              if (depHoverTimeoutRef.current) {
-                                clearTimeout(depHoverTimeoutRef.current);
-                                depHoverTimeoutRef.current = null;
-                              }
-                              setHoveredDep({
-                                sourceItem,
-                                targetItem: item,
-                                x: e.clientX,
-                                y: e.clientY - 12,
-                              });
-                            }}
-                            onMouseMove={() => {
-                              if (depHoverTimeoutRef.current) {
-                                clearTimeout(depHoverTimeoutRef.current);
-                                depHoverTimeoutRef.current = null;
-                              }
-                            }}
-                            onMouseLeave={() => {
-                              if (depHoverTimeoutRef.current) clearTimeout(depHoverTimeoutRef.current);
-                              depHoverTimeoutRef.current = setTimeout(() => {
-                                setHoveredDep(null);
-                              }, 140);
-                            }}
+                            strokeWidth="14"
+                            className="dep-line-hit"
                           />
                           <path
                             d={pathD}
@@ -5917,7 +5920,7 @@ export default function CronogramaGanttView({
                             strokeWidth={strokeWidth}
                             markerEnd={markerId}
                             opacity={pathOpacity}
-                            style={{ pointerEvents: 'none', transition: 'stroke 0.12s ease' }}
+                            className="dep-line-visible"
                           />
                         </g>
                       );
