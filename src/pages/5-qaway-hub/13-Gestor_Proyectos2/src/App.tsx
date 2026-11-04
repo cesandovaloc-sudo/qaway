@@ -364,8 +364,9 @@ function App() {
               onActions={(h) => { binds.current['resumen'] = h; }}
             />
           </div>
-          <div className={active === 'tareas' ? 'qt-v2 qm-pane-active' : 'qt-v2 qm-pane'}>
+          <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <TareasView
+              activeProject={activeProject}
               onTasksCount={setTasksCount}
               onActions={(h) => { binds.current['tareas'] = h; }}
             />

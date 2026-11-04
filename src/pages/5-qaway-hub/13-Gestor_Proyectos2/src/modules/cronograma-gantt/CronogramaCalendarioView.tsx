@@ -703,8 +703,9 @@ export default function CronogramaCalendarioView({
         )}
       </div>
 
-      {/* Barra Lateral Derecha Institucional: Próximos Entregables y Leyenda de Gantt */}
-      <aside className="cal-sidebar-clean">
+      {/* Barra Lateral Derecha Institucional: Próximos Entregables y Leyenda (Solo en Mes, Semana y Día) */}
+      {calSubView !== 'Agenda' && (
+        <aside className="cal-sidebar-clean">
         {/* Sección: Próximos Entregables */}
         <div className="cal-sidebar-section">
           <div className="cal-sidebar-head">
@@ -821,6 +822,7 @@ export default function CronogramaCalendarioView({
           </div>
         </div>
       </aside>
+      )}
     </div>
   );
 }
