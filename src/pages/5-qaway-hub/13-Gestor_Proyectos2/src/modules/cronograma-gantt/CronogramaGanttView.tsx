@@ -2474,7 +2474,12 @@ export default function CronogramaGanttView({
   const hitos = items.filter((x) => x.kind === 'hito');
   const subs = items.filter((x) => x.kind === 'subproceso');
   const inprog = items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length;
-  const late = items.filter((x) => x.status === 'Con retraso').length;
+  const isItemLate = (x: Item) => {
+    if (x.status === 'Con retraso') return true;
+    if (x.status === 'Completado' || x.status === 'Cumple' || (x.progress ?? 0) >= 100) return false;
+    return !!(x.end && currentTodayIso > x.end);
+  };
+  const late = items.filter(isItemLate).length;
   const complete = items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length;
   const overall = items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0;
 
@@ -2545,6 +2550,7 @@ export default function CronogramaGanttView({
         (tab === 'Subprocesos' && x.kind === 'subproceso') ||
         (tab === 'Completados' && (x.status === 'Completado' || x.status === 'Cumple')) ||
         (tab === 'En proceso' && (x.status === 'En proceso' || x.status === 'En curso')) ||
+        (tab === 'Con retraso' && isItemLate(x)) ||
         x.status === tab;
       const matchRegion =
         selectedRegions.length === 0 ||
@@ -3383,160 +3389,10 @@ export default function CronogramaGanttView({
               </button>
             )}
 
-            {/* Navegación temporal y selector de escala para todas las vistas */}
-            {viewMode === 'calendario' ? (
-              <>
-                <div className="filter-group-divider" aria-hidden="true" />
-                <div className="timeline-nav" title="Navegar por el calendario">
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={handlePrevCalPeriod}
-                    title="Período anterior"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <span className="cal-nav-label" style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a', padding: '0 8px', whiteSpace: 'nowrap' }}>
-                    {calPeriodLabel}
-                  </span>
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={handleNextCalPeriod}
-                    title="Período siguiente"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="today-pill"
-                    onClick={handleTodayCal}
-                    title="Ir a hoy (Octubre 2026)"
-                  >
-                    Hoy
-                  </button>
-                </div>
-
-                <div className="zoom">
-                  {(['Mes', 'Semana', 'Día', 'Agenda'] as const).map((v) => (
-                    <button
-                      type="button"
-                      key={v}
-                      className={calSubView === v ? 'active' : ''}
-                      onClick={() => setCalSubView(v)}
-                    >
-                      {v}
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : viewMode === 'lista' ? (
-              /* En Modo Lista: Filtros Rápidos Semánticos de Fecha con Diseño Oficial Homologado */
-              <>
-                <div className="filter-group-divider" aria-hidden="true" />
-                <button
-                  type="button"
-                  className={`today-pill ${listaTemporalFilter === 'Hoy' ? 'active' : ''}`}
-                  onClick={() => {
-                    const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
-                    setListaTemporalFilter(next);
-                    notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
-                  }}
-                  title={listaTemporalFilter === 'Hoy' ? 'Quitar filtro de Hoy' : `Filtrar actividades activas hoy (${formatDatePE(currentTodayIso)})`}
-                  style={{
-                    background: listaTemporalFilter === 'Hoy' ? '#0066ff' : '#ffffff',
-                    color: listaTemporalFilter === 'Hoy' ? '#ffffff' : '#334155',
-                    border: listaTemporalFilter === 'Hoy' ? '1px solid #0066ff' : '1px solid #cbd5e1',
-                    boxShadow: listaTemporalFilter === 'Hoy' ? '0 2px 6px rgba(0, 102, 255, 0.28)' : 'none',
-                  }}
-                >
-                  Hoy
-                </button>
-
-                <div className="zoom" title="Filtrar actividades por período de corte">
-                  {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
-                    const isActive = listaTemporalFilter === x;
-                    return (
-                      <button
-                        type="button"
-                        key={x}
-                        className={isActive ? 'active' : ''}
-                        onClick={() => {
-                          setListaTemporalFilter(x);
-                          notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
-                        }}
-                      >
-                        {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              /* En Modo Gantt, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
-              <>
-                <div className="filter-group-divider" aria-hidden="true" />
-                <button
-                  type="button"
-                  className="today-pill"
-                  onClick={scrollToToday}
-                  title="Ir y centrar en la fecha actual de hoy"
-                >
-                  Hoy
-                </button>
-
-                <div className="zoom">
-                  <button
-                    type="button"
-                    className="zoom-nav-arrow"
-                    onClick={() => scrollTimeline('left')}
-                    title="Desplazar línea de tiempo a la izquierda"
-                    aria-label="Desplazar hacia el pasado"
-                  >
-                    <ChevronLeft size={15} />
-                  </button>
-                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
-                    <button
-                      type="button"
-                      key={x}
-                      className={zoom === x ? 'active' : ''}
-                      onClick={() => handleZoomChange(x)}
-                    >
-                      {x}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="zoom-nav-arrow"
-                    onClick={() => scrollTimeline('right')}
-                    title="Desplazar línea de tiempo a la derecha"
-                    aria-label="Desplazar hacia el futuro"
-                  >
-                    <ChevronRight size={15} />
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
-            {viewMode !== 'calendario' && (
-              <button
-                type="button"
-                className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
-                onClick={() => setAdvancedFiltersOpen((v) => !v)}
-                data-tooltip="Filtros avanzados"
-                aria-label="Condiciones de filtrado avanzado"
-              >
-                <Filter size={15} />
-                {customRules.length > 0 && (
-                  <span className="custom-filter-counter-badge">{customRules.length}</span>
-                )}
-              </button>
-            )}
-
-            {/* Separador vertical: Filtros de datos | Tiempo Gantt */}
+            {/* Separador vertical: Bloque 1 (Búsqueda/Ubicación) | Bloque 2 (Filtros de datos) */}
             {viewMode !== 'calendario' && <div className="filter-group-divider" aria-hidden="true" />}
-            {/* Rango de Fechas Operativo con Popover Redondeado Moderno (Cero calendarios nativos rectos) */}
+
+            {/* Bloque 2: Rango de Fechas Operativo con Popover Redondeado Moderno */}
             {viewMode !== 'calendario' && (
             <div className="filter-dropdown-wrap date-range-wrap">
               <button
@@ -3704,6 +3560,169 @@ export default function CronogramaGanttView({
               )}
             </div>
             )}
+
+            {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
+            {viewMode !== 'calendario' && (
+              <button
+                type="button"
+                className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
+                onClick={() => setAdvancedFiltersOpen((v) => !v)}
+                data-tooltip="Filtros avanzados"
+                aria-label="Condiciones de filtrado avanzado"
+              >
+                <Filter size={15} />
+                {customRules.length > 0 && (
+                  <span className="custom-filter-counter-badge">{customRules.length}</span>
+                )}
+              </button>
+            )}
+
+            {/* Separador vertical: Bloque 2 (Datos del proyecto) | Bloque 3 (Navegación temporal / corte) */}
+            <div className="filter-group-divider" aria-hidden="true" />
+
+            {/* Bloque 3: Navegación temporal y selector de escala para todas las vistas */}
+            {viewMode === 'calendario' ? (
+              <>
+                <div className="timeline-nav" title="Navegar por el calendario">
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={handlePrevCalPeriod}
+                    title="Período anterior"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="cal-nav-label" style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a', padding: '0 8px', whiteSpace: 'nowrap' }}>
+                    {calPeriodLabel}
+                  </span>
+                  <button
+                    type="button"
+                    className="nav-arrow"
+                    onClick={handleNextCalPeriod}
+                    title="Período siguiente"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="today-pill"
+                    onClick={handleTodayCal}
+                    title="Ir a hoy (Octubre 2026)"
+                  >
+                    Hoy
+                  </button>
+                </div>
+
+                <div className="zoom">
+                  {(['Mes', 'Semana', 'Día', 'Agenda'] as const).map((v) => (
+                    <button
+                      type="button"
+                      key={v}
+                      className={calSubView === v ? 'active' : ''}
+                      onClick={() => setCalSubView(v)}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : viewMode === 'lista' ? (
+              /* En Modo Lista: Filtros Rápidos Semánticos de Fecha con Diseño Oficial Homologado */
+              <>
+                <button
+                  type="button"
+                  className={`today-pill ${listaTemporalFilter === 'Hoy' ? 'active' : ''}`}
+                  onClick={() => {
+                    const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
+                    setListaTemporalFilter(next);
+                    notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
+                  }}
+                  title={listaTemporalFilter === 'Hoy' ? 'Quitar filtro de Hoy' : `Actividades en curso hoy (${formatDatePE(currentTodayIso)})`}
+                  style={{
+                    background: listaTemporalFilter === 'Hoy' ? '#0066ff' : '#ffffff',
+                    color: listaTemporalFilter === 'Hoy' ? '#ffffff' : '#334155',
+                    border: listaTemporalFilter === 'Hoy' ? '1px solid #0066ff' : '1px solid #cbd5e1',
+                    boxShadow: listaTemporalFilter === 'Hoy' ? '0 2px 6px rgba(0, 102, 255, 0.28)' : 'none',
+                  }}
+                >
+                  Hoy
+                </button>
+
+                <div className="zoom" title="Filtrar actividades por período de corte">
+                  {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
+                    const isActive = listaTemporalFilter === x;
+                    const tooltipText =
+                      x === 'Todos'
+                        ? 'Mostrar todas las actividades sin filtro de fecha'
+                        : x === 'Semana'
+                        ? 'Actividades en curso esta semana'
+                        : x === 'Mes'
+                        ? 'Actividades en curso este mes'
+                        : 'Actividades en curso en el trimestre';
+                    return (
+                      <button
+                        type="button"
+                        key={x}
+                        className={isActive ? 'active' : ''}
+                        onClick={() => {
+                          setListaTemporalFilter(x);
+                          notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
+                        }}
+                        title={tooltipText}
+                      >
+                        {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              /* En Modo Gantt, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
+              <>
+                <button
+                  type="button"
+                  className="today-pill"
+                  onClick={scrollToToday}
+                  title="Ir y centrar en la fecha actual de hoy"
+                >
+                  Hoy
+                </button>
+
+                <div className="zoom">
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => scrollTimeline('left')}
+                    title="Desplazar línea de tiempo a la izquierda"
+                    aria-label="Desplazar hacia el pasado"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
+                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
+                    <button
+                      type="button"
+                      key={x}
+                      className={zoom === x ? 'active' : ''}
+                      onClick={() => handleZoomChange(x)}
+                    >
+                      {x}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => scrollTimeline('right')}
+                    title="Desplazar línea de tiempo a la derecha"
+                    aria-label="Desplazar hacia el futuro"
+                  >
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Separador vertical: Bloque 3 (Tiempo) | Bloque 4 (Herramientas y Acciones) */}
+            <div className="filter-group-divider" aria-hidden="true" />
 
             {/* Controles exclusivos de visualización Gantt (Capas y dependencias) */}
             {viewMode === 'gantt' && (

@@ -47,10 +47,18 @@ export const getForecastEnd = (it: ScheduleFields, today: string): string => {
   return today > it.end ? today : it.end;
 };
 
-/** Desviación en días respecto a la línea base; undefined si el registro no tiene línea base. */
+/** Desviación en días respecto a la línea base o fin comprometido; calcula retraso real si la fecha límite fue superada */
 export const getDeviationDays = (it: ScheduleFields, today: string): number | undefined => {
-  if (!it.baselineEnd) return undefined;
-  return daysBetween(it.baselineEnd, getForecastEnd(it, today));
+  if (it.baselineEnd) {
+    return daysBetween(it.baselineEnd, getForecastEnd(it, today));
+  }
+  // Si no tiene línea base fijada explícita, se evalúa contra su fecha de fin programada:
+  if (!it.end) return undefined;
+  if (isDone(it)) return 0;
+  if (today > it.end) {
+    return daysBetween(it.end, today); // Retraso en días sobre la fecha programada
+  }
+  return 0; // En plazo
 };
 
 export type DeviationTone = 'late' | 'ontime' | 'early' | 'none';
