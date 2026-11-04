@@ -16,6 +16,8 @@ import {
 } from './mockData';
 import EquipoDirectorioView from './EquipoDirectorioView';
 import EquipoSedesView from './EquipoSedesView';
+import EquipoOrganigramaView from './EquipoOrganigramaView';
+import EquipoCargaView from './EquipoCargaView';
 import EquipoDrawer from './EquipoDrawer';
 import EquipoExpedienteModal from './EquipoExpedienteModal';
 import EquipoNuevoModal from './EquipoNuevoModal';
@@ -465,15 +467,12 @@ export default function EquipoView({
 
         {/* PLACEHOLDERS PREPARADOS PARA LAS SIGUIENTES FASES */}
         {activeView === 'organigrama' && (
-          <div style={{ padding: '60px 24px', textAlign: 'center', background: '#fff' }}>
-            <GitBranch size={42} color="#0284c7" style={{ margin: '0 auto 12px' }} />
-            <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', color: '#0f172a' }}>
-              Vista de Organigrama Jerárquico Interactivo
-            </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
-              Se habilitará en la Fase 5 con lienzo espacial, controles de zoom y edición de dependencias.
-            </p>
-          </div>
+          <EquipoOrganigramaView
+            integrantes={integrantes}
+            areas={areas}
+            sedes={sedes}
+            onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
+          />
         )}
 
         {activeView === 'sedes' && (
@@ -492,15 +491,22 @@ export default function EquipoView({
         )}
 
         {activeView === 'carga' && (
-          <div style={{ padding: '60px 24px', textAlign: 'center', background: '#fff' }}>
-            <Activity size={42} color="#0284c7" style={{ margin: '0 auto 12px' }} />
-            <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', color: '#0f172a' }}>
-              Matriz de Capacidad y Carga de Trabajo
-            </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
-              Se habilitará en la Fase 5 con análisis de esfuerzo temporal y balanceo de tareas.
-            </p>
-          </div>
+          <EquipoCargaView
+            integrantes={integrantes}
+            asignaciones={asignaciones}
+            sedes={sedes}
+            onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
+            onReasignarTarea={(asignacionId, nuevoIntegranteId) => {
+              const nuevoIntegrante = integrantes.find((i) => i.id === nuevoIntegranteId);
+              const next = asignaciones.map((a) => {
+                if (a.id !== asignacionId) return a;
+                return { ...a, integranteId: nuevoIntegranteId };
+              });
+              setAsignaciones(next);
+              saveStoredAsignaciones(next);
+              notify(`Tarea reasignada con éxito a ${nuevoIntegrante?.nombreCompleto || 'nuevo integrante'}`);
+            }}
+          />
         )}
       </main>
 
