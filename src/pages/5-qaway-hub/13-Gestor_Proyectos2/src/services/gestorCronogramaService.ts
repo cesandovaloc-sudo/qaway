@@ -3,6 +3,7 @@
  * Maneja la sincronización bidireccional entre la base de datos Supabase y el estado local.
  */
 import { supabase } from './supabaseClient';
+import { isLegacyCronogramaItem, sortWbsHierarchy } from '../modules/cronograma-gantt/edtPmbokModel';
 
 export type EdtNodeType =
   | 'FASE'
@@ -159,17 +160,7 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
     if (Array.isArray(data) && data.length > 0) {
       // Filtrar y purgar registros obsoletos o mocks residuales de pruebas previas
       const legacyIds = data
-        .filter(
-          (row) =>
-            row.id === 'h1' ||
-            row.id === 'h2' ||
-            row.id === 's11' ||
-            row.name === 'Planificación de la distribución y conformación de comités' ||
-            (typeof row.name === 'string' &&
-              (row.name.toLowerCase().includes('nuevo hito') ||
-                row.name.toLowerCase().includes('nuevo subproceso'))) ||
-            (typeof row.id === 'string' && row.id.startsWith('h-'))
-        )
+        .filter((row) => isLegacyCronogramaItem(row))
         .map((r) => r.id);
 
       if (legacyIds.length > 0) {
@@ -182,14 +173,17 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
           .catch(() => {});
       }
 
-      const validRows = data.filter((row) => !legacyIds.includes(row.id));
+      // Validar filas limpias y eliminar huérfanos sin padre válido
+      const validInitial = data.filter((row) => !legacyIds.includes(row.id));
+      const validIds = new Set(validInitial.map((r) => r.id));
+      const validRows = validInitial.filter((row) => !row.parent_id || validIds.has(row.parent_id));
 
       if (projectId === 'p1' && (validRows.length < 50 || !validRows.some((r) => r.id === 'comp-11'))) {
         // En proyecto p1, si en BD faltan registros oficiales, retornar null para usar la matriz oficial de 62 registros
         return null;
       }
 
-      const mapped = validRows.map(fromSupabaseRow);
+      const mapped = sortWbsHierarchy(validRows.map(fromSupabaseRow));
       // Si la BD aún no guarda línea base/fechas reales, se conservan las del respaldo local.
       try {
         const local = JSON.parse(localStorage.getItem(`qaway-gantt-items-${projectId}`) || '[]');

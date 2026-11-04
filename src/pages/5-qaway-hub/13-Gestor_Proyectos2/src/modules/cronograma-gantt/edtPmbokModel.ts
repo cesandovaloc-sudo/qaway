@@ -1059,3 +1059,89 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     entregableVerificable: 'Informe de cierre institucional remitido mediante Oficio a DIGERE',
   },
 ];
+
+/**
+ * Comparador numérico natural para códigos WBS / EDT (ej. "1.", "1.1", "1.7a", "1.10", "2.", "10.", "11.").
+ * Evita el ordenamiento alfabético estándar donde "10." precede erróneamente a "2.".
+ */
+export function compareWbsCodes(codeA?: string, codeB?: string): number {
+  if (!codeA && !codeB) return 0;
+  if (!codeA) return 1;
+  if (!codeB) return -1;
+  const segsA = codeA.replace(/\.$/, '').split('.');
+  const segsB = codeB.replace(/\.$/, '').split('.');
+  const len = Math.max(segsA.length, segsB.length);
+  for (let i = 0; i < len; i++) {
+    const sA = segsA[i];
+    const sB = segsB[i];
+    if (sA === undefined) return -1;
+    if (sB === undefined) return 1;
+    const matchA = sA.match(/^(\d+)(.*)$/);
+    const matchB = sB.match(/^(\d+)(.*)$/);
+    if (matchA && matchB) {
+      const numA = parseInt(matchA[1], 10);
+      const numB = parseInt(matchB[1], 10);
+      if (numA !== numB) return numA - numB;
+      const suffComp = matchA[2].localeCompare(matchB[2]);
+      if (suffComp !== 0) return suffComp;
+    } else {
+      const cmp = sA.localeCompare(sB, undefined, { numeric: true });
+      if (cmp !== 0) return cmp;
+    }
+  }
+  return 0;
+}
+
+/**
+ * Ordena canónicamente una lista jerárquica respetando:
+ * 1. Nodos raíz (Componentes principales) ordenados por código WBS ("1.", "2." ... "10.", "11.").
+ * 2. Hijos directamente anidados bajo su padre, ordenados por código WBS.
+ * 3. Sub-hijos (Nivel 3) anidados bajo su respectivo subcomponente.
+ */
+export function sortWbsHierarchy<T extends { id: string; code?: string; parentId?: string }>(items: T[]): T[] {
+  const ids = new Set(items.map((r) => r.id));
+  const children = new Map<string, T[]>();
+  const roots: T[] = [];
+  items.forEach((r) => {
+    const pid = r.parentId;
+    if (pid && ids.has(pid)) {
+      const list = children.get(pid) || [];
+      list.push(r);
+      children.set(pid, list);
+    } else {
+      roots.push(r);
+    }
+  });
+
+  const out: T[] = [];
+  const seen = new Set<string>();
+  const walk = (list: T[]) => {
+    [...list].sort((a, b) => compareWbsCodes(a.code, b.code)).forEach((r) => {
+      if (seen.has(r.id)) return;
+      seen.add(r.id);
+      out.push(r);
+      const kids = children.get(r.id);
+      if (kids) walk(kids);
+    });
+  };
+  walk(roots);
+  return out.length === items.length ? out : items;
+}
+
+/**
+ * Predicado universal para detectar y aislar registros residuales (mocks de prueba antiguos h1..h9, s11..s99, huérfanos).
+ */
+export const isLegacyCronogramaItem = (it: { id?: string; name?: string; code?: string }): boolean => {
+  if (!it || !it.id) return true;
+  if (/^h\d+$/i.test(it.id) || /^s\d+$/i.test(it.id)) return true;
+  if (it.id.startsWith('h-') || it.id.startsWith('new-')) return true;
+  if (typeof it.name === 'string') {
+    const low = it.name.toLowerCase();
+    if (low.includes('nuevo hito') || low.includes('nuevo subproceso')) return true;
+    if (it.name === 'Planificación de la distribución y conformación de comités') return true;
+    if (it.name === 'Distribución y Transporte a II.EE.') return true;
+    if (it.name === 'Cierre, PECOSA y Consolidado Regional') return true;
+    if (it.name === 'Informe Técnico Final MINEDU - DIGERE') return true;
+  }
+  return false;
+};

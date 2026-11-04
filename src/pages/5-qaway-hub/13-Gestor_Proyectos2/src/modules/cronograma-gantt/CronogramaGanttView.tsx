@@ -28,6 +28,9 @@ import {
   resolveEdtNodeType,
   getEdtNodeDisplayLabel,
   DRE_JUNIN_DOTACION_2027_EDT,
+  sortWbsHierarchy,
+  compareWbsCodes,
+  isLegacyCronogramaItem,
 } from './edtPmbokModel';
 
 export {
@@ -38,6 +41,9 @@ export {
   resolveEdtNodeType,
   getEdtNodeDisplayLabel,
   DRE_JUNIN_DOTACION_2027_EDT,
+  sortWbsHierarchy,
+  compareWbsCodes,
+  isLegacyCronogramaItem,
 };
 import {
   AlertTriangle,
@@ -176,7 +182,7 @@ export interface Item {
   dependencies?: string[];
 }
 
-const INITIAL_ITEMS: Item[] = DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
+const INITIAL_ITEMS: Item[] = sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
   id: r.id,
   code: r.code,
   name: r.name,
@@ -199,7 +205,7 @@ const INITIAL_ITEMS: Item[] = DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
   region: 'Junín',
   gestor: r.entidadResponsable || 'Carlos Mendoza',
   gestores: [r.entidadResponsable || 'Carlos Mendoza'],
-}));
+})));
 
 const MONTHS = [
   { label: 'Sep', start: '2026-09-01' },
@@ -932,16 +938,10 @@ export default function CronogramaGanttView({
             // Detectar si el proyecto activo p1 contiene datos obsoletos de prueba (h1..h5, s11..s52, 'Nuevo hito', 'Nuevo subproceso', huérfanos)
             const hasLegacyMocks = parsed.some(
               (it) =>
-                it.id === 'h1' ||
-                it.id === 'h2' ||
-                it.id === 's11' ||
-                it.name === 'Planificación de la distribución y conformación de comités' ||
-                (typeof it.name === 'string' && it.name.toLowerCase().includes('nuevo hito')) ||
-                (typeof it.name === 'string' && it.name.toLowerCase().includes('nuevo subproceso')) ||
-                (it.id && typeof it.id === 'string' && it.id.startsWith('h-')) ||
+                isLegacyCronogramaItem(it) ||
                 (Boolean(it.parentId) && !parsed.some((p) => p.id === it.parentId))
             );
-            if (hasLegacyMocks || parsed.length < 50 || !parsed.some((it) => it.id === 'comp-11')) {
+            if (hasLegacyMocks || parsed.length !== 62 || !parsed.some((it) => it.id === 'comp-11')) {
               // Limpieza y migración automática y definitiva a los 62 registros oficiales del Excel DRE Junín
               try {
                 localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
@@ -963,7 +963,7 @@ export default function CronogramaGanttView({
                 : (init?.dependencies || []),
             };
           });
-          return upgraded;
+          return sortWbsHierarchy(upgraded);
         }
       }
       if (pid === 'p1') {
@@ -1015,19 +1015,16 @@ export default function CronogramaGanttView({
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
-        // Filtrar datos contaminados obsoletos si provienen de sesiones anteriores en BD
-        const cleanCloudItems = cloudItems.filter(
-          (it) =>
-            it.id !== 'h1' &&
-            it.id !== 'h2' &&
-            it.id !== 's11' &&
-            it.name !== 'Planificación de la distribución y conformación de comités' &&
-            !it.name.toLowerCase().includes('nuevo hito') &&
-            !it.name.toLowerCase().includes('nuevo subproceso') &&
-            !it.id.startsWith('h-')
+        // Filtrar datos contaminados obsoletos si provienen de sesiones anteriores en BD y ordenar canónicamente
+        const cleanCloudItems = sortWbsHierarchy(
+          cloudItems.filter(
+            (it) =>
+              !isLegacyCronogramaItem(it) &&
+              (!it.parentId || cloudItems.some((p) => p.id === it.parentId))
+          ) as Item[]
         );
         if (cleanCloudItems.length >= 50) {
-          setItems(cleanCloudItems as Item[]);
+          setItems(cleanCloudItems);
         }
       }
     });
@@ -2569,7 +2566,11 @@ export default function CronogramaGanttView({
       let currParentId = x.parentId;
       while (currParentId) {
         const pNode = items.find((p) => p.id === currParentId);
-        if (!pNode) break;
+        if (!pNode) {
+          // Si el padre no existe en el conjunto de items, es un elemento huérfano. Ocultar.
+          notCollapsed = false;
+          break;
+        }
         if (!isItemExpanded(pNode.id, pNode.expanded !== false)) {
           notCollapsed = false;
           break;
@@ -2710,12 +2711,16 @@ export default function CronogramaGanttView({
     return items.filter((it) => items.some((child) => child.parentId === it.id));
   }, [items]);
 
-  const allHitosExpanded = useMemo(() => {
-    return parentItems.length > 0 && parentItems.every((h) => isItemExpanded(h.id, h.expanded !== false));
+  // Si al menos un nodo contenedor está expandido, el botón de colapso contraerá todo a Nivel 1.
+  const hasAnyExpanded = useMemo(() => {
+    return parentItems.length > 0 && parentItems.some((h) => isItemExpanded(h.id, h.expanded !== false));
   }, [parentItems, collapsedByMode, viewMode]);
 
+  const allHitosExpanded = hasAnyExpanded;
+
   const toggleAllHitosExpand = () => {
-    const nextState = !allHitosExpanded;
+    // Si hay alguno expandido, la intención universal es contraer todo. Si ya están todos colapsados, expandir.
+    const nextState = !hasAnyExpanded;
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
     setCollapsedByMode((prev) => {
       const nextModeMap: Record<string, boolean> = { ...(prev[mode] || {}) };
