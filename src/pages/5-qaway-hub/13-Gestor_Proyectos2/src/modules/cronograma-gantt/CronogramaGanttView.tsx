@@ -13,6 +13,7 @@ import './gantt.css';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
+import { CronogramaArbolView } from './CronogramaArbolView';
 import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
@@ -59,6 +60,7 @@ import {
   LayoutDashboard,
   List,
   FolderKanban,
+  GitFork,
   GripVertical,
   Link2,
   MapPin,
@@ -284,6 +286,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Zarumilla',
     sede: 'UGEL Zarumilla',
     gestor: 'Lucía Ramos',
+    dependencies: ['s12'],
   },
   {
     id: 's32',
@@ -299,6 +302,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Maynas',
     sede: 'UGEL Maynas',
     gestor: 'Lucía Ramos',
+    dependencies: ['s31'],
   },
   {
     id: 's33',
@@ -314,6 +318,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Tayacaja',
     sede: 'UGEL Tayacaja',
     gestor: 'Carlos Mendoza',
+    dependencies: ['s32'],
   },
   {
     id: 'h4',
@@ -331,6 +336,7 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Consolidado',
     sede: 'Todas las UGEL',
     gestor: 'Carlos Mendoza',
+    dependencies: ['s33'],
   },
   {
     id: 's41',
@@ -1710,7 +1716,7 @@ export default function CronogramaGanttView({
   const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
-  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario'>('gantt');
+  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol'>('gantt');
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -3242,6 +3248,15 @@ export default function CronogramaGanttView({
               >
                 <CalendarDays size={14} />
                 <span>Calendario</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'arbol' ? 'active' : ''}`}
+                onClick={() => setViewMode('arbol')}
+                title="Vista Estructura Jerárquica WBS (Árbol de trabajo)"
+              >
+                <GitFork size={14} />
+                <span>Jerárquica</span>
               </button>
             </div>
           </nav>
@@ -5650,110 +5665,6 @@ export default function CronogramaGanttView({
                   </>
                 )}
 
-                {/* Capa SVG de Flechas y Líneas de Dependencia / Prelación */}
-                {showCriticalPath && (
-                  <svg
-                    className="gantt-dependency-svg"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: timelineMinWidth,
-                      height: `${shown.length * 48}px`,
-                      pointerEvents: 'none',
-                      zIndex: 8,
-                      overflow: 'visible',
-                    }}
-                  >
-                    <defs>
-                      <marker
-                        id="dep-arrow"
-                        viewBox="0 0 10 10"
-                        refX="8"
-                        refY="5"
-                        markerWidth="6"
-                        markerHeight="6"
-                        orient="auto-start-reverse"
-                      >
-                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
-                      </marker>
-                      <marker
-                        id="dep-arrow-critical"
-                        viewBox="0 0 10 10"
-                        refX="8"
-                        refY="5"
-                        markerWidth="6"
-                        markerHeight="6"
-                        orient="auto-start-reverse"
-                      >
-                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
-                      </marker>
-                    </defs>
-
-                    {(() => {
-                      const itemIndexMap = new Map<string, number>();
-                      shown.forEach((it, idx) => itemIndexMap.set(it.id, idx));
-
-                      return shown.flatMap((item) => {
-                        const targetIndex = itemIndexMap.get(item.id);
-                        if (targetIndex === undefined) return [];
-
-                        // Predecesores: campo dependencies explícito O parentId si ambos están en el árbol
-                        const predecessorIds = new Set<string>();
-                        if (item.dependencies && item.dependencies.length > 0) {
-                          item.dependencies.forEach((d) => predecessorIds.add(d));
-                        }
-                        if (item.kind === 'hito' && item.parentId) {
-                          predecessorIds.add(item.parentId);
-                        }
-
-                        return Array.from(predecessorIds).flatMap((predId) => {
-                          const sourceIndex = itemIndexMap.get(predId);
-                          if (sourceIndex === undefined) return [];
-                          const sourceItem = shown[sourceIndex];
-                          if (!sourceItem) return [];
-
-                          const rowHeight = 48;
-                          const fromX = getDatePixelOffset(shiftDays(sourceItem.end, 1));
-                          const fromY = sourceIndex * rowHeight + rowHeight / 2;
-                          const toX = getDatePixelOffset(item.start);
-                          const toY = targetIndex * rowHeight + rowHeight / 2;
-
-                          // Trazo ortogonal tipo codo (elbow connector: ──┐ └──►)
-                          const isSuccessorAfter = toX >= fromX + 16;
-                          let pathD = '';
-
-                          if (isSuccessorAfter) {
-                            const midX = fromX + Math.max(12, (toX - fromX) / 2);
-                            pathD = `M ${fromX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
-                          } else {
-                            // Si se solapan o la sucesora inicia cerca
-                            const loopX = fromX + 14;
-                            const midY = fromY + (toY > fromY ? 24 : -24);
-                            const backX = Math.min(toX - 16, fromX - 10);
-                            pathD = `M ${fromX} ${fromY} L ${loopX} ${fromY} L ${loopX} ${midY} L ${backX} ${midY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
-                          }
-
-                          const isCritical = (sourceItem.progress < 100 && item.progress === 0) || item.status === 'Con retraso';
-
-                          return (
-                            <path
-                              key={`${predId}->${item.id}`}
-                              d={pathD}
-                              fill="none"
-                              stroke={isCritical ? '#ea580c' : '#64748b'}
-                              strokeWidth={isCritical ? '2' : '1.5'}
-                              strokeDasharray={isCritical ? undefined : '4 3'}
-                              markerEnd={isCritical ? 'url(#dep-arrow-critical)' : 'url(#dep-arrow)'}
-                              opacity={0.88}
-                            />
-                          );
-                        });
-                      });
-                    })()}
-                  </svg>
-                )}
-
                 {/* Indicador dinámico de "Hoy" */}
                 <div
                   className="today"
@@ -5766,6 +5677,110 @@ export default function CronogramaGanttView({
               </div>
             )}
             </div>
+            )}
+
+            {/* Capa SVG Maestra de Flechas y Líneas de Dependencia / Prelación */}
+            {showCriticalPath && viewMode === 'gantt' && (
+              <svg
+                className="gantt-dependency-svg"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: `${fixedWidth}px`,
+                  width: timelineMinWidth,
+                  height: `${shown.length * 48}px`,
+                  pointerEvents: 'none',
+                  zIndex: 15,
+                  overflow: 'visible',
+                }}
+              >
+                <defs>
+                  <marker
+                    id="dep-arrow"
+                    viewBox="0 0 10 10"
+                    refX="8"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+                  </marker>
+                  <marker
+                    id="dep-arrow-critical"
+                    viewBox="0 0 10 10"
+                    refX="8"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
+                  </marker>
+                </defs>
+
+                {(() => {
+                  const itemIndexMap = new Map<string, number>();
+                  shown.forEach((it, idx) => itemIndexMap.set(it.id, idx));
+
+                  return shown.flatMap((item) => {
+                    const targetIndex = itemIndexMap.get(item.id);
+                    if (targetIndex === undefined) return [];
+
+                    // Predecesores: campo dependencies explícito O parentId si ambos están en el árbol
+                    const predecessorIds = new Set<string>();
+                    if (item.dependencies && item.dependencies.length > 0) {
+                      item.dependencies.forEach((d) => predecessorIds.add(d));
+                    }
+                    if (item.kind === 'hito' && item.parentId) {
+                      predecessorIds.add(item.parentId);
+                    }
+
+                    return Array.from(predecessorIds).flatMap((predId) => {
+                      const sourceIndex = itemIndexMap.get(predId);
+                      if (sourceIndex === undefined) return [];
+                      const sourceItem = shown[sourceIndex];
+                      if (!sourceItem) return [];
+
+                      const rowHeight = 48;
+                      const fromX = getDatePixelOffset(shiftDays(sourceItem.end, 1));
+                      const fromY = sourceIndex * rowHeight + rowHeight / 2;
+                      const toX = getDatePixelOffset(item.start);
+                      const toY = targetIndex * rowHeight + rowHeight / 2;
+
+                      // Trazo ortogonal tipo codo (elbow connector: ──┐ └──►)
+                      const isSuccessorAfter = toX >= fromX + 16;
+                      let pathD = '';
+
+                      if (isSuccessorAfter) {
+                        const midX = fromX + Math.max(12, (toX - fromX) / 2);
+                        pathD = `M ${fromX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
+                      } else {
+                        // Si se solapan o la sucesora inicia cerca
+                        const loopX = fromX + 14;
+                        const midY = fromY + (toY > fromY ? 24 : -24);
+                        const backX = Math.min(toX - 16, fromX - 10);
+                        pathD = `M ${fromX} ${fromY} L ${loopX} ${fromY} L ${loopX} ${midY} L ${backX} ${midY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
+                      }
+
+                      const isCritical = (sourceItem.progress < 100 && item.progress === 0) || item.status === 'Con retraso';
+
+                      return (
+                        <path
+                          key={`${predId}->${item.id}`}
+                          d={pathD}
+                          fill="none"
+                          stroke={isCritical ? '#ea580c' : '#64748b'}
+                          strokeWidth={isCritical ? '2' : '1.5'}
+                          strokeDasharray={isCritical ? undefined : '4 3'}
+                          markerEnd={isCritical ? 'url(#dep-arrow-critical)' : 'url(#dep-arrow)'}
+                          opacity={0.92}
+                        />
+                      );
+                    });
+                  });
+                })()}
+              </svg>
             )}
           </div>
 
@@ -5824,6 +5839,18 @@ export default function CronogramaGanttView({
               stateFilter={stateFilter}
               selectedRegions={selectedRegions}
               search={search}
+            />
+          )}
+
+          {/* Presentación 5: Estructura Jerárquica WBS / Árbol (Imagen de referencia 1) */}
+          {viewMode === 'arbol' && (
+            <CronogramaArbolView
+              items={shown}
+              allItems={items}
+              selectedId={selectedId}
+              onSelectItem={openEditorForItem}
+              onAddItem={(kind, pId) => add(kind, pId, true)}
+              formatDatePE={formatDatePE}
             />
           )}
 

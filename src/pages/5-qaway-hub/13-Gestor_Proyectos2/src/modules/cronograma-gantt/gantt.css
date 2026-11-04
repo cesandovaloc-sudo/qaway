@@ -7116,3 +7116,389 @@ body.gantt-resizing {
 .gantt-v2 .footer {
   flex-shrink: 0;
 }
+
+
+/* ==========================================================================
+   ESTRUCTURA JERÁRQUICA WBS (VISTA ÁRBOL / DESGLOSE DE TRABAJO - IMAGEN 1)
+   ========================================================================== */
+.gantt-v2 .arbol-wbs-container {
+  width: 100%;
+  padding: 20px 24px 48px;
+  background: #fbfcfd;
+  min-height: 580px;
+  box-sizing: border-box;
+}
+
+.gantt-v2 .arbol-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  margin-bottom: 20px;
+  color: #64748b;
+}
+
+.gantt-v2 .arbol-crumb.root {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.gantt-v2 .arbol-crumb-sep {
+  color: #94a3b8;
+}
+
+.gantt-v2 .arbol-crumb.active {
+  color: #0066ff;
+  font-weight: 500;
+}
+
+.gantt-v2 .arbol-tree-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.gantt-v2 .arbol-node-root {
+  position: relative;
+}
+
+/* Tarjetas Generales WBS */
+.gantt-v2 .arbol-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.gantt-v2 .arbol-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+  transform: translateY(-1px);
+}
+
+.gantt-v2 .arbol-card.selected {
+  border-color: #0066ff !important;
+  background: #f8fbff !important;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2) !important;
+}
+
+/* Tarjeta Raíz Master */
+.gantt-v2 .arbol-card.master-project {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+}
+
+.gantt-v2 .arbol-card.master-project .arbol-master-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.gantt-v2 .arbol-card.master-project .arbol-card-sub {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.gantt-v2 .arbol-card.master-project .arbol-metric-num {
+  color: #ffffff;
+}
+
+.gantt-v2 .arbol-card.master-project .arbol-progress-track {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.gantt-v2 .arbol-card.master-project .arbol-date-range {
+  color: #cbd5e1;
+}
+
+.gantt-v2 .arbol-master-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #0066ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .arbol-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.gantt-v2 .arbol-collapse-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .arbol-collapse-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.gantt-v2 .arbol-collapse-spacer {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .arbol-node-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .arbol-node-icon.hito-icon {
+  background: #eff6ff;
+}
+
+.gantt-v2 .arbol-node-icon.sub-icon {
+  background: #f0fdf4;
+}
+
+.gantt-v2 .arbol-node-icon.leaf-icon {
+  width: 24px;
+  height: 24px;
+  background: #f1f5f9;
+}
+
+.gantt-v2 .arbol-card-titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gantt-v2 .arbol-card-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-v2 .arbol-card-title.sub-title {
+  font-weight: 550;
+  font-size: 14px;
+}
+
+.gantt-v2 .arbol-card-title.leaf-title {
+  font-weight: 500;
+  font-size: 13.5px;
+  color: #334155;
+}
+
+.gantt-v2 .arbol-code {
+  color: #0066ff;
+  font-weight: 650;
+  margin-right: 4px;
+}
+
+.gantt-v2 .arbol-card-sub {
+  font-size: 12.5px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* Centro: Métrica y Fechas */
+.gantt-v2 .arbol-card-center {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .arbol-metric-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gantt-v2 .arbol-metric-num {
+  font-size: 13px;
+  font-weight: 650;
+  color: #1e293b;
+  min-width: 32px;
+  text-align: right;
+}
+
+.gantt-v2 .arbol-progress-track {
+  width: 100px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .arbol-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.gantt-v2 .arbol-date-range {
+  font-size: 12.5px;
+  color: #64748b;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+/* Derecha: Badges y Avatares */
+.gantt-v2 .arbol-card-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .arbol-count-badge {
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gantt-v2 .arbol-status-badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: capitalize;
+}
+
+.gantt-v2 .arbol-status-badge.completado {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.gantt-v2 .arbol-status-badge.en-proceso {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.gantt-v2 .arbol-status-badge.pendiente {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.gantt-v2 .arbol-status-badge.con-retraso {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.gantt-v2 .arbol-user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Conectores Jerárquicos WBS (Ramas y Brazos) */
+.gantt-v2 .arbol-branches-level1 {
+  position: relative;
+  margin-left: 28px;
+  padding-left: 28px;
+  border-left: 2px solid #cbd5e1;
+  margin-top: 14px;
+}
+
+.gantt-v2 .arbol-branch-item {
+  position: relative;
+  margin-top: 14px;
+}
+
+.gantt-v2 .arbol-connector-arm {
+  position: absolute;
+  left: -30px;
+  top: 26px;
+  width: 28px;
+  height: 2px;
+  background: #cbd5e1;
+}
+
+.gantt-v2 .arbol-children-container {
+  position: relative;
+  margin-left: 32px;
+  padding-left: 24px;
+  border-left: 2px solid #e2e8f0;
+  margin-top: 10px;
+}
+
+.gantt-v2 .arbol-sub-branch {
+  position: relative;
+  margin-top: 10px;
+}
+
+.gantt-v2 .arbol-connector-arm.sub {
+  left: -26px;
+  top: 22px;
+  width: 24px;
+  background: #e2e8f0;
+}
+
+.gantt-v2 .arbol-leaf-container {
+  position: relative;
+  margin-left: 30px;
+  padding-left: 20px;
+  border-left: 2px dashed #cbd5e1;
+  margin-top: 8px;
+}
+
+.gantt-v2 .arbol-leaf-item {
+  position: relative;
+  margin-top: 6px;
+}
+
+.gantt-v2 .arbol-connector-arm.leaf {
+  left: -22px;
+  top: 18px;
+  width: 20px;
+  background: #cbd5e1;
+}
+
+.gantt-v2 .arbol-card.leaf-card {
+  padding: 8px 14px;
+  background: #ffffff;
+  border-color: #f1f5f9;
+}
+
+.gantt-v2 .arbol-card.leaf-card:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
