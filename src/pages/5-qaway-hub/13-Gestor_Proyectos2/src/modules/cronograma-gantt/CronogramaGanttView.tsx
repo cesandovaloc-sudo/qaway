@@ -121,7 +121,7 @@ import {
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
+type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
 type EditField = ColKey;
 
 export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
@@ -182,6 +182,22 @@ export interface Item {
   dependencies?: string[];
 }
 
+export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
+  // Componente 1: Planificación
+  'pt-1.6': ['pt-1.4'],   // CDL depende de Plan de Distribución Local aprobado
+  'sub-1.7': ['pt-1.6'],  // Capacitación y difusión depende de CDL validado
+  'pt-1.7a': ['pt-1.6'],
+  'pt-1.7b': ['pt-1.7a'], // Capacitación a directores depende de Oficio de comunicación
+
+  // Dependencias macro entre componentes rectores
+  'comp-3': ['comp-2'],   // Recepción en DRE/UGEL depende de Habilitación de Almacenes
+  'comp-4': ['comp-1'],   // Contratos de transporte depende de Planificación y CDL
+  'comp-5': ['comp-4'],   // Distribución a IIEE depende de Contratación de Transporte
+  'comp-6': ['comp-5'],   // Recepción en IIEE depende de Distribución a IIEE
+  'comp-10': ['comp-5'],  // Monitoreo intensivo depende de inicio de Distribución
+  'comp-11': ['comp-5'],  // Alerta temprana depende de inicio de Distribución
+};
+
 const INITIAL_ITEMS: Item[] = sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
   id: r.id,
   code: r.code,
@@ -192,6 +208,7 @@ const INITIAL_ITEMS: Item[] = sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((
   parentId: r.parentId,
   start: r.start,
   end: r.end,
+  dependencies: OFFICIAL_WBS_DEPENDENCIES[r.id] || [],
   progress: r.kind === 'hito' ? 18 : (r.code === '1.1' || r.code === '2.1' ? 100 : (r.code.startsWith('1.') ? 50 : 0)),
   status: r.code === '1.1' || r.code === '2.1' ? 'Completado' : (r.code.startsWith('1.') ? 'En proceso' : 'Pendiente'),
   expanded: true,
@@ -349,7 +366,7 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'gestor', 'region', 'actualEnd', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'actions'];
 
 const DEFAULT_COLS: Record<string, number> = {
   code: 80,
@@ -361,6 +378,7 @@ const DEFAULT_COLS: Record<string, number> = {
   duration: 105,
   progress: 130,
   status: 125,
+  dependencies: 130,
   gestor: 165,
   region: 140,
   deviation: 120,
@@ -378,6 +396,7 @@ const MIN_COLS: Record<string, number> = {
   duration: 80,
   progress: 100,
   status: 90,
+  dependencies: 90,
   gestor: 110,
   region: 95,
   deviation: 90,
@@ -396,6 +415,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'progress', label: 'Avance' },
   { key: 'deviation', label: 'Desviación' },
   { key: 'status', label: 'Estado' },
+  { key: 'dependencies', label: 'Predecesores' },
   { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Ámbito' },
   { key: 'actualEnd', label: 'Fecha real' },
@@ -436,6 +456,12 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
     type: 'processState',
     accessor: (r) => r?.status,
     options: STATUS_FLOW.map((s) => ({ value: s, label: s })),
+  },
+  {
+    id: 'dependencies',
+    label: 'Predecesores',
+    type: 'text',
+    accessor: (r) => (r?.dependencies || []).join(', '),
   },
   { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
   { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
@@ -960,7 +986,7 @@ export default function CronogramaGanttView({
               faseId: it.faseId !== undefined ? it.faseId : (init?.faseId ?? null),
               dependencies: (it.dependencies && it.dependencies.length > 0)
                 ? it.dependencies
-                : (init?.dependencies || []),
+                : (init?.dependencies && init.dependencies.length > 0 ? init.dependencies : (OFFICIAL_WBS_DEPENDENCIES[it.id] || [])),
             };
           });
           return sortWbsHierarchy(upgraded);
@@ -1001,9 +1027,10 @@ export default function CronogramaGanttView({
       setItems((prev) =>
         prev.map((it) => {
           const init = initialMap.get(it.id);
+          const official = OFFICIAL_WBS_DEPENDENCIES[it.id] || [];
           return {
             ...it,
-            dependencies: it.dependencies && it.dependencies.length > 0 ? it.dependencies : (init?.dependencies || []),
+            dependencies: it.dependencies && it.dependencies.length > 0 ? it.dependencies : (init?.dependencies && init.dependencies.length > 0 ? init.dependencies : official),
           };
         })
       );
@@ -1848,6 +1875,7 @@ export default function CronogramaGanttView({
       duration: 105,
       progress: 130,
       status: 125,
+      dependencies: 130,
       gestor: 165,
       region: 140,
       deviation: 120,
@@ -4410,6 +4438,27 @@ export default function CronogramaGanttView({
                   <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('status'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
+              {visibleCols.includes('dependencies') && (
+                <div className="th-col-header">
+                  <span className="th-label">Predecesores</span>
+                  <div className="th-actions">
+                    <button
+                      type="button"
+                      className="th-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleColVisibility('dependencies');
+                        notify('Columna "Predecesores" ocultada.');
+                      }}
+                      title="Ocultar columna Predecesores"
+                    >
+                      <EyeOff size={11} />
+                    </button>
+                    <ColumnHeaderMenu engine={engine} columnId="dependencies" buttonClassName="th-action-btn" />
+                  </div>
+                  <div className={`col-resizer ${resizingCol === 'dependencies' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'dependencies')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('dependencies'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
+                </div>
+              )}
               {visibleCols.includes('gestor') && (
                 <div className="th-col-header">
                   <span className="th-label">Responsable</span>
@@ -5059,6 +5108,37 @@ export default function CronogramaGanttView({
                     </div>
                   )}
 
+                  {visibleCols.includes('dependencies') && (
+                    <div
+                      className="dependencies-cell editable"
+                      title={
+                        x.dependencies && x.dependencies.length > 0
+                          ? `Predecesores: ${x.dependencies.map((d) => items.find((it) => it.id === d)?.code || d).join(', ')} · Clic para editar`
+                          : 'Sin predecesores · Clic para vincular'
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditorForItem(x);
+                      }}
+                    >
+                      {x.dependencies && x.dependencies.length > 0 ? (
+                        <div className="dep-tags-list">
+                          {x.dependencies.map((depId) => {
+                            const depItem = items.find((it) => it.id === depId);
+                            const depCode = depItem?.code || depId;
+                            return (
+                              <span key={depId} className="dep-pill" title={depItem?.name || depId}>
+                                {depCode}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <span className="dep-empty">—</span>
+                      )}
+                    </div>
+                  )}
+
                   {visibleCols.includes('gestor') && (
                     <div
                       className="gestor-cell editable"
@@ -5443,10 +5523,10 @@ export default function CronogramaGanttView({
 
                           {/* Contenido interior secuencial: 1° Porcentaje (%) + 2° Iconos de responsables (sin salir del nodo) */}
                           {(showBarLabels || showBarAvatars) && (
-                            <div className={`bar-inner-content ${fitsInsideBar ? 'in-bar' : 'after-bar'}`}>
+                            <div className={`bar-inner-content ${fitsInsideBar ? 'in-bar' : 'before-bar'}`}>
                               {/* 1. Porcentaje de avance: espacio numérico natural (máx 100%) */}
                               {showBarLabels && (
-                                <span className={`bar-percent-tag ${fitsInsideBar ? 'in-bar' : 'after-bar'}`}>
+                                <span className={`bar-percent-tag ${fitsInsideBar ? 'in-bar' : 'before-bar'}`}>
                                   {x.progress}%
                                 </span>
                               )}
@@ -5633,24 +5713,13 @@ export default function CronogramaGanttView({
                   <marker
                     id="dep-arrow"
                     viewBox="0 0 10 10"
-                    refX="8"
+                    refX="7"
                     refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
+                    markerWidth="5"
+                    markerHeight="5"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 2 L 7 5 L 0 8 z" fill="#64748b" />
-                  </marker>
-                  <marker
-                    id="dep-arrow-critical"
-                    viewBox="0 0 10 10"
-                    refX="8"
-                    refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
-                    orient="auto-start-reverse"
-                  >
-                    <path d="M 0 2 L 7 5 L 0 8 z" fill="#ea580c" />
+                    <path d="M 0 2 L 7 5 L 0 8 z" fill="#94a3b8" />
                   </marker>
                 </defs>
 
@@ -5678,33 +5747,15 @@ export default function CronogramaGanttView({
                     const targetIndex = itemIndexMap.get(item.id);
                     if (targetIndex === undefined) return [];
 
-                    // 1. Predecesores directos del ítem
+                    // 1. Predecesores directos y reales del ítem (según WBS oficial o editados por el usuario)
                     const predecessorRawIds = new Set<string>();
                     if (item.dependencies && item.dependencies.length > 0) {
                       item.dependencies.forEach((d) => predecessorRawIds.add(d));
-                    } else {
-                      // Fallback natural de prelación secuencial WBS (conecta con la actividad anterior)
-                      if (item.parentId) {
-                        const siblings = items.filter((s) => s.parentId === item.parentId);
-                        const sIdx = siblings.findIndex((s) => s.id === item.id);
-                        if (sIdx > 0) {
-                          predecessorRawIds.add(siblings[sIdx - 1].id);
-                        }
-                      } else if (item.kind === 'hito') {
-                        const rootComps = items.filter((c) => c.kind === 'hito' && !c.parentId);
-                        const cIdx = rootComps.findIndex((c) => c.id === item.id);
-                        if (cIdx > 0) {
-                          predecessorRawIds.add(rootComps[cIdx - 1].id);
-                        }
-                      }
-                    }
-                    if (item.kind === 'hito' && item.parentId) {
-                      predecessorRawIds.add(item.parentId);
                     }
 
-                    // 2. Si el ítem es un hito con hijos ocultos, recolectar dependencias de sus hijos
+                    // 2. Si el ítem es un hito con hijos ocultos, recolectar dependencias reales de sus hijos
                     items.forEach((subIt) => {
-                      if (subIt.parentId === item.id && subIt.dependencies) {
+                      if (subIt.parentId === item.id && subIt.dependencies && subIt.dependencies.length > 0) {
                         subIt.dependencies.forEach((d) => predecessorRawIds.add(d));
                       }
                     });
@@ -5728,11 +5779,22 @@ export default function CronogramaGanttView({
                       const toX = getDatePixelOffset(item.start);
                       const toY = targetIndex * rowHeight + rowHeight / 2;
 
+                      // Determinar si la barra destino tiene el porcentaje fuera (lado izquierdo)
+                      const targetBarWidthPx = Math.max(8, getDatePixelOffset(shiftDays(item.end, 1)) - getDatePixelOffset(item.start));
+                      const targetFillWidthPx = targetBarWidthPx * (Math.min(100, Math.max(0, item.progress)) / 100);
+                      const targetFitsInsideBar = targetFillWidthPx >= 42;
+
                       let pathD = '';
                       if (toX >= fromEndX + 8) {
                         // Trazo secuencial clásico ortogonal (Fin a Inicio: ──┐ └──►)
                         const midX = fromEndX + Math.max(8, (toX - fromEndX) / 2);
-                        pathD = `M ${fromEndX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
+                        if (!targetFitsInsideBar && toX - midX > 24) {
+                          // Resguardar holgura para la etiqueta de porcentaje situada a la izquierda de la barra
+                          const laneY = toY - 8;
+                          pathD = `M ${fromEndX} ${fromY} L ${midX} ${fromY} L ${midX} ${laneY} L ${toX - 4} ${laneY} L ${toX - 2} ${toY}`;
+                        } else {
+                          pathD = `M ${fromEndX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
+                        }
                       } else {
                         // Trazo con canal de retorno en vacío para evitar cruzar sobre nodos
                         const exitX = fromEndX + 10;
@@ -5741,17 +5803,15 @@ export default function CronogramaGanttView({
                         pathD = `M ${fromEndX} ${fromY} L ${exitX} ${fromY} L ${exitX} ${interY} L ${backX} ${interY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
                       }
 
-                      const isCritical = (sourceItem.progress < 100 && item.progress === 0) || item.status === 'Con retraso';
-
                       return (
                         <path
                           key={pairKey}
                           d={pathD}
                           fill="none"
-                          stroke={isCritical ? '#ea580c' : '#64748b'}
-                          strokeWidth="1.6"
-                          markerEnd={isCritical ? 'url(#dep-arrow-critical)' : 'url(#dep-arrow)'}
-                          opacity={0.88}
+                          stroke="#94a3b8"
+                          strokeWidth="1.3"
+                          markerEnd="url(#dep-arrow)"
+                          opacity={0.82}
                         />
                       );
                     });

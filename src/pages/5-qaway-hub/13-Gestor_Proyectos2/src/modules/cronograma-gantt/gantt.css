@@ -2822,6 +2822,18 @@
   left: 8px; /* Espacio natural interior desde el borde donde toca la flecha */
 }
 
+.gantt-v2 .bar-inner-content.before-bar {
+  right: calc(100% + 10px);
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 20;
+}
+
 .gantt-v2 .bar-inner-content.after-bar {
   left: calc(100% + 6px);
 }
@@ -2833,16 +2845,33 @@
   line-height: 1;
   white-space: nowrap;
   letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .gantt-v2 .bar-percent-tag.in-bar {
   color: #ffffff;
-  text-shadow: none;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+.gantt-v2 .bar-percent-tag.before-bar {
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: none !important;
+  filter: none !important;
+  background: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  box-shadow: none;
 }
 
 .gantt-v2 .bar-percent-tag.after-bar {
   color: #334155;
-  text-shadow: none;
+  text-shadow: none !important;
+  filter: none !important;
 }
 
 .gantt-v2 .bar-avatars-group {
@@ -2912,10 +2941,10 @@
 /* Barra Maestra de Hito Rector */
 .gantt-v2 .bar.major {
   height: 20px;
-  background: rgba(0, 102, 255, 0.16);
-  border: 1px solid rgba(0, 102, 255, 0.45);
-  border-radius: 5px;
-  box-shadow: 0 2px 6px rgba(0, 102, 255, 0.18);
+  background: rgba(0, 102, 255, 0.12);
+  border: 1px solid rgba(0, 102, 255, 0.35);
+  border-radius: 4px;
+  box-shadow: none;
   position: relative;
   overflow: visible;
 }
@@ -2950,8 +2979,8 @@
 }
 
 .gantt-v2 .bar.major .bar-progress-fill {
-  background: linear-gradient(90deg, #0052cc 0%, #0066ff 100%);
-  box-shadow: 0 1px 4px rgba(0, 102, 255, 0.25);
+  background: #0066ff;
+  box-shadow: none;
 }
 
 .gantt-v2 .hito-diamond-badge {
@@ -3118,7 +3147,7 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #ef4444;
+  background: #0066ff;
   z-index: 15;
   pointer-events: none;
 }
@@ -3128,12 +3157,13 @@
   top: 4px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
-  background: #ef4444;
+  background: #0066ff;
   color: #fff;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 102, 255, 0.25);
 }
 
 .gantt-v2 .footer {
@@ -3713,6 +3743,43 @@ body.gantt-resizing {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+}
+
+.gantt-v2 .dependencies-cell {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.gantt-v2 .dep-tags-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.gantt-v2 .dep-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.gantt-v2 .dep-empty {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 /* --- E) Editores inline en celda --- */
