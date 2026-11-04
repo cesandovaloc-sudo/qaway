@@ -3,17 +3,14 @@ import type { Integrante, UnidadOrganizacional, SedeFrente } from './types';
 import {
   ZoomIn,
   ZoomOut,
-  Maximize,
   RotateCcw,
   Building2,
-  Users,
   ChevronDown,
   ChevronRight,
-  ShieldCheck,
   Crown,
   Search,
   Download,
-  ExternalLink,
+  X,
 } from 'lucide-react';
 
 interface EquipoOrganigramaViewProps {
@@ -40,7 +37,6 @@ export default function EquipoOrganigramaView({
 
   // Construir el árbol jerárquico a partir de reportaAId
   const hierarchicalTree = useMemo(() => {
-    // Buscar la raíz (aquellos sin reportaAId o reportaAId nulo/vacío)
     const lideres = integrantes.filter(
       (i) => !i.reportaAId || !integrantes.some((parent) => parent.id === i.reportaAId)
     );
@@ -104,7 +100,7 @@ export default function EquipoOrganigramaView({
             border: matchesSearch
               ? '2px solid #eab308'
               : esLider
-              ? '2px solid #0284c7'
+              ? '2px solid #0066ff'
               : '1px solid #cbd5e1',
             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
             padding: '14px 16px',
@@ -124,7 +120,7 @@ export default function EquipoOrganigramaView({
         >
           {/* Cabecera de la tarjeta: Área y Badge */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#0066ff', textTransform: 'uppercase' }}>
               {integrante.areaNombre}
             </span>
             {esLider && (
@@ -148,7 +144,7 @@ export default function EquipoOrganigramaView({
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
-                  background: esLider ? '#0284c7' : '#1e293b',
+                  background: esLider ? '#0066ff' : '#1e293b',
                   color: '#ffffff',
                   fontWeight: 700,
                   fontSize: '13px',
@@ -174,12 +170,12 @@ export default function EquipoOrganigramaView({
           {/* Sede y Reportes */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f1f5f9', fontSize: '10.5px', color: '#64748b' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Building2 size={12} color="#0284c7" />
+              <Building2 size={12} color="#0066ff" />
               {integrante.sedeNombre.length > 20 ? integrante.sedeNombre.slice(0, 20) + '...' : integrante.sedeNombre}
             </span>
 
             {hasChildren && (
-              <span style={{ fontWeight: 650, color: '#0284c7', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px' }}>
+              <span style={{ fontWeight: 650, color: '#0066ff', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px' }}>
                 {subordinados.length} {subordinados.length === 1 ? 'subordinado' : 'subordinados'}
               </span>
             )}
@@ -216,10 +212,8 @@ export default function EquipoOrganigramaView({
         {/* Línea conectora hacia hijos si no está colapsado */}
         {hasChildren && !isCollapsed && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-            {/* Línea vertical que baja del padre */}
             <div style={{ width: '2px', height: '24px', background: '#94a3b8' }} />
 
-            {/* Contenedor de subordinados con conectores horizontales */}
             <div
               style={{
                 display: 'flex',
@@ -228,7 +222,6 @@ export default function EquipoOrganigramaView({
                 paddingTop: '16px',
               }}
             >
-              {/* Barra horizontal que conecta a todos los hermanos */}
               {subordinados.length > 1 && (
                 <div
                   style={{
@@ -252,7 +245,6 @@ export default function EquipoOrganigramaView({
                     position: 'relative',
                   }}
                 >
-                  {/* Línea vertical corta que baja al nodo hijo */}
                   <div
                     style={{
                       position: 'absolute',
@@ -273,83 +265,78 @@ export default function EquipoOrganigramaView({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', position: 'relative' }}>
-      {/* Barra de Controles del Organigrama */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '10px 24px',
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          flexWrap: 'wrap',
-          gap: '10px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ position: 'relative', width: '260px' }}>
-            <Search size={14} color="#64748b" style={{ position: 'absolute', left: '10px', top: '9px' }} />
-            <input
-              type="text"
-              placeholder="Buscar puesto o persona en el árbol..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              style={{ width: '100%', height: '32px', border: '1px solid #cbd5e1', borderRadius: '6px', paddingLeft: '30px', fontSize: '12px', boxSizing: 'border-box' }}
-            />
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      {/* Barra de Filtros Nativa */}
+      <div className="filters">
+        <label className="search">
+          <Search size={16} />
+          <input
+            placeholder="Buscar integrante en el árbol jerárquico..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+          {busqueda && (
+            <button onClick={() => setBusqueda('')}>
+              <X size={14} />
+            </button>
+          )}
+        </label>
 
-          <button
-            onClick={() => setCollapsedNodes(new Set())}
-            style={{ height: '32px', padding: '0 10px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '11.5px', fontWeight: 600, color: '#334155', cursor: 'pointer' }}
-          >
-            Expandir Todo
-          </button>
-        </div>
+        <button
+          className="btn secondary"
+          style={{ height: '34px', fontSize: '12px' }}
+          onClick={() => setCollapsedNodes(new Set())}
+        >
+          Expandir Todos los Niveles
+        </button>
+
+        <div style={{ flex: 1 }} />
 
         {/* Controles de Zoom */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <button
             onClick={() => handleZoom(-10)}
-            style={{ width: '32px', height: '32px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
-            title="Alejar (Zoom Out)"
+            className="btn secondary"
+            style={{ width: '32px', height: '32px', padding: 0, display: 'grid', placeItems: 'center' }}
+            title="Alejar"
           >
-            <ZoomOut size={15} color="#334155" />
+            <ZoomOut size={14} />
           </button>
-          <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', minWidth: '42px', textAlign: 'center' }}>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', minWidth: '40px', textAlign: 'center' }}>
             {zoomLevel}%
           </span>
           <button
             onClick={() => handleZoom(10)}
-            style={{ width: '32px', height: '32px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
-            title="Acercar (Zoom In)"
+            className="btn secondary"
+            style={{ width: '32px', height: '32px', padding: 0, display: 'grid', placeItems: 'center' }}
+            title="Acercar"
           >
-            <ZoomIn size={15} color="#334155" />
+            <ZoomIn size={14} />
           </button>
           <button
             onClick={resetZoom}
-            style={{ height: '32px', padding: '0 8px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '11.5px', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
-            title="Restablecer zoom a 100%"
+            className="btn secondary"
+            style={{ height: '32px', padding: '0 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+            title="Restablecer zoom"
           >
-            <RotateCcw size={13} />
+            <RotateCcw size={12} />
             100%
           </button>
           <button
             onClick={() => window.print()}
-            style={{ height: '32px', padding: '0 10px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '11.5px', fontWeight: 650, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+            className="btn secondary"
+            style={{ height: '32px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <Download size={13} />
-            Exportar Estructura
+            <span>Exportar PDF</span>
           </button>
         </div>
       </div>
 
-      {/* Canvas Espacial de Navegación del Organigrama */}
+      {/* Canvas Espacial de Navegación */}
       <div
         style={{
-          width: '100%',
-          height: 'calc(100vh - 280px)',
-          minHeight: '520px',
+          flex: 1,
           overflow: 'auto',
           background: '#f8fafc',
           backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
@@ -375,6 +362,14 @@ export default function EquipoOrganigramaView({
           {hierarchicalTree.map((rootNode) => renderNode(rootNode, 0))}
         </div>
       </div>
+
+      {/* Footer que cierra la cápsula */}
+      <footer className="footer">
+        <span>Jerarquía Organizacional · {integrantes.length} integrantes vinculados</span>
+        <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+          Líneas de reporte y supervisión directa
+        </span>
+      </footer>
     </div>
   );
 }

@@ -78,7 +78,6 @@ export default function EquipoDirectorioView({
   onClearFilters,
 }: EquipoDirectorioViewProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [menuAbiertoId, setMenuAbiertoId] = useState<string | null>(null);
   const [modalBulkSede, setModalBulkSede] = useState(false);
   const [modalBulkEstado, setModalBulkEstado] = useState(false);
   const [targetSedeId, setTargetSedeId] = useState(sedes[0]?.id || '');
@@ -188,344 +187,177 @@ export default function EquipoDirectorioView({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      {/* Barra de Presets de Vistas Guardadas */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 24px',
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginRight: '6px', textTransform: 'uppercase' }}>
-            Vistas del Directorio:
-          </span>
-          {presets.map((preset) => {
-            const isSel = preset.id === activePresetId;
-            return (
-              <button
-                key={preset.id}
-                onClick={() => onSelectPreset(preset)}
-                style={{
-                  height: '28px',
-                  padding: '0 10px',
-                  borderRadius: '14px',
-                  border: isSel ? '1px solid #0284c7' : '1px solid #e2e8f0',
-                  background: isSel ? '#e0f2fe' : '#f8fafc',
-                  color: isSel ? '#0369a1' : '#475569',
-                  fontSize: '11.5px',
-                  fontWeight: isSel ? 700 : 500,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {preset.esPredefinido && <Bookmark size={11} color={isSel ? '#0284c7' : '#94a3b8'} />}
-                {preset.nombre}
-              </button>
-            );
-          })}
-        </div>
-
-        <button
-          onClick={onOpenColumnasModal}
-          style={{
-            height: '28px',
-            padding: '0 10px',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-            background: '#ffffff',
-            color: '#334155',
-            fontSize: '11.5px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-        >
-          <SlidersHorizontal size={13} color="#0284c7" />
-          Columnas ({visibleColumns.length})
-        </button>
-      </div>
-
-      {/* Toolbar de Filtros Combinados y Búsqueda */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          padding: '12px 24px',
-          background: '#f8fafc',
-          borderBottom: '1px solid #e2e8f0',
-          flexWrap: 'wrap',
-        }}
-      >
-        {/* Buscador Textual en Vivo */}
-        <div style={{ position: 'relative', width: '320px', maxWidth: '100%' }}>
-          <Search size={15} color="#64748b" style={{ position: 'absolute', left: '10px', top: '9px' }} />
+    <div className="cronograma-lista-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      {/* Barra de Filtros Nativa estilo Cronograma */}
+      <div className="filters">
+        <label className="search">
+          <Search size={16} />
           <input
-            type="text"
-            placeholder="Buscar por nombre, correo, cargo, doc..."
+            placeholder="Buscar por integrante, correo, cargo, documento..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              height: '34px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              paddingLeft: '32px',
-              paddingRight: '10px',
-              fontSize: '12.5px',
-              background: '#ffffff',
-              boxSizing: 'border-box',
-            }}
           />
-        </div>
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')}>
+              <X size={14} />
+            </button>
+          )}
+        </label>
 
-        {/* Filtros Desplegables */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {/* Filtro por Sede */}
+        {/* Filtro Sede */}
+        <div className="filter-dropdown-wrap">
           <select
             value={sedeFilter}
             onChange={(e) => setSedeFilter(e.target.value)}
-            style={{
-              height: '34px',
-              padding: '0 10px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              background: '#ffffff',
-              fontSize: '12px',
-              fontWeight: 500,
-              color: '#334155',
-            }}
+            className="filter-card-btn"
+            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
           >
-            <option value="todas">Todas las sedes</option>
+            <option value="todas">Ubicación: Todas las sedes</option>
             {sedes.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.nombre}
               </option>
             ))}
           </select>
+        </div>
 
-          {/* Filtro por Estado Operativo */}
+        {/* Filtro Estado Laboral */}
+        <div className="filter-dropdown-wrap">
           <select
             value={estadoOpFilter}
             onChange={(e) => setEstadoOpFilter(e.target.value)}
-            style={{
-              height: '34px',
-              padding: '0 10px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              background: '#ffffff',
-              fontSize: '12px',
-              fontWeight: 500,
-              color: '#334155',
-            }}
+            className="filter-card-btn"
+            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
           >
-            <option value="todos">Todos los estados laborales</option>
+            <option value="todos">Estado: Todos los frentes</option>
             <option value="En funciones">En funciones</option>
             <option value="Licencia / Permiso">Licencia / Permiso</option>
             <option value="Desvinculado">Desvinculado</option>
           </select>
+        </div>
 
-          {/* Filtro por Estado de Cuenta */}
+        {/* Filtro Cuenta de Acceso */}
+        <div className="filter-dropdown-wrap">
           <select
             value={estadoCuentaFilter}
             onChange={(e) => setEstadoCuentaFilter(e.target.value)}
-            style={{
-              height: '34px',
-              padding: '0 10px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              background: '#ffffff',
-              fontSize: '12px',
-              fontWeight: 500,
-              color: '#334155',
-            }}
+            className="filter-card-btn"
+            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
           >
-            <option value="todos">Todos los accesos de cuenta</option>
+            <option value="todos">Cuenta: Todos los accesos</option>
             <option value="Habilitada">Habilitada</option>
             <option value="Invitación Pendiente">Invitación Pendiente</option>
             <option value="Suspendida">Suspendida</option>
           </select>
-
-          {(searchQuery || sedeFilter !== 'todas' || estadoOpFilter !== 'todos' || estadoCuentaFilter !== 'todos') && (
-            <button
-              onClick={onClearFilters}
-              style={{
-                height: '34px',
-                padding: '0 10px',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                background: '#ffffff',
-                color: '#ef4444',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Limpiar
-            </button>
-          )}
-
-          <button
-            onClick={exportarSeleccionCsv}
-            style={{
-              height: '34px',
-              padding: '0 12px',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              background: '#ffffff',
-              color: '#1e293b',
-              fontSize: '12px',
-              fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-            }}
-          >
-            <Download size={14} />
-            Exportar CSV
-          </button>
         </div>
+
+        {(searchQuery || sedeFilter !== 'todas' || estadoOpFilter !== 'todos' || estadoCuentaFilter !== 'todos') && (
+          <button className="clear-btn" onClick={onClearFilters} title="Limpiar todos los filtros">
+            Limpiar
+          </button>
+        )}
+
+        <div style={{ flex: 1 }} />
+
+        {/* Configurar Columnas */}
+        <button
+          type="button"
+          className="btn secondary"
+          style={{ height: '34px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          onClick={onOpenColumnasModal}
+        >
+          <SlidersHorizontal size={13} color="#0066ff" />
+          <span>Columnas</span>
+        </button>
+
+        {/* Exportar */}
+        <button
+          type="button"
+          className="btn secondary"
+          style={{ height: '34px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          onClick={exportarSeleccionCsv}
+        >
+          <Download size={13} />
+          <span>Exportar</span>
+        </button>
       </div>
 
-      {/* Tabla Maestra Interactiva */}
-      <div style={{ width: '100%', overflowX: 'auto', background: '#ffffff' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '950px' }}>
+      {/* Contenedor de Tabla con Scroll Interno Encapsulado */}
+      <div className="cronograma-lista-table-wrap" style={{ flex: 1, overflow: 'auto' }}>
+        <table className="cronograma-lista-table">
           <thead>
-            <tr style={{ height: '42px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {/* Checkbox Columna Maestra */}
-              <th style={{ width: '44px', textAlign: 'center', padding: '0 8px' }}>
-                <div
-                  onClick={toggleSelectAll}
-                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                  title="Seleccionar o desmarcar todos"
-                >
-                  {allFilteredSelected ? (
-                    <CheckSquare size={16} color="#0284c7" />
-                  ) : (
-                    <Square size={16} color="#94a3b8" />
-                  )}
-                </div>
+            <tr>
+              <th className="col-chk" style={{ width: '40px', textAlign: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={allFilteredSelected}
+                  onChange={toggleSelectAll}
+                  aria-label="Seleccionar todos"
+                  style={{ cursor: 'pointer' }}
+                />
               </th>
 
               {visibleColumns.includes('integrante') && (
-                <th
-                  onClick={() => handleSort('nombreCompleto')}
-                  style={{ padding: '0 14px', cursor: 'pointer' }}
-                >
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    Integrante
-                    <ArrowUpDown size={12} color="#94a3b8" />
+                <th onClick={() => handleSort('nombreCompleto')} style={{ cursor: 'pointer' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    Integrante / Especialista
+                    <ArrowUpDown size={11} color="#94a3b8" />
                   </div>
                 </th>
               )}
 
               {visibleColumns.includes('cargo') && (
-                <th
-                  onClick={() => handleSort('cargo')}
-                  style={{ padding: '0 14px', cursor: 'pointer' }}
-                >
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <th onClick={() => handleSort('cargo')} style={{ cursor: 'pointer' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     Cargo Funcional
-                    <ArrowUpDown size={12} color="#94a3b8" />
+                    <ArrowUpDown size={11} color="#94a3b8" />
                   </div>
                 </th>
               )}
 
               {visibleColumns.includes('sede') && (
-                <th
-                  onClick={() => handleSort('sedeNombre')}
-                  style={{ padding: '0 14px', cursor: 'pointer' }}
-                >
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <th onClick={() => handleSort('sedeNombre')} style={{ cursor: 'pointer' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     Sede / Frente
-                    <ArrowUpDown size={12} color="#94a3b8" />
+                    <ArrowUpDown size={11} color="#94a3b8" />
                   </div>
                 </th>
               )}
 
               {visibleColumns.includes('estadoOperativo') && (
-                <th
-                  onClick={() => handleSort('estadoOperativo')}
-                  style={{ padding: '0 14px', cursor: 'pointer' }}
-                >
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <th onClick={() => handleSort('estadoOperativo')} style={{ cursor: 'pointer' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     Estado Laboral
-                    <ArrowUpDown size={12} color="#94a3b8" />
+                    <ArrowUpDown size={11} color="#94a3b8" />
                   </div>
                 </th>
               )}
 
               {visibleColumns.includes('estadoCuenta') && (
-                <th
-                  onClick={() => handleSort('estadoCuenta')}
-                  style={{ padding: '0 14px', cursor: 'pointer' }}
-                >
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    Cuenta de Acceso
-                    <ArrowUpDown size={12} color="#94a3b8" />
+                <th onClick={() => handleSort('estadoCuenta')} style={{ cursor: 'pointer' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    Acceso de Cuenta
+                    <ArrowUpDown size={11} color="#94a3b8" />
                   </div>
                 </th>
               )}
 
               {visibleColumns.includes('carga') && (
-                <th style={{ padding: '0 14px' }}>
-                  Carga Operativa
-                </th>
+                <th style={{ minWidth: '150px' }}>Carga Operativa</th>
               )}
 
-              {visibleColumns.includes('email') && (
-                <th style={{ padding: '0 14px' }}>Correo</th>
-              )}
+              {visibleColumns.includes('email') && <th>Correo Institucional</th>}
+              {visibleColumns.includes('telefono') && <th>Teléfono Móvil</th>}
 
-              {visibleColumns.includes('telefono') && (
-                <th style={{ padding: '0 14px' }}>Teléfono</th>
-              )}
-
-              <th style={{ width: '48px', padding: '0 8px', textAlign: 'center' }}></th>
+              <th className="col-actions" style={{ width: '44px', textAlign: 'center' }}></th>
             </tr>
           </thead>
 
           <tbody>
             {filteredIntegrantes.length === 0 ? (
               <tr>
-                <td colSpan={10} style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
-                  <Filter size={32} color="#94a3b8" style={{ margin: '0 auto 8px' }} />
-                  <p style={{ margin: '0 0 6px 0', fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
-                    No se encontraron integrantes
-                  </p>
-                  <span style={{ fontSize: '12.5px', color: '#64748b' }}>
-                    Intenta ajustar los filtros aplicados o limpia la búsqueda.
-                  </span>
-                  <div style={{ marginTop: '12px' }}>
-                    <button
-                      onClick={onClearFilters}
-                      style={{
-                        height: '30px',
-                        padding: '0 14px',
-                        background: '#0284c7',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: 650,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Restablecer Filtros
-                    </button>
-                  </div>
+                <td colSpan={10} className="empty-row">
+                  No se encontraron integrantes registrados con los filtros seleccionados
                 </td>
               </tr>
             ) : (
@@ -538,151 +370,85 @@ export default function EquipoDirectorioView({
                   <tr
                     key={item.id}
                     onClick={() => onSelectIntegrante(item.id)}
-                    style={{
-                      height: '48px',
-                      borderBottom: '1px solid #e2e8f0',
-                      background: isSelectedRow ? '#f0f9ff' : isChecked ? '#f8fafc' : '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'background 0.12s ease',
-                    }}
+                    className={`lista-row ${isSelectedRow ? 'selected-row' : ''}`}
+                    style={{ background: isSelectedRow ? '#f0f9ff' : isChecked ? '#f8fafc' : undefined }}
                   >
                     {/* Checkbox */}
-                    <td style={{ textAlign: 'center', padding: '0 8px' }}>
-                      <div
-                        onClick={(e) => toggleSelectOne(item.id, e)}
-                        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                      >
-                        {isChecked ? (
-                          <CheckSquare size={16} color="#0284c7" />
-                        ) : (
-                          <Square size={16} color="#cbd5e1" />
-                        )}
-                      </div>
+                    <td className="col-chk" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => toggleSelectOne(item.id, e as any)}
+                        style={{ cursor: 'pointer' }}
+                      />
                     </td>
 
-                    {/* Integrante (Avatar + Nombre + Correo) */}
+                    {/* Integrante */}
                     {visibleColumns.includes('integrante') && (
-                      <td style={{ padding: '0 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <td className="col-name">
+                        <div className="gestor-cell" style={{ gap: '10px' }}>
                           {item.avatarUrl ? (
                             <img
                               src={item.avatarUrl}
                               alt={item.nombreCompleto}
-                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                              style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
                             />
                           ) : (
-                            <div
-                              style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                background: '#1e293b',
-                                color: '#ffffff',
-                                fontSize: '11.5px',
-                                fontWeight: 700,
-                                display: 'grid',
-                                placeItems: 'center',
-                                flexShrink: 0,
-                              }}
-                            >
+                            <div className="gestor-avatar" style={{ background: '#1e293b', width: '28px', height: '28px', fontSize: '11px' }}>
                               {item.iniciales}
                             </div>
                           )}
-                          <div style={{ minWidth: 0 }}>
-                            <b style={{ display: 'block', fontSize: '13px', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {item.nombreCompleto}
-                            </b>
-                            <small style={{ display: 'block', fontSize: '11px', color: '#64748b' }}>
-                              {item.email}
-                            </small>
+                          <div>
+                            <b style={{ display: 'block', fontSize: '13px', color: '#0f172a' }}>{item.nombreCompleto}</b>
+                            <small style={{ color: '#64748b', fontSize: '11px' }}>{item.email}</small>
                           </div>
                         </div>
                       </td>
                     )}
 
-                    {/* Cargo Funcional */}
+                    {/* Cargo */}
                     {visibleColumns.includes('cargo') && (
-                      <td style={{ padding: '0 14px', fontSize: '12.5px', color: '#334155', fontWeight: 500 }}>
-                        {item.cargo}
-                      </td>
+                      <td style={{ fontSize: '12.5px', color: '#334155' }}>{item.cargo}</td>
                     )}
 
-                    {/* Sede / Frente */}
+                    {/* Sede */}
                     {visibleColumns.includes('sede') && (
-                      <td style={{ padding: '0 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#0f172a', fontWeight: 600 }}>
-                          <Building2 size={13} color="#0284c7" />
-                          <span>{item.sedeNombre}</span>
+                      <td className="col-region">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Building2 size={13} color="#0066ff" />
+                          <span className="region-text">{item.sedeNombre}</span>
                         </div>
                       </td>
                     )}
 
                     {/* Estado Operativo */}
                     {visibleColumns.includes('estadoOperativo') && (
-                      <td style={{ padding: '0 14px' }}>
+                      <td className="col-status">
                         <span
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: 650,
-                            padding: '2px 8px',
-                            borderRadius: '12px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            background:
-                              item.estadoOperativo === 'En funciones'
-                                ? '#dcfce7'
-                                : item.estadoOperativo === 'Licencia / Permiso'
-                                ? '#fef3c7'
-                                : '#f1f5f9',
-                            color:
-                              item.estadoOperativo === 'En funciones'
-                                ? '#15803d'
-                                : item.estadoOperativo === 'Licencia / Permiso'
-                                ? '#b45309'
-                                : '#475569',
-                          }}
+                          className={`status-pill ${
+                            item.estadoOperativo === 'En funciones'
+                              ? 'badge-complete'
+                              : item.estadoOperativo === 'Licencia / Permiso'
+                              ? 'badge-progress'
+                              : 'badge-pending'
+                          }`}
                         >
-                          <span
-                            style={{
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              background:
-                                item.estadoOperativo === 'En funciones'
-                                  ? '#22c55e'
-                                  : item.estadoOperativo === 'Licencia / Permiso'
-                                  ? '#f59e0b'
-                                  : '#94a3b8',
-                            }}
-                          />
                           {item.estadoOperativo}
                         </span>
                       </td>
                     )}
 
-                    {/* Estado de Cuenta */}
+                    {/* Estado Cuenta */}
                     {visibleColumns.includes('estadoCuenta') && (
-                      <td style={{ padding: '0 14px' }}>
+                      <td>
                         <span
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            padding: '2px 8px',
-                            borderRadius: '12px',
-                            background:
-                              item.estadoCuenta === 'Habilitada'
-                                ? '#e0f2fe'
-                                : item.estadoCuenta === 'Invitación Pendiente'
-                                ? '#ffedd5'
-                                : '#fee2e2',
-                            color:
-                              item.estadoCuenta === 'Habilitada'
-                                ? '#0369a1'
-                                : item.estadoCuenta === 'Invitación Pendiente'
-                                ? '#c2410c'
-                                : '#b91c1c',
-                          }}
+                          className={`status-pill ${
+                            item.estadoCuenta === 'Habilitada'
+                              ? 'badge-progress'
+                              : item.estadoCuenta === 'Invitación Pendiente'
+                              ? 'badge-late'
+                              : 'badge-pending'
+                          }`}
                         >
                           {item.estadoCuenta}
                         </span>
@@ -691,57 +457,40 @@ export default function EquipoDirectorioView({
 
                     {/* Carga Operativa */}
                     {visibleColumns.includes('carga') && (
-                      <td style={{ padding: '0 14px' }}>
+                      <td className="col-progress">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ width: '80px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: '70px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
                             <div
                               style={{
                                 width: `${Math.min(100, carga.porcentaje)}%`,
                                 height: '100%',
-                                background: carga.porcentaje > 100 ? '#ef4444' : carga.porcentaje > 75 ? '#f59e0b' : '#0284c7',
+                                background: carga.porcentaje > 100 ? '#dc2626' : carga.porcentaje > 80 ? '#f59e0b' : '#0066ff',
                               }}
                             />
                           </div>
-                          <span style={{ fontSize: '11px', fontWeight: 650, color: carga.porcentaje > 100 ? '#ef4444' : '#0f172a' }}>
+                          <span style={{ fontSize: '11.5px', fontWeight: 650, color: carga.porcentaje > 100 ? '#dc2626' : '#0f172a' }}>
                             {carga.porcentaje}%
                           </span>
-                          <span style={{ fontSize: '10.5px', color: '#64748b' }}>
-                            ({carga.activas} t.)
-                          </span>
+                          <span style={{ fontSize: '10.5px', color: '#64748b' }}>({carga.activas} t.)</span>
                         </div>
                       </td>
                     )}
 
-                    {visibleColumns.includes('email') && (
-                      <td style={{ padding: '0 14px', fontSize: '12px', color: '#64748b' }}>
-                        {item.email}
-                      </td>
-                    )}
-
-                    {visibleColumns.includes('telefono') && (
-                      <td style={{ padding: '0 14px', fontSize: '12px', color: '#64748b' }}>
-                        {item.telefono}
-                      </td>
-                    )}
+                    {visibleColumns.includes('email') && <td style={{ fontSize: '12px', color: '#64748b' }}>{item.email}</td>}
+                    {visibleColumns.includes('telefono') && <td style={{ fontSize: '12px', color: '#64748b' }}>{item.telefono}</td>}
 
                     {/* Acciones */}
-                    <td style={{ padding: '0 8px', textAlign: 'center' }}>
+                    <td className="col-actions" style={{ textAlign: 'center' }}>
                       <button
+                        type="button"
+                        className="lista-action-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           onOpenExpediente(item);
                         }}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: '#64748b',
-                          padding: '4px',
-                          borderRadius: '4px',
-                        }}
                         title="Ver expediente completo"
                       >
-                        <Maximize2 size={14} />
+                        <Maximize2 size={13} />
                       </button>
                     </td>
                   </tr>
@@ -752,26 +501,26 @@ export default function EquipoDirectorioView({
         </table>
       </div>
 
-      {/* Pie del Directorio: Contador */}
-      <div
-        style={{
-          padding: '10px 24px',
-          background: '#f8fafc',
-          borderTop: '1px solid #e2e8f0',
-          fontSize: '11.5px',
-          color: '#64748b',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      {/* Footer de Paginación que cierra la cápsula */}
+      <footer className="footer">
         <span>
-          Mostrando {filteredIntegrantes.length} de {integrantes.length} integrantes registrados
+          Mostrando {filteredIntegrantes.length ? 1 : 0}-{filteredIntegrantes.length} de {integrantes.length} integrantes registrados
         </span>
-        <span>
-          {selectedIds.size > 0 && `${selectedIds.size} seleccionados`}
-        </span>
-      </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {selectedIds.size > 0 && (
+            <span style={{ fontWeight: 600, color: '#0066ff' }}>
+              {selectedIds.size} seleccionados
+            </span>
+          )}
+          <button
+            className="btn secondary"
+            style={{ minHeight: '30px', fontSize: '12px' }}
+            onClick={exportarSeleccionCsv}
+          >
+            Descargar Listado
+          </button>
+        </div>
+      </footer>
 
       {/* BARRA FLOTANTE INFERIOR DE ACCIONES MASIVAS */}
       {selectedIds.size > 0 && (
@@ -790,7 +539,6 @@ export default function EquipoDirectorioView({
             alignItems: 'center',
             gap: '14px',
             boxShadow: '0 12px 35px rgba(0, 0, 0, 0.4)',
-            animation: 'fadeInPop 0.2s ease-out',
             border: '1px solid #334155',
           }}
         >
@@ -817,7 +565,7 @@ export default function EquipoDirectorioView({
               gap: '4px',
             }}
           >
-            <Building2 size={13} color="#0284c7" />
+            <Building2 size={13} color="#0066ff" />
             Reasignar Sede
           </button>
 
@@ -937,7 +685,7 @@ export default function EquipoDirectorioView({
                   setModalBulkSede(false);
                   setSelectedIds(new Set());
                 }}
-                style={{ height: '32px', padding: '0 14px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 650, cursor: 'pointer' }}
+                style={{ height: '32px', padding: '0 14px', background: '#0066ff', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 650, cursor: 'pointer' }}
               >
                 Aplicar Reasignación
               </button>
@@ -976,7 +724,7 @@ export default function EquipoDirectorioView({
                   setModalBulkEstado(false);
                   setSelectedIds(new Set());
                 }}
-                style={{ height: '32px', padding: '0 14px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 650, cursor: 'pointer' }}
+                style={{ height: '32px', padding: '0 14px', background: '#0066ff', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 650, cursor: 'pointer' }}
               >
                 Actualizar Estados
               </button>

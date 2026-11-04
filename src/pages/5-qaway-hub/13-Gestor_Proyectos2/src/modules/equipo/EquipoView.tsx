@@ -12,7 +12,6 @@ import {
   saveStoredAsignaciones,
   getStoredPresets,
   saveStoredPresets,
-  INITIAL_PRESETS,
 } from './mockData';
 import EquipoDirectorioView from './EquipoDirectorioView';
 import EquipoSedesView from './EquipoSedesView';
@@ -27,7 +26,6 @@ import {
   UserCheck,
   Clock3,
   AlertTriangle,
-  FolderKanban,
   Download,
   Plus,
   GitBranch,
@@ -35,7 +33,6 @@ import {
   Activity,
   List,
   CheckCircle2,
-  Calendar,
 } from 'lucide-react';
 
 const ALL_COLUMNS = [
@@ -65,6 +62,7 @@ export default function EquipoView({
 
   // Vistas conmutables
   const [activeView, setActiveView] = useState<'directorio' | 'organigrama' | 'sedes' | 'carga'>('directorio');
+  const [selectedPill, setSelectedPill] = useState<string>('Todos');
 
   // Drawer y Modales
   const [selectedIntegranteId, setSelectedIntegranteId] = useState<string | null>(null);
@@ -96,7 +94,6 @@ export default function EquipoView({
     onActions?.({ notify });
   }, [onActions]);
 
-  // Selección activa
   const selectedIntegrante = useMemo(() => {
     return integrantes.find((i) => i.id === selectedIntegranteId) || null;
   }, [integrantes, selectedIntegranteId]);
@@ -105,20 +102,48 @@ export default function EquipoView({
   const metrics = useMemo(() => {
     const total = integrantes.length;
     const activos = integrantes.filter((i) => i.estadoOperativo === 'En funciones').length;
+    const licencias = integrantes.filter((i) => i.estadoOperativo === 'Licencia / Permiso').length;
     const pendientesCuenta = integrantes.filter((i) => i.estadoCuenta === 'Invitación Pendiente').length;
     const alertasAtrasadas = asignaciones.filter((a) => a.estado === 'Atrasado').length;
 
-    // Cálculo objetivo de carga promedio
     const totalEsfuerzoActivo = asignaciones
       .filter((a) => a.estado !== 'Completado')
       .reduce((sum, a) => sum + a.esfuerzoHoras, 0);
     const totalCapacidad = integrantes.reduce((sum, i) => sum + i.capacidadNominalHorasSemana, 0);
     const ocupacionPromedio = totalCapacidad > 0 ? Math.round((totalEsfuerzoActivo / totalCapacidad) * 100) : 0;
 
-    return { total, activos, pendientesCuenta, alertasAtrasadas, ocupacionPromedio };
+    return { total, activos, licencias, pendientesCuenta, alertasAtrasadas, ocupacionPromedio };
   }, [integrantes, asignaciones]);
 
-  // Actualización de integrante individual
+  // Píldoras de filtrado superior
+  const tabPills = [
+    { n: 'Todos', c: metrics.total },
+    { n: 'En funciones', c: metrics.activos },
+    { n: 'Licencia / Permiso', c: metrics.licencias },
+    { n: 'Cuentas por activar', c: metrics.pendientesCuenta },
+    { n: 'Con alerta', c: metrics.alertasAtrasadas },
+  ];
+
+  const handlePillClick = (nombrePill: string) => {
+    setSelectedPill(nombrePill);
+    if (nombrePill === 'Todos') {
+      setEstadoOpFilter('todos');
+      setEstadoCuentaFilter('todos');
+    } else if (nombrePill === 'En funciones') {
+      setEstadoOpFilter('En funciones');
+      setEstadoCuentaFilter('todos');
+    } else if (nombrePill === 'Licencia / Permiso') {
+      setEstadoOpFilter('Licencia / Permiso');
+      setEstadoCuentaFilter('todos');
+    } else if (nombrePill === 'Cuentas por activar') {
+      setEstadoOpFilter('todos');
+      setEstadoCuentaFilter('Invitación Pendiente');
+    } else if (nombrePill === 'Con alerta') {
+      setEstadoOpFilter('todos');
+      setEstadoCuentaFilter('todos');
+    }
+  };
+
   const handleUpdateIntegrante = (updated: Integrante) => {
     const next = integrantes.map((i) => (i.id === updated.id ? updated : i));
     setIntegrantes(next);
@@ -129,7 +154,6 @@ export default function EquipoView({
     notify(`Ficha de ${updated.nombreCompleto} actualizada`);
   };
 
-  // Creación de nuevo integrante
   const handleCreateIntegrante = (nuevo: Integrante) => {
     const next = [nuevo, ...integrantes];
     setIntegrantes(next);
@@ -138,7 +162,6 @@ export default function EquipoView({
     notify(`Nuevo integrante ${nuevo.nombreCompleto} registrado`);
   };
 
-  // Acciones Masivas
   const handleBulkUpdateSede = (ids: string[], newSedeId: string) => {
     const targetSede = sedes.find((s) => s.id === newSedeId);
     if (!targetSede) return;
@@ -148,17 +171,6 @@ export default function EquipoView({
         ...i,
         sedeId: targetSede.id,
         sedeNombre: targetSede.nombre,
-        historial: [
-          {
-            id: 'his-' + Date.now(),
-            integranteId: i.id,
-            fechaHora: new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }),
-            tipoEvento: 'reasignacion_sede' as any,
-            descripcion: `Reasignado masivamente a ${targetSede.nombre}`,
-            autorNombre: 'Coordinador General',
-          },
-          ...(i.historial || []),
-        ],
       };
     });
     setIntegrantes(next);
@@ -169,21 +181,7 @@ export default function EquipoView({
   const handleBulkUpdateEstadoOperativo = (ids: string[], nuevoEstado: EstadoOperativo) => {
     const next = integrantes.map((i) => {
       if (!ids.includes(i.id)) return i;
-      return {
-        ...i,
-        estadoOperativo: nuevoEstado,
-        historial: [
-          {
-            id: 'his-' + Date.now(),
-            integranteId: i.id,
-            fechaHora: new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }),
-            tipoEvento: 'cambio_estado_operativo' as any,
-            descripcion: `Estado operativo actualizado masivamente a ${nuevoEstado}`,
-            autorNombre: 'Coordinador General',
-          },
-          ...(i.historial || []),
-        ],
-      };
+      return { ...i, estadoOperativo: nuevoEstado };
     });
     setIntegrantes(next);
     saveStoredIntegrantes(next);
@@ -191,10 +189,9 @@ export default function EquipoView({
   };
 
   const handleBulkReenviarInvitaciones = (ids: string[]) => {
-    notify(`Invitaciones de acceso reenviadas a ${ids.length} correos institucionales`);
+    notify(`Invitaciones de acceso reenviadas a ${ids.length} correos`);
   };
 
-  // Presets de vistas
   const handleSelectPreset = (preset: PresetVista) => {
     setActivePresetId(preset.id);
     if (preset.columnasVisibles && preset.columnasVisibles.length > 0) {
@@ -223,7 +220,7 @@ export default function EquipoView({
     setPresets(next);
     saveStoredPresets(next);
     setActivePresetId(newPreset.id);
-    notify(`Nueva vista personalizada "${nombre}" guardada`);
+    notify(`Vista "${nombre}" guardada`);
   };
 
   const handleToggleColumn = (colId: string) => {
@@ -241,36 +238,31 @@ export default function EquipoView({
     setSedeFilter('todas');
     setEstadoOpFilter('todos');
     setEstadoCuentaFilter('todos');
+    setSelectedPill('Todos');
     notify('Filtros restablecidos');
   };
 
   const projectName = activeProject?.name || 'Proyecto Operativo';
 
   return (
-    <div className="gantt-v2" style={{ position: 'relative' }}>
+    <div className="gantt-v2">
       <main className="gantt-main">
         {/* Cabecera Principal / Page-Head con neutralidad institucional */}
-        <section className="page-head" style={{ borderBottom: '1px solid #dfe8f4', background: '#f8fafc', padding: '16px 24px' }}>
+        <section className="page-head">
           <div>
-            <div className="eyebrow" style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-              GESTIÓN DE PERSONAS Y OPERACIONES
-            </div>
-            <h1 style={{ margin: '2px 0 0 0', fontSize: '22px', fontWeight: 700, color: '#0f172a' }}>
-              Equipo del Proyecto · {projectName}
-            </h1>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
-              Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo.
-            </p>
+            <div className="eyebrow">GESTIÓN DE PERSONAS Y OPERACIONES</div>
+            <h1>Equipo del Proyecto · {projectName}</h1>
+            <p>Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo.</p>
           </div>
 
-          <div className="head-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="head-actions">
             <button
               className="btn secondary"
               onClick={() => setIsColumnasModalOpen(true)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Download size={15} />
-              Configurar Columnas
+              <Download size={14} />
+              <span>Configurar Columnas</span>
             </button>
 
             <button
@@ -278,14 +270,14 @@ export default function EquipoView({
               onClick={() => setIsNuevoModalOpen(true)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Plus size={16} />
-              Nuevo Integrante
+              <Plus size={15} />
+              <span>Nuevo Integrante</span>
             </button>
           </div>
         </section>
 
-        {/* Tarjetas KPI de Colores Desacopladas */}
-        <section className="metrics" style={{ padding: '16px 24px' }}>
+        {/* Tarjetas KPI Superiores Desacopladas (Idénticas a Cronograma) */}
+        <section className="metrics">
           {/* Card 1: Azul - Total Integrantes */}
           <div className="metric blue">
             <div className="metric-icon">
@@ -307,7 +299,12 @@ export default function EquipoView({
             </div>
             <div className="metric-copy">
               <small>En Funciones</small>
-              <b>{metrics.activos} <span style={{ fontSize: '13px', fontWeight: 500, color: '#166534' }}>({Math.round((metrics.activos / Math.max(1, metrics.total)) * 100)}%)</span></b>
+              <b>
+                {metrics.activos}{' '}
+                <span style={{ fontSize: '13px', fontWeight: 500, color: '#166534' }}>
+                  ({Math.round((metrics.activos / Math.max(1, metrics.total)) * 100)}%)
+                </span>
+              </b>
             </div>
             <div className="bars">
               <span style={{ width: `${(metrics.activos / Math.max(1, metrics.total)) * 100}%` }} />
@@ -342,7 +339,7 @@ export default function EquipoView({
             </div>
           </div>
 
-          {/* Card 5: Circular - Carga Promedio Comprometida */}
+          {/* Card 5: Circular - Carga Promedio */}
           <div
             className="metric"
             style={{
@@ -361,7 +358,7 @@ export default function EquipoView({
                   width: '46px',
                   height: '46px',
                   borderRadius: '50%',
-                  border: '3px solid #0284c7',
+                  border: '3px solid #0066ff',
                   borderTopColor: '#e0f2fe',
                   display: 'grid',
                   placeItems: 'center',
@@ -384,130 +381,142 @@ export default function EquipoView({
           </div>
         </section>
 
-        {/* Conmutador de Vistas del Módulo */}
-        <section
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 24px',
-            background: '#ffffff',
-            borderBottom: '1px solid #dfe8f4',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '4px' }}>
-            {[
-              { id: 'directorio', label: 'Directorio', icon: List },
-              { id: 'organigrama', label: 'Organigrama', icon: GitBranch },
-              { id: 'sedes', label: 'Frentes Territoriales', icon: Building2 },
-              { id: 'carga', label: 'Carga de Trabajo', icon: Activity },
-            ].map((v) => {
-              const Icon = v.icon;
-              const isSel = activeView === v.id;
-              return (
+        {/* =========================================================================
+            LA CÁPSULA UNIFICADA: Workspace Central encapsulado con bordes y sombra
+           ========================================================================= */}
+        <main className="workspace">
+          {/* Tabs Superiores con Switcher de Modos a la Derecha */}
+          <nav className="tabs">
+            <div className="tabs-list">
+              {tabPills.map((t) => (
                 <button
-                  key={v.id}
-                  onClick={() => setActiveView(v.id as any)}
-                  style={{
-                    padding: '12px 16px',
-                    background: 'transparent',
-                    border: 'none',
-                    borderBottom: isSel ? '2px solid #0284c7' : '2px solid transparent',
-                    color: isSel ? '#0284c7' : '#64748b',
-                    fontSize: '13px',
-                    fontWeight: isSel ? 700 : 500,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.15s ease',
-                  }}
+                  key={t.n}
+                  type="button"
+                  className={selectedPill === t.n ? 'active' : ''}
+                  onClick={() => handlePillClick(t.n)}
                 >
-                  <Icon size={15} />
-                  {v.label}
+                  {t.n} <span>({t.c})</span>
                 </button>
-              );
-            })}
-          </div>
+              ))}
+            </div>
 
-          <div style={{ fontSize: '12px', color: '#64748b' }}>
-            {integrantes.length} integrantes registrados · 5 frentes operativos
-          </div>
-        </section>
+            {/* Switcher de Modos con cápsula azul activa (Exacto a Cronograma) */}
+            <div className="view-mode-switcher" role="tablist">
+              <button
+                type="button"
+                className={`view-mode-btn ${activeView === 'directorio' ? 'active' : ''}`}
+                onClick={() => setActiveView('directorio')}
+                title="Directorio Maestro"
+              >
+                <List size={14} />
+                <span>Directorio</span>
+              </button>
 
-        {/* CONTENIDO DE LA VISTA ACTIVA */}
-        {activeView === 'directorio' && (
-          <EquipoDirectorioView
-            integrantes={integrantes}
-            selectedId={selectedIntegranteId}
-            onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
-            onOpenExpediente={(it) => setExpedienteIntegrante(it)}
-            onUpdateIntegrante={handleUpdateIntegrante}
-            onBulkUpdateSede={handleBulkUpdateSede}
-            onBulkUpdateEstadoOperativo={handleBulkUpdateEstadoOperativo}
-            onBulkReenviarInvitaciones={handleBulkReenviarInvitaciones}
-            sedes={sedes}
-            asignaciones={asignaciones}
-            visibleColumns={visibleColumns}
-            onOpenColumnasModal={() => setIsColumnasModalOpen(true)}
-            activePresetId={activePresetId}
-            presets={presets}
-            onSelectPreset={handleSelectPreset}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            sedeFilter={sedeFilter}
-            setSedeFilter={setSedeFilter}
-            estadoOpFilter={estadoOpFilter}
-            setEstadoOpFilter={setEstadoOpFilter}
-            estadoCuentaFilter={estadoCuentaFilter}
-            setEstadoCuentaFilter={setEstadoCuentaFilter}
-            onClearFilters={handleClearFilters}
-          />
-        )}
+              <button
+                type="button"
+                className={`view-mode-btn ${activeView === 'organigrama' ? 'active' : ''}`}
+                onClick={() => setActiveView('organigrama')}
+                title="Organigrama Jerárquico"
+              >
+                <GitBranch size={14} />
+                <span>Organigrama</span>
+              </button>
 
-        {/* PLACEHOLDERS PREPARADOS PARA LAS SIGUIENTES FASES */}
-        {activeView === 'organigrama' && (
-          <EquipoOrganigramaView
-            integrantes={integrantes}
-            areas={areas}
-            sedes={sedes}
-            onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
-          />
-        )}
+              <button
+                type="button"
+                className={`view-mode-btn ${activeView === 'sedes' ? 'active' : ''}`}
+                onClick={() => setActiveView('sedes')}
+                title="Frentes Territoriales"
+              >
+                <Building2 size={14} />
+                <span>Frentes Territoriales</span>
+              </button>
 
-        {activeView === 'sedes' && (
-          <EquipoSedesView
-            sedes={sedes}
-            integrantes={integrantes}
-            onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
-            onUpdateIntegrante={handleUpdateIntegrante}
-            onUpdateSede={(updatedSede) => {
-              const next = sedes.map((s) => (s.id === updatedSede.id ? updatedSede : s));
-              setSedes(next);
-              saveStoredSedes(next);
-              notify(`Sede "${updatedSede.nombre}" actualizada`);
-            }}
-          />
-        )}
+              <button
+                type="button"
+                className={`view-mode-btn ${activeView === 'carga' ? 'active' : ''}`}
+                onClick={() => setActiveView('carga')}
+                title="Carga de Trabajo"
+              >
+                <Activity size={14} />
+                <span>Carga de Trabajo</span>
+              </button>
+            </div>
+          </nav>
 
-        {activeView === 'carga' && (
-          <EquipoCargaView
-            integrantes={integrantes}
-            asignaciones={asignaciones}
-            sedes={sedes}
-            onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
-            onReasignarTarea={(asignacionId, nuevoIntegranteId) => {
-              const nuevoIntegrante = integrantes.find((i) => i.id === nuevoIntegranteId);
-              const next = asignaciones.map((a) => {
-                if (a.id !== asignacionId) return a;
-                return { ...a, integranteId: nuevoIntegranteId };
-              });
-              setAsignaciones(next);
-              saveStoredAsignaciones(next);
-              notify(`Tarea reasignada con éxito a ${nuevoIntegrante?.nombreCompleto || 'nuevo integrante'}`);
-            }}
-          />
-        )}
+          {/* VISTAS DENTRO DE LA CÁPSULA */}
+          {activeView === 'directorio' && (
+            <EquipoDirectorioView
+              integrantes={integrantes}
+              selectedId={selectedIntegranteId}
+              onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
+              onOpenExpediente={(it) => setExpedienteIntegrante(it)}
+              onUpdateIntegrante={handleUpdateIntegrante}
+              onBulkUpdateSede={handleBulkUpdateSede}
+              onBulkUpdateEstadoOperativo={handleBulkUpdateEstadoOperativo}
+              onBulkReenviarInvitaciones={handleBulkReenviarInvitaciones}
+              sedes={sedes}
+              asignaciones={asignaciones}
+              visibleColumns={visibleColumns}
+              onOpenColumnasModal={() => setIsColumnasModalOpen(true)}
+              activePresetId={activePresetId}
+              presets={presets}
+              onSelectPreset={handleSelectPreset}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              sedeFilter={sedeFilter}
+              setSedeFilter={setSedeFilter}
+              estadoOpFilter={estadoOpFilter}
+              setEstadoOpFilter={setEstadoOpFilter}
+              estadoCuentaFilter={estadoCuentaFilter}
+              setEstadoCuentaFilter={setEstadoCuentaFilter}
+              onClearFilters={handleClearFilters}
+            />
+          )}
+
+          {activeView === 'organigrama' && (
+            <EquipoOrganigramaView
+              integrantes={integrantes}
+              areas={areas}
+              sedes={sedes}
+              onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
+            />
+          )}
+
+          {activeView === 'sedes' && (
+            <EquipoSedesView
+              sedes={sedes}
+              integrantes={integrantes}
+              onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
+              onUpdateIntegrante={handleUpdateIntegrante}
+              onUpdateSede={(updatedSede) => {
+                const next = sedes.map((s) => (s.id === updatedSede.id ? updatedSede : s));
+                setSedes(next);
+                saveStoredSedes(next);
+                notify(`Sede "${updatedSede.nombre}" actualizada`);
+              }}
+            />
+          )}
+
+          {activeView === 'carga' && (
+            <EquipoCargaView
+              integrantes={integrantes}
+              asignaciones={asignaciones}
+              sedes={sedes}
+              onSelectIntegrante={(id) => setSelectedIntegranteId(id)}
+              onReasignarTarea={(asignacionId, nuevoIntegranteId) => {
+                const nuevoIntegrante = integrantes.find((i) => i.id === nuevoIntegranteId);
+                const next = asignaciones.map((a) => {
+                  if (a.id !== asignacionId) return a;
+                  return { ...a, integranteId: nuevoIntegranteId };
+                });
+                setAsignaciones(next);
+                saveStoredAsignaciones(next);
+                notify(`Tarea reasignada a ${nuevoIntegrante?.nombreCompleto || 'nuevo integrante'}`);
+              }}
+            />
+          )}
+        </main>
       </main>
 
       {/* DRAWER LATERAL DE CONSULTA Y EDICIÓN RÁPIDA (NIVEL 1) */}
@@ -568,7 +577,7 @@ export default function EquipoView({
             borderRadius: '8px',
             boxShadow: '0 10px 25px rgba(0,0,0,0.25)',
             fontSize: '12.5px',
-            fontWeight: 600,
+            fontWeight: 650,
             display: 'flex',
             alignItems: 'center',
             gap: '8px',

@@ -3,15 +3,10 @@ import type { Integrante, AsignacionViva, SedeFrente } from './types';
 import {
   Activity,
   AlertTriangle,
-  CheckCircle2,
-  Clock,
   ArrowRightLeft,
-  Filter,
   Search,
   Building2,
-  Calendar,
-  ChevronRight,
-  TrendingUp,
+  X,
 } from 'lucide-react';
 
 interface EquipoCargaViewProps {
@@ -38,7 +33,6 @@ export default function EquipoCargaView({
   } | null>(null);
   const [targetIntegranteId, setTargetIntegranteId] = useState<string>('');
 
-  // Estadísticas y cálculo objetivo por integrante
   const listaCarga = useMemo(() => {
     return integrantes.map((integ) => {
       const tareasPersona = asignaciones.filter((a) => a.integranteId === integ.id);
@@ -47,12 +41,6 @@ export default function EquipoCargaView({
       const capacidad = Math.max(1, integ.capacidadNominalHorasSemana);
       const porcentaje = Math.round((esfuerzoTotal / capacidad) * 100);
 
-      let estadoCarga: 'disponible' | 'optimo' | 'alta' | 'sobrecargado' = 'optimo';
-      if (porcentaje < 50) estadoCarga = 'disponible';
-      else if (porcentaje <= 85) estadoCarga = 'optimo';
-      else if (porcentaje <= 100) estadoCarga = 'alta';
-      else estadoCarga = 'sobrecargado';
-
       return {
         integrante: integ,
         tareasTotal: tareasPersona.length,
@@ -60,12 +48,10 @@ export default function EquipoCargaView({
         esfuerzoTotal,
         capacidad,
         porcentaje,
-        estadoCarga,
       };
     });
   }, [integrantes, asignaciones]);
 
-  // Filtrado de la matriz
   const filteredList = useMemo(() => {
     return listaCarga.filter((item) => {
       const matchesSede = filtroSede === 'todas' || item.integrante.sedeId === filtroSede;
@@ -84,7 +70,6 @@ export default function EquipoCargaView({
     });
   }, [listaCarga, filtroSede, filtroNivelCarga, busqueda]);
 
-  // Resumen global de capacidad
   const resumenGlobal = useMemo(() => {
     const totalEsfuerzo = listaCarga.reduce((sum, i) => sum + i.esfuerzoTotal, 0);
     const totalCapacidad = listaCarga.reduce((sum, i) => sum + i.capacidad, 0);
@@ -102,211 +87,138 @@ export default function EquipoCargaView({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      {/* Indicadores de Balance de Capacidad */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '14px',
-          padding: '16px 24px',
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-        }}
-      >
-        <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-            ESFUERZO COMPROMETIDO
-          </span>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>
-            {resumenGlobal.totalEsfuerzo}h <small style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>/ {resumenGlobal.totalCapacidad}h</small>
-          </div>
-          <span style={{ fontSize: '11px', color: '#64748b' }}>Horas de esfuerzo activas en el equipo</span>
-        </div>
-
-        <div style={{ background: '#f0fdf4', padding: '12px 16px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase' }}>
-            CON DISPONIBILIDAD (&lt;50%)
-          </span>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: '#15803d', marginTop: '4px' }}>
-            {resumenGlobal.disponibles} integrantes
-          </div>
-          <span style={{ fontSize: '11px', color: '#166534' }}>Listos para absorber nuevas tareas</span>
-        </div>
-
-        <div style={{ background: resumenGlobal.sobrecargados > 0 ? '#fef2f2' : '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: resumenGlobal.sobrecargados > 0 ? '1px solid #fecaca' : '1px solid #e2e8f0' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: resumenGlobal.sobrecargados > 0 ? '#991b1b' : '#64748b', textTransform: 'uppercase' }}>
-            SOBRECARGADOS (&gt;100%)
-          </span>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: resumenGlobal.sobrecargados > 0 ? '#dc2626' : '#0f172a', marginTop: '4px' }}>
-            {resumenGlobal.sobrecargados} integrantes
-          </div>
-          <span style={{ fontSize: '11px', color: resumenGlobal.sobrecargados > 0 ? '#b91c1c' : '#64748b' }}>
-            {resumenGlobal.sobrecargados > 0 ? 'Riesgo de cuello de botella' : 'Carga balanceada'}
-          </span>
-        </div>
-
-        <div style={{ background: '#f0f9ff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase' }}>
-            BALANCE GENERAL
-          </span>
-          <div style={{ fontSize: '20px', fontWeight: 700, color: '#0284c7', marginTop: '4px' }}>
-            {Math.round((resumenGlobal.totalEsfuerzo / Math.max(1, resumenGlobal.totalCapacidad)) * 100)}%
-          </div>
-          <span style={{ fontSize: '11px', color: '#0369a1' }}>Ocupación promedio del padrón</span>
-        </div>
-      </div>
-
-      {/* Toolbar de Filtros de Carga */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 24px',
-          background: '#f8fafc',
-          borderBottom: '1px solid #e2e8f0',
-          flexWrap: 'wrap',
-          gap: '12px',
-        }}
-      >
-        <div style={{ position: 'relative', width: '280px' }}>
-          <Search size={14} color="#64748b" style={{ position: 'absolute', left: '10px', top: '9px' }} />
+    <div className="cronograma-lista-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      {/* Barra de Filtros Nativa */}
+      <div className="filters">
+        <label className="search">
+          <Search size={16} />
           <input
-            type="text"
-            placeholder="Buscar integrante..."
+            placeholder="Buscar integrante en la matriz de capacidad..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            style={{ width: '100%', height: '32px', border: '1px solid #cbd5e1', borderRadius: '6px', paddingLeft: '30px', fontSize: '12px', boxSizing: 'border-box' }}
           />
-        </div>
+          {busqueda && (
+            <button onClick={() => setBusqueda('')}>
+              <X size={14} />
+            </button>
+          )}
+        </label>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="filter-dropdown-wrap">
           <select
             value={filtroSede}
             onChange={(e) => setFiltroSede(e.target.value)}
-            style={{ height: '32px', padding: '0 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', background: '#fff' }}
+            className="filter-card-btn"
+            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
           >
-            <option value="todas">Todas las sedes</option>
+            <option value="todas">Ubicación: Todas las sedes</option>
             {sedes.map((s) => (
               <option key={s.id} value={s.id}>{s.nombre}</option>
             ))}
           </select>
+        </div>
 
+        <div className="filter-dropdown-wrap">
           <select
             value={filtroNivelCarga}
             onChange={(e) => setFiltroNivelCarga(e.target.value)}
-            style={{ height: '32px', padding: '0 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '12px', background: '#fff' }}
+            className="filter-card-btn"
+            style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
           >
-            <option value="todos">Todos los niveles de ocupación</option>
-            <option value="sobrecargado">Solo Sobrecargados (&gt;100%)</option>
+            <option value="todos">Nivel: Toda la ocupación</option>
+            <option value="sobrecargado">Sobrecargados (&gt;100%)</option>
             <option value="optimo">Carga Óptima (50% - 100%)</option>
             <option value="disponible">Con Disponibilidad (&lt;50%)</option>
           </select>
         </div>
+
+        <div style={{ flex: 1 }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+          <span style={{ color: '#166534', background: '#dcfce7', padding: '3px 8px', borderRadius: '12px', fontWeight: 650 }}>
+            {resumenGlobal.disponibles} con disponibilidad
+          </span>
+          {resumenGlobal.sobrecargados > 0 && (
+            <span style={{ color: '#b91c1c', background: '#fee2e2', padding: '3px 8px', borderRadius: '12px', fontWeight: 650 }}>
+              {resumenGlobal.sobrecargados} sobrecargados
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Matriz de Capacidad y Tareas Concurrentes */}
-      <div style={{ width: '100%', overflowX: 'auto', background: '#ffffff' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '950px' }}>
+      {/* Tabla de Capacidad dentro del Contenedor de Scroll */}
+      <div className="cronograma-lista-table-wrap" style={{ flex: 1, overflow: 'auto' }}>
+        <table className="cronograma-lista-table">
           <thead>
-            <tr style={{ height: '40px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' }}>
-              <th style={{ padding: '0 20px' }}>Integrante</th>
-              <th style={{ padding: '0 16px' }}>Sede</th>
-              <th style={{ padding: '0 16px' }}>Capacidad Base</th>
-              <th style={{ padding: '0 16px' }}>Esfuerzo Comprometido</th>
-              <th style={{ padding: '0 16px', minWidth: '180px' }}>Índice de Ocupación</th>
-              <th style={{ padding: '0 16px' }}>Tareas Activas Concurrentes</th>
+            <tr>
+              <th className="col-name" style={{ paddingLeft: '16px' }}>Integrante</th>
+              <th className="col-region">Frente Asignado</th>
+              <th className="col-dur">Capacidad Base</th>
+              <th className="col-dur">Esfuerzo Comprometido</th>
+              <th className="col-progress" style={{ minWidth: '160px' }}>Índice de Carga</th>
+              <th>Tareas Concurrentes Activas</th>
             </tr>
           </thead>
           <tbody>
             {filteredList.map((row) => {
-              const { integrante, tareasActivas, esfuerzoTotal, capacidad, porcentaje, estadoCarga } = row;
+              const { integrante, tareasActivas, esfuerzoTotal, capacidad, porcentaje } = row;
 
               return (
-                <tr
-                  key={integrante.id}
-                  style={{ height: '54px', borderBottom: '1px solid #e2e8f0', background: '#ffffff' }}
-                >
-                  {/* Integrante */}
-                  <td style={{ padding: '0 20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div
-                        style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          background: '#1e293b',
-                          color: '#fff',
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          display: 'grid',
-                          placeItems: 'center',
-                          flexShrink: 0,
-                        }}
-                      >
+                <tr key={integrante.id} className="lista-row">
+                  <td className="col-name" style={{ paddingLeft: '16px' }}>
+                    <div className="gestor-cell" style={{ gap: '10px' }}>
+                      <div className="gestor-avatar" style={{ background: '#1e293b' }}>
                         {integrante.iniciales}
                       </div>
                       <div>
                         <b
                           onClick={() => onSelectIntegrante(integrante.id)}
-                          style={{ display: 'block', fontSize: '13px', color: '#0f172a', cursor: 'pointer', textDecoration: 'underline' }}
+                          style={{ fontSize: '13px', color: '#0f172a', cursor: 'pointer', textDecoration: 'underline' }}
                         >
                           {integrante.nombreCompleto}
                         </b>
-                        <small style={{ color: '#64748b', fontSize: '11px' }}>{integrante.cargo}</small>
+                        <small style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>{integrante.cargo}</small>
                       </div>
                     </div>
                   </td>
 
-                  {/* Sede */}
-                  <td style={{ padding: '0 16px', fontSize: '12px', color: '#334155' }}>
-                    {integrante.sedeNombre}
+                  <td className="col-region">
+                    <span className="region-text">{integrante.sedeNombre}</span>
                   </td>
 
-                  {/* Capacidad Base */}
-                  <td style={{ padding: '0 16px', fontSize: '12px', color: '#0f172a', fontWeight: 600 }}>
+                  <td className="col-dur" style={{ fontWeight: 600 }}>
                     {capacidad}h / semana
                   </td>
 
-                  {/* Esfuerzo */}
-                  <td style={{ padding: '0 16px', fontSize: '12.5px', color: '#0f172a', fontWeight: 650 }}>
+                  <td className="col-dur" style={{ fontWeight: 700, color: '#0f172a' }}>
                     {esfuerzoTotal} horas
                   </td>
 
-                  {/* Barra de Ocupación */}
-                  <td style={{ padding: '0 16px' }}>
+                  <td className="col-progress">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ flex: 1, height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: '80px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
                         <div
                           style={{
                             width: `${Math.min(100, porcentaje)}%`,
                             height: '100%',
                             background:
                               porcentaje > 100
-                                ? '#ef4444'
-                                : porcentaje > 85
+                                ? '#dc2626'
+                                : porcentaje > 80
                                 ? '#f59e0b'
                                 : porcentaje < 50
-                                ? '#0284c7'
-                                : '#22c55e',
+                                ? '#0066ff'
+                                : '#10b981',
                           }}
                         />
                       </div>
-                      <b
-                        style={{
-                          fontSize: '12px',
-                          color: porcentaje > 100 ? '#dc2626' : '#0f172a',
-                          minWidth: '40px',
-                        }}
-                      >
+                      <b style={{ fontSize: '11.5px', color: porcentaje > 100 ? '#dc2626' : '#0f172a' }}>
                         {porcentaje}%
                       </b>
                     </div>
                   </td>
 
-                  {/* Tareas Concurrentes con Botón Rebalanceo */}
-                  <td style={{ padding: '0 16px' }}>
+                  <td>
                     {tareasActivas.length === 0 ? (
                       <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>Sin tareas concurrentes</span>
                     ) : (
@@ -326,14 +238,13 @@ export default function EquipoCargaView({
                               color: '#334155',
                             }}
                           >
-                            <span>{tarea.titulo.length > 28 ? tarea.titulo.slice(0, 28) + '...' : tarea.titulo}</span>
-                            <span style={{ fontWeight: 700, color: '#0284c7' }}>({tarea.esfuerzoHoras}h)</span>
+                            <span>{tarea.titulo.length > 26 ? tarea.titulo.slice(0, 26) + '...' : tarea.titulo}</span>
+                            <span style={{ fontWeight: 700, color: '#0066ff' }}>({tarea.esfuerzoHoras}h)</span>
 
                             {porcentaje > 85 && (
                               <button
                                 onClick={() => {
                                   setModalRebalanceo({ integranteOrigen: integrante, tarea });
-                                  // Sugerir el integrante con menor carga
                                   const disponibles = listaCarga
                                     .filter((l) => l.integrante.id !== integrante.id)
                                     .sort((a, b) => a.porcentaje - b.porcentaje);
@@ -344,11 +255,11 @@ export default function EquipoCargaView({
                                   background: 'none',
                                   cursor: 'pointer',
                                   padding: '1px',
-                                  color: '#0284c7',
+                                  color: '#0066ff',
                                   display: 'flex',
                                   alignItems: 'center',
                                 }}
-                                title="Rebalancear: Reasignar tarea a otro colega con disponibilidad"
+                                title="Rebalancear tarea"
                               >
                                 <ArrowRightLeft size={11} />
                               </button>
@@ -365,7 +276,13 @@ export default function EquipoCargaView({
         </table>
       </div>
 
-      {/* MODAL DE REBALANCEO DE TAREA */}
+      {/* Footer que cierra la cápsula */}
+      <footer className="footer">
+        <span>Balance de Capacidad: {resumenGlobal.totalEsfuerzo}h esfuerzo asignado / {resumenGlobal.totalCapacidad}h capacidad base</span>
+        <span>Ocupación global: {Math.round((resumenGlobal.totalEsfuerzo / Math.max(1, resumenGlobal.totalCapacidad)) * 100)}%</span>
+      </footer>
+
+      {/* Modal de Rebalanceo */}
       {modalRebalanceo && (
         <div
           style={{ position: 'fixed', inset: 0, zIndex: 2500, background: 'rgba(0,0,0,0.4)', display: 'grid', placeItems: 'center' }}
@@ -380,12 +297,9 @@ export default function EquipoCargaView({
             </h3>
             <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>
               Transferir la tarea <b>"{modalRebalanceo.tarea.titulo}"</b> ({modalRebalanceo.tarea.esfuerzoHoras}h) de{' '}
-              <b>{modalRebalanceo.integranteOrigen.nombreCompleto}</b> para mitigar sobrecarga.
+              <b>{modalRebalanceo.integranteOrigen.nombreCompleto}</b>.
             </p>
 
-            <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-              Reasignar a integrante con capacidad:
-            </label>
             <select
               value={targetIntegranteId}
               onChange={(e) => setTargetIntegranteId(e.target.value)}
@@ -405,14 +319,16 @@ export default function EquipoCargaView({
               <button
                 type="button"
                 onClick={() => setModalRebalanceo(null)}
-                style={{ height: '32px', padding: '0 12px', border: '1px solid #cbd5e1', background: '#fff', borderRadius: '6px', cursor: 'pointer' }}
+                className="btn secondary"
+                style={{ height: '32px' }}
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmRebalanceo}
-                style={{ height: '32px', padding: '0 14px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 650, cursor: 'pointer' }}
+                className="btn primary"
+                style={{ height: '32px' }}
               >
                 Reasignar Tarea
               </button>
