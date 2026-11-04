@@ -2763,7 +2763,8 @@
   height: 18px;
   min-width: 8px;
   border-radius: 4px;
-  z-index: 1;
+  z-index: 6;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: flex-end;

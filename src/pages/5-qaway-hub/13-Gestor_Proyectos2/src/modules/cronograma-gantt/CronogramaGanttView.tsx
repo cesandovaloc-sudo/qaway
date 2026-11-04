@@ -221,7 +221,6 @@ const INITIAL_ITEMS: Item[] = [
     sede: 'UGEL Huancayo',
     gestor: 'Carlos Mendoza',
     gestores: ['Carlos Mendoza', 'Lucía Ramos', 'Javier Ruiz'],
-    dependencies: ['h1'],
   },
   {
     id: 's21',
@@ -270,7 +269,6 @@ const INITIAL_ITEMS: Item[] = [
     distrito: 'Tumbes',
     sede: 'UGEL Tumbes',
     gestor: 'Javier Ruiz',
-    dependencies: ['h2'],
   },
   {
     id: 's31',
@@ -1785,8 +1783,8 @@ export default function CronogramaGanttView({
   } | null>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
-  const [showCriticalPath, setShowCriticalPath] = useState(true);
-  const [showBarAvatars, setShowBarAvatars] = useState(true);
+  const [showCriticalPath, setShowCriticalPath] = useState(false);
+  const [showBarAvatars, setShowBarAvatars] = useState(false);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
   const [resizeTempWidth, setResizeTempWidth] = useState<number | null>(null);
   const [resizeTempEndDate, setResizeTempEndDate] = useState<string | null>(null);
@@ -5733,7 +5731,7 @@ export default function CronogramaGanttView({
                   width: timelineMinWidth,
                   height: `${shown.length * 48}px`,
                   pointerEvents: 'none',
-                  zIndex: 15,
+                  zIndex: 2,
                   overflow: 'visible',
                 }}
               >
@@ -5743,22 +5741,22 @@ export default function CronogramaGanttView({
                     viewBox="0 0 10 10"
                     refX="8"
                     refY="5"
-                    markerWidth="7"
-                    markerHeight="7"
+                    markerWidth="6"
+                    markerHeight="6"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
+                    <path d="M 0 2 L 7 5 L 0 8 z" fill="#64748b" />
                   </marker>
                   <marker
                     id="dep-arrow-critical"
                     viewBox="0 0 10 10"
                     refX="8"
                     refY="5"
-                    markerWidth="7"
-                    markerHeight="7"
+                    markerWidth="6"
+                    markerHeight="6"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
+                    <path d="M 0 2 L 7 5 L 0 8 z" fill="#ea580c" />
                   </marker>
                 </defs>
 
@@ -5817,26 +5815,21 @@ export default function CronogramaGanttView({
 
                       const rowHeight = 48;
                       const fromEndX = getDatePixelOffset(shiftDays(sourceItem.end, 1));
-                      const fromStartX = getDatePixelOffset(sourceItem.start);
                       const fromY = sourceIndex * rowHeight + rowHeight / 2;
                       const toX = getDatePixelOffset(item.start);
                       const toY = targetIndex * rowHeight + rowHeight / 2;
 
                       let pathD = '';
-                      if (toX >= fromEndX + 10) {
-                        // Trazo secuencial clásico (Fin a Inicio: ──┐ └──►)
-                        const midX = fromEndX + Math.max(10, (toX - fromEndX) / 2);
+                      if (toX >= fromEndX + 8) {
+                        // Trazo secuencial clásico ortogonal (Fin a Inicio: ──┐ └──►)
+                        const midX = fromEndX + Math.max(8, (toX - fromEndX) / 2);
                         pathD = `M ${fromEndX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX - 2} ${toY}`;
-                      } else if (toX >= fromStartX) {
-                        // Trazo paralelo o con solapamiento limpio
-                        const branchX = Math.max(fromStartX + 14, toX - 16);
-                        pathD = `M ${fromStartX + 14} ${fromY} L ${branchX} ${fromY} L ${branchX} ${toY} L ${toX - 2} ${toY}`;
                       } else {
-                        // Bucle hacia atrás seguro
-                        const loopX = fromEndX + 12;
-                        const backX = Math.max(8, toX - 16);
-                        const interY = fromY + (toY > fromY ? 20 : -20);
-                        pathD = `M ${fromEndX} ${fromY} L ${loopX} ${fromY} L ${loopX} ${interY} L ${backX} ${interY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
+                        // Trazo con canal de retorno en vacío para evitar cruzar sobre nodos
+                        const exitX = fromEndX + 10;
+                        const backX = Math.min(toX - 12, fromEndX - 10);
+                        const interY = fromY + (toY > fromY ? 24 : -24);
+                        pathD = `M ${fromEndX} ${fromY} L ${exitX} ${fromY} L ${exitX} ${interY} L ${backX} ${interY} L ${backX} ${toY} L ${toX - 2} ${toY}`;
                       }
 
                       const isCritical = (sourceItem.progress < 100 && item.progress === 0) || item.status === 'Con retraso';
@@ -5846,11 +5839,10 @@ export default function CronogramaGanttView({
                           key={pairKey}
                           d={pathD}
                           fill="none"
-                          stroke={isCritical ? '#ea580c' : '#2563eb'}
-                          strokeWidth={isCritical ? '2.2' : '1.8'}
-                          strokeDasharray={isCritical ? undefined : '5 3.5'}
+                          stroke={isCritical ? '#ea580c' : '#64748b'}
+                          strokeWidth="1.6"
                           markerEnd={isCritical ? 'url(#dep-arrow-critical)' : 'url(#dep-arrow)'}
-                          opacity={0.92}
+                          opacity={0.88}
                         />
                       );
                     });
