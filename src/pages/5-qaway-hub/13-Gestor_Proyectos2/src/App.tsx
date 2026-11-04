@@ -405,7 +405,7 @@ function App() {
           <div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
           </div>
-          <div className={active === 'reuniones' ? 'rm-v1 qm-pane-active' : 'rm-v1 qm-pane'}>
+          <div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
           </div>
           <div className={active === 'reportes' ? 'rep-v1 qm-pane-active' : 'rep-v1 qm-pane'}>
