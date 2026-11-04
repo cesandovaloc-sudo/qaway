@@ -33,6 +33,8 @@ import {
   Activity,
   List,
   CheckCircle2,
+  SlidersHorizontal,
+  ChartNoAxesColumnIncreasing,
 } from 'lucide-react';
 
 const ALL_COLUMNS = [
@@ -246,139 +248,98 @@ export default function EquipoView({
 
   return (
     <div className="gantt-v2">
-      <main className="gantt-main">
-        {/* Cabecera Principal / Page-Head con neutralidad institucional */}
-        <section className="page-head">
-          <div>
-            <div className="eyebrow">GESTIÓN DE PERSONAS Y OPERACIONES</div>
-            <h1>Equipo del Proyecto · {projectName}</h1>
-            <p>Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo.</p>
+      <div className="app">
+        {/* Header Principal idéntico a Cronograma */}
+        <header className="header">
+          <div className="heading">
+            <span className="heading-icon">
+              <Users size={26} />
+            </span>
+            <div>
+              <h1>Equipo del Proyecto · {projectName}</h1>
+              <p>
+                Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo.
+              </p>
+            </div>
           </div>
-
           <div className="head-actions">
             <button
               className="btn secondary"
               onClick={() => setIsColumnasModalOpen(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Download size={14} />
+              <SlidersHorizontal size={15} />
               <span>Configurar Columnas</span>
             </button>
-
             <button
               className="btn primary"
               onClick={() => setIsNuevoModalOpen(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
-              <Plus size={15} />
+              <Plus size={16} />
               <span>Nuevo Integrante</span>
             </button>
           </div>
-        </section>
+        </header>
 
-        {/* Tarjetas KPI Superiores Desacopladas (Idénticas a Cronograma) */}
+        {/* Tarjetas Métricas Directivas */}
         <section className="metrics">
-          {/* Card 1: Azul - Total Integrantes */}
-          <div className="metric blue">
-            <div className="metric-icon">
+          <article className="metric blue">
+            <span className="metric-icon">
               <Users size={22} />
-            </div>
+            </span>
             <div className="metric-copy">
-              <small>Total Integrantes</small>
               <b>{metrics.total}</b>
+              <strong>Total Integrantes</strong>
+              <small>padrón del proyecto</small>
             </div>
-            <div className="bars">
-              <span style={{ width: '100%' }} />
-            </div>
-          </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
 
-          {/* Card 2: Verde - En Funciones (Activos) */}
-          <div className="metric green">
-            <div className="metric-icon">
+          <article className="metric green">
+            <span className="metric-icon">
               <UserCheck size={22} />
-            </div>
+            </span>
             <div className="metric-copy">
-              <small>En Funciones</small>
-              <b>
-                {metrics.activos}{' '}
-                <span style={{ fontSize: '13px', fontWeight: 500, color: '#166534' }}>
-                  ({Math.round((metrics.activos / Math.max(1, metrics.total)) * 100)}%)
-                </span>
-              </b>
+              <b>{metrics.activos}</b>
+              <strong>En Funciones</strong>
+              <small>{Math.round((metrics.activos / Math.max(1, metrics.total)) * 100)}% operativos</small>
             </div>
-            <div className="bars">
-              <span style={{ width: `${(metrics.activos / Math.max(1, metrics.total)) * 100}%` }} />
-            </div>
-          </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
 
-          {/* Card 3: Ámbar - Cuentas por Activar */}
-          <div className="metric amber">
-            <div className="metric-icon">
+          <article className="metric amber">
+            <span className="metric-icon">
               <Clock3 size={22} />
-            </div>
+            </span>
             <div className="metric-copy">
-              <small>Cuentas por Activar</small>
               <b>{metrics.pendientesCuenta}</b>
+              <strong>Cuentas por Activar</strong>
+              <small>invitación pendiente</small>
             </div>
-            <div className="bars">
-              <span style={{ width: `${(metrics.pendientesCuenta / Math.max(1, metrics.total)) * 100}%` }} />
-            </div>
-          </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
 
-          {/* Card 4: Rojo - Asignaciones Atrasadas */}
-          <div className="metric red">
-            <div className="metric-icon">
+          <article className="metric red">
+            <span className="metric-icon">
               <AlertTriangle size={22} />
-            </div>
+            </span>
             <div className="metric-copy">
-              <small>Asignaciones con Alerta</small>
               <b>{metrics.alertasAtrasadas}</b>
+              <strong>Con Alerta</strong>
+              <small>atención requerida</small>
             </div>
-            <div className="bars">
-              <span style={{ width: `${(metrics.alertasAtrasadas / Math.max(1, asignaciones.length)) * 100}%` }} />
-            </div>
-          </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
 
-          {/* Card 5: Circular - Carga Promedio */}
-          <div
-            className="metric"
-            style={{
-              background: '#ffffff',
-              border: '1px solid #dfe8f4',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 18px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '50%',
-                  border: '3px solid #0066ff',
-                  borderTopColor: '#e0f2fe',
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  color: '#0f172a',
-                }}
-              >
-                {metrics.ocupacionPromedio}%
-              </div>
-              <div>
-                <small style={{ display: 'block', fontSize: '11px', fontWeight: 650, color: '#64748b', textTransform: 'uppercase' }}>
-                  Carga Promedio
-                </small>
-                <b style={{ fontSize: '13px', color: '#0f172a' }}>
-                  Capacidad de Trabajo
-                </b>
-              </div>
+          <article className="metric overall">
+            <div className="ring" style={{ '--p': `${metrics.ocupacionPromedio}%` } as React.CSSProperties}>
+              <b>{metrics.ocupacionPromedio}%</b>
             </div>
-          </div>
+            <div>
+              <strong>Carga Promedio</strong>
+              <small>capacidad del equipo</small>
+            </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
         </section>
 
         {/* =========================================================================
@@ -517,7 +478,7 @@ export default function EquipoView({
             />
           )}
         </main>
-      </main>
+      </div>
 
       {/* DRAWER LATERAL DE CONSULTA Y EDICIÓN RÁPIDA (NIVEL 1) */}
       {selectedIntegrante && !expedienteIntegrante && (

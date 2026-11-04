@@ -229,7 +229,7 @@ export default function EquipoDirectorioView({
             className="filter-card-btn"
             style={{ appearance: 'auto', paddingRight: '24px', cursor: 'pointer' }}
           >
-            <option value="todos">Estado: Todos los frentes</option>
+            <option value="todos">Estado: Todos los estados</option>
             <option value="En funciones">En funciones</option>
             <option value="Licencia / Permiso">Licencia / Permiso</option>
             <option value="Desvinculado">Desvinculado</option>
