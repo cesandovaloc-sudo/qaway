@@ -357,7 +357,7 @@ function App() {
           activeProject={activeProject}
         />
         <main className="qm-canvas">
-          <div className={active === 'resumen' ? 'res-v1 qm-pane-active' : 'res-v1 qm-pane'}>
+          <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ResumenProyectoView
               userRole={userRole}
               onOpenCreateProject={() => setIsCreateProjectOpen(true)}

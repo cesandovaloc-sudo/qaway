@@ -1,40 +1,61 @@
 // @ts-nocheck
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import '../cronograma-gantt/gantt.css';
 import './resumen.css';
 import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import {
-  Activity, AlertTriangle, ArrowRight, Bell, Building2, Calendar, Check,
-  ChevronDown, ChevronRight, Download, FileText, Filter, Plus, RefreshCw, Search,
-  ShieldCheck, SlidersHorizontal, Users, X
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Bell,
+  Building2,
+  Calendar,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  FileText,
+  Filter,
+  LayoutGrid,
+  Plus,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  SlidersHorizontal,
+  Users,
+  X,
+  ChartNoAxesColumnIncreasing,
+  Clock3,
 } from 'lucide-react';
 
 const DEMO_UGEL = [
-  { nombre: 'UGEL Chupaca', estado: 'cumple', avance: 100, fase1: true, fase2: true, dei: true, hito: 'CDL validado', fecha: '15 oct.' },
-  { nombre: 'UGEL Concepción', estado: 'cumple', avance: 100, fase1: true, fase2: true, dei: true, hito: 'CDL validado', fecha: '14 oct.' },
-  { nombre: 'UGEL Huancayo', estado: 'proceso', avance: 75, fase1: true, fase2: false, dei: true, hito: 'Registro MC SIGA', fecha: '20 oct.' },
-  { nombre: 'UGEL Jauja', estado: 'proceso', avance: 50, fase1: true, fase2: false, dei: false, hito: 'Validación DEI', fecha: '21 oct.' },
-  { nombre: 'UGEL Junín', estado: 'proceso', avance: 50, fase1: true, fase2: false, dei: false, hito: 'Registro MC SIGA', fecha: '21 oct.' },
-  { nombre: 'UGEL Satipo', estado: 'incumple', avance: 33, fase1: true, fase2: false, dei: false, hito: 'Registro de NEA', fecha: '20 oct.' },
-  { nombre: 'UGEL Tarma', estado: 'incumple', avance: 20, fase1: true, fase2: false, dei: false, hito: 'Carga RAR', fecha: '22 oct.' },
-  { nombre: 'UGEL Chanchamayo', estado: 'incumple', avance: 20, fase1: false, fase2: false, dei: false, hito: 'Validación', fecha: '24 oct.' },
-  { nombre: 'UGEL Yauli', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Registro MC SIGA', fecha: '28 oct.' },
-  { nombre: 'UGEL Pichanaki', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Carga RAR', fecha: '30 oct.' },
-  { nombre: 'UGEL Río Tambo', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Acta de recepción', fecha: '30 oct.' },
-  { nombre: 'UGEL Pangoa', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Validación CDL', fecha: '31 oct.' },
-  { nombre: 'UGEL Perené', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Registro MC SIGA', fecha: '31 oct.' },
+  { nombre: 'Sede Chupaca', estado: 'cumple', avance: 100, fase1: true, fase2: true, dei: true, hito: 'CDL validado', fecha: '15 oct.' },
+  { nombre: 'Sede Concepción', estado: 'cumple', avance: 100, fase1: true, fase2: true, dei: true, hito: 'CDL validado', fecha: '14 oct.' },
+  { nombre: 'Sede Huancayo', estado: 'proceso', avance: 75, fase1: true, fase2: false, dei: true, hito: 'Registro en sistema', fecha: '20 oct.' },
+  { nombre: 'Sede Jauja', estado: 'proceso', avance: 50, fase1: true, fase2: false, dei: false, hito: 'Validación DEI', fecha: '21 oct.' },
+  { nombre: 'Sede Junín', estado: 'proceso', avance: 50, fase1: true, fase2: false, dei: false, hito: 'Registro en sistema', fecha: '21 oct.' },
+  { nombre: 'Sede Satipo', estado: 'incumple', avance: 33, fase1: true, fase2: false, dei: false, hito: 'Registro de NEA', fecha: '20 oct.' },
+  { nombre: 'Sede Tarma', estado: 'incumple', avance: 20, fase1: true, fase2: false, dei: false, hito: 'Carga RAR', fecha: '22 oct.' },
+  { nombre: 'Sede Chanchamayo', estado: 'incumple', avance: 20, fase1: false, fase2: false, dei: false, hito: 'Validación territorial', fecha: '24 oct.' },
+  { nombre: 'Sede Yauli', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Registro en sistema', fecha: '28 oct.' },
+  { nombre: 'Sede Pichanaki', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Carga RAR', fecha: '30 oct.' },
+  { nombre: 'Sede Río Tambo', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Acta de recepción', fecha: '30 oct.' },
+  { nombre: 'Sede Pangoa', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Validación CDT', fecha: '31 oct.' },
+  { nombre: 'Sede Perené', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Registro en sistema', fecha: '31 oct.' },
 ];
 
 const DEMO_HITOS = [
-  { dia: '20', mes: 'OCT', titulo: 'Carga de archivo RAR en MC SIGA', unidad: 'UGEL Junín', estado: 'Retrasado', tipo: 'rojo' },
-  { dia: '24', mes: 'OCT', titulo: 'Registro de NEA en MC SIGA', unidad: 'UGEL Tarma', estado: 'Retrasado', tipo: 'rojo' },
-  { dia: '28', mes: 'OCT', titulo: 'Validación de inconsistencias CDL', unidad: 'UGEL Yauli', estado: 'En riesgo', tipo: 'amarillo' },
-  { dia: '30', mes: 'OCT', titulo: 'Envío de acta de comité y padrón', unidad: 'UGEL Chupaca', estado: 'Pendiente', tipo: 'gris' },
+  { dia: '20', mes: 'OCT', titulo: 'Carga de archivo RAR en plataforma', unidad: 'Sede Junín', estado: 'Retrasado', tipo: 'rojo' },
+  { dia: '24', mes: 'OCT', titulo: 'Registro de NEA en plataforma', unidad: 'Sede Tarma', estado: 'Retrasado', tipo: 'rojo' },
+  { dia: '28', mes: 'OCT', titulo: 'Validación de inconsistencias CDT', unidad: 'Sede Yauli', estado: 'En riesgo', tipo: 'amarillo' },
+  { dia: '30', mes: 'OCT', titulo: 'Envío de acta de comité y padrón', unidad: 'Sede Chupaca', estado: 'Pendiente', tipo: 'gris' },
 ];
 
 const PHASES = [
-  { nombre: 'Fase 1 — Planificación y CDL', avance: 69, inicio: 3, fin: 34, estado: 'green' },
-  { nombre: 'Fase 2 — Registro MC SIGA (RAR / NEA)', avance: 38, inicio: 17, fin: 47, estado: 'amber' },
-  { nombre: 'DEI — Validación Nivel Inicial', avance: 23, inicio: 34, fin: 66, estado: 'red' },
+  { nombre: 'Fase 1 — Planificación y CDT', avance: 69, inicio: 3, fin: 34, estado: 'green' },
+  { nombre: 'Fase 2 — Registro en Plataforma (RAR / NEA)', avance: 38, inicio: 17, fin: 47, estado: 'amber' },
+  { nombre: 'Fase 3 — Validación DEI Nivel Inicial', avance: 23, inicio: 34, fin: 66, estado: 'red' },
 ];
 
 const RESUMEN_ESTADOS = [
@@ -44,10 +65,10 @@ const RESUMEN_ESTADOS = [
 ];
 
 const RESUMEN_COLUMNS: ColumnDef<(typeof DEMO_UGEL)[0]>[] = [
-  { id: 'nombre', label: 'Sede', type: 'select', accessor: (r) => r.nombre },
+  { id: 'nombre', label: 'Sede Territorial', type: 'select', accessor: (r) => r.nombre },
   { id: 'estado', label: 'Estado', type: 'processState', accessor: (r) => r.estado, options: RESUMEN_ESTADOS },
-  { id: 'avance', label: 'Avance', type: 'percent', accessor: (r) => r.avance },
-  { id: 'hito', label: 'Próximo hito', type: 'text', accessor: (r) => r.hito },
+  { id: 'avance', label: 'Avance Físico', type: 'percent', accessor: (r) => r.avance },
+  { id: 'hito', label: 'Próximo Hito Crítico', type: 'text', accessor: (r) => r.hito },
 ];
 
 export default function ResumenProyectoView({
@@ -60,11 +81,16 @@ export default function ResumenProyectoView({
   onOpenCreateProject?: () => void;
 }) {
   const engine = useTableEngine<(typeof DEMO_UGEL)[0]>({ tableId: 'resumen-ugel', columns: RESUMEN_COLUMNS, rows: DEMO_UGEL });
+
+  const [selectedTab, setSelectedTab] = useState<string>('Todas');
+  const [viewMode, setViewMode] = useState<'semaforo' | 'fases'>('semaforo');
+
   const [fase, setFase] = useState('Todas');
   const [ugel, setUgel] = useState('Todas');
-  const [periodo, setPeriodo] = useState('01/10/2026 – 15/10/2026');
   const [busqueda, setBusqueda] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [openDropdown, setOpenDropdown] = useState<'fase' | 'estado' | 'sede' | null>(null);
+
   const [actualizado, setActualizado] = useState('26 oct. 2026 · 10:30');
   const [notice, setNotice] = useState('');
 
@@ -73,63 +99,137 @@ export default function ResumenProyectoView({
     setTimeout(() => setNotice(''), 2600);
   };
 
-  const rows = useMemo(() => {
-    const base = DEMO_UGEL.filter((row) => {
-      const matchesUgel = ugel === 'Todas' || row.nombre === ugel;
-      const matchesSearch = row.nombre.toLowerCase().includes(busqueda.toLowerCase());
-      const matchesStatus = filtroEstado === 'todos' || row.estado === filtroEstado;
-      const matchesPhase = fase === 'Todas' || (fase === 'Fase 1' ? row.fase1 : fase === 'Fase 2' ? row.fase2 : row.dei);
-      return matchesUgel && matchesSearch && matchesStatus && matchesPhase;
+  useEffect(() => {
+    onActions?.({
+      notify,
+      setView: (v: string) => setSelectedTab(v),
     });
-    return engine.apply(base);
-  }, [ugel, busqueda, filtroEstado, fase, engine.apply]);
+  }, [onActions]);
+
+  // Cerrar desplegables con clic fuera
+  useEffect(() => {
+    const handleWindowClick = () => setOpenDropdown(null);
+    window.addEventListener('click', handleWindowClick);
+    return () => window.removeEventListener('click', handleWindowClick);
+  }, []);
 
   const total = DEMO_UGEL.length;
   const cumple = DEMO_UGEL.filter((x) => x.estado === 'cumple').length;
   const proceso = DEMO_UGEL.filter((x) => x.estado === 'proceso').length;
   const incumple = DEMO_UGEL.filter((x) => x.estado === 'incumple').length;
 
+  const tabPills = [
+    { id: 'Todas', label: 'Todas las sedes', count: total },
+    { id: 'Cumplen', label: 'Cumplen', count: cumple },
+    { id: 'En proceso', label: 'En proceso', count: proceso },
+    { id: 'En alerta', label: 'En alerta / No cumplen', count: incumple },
+  ];
+
+  const rows = useMemo(() => {
+    const base = DEMO_UGEL.filter((row) => {
+      const matchesUgel = ugel === 'Todas' || row.nombre === ugel;
+      const matchesSearch = row.nombre.toLowerCase().includes(busqueda.toLowerCase()) || row.hito.toLowerCase().includes(busqueda.toLowerCase());
+
+      const matchesTab =
+        selectedTab === 'Todas' ||
+        (selectedTab === 'Cumplen' && row.estado === 'cumple') ||
+        (selectedTab === 'En proceso' && row.estado === 'proceso') ||
+        (selectedTab === 'En alerta' && row.estado === 'incumple');
+
+      const matchesStatus = filtroEstado === 'todos' || row.estado === filtroEstado;
+      const matchesPhase = fase === 'Todas' || (fase === 'Fase 1' ? row.fase1 : fase === 'Fase 2' ? row.fase2 : row.dei);
+
+      return matchesUgel && matchesSearch && matchesTab && matchesStatus && matchesPhase;
+    });
+    return engine.apply(base);
+  }, [ugel, busqueda, selectedTab, filtroEstado, fase, engine.apply]);
+
+  const hasActiveFilters =
+    busqueda.trim() !== '' ||
+    fase !== 'Todas' ||
+    filtroEstado !== 'todos' ||
+    ugel !== 'Todas';
+
+  const clearAllFilters = () => {
+    setBusqueda('');
+    setFase('Todas');
+    setFiltroEstado('todos');
+    setUgel('Todas');
+    engine.clearAllFilters();
+  };
+
   const refresh = () => {
-    setActualizado(new Date().toLocaleString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+    setActualizado(
+      new Date().toLocaleString('es-PE', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    );
     notify('Resumen regional sincronizado con la última fecha de corte');
   };
 
   return (
-    <div className="res-v1">
-      <header className="topbar">
-        <div>
-          Proyecto <ChevronRight size={13} /> <b>MINEDU · Dotación 2027</b> <ChevronRight size={13} /> <b>Resumen del proyecto</b>
-        </div>
-        <div className="top-actions">
-          <button className="iconbtn" onClick={() => notify('Panel de Resumen Regional conectado a MC SIGA.')}>
-            <ShieldCheck size={18} />
-          </button>
-          <button className="iconbtn" onClick={() => notify('Sin alertas pendientes')}>
-            <Bell size={18} />
-          </button>
-          <div className="avatar">CM</div>
-        </div>
-      </header>
+    <div className="gantt-v2">
+      <div className="app">
+        {/* Cabecera Principal Oficial (Idéntica a Cronograma) */}
+        <header className="header">
+          <div className="heading">
+            <span className="heading-icon">
+              <Activity size={26} />
+            </span>
+            <div>
+              <span className="super">SALA DE SITUACIÓN OPERATIVA · REGIÓN JUNÍN</span>
+              <h1>Resumen Ejecutivo del Proyecto</h1>
+              <p>
+                Monitoreo ejecutivo del avance físico de sedes, semáforo de cumplimiento territorial y control de fases.
+              </p>
+            </div>
+          </div>
+          <div className="head-actions">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={refresh}
+              title="Sincronizar fecha de corte con el sistema"
+            >
+              <RefreshCw size={15} />
+              <span>Sincronizar ({actualizado})</span>
+            </button>
+            {userRole === 'coordinador' && (
+              <button
+                type="button"
+                className="btn primary"
+                onClick={onOpenCreateProject}
+                title="Crear un nuevo proyecto regional"
+              >
+                <Plus size={16} />
+                <span>Nuevo Proyecto Regional</span>
+              </button>
+            )}
+          </div>
+        </header>
 
-      <div className="content">
+        {/* Banner de Gobernanza Multirregional para Coordinador */}
         {userRole === 'coordinador' && (
           <div
             style={{
               background: '#0f172a',
               color: '#ffffff',
-              borderRadius: '10px',
-              padding: '16px 20px',
-              marginBottom: '20px',
+              borderRadius: '12px',
+              padding: '14px 20px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '16px',
-              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.08)',
               border: '1px solid #1e293b',
+              boxShadow: '0 2px 6px rgba(15, 23, 42, 0.08)',
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
                 <span
                   style={{
                     fontSize: '10px',
@@ -145,279 +245,621 @@ export default function ResumenProyectoView({
                 </span>
                 <span style={{ fontSize: '12px', color: '#94a3b8' }}>Carlos Mendoza</span>
               </div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>
-                Gobernanza Multirregional y Creación de Proyectos
-              </h3>
-              <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#94a3b8' }}>
-                Como Coordinador General puedes crear nuevos proyectos para otras DRE/UGEL y subir su cronograma maestro desde cero.
+              <p style={{ margin: 0, fontSize: '12.5px', color: '#cbd5e1' }}>
+                Como Coordinador General puedes supervisar múltiples regiones y crear proyectos adicionales desde cero.
               </p>
             </div>
             <button
+              type="button"
+              className="btn primary"
               onClick={onOpenCreateProject}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: '#2563eb',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '10px 18px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)',
-              }}
+              style={{ padding: '8px 16px', fontSize: '12.5px' }}
             >
-              <Plus size={16} />
-              <span>+ Crear nuevo proyecto regional</span>
+              <Plus size={15} />
+              <span>Crear Proyecto</span>
             </button>
           </div>
         )}
 
-        <div className="page-heading">
-          <div>
-            <div className="eyebrow">DRE JUNÍN <span>•</span> DOTACIÓN 2027</div>
-            <h1>Resumen del proyecto</h1>
-            <p>Monitoreo ejecutivo de la subida del Cuadro de Distribución Local (CDL) en MC SIGA · Actividad 1.6</p>
-          </div>
-          <div className="updated-box">
-            <div>
-              <span>ÚLTIMA ACTUALIZACIÓN REGIONAL</span>
-              <strong>{actualizado}</strong>
+        {/* Tarjetas Métricas Directivas (Idénticas a Cronograma) */}
+        <section className="metrics">
+          <article
+            className="metric blue"
+            onClick={() => {
+              setSelectedTab('Todas');
+              setFiltroEstado('todos');
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="metric-icon">
+              <Building2 size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(total).padStart(2, '0')}</b>
+              <strong>Sedes Monitoreadas</strong>
+              <small>en la región Junín</small>
             </div>
-            <button type="button" onClick={refresh}>
-              <RefreshCw size={14} /> Sincronizar
-            </button>
-          </div>
-        </div>
-
-        {/* Filtros */}
-        <section className="filters">
-          <label>
-            <span>Fase del subproceso</span>
-            <select value={fase} onChange={(e) => setFase(e.target.value)}>
-              <option>Todas</option>
-              <option>Fase 1</option>
-              <option>Fase 2</option>
-              <option>DEI</option>
-            </select>
-          </label>
-          <label>
-            <span>Sede operativa</span>
-            <select value={ugel} onChange={(e) => setUgel(e.target.value)}>
-              <option>Todas</option>
-              {DEMO_UGEL.map((x) => (
-                <option key={x.nombre}>{x.nombre}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Periodo de corte</span>
-            <div className="date-field">
-              <Calendar size={15} className="text-slate-400" />
-              <input value={periodo} onChange={(e) => setPeriodo(e.target.value)} />
-            </div>
-          </label>
-          <div className="filter-reset">
-            <button
-              type="button"
-              onClick={() => {
-                setFase('Todas');
-                setUgel('Todas');
-                setPeriodo('01/10/2026 – 15/10/2026');
-                setFiltroEstado('todos');
-                setBusqueda('');
-              }}
-            >
-              Restablecer
-            </button>
-          </div>
-        </section>
-
-        {/* KPIs estilo Power BI */}
-        <section className="kpis">
-          <div className="kpi-card">
-            <div className="kpi-icon blue"><Building2 size={22} /></div>
-            <div className="kpi-info">
-              <span>Sedes monitoreadas</span>
-              <strong>{total}</strong>
-              <small>En la región Junín</small>
-            </div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-icon green"><Check size={22} /></div>
-            <div className="kpi-info">
-              <span>Cumplen</span>
-              <strong>{cumple}<em>{Math.round((cumple / total) * 100)}%</em></strong>
-              <small>Fases completadas</small>
-            </div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-icon amber"><AlertTriangle size={22} /></div>
-            <div className="kpi-info">
-              <span>En proceso</span>
-              <strong>{proceso}<em>{Math.round((proceso / total) * 100)}%</em></strong>
-              <small>Avance activo parcial</small>
-            </div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-icon red"><AlertTriangle size={22} /></div>
-            <div className="kpi-info">
-              <span>No cumplen</span>
-              <strong>{incumple}<em>{Math.round((incumple / total) * 100)}%</em></strong>
-              <small>Requieren asistencia</small>
-            </div>
-          </div>
-        </section>
-
-        {/* Avance por Fase */}
-        <section className="section-card">
-          <div className="section-head">
-            <div>
-              <h2>Avance por fase de trabajo</h2>
-              <p>Progreso reportado de subida de archivos en MC SIGA</p>
-            </div>
-            <div className="legend">
-              <span><i className="dot green" /> En plazo</span>
-              <span><i className="dot amber" /> En riesgo</span>
-              <span><i className="dot red" /> Retrasado</span>
-            </div>
-          </div>
-
-          <div className="timeline-months">
-            <span>OCT 2026</span>
-            <span>NOV 2026</span>
-            <span>DIC 2026</span>
-            <span>ENE 2027</span>
-            <span>FEB 2027</span>
-          </div>
-
-          {PHASES.map((p) => (
-            <div className="phase-row" key={p.nombre}>
-              <strong>{p.nombre}</strong>
-              <b>{p.avance}%</b>
-              <div className="phase-track">
-                <span className={`phase-fill ${p.estado}`} style={{ left: `${p.inicio}%`, width: `${p.fin - p.inicio}%` }} />
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* Grid Inferior: Curva + Hitos Críticos + UGEL de Atención */}
-        <section className="bottom-grid">
-          {/* Curva Regional SVG */}
-          <article className="section-card">
-            <div className="section-head">
-              <div>
-                <h2>Avance regional</h2>
-                <p>Curva de progreso acumulado</p>
-              </div>
-            </div>
-            <div style={{ height: '180px', position: 'relative' }}>
-              <svg viewBox="0 0 450 170" style={{ width: '100%', height: '100%' }}>
-                <line x1="10" y1="20" x2="440" y2="20" stroke="#f1f5f9" strokeDasharray="3 3" />
-                <line x1="10" y1="60" x2="440" y2="60" stroke="#f1f5f9" strokeDasharray="3 3" />
-                <line x1="10" y1="100" x2="440" y2="100" stroke="#f1f5f9" strokeDasharray="3 3" />
-                <line x1="10" y1="140" x2="440" y2="140" stroke="#f1f5f9" strokeDasharray="3 3" />
-                {/* Línea planeada */}
-                <path d="M 20 145 Q 150 90 430 30" fill="none" stroke="#94a3b8" strokeWidth="2" strokeDasharray="4 4" />
-                {/* Línea real */}
-                <path d="M 20 150 Q 140 120 300 75" fill="none" stroke="#2563eb" strokeWidth="3" />
-                <circle cx="300" cy="75" r="4.5" fill="#2563eb" />
-                <text x="310" y="72" fontSize="12" fontWeight="700" fill="#2563eb">50%</text>
-              </svg>
-            </div>
-            <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
-              <span><i style={{ display: 'inline-block', width: '10px', height: '2px', background: '#94a3b8', verticalAlign: 'middle', marginRight: '4px' }} /> Planificado</span>
-              <span><i style={{ display: 'inline-block', width: '10px', height: '3px', background: '#2563eb', verticalAlign: 'middle', marginRight: '4px' }} /> Real (promedio)</span>
-            </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          {/* Hitos Críticos */}
-          <article className="section-card">
-            <div className="section-head">
-              <div>
-                <h2>Hitos críticos</h2>
-                <p>Próximos compromisos</p>
-              </div>
+          <article
+            className="metric green"
+            onClick={() => {
+              setSelectedTab('Cumplen');
+              setFiltroEstado('cumple');
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="metric-icon">
+              <Check size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(cumple).padStart(2, '0')}</b>
+              <strong>Cumplen ({Math.round((cumple / total) * 100)}%)</strong>
+              <small>fases completadas</small>
             </div>
-            <div className="milestone-list">
-              {DEMO_HITOS.map((h) => (
-                <div className="milestone-item" key={h.titulo}>
-                  <div className="milestone-date">
-                    <b>{h.dia}</b>
-                    <span>{h.mes}</span>
-                  </div>
-                  <div className="milestone-copy">
-                    <strong>{h.titulo}</strong>
-                    <span>{h.unidad}</span>
-                  </div>
-                  <span className={`status-tag ${h.tipo}`}>{h.estado}</span>
-                </div>
-              ))}
-            </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          {/* Sedes que requieren atención */}
-          <article className="section-card">
-            <div className="section-head">
-              <div>
-                <h2>Sedes en atención</h2>
-                <p>Prioridad según avance</p>
-              </div>
+          <article
+            className="metric amber"
+            onClick={() => {
+              setSelectedTab('En proceso');
+              setFiltroEstado('proceso');
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="metric-icon">
+              <AlertTriangle size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(proceso).padStart(2, '0')}</b>
+              <strong>En Proceso ({Math.round((proceso / total) * 100)}%)</strong>
+              <small>avance activo parcial</small>
+            </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
+
+          <article
+            className="metric red"
+            onClick={() => {
+              setSelectedTab('En alerta');
+              setFiltroEstado('incumple');
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className="metric-icon">
+              <AlertTriangle size={22} />
+            </span>
+            <div className="metric-copy">
+              <b>{String(incumple).padStart(2, '0')}</b>
+              <strong>En Alerta ({Math.round((incumple / total) * 100)}%)</strong>
+              <small>requieren intervención</small>
+            </div>
+            <ChartNoAxesColumnIncreasing className="bars" />
+          </article>
+        </section>
+
+        {/* =========================================================================
+            LA CÁPSULA WORKSPACE CENTRAL (Idéntica a Cronograma, Sedes, Hitos y Tareas)
+           ========================================================================= */}
+        <main className="workspace">
+          {/* Tabs Superiores con Switcher de Modos a la Derecha */}
+          <nav className="tabs">
+            <div className="tabs-list">
+              {tabPills.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={selectedTab === t.id ? 'active' : ''}
+                  onClick={() => setSelectedTab(t.id)}
+                >
+                  {t.label} <span>({t.count})</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Switcher de Vistas Ejecutivas */}
+            <div className="view-mode-switcher" role="tablist">
               <button
-                style={{ border: 'none', background: 'transparent', color: '#2563eb', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-                onClick={() => setFiltroEstado(filtroEstado === 'incumple' ? 'todos' : 'incumple')}
+                type="button"
+                className={`view-mode-btn ${viewMode === 'semaforo' ? 'active' : ''}`}
+                onClick={() => setViewMode('semaforo')}
+                title="Vista Semáforo Territorial de Sedes"
               >
-                {filtroEstado === 'incumple' ? 'Mostrar todas' : 'Solo incumplimientos'}
+                <LayoutGrid size={14} />
+                <span>Semáforo de Sedes</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'fases' ? 'active' : ''}`}
+                onClick={() => setViewMode('fases')}
+                title="Vista Fases Operativas y Curva S"
+              >
+                <Activity size={14} />
+                <span>Fases y Curva S</span>
               </button>
             </div>
+          </nav>
 
-            <div style={{ overflowX: 'auto' }}>
-              <TableEngineStatus engine={engine} />
-              <table>
-                <thead>
-                  <tr>
-                    <th><ColumnHeader engine={engine} columnId="nombre" label="Sede" /></th>
-                    <th><ColumnHeader engine={engine} columnId="estado" label="Estado" /></th>
-                    <th><ColumnHeader engine={engine} columnId="avance" label="Avance" /></th>
-                    <th><ColumnHeader engine={engine} columnId="hito" label="Próximo hito" /></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.filter((r) => r.estado !== 'cumple').slice(0, 5).map((r) => (
-                    <tr key={r.nombre}>
-                      <td><b>{r.nombre}</b></td>
-                      <td>
-                        <span className={`status-badge ${r.estado}`}>
-                          <i style={{ width: '6px', height: '6px', borderRadius: '50%', background: r.estado === 'proceso' ? '#f59e0b' : '#ef4444', display: 'inline-block' }} />
-                          {r.estado === 'proceso' ? 'En proceso' : 'No cumple'}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="progress-track">
-                          <i className={r.estado === 'proceso' ? 'amber' : 'red'} style={{ width: `${r.avance}%` }} />
-                        </div>
-                        <span style={{ fontSize: '12px', fontWeight: 600 }}>{r.avance}%</span>
-                      </td>
-                      <td><span style={{ fontSize: '12.5px' }}>{r.hito}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Barra de Filtros Nativa estilo Cronograma */}
+          <div className="filters">
+            <label className="search">
+              <Search size={16} />
+              <input
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar por sede o hito crítico..."
+              />
+              {busqueda && (
+                <button type="button" onClick={() => setBusqueda('')}>
+                  <X size={14} />
+                </button>
+              )}
+            </label>
+
+            {/* Filtro Fase Operativa */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${openDropdown === 'fase' ? 'active' : ''} ${
+                  fase !== 'Todas' ? 'filtered' : ''
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenDropdown(openDropdown === 'fase' ? null : 'fase');
+                }}
+                title="Filtrar por fase del subproceso"
+              >
+                <div className="filter-card-copy">
+                  <small>Fase Operativa</small>
+                  <span>{fase === 'Todas' ? 'Todas las fases' : fase}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+
+              {openDropdown === 'fase' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 200 }}>
+                  <div className="filter-popover-title">Filtrar por Fase</div>
+                  <div className="filter-popover-list">
+                    {['Todas', 'Fase 1', 'Fase 2', 'DEI'].map((f) => (
+                      <button
+                        key={f}
+                        type="button"
+                        className={`filter-item-btn ${fase === f ? 'selected' : ''}`}
+                        onClick={() => {
+                          setFase(f);
+                          setOpenDropdown(null);
+                        }}
+                      >
+                        <span>{f === 'Todas' ? 'Todas las fases' : f}</span>
+                        {fase === f && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </article>
-        </section>
-      </div>
 
-      {notice && (
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#0f172a', color: '#ffffff', padding: '12px 18px', borderRadius: '8px', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(0,0,0,0.2)' }}>
-          <Check size={16} className="text-green-400" />
-          <span>{notice}</span>
-        </div>
-      )}
+            {/* Filtro Estado */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${openDropdown === 'estado' ? 'active' : ''} ${
+                  filtroEstado !== 'todos' ? 'filtered' : ''
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenDropdown(openDropdown === 'estado' ? null : 'estado');
+                }}
+                title="Filtrar por estado de cumplimiento"
+              >
+                <div className="filter-card-copy">
+                  <small>Estado</small>
+                  <span>
+                    {filtroEstado === 'todos'
+                      ? 'Todos los estados'
+                      : filtroEstado === 'cumple'
+                      ? 'Cumplen'
+                      : filtroEstado === 'proceso'
+                      ? 'En proceso'
+                      : 'No cumplen'}
+                  </span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+
+              {openDropdown === 'estado' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 200 }}>
+                  <div className="filter-popover-title">Filtrar por Estado</div>
+                  <div className="filter-popover-list">
+                    {[
+                      { id: 'todos', label: 'Todos los estados' },
+                      { id: 'cumple', label: 'Cumplen' },
+                      { id: 'proceso', label: 'En proceso' },
+                      { id: 'incumple', label: 'No cumplen / En alerta' },
+                    ].map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        className={`filter-item-btn ${filtroEstado === st.id ? 'selected' : ''}`}
+                        onClick={() => {
+                          setFiltroEstado(st.id);
+                          setOpenDropdown(null);
+                        }}
+                      >
+                        <span>{st.label}</span>
+                        {filtroEstado === st.id && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Filtro Sede */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${openDropdown === 'sede' ? 'active' : ''} ${
+                  ugel !== 'Todas' ? 'filtered' : ''
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenDropdown(openDropdown === 'sede' ? null : 'sede');
+                }}
+                title="Filtrar por sede territorial"
+              >
+                <div className="filter-card-copy">
+                  <small>Sede Operativa</small>
+                  <span>{ugel === 'Todas' ? 'Todas las sedes' : ugel}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+
+              {openDropdown === 'sede' && (
+                <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 220 }}>
+                  <div className="filter-popover-title">Filtrar por Sede</div>
+                  <div className="filter-popover-list" style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                    {['Todas', ...DEMO_UGEL.map((x) => x.nombre)].map((u) => (
+                      <button
+                        key={u}
+                        type="button"
+                        className={`filter-item-btn ${ugel === u ? 'selected' : ''}`}
+                        onClick={() => {
+                          setUgel(u);
+                          setOpenDropdown(null);
+                        }}
+                      >
+                        <span>{u === 'Todas' ? 'Todas las sedes' : u}</span>
+                        {ugel === u && <Check size={14} className="item-check" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={clearAllFilters}
+                style={{ height: '38px', padding: '0 14px', fontSize: '12px' }}
+                title="Restablecer filtros"
+              >
+                <RefreshCw size={13} />
+                <span>Limpiar</span>
+              </button>
+            )}
+          </div>
+
+          {/* Vistas: Semáforo de Sedes o Fases y Curva S */}
+          {viewMode === 'semaforo' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '8px 0 24px' }}>
+              {/* Tabla de Semáforo de Sedes */}
+              <div
+                className="cronograma-lista-table-wrap"
+                style={{
+                  overflowX: 'auto',
+                  background: '#fff',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <TableEngineStatus engine={engine} />
+                <table className="cronograma-lista-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', padding: '12px 16px' }}>
+                        <ColumnHeader engine={engine} columnId="nombre" label="Sede Territorial" />
+                      </th>
+                      <th style={{ textAlign: 'center', padding: '12px 16px', width: '140px' }}>
+                        <ColumnHeader engine={engine} columnId="estado" label="Estado" />
+                      </th>
+                      <th style={{ textAlign: 'center', padding: '12px 16px', width: '200px' }}>
+                        <ColumnHeader engine={engine} columnId="avance" label="Avance Físico" />
+                      </th>
+                      <th style={{ textAlign: 'left', padding: '12px 16px' }}>
+                        <ColumnHeader engine={engine} columnId="hito" label="Próximo Hito Crítico" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r) => (
+                      <tr key={r.nombre}>
+                        <td style={{ padding: '12px 16px', fontWeight: 650, color: '#0f172a' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Building2 size={16} color="#2563eb" />
+                            <span>{r.nombre}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <span
+                            className={`status-pill ${
+                              r.estado === 'cumple'
+                                ? 'badge-complete'
+                                : r.estado === 'proceso'
+                                ? 'badge-progress'
+                                : 'badge-late'
+                            }`}
+                          >
+                            {r.estado === 'cumple' ? 'Cumple' : r.estado === 'proceso' ? 'En proceso' : 'No cumple'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                            <div style={{ flex: 1, height: '6px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                              <div
+                                style={{
+                                  width: `${r.avance}%`,
+                                  height: '100%',
+                                  backgroundColor:
+                                    r.avance === 100 ? '#16a34a' : r.avance >= 50 ? '#2563eb' : '#dc2626',
+                                }}
+                              />
+                            </div>
+                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>{r.avance}%</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#475569', fontSize: '13px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <Clock3 size={13} color="#94a3b8" /> {r.hito}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Hitos Críticos Inmediatos */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '18px 20px',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 750, color: '#0f172a' }}>
+                      Hitos Críticos de Intervención Inmediata
+                    </h3>
+                    <small style={{ color: '#64748b', fontSize: '12px' }}>
+                      Compromisos prioritarios que requieren seguimiento territorial
+                    </small>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+                  {DEMO_HITOS.map((h) => (
+                    <div
+                      key={h.titulo}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px 14px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '42px',
+                          height: '42px',
+                          borderRadius: '8px',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <b style={{ fontSize: '15px', lineHeight: 1, color: '#0f172a' }}>{h.dia}</b>
+                        <span style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>{h.mes}</span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <strong
+                          style={{
+                            display: 'block',
+                            fontSize: '13px',
+                            color: '#0f172a',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {h.titulo}
+                        </strong>
+                        <small style={{ color: '#64748b', fontSize: '11.5px' }}>{h.unidad}</small>
+                      </div>
+                      <span
+                        className={`status-pill ${
+                          h.estado === 'Retrasado'
+                            ? 'badge-late'
+                            : h.estado === 'En riesgo'
+                            ? 'badge-progress'
+                            : 'badge-pending'
+                        }`}
+                      >
+                        {h.estado}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '8px 0 24px' }}>
+              {/* Sección Avance por Fase */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 750, color: '#0f172a' }}>
+                      Avance por Fase de Trabajo
+                    </h3>
+                    <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#64748b' }}>
+                      Progreso reportado de subida de archivos y validaciones operativas
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: '#64748b' }}>
+                    <span><i style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a', marginRight: '5px' }} /> En plazo</span>
+                    <span><i style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', marginRight: '5px' }} /> En riesgo</span>
+                    <span><i style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#dc2626', marginRight: '5px' }} /> Retrasado</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingLeft: '220px', paddingRight: '20px', marginBottom: '10px', fontSize: '11px', fontWeight: 700, color: '#94a3b8' }}>
+                  <span>OCT 2026</span>
+                  <span>NOV 2026</span>
+                  <span>DIC 2026</span>
+                  <span>ENE 2027</span>
+                  <span>FEB 2027</span>
+                </div>
+
+                {PHASES.map((p) => (
+                  <div
+                    key={p.nombre}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '220px 50px 1fr',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '12px 0',
+                      borderBottom: '1px solid #f1f5f9',
+                    }}
+                  >
+                    <strong style={{ fontSize: '13px', fontWeight: 650, color: '#0f172a' }}>{p.nombre}</strong>
+                    <b style={{ fontSize: '13px', fontWeight: 750, color: '#2563eb' }}>{p.avance}%</b>
+                    <div style={{ height: '9px', background: '#f1f5f9', borderRadius: '999px', position: 'relative', overflow: 'hidden' }}>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          bottom: 0,
+                          left: `${p.inicio}%`,
+                          width: `${p.fin - p.inicio}%`,
+                          borderRadius: '999px',
+                          backgroundColor: p.estado === 'green' ? '#16a34a' : p.estado === 'amber' ? '#f59e0b' : '#dc2626',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Curva Regional de Avance Acumulado */}
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)',
+                }}
+              >
+                <div style={{ marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 750, color: '#0f172a' }}>
+                    Curva S de Avance Regional
+                  </h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: '#64748b' }}>
+                    Progreso acumulado: Planificado vs. Real en territorio
+                  </p>
+                </div>
+
+                <div style={{ height: '180px', position: 'relative' }}>
+                  <svg viewBox="0 0 450 170" style={{ width: '100%', height: '100%' }}>
+                    <line x1="10" y1="20" x2="440" y2="20" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <line x1="10" y1="60" x2="440" y2="60" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <line x1="10" y1="100" x2="440" y2="100" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    <line x1="10" y1="140" x2="440" y2="140" stroke="#f1f5f9" strokeDasharray="3 3" />
+                    {/* Línea planeada */}
+                    <path d="M 20 145 Q 150 90 430 30" fill="none" stroke="#94a3b8" strokeWidth="2" strokeDasharray="4 4" />
+                    {/* Línea real */}
+                    <path d="M 20 150 Q 140 120 300 75" fill="none" stroke="#2563eb" strokeWidth="3" />
+                    <circle cx="300" cy="75" r="4.5" fill="#2563eb" />
+                    <text x="310" y="72" fontSize="12" fontWeight="700" fill="#2563eb">
+                      50%
+                    </text>
+                  </svg>
+                </div>
+                <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
+                  <span>
+                    <i style={{ display: 'inline-block', width: '10px', height: '2px', background: '#94a3b8', verticalAlign: 'middle', marginRight: '4px' }} /> Planificado
+                  </span>
+                  <span>
+                    <i style={{ display: 'inline-block', width: '10px', height: '3px', background: '#2563eb', verticalAlign: 'middle', marginRight: '4px' }} /> Real (promedio regional)
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Pie de página canónico */}
+          <footer className="footer">
+            <span>
+              Mostrando {rows.length} de {total} sedes territoriales monitoreadas
+            </span>
+          </footer>
+        </main>
+
+        {notice && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              background: '#0f172a',
+              color: '#ffffff',
+              padding: '12px 18px',
+              borderRadius: '8px',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+            }}
+          >
+            <Check size={16} color="#4ade80" />
+            <span>{notice}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
