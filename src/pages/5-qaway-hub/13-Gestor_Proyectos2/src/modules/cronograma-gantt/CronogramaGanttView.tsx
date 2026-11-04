@@ -3485,34 +3485,25 @@ export default function CronogramaGanttView({
               /* En Modo Gantt / Kanban: Control de Escala y Navegación Horizontal */
               <>
                 <div className="filter-group-divider" aria-hidden="true" />
-                <div className="timeline-nav" title="Navegar por la línea de tiempo">
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={() => scrollTimeline('left')}
-                    title="Desplazar línea de tiempo a la izquierda"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="today-pill"
-                    onClick={scrollToToday}
-                    title="Ir y centrar en la fecha actual (27 de octubre de 2026)"
-                  >
-                    Hoy
-                  </button>
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={() => scrollTimeline('right')}
-                    title="Desplazar línea de tiempo a la derecha"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className="today-pill"
+                  onClick={scrollToToday}
+                  title="Ir y centrar en la fecha actual de hoy"
+                >
+                  Hoy
+                </button>
 
                 <div className="zoom">
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => scrollTimeline('left')}
+                    title="Desplazar línea de tiempo a la izquierda"
+                    aria-label="Desplazar hacia el pasado"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
                   {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
                     <button
                       type="button"
@@ -3523,6 +3514,15 @@ export default function CronogramaGanttView({
                       {x}
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => scrollTimeline('right')}
+                    title="Desplazar línea de tiempo a la derecha"
+                    aria-label="Desplazar hacia el futuro"
+                  >
+                    <ChevronRight size={15} />
+                  </button>
                 </div>
               </>
             )}
