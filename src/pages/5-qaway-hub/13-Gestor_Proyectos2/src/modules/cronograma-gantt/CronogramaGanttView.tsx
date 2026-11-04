@@ -2936,12 +2936,23 @@ export default function CronogramaGanttView({
 
   const handleConfirmDelete = () => {
     if (!activeItem) return;
-    deleteCronogramaItemFromSupabase(activeItem.id);
-    commitChange((old) => old.filter((x) => x.id !== activeItem.id && x.parentId !== activeItem.id));
+    const idsToDelete = new Set<string>();
+    idsToDelete.add(activeItem.id);
+    const collectDescendants = (parentId: string) => {
+      items.filter((x) => x.parentId === parentId).forEach((child) => {
+        idsToDelete.add(child.id);
+        collectDescendants(child.id);
+      });
+    };
+    collectDescendants(activeItem.id);
+
+    const remaining = items.filter((x) => !idsToDelete.has(x.id));
+    commitChange(() => remaining);
+    deleteCronogramaItemFromSupabase(projectId, activeItem.id, Array.from(idsToDelete));
     setDrawerDraft(null);
     setSelectedId(null);
     setPanelOpen(false);
-    notify('Elemento eliminado del cronograma maestro');
+    notify('Elemento y sus dependientes eliminados con éxito del cronograma maestro');
   };
 
   return (
