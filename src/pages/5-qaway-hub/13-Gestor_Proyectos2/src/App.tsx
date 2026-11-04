@@ -402,7 +402,7 @@ function App() {
               onActions={(h) => { binds.current['cronograma'] = h; }}
             />
           </div>
-          <div className={active === 'hitos' ? 'hit-v1 qm-pane-active' : 'hit-v1 qm-pane'}>
+          <div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
           </div>
           <div className={active === 'reuniones' ? 'rm-v1 qm-pane-active' : 'rm-v1 qm-pane'}>

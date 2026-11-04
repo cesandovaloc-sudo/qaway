@@ -1,255 +1,4 @@
-/* Scope aislado para el módulo de Hitos Rectores */
-.hit-v1 {
-  width: 100%;
-  min-height: 100vh;
-  background-color: #f4f7fb;
-  color: #1e293b;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  box-sizing: border-box;
-}
-
-.hit-v1 * {
-  box-sizing: border-box;
-}
-
-.hit-workspace {
-  max-width: 1540px;
-  margin: 0 auto;
-  padding: 24px 32px 60px;
-}
-
-/* Header principal */
-.hit-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 24px;
-  gap: 20px;
-}
-
-.hit-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  color: #0284c7;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.hit-eyebrow-line {
-  width: 18px;
-  height: 2px;
-  background: #0284c7;
-  border-radius: 2px;
-}
-
-.hit-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-  letter-spacing: -0.5px;
-}
-
-.hit-subtitle {
-  font-size: 14.5px;
-  color: #64748b;
-  margin: 6px 0 0;
-}
-
-.hit-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hit-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  background: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hit-btn-secondary:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
-}
-
-.hit-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  background: #0f172a;
-  color: #ffffff;
-  border: 1px solid #0f172a;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hit-btn-primary:hover {
-  background: #1e293b;
-  transform: translateY(-1px);
-}
-
-/* Toast Notice */
-.hit-toast {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
-  background: #0f172a;
-  color: #ffffff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Tarjetas KPI flotantes estilo Power BI */
-.hit-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin-bottom: 24px;
-}
-
-.hit-kpi-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 4px -1px rgba(15, 23, 42, 0.04), 2px 6px 16px -2px rgba(15, 23, 42, 0.06);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
-}
-
-.hit-kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 3px 10px 22px -3px rgba(15, 23, 42, 0.09);
-}
-
-.hit-kpi-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.hit-kpi-icon.blue { background: #e0f2fe; color: #0284c7; }
-.hit-kpi-icon.green { background: #dcfce7; color: #16a34a; }
-.hit-kpi-icon.amber { background: #fef3c7; color: #d97706; }
-.hit-kpi-icon.slate { background: #f1f5f9; color: #64748b; }
-
-.hit-kpi-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.hit-kpi-val {
-  font-size: 26px;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.1;
-}
-
-.hit-kpi-label {
-  font-size: 13px;
-  color: #64748b;
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-/* Barra de filtros y búsqueda */
-.hit-filter-bar {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px 18px;
-  margin-bottom: 22px;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.hit-search-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 8px 14px;
-  flex: 1;
-  min-width: 260px;
-  max-width: 440px;
-}
-
-.hit-search-box input {
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 14px;
-  color: #1e293b;
-  width: 100%;
-}
-
-.hit-filter-pills {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.hit-pill {
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #64748b;
-  border-radius: 6px;
-  padding: 6px 13px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.hit-pill:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
-
-.hit-pill.active {
-  background: #0284c7;
-  color: #ffffff;
-  border-color: #0284c7;
-}
+/* Estilos complementarios para la Matriz de Hitos Rectores y Tareas Operativas · Qaway Lab */
 
 /* Lista de Hitos (Acordeón) */
 .hit-list {
@@ -262,31 +11,31 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hit-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
 }
 
 .hit-card.open {
   border-color: #93c5fd;
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.08);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.07);
 }
 
 /* Cabecera del Hito (clicable para colapsar/expandir) */
 .hit-row-head {
-  padding: 18px 22px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
   cursor: pointer;
   user-select: none;
   background: #ffffff;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
 
 .hit-row-head:hover {
@@ -358,7 +107,7 @@
   align-items: center;
   gap: 7px;
   color: #475569;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   min-width: 130px;
 }
@@ -374,7 +123,7 @@
 .hit-progress-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #64748b;
 }
@@ -392,67 +141,30 @@
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hit-progress-fill.green { background: #16a34a; }
-.hit-progress-fill.amber { background: #d97706; }
-.hit-progress-fill.red { background: #dc2626; }
-.hit-progress-fill.slate { background: #94a3b8; }
-
-/* Semáforos de Estado */
-.hit-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12.5px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.hit-status-badge.cumple {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.hit-status-badge.proceso {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.hit-status-badge.riesgo {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.hit-status-badge.programado {
-  background: #f1f5f9;
-  color: #475569;
-}
-
 .hit-chevron {
   color: #94a3b8;
-  transition: transform 0.25s ease;
+  transition: transform 0.22s ease;
 }
 
 .hit-chevron.open {
   transform: rotate(180deg);
-  color: #0284c7;
+  color: #2563eb;
 }
 
 /* Contenido Expandido del Hito */
 .hit-body {
   border-top: 1px solid #e2e8f0;
-  padding: 22px 24px;
+  padding: 20px 24px;
   background: #fafcff;
 }
 
 .hit-deliverable-box {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-left: 4px solid #0284c7;
   border-radius: 8px;
   padding: 14px 18px;
   margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
 }
 
 .hit-deliverable-title {
@@ -468,7 +180,7 @@
 }
 
 .hit-deliverable-text {
-  font-size: 14px;
+  font-size: 13.5px;
   color: #334155;
   line-height: 1.5;
   margin: 0;
@@ -483,7 +195,7 @@
 }
 
 .hit-tasks-title {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #1e293b;
   display: flex;
@@ -502,7 +214,7 @@
 
 .hit-tasks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 14px;
 }
 
@@ -511,13 +223,13 @@
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 16px;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 12px;
   position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
 }
 
 .hit-task-card:hover {
@@ -568,11 +280,11 @@
 }
 
 .hit-task-title {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #0f172a;
   line-height: 1.4;
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
 .hit-task-blocked-msg {
@@ -585,17 +297,17 @@
   padding: 5px 8px;
   border-radius: 4px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .hit-task-meta {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 12.5px;
+  gap: 5px;
+  font-size: 12px;
   color: #475569;
   border-top: 1px solid #f1f5f9;
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
 .hit-task-meta-row {
@@ -608,8 +320,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 6px;
-  padding-top: 10px;
+  margin-top: 4px;
+  padding-top: 8px;
   border-top: 1px solid #f1f5f9;
 }
 
@@ -619,12 +331,12 @@
   gap: 6px;
   background: #25d366;
   color: #ffffff;
-  padding: 6px 12px;
+  padding: 5px 11px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
 
 .hit-wa-btn:hover {
@@ -632,36 +344,28 @@
 }
 
 .hit-empty-tasks {
-  padding: 24px;
+  padding: 20px;
   text-align: center;
   color: #94a3b8;
-  font-size: 14px;
+  font-size: 13px;
   background: #ffffff;
   border: 1px dashed #cbd5e1;
   border-radius: 8px;
 }
 
-@media (max-width: 1024px) {
-  .hit-kpis {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .hit-row-head {
-    flex-wrap: wrap;
-  }
-}
-
-@media (max-width: 640px) {
-  .hit-workspace {
-    padding: 16px 14px 40px;
-  }
-  .hit-kpis {
-    grid-template-columns: 1fr;
-  }
-  .hit-tasks-grid {
-    grid-template-columns: 1fr;
-  }
-  .hit-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* Toast Notice */
+.hit-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
