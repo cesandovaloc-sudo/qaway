@@ -964,7 +964,9 @@ export default function CronogramaGanttView({
             const hasLegacyMocks = parsed.some(
               (it) =>
                 isLegacyCronogramaItem(it) ||
-                (Boolean(it.parentId) && !parsed.some((p) => p.id === it.parentId))
+                (Boolean(it.parentId) && !parsed.some((p) => p.id === it.parentId)) ||
+                it.name.toLowerCase().includes('husyan') ||
+                it.name.toLowerCase().includes('adad')
             );
             if (hasLegacyMocks || parsed.length !== 62 || !parsed.some((it) => it.id === 'comp-11')) {
               // Limpieza y migración automática y definitiva a los 62 registros oficiales del Excel DRE Junín
@@ -1035,26 +1037,6 @@ export default function CronogramaGanttView({
       );
     }
   }, [items]);
-
-  // Purgar de inmediato borradores accidentales huérfanos generados por el antiguo comportamiento del Enter
-  useEffect(() => {
-    const hasJunkDrafts = items.some(
-      (it) =>
-        it.name.toLowerCase().includes('husyan') ||
-        it.name.toLowerCase().includes('adad') ||
-        (it.name === 'Nuevo componente' && it.id !== inlineDraftCreatedId)
-    );
-    if (hasJunkDrafts) {
-      commitChange((old) =>
-        old.filter(
-          (it) =>
-            !it.name.toLowerCase().includes('husyan') &&
-            !it.name.toLowerCase().includes('adad') &&
-            !(it.name === 'Nuevo componente' && it.id !== inlineDraftCreatedId)
-        )
-      );
-    }
-  }, [items, inlineDraftCreatedId]);
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
@@ -5967,9 +5949,9 @@ export default function CronogramaGanttView({
                 <span>🔗 Relación Fin a Inicio</span>
               </div>
               <div className="tooltip-metric" style={{ fontSize: '11.5px', marginTop: 4 }}>
-                <b>{hoveredDep.sourceItem.code}</b> {hoveredDep.sourceItem.name.slice(0, 36)} (Fin: {formatDatePE(hoveredDep.sourceItem.end)})
+                <b>{hoveredDep.sourceItem?.code || ''}</b> {(hoveredDep.sourceItem?.name || '').slice(0, 36)} (Fin: {formatDatePE(hoveredDep.sourceItem?.end || '')})
                 <div style={{ color: '#0066ff', fontWeight: 700, margin: '2px 0' }}>➔ habilita a:</div>
-                <b>{hoveredDep.targetItem.code}</b> {hoveredDep.targetItem.name.slice(0, 36)} (Inicio: {formatDatePE(hoveredDep.targetItem.start)})
+                <b>{hoveredDep.targetItem?.code || ''}</b> {(hoveredDep.targetItem?.name || '').slice(0, 36)} (Inicio: {formatDatePE(hoveredDep.targetItem?.start || '')})
               </div>
             </div>
           )}
