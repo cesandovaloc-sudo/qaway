@@ -801,62 +801,150 @@ export default function TareasView({ activeProject, onTasksCount, onActions }: T
 
           {/* CUERPO PRINCIPAL DINÁMICO SEGÚN MODO */}
           {viewMode === 'Tablero' ? (
-            <div className="board" style={{ flex: 1, padding: '16px 18px', overflow: 'auto' }}>
-              {STATUSES.map((s) => (
-                <div className="board-col" key={s}>
-                  <header>
-                    <i className={'dot ' + (s === 'Cumple' ? 'done' : s === 'En proceso' ? 'progress' : s === 'Bloqueada' ? 'blocked' : 'pending')} />
-                    <b>{s}</b>
-                    <span>{filtered.filter((t) => t.status === s).length}</span>
-                    <button onClick={() => setCreate(true)}>
-                      <Plus size={14} />
-                    </button>
-                  </header>
-                  {filtered
-                    .filter((t) => t.status === s)
-                    .map((t) => (
-                      <button
-                        className="board-card"
-                        key={t.id}
-                        onClick={() => {
-                          setDetail(t.id);
-                          setDetailTab('Resumen');
-                        }}
-                      >
-                        <span className={'priority p-' + t.priority.toLowerCase()}>{t.priority}</span>
-                        {t.kind === 'En consulta' && <span className="consult">Consulta</span>}
-                        <b>{t.title}</b>
-                        {t.deliverable && (
-                          <span
-                            className="card-deliverable"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '11px',
-                              color: '#0369a1',
-                              background: '#f0f9ff',
-                              border: '1px solid #bae6fd',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              margin: '4px 0 2px',
-                            }}
-                          >
-                            <Target size={11} color="#0284c7" />
-                            {t.deliverable}
-                          </span>
+            <div className="cronograma-kanban-board">
+              <div className="kanban-columns-track">
+                {STATUSES.map((s) => {
+                  const dotColor =
+                    s === 'Cumple'
+                      ? '#10b981'
+                      : s === 'En proceso'
+                      ? '#0066ff'
+                      : s === 'Bloqueada'
+                      ? '#ef4444'
+                      : '#94a3b8';
+                  const cardsInCol = filtered.filter((t) => t.status === s);
+
+                  return (
+                    <div className="kanban-column" key={s}>
+                      {/* Cabecera de Columna oficial Cronograma */}
+                      <div className="kanban-column-header">
+                        <div className="kanban-col-title-group">
+                          <span className="kanban-col-dot" style={{ background: dotColor }} />
+                          <span className="kanban-col-label">{s}</span>
+                          <span className="kanban-col-count">{cardsInCol.length}</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="kanban-add-btn"
+                          onClick={() => setCreate(true)}
+                          title="Añadir tarea a esta etapa"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+
+                      {/* Lista de Tarjetas con diseño tarjeta Cronograma */}
+                      <div className="kanban-cards-list">
+                        {cardsInCol.length === 0 ? (
+                          <div className="kanban-column-empty">Sin tareas en esta etapa</div>
+                        ) : (
+                          cardsInCol.map((t) => (
+                            <div
+                              className="kanban-card"
+                              key={t.id}
+                              onClick={() => {
+                                setDetail(t.id);
+                                setDetailTab('Resumen');
+                              }}
+                            >
+                              <div className="kanban-card-top">
+                                <div className="kanban-card-title-wrap">
+                                  <span className="kanban-card-code">
+                                    QW-T-{String(t.id).padStart(3, '0')}
+                                  </span>
+                                  <span className="kanban-card-name">{t.title}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="kanban-card-menu-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDetail(t.id);
+                                  }}
+                                  title="Ver detalle de tarea"
+                                >
+                                  <MoreHorizontal size={14} />
+                                </button>
+                              </div>
+
+                              {t.deliverable && (
+                                <div
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    fontSize: '11px',
+                                    color: '#0369a1',
+                                    background: '#f0f9ff',
+                                    border: '1px solid #bae6fd',
+                                    padding: '2px 7px',
+                                    borderRadius: '4px',
+                                    width: 'fit-content',
+                                  }}
+                                >
+                                  <Target size={11} color="#0284c7" />
+                                  <span>{t.deliverable}</span>
+                                </div>
+                              )}
+
+                              <div className="kanban-card-dates">
+                                <CalendarDays size={12} />
+                                <span>{formatDateText(t.due)}</span>
+                                <span
+                                  className={'priority p-' + t.priority.toLowerCase()}
+                                  style={{
+                                    marginLeft: 'auto',
+                                    fontSize: '10px',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    fontWeight: 650,
+                                  }}
+                                >
+                                  {t.priority}
+                                </span>
+                              </div>
+
+                              <div className="kanban-card-footer">
+                                <div className="kanban-card-meta-left">
+                                  <div
+                                    className="gestor-avatar"
+                                    style={{
+                                      background: '#1e293b',
+                                      width: '22px',
+                                      height: '22px',
+                                      fontSize: '9px',
+                                      color: '#fff',
+                                    }}
+                                  >
+                                    {getInitials(t.owner)}
+                                  </div>
+                                  <span style={{ fontSize: '11.5px', color: '#475569', fontWeight: 500 }}>
+                                    {t.owner}
+                                  </span>
+                                </div>
+                                {t.milestone !== '—' && (
+                                  <span
+                                    style={{
+                                      fontSize: '10.5px',
+                                      color: '#64748b',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                    }}
+                                  >
+                                    <Flag size={10} color="#0066ff" />{' '}
+                                    {t.milestone.length > 18 ? t.milestone.slice(0, 18) + '...' : t.milestone}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))
                         )}
-                        <small>
-                          <CalendarDays size={12} />
-                          {formatDateText(t.due)}
-                          <span className="avatar mini" style={{ background: '#1e293b', color: '#fff' }}>
-                            {getInitials(t.owner)}
-                          </span>
-                        </small>
-                      </button>
-                    ))}
-                </div>
-              ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ) : viewMode === 'Por hito' ? (
             <div className="groups" style={{ flex: 1, padding: '16px 18px', overflow: 'auto' }}>
