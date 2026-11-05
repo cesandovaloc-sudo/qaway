@@ -85,6 +85,114 @@ export default function ResumenProyectoView({
   const [selectedTab, setSelectedTab] = useState<string>('Todas');
   const [viewMode, setViewMode] = useState<'semaforo' | 'fases'>('semaforo');
 
+  // Cargar datos en vivo del cronograma maestro
+  const [ganttItems, setGanttItems] = useState<any[]>(() => {
+    try {
+      const raw = localStorage.getItem('qaway-gantt-items-p1');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const raw = localStorage.getItem('qaway-gantt-items-p1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) setGanttItems(parsed);
+        }
+      } catch {}
+    };
+    window.addEventListener('qaway-gantt-items-updated', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('qaway-gantt-items-updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, []);
+
+  const liveHitos = useMemo(() => {
+    if (ganttItems.length === 0) return DEMO_HITOS;
+    const candidates = ganttItems
+      .filter((it) => it.kind === 'subproceso' || it.kind === 'hito')
+      .sort((a, b) => (a.end || '').localeCompare(b.end || ''));
+
+    const priorityItems = [
+      ...candidates.filter((it) => it.status === 'Con retraso'),
+      ...candidates.filter((it) => it.status === 'En curso' || it.status === 'En proceso'),
+      ...candidates.filter((it) => it.status === 'Pendiente'),
+    ].slice(0, 4);
+
+    if (priorityItems.length === 0) return DEMO_HITOS;
+
+    const MONTHS_SHORT = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
+
+    return priorityItems.map((it) => {
+      let dia = '15';
+      let mes = 'OCT';
+      if (it.end) {
+        const parts = it.end.split('-');
+        if (parts.length === 3) {
+          dia = parts[2];
+          const mNum = parseInt(parts[1], 10);
+          if (mNum >= 1 && mNum <= 12) mes = MONTHS_SHORT[mNum - 1];
+        }
+      }
+
+      const tipo = it.status === 'Con retraso' ? 'rojo' : it.progress > 0 ? 'amarillo' : 'gris';
+      const estadoLabel =
+        it.status === 'Con retraso'
+          ? 'Retrasado'
+          : it.status === 'En curso' || it.status === 'En proceso'
+          ? 'En curso'
+          : 'Programado';
+
+      return {
+        dia,
+        mes,
+        titulo: it.name,
+        unidad: it.sede || it.region || (it.gestor ? `Gestor: ${it.gestor}` : 'Sede Junín'),
+        estado: estadoLabel,
+        tipo,
+      };
+    });
+  }, [ganttItems]);
+
+  const livePhases = useMemo(() => {
+    if (ganttItems.length === 0) return PHASES;
+
+    const phaseNames = [
+      'Fase 1 — Planificación y CDT',
+      'Fase 2 — Registro en Plataforma (RAR / NEA)',
+      'Fase 3 — Validación DEI Nivel Inicial',
+    ];
+
+    return phaseNames.map((pName, idx) => {
+      const inPhase = ganttItems.filter((it) => (it.phase || '').toLowerCase().includes(`fase ${idx + 1}`));
+      const avg =
+        inPhase.length > 0
+          ? Math.round(inPhase.reduce((acc, it) => acc + (it.progress || 0), 0) / inPhase.length)
+          : idx === 0
+          ? 69
+          : idx === 1
+          ? 38
+          : 23;
+
+      const st = avg >= 80 ? 'green' : avg >= 40 ? 'amber' : 'red';
+      return {
+        nombre: pName,
+        avance: avg,
+        inicio: idx === 0 ? 3 : idx === 1 ? 17 : 34,
+        fin: idx === 0 ? 34 : idx === 1 ? 47 : 66,
+        estado: st,
+      };
+    });
+  }, [ganttItems]);
+
   const [fase, setFase] = useState('Todas');
   const [ugel, setUgel] = useState('Todas');
   const [busqueda, setBusqueda] = useState('');
@@ -655,7 +763,7 @@ export default function ResumenProyectoView({
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-                  {DEMO_HITOS.map((h) => (
+                  {liveHitos.map((h) => (
                     <div
                       key={h.titulo}
                       style={{
@@ -752,7 +860,7 @@ export default function ResumenProyectoView({
                   <span>FEB 2027</span>
                 </div>
 
-                {PHASES.map((p) => (
+                {livePhases.map((p) => (
                   <div
                     key={p.nombre}
                     style={{

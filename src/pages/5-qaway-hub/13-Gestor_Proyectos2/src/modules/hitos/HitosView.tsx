@@ -2,6 +2,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import '../cronograma-gantt/gantt.css';
 import './hitos.css';
+import { DRE_JUNIN_DOTACION_2027_EDT } from '../cronograma-gantt/edtPmbokModel';
 import {
   AlertTriangle,
   ArrowRight,
@@ -17,6 +18,7 @@ import {
   Filter,
   Flag,
   LayoutGrid,
+  Layers,
   List,
   MessageCircle,
   Phone,
@@ -46,11 +48,14 @@ interface OperationalTask {
   blockReason?: string;
 }
 
-interface HitoRector {
+export interface ComponenteWbs {
   id: string;
   code: string;
   title: string;
   subproceso: string;
+  subcomponentsCount: number;
+  phase: string;
+  startDate: string;
   dueDate: string;
   deliverable: string;
   conformityRequired: boolean;
@@ -58,231 +63,149 @@ interface HitoRector {
   progress: number;
   totalUgels: number;
   completedUgels: number;
+  subcomponents: Array<{ id: string; code: string; name: string; progress: number; status: string; end: string }>;
 }
 
-const OFFICIAL_HITOS: HitoRector[] = [
-  {
-    id: 'h1',
-    code: 'H1',
-    title: 'Comunicación de Directorio de Almacenes',
-    subproceso: '2.2',
-    dueDate: '11/09/2026',
-    deliverable: 'Oficio con directorio, características y responsables de almacenes territoriales',
-    conformityRequired: true,
-    status: 'cumple',
-    progress: 100,
-    totalUgels: 220,
-    completedUgels: 220,
-  },
-  {
-    id: 'h2',
-    code: 'H2',
-    title: 'Solicitud de Ajustes de Códigos Modulares en Sistema de Gestión',
-    subproceso: '1.5',
-    dueDate: '14/09/2026',
-    deliverable: 'Oficio de titular regional + Informe técnico + Formato de sustento',
-    conformityRequired: true,
-    status: 'cumple',
-    progress: 100,
-    totalUgels: 220,
-    completedUgels: 220,
-  },
-  {
-    id: 'h3',
-    code: 'H3',
-    title: 'Conformación del Comité de Distribución en Sedes Territoriales',
-    subproceso: '1.2',
-    dueDate: '25/09/2026',
-    deliverable: 'Resolución de conformación del comité y designación de punto focal de enlace',
-    conformityRequired: true,
-    status: 'proceso',
-    progress: 84,
-    totalUgels: 220,
-    completedUgels: 185,
-  },
-  {
-    id: 'h4',
-    code: 'H4',
-    title: 'Aprobación del Plan de Distribución Local y Monitoreo',
-    subproceso: '1.3 - 1.4',
-    dueDate: '25/09/2026',
-    deliverable: 'Resolución que aprueba el Plan de Distribución Local (cronograma, rutas y contingencias)',
-    conformityRequired: true,
-    status: 'proceso',
-    progress: 78,
-    totalUgels: 220,
-    completedUgels: 172,
-  },
-  {
-    id: 'h5',
-    code: 'H5',
-    title: 'Elaboración y Validación del Cuadro de Distribución Territorial (CDT)',
-    subproceso: '1.6',
-    dueDate: '22/10/2026',
-    deliverable: 'Registro y validación completa del CDT en el aplicativo integrado de gestión',
-    conformityRequired: true,
-    status: 'riesgo',
-    progress: 62,
-    totalUgels: 220,
-    completedUgels: 136,
-  },
-  {
-    id: 'h6',
-    code: 'H6',
-    title: 'Requerimiento de Personal de Apoyo Operativo Territorial',
-    subproceso: '5.1',
-    dueDate: '30/10/2026',
-    deliverable: 'Oficio de coordinación territorial solicitando ternas acreditadas para apoyo de campo',
-    conformityRequired: false,
-    status: 'proceso',
-    progress: 45,
-    totalUgels: 220,
-    completedUgels: 99,
-  },
-  {
-    id: 'h7',
-    code: 'H7',
-    title: 'Culminación de Actuaciones Preparatorias para Transporte',
-    subproceso: '4.1',
-    dueDate: '30/11/2026',
-    deliverable: 'Expediente de contratación aprobado y bases técnicas del proceso de transporte',
-    conformityRequired: true,
-    status: 'programado',
-    progress: 30,
-    totalUgels: 220,
-    completedUgels: 66,
-  },
-  {
-    id: 'h8',
-    code: 'H8',
-    title: 'Reconocimiento de Personas de Apoyo para Recepción en Campo',
-    subproceso: '5.2',
-    dueDate: '18/12/2026',
-    deliverable: 'Resolución que aprueba padrón formal de apoyo para recepción en puntos de destino',
-    conformityRequired: true,
-    status: 'programado',
-    progress: 0,
-    totalUgels: 220,
-    completedUgels: 0,
-  },
-  {
-    id: 'h9',
-    code: 'H9',
-    title: 'Adjudicación y Contrato del Servicio de Distribución y Transporte',
-    subproceso: '4.2 - 4.3',
-    dueDate: '05/02/2027',
-    deliverable: 'Contrato suscrito de servicio de transporte territorial registrado en plataforma',
-    conformityRequired: true,
-    status: 'programado',
-    progress: 0,
-    totalUgels: 220,
-    completedUgels: 0,
-  },
-  {
-    id: 'h10',
-    code: 'H10',
-    title: 'Registro de Asignación y Recepción en Módulo de Control de Entregas',
-    subproceso: '9.2 - 9.4',
-    dueDate: '30/04/2027',
-    deliverable: '100% de actas formales de entrega registradas en la plataforma de control',
-    conformityRequired: true,
-    status: 'programado',
-    progress: 0,
-    totalUgels: 220,
-    completedUgels: 0,
-  },
-];
+const formatDatePE = (d?: string) => {
+  if (!d) return 'Por definir';
+  const parts = d.split('-');
+  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  return d;
+};
 
-const OPERATIONAL_TASKS: OperationalTask[] = [
-  {
-    id: 'TSK-M01',
-    title: 'Consolidar padrón de miembros del comité territorial Huancavelica vía matriz',
-    hitoId: 'h3',
-    gestor: 'Carlos Mendoza (Coordinador Sierra Centro)',
-    phone: '+51987654321',
-    email: 'cmendoza@gestor.pe',
-    ugel: 'Sede Huancavelica',
-    dueDate: '20/09/2026',
-    status: 'in_progress',
-    priority: 'ALTA',
-  },
-  {
-    id: 'TSK-M02',
-    title: 'Emitir alerta preventiva por retraso en resolución de comité en Sede Maynas',
-    hitoId: 'h3',
-    gestor: 'Lucía Ramos (Coordinadora Selva)',
-    phone: '+51976543210',
-    email: 'lramos@gestor.pe',
-    ugel: 'Sede Maynas',
-    dueDate: '22/09/2026',
-    status: 'todo',
-    priority: 'URGENTE',
-    isBlocked: true,
-    blockReason: 'Dificultad de enlace en zona ribereña',
-  },
-  {
-    id: 'TSK-M03',
-    title: 'Validar consistencia de códigos modulares de Sede 03 Centro',
-    hitoId: 'h2',
-    gestor: 'Roberto Farfán (Especialista Técnico)',
-    phone: '+51965432109',
-    email: 'rfarfan@gestor.pe',
-    ugel: 'Sede 03 Metropolitana',
-    dueDate: '12/09/2026',
-    status: 'done',
-    priority: 'MEDIA',
-  },
-  {
-    id: 'TSK-M04',
-    title: 'Asistencia técnica virtual a responsables sobre plataforma operativa',
-    hitoId: 'h5',
-    gestor: 'Ana Paola Quispe (Especialista Territorial)',
-    phone: '+51954321098',
-    email: 'aquispe@gestor.pe',
-    ugel: 'Sede Cusco Sur',
-    dueDate: '15/10/2026',
-    status: 'in_progress',
-    priority: 'ALTA',
-  },
-  {
-    id: 'TSK-M05',
-    title: 'Revisar Términos de Referencia de transporte para ruta fluvial Condorcanqui',
-    hitoId: 'h7',
-    gestor: 'Javier Ruiz (Especialista en Contrataciones)',
-    phone: '+51943210987',
-    email: 'jruiz@gestor.pe',
-    ugel: 'Sede Condorcanqui',
-    dueDate: '20/11/2026',
-    status: 'todo',
-    priority: 'URGENTE',
-  },
-  {
-    id: 'TSK-M06',
-    title: 'Comprobar recepción de directorio de almacén Satipo con personal acreditado',
-    hitoId: 'h1',
-    gestor: 'Carlos Mendoza (Coordinador Sierra Centro)',
-    phone: '+51987654321',
-    email: 'cmendoza@gestor.pe',
-    ugel: 'Sede Satipo',
-    dueDate: '10/09/2026',
-    status: 'done',
-    priority: 'MEDIA',
-  },
-  {
-    id: 'TSK-M07',
-    title: 'Revisión y visado del plan de contingencia de transporte fluvial Sede Nauta',
-    hitoId: 'h4',
-    gestor: 'Lucía Ramos (Coordinadora Selva)',
-    phone: '+51976543210',
-    email: 'lramos@gestor.pe',
-    ugel: 'Sede Nauta',
-    dueDate: '24/09/2026',
-    status: 'in_progress',
-    priority: 'ALTA',
-  },
-];
+const getLiveWbsComponents = (): ComponenteWbs[] => {
+  try {
+    let items: any[] = [];
+    const rawGantt = localStorage.getItem('qaway-gantt-items-p1');
+    if (rawGantt) {
+      try {
+        const parsed = JSON.parse(rawGantt);
+        if (Array.isArray(parsed) && parsed.length > 0) items = parsed;
+      } catch {}
+    }
+
+    if (items.length === 0) {
+      items = DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
+        id: r.id,
+        code: r.code,
+        name: r.name,
+        kind: r.kind,
+        parentId: r.parentId,
+        start: r.start,
+        end: r.end,
+        progress: r.progress,
+        status: r.status,
+        deliverable: r.deliverable,
+        phase: r.phase,
+      }));
+    }
+
+    // Identificar los 11 Componentes principales (WBS Nivel 1)
+    const rootComponents = items.filter(
+      (it: any) => !it.parentId || it.id.startsWith('comp-') || it.id.startsWith('c-') || it.kind === 'hito'
+    );
+
+    return rootComponents.map((c: any, idx: number) => {
+      const children = items.filter((sub: any) => sub.parentId === c.id);
+      const subCount = children.length;
+
+      let st: 'cumple' | 'proceso' | 'riesgo' | 'programado' = 'programado';
+      if (c.progress >= 100 || c.status === 'Cumple' || c.status === 'Completado') {
+        st = 'cumple';
+      } else if (c.status === 'Con retraso' || (c.deviation !== undefined && c.deviation < 0)) {
+        st = 'riesgo';
+      } else if (c.progress > 0 || c.status === 'En curso' || c.status === 'En proceso') {
+        st = 'proceso';
+      }
+
+      return {
+        id: c.id,
+        code: c.code ? (c.code.endsWith('.') ? c.code : `${c.code}.`) : `C${idx + 1}.`,
+        title: c.name,
+        subproceso: subCount > 0 ? `${subCount} subcomponentes vinculados` : 'Control territorial directo',
+        subcomponentsCount: subCount,
+        phase: c.phase || (idx < 2 ? 'Fase 1 · Planificación' : idx < 7 ? 'Fase 2 · Preparación y Ejecución' : 'Fase 3 · Cierre y Rendición'),
+        startDate: formatDatePE(c.start),
+        dueDate: formatDatePE(c.end),
+        deliverable: c.deliverable || `Informe de cumplimiento, acta de validación y sustento del Componente ${c.code || idx + 1}`,
+        conformityRequired: true,
+        status: st,
+        progress: typeof c.progress === 'number' ? c.progress : 0,
+        totalUgels: 220,
+        completedUgels: Math.round(220 * ((c.progress || 0) / 100)),
+        subcomponents: children.map((sub: any) => ({
+          id: sub.id,
+          code: sub.code,
+          name: sub.name,
+          progress: sub.progress || 0,
+          status: sub.status || 'Pendiente',
+          end: formatDatePE(sub.end),
+        })),
+      };
+    });
+  } catch {
+    return [];
+  }
+};
+
+const getLiveTasksForComponent = (component: ComponenteWbs): OperationalTask[] => {
+  try {
+    const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+    if (!Array.isArray(raw)) return [];
+
+    const cleanTitle = component.title.toLowerCase();
+    const cleanCode = component.code.toLowerCase().replace('.', '');
+
+    return raw
+      .filter((t: any) => {
+        if (!t.milestone) return false;
+        const m = t.milestone.toLowerCase();
+        return (
+          m === cleanTitle ||
+          m.includes(cleanTitle.slice(0, 14)) ||
+          m.startsWith(cleanCode) ||
+          t.componentId === component.id
+        );
+      })
+      .map((t: any) => ({
+        id: `TSK-${String(t.id).padStart(3, '0')}`,
+        title: t.title,
+        hitoId: component.id,
+        gestor: t.owner || 'Gestor Territorial',
+        phone: '+51987654321',
+        email: 'gestor@qaway.pe',
+        ugel: t.deliverable ? `Entregable: ${t.deliverable.slice(0, 32)}` : 'Sede Regional Junín',
+        dueDate: t.due ? formatDatePE(t.due) : '30/11/2026',
+        status: (t.status === 'Cumple' || t.status === 'Completado' ? 'done' : t.status === 'En proceso' ? 'in_progress' : 'todo') as any,
+        priority: (t.priority === 'Alta' ? 'ALTA' : t.priority === 'Baja' ? 'MEDIA' : 'ALTA') as any,
+        isBlocked: t.status === 'Bloqueada',
+        blockReason: t.blockedReason,
+      }));
+  } catch {
+    return [];
+  }
+};
 
 export default function HitosView({ onActions }: { onActions?: (h: any) => void }) {
+  const [componentes, setComponentes] = useState<ComponenteWbs[]>(getLiveWbsComponents);
+  const [tasksNonce, setTasksNonce] = useState(0);
+
+  // Escucha activa de sincronización con Cronograma y Tareas
+  useEffect(() => {
+    const reload = () => {
+      setComponentes(getLiveWbsComponents());
+      setTasksNonce((n) => n + 1);
+    };
+    window.addEventListener('qaway-gantt-items-updated', reload);
+    window.addEventListener('qaway-tasks-updated', reload);
+    window.addEventListener('storage', reload);
+    return () => {
+      window.removeEventListener('qaway-gantt-items-updated', reload);
+      window.removeEventListener('qaway-tasks-updated', reload);
+      window.removeEventListener('storage', reload);
+    };
+  }, []);
+
   const [search, setSearch] = useState('');
   const [selectedTab, setSelectedTab] = useState<string>('todos');
   const [filterStatus, setFilterStatus] = useState<string>('todos');
@@ -291,6 +214,8 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
   const [openDropdown, setOpenDropdown] = useState<'status' | 'conformity' | null>(null);
 
   const [openHitos, setOpenHitos] = useState<Record<string, boolean>>({
+    'comp-1': true,
+    'comp-2': true,
     h3: true,
     h5: true,
   });
@@ -320,16 +245,16 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
   };
 
   const kpis = useMemo(() => {
-    const total = OFFICIAL_HITOS.length;
-    const cumplidos = OFFICIAL_HITOS.filter((h) => h.status === 'cumple').length;
-    const riesgo = OFFICIAL_HITOS.filter((h) => h.status === 'riesgo').length;
-    const proceso = OFFICIAL_HITOS.filter((h) => h.status === 'proceso').length;
-    const programado = OFFICIAL_HITOS.filter((h) => h.status === 'programado').length;
+    const total = componentes.length;
+    const cumplidos = componentes.filter((h) => h.status === 'cumple').length;
+    const riesgo = componentes.filter((h) => h.status === 'riesgo').length;
+    const proceso = componentes.filter((h) => h.status === 'proceso').length;
+    const programado = componentes.filter((h) => h.status === 'programado').length;
     return { total, cumplidos, riesgo, proceso, programado };
-  }, []);
+  }, [componentes]);
 
   const tabPills = [
-    { id: 'todos', label: 'Todos los hitos', count: kpis.total },
+    { id: 'todos', label: 'Todos los componentes', count: kpis.total },
     { id: 'cumple', label: 'Cumplidos', count: kpis.cumplidos },
     { id: 'proceso', label: 'En proceso', count: kpis.proceso },
     { id: 'riesgo', label: 'En riesgo', count: kpis.riesgo },
@@ -337,10 +262,11 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
   ];
 
   const filteredHitos = useMemo(() => {
-    return OFFICIAL_HITOS.filter((h) => {
+    return componentes.filter((h) => {
       const matchSearch =
         h.title.toLowerCase().includes(search.toLowerCase()) ||
         h.code.toLowerCase().includes(search.toLowerCase()) ||
+        h.phase.toLowerCase().includes(search.toLowerCase()) ||
         h.subproceso.toLowerCase().includes(search.toLowerCase()) ||
         h.deliverable.toLowerCase().includes(search.toLowerCase());
 
@@ -353,7 +279,7 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
 
       return matchSearch && matchTab && matchStatus && matchConformity;
     });
-  }, [search, selectedTab, filterStatus, filterConformity]);
+  }, [componentes, search, selectedTab, filterStatus, filterConformity]);
 
   const hasActiveFilters =
     search !== '' ||
@@ -366,8 +292,8 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
     setFilterConformity('todas');
   };
 
-  const getHitoTasks = (hitoId: string) => {
-    return OPERATIONAL_TASKS.filter((t) => t.hitoId === hitoId);
+  const getHitoTasks = (hito: ComponenteWbs) => {
+    return getLiveTasksForComponent(hito);
   };
 
   const buildWhatsAppLink = (task: OperationalTask) => {
@@ -432,9 +358,9 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
             </span>
             <div>
               <span className="super">MONITOREO DE CUMPLIMIENTO REGIONAL · DOTACIÓN 2027</span>
-              <h1>Hitos Rectores y Matriz Contractual</h1>
+              <h1>Componentes del Proyecto y Estructura WBS</h1>
               <p>
-                Monitoreo de cumplimiento por hito normativo, validación documental y tareas operativas territoriales.
+                Monitoreo de los 11 componentes rectores, fases de ejecución y paquetes de trabajo vinculados.
               </p>
             </div>
           </div>
@@ -475,8 +401,8 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
             </span>
             <div className="metric-copy">
               <b>{String(kpis.total).padStart(2, '0')}</b>
-              <strong>Hitos Rectores</strong>
-              <small>matriz de cumplimiento activa</small>
+              <strong>Componentes WBS</strong>
+              <small>matriz viva de cumplimiento</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -725,7 +651,7 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
             <div className="hit-list" style={{ padding: '8px 0 24px' }}>
               {filteredHitos.map((hito) => {
                 const isOpen = !!openHitos[hito.id];
-                const tasks = getHitoTasks(hito.id);
+                const tasks = getHitoTasks(hito);
 
                 return (
                   <div key={hito.id} className={`hit-card ${isOpen ? 'open' : ''}`}>
@@ -734,7 +660,7 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
                       <div className="hit-info-main">
                         <div className="hit-info-top">
                           <span className="hit-name">{hito.title}</span>
-                          <span className="hit-subproc">Subproceso {hito.subproceso}</span>
+                          <span className="hit-subproc">{hito.phase} · {hito.subproceso}</span>
                           {hito.conformityRequired ? (
                             <span className="hit-conformity-tag">
                               <ShieldCheck size={12} /> Conformidad Requerida
@@ -781,6 +707,33 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
                           </div>
                           <p className="hit-deliverable-text">{hito.deliverable}</p>
                         </div>
+
+                        {/* Subcomponentes de la Estructura WBS */}
+                        {hito.subcomponents && hito.subcomponents.length > 0 && (
+                          <div style={{ marginBottom: '18px' }}>
+                            <div className="hit-tasks-title" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '12px', fontWeight: 650, color: '#334155' }}>
+                              <Layers size={15} color="#0066ff" />
+                              <span>Subcomponentes y Paquetes de Trabajo ({hito.subcomponents.length})</span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '8px' }}>
+                              {hito.subcomponents.map((sub) => (
+                                <div key={sub.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '7px', padding: '9px 11px', fontSize: '11.5px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                                    <b style={{ color: '#0f172a' }}>{sub.code}</b>
+                                    <span style={{ fontSize: '10.5px', color: '#64748b' }}>{sub.end}</span>
+                                  </div>
+                                  <div style={{ color: '#334155', lineHeight: 1.3, marginBottom: '6px' }}>{sub.name}</div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div style={{ flex: 1, height: '4px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                                      <div style={{ width: `${sub.progress}%`, height: '100%', background: '#0066ff' }} />
+                                    </div>
+                                    <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#0066ff' }}>{sub.progress}%</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Tareas Operativas del Hito */}
                         <div className="hit-tasks-header">
@@ -977,7 +930,7 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
           {/* Pie de página canónico */}
           <footer className="footer">
             <span>
-              Mostrando {filteredHitos.length} de {kpis.total} hitos rectores registrados
+              Mostrando {filteredHitos.length} de {kpis.total} componentes WBS registrados
             </span>
           </footer>
         </main>

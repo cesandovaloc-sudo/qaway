@@ -256,7 +256,7 @@ export default function Sidebar({
         onClick={() => onModule('hitos')}
       >
         <Flag size={18} />
-        <span>Hitos</span>
+        <span>Componentes</span>
       </button>
 
       <button

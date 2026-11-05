@@ -280,6 +280,63 @@ export default function TareasView({ activeProject, onTasksCount, onActions }: T
 
   const engine = useTableEngine<Task>({ tableId: 'tareas-lista', columns: TASK_COLUMNS, rows: tasks });
 
+  // Sincronización en vivo con eventos de tareas y cronograma
+  useEffect(() => {
+    const reloadTasks = () => {
+      try {
+        const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || 'null');
+        if (Array.isArray(raw)) {
+          setTasks(
+            raw.map((t: any, idx: number) => ({
+              ...t,
+              deliverable: t.deliverable || INITIAL_TASKS[idx]?.deliverable || t.deliverable,
+              status: ({ 'En curso': 'En proceso', Completada: 'Cumple' } as any)[t.status] || t.status,
+            }))
+          );
+        }
+      } catch {}
+    };
+
+    window.addEventListener('qaway-tasks-updated', reloadTasks);
+    window.addEventListener('storage', reloadTasks);
+    return () => {
+      window.removeEventListener('qaway-tasks-updated', reloadTasks);
+      window.removeEventListener('storage', reloadTasks);
+    };
+  }, []);
+
+  // Obtener la lista real y viva de componentes WBS del cronograma maestro
+  const availableMilestones = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('qaway-gantt-items-p1');
+      if (raw) {
+        const items = JSON.parse(raw);
+        if (Array.isArray(items) && items.length > 0) {
+          return items.map((it: any) => ({
+            id: it.id,
+            label: `${it.code ? (it.code.endsWith('.') ? it.code : `${it.code} `) : ''}${it.name}`.trim(),
+            name: it.name,
+            code: it.code || '',
+            kind: it.kind || (!it.parentId ? 'componente' : 'subcomponente'),
+          }));
+        }
+      }
+    } catch {}
+    return [
+      { id: 'c1', label: '1. PLANIFICACIÓN DE LA DISTRIBUCIÓN', name: 'PLANIFICACIÓN DE LA DISTRIBUCIÓN', code: '1.' },
+      { id: 'c2', label: '2. GESTIÓN DE ALMACENES', name: 'GESTIÓN DE ALMACENES', code: '2.' },
+      { id: 'c3', label: '3. RECEPCIÓN DE MATERIAL EDUCATIVO', name: 'RECEPCIÓN DE MATERIAL EDUCATIVO', code: '3.' },
+      { id: 'c4', label: '4. GESTIÓN DE CONTRATOS', name: 'GESTIÓN DE CONTRATOS', code: '4.' },
+      { id: 'c5', label: '5. REGISTRO DE PERSONAL DE APOYO', name: 'REGISTRO DE PERSONAL DE APOYO', code: '5.' },
+      { id: 'c6', label: '6. ACONDICIONAMIENTO DE ALMACENES', name: 'ACONDICIONAMIENTO DE ALMACENES', code: '6.' },
+      { id: 'c7', label: '7. DISTRIBUCIÓN A II.EE.', name: 'DISTRIBUCIÓN A II.EE.', code: '7.' },
+      { id: 'c8', label: '8. CONFORMIDAD Y PECOSAS', name: 'CONFORMIDAD Y PECOSAS', code: '8.' },
+      { id: 'c9', label: '9. SEGUIMIENTO Y MONITOREO', name: 'SEGUIMIENTO Y MONITOREO', code: '9.' },
+      { id: 'c10', label: '10. GESTIÓN DE RIESGOS', name: 'GESTIÓN DE RIESGOS', code: '10.' },
+      { id: 'c11', label: '11. BALANCE Y CIERRE', name: 'BALANCE Y CIERRE', code: '11.' },
+    ];
+  }, []);
+
   // Pestañas y Switcher
   const [selectedPill, setSelectedPill] = useState<string>('Todas');
   const [viewMode, setViewMode] = useState<'Todas' | 'Tablero' | 'Por hito'>('Todas');
@@ -327,6 +384,7 @@ export default function TareasView({ activeProject, onTasksCount, onActions }: T
     setTasks(next);
     try {
       localStorage.setItem('qaway-tasks-v1', JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
     } catch {}
   };
 
@@ -1167,21 +1225,15 @@ export default function TareasView({ activeProject, onTasksCount, onActions }: T
               </label>
 
               <label>
-                Hito relacionado <span>(opcional)</span>
+                Componente / Hito relacionado <span>(opcional)</span>
                 <select
                   value={form.milestone}
                   onChange={(e) => setForm({ ...form, milestone: e.target.value })}
                 >
-                  <option value="">Sin hito asignado</option>
-                  {[
-                    'Aprobación del plan de trabajo',
-                    'Seguimiento de distribución',
-                    'Verificación de disponibilidad',
-                    'Reporte de avance',
-                    'Organización operativa',
-                  ].map((m) => (
-                    <option key={m} value={m}>
-                      {m}
+                  <option value="">Sin hito / componente asignado</option>
+                  {availableMilestones.map((m) => (
+                    <option key={m.id} value={m.name}>
+                      {m.label}
                     </option>
                   ))}
                 </select>
