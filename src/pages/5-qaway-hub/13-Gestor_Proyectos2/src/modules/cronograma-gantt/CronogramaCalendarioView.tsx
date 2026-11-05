@@ -145,15 +145,26 @@ export default function CronogramaCalendarioView({
     return weeks;
   }, [calYear, calMonth]);
 
-  // Filtrado de items reales que aplican a los filtros globales
+  // Filtrado de items reales que aplican a los filtros globales (Excluyendo hitos/componentes agrupadores: solo paquetes de trabajo ejecutables)
+  const parentIds = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach((it) => {
+      if (it.parentId) set.add(it.parentId);
+    });
+    return set;
+  }, [items]);
+
   const matchingItems = useMemo(() => {
     return items.filter((it) => {
+      // Un calendario operativo muestra paquetes de trabajo / entregables, no barras agrupadoras de Componentes/Hitos de 90+ días
+      if (it.kind === 'hito' || parentIds.has(it.id)) return false;
+
       if (typeFilter && typeFilter !== 'Todos') {
-        if (typeFilter === 'Hitos' && it.kind !== 'hito') return false;
+        if (typeFilter === 'Hitos') return false;
         if (typeFilter === 'Subprocesos' && it.kind !== 'subproceso') return false;
       }
       if (tab && tab !== 'Todos') {
-        if (tab === 'Hitos' && it.kind !== 'hito') return false;
+        if (tab === 'Componentes' || tab === 'Hitos') return false;
         if (tab === 'Subprocesos' && it.kind !== 'subproceso') return false;
         if (tab === 'Completados' && it.status !== 'Completado' && it.status !== 'Cumple') return false;
         if (tab === 'En proceso' && it.status !== 'En proceso' && it.status !== 'En curso') return false;
@@ -172,60 +183,144 @@ export default function CronogramaCalendarioView({
       }
       return true;
     });
-  }, [items, typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
+  }, [items, parentIds, typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
 
-  // Eventos proyectados en la rejilla del mes de forma dinámica
+  // Proyección de entregables en el calendario mensual como bloques discretos de calendario (2 a 4 días por hito de corte, sin repetir barras de 138 días en todas las semanas)
   const weekEvents = useMemo(() => {
     const map: Record<number, DynamicCalendarEvent[]> = {};
     monthWeeks.forEach((w) => {
       map[w.weekIndex] = [];
     });
+    if (monthWeeks.length === 0) return map;
 
-    monthWeeks.forEach((w) => {
-      const activeInWeek = matchingItems.filter((it) => it.start <= w.endDateIso && it.end >= w.startDateIso);
-      // Asignación inteligente de carriles (lanes) sin colisiones para que ninguna barra se superponga
-      const laneEndCols: number[] = [];
+    const monthStartIso = monthWeeks[0].startDateIso;
+    const monthEndIso = monthWeeks[monthWeeks.length - 1].endDateIso;
 
-      activeInWeek.slice(0, 6).forEach((it) => {
-        const startIso = it.start < w.startDateIso ? w.startDateIso : it.start;
-        const endIso = it.end > w.endDateIso ? w.endDateIso : it.end;
+    // 1. Priorizar paquetes cuya fecha de entrega (end) o inicio (start) cae dentro de las semanas visibles del mes
+    const inMonthCutoffs = matchingItems.filter(
+      (it) =>
+        (it.end >= monthStartIso && it.end <= monthEndIso) ||
+        (it.start >= monthStartIso && it.start <= monthEndIso)
+    );
 
-        const startIdx = Math.max(0, Math.min(6, Math.round((new Date(startIso + 'T12:00:00').getTime() - new Date(w.startDateIso + 'T12:00:00').getTime()) / (1000 * 60 * 60 * 24))));
-        const endIdx = Math.max(0, Math.min(6, Math.round((new Date(endIso + 'T12:00:00').getTime() - new Date(w.startDateIso + 'T12:00:00').getTime()) / (1000 * 60 * 60 * 24))));
-        const colStart = startIdx + 1;
-        const colSpan = Math.max(1, endIdx - startIdx + 1);
-        const colEnd = colStart + colSpan - 1;
+    // 2. Si hay pocos cortes puntuales en este mes, completar con los paquetes activos en el mes (sin repetir el mismo paquete en múltiples semanas)
+    const activeFallback = matchingItems.filter(
+      (it) =>
+        it.start <= monthEndIso &&
+        it.end >= monthStartIso &&
+        !inMonthCutoffs.some((c) => c.id === it.id)
+    );
 
-        let assignedLane = -1;
-        for (let l = 0; l < laneEndCols.length; l++) {
-          if (laneEndCols[l] < colStart) {
-            assignedLane = l;
-            laneEndCols[l] = colEnd;
-            break;
-          }
+    const candidates = [...inMonthCutoffs, ...activeFallback].slice(0, 9);
+
+    // Plantillas de ventanas limpias estilo Calendario (colStart 1..7, colSpan 2..4, row 1..2) por semana
+    const weekSlots: Record<number, { colStart: number; colSpan: number; row: number }[]> = {
+      0: [
+        { colStart: 4, colSpan: 3, row: 1 },
+        { colStart: 1, colSpan: 3, row: 2 },
+      ],
+      1: [
+        { colStart: 2, colSpan: 2, row: 1 },
+        { colStart: 5, colSpan: 2, row: 1 },
+        { colStart: 1, colSpan: 5, row: 2 },
+      ],
+      2: [
+        { colStart: 3, colSpan: 3, row: 1 },
+        { colStart: 5, colSpan: 3, row: 2 },
+      ],
+      3: [
+        { colStart: 3, colSpan: 3, row: 1 },
+        { colStart: 6, colSpan: 2, row: 2 },
+      ],
+      4: [
+        { colStart: 2, colSpan: 2, row: 1 },
+        { colStart: 5, colSpan: 2, row: 1 },
+        { colStart: 6, colSpan: 2, row: 2 },
+      ],
+      5: [
+        { colStart: 2, colSpan: 3, row: 1 },
+      ],
+    };
+
+    const weekCursor: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    candidates.forEach((it, idx) => {
+      // Determinar en qué semana cae su fecha de corte (end) o inicio (start)
+      let targetWeekIdx = monthWeeks.findIndex(
+        (w) => it.end >= w.startDateIso && it.end <= w.endDateIso
+      );
+      if (targetWeekIdx === -1) {
+        targetWeekIdx = monthWeeks.findIndex(
+          (w) => it.start >= w.startDateIso && it.start <= w.endDateIso
+        );
+      }
+      if (targetWeekIdx === -1) {
+        targetWeekIdx = idx % monthWeeks.length;
+      }
+
+      // Si la semana elegida ya llenó sus slots, buscar la siguiente semana con espacio libre
+      let finalWeekIdx = targetWeekIdx;
+      for (let step = 0; step < monthWeeks.length; step++) {
+        const tryIdx = (targetWeekIdx + step) % monthWeeks.length;
+        const slots = weekSlots[tryIdx] || weekSlots[0];
+        if ((weekCursor[tryIdx] || 0) < slots.length) {
+          finalWeekIdx = tryIdx;
+          break;
         }
-        if (assignedLane === -1) {
-          assignedLane = laneEndCols.length;
-          laneEndCols.push(colEnd);
-        }
+      }
 
-        map[w.weekIndex].push({
-          id: `${it.id}-w${w.weekIndex}`,
-          code: it.code,
-          name: it.name,
-          kind: it.kind,
-          status: it.status,
-          progress: it.progress,
-          start: it.start,
-          end: it.end,
-          weekIndex: w.weekIndex,
-          colStart,
-          colSpan,
-          row: assignedLane + 1,
-          gestor: it.gestor || 'Carlos Mendoza',
-          region: it.region || 'Junín',
-          item: it,
-        });
+      const slots = weekSlots[finalWeekIdx] || weekSlots[0];
+      const slotIdx = weekCursor[finalWeekIdx] || 0;
+      if (slotIdx >= slots.length) return;
+      weekCursor[finalWeekIdx] = slotIdx + 1;
+
+      const slot = slots[slotIdx];
+      let colStart = slot.colStart;
+      let colSpan = slot.colSpan;
+
+      // Si la fecha de fin del paquete cae exactamente en esta semana, anclar la barra a su día real con máximo 3-4 días de ancho
+      const weekObj = monthWeeks[finalWeekIdx];
+      if (weekObj && it.end >= weekObj.startDateIso && it.end <= weekObj.endDateIso) {
+        const endDayIdx = Math.max(
+          0,
+          Math.min(
+            6,
+            Math.round(
+              (new Date(it.end + 'T12:00:00').getTime() -
+                new Date(weekObj.startDateIso + 'T12:00:00').getTime()) /
+                86400000
+            )
+          )
+        );
+        const span = Math.min(3, endDayIdx + 1);
+        const computedStart = Math.max(1, endDayIdx + 2 - span);
+        // Usar posición real si no colisiona en la misma fila
+        const existingInRow = map[finalWeekIdx].filter((e) => e.row === slot.row);
+        const collides = existingInRow.some(
+          (e) => !(computedStart + span - 1 < e.colStart || computedStart > e.colStart + e.colSpan - 1)
+        );
+        if (!collides && span >= 2) {
+          colStart = computedStart;
+          colSpan = span;
+        }
+      }
+
+      map[finalWeekIdx].push({
+        id: `${it.id}-w${finalWeekIdx}`,
+        code: it.code,
+        name: it.name,
+        kind: 'subproceso',
+        status: it.status,
+        progress: it.progress,
+        start: it.start,
+        end: it.end,
+        weekIndex: finalWeekIdx,
+        colStart,
+        colSpan,
+        row: slot.row,
+        gestor: it.gestor || 'Carlos Mendoza',
+        region: it.region || 'Junín',
+        item: it,
       });
     });
 
@@ -322,17 +417,14 @@ export default function CronogramaCalendarioView({
                     </div>
                   ))}
 
-                  {/* Capa de Barras de Gantt Oficiales sobre los días */}
+                  {/* Capa de Barras de Calendario con colores oficiales Gantt y sombra de Línea Base (sin hitos) */}
                   <div className="cal-week-events-overlay">
                     {evs.map((ev) => {
-                      const isMajor = ev.kind === 'hito';
                       const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
                       const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
                       const isLate = ev.status === 'Con retraso';
 
-                      const barColorClass = isMajor
-                        ? 'bar-major'
-                        : isComplete
+                      const barColorClass = isComplete
                         ? 'bar-complete'
                         : isProgress
                         ? 'bar-progress'
@@ -340,43 +432,48 @@ export default function CronogramaCalendarioView({
                         ? 'bar-late'
                         : 'bar-pending';
 
+                      const bStart = ev.item.baselineStart || ev.start;
+                      const bEnd = ev.item.baselineEnd || ev.end;
+
                       return (
                         <div
                           key={ev.id}
-                          className={`cal-gantt-bar ${barColorClass}`}
+                          className="cal-event-slot-wrap"
                           style={{
                             gridColumn: `${ev.colStart} / span ${ev.colSpan}`,
                             gridRow: ev.row,
                           }}
-                          onClick={() => onSelectItem(ev.item)}
-                          title={`${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status})`}
                         >
-                          {/* Barra de avance interior con física y color Gantt */}
                           <div
-                            className="cal-gantt-progress-fill"
-                            style={{
-                              width: `${Math.min(100, Math.max(0, ev.progress))}%`,
-                            }}
-                          />
+                            className={`cal-gantt-bar ${barColorClass}`}
+                            onClick={() => onSelectItem(ev.item)}
+                            title={`${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status}) | Línea Base: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}`}
+                          >
+                            {/* Barra de avance interior con física y color Gantt */}
+                            <div
+                              className="cal-gantt-progress-fill"
+                              style={{
+                                width: `${Math.min(100, Math.max(0, ev.progress))}%`,
+                              }}
+                            />
 
-                          {/* Contenido legible del entregable con alto contraste */}
-                          <div className="cal-gantt-content">
-                            {isMajor ? (
-                              <span className="cal-gantt-hito-badge">◆</span>
-                            ) : isComplete ? (
-                              <Check size={11} strokeWidth={3} className="cal-gantt-check-icon" />
-                            ) : null}
-                            <strong className="cal-gantt-code">{ev.code}</strong>
-                            <span className="cal-gantt-name">{ev.name}</span>
-                            <span className="cal-gantt-pct">{ev.progress}%</span>
+                            {/* Contenido legible del entregable con alto contraste */}
+                            <div className="cal-gantt-content">
+                              {isComplete ? (
+                                <Check size={11} strokeWidth={3} className="cal-gantt-check-icon" />
+                              ) : (
+                                <FileText size={11} className="cal-gantt-check-icon" />
+                              )}
+                              <strong className="cal-gantt-code">{ev.code}</strong>
+                              <span className="cal-gantt-name">{ev.name}</span>
+                              <span className="cal-gantt-pct">{ev.progress}%</span>
+                            </div>
                           </div>
-
-                          {/* Diamante característico al final del Componente Principal */}
-                          {isMajor && (
-                            <span className="cal-gantt-diamond-badge" title="Componente Principal">
-                              <span className="cal-diamond-shape" />
-                            </span>
-                          )}
+                          {/* Sombra de Línea Base idéntica a la vista Gantt */}
+                          <div
+                            className="cal-baseline-shadow-bar"
+                            title={`Línea base aprobada: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}`}
+                          />
                         </div>
                       );
                     })}
@@ -564,23 +661,23 @@ export default function CronogramaCalendarioView({
           </div>
         </div>
 
-        {/* Sección: Leyenda Oficial */}
+        {/* Sección: Leyenda Oficial (Colores Gantt + Línea Base, sin Hitos) */}
         <div className="cal-sidebar-section cal-legend-section">
           <h3 className="cal-sidebar-title">Leyenda</h3>
           <div className="cal-clean-legend-grid">
-            <div className="cal-legend-row" title="Componente Principal oficial con rombo característico de Gantt">
-              <span className="cal-legend-diamond">◆</span>
-              <span>Componente Principal</span>
-            </div>
-            <div className="cal-legend-row" title="Subproceso en curso con avance parcial">
+            <div className="cal-legend-row" title="Paquete de trabajo en ejecución activa">
               <span className="cal-legend-box box-progress" />
               <span>En proceso</span>
             </div>
-            <div className="cal-legend-row" title="Subproceso cumplido al 100%">
+            <div className="cal-legend-row" title="Paquete de trabajo completado al 100%">
               <span className="cal-legend-box box-complete" />
               <span>Completado</span>
             </div>
-            <div className="cal-legend-row" title="Subproceso pendiente de inicio">
+            <div className="cal-legend-row" title="Paquete de trabajo con retraso respecto a línea base">
+              <span className="cal-legend-box box-late" style={{ background: '#ef4444' }} />
+              <span>Con retraso</span>
+            </div>
+            <div className="cal-legend-row" title="Paquete de trabajo pendiente de inicio">
               <span className="cal-legend-box box-pending" />
               <span>Pendiente</span>
             </div>

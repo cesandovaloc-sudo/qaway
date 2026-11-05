@@ -50,6 +50,7 @@ import {
   AlertTriangle,
   ArrowLeftRight,
   ArrowRight,
+  Building2,
   CalendarDays,
   CalendarRange,
   ChartNoAxesColumnIncreasing,
@@ -1097,6 +1098,7 @@ export default function CronogramaGanttView({
   onActions,
   onSwitchPerspective,
   activeProject,
+  perspective = 'maestro',
 }: {
   onActions?: (h: any) => void;
   onSwitchPerspective?: (p: 'maestro' | 'territorial') => void;
@@ -1107,6 +1109,7 @@ export default function CronogramaGanttView({
     region: string;
     subtext?: string;
   };
+  perspective?: 'maestro' | 'territorial';
 }) {
   const projectId = activeProject?.id || 'p1';
   const currentPidRef = useRef(projectId);
@@ -3412,12 +3415,18 @@ export default function CronogramaGanttView({
         <header className="header">
           <div className="heading">
             <span className="heading-icon">
-              <CalendarDays size={26} />
+              {perspective === 'territorial' ? <Building2 size={26} /> : <CalendarDays size={26} />}
             </span>
             <div>
-              <h1>Cronograma Maestro · {activeProject?.name || 'Gestión del Proyecto'}</h1>
+              <h1>
+                {perspective === 'territorial'
+                  ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
+                  : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`}
+              </h1>
               <p>
-                Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.
+                {perspective === 'territorial'
+                  ? 'Seguimiento de entregables territoriales, sedes operativas, UGEL y DRE en tiempo real.'
+                  : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'}
               </p>
             </div>
           </div>
