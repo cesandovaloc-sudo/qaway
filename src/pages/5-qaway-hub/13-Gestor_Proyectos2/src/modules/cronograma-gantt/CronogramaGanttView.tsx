@@ -14,6 +14,7 @@ import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
 import { CronogramaArbolView } from './CronogramaArbolView';
+import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
 import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
@@ -1759,7 +1760,7 @@ export default function CronogramaGanttView({
   const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
-  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol'>('gantt');
+  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama'>('gantt');
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -1788,13 +1789,11 @@ export default function CronogramaGanttView({
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
   const [listaTemporalFilter, setListaTemporalFilter] = useState<'Todos' | 'Hoy' | 'Semana' | 'Mes' | 'Trimestre'>('Todos');
-  // Modo Alertas Críticas (Punto 1 - Botón Único sin desplegables)
-  const [isAlertModeActive, setIsAlertModeActive] = useState<boolean>(false);
-  const [alertPeriod, setAlertPeriod] = useState<'Hoy' | 'Día' | 'Semana' | 'Mes' | 'Trimestre'>('Semana');
+  // Control de Vencimientos y Alertas Críticas mediante Desplegable Formal
+  const [vencimientosFilter, setVencimientosFilter] = useState<'todos' | 'hoy' | 'semana' | 'mes' | 'trimestre' | 'retraso'>('todos');
 
-  // Clasificación de niveles WBS según PM4R / BID (Punto 2)
-  const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'componentes' | 'intermedios' | 'paquetes'>('todos');
-  const [isWbsLevelDropdownOpen, setIsWbsLevelDropdownOpen] = useState(false);
+  // Clasificación y filtro de niveles WBS según PMI / PMBOK (Nivel 1 al 5)
+  const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'nivel-1' | 'nivel-2' | 'nivel-3' | 'nivel-4' | 'nivel-5'>('todos');
   const [zoom, setZoom] = useState('Mes');
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
   const [hoveredTask, setHoveredTask] = useState<{
@@ -1837,7 +1836,7 @@ export default function CronogramaGanttView({
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
   
-  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | null;
+  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
@@ -2695,18 +2694,74 @@ export default function CronogramaGanttView({
   const complete = items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length;
   const overall = items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0;
 
-  // Desglose oficial de niveles WBS según taxonomía PM4R (BID)
-  const intermediosCount = useMemo(() => {
-    return items.filter((x) => Boolean(x.parentId) && items.some((c) => c.parentId === x.id)).length;
+  // Mapa de profundidad y niveles WBS (1 al 5) según PMI / PMBOK
+  const itemDepthMap = useMemo(() => {
+    const dMap = new Map<string, number>();
+    const getDepth = (id: string): number => {
+      if (dMap.has(id)) return dMap.get(id)!;
+      const it = items.find((x) => x.id === id);
+      if (!it || !it.parentId) {
+        dMap.set(id, 0);
+        return 0;
+      }
+      const d = 1 + getDepth(it.parentId);
+      dMap.set(id, d);
+      return d;
+    };
+    items.forEach((it) => getDepth(it.id));
+    return dMap;
   }, [items]);
 
-  const paquetesCount = useMemo(() => {
-    return items.filter((x) => !items.some((c) => c.parentId === x.id)).length;
-  }, [items]);
+  const levelCounts = useMemo(() => {
+    const counts = [0, 0, 0, 0, 0];
+    items.forEach((it) => {
+      const d = itemDepthMap.get(it.id) ?? 0;
+      if (d < 5) counts[d]++;
+    });
+    return counts;
+  }, [items, itemDepthMap]);
 
-  // Conteo de elementos con alerta crítica (con retraso o pendientes de vencimiento)
+  const intermediosCount = levelCounts[1] || 6;
+  const paquetesCount = (levelCounts[2] || 46) + (levelCounts[3] || 0) + (levelCounts[4] || 0);
+
+  // Conteo de elementos por período de vencimiento
   const criticalItemsCount = useMemo(() => {
     return items.filter(isItemLate).length;
+  }, [items, currentTodayIso]);
+
+  const vencenHoyCount = useMemo(() => {
+    return items.filter((x) => x.end === currentTodayIso && x.status !== 'Completado' && x.status !== 'Cumple').length;
+  }, [items, currentTodayIso]);
+
+  const vencenSemanaCount = useMemo(() => {
+    const curr = new Date(currentTodayIso + 'T12:00:00');
+    const dayOfWeek = (curr.getDay() + 6) % 7;
+    const monday = new Date(curr);
+    monday.setDate(curr.getDate() - dayOfWeek);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    const monIso = monday.toISOString().slice(0, 10);
+    const sunIso = sunday.toISOString().slice(0, 10);
+    return items.filter((x) => x.end >= monIso && x.end <= sunIso && x.status !== 'Completado' && x.status !== 'Cumple').length;
+  }, [items, currentTodayIso]);
+
+  const vencenMesCount = useMemo(() => {
+    const curr = new Date(currentTodayIso + 'T12:00:00');
+    const y = curr.getFullYear();
+    const m = curr.getMonth();
+    const firstDay = new Date(y, m, 1).toISOString().slice(0, 10);
+    const lastDay = new Date(y, m + 1, 0).toISOString().slice(0, 10);
+    return items.filter((x) => x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple').length;
+  }, [items, currentTodayIso]);
+
+  const vencenTrimestreCount = useMemo(() => {
+    const curr = new Date(currentTodayIso + 'T12:00:00');
+    const y = curr.getFullYear();
+    const m = curr.getMonth();
+    const qStartMonth = Math.floor(m / 3) * 3;
+    const firstDay = new Date(y, qStartMonth, 1).toISOString().slice(0, 10);
+    const lastDay = new Date(y, qStartMonth + 3, 0).toISOString().slice(0, 10);
+    return items.filter((x) => x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple').length;
   }, [items, currentTodayIso]);
 
   /* Rango predeterminado del botón Limpiar */
@@ -3108,6 +3163,11 @@ export default function CronogramaGanttView({
       }
     }
     if (kind === 'subproceso' && pId) {
+      const parentDepth = itemDepthMap.get(pId) ?? 0;
+      if (parentDepth >= 4) {
+        notify('Límite metodológico alcanzado (5 niveles según PMI/PMBOK). La creación de niveles adicionales requiere aprobación formal del Coordinador General.');
+        return;
+      }
       const existingSiblings = items.filter((x) => x.parentId === pId);
       if (existingSiblings.length === 0) {
         notify('Aviso metodológico EDT (PMI): Según la regla del 100%, todo contenedor desglosado debe constar de al menos dos elementos para representar la totalidad del alcance.');
@@ -3567,10 +3627,19 @@ export default function CronogramaGanttView({
                 type="button"
                 className={`view-mode-btn ${viewMode === 'arbol' ? 'active' : ''}`}
                 onClick={() => handleViewModeChange('arbol')}
-                title="Vista Estructura Desglosada de Trabajo (EDT / WBS - Organigrama)"
+                title="Vista Jerárquica WBS (Árbol de trabajo)"
+              >
+                <GitFork size={14} />
+                <span>Jerárquica</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
+                onClick={() => handleViewModeChange('organigrama')}
+                title="Vista Organigrama WBS / EDT por Niveles (Diagrama de bloques)"
               >
                 <Network size={14} />
-                <span>EDT (Organigrama)</span>
+                <span>Organigrama</span>
               </button>
             </div>
           </nav>
@@ -3591,31 +3660,43 @@ export default function CronogramaGanttView({
               )}
             </label>
 
-            {/* Filtro Ubicación Multirregión con Árbol de Sedes */}
+            {/* Filtro Desplegable de Niveles WBS (PMI / PMBOK - Nivel 1 al 5) */}
             <div className="filter-dropdown-wrap">
               <button
                 type="button"
-                className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
-                  selectedRegions.length > 0 ? 'filtered' : ''
+                className={`filter-card-btn ${activeMenu === 'wbsLevel' ? 'active' : ''} ${
+                  wbsLevelFilter !== 'todos' ? 'filtered' : ''
                 }`}
-                onClick={() => toggleMenu('region')}
-                title="Filtrar por una o varias regiones y sedes"
+                onClick={() => toggleMenu('wbsLevel')}
+                title="Filtrar por nivel metodológico EDT / WBS (Nivel 1 al 5)"
               >
                 <div className="filter-card-copy">
-                  <small>Ubicación</small>
-                  <span>{regionButtonText}</span>
+                  <small>Nivel WBS</small>
+                  <span>
+                    {wbsLevelFilter === 'todos'
+                      ? `Todos los niveles (${items.length})`
+                      : wbsLevelFilter === 'nivel-1'
+                      ? `Nivel 1 · Componentes (${hitos.length})`
+                      : wbsLevelFilter === 'nivel-2'
+                      ? `Nivel 2 · Subcomponentes (${levelCounts[1] || intermediosCount})`
+                      : wbsLevelFilter === 'nivel-3'
+                      ? `Nivel 3 · Paquetes (${levelCounts[2] || paquetesCount})`
+                      : wbsLevelFilter === 'nivel-4'
+                      ? `Nivel 4 · Actividades (${levelCounts[3] || 0})`
+                      : `Nivel 5 · Entregables (${levelCounts[4] || 0})`}
+                  </span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
-              {activeMenu === 'region' && (
+              {activeMenu === 'wbsLevel' && (
                 <div
                   className="filter-card-popover"
                   onClick={(e) => e.stopPropagation()}
-                  style={{ minWidth: 260, maxWidth: 320 }}
+                  style={{ minWidth: 260 }}
                 >
                   <div className="filter-popover-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Filtrar por Ubicación</span>
-                    {selectedRegions.length > 0 && (
+                    <span>Nivel Metodológico WBS</span>
+                    {wbsLevelFilter !== 'todos' && (
                       <button
                         type="button"
                         style={{
@@ -3627,112 +3708,34 @@ export default function CronogramaGanttView({
                           cursor: 'pointer',
                           padding: 0,
                         }}
-                        onClick={() => setSelectedRegions([])}
+                        onClick={() => setWbsLevelFilter('todos')}
                       >
-                        Limpiar ({selectedRegions.length})
+                        Restablecer
                       </button>
                     )}
                   </div>
-                  <div className="filter-popover-list" style={{ maxHeight: 290 }}>
-                    {/* Opción Todas las Ubicaciones */}
-                    <button
-                      type="button"
-                      className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
-                      onClick={() => setSelectedRegions([])}
-                    >
-                      <span style={{ fontWeight: selectedRegions.length === 0 ? 700 : 500 }}>
-                        Todas las Ubicaciones
-                      </span>
-                      <span style={{ fontSize: '11px', color: '#94a3b8' }}>({items.length})</span>
-                    </button>
-
-                    <div style={{ height: 1, background: '#f1f5f9', margin: '4px 0' }} />
-
-                    {/* Regiones con selección múltiple y árbol de distritos/sedes */}
-                    {LOCATION_HIERARCHY.map((reg) => {
-                      const isChecked = selectedRegions.includes(reg.name);
-                      const isExpanded = expandedRegion === reg.name;
-                      return (
-                        <div key={reg.name} className="location-tree-group">
-                          <div
-                            className={`filter-item-btn ${isChecked ? 'selected' : ''}`}
-                            style={{ gap: 8, padding: '6px 8px', display: 'flex', alignItems: 'center' }}
-                            onClick={() => toggleRegion(reg.name)}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => {}}
-                              style={{ cursor: 'pointer', accentColor: '#0066ff', width: 14, height: 14, margin: 0 }}
-                            />
-                            <span style={{ flex: 1, fontWeight: isChecked ? 600 : 500 }}>
-                              {reg.name}
-                            </span>
-                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>({reg.count})</span>
-                            {reg.distritos && reg.distritos.length > 0 && (
-                              <button
-                                type="button"
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: '2px 4px',
-                                  cursor: 'pointer',
-                                  color: '#64748b',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setExpandedRegion(isExpanded ? null : reg.name);
-                                }}
-                                title={isExpanded ? 'Contraer distritos y sedes' : 'Ver distritos y sedes'}
-                              >
-                                {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-                              </button>
-                            )}
-                          </div>
-
-                          {/* Sub-lista en cascada de distritos y sedes del proyecto */}
-                          {isExpanded && reg.distritos && (
-                            <div
-                              className="location-sub-tree"
-                              style={{
-                                paddingLeft: 26,
-                                paddingRight: 8,
-                                paddingTop: 3,
-                                paddingBottom: 5,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 3,
-                                background: '#f8fafc',
-                                borderRadius: 6,
-                                margin: '2px 0 4px',
-                              }}
-                            >
-                              {reg.distritos.map((dist) => (
-                                <div
-                                  key={dist.distrito}
-                                  style={{
-                                    fontSize: '11.5px',
-                                    color: '#475569',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    padding: '2px 4px',
-                                  }}
-                                >
-                                  <span>
-                                    <strong style={{ fontWeight: 600 }}>{dist.distrito}</strong> ·{' '}
-                                    <span style={{ color: '#64748b' }}>{dist.sede}</span>
-                                  </span>
-                                  <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>({dist.count})</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                  <div className="filter-popover-list">
+                    {[
+                      { id: 'todos', label: 'Todos los niveles', count: items.length },
+                      { id: 'nivel-1', label: 'Nivel 1 · Componentes', count: hitos.length },
+                      { id: 'nivel-2', label: 'Nivel 2 · Subcomponentes / Productos', count: levelCounts[1] || intermediosCount },
+                      { id: 'nivel-3', label: 'Nivel 3 · Paquetes de Trabajo', count: levelCounts[2] || paquetesCount },
+                      { id: 'nivel-4', label: 'Nivel 4 · Actividades operativas', count: levelCounts[3] || 0 },
+                      { id: 'nivel-5', label: 'Nivel 5 · Micro-entregables', count: levelCounts[4] || 0 },
+                    ].map((lvl) => (
+                      <button
+                        key={lvl.id}
+                        type="button"
+                        className={`filter-item-btn ${wbsLevelFilter === lvl.id ? 'selected' : ''}`}
+                        onClick={() => {
+                          setWbsLevelFilter(lvl.id as any);
+                          closeMenus();
+                        }}
+                      >
+                        <span>{lvl.label}</span>
+                        <span className="wbs-level-badge">{lvl.count}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -3772,177 +3775,7 @@ export default function CronogramaGanttView({
               </button>
             )}
 
-            {/* Separador vertical: Bloque 1 (Búsqueda/Ubicación) | Bloque 2 (Filtros de datos) */}
-            {viewMode !== 'calendario' && <div className="filter-group-divider" aria-hidden="true" />}
 
-            {/* Bloque 2: Rango de Fechas Operativo con Popover Redondeado Moderno */}
-            {viewMode !== 'calendario' && (
-            <div className="filter-dropdown-wrap date-range-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn date-range-btn ${activeMenu === 'dates' ? 'active' : ''} ${
-                  rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('dates')}
-              >
-                <CalendarDays size={15} className="dr-icon" />
-                <div className="filter-card-copy">
-                  <small>Rango de Fechas</small>
-                  <span>{formatDateRange(rangeFrom, rangeTo)}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-
-              {activeMenu === 'dates' && (
-                <div className="date-range-popover" onClick={(e) => e.stopPropagation()}>
-                  <div className="dr-pop-header">
-                    <div className="dr-pop-title">
-                      <CalendarDays size={16} />
-                      <strong>Rango de Fechas Oficial</strong>
-                    </div>
-                    <button
-                      type="button"
-                      className="dr-close"
-                      onClick={closeMenus}
-                      title="Cerrar selector"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-
-                  <div className="dr-section-label">Accesos Rápidos</div>
-                  <div className="dr-presets">
-                    <button
-                      type="button"
-                      className={rangeFrom === RANGE_MIN && rangeTo === RANGE_MAX ? 'active' : ''}
-                      onClick={() => {
-                        setRangeFrom(RANGE_MIN);
-                        setRangeTo(RANGE_MAX);
-                        scrollToDate(RANGE_MIN);
-                        notify('Visualizando todo el cronograma oficial');
-                      }}
-                    >
-                      Todo el proyecto
-                    </button>
-                    <button
-                      type="button"
-                      className={rangeFrom === '2026-10-01' && rangeTo === '2026-12-31' ? 'active' : ''}
-                      onClick={() => {
-                        setRangeFrom('2026-10-01');
-                        setRangeTo('2026-12-31');
-                        scrollToDate('2026-10-01');
-                        notify('Enfocando Q4 2026 (Octubre – Diciembre)');
-                      }}
-                    >
-                      Q4 2026 (Oct-Dic)
-                    </button>
-                    <button
-                      type="button"
-                      className={rangeFrom === '2027-01-01' && rangeTo === '2027-03-31' ? 'active' : ''}
-                      onClick={() => {
-                        setRangeFrom('2027-01-01');
-                        setRangeTo('2027-03-31');
-                        scrollToDate('2027-01-01');
-                        notify('Enfocando Q1 2027 (Enero – Marzo)');
-                      }}
-                    >
-                      Q1 2027 (Ene-Mar)
-                    </button>
-                    <button
-                      type="button"
-                      className={rangeFrom === TODAY_ISO ? 'active' : ''}
-                      onClick={() => {
-                        const next30 = shiftDays(TODAY_ISO, 30);
-                        setRangeFrom(TODAY_ISO);
-                        setRangeTo(next30);
-                        scrollToDate(TODAY_ISO);
-                        notify('Enfocando próximos 30 días de actividad territorial');
-                      }}
-                    >
-                      Próximos 30 días
-                    </button>
-                  </div>
-
-                  <div className="dr-inputs">
-                    <div className="dr-input-box">
-                      <span>Desde</span>
-                      <button
-                        type="button"
-                        className={`dr-date-field ${calOpen === 'from' ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCalOpen((c) => (c === 'from' ? null : 'from'));
-                        }}
-                      >
-                        <span>{formatDatePE(rangeFrom)}</span>
-                        <CalendarDays size={14} className="dr-field-icon" />
-                      </button>
-                      {calOpen === 'from' && (
-                        <MiniCalendar
-                          value={rangeFrom}
-                          min={RANGE_MIN}
-                          max={RANGE_MAX}
-                          onChange={handleSelectFrom}
-                          onClose={() => setCalOpen(null)}
-                          align="left"
-                        />
-                      )}
-                    </div>
-                    <div className="dr-input-box">
-                      <span>Hasta</span>
-                      <button
-                        type="button"
-                        className={`dr-date-field ${calOpen === 'to' ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCalOpen((c) => (c === 'to' ? null : 'to'));
-                        }}
-                      >
-                        <span>{formatDatePE(rangeTo)}</span>
-                        <CalendarDays size={14} className="dr-field-icon" />
-                      </button>
-                      {calOpen === 'to' && (
-                        <MiniCalendar
-                          value={rangeTo}
-                          min={RANGE_MIN}
-                          max={RANGE_MAX}
-                          onChange={handleSelectTo}
-                          onClose={() => setCalOpen(null)}
-                          align="right"
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="dr-footer">
-                    <button
-                      type="button"
-                      className="dr-reset"
-                      onClick={() => {
-                        setRangeFrom(RANGE_MIN);
-                        setRangeTo(RANGE_MAX);
-                        scrollToDate(RANGE_MIN);
-                        notify('Rango restablecido a todo el proyecto');
-                      }}
-                    >
-                      Restablecer
-                    </button>
-                    <button
-                      type="button"
-                      className="dr-apply"
-                      onClick={() => {
-                        closeMenus();
-                        scrollToDate(rangeFrom);
-                        notify(`Rango oficial aplicado: ${formatDate(rangeFrom)} – ${formatDate(rangeTo)}`);
-                      }}
-                    >
-                      Aplicar Rango
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            )}
 
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
             {viewMode !== 'calendario' && (
@@ -4014,62 +3847,102 @@ export default function CronogramaGanttView({
               <>
                 <button
                   type="button"
-                  className={`today-pill ${listaTemporalFilter === 'Hoy' || (isAlertModeActive && alertPeriod === 'Hoy') ? 'active' : ''}`}
+                  className={`today-pill ${listaTemporalFilter === 'Hoy' ? 'active' : ''}`}
                   onClick={() => {
-                    if (isAlertModeActive) {
-                      setAlertPeriod('Hoy');
-                    } else {
-                      const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
-                      setListaTemporalFilter(next);
-                      notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
-                    }
+                    const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
+                    setListaTemporalFilter(next);
+                    notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
                   }}
                   title={listaTemporalFilter === 'Hoy' ? 'Quitar filtro de Hoy' : `Actividades en curso hoy (${formatDatePE(currentTodayIso)})`}
-                  style={isAlertModeActive && alertPeriod === 'Hoy' ? { background: '#e11d48', color: '#fff', borderColor: '#e11d48' } : undefined}
                 >
                   Hoy
                 </button>
 
-                {/* Botón Único de Alertas Críticas (Punto 1: sin menú desplegable) */}
-                <button
-                  type="button"
-                  className={`alert-criticos-pill ${isAlertModeActive ? 'active' : ''}`}
-                  onClick={() => {
-                    const next = !isAlertModeActive;
-                    setIsAlertModeActive(next);
-                    if (next) setAlertPeriod('Semana');
-                    notify(next ? 'Modo Alertas Críticas activado' : 'Modo estándar restaurado');
-                  }}
-                  title={isAlertModeActive ? 'Desactivar modo alertas de fechas críticas' : 'Activar modo alertas: convierte los botones en activadores de vencimiento'}
-                >
-                  <Zap size={13} />
-                  <span>Críticos</span>
-                  {criticalItemsCount > 0 && <span className="alert-badge">{criticalItemsCount}</span>}
-                </button>
+                {/* Desplegable Formal de Vencimientos y Alertas */}
+                <div className="filter-dropdown-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
+                      vencimientosFilter !== 'todos' ? 'filtered' : ''
+                    }`}
+                    onClick={() => toggleMenu('vencimientos')}
+                    style={{ height: 32, padding: '0 8px' }}
+                    title="Control de plazos de vencimiento y retraso"
+                  >
+                    <div className="filter-card-copy">
+                      <small style={{ fontSize: '10px' }}>Vencimientos</small>
+                      <span style={{ fontSize: '11.5px', fontWeight: 650 }}>
+                        {vencimientosFilter === 'todos'
+                          ? 'Todos los plazos'
+                          : vencimientosFilter === 'hoy'
+                          ? 'Vencen hoy'
+                          : vencimientosFilter === 'semana'
+                          ? 'Esta semana'
+                          : vencimientosFilter === 'mes'
+                          ? 'Este mes'
+                          : vencimientosFilter === 'trimestre'
+                          ? 'Este trimestre'
+                          : 'Con retraso'}
+                      </span>
+                    </div>
+                    {criticalItemsCount > 0 && (
+                      <span className="alert-badge" style={{ marginLeft: 4, background: '#fee2e2', color: '#b91c1c' }}>
+                        {criticalItemsCount}
+                      </span>
+                    )}
+                    <ChevronDown size={13} className="filter-chevron" />
+                  </button>
+                  {activeMenu === 'vencimientos' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
+                      <div className="filter-popover-title">
+                        <span>Control de Vencimientos</span>
+                      </div>
+                      <div className="filter-popover-list">
+                        {[
+                          { id: 'todos', label: 'Todos los plazos', badge: items.length },
+                          { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount },
+                          { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount },
+                          { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount },
+                          { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount },
+                          { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, isLate: true },
+                        ].map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn ${vencimientosFilter === opt.id ? 'selected' : ''}`}
+                            onClick={() => {
+                              setVencimientosFilter(opt.id as any);
+                              closeMenus();
+                            }}
+                          >
+                            <span>{opt.label}</span>
+                            <span
+                              className="wbs-level-badge"
+                              style={opt.isLate && opt.badge > 0 ? { background: '#fee2e2', color: '#b91c1c' } : undefined}
+                            >
+                              {opt.badge}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="zoom" title="Filtrar actividades por período de corte">
-                  {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
-                    const isActive = isAlertModeActive ? alertPeriod === x : listaTemporalFilter === x;
-                    return (
-                      <button
-                        type="button"
-                        key={x}
-                        className={isActive ? 'active' : ''}
-                        style={isAlertModeActive && isActive ? { background: '#e11d48', color: '#fff', borderColor: '#e11d48' } : undefined}
-                        onClick={() => {
-                          if (isAlertModeActive) {
-                            if (x === 'Todos') setIsAlertModeActive(false);
-                            else setAlertPeriod(x);
-                          } else {
-                            setListaTemporalFilter(x);
-                            notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
-                          }
-                        }}
-                      >
-                        {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
-                      </button>
-                    );
-                  })}
+                  {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => (
+                    <button
+                      type="button"
+                      key={x}
+                      className={listaTemporalFilter === x ? 'active' : ''}
+                      onClick={() => {
+                        setListaTemporalFilter(x);
+                        notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
+                      }}
+                    >
+                      {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
+                    </button>
+                  ))}
                 </div>
               </>
             ) : (
@@ -4078,89 +3951,113 @@ export default function CronogramaGanttView({
                 <button
                   type="button"
                   className="today-pill"
-                  onClick={() => {
-                    if (isAlertModeActive) {
-                      setAlertPeriod('Hoy');
-                    } else {
-                      scrollToToday();
-                    }
-                  }}
-                  title={isAlertModeActive ? 'Filtrar entregables que vencen Hoy' : 'Ir y centrar en la fecha actual de hoy'}
-                  style={isAlertModeActive && alertPeriod === 'Hoy' ? { background: '#e11d48', color: '#fff', borderColor: '#e11d48' } : undefined}
+                  onClick={scrollToToday}
+                  title="Ir y centrar en la fecha actual de hoy"
                 >
                   Hoy
                 </button>
 
-                {/* Botón Único de Alertas Críticas (Punto 1: sin menú desplegable) */}
-                <button
-                  type="button"
-                  className={`alert-criticos-pill ${isAlertModeActive ? 'active' : ''}`}
-                  onClick={() => {
-                    const next = !isAlertModeActive;
-                    setIsAlertModeActive(next);
-                    if (next) setAlertPeriod('Semana');
-                    notify(next ? 'Modo Alertas Críticas activado: usa los botones Día, Semana, Mes o Trimestre para filtrar' : 'Modo estándar de escala restaurado');
-                  }}
-                  title={isAlertModeActive ? 'Desactivar modo de alertas críticas' : 'Activar modo de alertas: convierte Día, Semana, Mes y Trimestre en activadores de vencimiento'}
-                >
-                  <Zap size={13} />
-                  <span>Críticos</span>
-                  {criticalItemsCount > 0 && <span className="alert-badge">{criticalItemsCount}</span>}
-                </button>
+                {/* Desplegable Formal de Vencimientos y Alertas */}
+                <div className="filter-dropdown-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
+                      vencimientosFilter !== 'todos' ? 'filtered' : ''
+                    }`}
+                    onClick={() => toggleMenu('vencimientos')}
+                    style={{ height: 32, padding: '0 8px' }}
+                    title="Control de plazos de vencimiento y retraso"
+                  >
+                    <div className="filter-card-copy">
+                      <small style={{ fontSize: '10px' }}>Vencimientos</small>
+                      <span style={{ fontSize: '11.5px', fontWeight: 650 }}>
+                        {vencimientosFilter === 'todos'
+                          ? 'Todos los plazos'
+                          : vencimientosFilter === 'hoy'
+                          ? 'Vencen hoy'
+                          : vencimientosFilter === 'semana'
+                          ? 'Esta semana'
+                          : vencimientosFilter === 'mes'
+                          ? 'Este mes'
+                          : vencimientosFilter === 'trimestre'
+                          ? 'Este trimestre'
+                          : 'Con retraso'}
+                      </span>
+                    </div>
+                    {criticalItemsCount > 0 && (
+                      <span className="alert-badge" style={{ marginLeft: 4, background: '#fee2e2', color: '#b91c1c' }}>
+                        {criticalItemsCount}
+                      </span>
+                    )}
+                    <ChevronDown size={13} className="filter-chevron" />
+                  </button>
+                  {activeMenu === 'vencimientos' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
+                      <div className="filter-popover-title">
+                        <span>Control de Vencimientos</span>
+                      </div>
+                      <div className="filter-popover-list">
+                        {[
+                          { id: 'todos', label: 'Todos los plazos', badge: items.length },
+                          { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount },
+                          { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount },
+                          { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount },
+                          { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount },
+                          { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, isLate: true },
+                        ].map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn ${vencimientosFilter === opt.id ? 'selected' : ''}`}
+                            onClick={() => {
+                              setVencimientosFilter(opt.id as any);
+                              closeMenus();
+                            }}
+                          >
+                            <span>{opt.label}</span>
+                            <span
+                              className="wbs-level-badge"
+                              style={opt.isLate && opt.badge > 0 ? { background: '#fee2e2', color: '#b91c1c' } : undefined}
+                            >
+                              {opt.badge}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="zoom">
-                  {!isAlertModeActive && (
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => scrollTimeline('left')}
+                    title="Desplazar línea de tiempo a la izquierda"
+                    aria-label="Desplazar hacia el pasado"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
+                  {(['Día', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => (
                     <button
                       type="button"
-                      className="zoom-nav-arrow"
-                      onClick={() => scrollTimeline('left')}
-                      title="Desplazar línea de tiempo a la izquierda"
-                      aria-label="Desplazar hacia el pasado"
+                      key={x}
+                      className={zoom === x ? 'active' : ''}
+                      onClick={() => handleZoomChange(x)}
+                      title={`Escala ${x}`}
                     >
-                      <ChevronLeft size={15} />
+                      {x}
                     </button>
-                  )}
-                  {(['Día', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
-                    const isSelected = isAlertModeActive ? alertPeriod === x : zoom === x;
-                    return (
-                      <button
-                        type="button"
-                        key={x}
-                        className={isSelected ? 'active' : ''}
-                        style={
-                          isAlertModeActive && isSelected
-                            ? { background: '#e11d48', color: '#ffffff', borderColor: '#e11d48', fontWeight: 700 }
-                            : undefined
-                        }
-                        onClick={() => {
-                          if (isAlertModeActive) {
-                            setAlertPeriod(x);
-                            notify(`Filtrando alertas críticas con vencimiento en: ${x}`);
-                          } else {
-                            handleZoomChange(x);
-                          }
-                        }}
-                        title={
-                          isAlertModeActive
-                            ? `Filtrar entregables críticos en: ${x}`
-                            : `Escala ${x}`
-                        }
-                      >
-                        {x}
-                      </button>
-                    );
-                  })}
-                  {!isAlertModeActive && (
-                    <button
-                      type="button"
-                      className="zoom-nav-arrow"
-                      onClick={() => scrollTimeline('right')}
-                      title="Desplazar línea de tiempo a la derecha"
-                      aria-label="Desplazar hacia el futuro"
-                    >
-                      <ChevronRight size={15} />
-                    </button>
-                  )}
+                  ))}
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => scrollTimeline('right')}
+                    title="Desplazar línea de tiempo a la derecha"
+                    aria-label="Desplazar hacia el futuro"
+                  >
+                    <ChevronRight size={15} />
+                  </button>
                 </div>
               </>
             )}
@@ -4287,15 +4184,25 @@ export default function CronogramaGanttView({
                 <div className="filter-dropdown-wrap cols-dropdown-wrap">
                   <button
                     type="button"
-                    className={`btn secondary qm-btn-icon ${colsMenuOpen ? "active" : ""}`}
+                    className={`btn secondary ${colsMenuOpen ? "active" : ""}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       setColsMenuOpen((v) => !v);
                     }}
-                    data-tooltip={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
+                    style={{
+                      height: 32,
+                      padding: '0 10px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    }}
+                    title={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
                     aria-label="Configurar columnas visibles de la tabla"
                   >
                     <Columns3 size={14} />
+                    <span>Columnas</span>
                   </button>
 
                   {colsMenuOpen && (
@@ -4423,6 +4330,43 @@ export default function CronogramaGanttView({
           {/* Fila extra expandible de Filtros Personalizados */}
           {advancedFiltersOpen && (
             <div className="advanced-filter-row">
+              {/* Sección Rango de Fechas Operativo */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: '12px' }}>
+                <span style={{ fontWeight: 650, color: '#334155', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <CalendarDays size={14} color="#0066ff" />
+                  Rango de Fechas del Proyecto:
+                </span>
+                <span style={{ color: '#64748b' }}>Desde</span>
+                <input
+                  type="date"
+                  value={rangeFrom}
+                  min={RANGE_MIN}
+                  max={rangeTo}
+                  onChange={(e) => setRangeFrom(e.target.value)}
+                  style={{ padding: '3px 8px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: '12px', background: '#fff' }}
+                />
+                <span style={{ color: '#64748b' }}>Hasta</span>
+                <input
+                  type="date"
+                  value={rangeTo}
+                  min={rangeFrom}
+                  max={RANGE_MAX}
+                  onChange={(e) => setRangeTo(e.target.value)}
+                  style={{ padding: '3px 8px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: '12px', background: '#fff' }}
+                />
+                {(rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRangeFrom(RANGE_MIN);
+                      setRangeTo(RANGE_MAX);
+                    }}
+                    style={{ background: 'none', border: 'none', color: '#0066ff', cursor: 'pointer', fontWeight: 600, fontSize: '11.5px' }}
+                  >
+                    Restablecer a todo el proyecto
+                  </button>
+                )}
+              </div>
               <div className="advanced-filter-header">
                 <div className="advanced-filter-title">
                   <Filter size={14} className="af-title-icon" />
@@ -6517,6 +6461,18 @@ export default function CronogramaGanttView({
           {/* Presentación 5: Estructura Jerárquica WBS / Árbol (Imagen de referencia 1) */}
           {viewMode === 'arbol' && (
             <CronogramaArbolView
+              items={shown}
+              allItems={items}
+              selectedId={selectedId}
+              onSelectItem={openEditorForItem}
+              onAddItem={(kind, pId) => add(kind, pId, true)}
+              formatDatePE={formatDatePE}
+            />
+          )}
+
+          {/* Presentación 6: Vista Organigrama WBS por Niveles (Imagen 2) */}
+          {viewMode === 'organigrama' && (
+            <CronogramaOrganigramaView
               items={shown}
               allItems={items}
               selectedId={selectedId}
