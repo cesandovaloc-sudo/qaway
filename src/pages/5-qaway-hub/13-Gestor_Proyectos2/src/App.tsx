@@ -170,12 +170,33 @@ function App() {
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
   const canvasRef = useRef<HTMLElement | null>(null);
 
-  // Coordinación universal de scroll en .qm-canvas para todos los módulos y vistas:
-  // Al girar la rueda hacia abajo, primero oculta las tarjetas superiores hasta fijar la cápsula (.workspace).
-  // Al girar la rueda hacia arriba estando en el tope del contenedor interno, vuelve a mostrar las tarjetas.
+  // Coordinación universal de scroll en .qm-canvas con interpolación suave (ease-out 60fps):
+  // Al girar la rueda hacia abajo, desliza progresivamente .qm-canvas para ocultar las tarjetas superiores hasta fijar la cápsula (.workspace).
+  // Al girar la rueda hacia arriba estando en el tope del contenedor interno, vuelve a deslizar suavemente las tarjetas.
   useEffect(() => {
     const scrollCanvas = canvasRef.current;
     if (!scrollCanvas) return;
+
+    let targetScroll = scrollCanvas.scrollTop;
+    let rafId: number | null = null;
+
+    const stepSmoothScroll = () => {
+      const current = scrollCanvas.scrollTop;
+      const diff = targetScroll - current;
+      if (Math.abs(diff) < 0.8) {
+        scrollCanvas.scrollTop = targetScroll;
+        rafId = null;
+        return;
+      }
+      scrollCanvas.scrollTop = current + diff * 0.38;
+      rafId = requestAnimationFrame(stepSmoothScroll);
+    };
+
+    const startSmoothScroll = () => {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(stepSmoothScroll);
+      }
+    };
 
     const findScrollableUp = (el: HTMLElement | null, boundary: HTMLElement): HTMLElement | null => {
       let cur = el;
@@ -201,22 +222,36 @@ function App() {
       const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
       if (!ws) return;
 
+      if (rafId === null) {
+        targetScroll = scrollCanvas.scrollTop;
+      }
+
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = scrollCanvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
       const maxCanvasScroll = scrollCanvas.scrollHeight - scrollCanvas.clientHeight;
+      const maxTarget = Math.min(maxCanvasScroll, scrollCanvas.scrollTop + Math.max(0, delta));
+      const remainingDown = maxTarget - targetScroll;
 
-      if (e.deltaY > 0 && delta > 2 && scrollCanvas.scrollTop < maxCanvasScroll - 1) {
+      if (e.deltaY > 0 && remainingDown > 1) {
         e.preventDefault();
-        scrollCanvas.scrollTop += Math.min(e.deltaY, delta);
+        const consume = Math.min(e.deltaY, remainingDown);
+        const leftover = e.deltaY - consume;
+        targetScroll += consume;
+        startSmoothScroll();
+        if (leftover > 0) {
+          const innerScroll = findScrollableUp(targetEl, ws);
+          if (innerScroll) innerScroll.scrollTop += leftover;
+        }
         return;
       }
 
-      if (e.deltaY < 0 && scrollCanvas.scrollTop > 0) {
+      if (e.deltaY < 0 && targetScroll > 0.5) {
         const innerScroll = findScrollableUp(targetEl, ws);
         if (!innerScroll || innerScroll.scrollTop <= 0) {
           e.preventDefault();
-          scrollCanvas.scrollTop = Math.max(0, scrollCanvas.scrollTop + e.deltaY);
+          targetScroll = Math.max(0, targetScroll + e.deltaY);
+          startSmoothScroll();
         }
       }
     };
@@ -224,6 +259,7 @@ function App() {
     scrollCanvas.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
       scrollCanvas.removeEventListener('wheel', handleWheel);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
 
