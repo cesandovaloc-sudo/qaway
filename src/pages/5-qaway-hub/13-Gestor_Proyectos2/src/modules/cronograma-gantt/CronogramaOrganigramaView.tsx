@@ -25,6 +25,9 @@ interface CronogramaOrganigramaViewProps {
   formatDatePE: (iso: string) => string;
   onMoveNode?: (draggedId: string, targetId: string, mode: 'reparent' | 'reorder') => void;
   onAutoSort?: () => void;
+  zoomLevel?: number;
+  onZoomChange?: (z: number | ((prev: number) => number)) => void;
+  fitViewTrigger?: number;
 }
 
 type NodeCategory = 'COMPONENTE' | 'AGRUPADOR' | 'PAQUETE';
@@ -44,8 +47,24 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
   formatDatePE,
   onMoveNode,
   onAutoSort,
+  zoomLevel: externalZoom,
+  onZoomChange,
+  fitViewTrigger,
 }) => {
-  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [internalZoom, setInternalZoom] = useState<number>(100);
+  const zoomLevel = externalZoom !== undefined ? externalZoom : internalZoom;
+  const setZoomLevel = useCallback(
+    (action: number | ((prev: number) => number)) => {
+      const nextVal = typeof action === 'function' ? action(zoomLevel) : action;
+      const clamped = Math.min(150, Math.max(40, nextVal));
+      if (onZoomChange) {
+        onZoomChange(clamped);
+      } else {
+        setInternalZoom(clamped);
+      }
+    },
+    [zoomLevel, onZoomChange]
+  );
   const [collapsedIds, setCollapsedIds] = useState<Record<string, boolean>>({});
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [hoverTargetId, setHoverTargetId] = useState<string | null>(null);
@@ -348,10 +367,11 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
       setZoomLevel(100);
       return;
     }
-    const naturalWidth = stage.scrollWidth / (zoomLevel / 100);
-    const availableWidth = container.clientWidth - 64;
+    const currentScale = (zoomLevel || 100) / 100;
+    const naturalWidth = (stage.scrollWidth || stage.offsetWidth) / (currentScale || 1);
+    const availableWidth = container.clientWidth - 48;
     if (naturalWidth > 0 && availableWidth > 0) {
-      const idealZoom = Math.min(100, Math.max(55, Math.round((availableWidth / naturalWidth) * 100)));
+      const idealZoom = Math.min(100, Math.max(45, Math.round((availableWidth / naturalWidth) * 100)));
       setZoomLevel(idealZoom);
     } else {
       setZoomLevel(100);
@@ -365,7 +385,30 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
         });
       }
     });
-  }, [zoomLevel]);
+  }, [zoomLevel, setZoomLevel]);
+
+  useEffect(() => {
+    if (fitViewTrigger && fitViewTrigger > 0) {
+      handleFitView();
+    }
+  }, [fitViewTrigger, handleFitView]);
+
+  // Soporte de zoom interactivo en EDT (Ctrl + Rueda de mouse o Trackpad pinch)
+  useEffect(() => {
+    const el = canvasScrollRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 10 : -10;
+        setZoomLevel((prev) => prev + delta);
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [setZoomLevel]);
 
   const handleAutoSortClick = () => {
     setCollapsedIds({});
@@ -603,8 +646,13 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
           ref={treeStageRef}
           className="organigrama-tree-stage"
           style={{
-            transform: `scale(${zoomLevel / 100})`,
-            transformOrigin: 'top center',
+            zoom: `${zoomLevel}%`,
+            ...(typeof CSS !== 'undefined' && !CSS.supports?.('zoom', '1')
+              ? {
+                  transform: `scale(${zoomLevel / 100})`,
+                  transformOrigin: 'top center',
+                }
+              : {}),
           }}
         >
           {/* ══════════════════════════════════════════════════════════════

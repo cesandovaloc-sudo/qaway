@@ -239,7 +239,7 @@ export default function Sidebar({
         onClick={() => onModule('sedes')}
       >
         <Building2 size={18} />
-        <span>Sedes de Supervisión</span>
+        <span>Sedes</span>
       </button>
 
       <button

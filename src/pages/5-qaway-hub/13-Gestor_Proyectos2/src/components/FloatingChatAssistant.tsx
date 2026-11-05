@@ -57,7 +57,7 @@ const MODULE_CONTEXT_INFO: Record<ModuleKey, { title: string; hint: string; sugg
     ]
   },
   sedes: {
-    title: 'Sedes de Supervisión',
+    title: 'Sedes',
     hint: 'Monitoreo de avance y cumplimiento por sede operativa.',
     suggestions: [
       '🏢 Estado de cumplimiento por sede',

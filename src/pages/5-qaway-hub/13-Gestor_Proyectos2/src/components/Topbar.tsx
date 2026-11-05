@@ -34,7 +34,7 @@ interface TopbarProps {
 const MODULE_LABELS: Record<ModuleKey, string> = {
   resumen: 'Resumen del proyecto',
   cronograma: 'Proyecto',
-  sedes: 'Sedes de Supervisión',
+  sedes: 'Sedes',
   tareas: 'Tareas',
   hitos: 'Componentes del proyecto',
   reuniones: 'Reuniones',

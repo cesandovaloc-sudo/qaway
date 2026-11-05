@@ -120,6 +120,8 @@ import {
   Users,
   Network,
   Zap,
+  ZoomIn,
+  ZoomOut,
   X
 } from 'lucide-react';
 
@@ -1802,6 +1804,30 @@ export default function CronogramaGanttView({
   const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
+  const [isDocked, setIsDocked] = useState(false);
+
+  useEffect(() => {
+    const ws = workspaceRef.current;
+    if (!ws) return;
+    const canvas = (ws.closest('.qm-canvas') || document.querySelector('.qm-canvas')) as HTMLElement | null;
+    if (!canvas) return;
+
+    const checkDocked = () => {
+      const wsRect = ws.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const delta = wsRect.top - canvasRect.top - 8;
+      setIsDocked(delta <= 14);
+    };
+
+    canvas.addEventListener('scroll', checkDocked, { passive: true });
+    window.addEventListener('resize', checkDocked, { passive: true });
+    checkDocked();
+
+    return () => {
+      canvas.removeEventListener('scroll', checkDocked);
+      window.removeEventListener('resize', checkDocked);
+    };
+  }, []);
   const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama'>('gantt');
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
@@ -1837,6 +1863,8 @@ export default function CronogramaGanttView({
   // Clasificación y filtro de niveles WBS según PM4R / BID (Todos, Componentes, Intermedios, Paquetes)
   const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'componentes' | 'intermedios' | 'paquetes'>('todos');
   const [zoom, setZoom] = useState('Mes');
+  const [organigramaZoom, setOrganigramaZoom] = useState<number>(100);
+  const [organigramaFitTrigger, setOrganigramaFitTrigger] = useState<number>(0);
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
   const [hoveredTask, setHoveredTask] = useState<{
     item: Item;
@@ -2853,6 +2881,9 @@ export default function CronogramaGanttView({
   };
 
   const toggleItemExpand = (id: string, defaultExpanded: boolean = true) => {
+    const canvasEl = (workspaceRef.current?.closest('.qm-canvas') || document.querySelector('.qm-canvas')) as HTMLElement | null;
+    const prevCanvasScroll = canvasEl ? canvasEl.scrollTop : 0;
+
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
     setCollapsedByMode((prev) => {
       const modeMap = prev[mode] || {};
@@ -2870,6 +2901,15 @@ export default function CronogramaGanttView({
       } catch {}
       return next;
     });
+
+    if (canvasEl && prevCanvasScroll > 0) {
+      requestAnimationFrame(() => {
+        canvasEl.scrollTop = prevCanvasScroll;
+        requestAnimationFrame(() => {
+          canvasEl.scrollTop = prevCanvasScroll;
+        });
+      });
+    }
   };
 
   const shownBase = useMemo(() => {
@@ -3124,6 +3164,9 @@ export default function CronogramaGanttView({
   const allHitosExpanded = hasAnyExpanded;
 
   const toggleAllHitosExpand = () => {
+    const canvasEl = (workspaceRef.current?.closest('.qm-canvas') || document.querySelector('.qm-canvas')) as HTMLElement | null;
+    const prevCanvasScroll = canvasEl ? canvasEl.scrollTop : 0;
+
     // Si hay alguno expandido, la intención universal es contraer todo. Si ya están todos colapsados, expandir.
     const nextState = !hasAnyExpanded;
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
@@ -3138,6 +3181,17 @@ export default function CronogramaGanttView({
       } catch {}
       return next;
     });
+
+    if (canvasEl && prevCanvasScroll > 0) {
+      // Preservar la posición de scroll de .qm-canvas para que las tarjetas de métricas permanezcan ancladas arriba
+      requestAnimationFrame(() => {
+        canvasEl.scrollTop = prevCanvasScroll;
+        requestAnimationFrame(() => {
+          canvasEl.scrollTop = prevCanvasScroll;
+        });
+      });
+    }
+
     notify(
       nextState
         ? `Todos los niveles desplegados en ${viewMode === 'lista' ? 'Modo Lista' : 'Modo Gantt'}`
@@ -3536,7 +3590,7 @@ export default function CronogramaGanttView({
         </section>
 
         {/* Workspace Central */}
-        <main ref={workspaceRef} id="edt-workspace-toolbar" className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''}`}>
+        <main ref={workspaceRef} id="edt-workspace-toolbar" className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''} ${isDocked ? 'is-docked' : ''}`}>
           {/* Barra superior de salida en pantalla completa */}
           {isFullscreen && (
             <div className="fullscreen-exit-bar">
@@ -3980,6 +4034,50 @@ export default function CronogramaGanttView({
                   ))}
                 </div>
               </>
+            ) : viewMode === 'organigrama' ? (
+              /* En Modo Organigrama EDT: Controles Oficiales de Zoom y Ajuste */
+              <>
+                <button
+                  type="button"
+                  className="today-pill"
+                  onClick={() => setOrganigramaFitTrigger((c) => c + 1)}
+                  title="Ajustar vista del organigrama EDT al ancho de pantalla"
+                >
+                  Ajustar
+                </button>
+
+                <div className="zoom" title="Escala de zoom del organigrama EDT">
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => setOrganigramaZoom((z) => Math.max(40, z - 10))}
+                    title="Reducir zoom EDT"
+                    aria-label="Reducir zoom"
+                  >
+                    <ZoomOut size={14} />
+                  </button>
+                  {([50, 75, 100, 125] as const).map((pct) => (
+                    <button
+                      type="button"
+                      key={pct}
+                      className={organigramaZoom === pct ? 'active' : ''}
+                      onClick={() => setOrganigramaZoom(pct)}
+                      title={`Zoom ${pct}%`}
+                    >
+                      {pct}%
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="zoom-nav-arrow"
+                    onClick={() => setOrganigramaZoom((z) => Math.min(150, z + 10))}
+                    title="Aumentar zoom EDT"
+                    aria-label="Aumentar zoom"
+                  >
+                    <ZoomIn size={14} />
+                  </button>
+                </div>
+              </>
             ) : (
               /* En Modo Gantt, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
               <>
@@ -4102,6 +4200,7 @@ export default function CronogramaGanttView({
                   type="button"
                   className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     toggleAllHitosExpand();
                   }}
@@ -4595,6 +4694,7 @@ export default function CronogramaGanttView({
                     type="button"
                     className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       toggleAllHitosExpand();
                     }}
@@ -6491,6 +6591,9 @@ export default function CronogramaGanttView({
               allItems={items}
               selectedId={selectedId}
               projectName={activeProject?.name || 'Programa Maestro Operativo 2027'}
+              zoomLevel={organigramaZoom}
+              onZoomChange={setOrganigramaZoom}
+              fitViewTrigger={organigramaFitTrigger}
               onSelectItem={openEditorForItem}
               onAddItem={(kind, pId) => add(kind, pId, true)}
               formatDatePE={formatDatePE}

@@ -180,15 +180,30 @@ function App() {
     let targetScroll = scrollCanvas.scrollTop;
     let rafId: number | null = null;
 
+    const updateDockedStatus = () => {
+      const activePane = scrollCanvas.querySelector('.qm-pane-active') as HTMLElement | null;
+      const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
+      if (!ws) return;
+      const wsRect = ws.getBoundingClientRect();
+      const canvasRect = scrollCanvas.getBoundingClientRect();
+      const delta = wsRect.top - canvasRect.top - 8;
+      const isStuck = delta <= 14;
+      if (ws.classList.contains('is-docked') !== isStuck) {
+        ws.classList.toggle('is-docked', isStuck);
+      }
+    };
+
     const stepSmoothScroll = () => {
       const current = scrollCanvas.scrollTop;
       const diff = targetScroll - current;
       if (Math.abs(diff) < 0.8) {
         scrollCanvas.scrollTop = targetScroll;
         rafId = null;
+        updateDockedStatus();
         return;
       }
       scrollCanvas.scrollTop = current + diff * 0.38;
+      updateDockedStatus();
       rafId = requestAnimationFrame(stepSmoothScroll);
     };
 
@@ -257,11 +272,33 @@ function App() {
     };
 
     scrollCanvas.addEventListener('wheel', handleWheel, { passive: false });
+    scrollCanvas.addEventListener('scroll', updateDockedStatus, { passive: true });
+    window.addEventListener('resize', updateDockedStatus, { passive: true });
+    updateDockedStatus();
+
     return () => {
       scrollCanvas.removeEventListener('wheel', handleWheel);
+      scrollCanvas.removeEventListener('scroll', updateDockedStatus);
+      window.removeEventListener('resize', updateDockedStatus);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
+
+  // Sincronizar estado acoplado (.is-docked) al conmutar entre módulos o vistas
+  useEffect(() => {
+    const scrollCanvas = canvasRef.current;
+    if (!scrollCanvas) return;
+    const timer = setTimeout(() => {
+      const activePane = scrollCanvas.querySelector('.qm-pane-active') as HTMLElement | null;
+      const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
+      if (!ws) return;
+      const wsRect = ws.getBoundingClientRect();
+      const canvasRect = scrollCanvas.getBoundingClientRect();
+      const delta = wsRect.top - canvasRect.top - 8;
+      ws.classList.toggle('is-docked', delta <= 14);
+    }, 40);
+    return () => clearTimeout(timer);
+  }, [active]);
 
   // Sincronizar y redirigir a ruta canónica con prefijo /hub/gestor_proyecto
   useEffect(() => {
