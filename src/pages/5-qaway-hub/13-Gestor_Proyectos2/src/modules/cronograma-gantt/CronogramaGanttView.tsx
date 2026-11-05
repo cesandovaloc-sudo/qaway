@@ -615,6 +615,13 @@ const formatDatePE = (iso: string) => {
   return `${d}/${m}/${y}`;
 };
 
+const formatDateDash = (iso: string) => {
+  if (!iso) return '';
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  if (!y || !m || !d) return iso;
+  return `${d}-${m}-${y}`;
+};
+
 function MiniCalendar({
   value,
   onChange,
@@ -1792,8 +1799,8 @@ export default function CronogramaGanttView({
   // Control de Vencimientos y Alertas Críticas mediante Desplegable Formal
   const [vencimientosFilter, setVencimientosFilter] = useState<'todos' | 'hoy' | 'semana' | 'mes' | 'trimestre' | 'retraso'>('todos');
 
-  // Clasificación y filtro de niveles WBS según PMI / PMBOK (Nivel 1 al 5)
-  const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'nivel-1' | 'nivel-2' | 'nivel-3' | 'nivel-4' | 'nivel-5'>('todos');
+  // Clasificación y filtro de niveles WBS según PM4R / BID (Todos, Componentes, Intermedios, Paquetes)
+  const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'componentes' | 'intermedios' | 'paquetes'>('todos');
   const [zoom, setZoom] = useState('Mes');
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
   const [hoveredTask, setHoveredTask] = useState<{
@@ -2721,8 +2728,14 @@ export default function CronogramaGanttView({
     return counts;
   }, [items, itemDepthMap]);
 
-  const intermediosCount = levelCounts[1] || 6;
-  const paquetesCount = (levelCounts[2] || 46) + (levelCounts[3] || 0) + (levelCounts[4] || 0);
+  // Desglose oficial de niveles WBS según taxonomía PM4R (BID)
+  const intermediosCount = useMemo(() => {
+    return items.filter((x) => Boolean(x.parentId) && items.some((c) => c.parentId === x.id)).length;
+  }, [items]);
+
+  const paquetesCount = useMemo(() => {
+    return items.filter((x) => !items.some((c) => c.parentId === x.id)).length;
+  }, [items]);
 
   // Conteo de elementos por período de vencimiento
   const criticalItemsCount = useMemo(() => {
@@ -2909,19 +2922,16 @@ export default function CronogramaGanttView({
         });
       }
 
-      // Filtro metodológico WBS PMI / PMBOK (1 a 5 niveles)
+      // Filtro metodológico WBS PM4R / BID (Componentes, Intermedios, Paquetes)
       let matchWbsLevel = true;
-      const itemDepth = itemDepthMap.get(x.id) ?? (x.parentId ? 1 : 0);
-      if (wbsLevelFilter === 'nivel-1') {
+      if (wbsLevelFilter === 'componentes') {
         matchWbsLevel = !x.parentId;
-      } else if (wbsLevelFilter === 'nivel-2') {
-        matchWbsLevel = itemDepth === 1;
-      } else if (wbsLevelFilter === 'nivel-3') {
-        matchWbsLevel = itemDepth === 2;
-      } else if (wbsLevelFilter === 'nivel-4') {
-        matchWbsLevel = itemDepth === 3;
-      } else if (wbsLevelFilter === 'nivel-5') {
-        matchWbsLevel = itemDepth >= 4;
+      } else if (wbsLevelFilter === 'intermedios') {
+        const hasChildren = items.some((c) => c.parentId === x.id);
+        matchWbsLevel = Boolean(x.parentId) && hasChildren;
+      } else if (wbsLevelFilter === 'paquetes') {
+        const hasChildren = items.some((c) => c.parentId === x.id);
+        matchWbsLevel = !hasChildren;
       }
 
       // Filtro de Vencimientos y Alertas Críticas (Desplegable formal)
@@ -3401,14 +3411,14 @@ export default function CronogramaGanttView({
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          <article className="metric green" title="46 Paquetes de Trabajo finales (nodos terminales ejecutables) y 6 Productos intermedios (PM4R / BID)">
+          <article className="metric green" title="46 Paquetes de Trabajo finales (nodos terminales ejecutables) y 6 agrupadores intermedios (PM4R / BID)">
             <span className="metric-icon">
               <Layers3 size={22} />
             </span>
             <div className="metric-copy">
               <b>{paquetesCount}</b>
               <strong>Paquetes de Trabajo</strong>
-              <small>{paquetesCount} terminales · {intermediosCount} productos</small>
+              <small>{paquetesCount} terminales ejecutables · {intermediosCount} agrupadores intermedios</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -3493,17 +3503,6 @@ export default function CronogramaGanttView({
                 }}
               >
                 Componentes <span>({hitos.length})</span>
-              </button>
-
-              <button
-                type="button"
-                className={tab === 'Subprocesos' ? 'active' : ''}
-                onClick={() => {
-                  setTab('Subprocesos');
-                  setWbsLevelFilter('todos');
-                }}
-              >
-                Subcomponentes <span>({subs.length})</span>
               </button>
 
               {[
@@ -3598,7 +3597,7 @@ export default function CronogramaGanttView({
               )}
             </label>
 
-            {/* Filtro Desplegable de Niveles WBS (PMI / PMBOK - Nivel 1 al 5) */}
+            {/* Filtro Desplegable de Niveles WBS (PM4R / BID) */}
             <div className="filter-dropdown-wrap">
               <button
                 type="button"
@@ -3606,22 +3605,18 @@ export default function CronogramaGanttView({
                   wbsLevelFilter !== 'todos' ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('wbsLevel')}
-                title="Filtrar por nivel metodológico EDT / WBS (Nivel 1 al 5)"
+                title="Filtrar por nivel metodológico EDT / WBS (PM4R / BID)"
               >
                 <div className="filter-card-copy">
                   <small>Nivel WBS</small>
                   <span>
                     {wbsLevelFilter === 'todos'
                       ? `Todos los niveles (${items.length})`
-                      : wbsLevelFilter === 'nivel-1'
-                      ? `Nivel 1 · Componentes (${hitos.length})`
-                      : wbsLevelFilter === 'nivel-2'
-                      ? `Nivel 2 · Subcomponentes (${levelCounts[1] || intermediosCount})`
-                      : wbsLevelFilter === 'nivel-3'
-                      ? `Nivel 3 · Paquetes (${levelCounts[2] || paquetesCount})`
-                      : wbsLevelFilter === 'nivel-4'
-                      ? `Nivel 4 · Actividades (${levelCounts[3] || 0})`
-                      : `Nivel 5 · Entregables (${levelCounts[4] || 0})`}
+                      : wbsLevelFilter === 'componentes'
+                      ? `Componentes Principales (${hitos.length})`
+                      : wbsLevelFilter === 'intermedios'
+                      ? `Agrupadores Intermedios (${intermediosCount})`
+                      : `Paquetes de Trabajo Terminales (${paquetesCount})`}
                   </span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
@@ -3655,11 +3650,9 @@ export default function CronogramaGanttView({
                   <div className="filter-popover-list">
                     {[
                       { id: 'todos', label: 'Todos los niveles', count: items.length },
-                      { id: 'nivel-1', label: 'Nivel 1 · Componentes', count: hitos.length },
-                      { id: 'nivel-2', label: 'Nivel 2 · Subcomponentes / Productos', count: levelCounts[1] || intermediosCount },
-                      { id: 'nivel-3', label: 'Nivel 3 · Paquetes de Trabajo', count: levelCounts[2] || paquetesCount },
-                      { id: 'nivel-4', label: 'Nivel 4 · Actividades operativas', count: levelCounts[3] || 0 },
-                      { id: 'nivel-5', label: 'Nivel 5 · Micro-entregables', count: levelCounts[4] || 0 },
+                      { id: 'componentes', label: 'Componentes Principales', count: hitos.length },
+                      { id: 'intermedios', label: 'Agrupadores Intermedios', count: intermediosCount },
+                      { id: 'paquetes', label: 'Paquetes de Trabajo Terminales', count: paquetesCount },
                     ].map((lvl) => (
                       <button
                         key={lvl.id}
@@ -6261,9 +6254,11 @@ export default function CronogramaGanttView({
                 {hoveredTask.item.code} {hoveredTask.item.name}
               </div>
               <div className="tooltip-metric">
-                Cumplimiento : {hoveredTask.item.progress}%
-                {hoveredTask.item.kind === 'hito' && (
-                  <span className="tooltip-sub"> · Corte: {formatDate(hoveredTask.item.end)}</span>
+                <span>Cumplimiento : {hoveredTask.item.progress}%</span>
+                {hoveredTask.item.end && (
+                  <span className="tooltip-fc">
+                    <span className="tooltip-sep">·</span> FC: {formatDateDash(hoveredTask.item.end)}
+                  </span>
                 )}
               </div>
             </div>

@@ -3964,6 +3964,20 @@ body.gantt-resizing {
   margin-left: 6px;
 }
 
+.gantt-v2 .gantt-modern-tooltip .tooltip-fc {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+.gantt-v2 .gantt-modern-tooltip .tooltip-sep {
+  color: #94a3b8;
+  margin: 0 6px;
+  font-weight: 400;
+}
+
 /* Estabilidad Total de Líneas de Dependencia (Cero parpadeo, Cero destello/halo) */
 .gantt-v2 .dep-line-group {
   cursor: pointer;
@@ -8348,44 +8362,60 @@ body.gantt-resizing {
   color: #b45309;
 }
 
-/* NIVEL 2: SUBCOMPONENTES / PRODUCTOS (AMARILLO) */
+/* RAMIFICACIÓN REAL WBS PM4R / BID */
 .gantt-v2 .organigrama-children-stack {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 6px;
+  position: relative;
 }
 
 .gantt-v2 .organigrama-line-down-to-children {
+  width: 2px;
+  height: 18px;
+  background: #cbd5e1;
+}
+
+.gantt-v2 .organigrama-branches-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+  padding-top: 16px;
+}
+
+.gantt-v2 .organigrama-branches-bus-bar {
+  position: absolute;
+  top: 0;
+  height: 2px;
+  background: #cbd5e1;
+}
+
+.gantt-v2 .organigrama-branch-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.gantt-v2 .organigrama-branch-feeder {
   width: 2px;
   height: 16px;
   background: #cbd5e1;
 }
 
-.gantt-v2 .organigrama-sub-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
-.gantt-v2 .organigrama-sub-block {
+/* NIVEL INTERMEDIO: AGRUPADORES / PRODUCTOS (AMARILLO) */
+.gantt-v2 .organigrama-agrupador-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  position: relative;
-}
-
-.gantt-v2 .organigrama-sub-feeder {
-  width: 2px;
-  height: 10px;
-  background: #cbd5e1;
 }
 
 .gantt-v2 .organigrama-card.subcomp-card {
-  width: 95%;
+  width: 230px;
   padding: 10px 12px;
   background: #fefce8;
   border: 1.5px solid #eab308;
@@ -8404,26 +8434,28 @@ body.gantt-resizing {
   font-weight: 800;
 }
 
-/* NIVEL 3: PAQUETES DE TRABAJO (MAGENTA/ROSA) */
+/* BIFURCACIÓN DE PAQUETES BAJO AGRUPADOR */
 .gantt-v2 .organigrama-packages-stack {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
   margin-top: 6px;
+  position: relative;
 }
 
 .gantt-v2 .organigrama-sub-trunk-down {
   width: 2px;
-  height: 10px;
+  height: 14px;
   background: #fda4af;
 }
 
 .gantt-v2 .organigrama-pkgs-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
+  align-items: center;
 }
 
 .gantt-v2 .organigrama-pkg-item {
@@ -8435,13 +8467,20 @@ body.gantt-resizing {
 
 .gantt-v2 .organigrama-pkg-feeder {
   width: 2px;
-  height: 6px;
+  height: 8px;
   background: #fda4af;
 }
 
+.gantt-v2 .organigrama-direct-pkg-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* NIVEL TERMINAL: PAQUETES DE TRABAJO (MAGENTA/ROSA) */
 .gantt-v2 .organigrama-card.paquete-card {
-  width: 90%;
-  padding: 9px 11px;
+  width: 220px;
+  padding: 10px 12px;
   background: #fff1f2;
   border: 1.5px solid #f43f5e;
 }
@@ -8463,11 +8502,58 @@ body.gantt-resizing {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10.5px;
+  font-size: 10px;
   color: #9f1239;
   font-weight: 600;
   margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* FILA DE INDICADORES: RESPONSABLE OPERATIVO Y TAREAS */
+.gantt-v2 .pkg-indicators-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.gantt-v2 .pkg-responsible-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-v2 .pkg-task-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 750;
+  padding: 1.5px 6px;
+  border-radius: 999px;
+  background: #ffe4e6;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.gantt-v2 .pkg-task-pill:hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: #f43f5e;
 }

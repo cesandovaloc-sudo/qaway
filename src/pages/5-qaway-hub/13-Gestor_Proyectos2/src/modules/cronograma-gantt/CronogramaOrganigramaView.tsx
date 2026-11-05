@@ -9,6 +9,8 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
+  CheckSquare,
+  User,
   CheckCircle2,
   Clock,
   AlertCircle
@@ -35,12 +37,10 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
   const [collapsedCompIds, setCollapsedCompIds] = useState<Record<string, boolean>>({});
 
   // Construcción del mapa jerárquico multinivel
-  const { roots, childrenMap, depthMap } = useMemo(() => {
+  const { roots, childrenMap } = useMemo(() => {
     const r: Item[] = [];
     const cMap = new Map<string, Item[]>();
-    const dMap = new Map<string, number>();
 
-    // 1. Agrupar por parentId
     items.forEach((it) => {
       if (!it.parentId) {
         r.push(it);
@@ -50,22 +50,8 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
       }
     });
 
-    // 2. Calcular profundidad de cada nodo
-    const computeDepth = (id: string): number => {
-      if (dMap.has(id)) return dMap.get(id)!;
-      const it = allItems.find((x) => x.id === id);
-      if (!it || !it.parentId) {
-        dMap.set(id, 0);
-        return 0;
-      }
-      const d = 1 + computeDepth(it.parentId);
-      dMap.set(id, d);
-      return d;
-    };
-    items.forEach((it) => computeDepth(it.id));
-
-    return { roots: r, childrenMap: cMap, depthMap: dMap };
-  }, [items, allItems]);
+    return { roots: r, childrenMap: cMap };
+  }, [items]);
 
   const toggleCollapse = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -79,6 +65,105 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
     return Math.round(sum / items.length);
   }, [items]);
 
+  // Conteos exactos WBS PM4R / BID
+  const { totalAgrupadores, totalPaquetes } = useMemo(() => {
+    let ag = 0;
+    let pq = 0;
+    items.forEach((it) => {
+      if (it.parentId) {
+        const hasChildren = items.some((c) => c.parentId === it.id);
+        if (hasChildren) ag++;
+        else pq++;
+      }
+    });
+    return { totalAgrupadores: ag, totalPaquetes: pq };
+  }, [items]);
+
+  const getTaskCounts = (item: Item) => {
+    const total = item.tasks ?? 4;
+    const done = item.done ?? Math.min(total, Math.round(((item.progress ?? 0) / 100) * total));
+    return { done, total };
+  };
+
+  // Renderizador de tarjeta de Paquete de Trabajo Terminal (Rosa / Magenta)
+  const renderPaqueteCard = (pkg: Item) => {
+    const isPkgSelected = selectedId === pkg.id;
+    const taskCounts = getTaskCounts(pkg);
+    const responsable = pkg.gestor || pkg.sede || 'DRE / UGEL';
+
+    return (
+      <div
+        key={pkg.id}
+        className={`organigrama-card paquete-card ${isPkgSelected ? 'selected' : ''}`}
+        onClick={() => onSelectItem(pkg)}
+        title="Clic para abrir detalle operativo y checklist de tareas"
+      >
+        <div className="card-level-chip paquete">
+          <span>Nivel Terminal · Paquete de Trabajo</span>
+          <span className="card-pkg-prog">{pkg.progress}%</span>
+        </div>
+
+        <div className="card-code-title">
+          <b className="node-code">{pkg.code}</b>
+          <span className="node-title">{pkg.name}</span>
+        </div>
+
+        {pkg.deliverable && (
+          <div className="pkg-deliverable-line" title={pkg.deliverable}>
+            <FileText size={11} />
+            <span>{pkg.deliverable}</span>
+          </div>
+        )}
+
+        {/* Insignia de Responsable e Insignia de Actividades Operativas (Tareas) */}
+        <div className="pkg-indicators-row">
+          <span className="pkg-responsible-pill" title={`Responsable operativo: ${responsable}`}>
+            <User size={10} />
+            <span>{responsable}</span>
+          </span>
+
+          <div
+            className="pkg-task-pill"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectItem(pkg);
+            }}
+            title="Actividades operativas: clic para ver checklist y tareas"
+          >
+            <CheckSquare size={10} />
+            <span>{taskCounts.done}/{taskCounts.total} Tareas</span>
+          </div>
+        </div>
+
+        <div className="card-meta-line" style={{ marginTop: 6, marginBottom: 6 }}>
+          <span className="node-dates">
+            {formatDatePE(pkg.start)} – {formatDatePE(pkg.end)}
+          </span>
+          <span className={`node-status-pill micro ${pkg.status.toLowerCase().replace(/\s+/g, '-')}`}>
+            {pkg.status}
+          </span>
+        </div>
+
+        <div className="card-progress-footer">
+          <div className="card-prog-track" style={{ background: '#fecdd3' }}>
+            <div
+              className="card-prog-fill"
+              style={{
+                width: `${pkg.progress}%`,
+                background: '#f43f5e',
+                height: '100%',
+                borderRadius: 999
+              }}
+            />
+          </div>
+          <span className="card-prog-val" style={{ color: '#be123c', fontSize: '10px' }}>
+            {pkg.progress}%
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="organigrama-wbs-container">
       {/* Barra de herramientas superior del Organigrama */}
@@ -90,15 +175,15 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
           </span>
           <span className="legend-chip comp">
             <span className="chip-dot" style={{ background: '#f59e0b' }} />
-            Nivel 1: Componentes
+            Nivel 1: Componentes ({roots.length})
           </span>
           <span className="legend-chip subcomp">
             <span className="chip-dot" style={{ background: '#eab308' }} />
-            Nivel 2: Subcomponentes / Productos
+            Nivel Intermedio: Agrupadores ({totalAgrupadores})
           </span>
           <span className="legend-chip paquete">
-            <span className="chip-dot" style={{ background: '#e11d48' }} />
-            Nivel 3+: Paquetes de Trabajo
+            <span className="chip-dot" style={{ background: '#f43f5e' }} />
+            Nivel Terminal: Paquetes de Trabajo ({totalPaquetes})
           </span>
         </div>
 
@@ -168,7 +253,7 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
                 </div>
                 <div className="mini-count-badge">
                   <Layers size={12} />
-                  <span>{roots.length} Componentes</span>
+                  <span>{roots.length} Componentes · {totalPaquetes} Paquetes</span>
                 </div>
               </div>
             </div>
@@ -184,7 +269,7 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
             {/* Barra conectora horizontal que une todos los componentes */}
             <div className="organigrama-horizontal-bus-bar" />
 
-            {roots.map((comp, compIdx) => {
+            {roots.map((comp) => {
               const childrenL2 = childrenMap.get(comp.id) || [];
               const isCollapsed = collapsedCompIds[comp.id];
               const isSelected = selectedId === comp.id;
@@ -207,7 +292,7 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
                           type="button"
                           className="card-collapse-mini-btn"
                           onClick={(e) => toggleCollapse(comp.id, e)}
-                          title={isCollapsed ? 'Desplegar subcomponentes' : 'Colapsar subcomponentes'}
+                          title={isCollapsed ? 'Desplegar estructura' : 'Colapsar estructura'}
                         >
                           {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
                         </button>
@@ -240,94 +325,99 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
                   </div>
 
                   {/* ══════════════════════════════════════════════════════════════
-                      NIVEL 2: SUBCOMPONENTES / PRODUCTOS (Cajas Amarillas)
+                      RAMIFICACIÓN REAL: ABANICO DESCENDENTE WBS PM4R / BID
                       ══════════════════════════════════════════════════════════════ */}
                   {!isCollapsed && hasSub && (
                     <div className="organigrama-children-stack">
-                      {/* Línea conectora hacia los hijos */}
+                      {/* Línea conectora que baja del Componente a la barra de bifurcación */}
                       <div className="organigrama-line-down-to-children" />
 
-                      <div className="organigrama-sub-list">
-                        {childrenL2.map((sub) => {
-                          const childrenL3 = childrenMap.get(sub.id) || [];
-                          const isSubSelected = selectedId === sub.id;
-                          const hasWorkPackages = childrenL3.length > 0;
+                      {/* Contenedor en Abanico de ramas hijas del Componente */}
+                      <div className="organigrama-branches-row">
+                        {/* Barra conectora horizontal entre ramas directas */}
+                        {childrenL2.length > 1 && (
+                          <div
+                            className="organigrama-branches-bus-bar"
+                            style={{
+                              left: childrenL2.length === 2 ? '25%' : '12%',
+                              right: childrenL2.length === 2 ? '25%' : '12%',
+                            }}
+                          />
+                        )}
+
+                        {childrenL2.map((item) => {
+                          const childrenL3 = childrenMap.get(item.id) || [];
+                          const isAgrupador = childrenL3.length > 0;
+                          const isItemSelected = selectedId === item.id;
 
                           return (
-                            <div key={sub.id} className="organigrama-sub-block">
-                              <div className="organigrama-sub-feeder" />
+                            <div key={item.id} className="organigrama-branch-col">
+                              {/* Alimentador vertical desde la barra horizontal */}
+                              <div className="organigrama-branch-feeder" />
 
-                              {/* Tarjeta de Subcomponente / Producto (Nivel 2 - Amarillo) */}
-                              <div
-                                className={`organigrama-card subcomp-card ${isSubSelected ? 'selected' : ''}`}
-                                onClick={() => onSelectItem(sub)}
-                              >
-                                <div className="card-level-chip subcomp">
-                                  <span>{hasWorkPackages ? 'Nivel 2 · Producto' : 'Nivel 2 · Paquete Final'}</span>
-                                  <span className="card-sub-prog-tag">{sub.progress}%</span>
-                                </div>
+                              {/* CASO A: AGRUPADOR INTERMEDIO / PRODUCTO (AMARILLO) */}
+                              {isAgrupador ? (
+                                <div className="organigrama-agrupador-wrapper">
+                                  <div
+                                    className={`organigrama-card subcomp-card ${isItemSelected ? 'selected' : ''}`}
+                                    onClick={() => onSelectItem(item)}
+                                    title="Agrupador intermedio WBS / Producto contenedor"
+                                  >
+                                    <div className="card-level-chip subcomp">
+                                      <span>Nivel Intermedio · Agrupador</span>
+                                      <span className="card-sub-prog-tag">{item.progress}%</span>
+                                    </div>
 
-                                <div className="card-code-title">
-                                  <b className="node-code">{sub.code}</b>
-                                  <span className="node-title">{sub.name}</span>
-                                </div>
+                                    <div className="card-code-title">
+                                      <b className="node-code">{item.code}</b>
+                                      <span className="node-title">{item.name}</span>
+                                    </div>
 
-                                <div className="card-meta-line">
-                                  <span className="node-dates">
-                                    {formatDatePE(sub.start)} – {formatDatePE(sub.end)}
-                                  </span>
-                                  <span className={`node-status-pill mini ${sub.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                                    {sub.status}
-                                  </span>
-                                </div>
-                              </div>
+                                    <div className="card-meta-line">
+                                      <span className="node-dates">
+                                        {formatDatePE(item.start)} – {formatDatePE(item.end)}
+                                      </span>
+                                      <span className={`node-status-pill mini ${item.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                                        {item.status}
+                                      </span>
+                                    </div>
 
-                              {/* ══════════════════════════════════════════════════════════════
-                                  NIVEL 3: PAQUETES DE TRABAJO (Cajas Magenta/Rosa)
-                                  ══════════════════════════════════════════════════════════════ */}
-                              {hasWorkPackages && (
-                                <div className="organigrama-packages-stack">
-                                  <div className="organigrama-sub-trunk-down" />
-                                  <div className="organigrama-pkgs-list">
-                                    {childrenL3.map((pkg) => {
-                                      const isPkgSelected = selectedId === pkg.id;
-                                      return (
+                                    <div className="card-progress-footer">
+                                      <div className="card-prog-track" style={{ background: '#fef08a' }}>
+                                        <div
+                                          className="card-prog-fill"
+                                          style={{
+                                            width: `${item.progress}%`,
+                                            background: '#eab308',
+                                            height: '100%',
+                                            borderRadius: 999
+                                          }}
+                                        />
+                                      </div>
+                                      <span className="card-prog-val" style={{ color: '#a16207', fontSize: '10px' }}>
+                                        {item.progress}%
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Sub-bifurcación hacia los Paquetes de Trabajo dependientes */}
+                                  <div className="organigrama-packages-stack">
+                                    <div className="organigrama-sub-trunk-down" />
+
+                                    <div className="organigrama-pkgs-list">
+                                      {childrenL3.map((pkg) => (
                                         <div key={pkg.id} className="organigrama-pkg-item">
                                           <div className="organigrama-pkg-feeder" />
-                                          <div
-                                            className={`organigrama-card paquete-card ${isPkgSelected ? 'selected' : ''}`}
-                                            onClick={() => onSelectItem(pkg)}
-                                          >
-                                            <div className="card-level-chip paquete">
-                                              <span>Nivel 3 · Paquete Ejecutable</span>
-                                              <span className="card-pkg-prog">{pkg.progress}%</span>
-                                            </div>
-
-                                            <div className="card-code-title">
-                                              <b className="node-code">{pkg.code}</b>
-                                              <span className="node-title">{pkg.name}</span>
-                                            </div>
-
-                                            {pkg.deliverable && (
-                                              <div className="pkg-deliverable-line" title={pkg.deliverable}>
-                                                <FileText size={11} />
-                                                <span>{pkg.deliverable}</span>
-                                              </div>
-                                            )}
-
-                                            <div className="card-meta-line">
-                                              <span className="node-dates">
-                                                {formatDatePE(pkg.start)} – {formatDatePE(pkg.end)}
-                                              </span>
-                                              <span className={`node-status-pill micro ${pkg.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                                                {pkg.status}
-                                              </span>
-                                            </div>
-                                          </div>
+                                          {renderPaqueteCard(pkg)}
                                         </div>
-                                      );
-                                    })}
+                                      ))}
+                                    </div>
                                   </div>
+                                </div>
+                              ) : (
+                                /* CASO B: PAQUETE DE TRABAJO TERMINAL DIRECTO (ROSA / MAGENTA) */
+                                <div className="organigrama-direct-pkg-wrapper">
+                                  {renderPaqueteCard(item)}
                                 </div>
                               )}
                             </div>
