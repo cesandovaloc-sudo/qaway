@@ -4760,13 +4760,19 @@ body.gantt-resizing {
 /* --- Estilos para Línea Base y Ruta Crítica (Benchmark Imagen 2) --- */
 .gantt-v2 .baseline-shadow-bar {
   position: absolute;
-  height: 6px;
-  bottom: 2px;
+  top: calc(50% + 11px);
+  height: 5px;
   border-radius: 3px;
   background: repeating-linear-gradient(45deg, #94a3b8, #94a3b8 4px, #cbd5e1 4px, #cbd5e1 8px);
-  opacity: 0.75;
-  z-index: 1;
-  pointer-events: none;
+  opacity: 0.85;
+  z-index: 4;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.gantt-v2 .baseline-shadow-bar:hover {
+  opacity: 1;
 }
 
 .gantt-v2 .row-critical-path {

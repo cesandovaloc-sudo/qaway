@@ -5972,6 +5972,25 @@ export default function CronogramaGanttView({
                         <span key={s.key} />
                       ))}
                     </div>
+                    {/* Sombra de Línea Base Desacoplada (Punto 2.A: coordenadas absolutas independientes) */}
+                    {showBaseline && (() => {
+                      const bStart = x.baselineStart || x.start;
+                      const bEnd = x.baselineEnd || x.end;
+                      if (!bStart || !bEnd) return null;
+                      const bLeft = getDatePixelOffset(bStart);
+                      const bWidth = Math.max(8, getDatePixelOffset(shiftDays(bEnd, 1)) - bLeft);
+                      const hasDev = x.baselineEnd && x.end !== x.baselineEnd;
+                      return (
+                        <div
+                          className="baseline-shadow-bar"
+                          style={{
+                            left: `${bLeft}px`,
+                            width: `${bWidth}px`,
+                          }}
+                          title={`Línea base aprobada: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}${hasDev ? ` (Desvío con fecha viva: ${getDays(x.baselineEnd, x.end)}d)` : ''}`}
+                        />
+                      );
+                    })()}
                     {(() => {
                       const barWidthPx =
                         resizingTaskId === x.id && resizeTempWidth !== null
@@ -6018,14 +6037,6 @@ export default function CronogramaGanttView({
                               borderBottomRightRadius: x.progress >= 98 ? 'inherit' : 0,
                             }}
                           />
-
-                          {showBaseline && (
-                            <div
-                              className="baseline-shadow-bar"
-                              style={{ left: 0, width: "100%" }}
-                              title={`Línea base contractual: ${formatDatePE(x.start)} – ${formatDatePE(x.end)}`}
-                            />
-                          )}
 
                           {/* Contenido interior secuencial: 1° Porcentaje (%) + 2° Iconos de responsables (sin salir del nodo) */}
                           {(showBarLabels || showBarAvatars) && (
