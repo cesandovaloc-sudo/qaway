@@ -1804,32 +1804,7 @@ export default function CronogramaGanttView({
   const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
-  const [isDocked, setIsDocked] = useState(false);
-
-  useEffect(() => {
-    const ws = workspaceRef.current;
-    if (!ws) return;
-    const canvas = (ws.closest('.qm-canvas') || document.querySelector('.qm-canvas')) as HTMLElement | null;
-    if (!canvas) return;
-
-    const checkDocked = () => {
-      const wsRect = ws.getBoundingClientRect();
-      const canvasRect = canvas.getBoundingClientRect();
-      const delta = wsRect.top - canvasRect.top - 8;
-      const currentScroll = Math.max(0, Math.min(201, canvas.scrollTop));
-      canvas.style.setProperty('--canvas-scroll', `${currentScroll}px`);
-      setIsDocked(delta <= 10);
-    };
-
-    canvas.addEventListener('scroll', checkDocked, { passive: true });
-    window.addEventListener('resize', checkDocked, { passive: true });
-    checkDocked();
-
-    return () => {
-      canvas.removeEventListener('scroll', checkDocked);
-      window.removeEventListener('resize', checkDocked);
-    };
-  }, []);
+  const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama'>('gantt');
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');

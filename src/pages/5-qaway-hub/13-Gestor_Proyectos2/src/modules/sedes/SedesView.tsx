@@ -27,6 +27,7 @@ import {
   FileText,
   ExternalLink,
   FolderKanban,
+  Landmark,
 } from 'lucide-react';
 
 export interface SedeItem {
@@ -222,6 +223,10 @@ export interface UgelDoc {
 export interface UgelExecutionRow {
   id: string;
   ugelName: string;
+  tipo?: 'DRE' | 'UGEL';
+  zona?: string;
+  coordinadorZonal?: string;
+  gestorCampo?: string;
   status: UgelStatus;
   start: string;
   end: string;
@@ -297,8 +302,40 @@ const DEFAULT_DELIVERABLES: DeliverableOption[] = [
 
 const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
+    id: 'dre-junin',
+    ugelName: 'DRE Junín (Sede Regional)',
+    tipo: 'DRE',
+    zona: 'Valle del Mantaro',
+    coordinadorZonal: 'Carlos Mendoza',
+    gestorCampo: 'María Salazar',
+    status: 'En proceso',
+    start: '12/10/2026',
+    end: '30/11/2026',
+    durationLabel: '2 meses',
+    progress: 75,
+    responsable: 'Director DRE Junín / Almacén Central Regional',
+    cargo: 'Autoridad Regional Matriz',
+    faseActual: 'Fase 2 – Recepción y Consolidación Regional',
+    observaciones: 'Recepción en Almacén Central Regional de Junín y monitoreo coordinado con las 13 UGEL.',
+    barLeftPct: 18,
+    barWidthPct: 40,
+    tasks: [
+      { id: 't-dre-1', text: 'Instalar Comité Regional de Distribución', done: true },
+      { id: 't-dre-2', text: 'Validar matriz consolidada SIGA regional', done: true },
+      { id: 't-dre-3', text: 'Conformar actas de enlace con las 13 UGEL', done: false },
+    ],
+    docs: [
+      { id: 'd-dre-1', name: 'Acta_Comite_Regional_DRE_Junin.pdf', updatedAt: 'Actualizado 18 oct. 2026', type: 'pdf', verified: true },
+      { id: 'd-dre-2', name: 'Matriz_Regional_Consolidada.xlsx', updatedAt: 'Actualizado 25 oct. 2026', type: 'excel', verified: true },
+    ],
+  },
+  {
     id: 'ugel-chupaca',
     ugelName: 'UGEL Chupaca',
+    tipo: 'UGEL',
+    zona: 'Valle del Mantaro',
+    coordinadorZonal: 'Carlos Mendoza',
+    gestorCampo: 'María Salazar',
     status: 'Cumple',
     start: '12/10/2026',
     end: '15/11/2026',
@@ -325,6 +362,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-concepcion',
     ugelName: 'UGEL Concepción',
+    tipo: 'UGEL',
+    zona: 'Valle del Mantaro',
+    coordinadorZonal: 'Carlos Mendoza',
+    gestorCampo: 'María Salazar',
     status: 'Cumple',
     start: '12/10/2026',
     end: '15/11/2026',
@@ -350,6 +391,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-huancayo',
     ugelName: 'UGEL Huancayo',
+    tipo: 'UGEL',
+    zona: 'Valle del Mantaro',
+    coordinadorZonal: 'Carlos Mendoza',
+    gestorCampo: 'Carlos Mendoza',
     status: 'En proceso',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -376,6 +421,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-jauja',
     ugelName: 'UGEL Jauja',
+    tipo: 'UGEL',
+    zona: 'Valle del Mantaro',
+    coordinadorZonal: 'Carlos Mendoza',
+    gestorCampo: 'Carlos Mendoza',
     status: 'En proceso',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -401,6 +450,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-junin',
     ugelName: 'UGEL Junín',
+    tipo: 'UGEL',
+    zona: 'Zona Sierra Central',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'María Salazar',
     status: 'En proceso',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -425,6 +478,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-satipo',
     ugelName: 'UGEL Satipo',
+    tipo: 'UGEL',
+    zona: 'Selva Central',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'María Salazar',
     status: 'No cumple',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -448,6 +505,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-tarma',
     ugelName: 'UGEL Tarma',
+    tipo: 'UGEL',
+    zona: 'Zona Sierra Central',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'Carlos Mendoza',
     status: 'No cumple',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -473,6 +534,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-chanchamayo',
     ugelName: 'UGEL Chanchamayo',
+    tipo: 'UGEL',
+    zona: 'Selva Central',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'Lucía Ramos',
     status: 'No cumple',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -498,6 +563,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-yauli',
     ugelName: 'UGEL Yauli',
+    tipo: 'UGEL',
+    zona: 'Zona Minera / Sierra',
+    coordinadorZonal: 'Carlos Mendoza',
+    gestorCampo: 'Carlos Mendoza',
     status: 'No cumple',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -518,6 +587,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-pichanaqui',
     ugelName: 'UGEL Pichanaqui',
+    tipo: 'UGEL',
+    zona: 'Selva Central',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'Lucía Ramos',
     status: 'No cumple',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -538,6 +611,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-riotambo',
     ugelName: 'UGEL Río Tambo',
+    tipo: 'UGEL',
+    zona: 'Selva Frontera',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'Javier Ruiz',
     status: 'No cumple',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -558,6 +635,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-pangoa',
     ugelName: 'UGEL Pangoa',
+    tipo: 'UGEL',
+    zona: 'Selva Central',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'Javier Ruiz',
     status: 'Sin información',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -578,6 +659,10 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
   {
     id: 'ugel-perene',
     ugelName: 'UGEL Perené',
+    tipo: 'UGEL',
+    zona: 'Selva Central',
+    coordinadorZonal: 'Lucía Ramos',
+    gestorCampo: 'Lucía Ramos',
     status: 'No cumple',
     start: '14/10/2026',
     end: '28/11/2026',
@@ -600,9 +685,11 @@ const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
 export default function SedesView({
   onActions,
   activeProjectId,
+  activeProject,
 }: {
   onActions?: (h: any) => void;
   activeProjectId?: string;
+  activeProject?: any;
 }) {
   const storageKey = `qaway-sedes-${activeProjectId || 'default'}`;
 
@@ -628,23 +715,23 @@ export default function SedesView({
   const [statusFilter, setStatusFilter] = useState('Todos los Estados');
   const [openDropdown, setOpenDropdown] = useState<'zona' | 'coord' | 'gestor' | 'status' | null>(null);
 
-  // Estados de la Vista Cronograma Territorial por UGEL
+  // Estados de la Vista Cronograma Territorial (Inicia CERRADO para no comprimir la tabla)
   const [selectedDeliverableId, setSelectedDeliverableId] = useState<string>('pt-1.6');
   const [ugelStatusFilter, setUgelStatusFilter] = useState<string>('Todos');
   const [ugelRowsByDeliverable, setUgelRowsByDeliverable] = useState<Record<string, UgelExecutionRow[]>>(() => {
     try {
-      const saved = localStorage.getItem('qaway-sedes-territorial-v1');
+      const saved = localStorage.getItem('qaway-sedes-territorial-v2');
       if (saved) return JSON.parse(saved);
     } catch {}
     return { 'pt-1.6': INITIAL_UGEL_ROWS };
   });
-  const [selectedUgelId, setSelectedUgelId] = useState<string | null>('ugel-huancayo');
+  const [selectedUgelId, setSelectedUgelId] = useState<string | null>(null);
   const [ugelDrawerTab, setUgelDrawerTab] = useState<'info' | 'tareas' | 'docs'>('info');
   const [newTaskText, setNewTaskText] = useState<string>('');
 
   useEffect(() => {
     try {
-      localStorage.setItem('qaway-sedes-territorial-v1', JSON.stringify(ugelRowsByDeliverable));
+      localStorage.setItem('qaway-sedes-territorial-v2', JSON.stringify(ugelRowsByDeliverable));
     } catch {}
   }, [ugelRowsByDeliverable]);
 
@@ -653,16 +740,46 @@ export default function SedesView({
     [selectedDeliverableId]
   );
 
+  const allCurrentUgelRows = ugelRowsByDeliverable[selectedDeliverableId] || INITIAL_UGEL_ROWS;
+
+  // Filtrado reactivo completo para la vista Territorial
   const currentUgelRows = useMemo(() => {
     const list = ugelRowsByDeliverable[selectedDeliverableId] || INITIAL_UGEL_ROWS;
     return list.filter((r) => {
-      const matchSearch = search === '' || r.ugelName.toLowerCase().includes(search.toLowerCase()) || r.responsable.toLowerCase().includes(search.toLowerCase());
-      const matchSt = ugelStatusFilter === 'Todos' || r.status === ugelStatusFilter;
-      return matchSearch && matchSt;
-    });
-  }, [ugelRowsByDeliverable, selectedDeliverableId, search, ugelStatusFilter]);
+      const q = search.trim().toLowerCase();
+      const matchSearch =
+        q === '' ||
+        r.ugelName.toLowerCase().includes(q) ||
+        r.responsable.toLowerCase().includes(q) ||
+        (r.cargo && r.cargo.toLowerCase().includes(q)) ||
+        (r.gestorCampo && r.gestorCampo.toLowerCase().includes(q)) ||
+        (r.coordinadorZonal && r.coordinadorZonal.toLowerCase().includes(q)) ||
+        (r.zona && r.zona.toLowerCase().includes(q));
 
-  const allCurrentUgelRows = ugelRowsByDeliverable[selectedDeliverableId] || INITIAL_UGEL_ROWS;
+      const matchUgelStatus = ugelStatusFilter === 'Todos' || r.status === ugelStatusFilter;
+
+      const matchStatusFilter =
+        statusFilter === 'Todos los Estados' ||
+        (statusFilter === 'En plazo' && (r.status === 'Cumple' || r.status === 'En proceso')) ||
+        (statusFilter === 'En curso' && r.status === 'En proceso') ||
+        (statusFilter === 'Con retraso' && r.status === 'No cumple') ||
+        (statusFilter === 'Completado' && r.status === 'Cumple');
+
+      const matchTab =
+        selectedTab === 'Todas' ||
+        (selectedTab === 'En plazo' && (r.status === 'Cumple' || r.status === 'En proceso')) ||
+        (selectedTab === 'En curso' && r.status === 'En proceso') ||
+        (selectedTab === 'Con retraso' && r.status === 'No cumple') ||
+        (selectedTab === 'Completado' && r.status === 'Cumple');
+
+      const matchZona = zonaFilter === 'Todas las Zonas' || r.zona === zonaFilter;
+      const matchCoord = coordFilter === 'Todos los Coord.' || r.coordinadorZonal === coordFilter;
+      const matchGestor = gestorFilter === 'Todos los Gestores' || r.gestorCampo === gestorFilter;
+
+      return matchSearch && matchUgelStatus && matchStatusFilter && matchTab && matchZona && matchCoord && matchGestor;
+    });
+  }, [ugelRowsByDeliverable, selectedDeliverableId, search, ugelStatusFilter, statusFilter, selectedTab, zonaFilter, coordFilter, gestorFilter]);
+
   const deliverableRollupProgress = useMemo(() => {
     if (allCurrentUgelRows.length === 0) return 0;
     const sum = allCurrentUgelRows.reduce((acc, r) => acc + (r.progress || 0), 0);
@@ -682,7 +799,7 @@ export default function SedesView({
     });
   };
 
-  // Modales y Drawer
+  // Modales y Drawer de Sede tradicional
   const [selectedSede, setSelectedSede] = useState<SedeItem | null>(null);
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
   const [newSedeName, setNewSedeName] = useState('');
@@ -712,20 +829,43 @@ export default function SedesView({
     return () => window.removeEventListener('click', handleWindowClick);
   }, []);
 
-  // Listas únicas de opciones
-  const zonas = useMemo(() => ['Todas las Zonas', ...Array.from(new Set(sedes.map((s) => s.zona)))], [sedes]);
-  const coords = useMemo(() => ['Todos los Coord.', ...Array.from(new Set(sedes.map((s) => s.coordinadorZonal)))], [sedes]);
-  const gestores = useMemo(() => ['Todos los Gestores', ...Array.from(new Set(sedes.map((s) => s.gestorCampo)))], [sedes]);
+  // Listas únicas de opciones conectadas para ambos modos
+  const zonas = useMemo(() => {
+    const fromTerritorial = allCurrentUgelRows.map((r) => r.zona).filter(Boolean);
+    const fromSedes = sedes.map((s) => s.zona).filter(Boolean);
+    return ['Todas las Zonas', ...Array.from(new Set([...fromTerritorial, ...fromSedes]))];
+  }, [allCurrentUgelRows, sedes]);
+
+  const coords = useMemo(() => {
+    const fromTerritorial = allCurrentUgelRows.map((r) => r.coordinadorZonal).filter(Boolean);
+    const fromSedes = sedes.map((s) => s.coordinadorZonal).filter(Boolean);
+    return ['Todos los Coord.', ...Array.from(new Set([...fromTerritorial, ...fromSedes]))];
+  }, [allCurrentUgelRows, sedes]);
+
+  const gestores = useMemo(() => {
+    const fromTerritorial = allCurrentUgelRows.map((r) => r.gestorCampo).filter(Boolean);
+    const fromSedes = sedes.map((s) => s.gestorCampo).filter(Boolean);
+    return ['Todos los Gestores', ...Array.from(new Set([...fromTerritorial, ...fromSedes]))];
+  }, [allCurrentUgelRows, sedes]);
+
   const statuses = ['Todos los Estados', 'En plazo', 'En curso', 'Con retraso', 'Completado'];
 
-  // Métricas
-  const totalSedes = sedes.length;
-  const sedesEnPlazo = sedes.filter((s) => s.status === 'En plazo').length;
-  const sedesEnCurso = sedes.filter((s) => s.status === 'En curso').length;
-  const sedesRetraso = sedes.filter((s) => s.status === 'Con retraso').length;
-  const sedesCompletado = sedes.filter((s) => s.status === 'Completado').length;
-  const sedesAlDia = sedes.filter((s) => s.status === 'Completado' || s.status === 'En plazo').length;
-  const gestoresActivos = new Set(sedes.map((s) => s.gestorCampo)).size;
+  // Métricas reactivas que responden a la vista activa
+  const totalSedes = viewMode === 'Territorial' ? allCurrentUgelRows.length : sedes.length;
+  const sedesEnPlazo = viewMode === 'Territorial'
+    ? allCurrentUgelRows.filter((r) => r.status === 'Cumple').length
+    : sedes.filter((s) => s.status === 'En plazo').length;
+  const sedesEnCurso = viewMode === 'Territorial'
+    ? allCurrentUgelRows.filter((r) => r.status === 'En proceso').length
+    : sedes.filter((s) => s.status === 'En curso').length;
+  const sedesRetraso = viewMode === 'Territorial'
+    ? allCurrentUgelRows.filter((r) => r.status === 'No cumple').length
+    : sedes.filter((s) => s.status === 'Con retraso').length;
+  const sedesCompletado = sedesEnPlazo;
+  const sedesAlDia = sedesEnPlazo;
+  const gestoresActivos = viewMode === 'Territorial'
+    ? new Set(allCurrentUgelRows.map((r) => r.gestorCampo).filter(Boolean)).size
+    : new Set(sedes.map((s) => s.gestorCampo)).size;
 
   const tabPills = [
     { id: 'Todas', label: 'Todas las sedes', count: totalSedes },
@@ -735,7 +875,7 @@ export default function SedesView({
     { id: 'Completado', label: 'Completadas', count: sedesCompletado },
   ];
 
-  // Filtrado reactivo
+  // Filtrado reactivo tradicional
   const filteredSedes = useMemo(() => {
     return sedes.filter((s) => {
       const matchSearch =
@@ -761,7 +901,9 @@ export default function SedesView({
     zonaFilter !== 'Todas las Zonas' ||
     coordFilter !== 'Todos los Coord.' ||
     gestorFilter !== 'Todos los Gestores' ||
-    statusFilter !== 'Todos los Estados';
+    statusFilter !== 'Todos los Estados' ||
+    ugelStatusFilter !== 'Todos' ||
+    selectedTab !== 'Todas';
 
   const clearAllFilters = () => {
     setSearch('');
@@ -769,6 +911,8 @@ export default function SedesView({
     setCoordFilter('Todos los Coord.');
     setGestorFilter('Todos los Gestores');
     setStatusFilter('Todos los Estados');
+    setUgelStatusFilter('Todos');
+    setSelectedTab('Todas');
   };
 
   const handleCreateSede = (e: React.FormEvent) => {
@@ -1293,7 +1437,7 @@ export default function SedesView({
                         <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                           <ChevronDown size={14} color="#475569" />
                           <FolderKanban size={15} color="#2563eb" />
-                          <span>MINEDU · Dotación 2027</span>
+                          <span>{activeProject?.name || 'Programa Maestro Operativo 2027'}</span>
                         </div>
                       </td>
                       <td>
@@ -1401,9 +1545,36 @@ export default function SedesView({
                           onClick={() => setSelectedUgelId(row.id)}
                         >
                           <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '50px' }}>
-                              <Building2 size={14} color={isSelected ? '#2563eb' : '#64748b'} />
-                              <span style={{ fontWeight: isSelected ? 700 : 600, color: '#0f172a' }}>{row.ugelName}</span>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                paddingLeft: row.tipo === 'DRE' ? '34px' : '50px',
+                              }}
+                            >
+                              {row.tipo === 'DRE' ? (
+                                <Landmark size={15} color={isSelected ? '#2563eb' : '#1e40af'} />
+                              ) : (
+                                <Building2 size={14} color={isSelected ? '#2563eb' : '#64748b'} />
+                              )}
+                              <span style={{ fontWeight: isSelected || row.tipo === 'DRE' ? 700 : 600, color: '#0f172a' }}>
+                                {row.ugelName}
+                              </span>
+                              {row.tipo === 'DRE' && (
+                                <span
+                                  style={{
+                                    fontSize: '10px',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    background: '#dbeafe',
+                                    color: '#1e40af',
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Sede Matriz
+                                </span>
+                              )}
                             </div>
                           </td>
                           <td>
@@ -1442,10 +1613,24 @@ export default function SedesView({
               {selectedUgelRow && (
                 <aside className="sd-ugel-panel">
                   <div className="sd-ugel-panel-head">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
                         {selectedUgelRow.ugelName}
                       </h3>
+                      {selectedUgelRow.tipo === 'DRE' && (
+                        <span
+                          style={{
+                            fontSize: '10px',
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            background: '#dbeafe',
+                            color: '#1e40af',
+                            fontWeight: 700,
+                          }}
+                        >
+                          Sede Matriz
+                        </span>
+                      )}
                       <span
                         className={`sd-ugel-badge ${
                           selectedUgelRow.status === 'Cumple'
@@ -1471,7 +1656,7 @@ export default function SedesView({
                         display: 'grid',
                         placeItems: 'center',
                       }}
-                      title="Cerrar panel de UGEL"
+                      title="Cerrar panel de sede"
                     >
                       <X size={17} />
                     </button>
@@ -1586,9 +1771,74 @@ export default function SedesView({
                           </div>
                         </div>
 
-                        {/* Responsable */}
+                        {/* Zona / Ámbito Territorial */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Zona / Ámbito</span>
+                          <span style={{ fontSize: '12.5px', fontWeight: 650, color: '#0f172a' }}>
+                            {selectedUgelRow.zona || 'Valle del Mantaro'}
+                          </span>
+                        </div>
+
+                        {/* Equipo del Proyecto Asignado (Supervisión) */}
+                        <div
+                          style={{
+                            padding: '10px 12px',
+                            background: '#f8fafc',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              color: '#64748b',
+                              letterSpacing: '0.04em',
+                            }}
+                          >
+                            Equipo del Proyecto (Supervisión)
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12px', color: '#475569' }}>Gestor de Campo</span>
+                            <select
+                              value={selectedUgelRow.gestorCampo || 'María Salazar'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                updateUgelRow(selectedUgelRow.id, (r) => ({ ...r, gestorCampo: val }));
+                              }}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '12px',
+                                fontWeight: 650,
+                                color: '#0f172a',
+                                background: '#ffffff',
+                              }}
+                            >
+                              <option value="María Salazar">María Salazar</option>
+                              <option value="Carlos Mendoza">Carlos Mendoza</option>
+                              <option value="Lucía Ramos">Lucía Ramos</option>
+                              <option value="Javier Ruiz">Javier Ruiz</option>
+                            </select>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12px', color: '#475569' }}>Coordinador Zonal</span>
+                            <span style={{ fontSize: '12px', fontWeight: 650, color: '#1e293b' }}>
+                              {selectedUgelRow.coordinadorZonal || 'Carlos Mendoza'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Responsable Externo de la Entidad */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '12px', color: '#64748b' }}>Responsable</span>
+                          <span style={{ fontSize: '12px', color: '#64748b' }}>
+                            {selectedUgelRow.tipo === 'DRE' ? 'Autoridad Regional Matriz' : 'Responsable Externo UGEL'}
+                          </span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span
                               className="sd-avatar-circle"

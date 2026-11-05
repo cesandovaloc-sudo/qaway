@@ -171,30 +171,26 @@ function App() {
   const canvasRef = useRef<HTMLElement | null>(null);
 
   // Coordinación universal de scroll en .qm-canvas con interpolación suave (ease-out 60fps):
-  // Al girar la rueda hacia abajo, desliza progresivamente .qm-canvas para ocultar las tarjetas superiores hasta fijar la cápsula (.workspace).
-  // Al girar la rueda hacia arriba estando en el tope del contenedor interno, vuelve a deslizar suavemente las tarjetas.
+  // Al girar la rueda hacia abajo, desliza progresivamente .header (--canvas-scroll) para ocultar las tarjetas superiores
+  // manteniendo el borde inferior de .workspace 100% anclado por Flexbox al borde inferior de la ventana sin temblor.
   useEffect(() => {
     const scrollCanvas = canvasRef.current;
     if (!scrollCanvas) return;
 
-    let targetScroll = scrollCanvas.scrollTop;
+    let currentCollapse = 0;
+    let targetScroll = 0;
     let rafId: number | null = null;
 
     const updateDockedStatus = () => {
-      if (scrollCanvas.scrollTop > 201) {
-        scrollCanvas.scrollTop = 201;
-      }
       const activePane = scrollCanvas.querySelector('.qm-pane-active') as HTMLElement | null;
-      const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
+      const ws = activePane?.querySelector('.workspace') as HTMLElement | null;
       if (!ws) return;
+
+      scrollCanvas.style.setProperty('--canvas-scroll', `${currentCollapse}px`);
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = scrollCanvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
-      const isStuck = delta <= 10;
-
-      // Compensación 1:1 en tiempo real para mantener el fondo de la tabla 100% inmóvil en pantalla
-      const currentScroll = Math.max(0, Math.min(201, scrollCanvas.scrollTop));
-      scrollCanvas.style.setProperty('--canvas-scroll', `${currentScroll}px`);
+      const isStuck = delta <= 2;
 
       if (ws.classList.contains('is-docked') !== isStuck) {
         ws.classList.toggle('is-docked', isStuck);
@@ -202,15 +198,14 @@ function App() {
     };
 
     const stepSmoothScroll = () => {
-      const current = scrollCanvas.scrollTop;
-      const diff = targetScroll - current;
-      if (Math.abs(diff) < 0.8) {
-        scrollCanvas.scrollTop = targetScroll;
+      const diff = targetScroll - currentCollapse;
+      if (Math.abs(diff) < 0.6) {
+        currentCollapse = targetScroll;
         rafId = null;
         updateDockedStatus();
         return;
       }
-      scrollCanvas.scrollTop = current + diff * 0.38;
+      currentCollapse += diff * 0.38;
       updateDockedStatus();
       rafId = requestAnimationFrame(stepSmoothScroll);
     };
@@ -242,21 +237,20 @@ function App() {
       }
 
       const activePane = scrollCanvas.querySelector('.qm-pane-active') as HTMLElement | null;
-      const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
+      const ws = activePane?.querySelector('.workspace') as HTMLElement | null;
       if (!ws) return;
 
       if (rafId === null) {
-        targetScroll = scrollCanvas.scrollTop;
+        targetScroll = currentCollapse;
       }
 
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = scrollCanvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
-      const maxCanvasScroll = Math.min(201, scrollCanvas.scrollHeight - scrollCanvas.clientHeight);
-      const maxTarget = Math.min(maxCanvasScroll, scrollCanvas.scrollTop + Math.max(0, delta));
+      const maxTarget = Math.max(0, currentCollapse + delta);
       const remainingDown = maxTarget - targetScroll;
 
-      if (e.deltaY > 0 && remainingDown > 1) {
+      if (e.deltaY > 0 && remainingDown > 0.5) {
         e.preventDefault();
         const consume = Math.min(e.deltaY, remainingDown);
         const leftover = e.deltaY - consume;
@@ -265,14 +259,6 @@ function App() {
         if (leftover > 0) {
           const innerScroll = findScrollableUp(targetEl, ws);
           if (innerScroll) innerScroll.scrollTop += leftover;
-        }
-        return;
-      }
-
-      if (e.deltaY > 0) {
-        const innerScroll = findScrollableUp(targetEl, ws);
-        if (!innerScroll || innerScroll.scrollTop + innerScroll.clientHeight >= innerScroll.scrollHeight - 1) {
-          e.preventDefault();
         }
         return;
       }
@@ -288,32 +274,28 @@ function App() {
     };
 
     scrollCanvas.addEventListener('wheel', handleWheel, { passive: false });
-    scrollCanvas.addEventListener('scroll', updateDockedStatus, { passive: true });
     window.addEventListener('resize', updateDockedStatus, { passive: true });
     updateDockedStatus();
 
     return () => {
       scrollCanvas.removeEventListener('wheel', handleWheel);
-      scrollCanvas.removeEventListener('scroll', updateDockedStatus);
       window.removeEventListener('resize', updateDockedStatus);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
 
-  // Sincronizar estado acoplado (.is-docked) y compensación de altura al conmutar entre módulos o vistas
+  // Sincronizar estado acoplado (.is-docked) al conmutar entre módulos
   useEffect(() => {
     const scrollCanvas = canvasRef.current;
     if (!scrollCanvas) return;
     const timer = setTimeout(() => {
       const activePane = scrollCanvas.querySelector('.qm-pane-active') as HTMLElement | null;
-      const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
+      const ws = activePane?.querySelector('.workspace') as HTMLElement | null;
       if (!ws) return;
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = scrollCanvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
-      const currentScroll = Math.max(0, Math.min(201, scrollCanvas.scrollTop));
-      scrollCanvas.style.setProperty('--canvas-scroll', `${currentScroll}px`);
-      ws.classList.toggle('is-docked', delta <= 10);
+      ws.classList.toggle('is-docked', delta <= 2);
     }, 40);
     return () => clearTimeout(timer);
   }, [active]);
@@ -536,6 +518,7 @@ function App() {
           <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <SedesView
               activeProjectId={activeProjectId}
+              activeProject={activeProject}
               onActions={(h) => { binds.current['sedes'] = h; }}
             />
           </div>

@@ -29,7 +29,7 @@
 
 .gantt-v2 .app {
   min-height: 100%;
-  padding: 16px 24px calc(217px - var(--canvas-scroll, 0px));
+  padding: 16px 24px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -38,6 +38,24 @@
   max-width: none;
   margin: 0;
   box-sizing: border-box;
+}
+
+.gantt-v2 .app:has(> .workspace) {
+  height: calc(100vh - 58px);
+  min-height: calc(100vh - 58px);
+  max-height: calc(100vh - 58px);
+  padding: 16px 24px 16px;
+  overflow: hidden;
+}
+
+.gantt-v2 .app:has(> .workspace) > .header {
+  margin-top: calc(-1 * var(--canvas-scroll, 0px));
+  flex-shrink: 0;
+}
+
+.gantt-v2 .app:has(> .workspace) > .metrics,
+.gantt-v2 .app:has(> .workspace) > .stats {
+  flex-shrink: 0;
 }
 
 /* Header */
@@ -457,28 +475,23 @@
 }
 
 /* Workspace y Tabla Gantt con tope inteligente de scroll */
-.gantt-v2 .workspace {
+.gantt-v2 .workspace,
+.gantt-v2 .workspace.is-docked {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
-  min-height: calc(100vh - 275px + var(--canvas-scroll, 0px));
+  min-height: 0;
+  height: auto;
+  max-height: none;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
   overflow: hidden;
-  position: sticky;
-  top: 8px;
-  height: calc(100vh - 275px + var(--canvas-scroll, 0px));
-  max-height: calc(100vh - 275px + var(--canvas-scroll, 0px));
+  position: relative;
+  top: 0;
   z-index: 25;
-}
-
-.gantt-v2 .workspace.is-docked {
-  height: calc(100vh - 74px);
-  min-height: calc(100vh - 74px);
-  max-height: calc(100vh - 74px);
 }
 
 .gantt-v2 .tabs {
@@ -3498,19 +3511,15 @@
    ========================================================= */
 
 /* --- B) Viewport Inteligente: scroll interno contenido en la tabla --- */
-.gantt-v2 .workspace {
-  position: sticky;
-  top: 8px;
-  height: calc(100vh - 275px + var(--canvas-scroll, 0px));
-  min-height: calc(100vh - 275px + var(--canvas-scroll, 0px));
-  max-height: calc(100vh - 275px + var(--canvas-scroll, 0px));
-  z-index: 25;
-}
-
+.gantt-v2 .workspace,
 .gantt-v2 .workspace.is-docked {
-  height: calc(100vh - 74px);
-  min-height: calc(100vh - 74px);
-  max-height: calc(100vh - 74px);
+  position: relative;
+  top: 0;
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  z-index: 25;
 }
 
 .gantt-v2 .gantt-scroll {
