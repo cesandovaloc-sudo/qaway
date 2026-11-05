@@ -471,7 +471,7 @@
   position: sticky;
   top: 8px;
   height: calc(100vh - 275px + var(--canvas-scroll, 0px));
-  max-height: calc(100vh - 74px);
+  max-height: calc(100vh - 275px + var(--canvas-scroll, 0px));
   z-index: 25;
 }
 
@@ -3771,7 +3771,7 @@
   top: 8px;
   height: calc(100vh - 275px + var(--canvas-scroll, 0px));
   min-height: calc(100vh - 275px + var(--canvas-scroll, 0px));
-  max-height: calc(100vh - 74px);
+  max-height: calc(100vh - 275px + var(--canvas-scroll, 0px));
   z-index: 25;
 }
 
