@@ -121,6 +121,7 @@ import {
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
+export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
 type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
 type EditField = ColKey;
 
@@ -149,6 +150,7 @@ export interface Item {
   kind: Kind;
   /** Clasificación metodológica formal PMI/PMBOK de la EDT/WBS */
   edtType?: EdtNodeType;
+  wbsNodeType?: WbsNodeType;
   /** Contenedor macro de ciclo de vida temporal (opcional / nullable) */
   faseId?: string | null;
   parentId?: string;
@@ -197,7 +199,127 @@ export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   'comp-11': ['comp-5'],  // Alerta temprana depende de inicio de Distribución
 };
 
-const INITIAL_ITEMS: Item[] = sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
+/**
+ * Obtiene el resumen de tareas operativas vinculadas a un elemento de la WBS
+ * desde el almacén central 'qaway-tasks-v1' del módulo /tareas.
+ */
+export function getLinkedTasksSummary(
+  item: Item,
+  rawTasks?: any[]
+): { total: number; completed: number; progress: number } | null {
+  if (!rawTasks || !Array.isArray(rawTasks) || rawTasks.length === 0) return null;
+  const itemLabel = `${item.code ? (item.code.endsWith('.') ? item.code : `${item.code} `) : ''}${item.name}`.trim().toLowerCase();
+  const itemName = (item.name || '').trim().toLowerCase();
+  const itemId = (item.id || '').trim().toLowerCase();
+  const itemCode = (item.code || '').trim().toLowerCase();
+
+  const linked = rawTasks.filter((t) => {
+    if (!t || !t.milestone || t.milestone === '—' || t.milestone === '-') return false;
+    const m = String(t.milestone).trim().toLowerCase();
+    if (m === itemLabel || m === itemName || m === itemId) return true;
+    if (itemCode && m.startsWith(itemCode)) return true;
+    if (m.includes(itemName) || itemName.includes(m)) return true;
+    if (t.wbsId && String(t.wbsId).toLowerCase() === itemId) return true;
+    if (t.componentId && String(t.componentId).toLowerCase() === itemId) return true;
+    return false;
+  });
+
+  if (linked.length === 0) return null;
+
+  const completed = linked.filter((t) =>
+    t.status === 'Cumple' || t.status === 'Completado' || t.status === 'Completada'
+  ).length;
+
+  const progress = Math.min(100, Math.max(0, Math.round((completed / linked.length) * 100)));
+  return { total: linked.length, completed, progress };
+}
+
+/**
+ * Motor central de Gobernanza WBS / EDT conforme al estándar PMI/PMBOK:
+ * - Clasifica wbsNodeType (COMPONENTE, SUBCOMPONENTE, PAQUETE_TRABAJO, HITO).
+ * - En hojas: sincroniza avance con tareas operativas si están vinculadas.
+ * - En contenedores: ejecuta Rollup dinámico del 100% (avance ponderado/promedio de hijos, min(start) y max(end)).
+ */
+export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] {
+  if (!Array.isArray(rawItems) || rawItems.length === 0) return [];
+
+  const items = rawItems.map((it) => ({ ...it }));
+  const parentToChildren = new Map<string, Item[]>();
+  items.forEach((it) => {
+    if (it.parentId) {
+      if (!parentToChildren.has(it.parentId)) parentToChildren.set(it.parentId, []);
+      parentToChildren.get(it.parentId)!.push(it);
+    }
+  });
+
+  // Clasificación de tipología de nodo y avance en nodos hoja
+  items.forEach((it) => {
+    const hasChildren = parentToChildren.has(it.id) && parentToChildren.get(it.id)!.length > 0;
+    if (!it.parentId) {
+      it.wbsNodeType = it.kind === 'hito' || hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO';
+    } else if (hasChildren) {
+      it.wbsNodeType = 'SUBCOMPONENTE';
+    } else {
+      const isMilestone = it.start === it.end && it.kind === 'hito';
+      it.wbsNodeType = isMilestone ? 'HITO' : 'PAQUETE_TRABAJO';
+    }
+
+    if (!hasChildren) {
+      const summary = getLinkedTasksSummary(it, rawTasks);
+      if (summary) {
+        it.progress = summary.progress;
+      }
+    }
+  });
+
+  // Cálculo de profundidad para procesamiento bottom-up estricto
+  const depthMap = new Map<string, number>();
+  const getDepth = (id: string): number => {
+    if (depthMap.has(id)) return depthMap.get(id)!;
+    const item = items.find((x) => x.id === id);
+    if (!item || !item.parentId) {
+      depthMap.set(id, 0);
+      return 0;
+    }
+    const d = 1 + getDepth(item.parentId);
+    depthMap.set(id, d);
+    return d;
+  };
+  items.forEach((it) => getDepth(it.id));
+
+  // Ordenar contenedores de mayor profundidad a menor (hojas intermedias primero, luego raíces)
+  const containers = items
+    .filter((it) => parentToChildren.has(it.id) && parentToChildren.get(it.id)!.length > 0)
+    .sort((a, b) => (depthMap.get(b.id) || 0) - (depthMap.get(a.id) || 0));
+
+  // Rollup de avance, fechas y estado en contenedores
+  containers.forEach((parent) => {
+    const children = items.filter((x) => x.parentId === parent.id);
+    if (children.length > 0) {
+      const totalProgress = children.reduce((sum, c) => sum + (typeof c.progress === 'number' ? c.progress : 0), 0);
+      parent.progress = Math.min(100, Math.max(0, Math.round(totalProgress / children.length)));
+
+      const validStarts = children.map((c) => c.start).filter((s) => s && /^\d{4}-\d{2}-\d{2}/.test(s)).sort();
+      const validEnds = children.map((c) => c.end).filter((e) => e && /^\d{4}-\d{2}-\d{2}/.test(e)).sort();
+      if (validStarts.length > 0) parent.start = validStarts[0];
+      if (validEnds.length > 0) parent.end = validEnds[validEnds.length - 1];
+
+      if (parent.progress === 100) {
+        parent.status = 'Completado';
+      } else if (children.some((c) => c.status === 'Con retraso')) {
+        parent.status = 'Con retraso';
+      } else if (parent.progress > 0) {
+        parent.status = 'En proceso';
+      } else {
+        parent.status = 'Pendiente';
+      }
+    }
+  });
+
+  return items;
+}
+
+const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
   id: r.id,
   code: r.code,
   name: r.name,
@@ -221,7 +343,7 @@ const INITIAL_ITEMS: Item[] = sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((
   region: 'Junín',
   gestor: r.entidadResponsable || 'Carlos Mendoza',
   gestores: [r.entidadResponsable || 'Carlos Mendoza'],
-})));
+}))));
 
 const MONTHS = [
   { label: 'Sep', start: '2026-09-01' },
@@ -990,7 +1112,7 @@ export default function CronogramaGanttView({
                 : (init?.dependencies && init.dependencies.length > 0 ? init.dependencies : (OFFICIAL_WBS_DEPENDENCIES[it.id] || [])),
             };
           });
-          return sortWbsHierarchy(upgraded);
+          return computeWbsHierarchy(sortWbsHierarchy(upgraded), rawTasks);
         }
       }
       if (pid === 'p1') {
@@ -1061,11 +1183,40 @@ export default function CronogramaGanttView({
     };
   }, [projectId]);
 
+  // Sincronización reactiva bidireccional con el módulo de tareas operativas (/tareas)
+  useEffect(() => {
+    const handleTasksUpdated = () => {
+      try {
+        const saved = localStorage.getItem('qaway-tasks-v1');
+        const parsed = saved ? JSON.parse(saved) : [];
+        setRawTasks(parsed);
+        setItems((prevItems) => {
+          const recomputed = computeWbsHierarchy(prevItems, parsed);
+          try {
+            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
+            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+          } catch {}
+          return recomputed;
+        });
+      } catch (e) {
+        console.error('Error sincronizando tareas operativas con WBS:', e);
+      }
+    };
+
+    window.addEventListener('qaway-tasks-updated', handleTasksUpdated);
+    window.addEventListener('storage', handleTasksUpdated);
+    return () => {
+      window.removeEventListener('qaway-tasks-updated', handleTasksUpdated);
+      window.removeEventListener('storage', handleTasksUpdated);
+    };
+  }, [projectId]);
+
   // Persistencia segura por proyecto activo (Doble capa: LocalStorage inmediato + Sincronización Supabase)
   useEffect(() => {
     if (currentPidRef.current === projectId) {
       try {
         localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(items));
+        window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
       } catch {
         /* fallback */
       }
@@ -2055,7 +2206,8 @@ export default function CronogramaGanttView({
   /* ---------- Historial de Deshacer y Rehacer (Buildern standard) ---------- */
   const commitChange = (nextOrUpdater: Item[] | ((prev: Item[]) => Item[])) => {
     setItems((prev) => {
-      const next = typeof nextOrUpdater === 'function' ? nextOrUpdater(prev) : nextOrUpdater;
+      const rawNext = typeof nextOrUpdater === 'function' ? nextOrUpdater(prev) : nextOrUpdater;
+      const next = computeWbsHierarchy(rawNext, rawTasks);
       if (JSON.stringify(prev) !== JSON.stringify(next)) {
         setHistory((h) => [prev, ...h].slice(0, 30));
         setRedoHistory([]);
@@ -2865,12 +3017,20 @@ export default function CronogramaGanttView({
         code = `1.${subs.length + 1}`;
       }
     }
+    if (kind === 'subproceso' && pId) {
+      const existingSiblings = items.filter((x) => x.parentId === pId);
+      if (existingSiblings.length === 0) {
+        notify('Aviso metodológico EDT (PMI): Según la regla del 100%, todo contenedor desglosado debe constar de al menos dos elementos para representar la totalidad del alcance.');
+      }
+    }
+
     const draftItem: Item = {
       id,
       code,
-      name: kind === 'hito' ? 'Nuevo componente' : 'Nuevo subcomponente',
+      name: kind === 'hito' ? 'Nuevo componente' : 'Nuevo paquete de trabajo',
       kind,
-      edtType: kind === 'hito' ? 'COMPONENTE' : 'SUBCOMPONENTE',
+      edtType: kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO',
+      wbsNodeType: kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO',
       faseId: null,
       parentId: pId,
       start: defaultStart,
@@ -5025,29 +5185,17 @@ export default function CronogramaGanttView({
                     </div>
                   )}
 
-                  {visibleCols.includes('progress') && (
-                    <div
-                      className="progress editable"
-                      title="Clic para ajustar el avance (0–100%)"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleEdit(x, 'progress');
-                      }}
-                    >
-                      {isEditing(x, 'progress') ? (
-                        <div className="cell-editor cell-pop progress-pop">
-                          <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            step={5}
-                            value={x.progress}
-                            onChange={(e) => setProgress(x, +e.target.value)}
-                          />
-                          <b>{x.progress}%</b>
-                        </div>
-                      ) : (
-                        <>
+                  {visibleCols.includes('progress') && (() => {
+                    const isContainer = Boolean(x.hasChildren || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === x.id));
+                    const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
+
+                    if (isContainer) {
+                      return (
+                        <div
+                          className="progress is-rollup"
+                          title="Avance calculado por rollup de subelementos (PMI - Regla del 100%)"
+                          style={{ cursor: 'default' }}
+                        >
                           <span>
                             <i
                               className={
@@ -5063,10 +5211,79 @@ export default function CronogramaGanttView({
                             />
                           </span>
                           <b>{x.progress}%</b>
-                        </>
-                      )}
-                    </div>
-                  )}
+                        </div>
+                      );
+                    }
+
+                    if (linkedTaskSummary) {
+                      return (
+                        <div
+                          className="progress is-linked-tasks"
+                          title={`Avance gobernado por tareas operativas: ${linkedTaskSummary.completed}/${linkedTaskSummary.total} completadas (Regla del 100%)`}
+                          style={{ cursor: 'default' }}
+                        >
+                          <span>
+                            <i
+                              className={
+                                x.progress === 100
+                                  ? 'green'
+                                  : x.status === 'Con retraso'
+                                  ? 'red'
+                                  : x.status === 'Pendiente'
+                                  ? 'gray'
+                                  : 'blue'
+                              }
+                              style={{ width: `${x.progress}%` }}
+                            />
+                          </span>
+                          <b>{x.progress}%</b>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        className="progress editable"
+                        title="Clic para ajustar el avance (0–100%)"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleEdit(x, 'progress');
+                        }}
+                      >
+                        {isEditing(x, 'progress') ? (
+                          <div className="cell-editor cell-pop progress-pop">
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              step={5}
+                              value={x.progress}
+                              onChange={(e) => setProgress(x, +e.target.value)}
+                            />
+                            <b>{x.progress}%</b>
+                          </div>
+                        ) : (
+                          <>
+                            <span>
+                              <i
+                                className={
+                                  x.progress === 100
+                                    ? 'green'
+                                    : x.status === 'Con retraso'
+                                    ? 'red'
+                                    : x.status === 'Pendiente'
+                                    ? 'gray'
+                                    : 'blue'
+                                }
+                                style={{ width: `${x.progress}%` }}
+                              />
+                            </span>
+                            <b>{x.progress}%</b>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
                   {visibleCols.includes('deviation') && (() => {
                     const dev = getDeviationDays(x, currentTodayIso);
                     const tone = getDeviationTone(dev);
@@ -5880,39 +6097,40 @@ export default function CronogramaGanttView({
                         <g
                           key={pairKey}
                           className={`dep-line-group ${isHighlighted ? 'is-active' : ''}`}
-                          onMouseEnter={(e) => {
-                            if (depHoverTimeoutRef.current) {
-                              clearTimeout(depHoverTimeoutRef.current);
-                              depHoverTimeoutRef.current = null;
-                            }
-                            setHoveredDep({
-                              sourceItem,
-                              targetItem: item,
-                              x: e.clientX,
-                              y: e.clientY - 14,
-                            });
-                          }}
-                          onMouseMove={() => {
-                            if (depHoverTimeoutRef.current) {
-                              clearTimeout(depHoverTimeoutRef.current);
-                              depHoverTimeoutRef.current = null;
-                            }
-                          }}
-                          onMouseLeave={() => {
-                            if (depHoverTimeoutRef.current) clearTimeout(depHoverTimeoutRef.current);
-                            depHoverTimeoutRef.current = setTimeout(() => {
-                              setHoveredDep(null);
-                            }, 160);
-                          }}
                         >
-                          {/* Hit area amplia (14px) 100% invisible para interacción suave sin parpadeo */}
+                          {/* Hit area invisible ajustada (10px) para interacción directa y certera sin parpadeo ni auras */}
                           <path
                             d={pathD}
                             fill="none"
-                            stroke="rgba(0,0,0,0.001)"
-                            strokeWidth="14"
+                            stroke="transparent"
+                            strokeWidth="10"
                             className="dep-line-hit"
                             style={{ pointerEvents: 'stroke', cursor: 'pointer' }}
+                            onMouseEnter={(e) => {
+                              if (depHoverTimeoutRef.current) {
+                                clearTimeout(depHoverTimeoutRef.current);
+                                depHoverTimeoutRef.current = null;
+                              }
+                              setHoveredDep({
+                                sourceItem,
+                                targetItem: item,
+                                x: e.clientX,
+                                y: e.clientY - 14,
+                              });
+                            }}
+                            onMouseMove={(e) => {
+                              if (depHoverTimeoutRef.current) {
+                                clearTimeout(depHoverTimeoutRef.current);
+                                depHoverTimeoutRef.current = null;
+                              }
+                              setHoveredDep((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY - 14 } : prev));
+                            }}
+                            onMouseLeave={() => {
+                              if (depHoverTimeoutRef.current) clearTimeout(depHoverTimeoutRef.current);
+                              depHoverTimeoutRef.current = setTimeout(() => {
+                                setHoveredDep(null);
+                              }, 140);
+                            }}
                           />
                           <path
                             d={pathD}
@@ -6940,20 +7158,39 @@ export default function CronogramaGanttView({
                 </div>
 
                 {/* 6. Avance */}
-                <div className="progress-edit">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Avance</span>
-                    <b style={{ fontSize: '13px', color: '#0f172a' }}>{activeItem.progress}%</b>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="5"
-                    value={activeItem.progress}
-                    onChange={(e) => setDraftProgress(+e.target.value)}
-                  />
-                </div>
+                {(() => {
+                  const isContainer = Boolean(activeItem.hasChildren || activeItem.wbsNodeType === 'COMPONENTE' || activeItem.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === activeItem.id));
+                  const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
+
+                  return (
+                    <div className="progress-edit">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Avance</span>
+                        <b style={{ fontSize: '13px', color: '#0f172a' }}>{activeItem.progress}%</b>
+                      </div>
+                      {isContainer ? (
+                        <div style={{ padding: '7px 10px', background: '#f1f5f9', borderRadius: '6px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
+                          <span>Calculado por rollup de subelementos (PMI - Regla del 100%)</span>
+                        </div>
+                      ) : linkedTaskSummary ? (
+                        <div style={{ padding: '7px 10px', background: '#eff6ff', borderRadius: '6px', fontSize: '11px', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563eb', flexShrink: 0 }} />
+                          <span>Gobernado por tareas operativas ({linkedTaskSummary.completed}/{linkedTaskSummary.total} completadas)</span>
+                        </div>
+                      ) : (
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="5"
+                          value={activeItem.progress}
+                          onChange={(e) => setDraftProgress(+e.target.value)}
+                        />
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* 7. Tipo de reporte */}
                 {activeItem.kind === 'hito' && (

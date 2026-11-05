@@ -2679,7 +2679,9 @@
   gap: 8px;
 }
 
-.gantt-v2 .progress.editable > span {
+.gantt-v2 .progress.editable > span,
+.gantt-v2 .progress.is-rollup > span,
+.gantt-v2 .progress.is-linked-tasks > span {
   height: 8px;
   min-width: 35px;
   flex: 1;
@@ -2688,22 +2690,44 @@
   overflow: hidden;
 }
 
-.gantt-v2 .progress.editable i {
+.gantt-v2 .progress.editable i,
+.gantt-v2 .progress.is-rollup i,
+.gantt-v2 .progress.is-linked-tasks i {
   display: block;
   height: 100%;
   border-radius: 8px;
 }
 
-.gantt-v2 .progress.editable i.blue { background: #0066ff; }
-.gantt-v2 .progress.editable i.green { background: #00b96b; }
-.gantt-v2 .progress.editable i.amber { background: #fa8c16; }
-.gantt-v2 .progress.editable i.red { background: #ef4444; }
-.gantt-v2 .progress.editable i.gray { background: #94a3b8; }
+.gantt-v2 .progress.editable i.blue,
+.gantt-v2 .progress.is-rollup i.blue,
+.gantt-v2 .progress.is-linked-tasks i.blue { background: #0066ff; }
+.gantt-v2 .progress.editable i.green,
+.gantt-v2 .progress.is-rollup i.green,
+.gantt-v2 .progress.is-linked-tasks i.green { background: #00b96b; }
+.gantt-v2 .progress.editable i.amber,
+.gantt-v2 .progress.is-rollup i.amber,
+.gantt-v2 .progress.is-linked-tasks i.amber { background: #fa8c16; }
+.gantt-v2 .progress.editable i.red,
+.gantt-v2 .progress.is-rollup i.red,
+.gantt-v2 .progress.is-linked-tasks i.red { background: #ef4444; }
+.gantt-v2 .progress.editable i.gray,
+.gantt-v2 .progress.is-rollup i.gray,
+.gantt-v2 .progress.is-linked-tasks i.gray { background: #94a3b8; }
 
-.gantt-v2 .progress.editable b {
+.gantt-v2 .progress.editable b,
+.gantt-v2 .progress.is-rollup b,
+.gantt-v2 .progress.is-linked-tasks b {
   font-size: 12px;
   color: #0f172a;
   min-width: 32px;
+}
+
+.gantt-v2 .progress.is-rollup {
+  cursor: default;
+}
+
+.gantt-v2 .progress.is-linked-tasks {
+  cursor: default;
 }
 
 /* Status pills */
@@ -3941,7 +3965,7 @@ body.gantt-resizing {
   margin-left: 6px;
 }
 
-/* Estabilidad Total de Líneas de Dependencia (Sin parpadeo, Hit-area estrictamente invisible) */
+/* Estabilidad Total de Líneas de Dependencia (Cero parpadeo, Cero destello/halo) */
 .gantt-v2 .dep-line-group {
   cursor: pointer;
 }
@@ -3951,12 +3975,15 @@ body.gantt-resizing {
 .gantt-v2 .dep-line-group:hover .dep-line-hit,
 .gantt-v2 .dep-line-group.is-active .dep-line-hit,
 .gantt-v2 .gantt-dependency-svg path.dep-line-hit:hover {
-  stroke: rgba(0, 0, 0, 0.001) !important;
+  stroke: transparent !important;
   fill: none !important;
-  stroke-width: 14px !important;
-  opacity: 0.001 !important;
+  stroke-width: 10px !important;
+  opacity: 0 !important;
   cursor: pointer !important;
   pointer-events: stroke !important;
+  filter: none !important;
+  box-shadow: none !important;
+  outline: none !important;
   transition: none !important;
 }
 
@@ -3964,6 +3991,9 @@ body.gantt-resizing {
 .gantt-v2 .gantt-dependency-svg path.dep-line-visible {
   transition: stroke 0.12s ease, stroke-width 0.12s ease;
   pointer-events: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .gantt-v2 .dep-line-group:hover .dep-line-visible,
@@ -3972,9 +4002,17 @@ body.gantt-resizing {
   stroke-width: 1.8px !important;
   marker-end: url(#dep-arrow-active) !important;
   opacity: 1 !important;
+  filter: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 /* Tooltip Compacto y Sin Desborde para Dependencias (2 Filas Ultra-Limpias) */
+.gantt-v2 .gantt-dep-tooltip,
+.gantt-v2 .gantt-dep-tooltip * {
+  pointer-events: none !important;
+}
+
 .gantt-v2 .gantt-dep-tooltip {
   position: fixed;
   transform: translate(-50%, -100%);
