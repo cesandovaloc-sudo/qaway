@@ -1385,6 +1385,13 @@
   border-color: #bfdbfe;
 }
 
+.gantt-v2 .qm-btn-icon:disabled,
+.gantt-v2 .qm-btn-icon.disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Micro-tooltip institucional en hover (concreto, sobrio, estilo Qaway) */
 .gantt-v2 [data-tooltip] {
   position: relative;

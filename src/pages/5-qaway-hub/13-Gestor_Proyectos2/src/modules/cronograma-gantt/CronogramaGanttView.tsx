@@ -73,6 +73,7 @@ import {
   FileText,
   FileUp,
   Filter,
+  FilterX,
   Flag,
   Folder,
   FolderMinus,
@@ -2017,6 +2018,30 @@ export default function CronogramaGanttView({
     }
   }, [visibleCols, viewMode]);
 
+  // DIRECTIVA TÉCNICA: Auto-scroll / enfoque al lienzo al conmutar a Organigrama (scrollIntoView)
+  useEffect(() => {
+    if (viewMode === 'organigrama') {
+      const timer = setTimeout(() => {
+        const target = document.getElementById('edt-workspace-toolbar');
+        if (target) {
+          try {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (_) {}
+
+          // Compatibilidad con contenedores de scroll anidados del shell (qm-canvas / gantt-v2)
+          const scrollParent = (target.closest('.qm-canvas') as HTMLElement | null) ||
+                               (document.querySelector('.qm-canvas') as HTMLElement | null) ||
+                               (target.closest('.gantt-v2') as HTMLElement | null);
+          if (scrollParent) {
+            const targetTop = target.offsetTop - 8;
+            scrollParent.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+          }
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [viewMode]);
+
   const ganttColumns = useMemo<ColumnDef<Item>[]>(
     () => [
       ...GANTT_COLUMNS,
@@ -2295,18 +2320,24 @@ export default function CronogramaGanttView({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isEditingInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+      if (isEditingInput) return;
+
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-        const target = e.target as HTMLElement | null;
-        const isEditingInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
-        if (!isEditingInput) {
-          e.preventDefault();
-          handleUndo();
-        }
+        e.preventDefault();
+        handleUndo();
+      } else if (
+        (e.ctrlKey || e.metaKey) &&
+        (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))
+      ) {
+        e.preventDefault();
+        handleRedo();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [history]);
+  }, [history, redoHistory]);
 
   /* ---------- Redimensionamiento de columnas (Agrandar y Disminuir) ---------- */
   useEffect(() => {
@@ -3460,7 +3491,7 @@ export default function CronogramaGanttView({
         </section>
 
         {/* Workspace Central */}
-        <main ref={workspaceRef} className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''}`}>
+        <main ref={workspaceRef} id="edt-workspace-toolbar" className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''}`}>
           {/* Barra superior de salida en pantalla completa */}
           {isFullscreen && (
             <div className="fullscreen-exit-bar">
@@ -4054,6 +4085,36 @@ export default function CronogramaGanttView({
                   <ArrowLeftRight size={14} />
                 </button>
 
+                {/* Botón Retroceder / Deshacer (Buildern standard) */}
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUndo();
+                  }}
+                  disabled={history.length === 0}
+                  data-tooltip={history.length > 0 ? "Retroceder / Deshacer (Ctrl+Z)" : "Sin cambios para retroceder"}
+                  aria-label="Retroceder o deshacer último cambio"
+                >
+                  <Undo2 size={14} />
+                </button>
+
+                {/* Botón Adelantar / Rehacer (Buildern standard) */}
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRedo();
+                  }}
+                  disabled={redoHistory.length === 0}
+                  data-tooltip={redoHistory.length > 0 ? "Adelantar / Rehacer (Ctrl+Y)" : "Sin cambios para adelantar"}
+                  aria-label="Adelantar o rehacer último cambio"
+                >
+                  <Redo2 size={14} />
+                </button>
+
                 {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base (en Gantt y Lista) */}
                 <button
                   type="button"
@@ -4182,21 +4243,27 @@ export default function CronogramaGanttView({
 
                 <div className="filter-group-divider" aria-hidden="true" />
 
-                {/* Zona 4: Restablecimiento Integral de Filtros y Orden */}
+                {/* Zona 4: Restablecimiento Universal de Todos los Filtros y Orden */}
                 <button
                   type="button"
                   className="btn secondary clear-btn qm-btn-icon"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setSearch('');
                     setStateFilter('Todos');
                     setTypeFilter('Todos');
                     setSelectedRegions([]);
                     setPhaseFilter('Todas');
                     setGestorFilter('Todos');
+                    setWbsLevelFilter('todos');
+                    setVencimientosFilter('todos');
+                    setListaTemporalFilter('Todos');
                     setRangeFrom(DEFAULT_RANGE.from);
                     setRangeTo(DEFAULT_RANGE.to);
                     setTab('Todos');
                     setCustomRules([]);
+                    setAdvancedFiltersOpen(false);
+                    setColFilterOpen(null);
                     setShowBaseline(false);
                     setShowCriticalPath(false);
                     engine.clearAllFilters();
@@ -4204,12 +4271,12 @@ export default function CronogramaGanttView({
                     resetColWidths();
                     closeMenus();
                     scrollToDate(RANGE_MIN);
-                    notify('Filtros, orden y visualización restablecidos');
+                    notify('Todos los filtros restablecidos');
                   }}
-                  data-tooltip="Restablecer filtros y orden"
-                  aria-label="Restablecer filtros, orden y rango temporal"
+                  data-tooltip="Borrar todos los filtros"
+                  aria-label="Borrar todos los filtros y restablecer vista"
                 >
-                  <RotateCcw size={15} />
+                  <FilterX size={15} />
                 </button>
               </>
             )}
@@ -4489,17 +4556,6 @@ export default function CronogramaGanttView({
                     title={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
                   >
                     <ChevronsUpDown size={13} />
-                  </button>
-                  <button
-                    type="button"
-                    className={`cols-trigger-btn ${colsMenuOpen ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setColsMenuOpen((v) => !v);
-                    }}
-                    title="Configurar columnas visibles"
-                  >
-                    <Columns3 size={13} />
                   </button>
                   {viewMode === 'gantt' && (
                     <button
