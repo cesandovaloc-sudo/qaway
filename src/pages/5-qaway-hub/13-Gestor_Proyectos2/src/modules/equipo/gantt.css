@@ -29,7 +29,7 @@
 
 .gantt-v2 .app {
   min-height: 100%;
-  padding: 16px 24px 210px;
+  padding: 16px 24px calc(217px - var(--canvas-scroll, 0px));
   display: flex;
   flex-direction: column;
   gap: 12px;

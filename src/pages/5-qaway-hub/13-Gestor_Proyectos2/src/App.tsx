@@ -181,6 +181,9 @@ function App() {
     let rafId: number | null = null;
 
     const updateDockedStatus = () => {
+      if (scrollCanvas.scrollTop > 201) {
+        scrollCanvas.scrollTop = 201;
+      }
       const activePane = scrollCanvas.querySelector('.qm-pane-active') as HTMLElement | null;
       const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
       if (!ws) return;
@@ -249,7 +252,7 @@ function App() {
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = scrollCanvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
-      const maxCanvasScroll = scrollCanvas.scrollHeight - scrollCanvas.clientHeight;
+      const maxCanvasScroll = Math.min(201, scrollCanvas.scrollHeight - scrollCanvas.clientHeight);
       const maxTarget = Math.min(maxCanvasScroll, scrollCanvas.scrollTop + Math.max(0, delta));
       const remainingDown = maxTarget - targetScroll;
 
@@ -262,6 +265,14 @@ function App() {
         if (leftover > 0) {
           const innerScroll = findScrollableUp(targetEl, ws);
           if (innerScroll) innerScroll.scrollTop += leftover;
+        }
+        return;
+      }
+
+      if (e.deltaY > 0) {
+        const innerScroll = findScrollableUp(targetEl, ws);
+        if (!innerScroll || innerScroll.scrollTop + innerScroll.clientHeight >= innerScroll.scrollHeight - 1) {
+          e.preventDefault();
         }
         return;
       }

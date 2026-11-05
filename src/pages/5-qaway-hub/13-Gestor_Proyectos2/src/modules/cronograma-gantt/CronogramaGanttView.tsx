@@ -3694,15 +3694,6 @@ export default function CronogramaGanttView({
               </button>
               <button
                 type="button"
-                className={`view-mode-btn ${viewMode === 'arbol' ? 'active' : ''}`}
-                onClick={() => handleViewModeChange('arbol')}
-                title="Vista Jerárquica WBS (Árbol de trabajo)"
-              >
-                <GitFork size={14} />
-                <span>Jerárquica</span>
-              </button>
-              <button
-                type="button"
                 className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
                 onClick={() => handleViewModeChange('organigrama')}
                 title="Vista Organigrama WBS / EDT por Niveles (Diagrama de bloques)"
