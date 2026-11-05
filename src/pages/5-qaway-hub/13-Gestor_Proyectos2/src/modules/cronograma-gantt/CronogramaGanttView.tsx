@@ -3679,6 +3679,107 @@ export default function CronogramaGanttView({
               )}
             </div>
 
+            {/* Filtro Desplegable de Vencimientos y Alertas Críticas (Misma forma que Nivel WBS, juntos) */}
+            <div className="filter-dropdown-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
+                  vencimientosFilter !== 'todos' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('vencimientos')}
+                title="Control de plazos de vencimiento y retraso"
+              >
+                <div className="filter-card-copy">
+                  <small>Vencimientos</small>
+                  <span>
+                    {vencimientosFilter === 'todos'
+                      ? 'Todos los plazos'
+                      : vencimientosFilter === 'hoy'
+                      ? 'Vencen hoy'
+                      : vencimientosFilter === 'semana'
+                      ? 'Esta semana'
+                      : vencimientosFilter === 'mes'
+                      ? 'Este mes'
+                      : vencimientosFilter === 'trimestre'
+                      ? 'Este trimestre'
+                      : 'Con retraso'}
+                  </span>
+                </div>
+                {criticalItemsCount > 0 && (
+                  <span
+                    className="wbs-level-badge"
+                    style={{
+                      background: '#fee2e2',
+                      color: '#b91c1c',
+                      fontWeight: 700,
+                      fontSize: '11px',
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    {criticalItemsCount}
+                  </span>
+                )}
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'vencimientos' && (
+                <div
+                  className="filter-card-popover"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ minWidth: 230 }}
+                >
+                  <div className="filter-popover-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Control de Vencimientos</span>
+                    {vencimientosFilter !== 'todos' && (
+                      <button
+                        type="button"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#0066ff',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                        onClick={() => setVencimientosFilter('todos')}
+                      >
+                        Restablecer
+                      </button>
+                    )}
+                  </div>
+                  <div className="filter-popover-list">
+                    {[
+                      { id: 'todos', label: 'Todos los plazos', badge: items.length },
+                      { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount },
+                      { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount },
+                      { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount },
+                      { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount },
+                      { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, isLate: true },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        className={`filter-item-btn ${vencimientosFilter === opt.id ? 'selected' : ''}`}
+                        onClick={() => {
+                          setVencimientosFilter(opt.id as any);
+                          closeMenus();
+                        }}
+                      >
+                        <span>{opt.label}</span>
+                        <span
+                          className="wbs-level-badge"
+                          style={opt.isLate && opt.badge > 0 ? { background: '#fee2e2', color: '#b91c1c' } : undefined}
+                        >
+                          {opt.badge}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Botón Limpiar para Calendario */}
             {viewMode === 'calendario' && (
               <button
@@ -3712,8 +3813,6 @@ export default function CronogramaGanttView({
                 <span>Limpiar</span>
               </button>
             )}
-
-
 
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
             {viewMode !== 'calendario' && (
@@ -3796,77 +3895,6 @@ export default function CronogramaGanttView({
                   Hoy
                 </button>
 
-                {/* Desplegable Formal de Vencimientos y Alertas */}
-                <div className="filter-dropdown-wrap">
-                  <button
-                    type="button"
-                    className={`filter-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
-                      vencimientosFilter !== 'todos' ? 'filtered' : ''
-                    }`}
-                    onClick={() => toggleMenu('vencimientos')}
-                    style={{ height: 32, padding: '0 8px' }}
-                    title="Control de plazos de vencimiento y retraso"
-                  >
-                    <div className="filter-card-copy">
-                      <small style={{ fontSize: '10px' }}>Vencimientos</small>
-                      <span style={{ fontSize: '11.5px', fontWeight: 650 }}>
-                        {vencimientosFilter === 'todos'
-                          ? 'Todos los plazos'
-                          : vencimientosFilter === 'hoy'
-                          ? 'Vencen hoy'
-                          : vencimientosFilter === 'semana'
-                          ? 'Esta semana'
-                          : vencimientosFilter === 'mes'
-                          ? 'Este mes'
-                          : vencimientosFilter === 'trimestre'
-                          ? 'Este trimestre'
-                          : 'Con retraso'}
-                      </span>
-                    </div>
-                    {criticalItemsCount > 0 && (
-                      <span className="alert-badge" style={{ marginLeft: 4, background: '#fee2e2', color: '#b91c1c' }}>
-                        {criticalItemsCount}
-                      </span>
-                    )}
-                    <ChevronDown size={13} className="filter-chevron" />
-                  </button>
-                  {activeMenu === 'vencimientos' && (
-                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
-                      <div className="filter-popover-title">
-                        <span>Control de Vencimientos</span>
-                      </div>
-                      <div className="filter-popover-list">
-                        {[
-                          { id: 'todos', label: 'Todos los plazos', badge: items.length },
-                          { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount },
-                          { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount },
-                          { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount },
-                          { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount },
-                          { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, isLate: true },
-                        ].map((opt) => (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            className={`filter-item-btn ${vencimientosFilter === opt.id ? 'selected' : ''}`}
-                            onClick={() => {
-                              setVencimientosFilter(opt.id as any);
-                              closeMenus();
-                            }}
-                          >
-                            <span>{opt.label}</span>
-                            <span
-                              className="wbs-level-badge"
-                              style={opt.isLate && opt.badge > 0 ? { background: '#fee2e2', color: '#b91c1c' } : undefined}
-                            >
-                              {opt.badge}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
                 <div className="zoom" title="Filtrar actividades por período de corte">
                   {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => (
                     <button
@@ -3894,77 +3922,6 @@ export default function CronogramaGanttView({
                 >
                   Hoy
                 </button>
-
-                {/* Desplegable Formal de Vencimientos y Alertas */}
-                <div className="filter-dropdown-wrap">
-                  <button
-                    type="button"
-                    className={`filter-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
-                      vencimientosFilter !== 'todos' ? 'filtered' : ''
-                    }`}
-                    onClick={() => toggleMenu('vencimientos')}
-                    style={{ height: 32, padding: '0 8px' }}
-                    title="Control de plazos de vencimiento y retraso"
-                  >
-                    <div className="filter-card-copy">
-                      <small style={{ fontSize: '10px' }}>Vencimientos</small>
-                      <span style={{ fontSize: '11.5px', fontWeight: 650 }}>
-                        {vencimientosFilter === 'todos'
-                          ? 'Todos los plazos'
-                          : vencimientosFilter === 'hoy'
-                          ? 'Vencen hoy'
-                          : vencimientosFilter === 'semana'
-                          ? 'Esta semana'
-                          : vencimientosFilter === 'mes'
-                          ? 'Este mes'
-                          : vencimientosFilter === 'trimestre'
-                          ? 'Este trimestre'
-                          : 'Con retraso'}
-                      </span>
-                    </div>
-                    {criticalItemsCount > 0 && (
-                      <span className="alert-badge" style={{ marginLeft: 4, background: '#fee2e2', color: '#b91c1c' }}>
-                        {criticalItemsCount}
-                      </span>
-                    )}
-                    <ChevronDown size={13} className="filter-chevron" />
-                  </button>
-                  {activeMenu === 'vencimientos' && (
-                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
-                      <div className="filter-popover-title">
-                        <span>Control de Vencimientos</span>
-                      </div>
-                      <div className="filter-popover-list">
-                        {[
-                          { id: 'todos', label: 'Todos los plazos', badge: items.length },
-                          { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount },
-                          { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount },
-                          { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount },
-                          { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount },
-                          { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, isLate: true },
-                        ].map((opt) => (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            className={`filter-item-btn ${vencimientosFilter === opt.id ? 'selected' : ''}`}
-                            onClick={() => {
-                              setVencimientosFilter(opt.id as any);
-                              closeMenus();
-                            }}
-                          >
-                            <span>{opt.label}</span>
-                            <span
-                              className="wbs-level-badge"
-                              style={opt.isLate && opt.badge > 0 ? { background: '#fee2e2', color: '#b91c1c' } : undefined}
-                            >
-                              {opt.badge}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
 
                 <div className="zoom">
                   <button

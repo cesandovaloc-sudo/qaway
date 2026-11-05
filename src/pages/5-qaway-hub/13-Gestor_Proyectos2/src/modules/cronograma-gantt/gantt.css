@@ -1,14 +1,13 @@
 /* Scope aislado para el módulo Cronograma Gantt Maestro (Coordinador) */
 .gantt-v2 {
   width: 100%;
-  height: calc(100vh - 58px);
-  min-height: calc(100vh - 58px);
+  height: auto;
+  min-height: 100%;
   background-color: #f0f4f9;
   color: #132344;
   font-family: var(--font-sans);
   box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   --blue: #0066ff;
   --line: #dfe8f4;
 }
@@ -3658,9 +3657,9 @@
 /* --- B) Viewport Inteligente: scroll interno contenido en la tabla --- */
 .gantt-v2 .workspace {
   position: sticky;
-  top: 10px;
-  height: calc(100vh - 76px);
-  max-height: calc(100vh - 76px);
+  top: 8px;
+  height: calc(100vh - 74px);
+  max-height: calc(100vh - 74px);
   z-index: 25;
 }
 
