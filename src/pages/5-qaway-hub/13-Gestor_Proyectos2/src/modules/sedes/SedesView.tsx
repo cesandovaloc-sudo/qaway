@@ -620,6 +620,14 @@ export default function SedesView({
   const [selectedTab, setSelectedTab] = useState<string>('Todas');
   const [viewMode, setViewMode] = useState<'Tarjetas' | 'Lista' | 'Territorial'>('Territorial');
 
+  // Filtros de búsqueda y cabecera
+  const [search, setSearch] = useState('');
+  const [zonaFilter, setZonaFilter] = useState('Todas las Zonas');
+  const [coordFilter, setCoordFilter] = useState('Todos los Coord.');
+  const [gestorFilter, setGestorFilter] = useState('Todos los Gestores');
+  const [statusFilter, setStatusFilter] = useState('Todos los Estados');
+  const [openDropdown, setOpenDropdown] = useState<'zona' | 'coord' | 'gestor' | 'status' | null>(null);
+
   // Estados de la Vista Cronograma Territorial por UGEL
   const [selectedDeliverableId, setSelectedDeliverableId] = useState<string>('pt-1.6');
   const [ugelStatusFilter, setUgelStatusFilter] = useState<string>('Todos');
@@ -673,14 +681,6 @@ export default function SedesView({
       return { ...prev, [selectedDeliverableId]: nextList };
     });
   };
-
-  // Filtros
-  const [search, setSearch] = useState('');
-  const [zonaFilter, setZonaFilter] = useState('Todas las Zonas');
-  const [coordFilter, setCoordFilter] = useState('Todos los Coord.');
-  const [gestorFilter, setGestorFilter] = useState('Todos los Gestores');
-  const [statusFilter, setStatusFilter] = useState('Todos los Estados');
-  const [openDropdown, setOpenDropdown] = useState<'zona' | 'coord' | 'gestor' | 'status' | null>(null);
 
   // Modales y Drawer
   const [selectedSede, setSelectedSede] = useState<SedeItem | null>(null);

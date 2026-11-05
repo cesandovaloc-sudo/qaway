@@ -18,6 +18,8 @@ import {
   Key,
   Layers,
   RotateCcw,
+  RefreshCw,
+  ChevronRight,
   Save,
   ShieldAlert,
   ShieldCheck,

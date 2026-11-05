@@ -1070,7 +1070,17 @@ export default function CronogramaGanttView({
   const projectId = activeProject?.id || 'p1';
   const currentPidRef = useRef(projectId);
 
-  const loadProjectItems = (pid: string): Item[] => {
+  // Estado reactivo de tareas operativas sincronizadas desde /tareas
+  const [rawTasks, setRawTasks] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('qaway-tasks-v1');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const loadProjectItems = (pid: string, tasksOverride?: any[]): Item[] => {
     try {
       const saved = localStorage.getItem(`qaway-gantt-items-${pid}`);
       if (saved) {
@@ -1113,7 +1123,7 @@ export default function CronogramaGanttView({
                 : (init?.dependencies && init.dependencies.length > 0 ? init.dependencies : (OFFICIAL_WBS_DEPENDENCIES[it.id] || [])),
             };
           });
-          return computeWbsHierarchy(sortWbsHierarchy(upgraded), rawTasks);
+          return computeWbsHierarchy(sortWbsHierarchy(upgraded), tasksOverride || rawTasks);
         }
       }
       if (pid === 'p1') {
@@ -1131,13 +1141,13 @@ export default function CronogramaGanttView({
     }
   };
 
-  const [items, setItems] = useState<Item[]>(() => loadProjectItems(projectId));
+  const [items, setItems] = useState<Item[]>(() => loadProjectItems(projectId, rawTasks));
 
   // Sincronización reactiva con Keep-Alive al conmutar de proyecto
   useEffect(() => {
     if (currentPidRef.current !== projectId) {
       currentPidRef.current = projectId;
-      const loaded = loadProjectItems(projectId);
+      const loaded = loadProjectItems(projectId, rawTasks);
       setItems(loaded);
       setSelectedId(null);
     }
