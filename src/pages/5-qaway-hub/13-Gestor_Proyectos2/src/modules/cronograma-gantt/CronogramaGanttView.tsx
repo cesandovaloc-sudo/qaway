@@ -3495,78 +3495,16 @@ export default function CronogramaGanttView({
                 Componentes <span>({hitos.length})</span>
               </button>
 
-              {/* Selector Desplegable de Niveles WBS (PM4R / BID - Punto 2) */}
-              <div className="wbs-level-dropdown-wrap">
-                <button
-                  type="button"
-                  className={`wbs-level-btn ${wbsLevelFilter !== 'todos' ? 'active' : ''}`}
-                  onClick={() => setIsWbsLevelDropdownOpen((p) => !p)}
-                  title="Filtrar por nivel metodológico WBS (PM4R/BID)"
-                >
-                  <span>
-                    {wbsLevelFilter === 'todos'
-                      ? `Nivel WBS: Todos (${items.length})`
-                      : wbsLevelFilter === 'componentes'
-                      ? `Componentes (${hitos.length})`
-                      : wbsLevelFilter === 'intermedios'
-                      ? `Productos intermedios (${intermediosCount})`
-                      : `Paquetes de Trabajo (${paquetesCount})`}
-                  </span>
-                  <ChevronDown size={13} />
-                </button>
-
-                {isWbsLevelDropdownOpen && (
-                  <div className="wbs-level-menu">
-                    <button
-                      type="button"
-                      className={`wbs-level-item ${wbsLevelFilter === 'todos' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setWbsLevelFilter('todos');
-                        setIsWbsLevelDropdownOpen(false);
-                      }}
-                    >
-                      <span>Todos los niveles</span>
-                      <span className="wbs-level-badge">{items.length}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`wbs-level-item ${wbsLevelFilter === 'componentes' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setWbsLevelFilter('componentes');
-                        setTab('Hitos');
-                        setIsWbsLevelDropdownOpen(false);
-                      }}
-                    >
-                      <span>Componentes Principales (Nivel 1)</span>
-                      <span className="wbs-level-badge">{hitos.length}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`wbs-level-item ${wbsLevelFilter === 'intermedios' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setWbsLevelFilter('intermedios');
-                        setTab('Todos');
-                        setIsWbsLevelDropdownOpen(false);
-                      }}
-                    >
-                      <span>Productos / Entregables intermedios</span>
-                      <span className="wbs-level-badge">{intermediosCount}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`wbs-level-item ${wbsLevelFilter === 'paquetes' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setWbsLevelFilter('paquetes');
-                        setTab('Todos');
-                        setIsWbsLevelDropdownOpen(false);
-                      }}
-                    >
-                      <span>Paquetes de Trabajo finales</span>
-                      <span className="wbs-level-badge">{paquetesCount}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                type="button"
+                className={tab === 'Subprocesos' ? 'active' : ''}
+                onClick={() => {
+                  setTab('Subprocesos');
+                  setWbsLevelFilter('todos');
+                }}
+              >
+                Subcomponentes <span>({subs.length})</span>
+              </button>
 
               {[
                 { n: 'En proceso', label: 'En proceso', c: inprog },
