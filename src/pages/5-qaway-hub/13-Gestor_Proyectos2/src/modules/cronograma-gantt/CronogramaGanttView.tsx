@@ -1816,7 +1816,9 @@ export default function CronogramaGanttView({
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = canvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
-      setIsDocked(delta <= 14);
+      const currentScroll = Math.max(0, Math.min(201, canvas.scrollTop));
+      canvas.style.setProperty('--canvas-scroll', `${currentScroll}px`);
+      setIsDocked(delta <= 10);
     };
 
     canvas.addEventListener('scroll', checkDocked, { passive: true });

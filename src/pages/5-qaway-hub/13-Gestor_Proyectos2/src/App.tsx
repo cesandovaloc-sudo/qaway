@@ -187,7 +187,12 @@ function App() {
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = scrollCanvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
-      const isStuck = delta <= 14;
+      const isStuck = delta <= 10;
+
+      // Compensación 1:1 en tiempo real para mantener el fondo de la tabla 100% inmóvil en pantalla
+      const currentScroll = Math.max(0, Math.min(201, scrollCanvas.scrollTop));
+      scrollCanvas.style.setProperty('--canvas-scroll', `${currentScroll}px`);
+
       if (ws.classList.contains('is-docked') !== isStuck) {
         ws.classList.toggle('is-docked', isStuck);
       }
@@ -284,7 +289,7 @@ function App() {
     };
   }, []);
 
-  // Sincronizar estado acoplado (.is-docked) al conmutar entre módulos o vistas
+  // Sincronizar estado acoplado (.is-docked) y compensación de altura al conmutar entre módulos o vistas
   useEffect(() => {
     const scrollCanvas = canvasRef.current;
     if (!scrollCanvas) return;
@@ -295,7 +300,9 @@ function App() {
       const wsRect = ws.getBoundingClientRect();
       const canvasRect = scrollCanvas.getBoundingClientRect();
       const delta = wsRect.top - canvasRect.top - 8;
-      ws.classList.toggle('is-docked', delta <= 14);
+      const currentScroll = Math.max(0, Math.min(201, scrollCanvas.scrollTop));
+      scrollCanvas.style.setProperty('--canvas-scroll', `${currentScroll}px`);
+      ws.classList.toggle('is-docked', delta <= 10);
     }, 40);
     return () => clearTimeout(timer);
   }, [active]);
