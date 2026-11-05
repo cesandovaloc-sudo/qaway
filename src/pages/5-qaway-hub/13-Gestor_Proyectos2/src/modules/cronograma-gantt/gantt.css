@@ -2823,6 +2823,57 @@
   border: 1px solid #fecaca;
 }
 
+/* -- Indicador de Estado estilo Semáforo (punto de color + texto sin cápsula) -- */
+.gantt-v2 .status-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.gantt-v2 .status-item .status-dot {
+  width: 7.5px;
+  height: 7.5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .status-item.complete .status-dot {
+  background: #10b981;
+}
+.gantt-v2 .status-item.complete .status-label {
+  color: #047857;
+  font-weight: 600;
+}
+
+.gantt-v2 .status-item.progress .status-dot {
+  background: #f59e0b;
+}
+.gantt-v2 .status-item.progress .status-label {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.gantt-v2 .status-item.pending .status-dot {
+  background: #94a3b8;
+}
+.gantt-v2 .status-item.pending .status-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.gantt-v2 .status-item.late .status-dot {
+  background: #ef4444;
+}
+.gantt-v2 .status-item.late .status-label {
+  color: #dc2626;
+  font-weight: 600;
+}
+
 /* Barras del Timeline */
 .gantt-v2 .timeline {
   position: relative;
@@ -6618,26 +6669,44 @@ body.gantt-resizing {
   max-width: 100%;
 }
 
-/* -- Tipo badge -- */
+/* -- Tipo en texto sin encapsular (limpio, elegante, sin IA barata) -- */
+.gantt-v2 .type-text-label {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #475569;
+  white-space: nowrap;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+.gantt-v2 .type-text-label.is-hito {
+  font-weight: 650;
+  color: #1e3a8a;
+}
+.gantt-v2 .type-text-label.is-sub {
+  color: #5b21b6;
+  font-weight: 500;
+}
+
 .gantt-v2 .type-badge-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  border-radius: 5px;
-  padding: 2px 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #475569;
   white-space: nowrap;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
 }
 .gantt-v2 .type-badge-pill.is-hito {
-  color: #1e40af;
-  background: #dbeafe;
-  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  font-weight: 650;
 }
 .gantt-v2 .type-badge-pill.is-sub {
-  color: #6d28d9;
-  background: #ede9fe;
-  border: 1px solid #ddd6fe;
+  color: #5b21b6;
+  font-weight: 500;
 }
 
 /* -- Hito padre text -- */
@@ -7269,45 +7338,40 @@ body.gantt-resizing {
   align-items: center;
 }
 
-.gantt-v2 .dev-pill {
+.gantt-v2 .dev-pill,
+.gantt-v2 .dev-text {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  max-width: 100%;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11.5px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 600;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-sizing: border-box;
-  border: 1px solid transparent;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
 }
 
-.gantt-v2 .dev-pill.ontime {
-  background: #e6f7ef;
-  color: #00a854;
-  border-color: #b7eb8f;
+.gantt-v2 .dev-pill.ontime,
+.gantt-v2 .dev-text.ontime {
+  color: #16a34a;
 }
 
-.gantt-v2 .dev-pill.late {
-  background: #fee2e2;
+.gantt-v2 .dev-pill.late,
+.gantt-v2 .dev-text.late {
   color: #dc2626;
-  border-color: #fecaca;
+  font-weight: 700;
 }
 
-.gantt-v2 .dev-pill.early {
-  background: #e0f2fe;
-  color: #0369a1;
-  border-color: #bae6fd;
+.gantt-v2 .dev-pill.early,
+.gantt-v2 .dev-text.early {
+  color: #0284c7;
 }
 
-.gantt-v2 .dev-pill.none {
-  background: transparent;
+.gantt-v2 .dev-pill.none,
+.gantt-v2 .dev-text.none {
   color: #94a3b8;
-  border-color: transparent;
-  padding-left: 0;
+  font-weight: 400;
 }
 
 /* Bloque "Línea base y cumplimiento" del panel de detalle */
@@ -8042,7 +8106,7 @@ body.gantt-resizing {
 }
 
 /* =========================================================
-   VISTA ORGANIGRAMA WBS / EDT POR NIVELES (IMAGEN 2 BENCHMARK)
+   VISTA EDT / ORGANIGRAMA ESTRUCTURADA (DIAGRAMA JERÁRQUICO)
    ========================================================= */
 
 .gantt-v2 .organigrama-wbs-container {
@@ -8061,25 +8125,28 @@ body.gantt-resizing {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 18px;
+  gap: 12px;
+  padding: 9px 18px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   z-index: 10;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .gantt-v2 .organigrama-legend-bar {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-wrap: wrap;
 }
 
 .gantt-v2 .legend-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11.5px;
-  font-weight: 650;
+  font-size: 12px;
+  font-weight: 600;
   color: #334155;
 }
 
@@ -8089,12 +8156,48 @@ body.gantt-resizing {
   border-radius: 50%;
 }
 
+.gantt-v2 .edt-actions-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gantt-v2 .edt-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 31px;
+  padding: 0 11px;
+  border-radius: 7px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gantt-v2 .edt-tool-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.gantt-v2 .edt-tool-btn.active-cursor {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #2563eb;
+  padding: 0 9px;
+}
+
 .gantt-v2 .organigrama-zoom-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: #f1f5f9;
-  padding: 3px 6px;
+  gap: 3px;
+  background: #f8fafc;
+  padding: 2px 5px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
@@ -8127,13 +8230,13 @@ body.gantt-resizing {
   text-align: center;
 }
 
+/* LIENZO DEL DIAGRAMA JERÁRQUICO */
 .gantt-v2 .organigrama-canvas-scroll {
   flex: 1;
   overflow: auto;
-  padding: 32px 40px;
+  padding: 28px 48px 136px;
   position: relative;
-  background: radial-gradient(#cbd5e1 1px, transparent 1px);
-  background-size: 24px 24px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .gantt-v2 .organigrama-tree-stage {
@@ -8142,10 +8245,92 @@ body.gantt-resizing {
   align-items: center;
   min-width: max-content;
   margin: 0 auto;
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* NODO RAÍZ (NIVEL 0) */
+/* TARJETA BASE DE LA EDT */
+.gantt-v2 .organigrama-card {
+  position: relative;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  cursor: grab;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease;
+  text-align: left;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.gantt-v2 .organigrama-card:active {
+  cursor: grabbing;
+}
+
+.gantt-v2 .organigrama-card:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.09);
+}
+
+.gantt-v2 .organigrama-card.selected {
+  outline: 2px solid #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+}
+
+/* ESTADOS DE ARRASTRE Y DESTINO (DRAG & DROP CONTROLADO) */
+.gantt-v2 .organigrama-card.edt-dragging-source {
+  opacity: 0.45;
+  transform: scale(0.98);
+}
+
+.gantt-v2 .organigrama-card.edt-drop-valid {
+  outline: 2px solid #2563eb !important;
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.22) !important;
+  transform: translateY(-2px);
+}
+
+.gantt-v2 .organigrama-card.edt-drop-invalid {
+  outline: 2px dashed #ef4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14) !important;
+  cursor: not-allowed !important;
+}
+
+.gantt-v2 .edt-drop-hint-pill {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  z-index: 20;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+}
+
+/* PUNTOS DE CONEXIÓN (•) EN BORDES Y BIFURCACIONES */
+.gantt-v2 .edt-junction-dot {
+  position: absolute;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.gantt-v2 .edt-junction-dot.top {
+  top: -3.5px;
+}
+
+.gantt-v2 .edt-junction-dot.bottom {
+  bottom: -3.5px;
+}
+
+/* NIVEL 0: PROYECTO RAÍZ */
 .gantt-v2 .organigrama-root-wrapper {
   display: flex;
   flex-direction: column;
@@ -8153,467 +8338,426 @@ body.gantt-resizing {
   position: relative;
 }
 
-.gantt-v2 .organigrama-card {
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  text-align: left;
-  user-select: none;
-}
-
-.gantt-v2 .organigrama-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
-}
-
-.gantt-v2 .organigrama-card.selected {
-  outline: 2px solid #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
-}
-
 .gantt-v2 .organigrama-card.root-card {
-  width: 480px;
-  padding: 16px 20px;
-  background: #eff6ff;
-  border: 2px solid #3b82f6;
-}
-
-.gantt-v2 .root-card .card-top-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #1d4ed8;
-  margin-bottom: 4px;
-}
-
-.gantt-v2 .root-card .card-main-title {
-  font-size: 17px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 4px 0;
-}
-
-.gantt-v2 .root-card .card-desc {
-  font-size: 12px;
-  color: #475569;
-  margin: 0 0 12px 0;
-  line-height: 1.4;
-}
-
-.gantt-v2 .root-card .card-metrics-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 10px;
-  border-top: 1px solid #dbeafe;
+  gap: 14px;
+  min-width: 340px;
+  max-width: 460px;
+  padding: 14px 22px;
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1.5px solid #93c5fd;
+  cursor: default;
 }
 
-.gantt-v2 .mini-progress-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.gantt-v2 .prog-label {
-  font-size: 11px;
-  font-weight: 650;
-  color: #1e40af;
-}
-
-.gantt-v2 .prog-bar-wrap {
-  flex: 1;
-  height: 7px;
-  background: #bfdbfe;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.gantt-v2 .prog-bar-fill {
-  height: 100%;
-  background: #2563eb;
-  border-radius: 999px;
-  transition: width 0.3s ease;
-}
-
-.gantt-v2 .prog-num {
-  font-size: 12px;
-  font-weight: 800;
-  color: #1d4ed8;
-}
-
-.gantt-v2 .mini-date-badge,
-.gantt-v2 .mini-count-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #3b82f6;
-  background: #ffffff;
-  padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid #bfdbfe;
-}
-
-/* LÍNEAS CONECTORAS */
-.gantt-v2 .organigrama-trunk-down {
-  width: 2px;
-  height: 32px;
-  background: #94a3b8;
-}
-
-.gantt-v2 .organigrama-level1-row {
-  display: flex;
-  gap: 24px;
-  position: relative;
-  padding-top: 24px;
-}
-
-.gantt-v2 .organigrama-horizontal-bus-bar {
-  position: absolute;
-  top: 0;
-  left: 130px;
-  right: 130px;
-  height: 2px;
-  background: #94a3b8;
-}
-
-.gantt-v2 .organigrama-comp-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 260px;
-  position: relative;
-}
-
-.gantt-v2 .organigrama-comp-feeder-line {
-  width: 2px;
-  height: 24px;
-  background: #94a3b8;
-}
-
-/* NIVEL 1: COMPONENTES (ÁMBAR/NARANJA) */
-.gantt-v2 .organigrama-card.comp-card {
-  width: 100%;
-  padding: 12px 14px;
-  background: #fffbeb;
-  border: 1.5px solid #f59e0b;
-}
-
-.gantt-v2 .card-level-chip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10.5px;
-  font-weight: 750;
-  margin-bottom: 6px;
-}
-
-.gantt-v2 .card-level-chip.comp {
-  color: #b45309;
-}
-
-.gantt-v2 .card-collapse-mini-btn {
-  background: #ffffff;
-  border: 1px solid #fde68a;
-  border-radius: 4px;
-  width: 18px;
-  height: 18px;
+.gantt-v2 .edt-node-icon-box {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .edt-node-icon-box.root-icon {
+  color: #2563eb;
+}
+
+.gantt-v2 .edt-node-icon-box.comp-icon {
+  color: #2563eb;
+  margin-top: 1px;
+}
+
+.gantt-v2 .edt-node-icon-box.subcomp-icon {
   color: #b45309;
+  margin-top: 1px;
 }
 
-.gantt-v2 .card-collapse-mini-btn:hover {
-  background: #fef3c7;
-}
-
-.gantt-v2 .card-code-title {
-  margin-bottom: 8px;
-}
-
-.gantt-v2 .node-code {
-  font-size: 12.5px;
-  color: #0f172a;
-  margin-right: 6px;
-}
-
-.gantt-v2 .node-title {
-  font-size: 12px;
-  font-weight: 650;
-  color: #1e293b;
-  line-height: 1.35;
-}
-
-.gantt-v2 .card-meta-line {
+.gantt-v2 .edt-node-body {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 10.5px;
-  color: #64748b;
-  margin-bottom: 8px;
-}
-
-.gantt-v2 .node-status-pill {
-  font-size: 10px;
-  font-weight: 750;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
-  white-space: nowrap;
-}
-
-.gantt-v2 .node-status-pill.completado,
-.gantt-v2 .node-status-pill.cumple {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.gantt-v2 .node-status-pill.en-proceso,
-.gantt-v2 .node-status-pill.en-curso {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.gantt-v2 .node-status-pill.con-retraso,
-.gantt-v2 .node-status-pill.no-cumple {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.gantt-v2 .node-status-pill.pendiente {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.gantt-v2 .card-progress-footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.gantt-v2 .card-prog-track {
+  flex-direction: column;
+  gap: 4px;
   flex: 1;
-  height: 5px;
-  background: #fde68a;
-  border-radius: 999px;
-  overflow: hidden;
+  min-width: 0;
 }
 
-.gantt-v2 .card-prog-fill.comp {
-  height: 100%;
-  background: #f59e0b;
-  border-radius: 999px;
+.gantt-v2 .edt-root-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
 }
 
-.gantt-v2 .card-prog-val {
-  font-size: 11px;
-  font-weight: 750;
-  color: #b45309;
+.gantt-v2 .edt-root-dates {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
 }
 
-/* RAMIFICACIÓN REAL WBS PM4R / BID */
-.gantt-v2 .organigrama-children-stack {
+/* SISTEMA AUTOMÁTICO DE CONECTORES ORTOGONALES PADRE-HIJO */
+.gantt-v2 .organigrama-trunk-down,
+.gantt-v2 .edt-trunk-down {
+  width: 1.5px;
+  height: 22px;
+  background: #64748b;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .edt-subtree-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 6px;
-  position: relative;
 }
 
-.gantt-v2 .organigrama-line-down-to-children {
-  width: 2px;
-  height: 18px;
-  background: #cbd5e1;
-}
-
-.gantt-v2 .organigrama-branches-row {
+.gantt-v2 .edt-tree-row {
   display: flex;
-  gap: 16px;
   align-items: flex-start;
   justify-content: center;
   position: relative;
-  padding-top: 16px;
 }
 
-.gantt-v2 .organigrama-branches-bus-bar {
-  position: absolute;
-  top: 0;
-  height: 2px;
-  background: #cbd5e1;
-}
-
-.gantt-v2 .organigrama-branch-col {
+.gantt-v2 .edt-tree-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
+  padding: 0 10px;
 }
 
-.gantt-v2 .organigrama-branch-feeder {
-  width: 2px;
-  height: 16px;
-  background: #cbd5e1;
+.gantt-v2 .edt-tree-col.comp-col {
+  padding: 0 14px;
 }
 
-/* NIVEL INTERMEDIO: AGRUPADORES / PRODUCTOS (AMARILLO) */
-.gantt-v2 .organigrama-agrupador-wrapper {
+/* Línea horizontal automática exacta de centro a centro entre hermanos */
+.gantt-v2 .edt-tree-col::before,
+.gantt-v2 .edt-tree-col::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 1.5px;
+  background: #64748b;
+}
+
+.gantt-v2 .edt-tree-col::before {
+  left: 0;
+}
+
+.gantt-v2 .edt-tree-col::after {
+  left: 50%;
+}
+
+.gantt-v2 .edt-tree-col:first-child::before {
+  display: none;
+}
+
+.gantt-v2 .edt-tree-col:last-child::after {
+  display: none;
+}
+
+.gantt-v2 .edt-tree-col:only-child::before,
+.gantt-v2 .edt-tree-col:only-child::after {
+  display: none;
+}
+
+.gantt-v2 .edt-feeder-down {
+  width: 1.5px;
+  height: 22px;
+  background: #64748b;
+  flex-shrink: 0;
+}
+
+/* NIVEL 1: TARJETAS DE COMPONENTES (AZUL SUAVE) */
+.gantt-v2 .organigrama-card.comp-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  width: 280px;
+  padding: 12px 15px;
+  background: linear-gradient(180deg, #eff6ff 0%, #e0ecff 100%);
+  border: 1.5px solid #93c5fd;
+}
+
+.gantt-v2 .edt-node-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gantt-v2 .edt-node-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.gantt-v2 .edt-node-title b {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.gantt-v2 .edt-node-dates {
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.gantt-v2 .edt-collapse-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid #bfdbfe;
+  background: rgba(255, 255, 255, 0.8);
+  color: #1d4ed8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .edt-collapse-btn:hover {
+  background: #ffffff;
+  border-color: #60a5fa;
+}
+
+.gantt-v2 .edt-collapse-btn.sub {
+  border-color: #fde047;
+  color: #a16207;
+}
+
+.gantt-v2 .edt-collapse-btn.sub:hover {
+  background: #ffffff;
+  border-color: #eab308;
+}
+
+/* NIVEL 2: TARJETAS DE AGRUPADORES (AMARILLO SUAVE) */
+.gantt-v2 .edt-agrupador-group {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .gantt-v2 .organigrama-card.subcomp-card {
-  width: 230px;
-  padding: 10px 12px;
-  background: #fefce8;
-  border: 1.5px solid #eab308;
-}
-
-.gantt-v2 .card-level-chip.subcomp {
-  color: #a16207;
-}
-
-.gantt-v2 .card-sub-prog-tag {
-  background: #fef08a;
-  color: #854d0e;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-/* BIFURCACIÓN DE PAQUETES BAJO AGRUPADOR */
-.gantt-v2 .organigrama-packages-stack {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 6px;
-  position: relative;
-}
-
-.gantt-v2 .organigrama-sub-trunk-down {
-  width: 2px;
-  height: 14px;
-  background: #fda4af;
-}
-
-.gantt-v2 .organigrama-pkgs-list {
-  display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
-  width: 100%;
-  align-items: center;
+  width: 240px;
+  padding: 11px 14px;
+  background: linear-gradient(180deg, #fefce8 0%, #fef08a 100%);
+  border: 1.5px solid #facc15;
 }
 
-.gantt-v2 .organigrama-pkg-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.gantt-v2 .organigrama-pkg-feeder {
-  width: 2px;
-  height: 8px;
-  background: #fda4af;
-}
-
-.gantt-v2 .organigrama-direct-pkg-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* NIVEL TERMINAL: PAQUETES DE TRABAJO (MAGENTA/ROSA) */
+/* NIVEL TERMINAL: TARJETAS DE PAQUETES DE TRABAJO (ROSADO SUAVE) */
 .gantt-v2 .organigrama-card.paquete-card {
-  width: 220px;
-  padding: 10px 12px;
-  background: #fff1f2;
-  border: 1.5px solid #f43f5e;
-}
-
-.gantt-v2 .card-level-chip.paquete {
-  color: #be123c;
-}
-
-.gantt-v2 .card-pkg-prog {
-  background: #ffe4e6;
-  color: #be123c;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.gantt-v2 .pkg-deliverable-line {
   display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  color: #9f1239;
-  font-weight: 600;
-  margin-bottom: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  width: 220px;
+  padding: 11px 14px;
+  background: linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%);
+  border: 1.5px solid #fda4af;
 }
 
-/* FILA DE INDICADORES: RESPONSABLE OPERATIVO Y TAREAS */
-.gantt-v2 .pkg-indicators-row {
+.gantt-v2 .edt-pkg-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.35;
+}
+
+.gantt-v2 .edt-pkg-code {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .edt-pkg-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.gantt-v2 .edt-pkg-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  margin-bottom: 6px;
 }
 
-.gantt-v2 .pkg-responsible-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 9.5px;
-  font-weight: 700;
+.gantt-v2 .edt-status-dot-tag {
+  font-size: 10px;
+  font-weight: 600;
   padding: 1px 6px;
-  border-radius: 4px;
-  background: #f1f5f9;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
   color: #475569;
-  max-width: 110px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.gantt-v2 .pkg-task-pill {
+.gantt-v2 .edt-status-dot-tag.completado,
+.gantt-v2 .edt-status-dot-tag.cumple {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+.gantt-v2 .edt-status-dot-tag.en-proceso,
+.gantt-v2 .edt-status-dot-tag.en-curso {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.gantt-v2 .edt-status-dot-tag.con-retraso {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+/* =========================================================
+   MINIMAPA DE NAVEGACIÓN (ESQUINA INFERIOR DERECHA)
+   ========================================================= */
+
+.gantt-v2 .edt-minimap-card {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  width: 196px;
+  height: 108px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.06);
+  padding: 10px 12px;
+  z-index: 25;
+  backdrop-filter: blur(6px);
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.gantt-v2 .edt-minimap-fit-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 9.5px;
-  font-weight: 750;
-  padding: 1.5px 6px;
-  border-radius: 999px;
-  background: #ffe4e6;
-  color: #be123c;
-  border: 1px solid #fecdd3;
+  justify-content: center;
   cursor: pointer;
+  z-index: 4;
   transition: all 0.15s ease;
-  white-space: nowrap;
 }
 
-.gantt-v2 .pkg-task-pill:hover {
-  background: #f43f5e;
-  color: #ffffff;
-  border-color: #f43f5e;
+.gantt-v2 .edt-minimap-fit-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.gantt-v2 .edt-minimap-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gantt-v2 .minimap-tree-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 92%;
+  pointer-events: none;
+}
+
+.gantt-v2 .minimap-root-node {
+  width: 44px;
+  height: 11px;
+  border-radius: 3px;
+  background: #3b82f6;
+}
+
+.gantt-v2 .minimap-v-line {
+  width: 1.5px;
+  height: 7px;
+  background: #94a3b8;
+}
+
+.gantt-v2 .minimap-v-line.short {
+  height: 5px;
+}
+
+.gantt-v2 .minimap-comp-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  border-top: 1.5px solid #94a3b8;
+  padding-top: 5px;
+}
+
+.gantt-v2 .minimap-comp-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.gantt-v2 .minimap-comp-node {
+  width: 100%;
+  max-width: 26px;
+  height: 9px;
+  border-radius: 2px;
+  background: #93c5fd;
+  border: 1px solid #60a5fa;
+}
+
+.gantt-v2 .minimap-sub-row {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  width: 100%;
+}
+
+.gantt-v2 .minimap-leaf-node {
+  width: 10px;
+  height: 7px;
+  border-radius: 2px;
+}
+
+.gantt-v2 .minimap-leaf-node.yellow {
+  background: #fde047;
+  border: 1px solid #eab308;
+}
+
+.gantt-v2 .minimap-leaf-node.pink {
+  background: #fecdd3;
+  border: 1px solid #fda4af;
+}
+
+.gantt-v2 .edt-minimap-viewport {
+  position: absolute;
+  border: 1.5px solid #2563eb;
+  background: rgba(37, 99, 235, 0.12);
+  border-radius: 4px;
+  pointer-events: none;
+  box-sizing: border-box;
+  transition: left 0.05s linear, top 0.05s linear, width 0.1s ease, height 0.1s ease;
 }

@@ -324,31 +324,51 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
   return items;
 }
 
-const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
-  id: r.id,
-  code: r.code,
-  name: r.name,
-  kind: r.kind,
-  edtType: r.edtType,
-  faseId: r.faseId,
-  parentId: r.parentId,
-  start: r.start,
-  end: r.end,
-  dependencies: OFFICIAL_WBS_DEPENDENCIES[r.id] || [],
-  progress: r.kind === 'hito' ? 18 : (r.code === '1.1' || r.code === '2.1' ? 100 : (r.code.startsWith('1.') ? 50 : 0)),
-  status: r.code === '1.1' || r.code === '2.1' ? 'Completado' : (r.code.startsWith('1.') ? 'En proceso' : 'Pendiente'),
-  expanded: true,
-  description: r.entregableVerificable ? `Entregable oficial: ${r.entregableVerificable}` : '',
-  deliverable: r.entregableVerificable || '',
-  deliverables: r.entregableVerificable ? [{
-    id: `deliv-${r.id}`,
-    name: r.entregableVerificable,
-    type: r.entregableVerificable.toLowerCase().includes('resolución') || r.entregableVerificable.toLowerCase().includes('informe') || r.entregableVerificable.toLowerCase().includes('oficio') ? 'document' : (r.entregableVerificable.toLowerCase().includes('excel') || r.entregableVerificable.toLowerCase().includes('directorio') || r.entregableVerificable.toLowerCase().includes('cuadro') ? 'spreadsheet' : 'document'),
-  }] : [],
-  region: 'Junín',
-  gestor: r.entidadResponsable || 'Carlos Mendoza',
-  gestores: [r.entidadResponsable || 'Carlos Mendoza'],
-}))));
+const resolveDefaultGestor = (code: string, name: string): string => {
+  const c = code || '';
+  const n = (name || '').toLowerCase();
+  if (c.startsWith('1.') || c === '1.') {
+    if (n.includes('siga') || n.includes('código') || n.includes('cdl')) return 'Lucía Flores';
+    if (n.includes('comunicación') || n.includes('capacitación')) return 'María Jara';
+    return 'Carlos Mendoza';
+  }
+  if (c.startsWith('2.') || c === '2.' || n.includes('almacén') || n.includes('pecosa')) return 'Javier Ruiz';
+  if (c.startsWith('3.') || c === '3.' || n.includes('transporte') || n.includes('distribución') || n.includes('ruta')) return 'Juan Pérez';
+  if (c.startsWith('4.') || c === '4.' || n.includes('cierre') || n.includes('auditoría')) return 'Ana Torres';
+  if (c.startsWith('5.') || c === '5.' || n.includes('informe') || n.includes('balance')) return 'María Jara';
+  if (n.includes('siga') || n.includes('matriz')) return 'Lucía Flores';
+  return 'Carlos Mendoza';
+};
+
+const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((r) => {
+  const defaultGestor = resolveDefaultGestor(r.code, r.name);
+  return {
+    id: r.id,
+    code: r.code,
+    name: r.name,
+    kind: r.kind,
+    edtType: r.edtType,
+    faseId: r.faseId,
+    parentId: r.parentId,
+    start: r.start,
+    end: r.end,
+    dependencies: OFFICIAL_WBS_DEPENDENCIES[r.id] || [],
+    progress: r.kind === 'hito' ? 18 : (r.code === '1.1' || r.code === '2.1' ? 100 : (r.code.startsWith('1.') ? 50 : 0)),
+    status: r.code === '1.1' || r.code === '2.1' ? 'Completado' : (r.code.startsWith('1.') ? 'En proceso' : 'Pendiente'),
+    expanded: true,
+    description: r.entregableVerificable ? `Entregable oficial: ${r.entregableVerificable}` : '',
+    deliverable: r.entregableVerificable || '',
+    deliverables: r.entregableVerificable ? [{
+      id: `deliv-${r.id}`,
+      name: r.entregableVerificable,
+      type: r.entregableVerificable.toLowerCase().includes('resolución') || r.entregableVerificable.toLowerCase().includes('informe') || r.entregableVerificable.toLowerCase().includes('oficio') ? 'document' : (r.entregableVerificable.toLowerCase().includes('excel') || r.entregableVerificable.toLowerCase().includes('directorio') || r.entregableVerificable.toLowerCase().includes('cuadro') ? 'spreadsheet' : 'document'),
+    }] : [],
+    region: 'Junín',
+    gestor: defaultGestor,
+    gestores: [defaultGestor],
+    entidadResponsable: r.entidadResponsable,
+  };
+})));
 
 const MONTHS = [
   { label: 'Sep', start: '2026-09-01' },
@@ -438,17 +458,25 @@ const REGION_OPTIONS = [
 
 const GESTOR_OPTIONS = [
   { value: 'Todos', label: 'Todos los Responsables' },
-  { value: 'Carlos Mendoza', label: 'Carlos Mendoza' },
-  { value: 'María Salazar', label: 'María Salazar' },
-  { value: 'Lucía Ramos', label: 'Lucía Ramos' },
-  { value: 'Javier Ruiz', label: 'Javier Ruiz' },
+  { value: 'Carlos Mendoza', label: 'Carlos Mendoza (Coordinador Territorial)' },
+  { value: 'María Jara', label: 'María Jara (Directora de Operaciones)' },
+  { value: 'Lucía Flores', label: 'Lucía Flores (Especialista SIGA)' },
+  { value: 'Javier Ruiz', label: 'Javier Ruiz (Logística y Almacenes)' },
+  { value: 'Juan Pérez', label: 'Juan Pérez (Responsable Operativo)' },
+  { value: 'Ana Torres', label: 'Ana Torres (Supervisora Territorial)' },
+  { value: 'Elena Rojas', label: 'Elena Rojas (Base Logística)' },
 ];
 
 const GESTOR_COLORS: Record<string, string> = {
-  'María Salazar': '#2563eb',
   'Carlos Mendoza': '#0284c7',
-  'Lucía Ramos': '#7c3aed',
+  'María Jara': '#2563eb',
+  'Lucía Flores': '#7c3aed',
   'Javier Ruiz': '#059669',
+  'Juan Pérez': '#d97706',
+  'Ana Torres': '#dc2626',
+  'Elena Rojas': '#475569',
+  'María Salazar': '#2563eb',
+  'Lucía Ramos': '#7c3aed',
 };
 
 const getGestorInitials = (name: string): string => {
@@ -1125,6 +1153,9 @@ export default function CronogramaGanttView({
           const initialMap = new Map(INITIAL_ITEMS.map((x) => [x.id, x]));
           const upgraded = parsed.map((it: Item) => {
             const init = initialMap.get(it.id);
+            const isEntity = it.gestor === 'DRE / UGEL' || it.gestor === 'DRE' || it.gestor === 'UGEL' || it.gestor === 'DRE/UGEL' || !it.gestor;
+            const finalGestor = isEntity ? (init?.gestor || resolveDefaultGestor(it.code, it.name)) : it.gestor;
+            const finalGestores = isEntity ? [finalGestor] : (it.gestores && it.gestores.length > 0 ? it.gestores : [finalGestor]);
             return {
               ...it,
               edtType: it.edtType || init?.edtType || resolveEdtNodeType(it, parsed),
@@ -1132,6 +1163,9 @@ export default function CronogramaGanttView({
               dependencies: (it.dependencies && it.dependencies.length > 0)
                 ? it.dependencies
                 : (init?.dependencies && init.dependencies.length > 0 ? init.dependencies : (OFFICIAL_WBS_DEPENDENCIES[it.id] || [])),
+              gestor: finalGestor,
+              gestores: finalGestores,
+              entidadResponsable: it.entidadResponsable || init?.entidadResponsable,
             };
           });
           return computeWbsHierarchy(sortWbsHierarchy(upgraded), tasksOverride || rawTasks);
@@ -1860,6 +1894,7 @@ export default function CronogramaGanttView({
     required?: boolean;
     showInList?: boolean;
     appliesTo?: 'all' | 'hitos' | 'subprocesos';
+    encapsular?: boolean;
   }
 
   const [customCols, setCustomCols] = useState<CustomColDef[]>(() => {
@@ -1876,6 +1911,7 @@ export default function CronogramaGanttView({
   const [newColType, setNewColType] = useState<CustomColDef['type']>('text');
   const [newColRequired, setNewColRequired] = useState(false);
   const [newColShowInList, setNewColShowInList] = useState(true);
+  const [newColEncapsular, setNewColEncapsular] = useState(false);
   const [newColAppliesTo, setNewColAppliesTo] = useState<'all' | 'hitos' | 'subprocesos'>('all');
 
   const handleCreateCustomCol = () => {
@@ -1888,6 +1924,7 @@ export default function CronogramaGanttView({
       required: newColRequired,
       showInList: newColShowInList,
       appliesTo: newColAppliesTo,
+      encapsular: newColEncapsular,
     };
     const updated = [...customCols, newCol];
     setCustomCols(updated);
@@ -1919,6 +1956,7 @@ export default function CronogramaGanttView({
     setNewColType('text');
     setNewColRequired(false);
     setNewColShowInList(true);
+    setNewColEncapsular(false);
     setNewColAppliesTo('all');
     setNewColModalOpen(false);
     notify(`Campo personalizado "${newCol.label}" creado con éxito`);
@@ -5224,7 +5262,7 @@ export default function CronogramaGanttView({
                   {/* ── Columna Tipo ── */}
                   {visibleCols.includes('kind') && (
                     <div className="kind-cell-col">
-                      <span className={`type-badge-pill ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
+                      <span className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
                         {getEdtNodeDisplayLabel(x, items)}
                       </span>
                     </div>
@@ -5471,7 +5509,7 @@ export default function CronogramaGanttView({
                             )}
                           </div>
                         ) : (
-                          <span className={`dev-pill ${tone}`}>{formatDeviation(dev)}</span>
+                          <span className={`dev-text ${tone}`}>{formatDeviation(dev)}</span>
                         )}
                       </div>
                     );
@@ -5499,12 +5537,18 @@ export default function CronogramaGanttView({
                                 closeEdit();
                               }}
                             >
-                              <span className={'status ' + STATUS_CLASS[s]}>{s}</span>
+                              <span className={`status-item ${STATUS_CLASS[s]}`}>
+                                <span className="status-dot" />
+                                <span className="status-label">{s}</span>
+                              </span>
                             </button>
                           ))}
                         </div>
                       ) : (
-                        <span className={'status ' + STATUS_CLASS[x.status]}>{x.status}</span>
+                        <span className={`status-item ${STATUS_CLASS[x.status]}`}>
+                          <span className="status-dot" />
+                          <span className="status-label">{x.status}</span>
+                        </span>
                       )}
                     </div>
                   )}
@@ -5831,9 +5875,15 @@ export default function CronogramaGanttView({
                             </div>
                           ) : cCol.type === 'select' ? (
                             cellVal ? (
-                              <span style={{ fontSize: 11.5, fontWeight: 600, background: '#eff6ff', color: '#1e40af', padding: '2px 8px', borderRadius: 4, border: '1px solid #bfdbfe' }}>
-                                {cellVal}
-                              </span>
+                              cCol.encapsular ? (
+                                <span style={{ fontSize: 11.5, fontWeight: 600, background: '#f1f5f9', color: '#1e293b', padding: '2px 8px', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                                  {cellVal}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: 12, color: '#334155', fontWeight: 500 }}>
+                                  {cellVal}
+                                </span>
+                              )
                             ) : (
                               <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>
                             )
@@ -5842,9 +5892,19 @@ export default function CronogramaGanttView({
                               {cellVal ? formatDatePE(cellVal) : '—'}
                             </span>
                           ) : (
-                            <span style={{ fontSize: 12, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {cellVal !== undefined && cellVal !== '' ? String(cellVal) : '—'}
-                            </span>
+                            cellVal !== undefined && cellVal !== '' ? (
+                              cCol.encapsular ? (
+                                <span style={{ fontSize: 11.5, fontWeight: 600, background: '#f1f5f9', color: '#1e293b', padding: '2px 8px', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                                  {String(cellVal)}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: 12, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {String(cellVal)}
+                                </span>
+                              )
+                            ) : (
+                              <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>
+                            )
                           )
                         )}
                       </div>
@@ -6424,15 +6484,118 @@ export default function CronogramaGanttView({
             />
           )}
 
-          {/* Presentación 6: Vista Organigrama WBS por Niveles (Imagen 2) */}
+          {/* Presentación 6: Vista Organigrama WBS por Niveles (EDT Estructurada) */}
           {viewMode === 'organigrama' && (
             <CronogramaOrganigramaView
               items={shown}
               allItems={items}
               selectedId={selectedId}
+              projectName={activeProject?.name || 'Programa Maestro Operativo 2027'}
               onSelectItem={openEditorForItem}
               onAddItem={(kind, pId) => add(kind, pId, true)}
               formatDatePE={formatDatePE}
+              onMoveNode={(draggedId, targetId, mode) => {
+                commitChange((prev) => {
+                  const dragged = prev.find((x) => x.id === draggedId);
+                  const target = prev.find((x) => x.id === targetId);
+                  if (!dragged || !target || dragged.id === target.id) return prev;
+
+                  // Colectar subárbol completo del elemento arrastrado (en caso sea Componente o Agrupador)
+                  const subtreeIds = new Set<string>([dragged.id]);
+                  const collectDescendants = (pId: string) => {
+                    prev.forEach((it) => {
+                      if (it.parentId === pId && !subtreeIds.has(it.id)) {
+                        subtreeIds.add(it.id);
+                        collectDescendants(it.id);
+                      }
+                    });
+                  };
+                  collectDescendants(dragged.id);
+
+                  // Evitar ciclos: el destino jamás puede estar dentro del subárbol arrastrado
+                  if (subtreeIds.has(target.id)) return prev;
+
+                  const newParentId = mode === 'reparent' ? target.id : target.parentId;
+                  const updatedDragged: Item = {
+                    ...dragged,
+                    parentId: newParentId,
+                    kind: newParentId ? 'subproceso' : 'hito',
+                  };
+
+                  const draggedBlock = prev
+                    .filter((x) => subtreeIds.has(x.id))
+                    .map((x) => (x.id === dragged.id ? updatedDragged : x));
+
+                  const remaining = prev.filter((x) => !subtreeIds.has(x.id));
+
+                  if (mode === 'reparent') {
+                    // Insertar al final de los hijos actuales del contenedor destino
+                    const targetSubtreeIds = new Set<string>([target.id]);
+                    const collectTargetDesc = (pId: string) => {
+                      remaining.forEach((it) => {
+                        if (it.parentId === pId && !targetSubtreeIds.has(it.id)) {
+                          targetSubtreeIds.add(it.id);
+                          collectTargetDesc(it.id);
+                        }
+                      });
+                    };
+                    collectTargetDesc(target.id);
+
+                    let insertIdx = remaining.findIndex((x) => x.id === target.id);
+                    remaining.forEach((it, idx) => {
+                      if (targetSubtreeIds.has(it.id)) insertIdx = idx;
+                    });
+
+                    const nextList = [...remaining];
+                    nextList.splice(insertIdx + 1, 0, ...draggedBlock);
+                    return nextList;
+                  } else {
+                    // Reordenamiento en el mismo nivel junto al elemento objetivo
+                    const origDraggedIdx = prev.findIndex((x) => x.id === dragged.id);
+                    const origTargetIdx = prev.findIndex((x) => x.id === target.id);
+                    const targetIdxInRemaining = remaining.findIndex((x) => x.id === target.id);
+                    if (targetIdxInRemaining === -1) return [...remaining, ...draggedBlock];
+
+                    // Si venía de antes y se suelta sobre un hermano posterior, insertar después del subárbol del hermano
+                    if (origDraggedIdx < origTargetIdx) {
+                      const targetSubtreeIds = new Set<string>([target.id]);
+                      const collectTargetDesc = (pId: string) => {
+                        remaining.forEach((it) => {
+                          if (it.parentId === pId && !targetSubtreeIds.has(it.id)) {
+                            targetSubtreeIds.add(it.id);
+                            collectTargetDesc(it.id);
+                          }
+                        });
+                      };
+                      collectTargetDesc(target.id);
+                      let afterIdx = targetIdxInRemaining;
+                      remaining.forEach((it, idx) => {
+                        if (targetSubtreeIds.has(it.id)) afterIdx = idx;
+                      });
+                      const nextList = [...remaining];
+                      nextList.splice(afterIdx + 1, 0, ...draggedBlock);
+                      return nextList;
+                    } else {
+                      const nextList = [...remaining];
+                      nextList.splice(targetIdxInRemaining, 0, ...draggedBlock);
+                      return nextList;
+                    }
+                  }
+                });
+                const draggedItem = items.find((x) => x.id === draggedId);
+                const targetItem = items.find((x) => x.id === targetId);
+                if (draggedItem && targetItem) {
+                  notify(
+                    mode === 'reparent'
+                      ? `"${draggedItem.code} ${draggedItem.name}" movido dentro de "${targetItem.code} ${targetItem.name}"`
+                      : `"${draggedItem.code} ${draggedItem.name}" reordenado junto a "${targetItem.code} ${targetItem.name}"`
+                  );
+                }
+              }}
+              onAutoSort={() => {
+                commitChange((prev) => sortWbsHierarchy(prev));
+                notify('Diagrama EDT autoordenado según jerarquía y numeración WBS');
+              }}
             />
           )}
 
@@ -8624,6 +8787,15 @@ export default function CronogramaGanttView({
                       onChange={(e) => setNewColShowInList(e.target.checked)}
                     />
                     <span>Mostrar en la vista Lista</span>
+                  </label>
+
+                  <label className="custom-col-checkbox-label" title="Encapsular valores dentro de una etiqueta o tarjeta de color">
+                    <input
+                      type="checkbox"
+                      checked={newColEncapsular}
+                      onChange={(e) => setNewColEncapsular(e.target.checked)}
+                    />
+                    <span>Encapsular valores (tarjeta/etiqueta)</span>
                   </label>
                 </div>
 
