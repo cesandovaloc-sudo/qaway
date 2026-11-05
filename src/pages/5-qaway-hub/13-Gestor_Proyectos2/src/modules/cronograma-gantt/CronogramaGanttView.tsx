@@ -1971,7 +1971,10 @@ export default function CronogramaGanttView({
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
   const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama') => {
-    if (newMode === viewMode) return;
+    if (newMode === viewMode) {
+      scrollToFilters(true);
+      return;
+    }
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
         localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
@@ -2021,15 +2024,17 @@ export default function CronogramaGanttView({
 
   // DIRECTIVA TÉCNICA: Auto-scroll y fijación al lienzo del workspace en TODAS las vistas
   const scrollToFilters = useCallback((smooth = true) => {
-    const target = document.getElementById('edt-workspace-toolbar');
+    const target = workspaceRef.current || document.getElementById('edt-workspace-toolbar');
     const scrollContainer = (target?.closest('.qm-canvas') as HTMLElement | null) ||
-                            (document.querySelector('.qm-canvas') as HTMLElement | null) ||
-                            (target?.closest('.gantt-v2') as HTMLElement | null);
+                            (document.querySelector('.qm-canvas') as HTMLElement | null);
     if (!target || !scrollContainer) return;
 
     try {
       const targetRect = target.getBoundingClientRect();
       const containerRect = scrollContainer.getBoundingClientRect();
+      // Si el contenedor está oculto por keep-alive (display: none), ignorar hasta que sea visible
+      if (targetRect.height === 0 || containerRect.height === 0) return;
+
       // Distancia exacta hasta el toolbar con 8px de resguardo superior
       const delta = targetRect.top - containerRect.top - 8;
       const targetScroll = scrollContainer.scrollTop + delta;
@@ -2040,70 +2045,35 @@ export default function CronogramaGanttView({
           behavior: smooth ? 'smooth' : 'auto',
         });
       }
-    } catch (_) {
-      try {
-        target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
-      } catch (_) {}
-    }
+    } catch (_) {}
   }, []);
 
-  // Auto-scroll al montar o al alternar entre CUALQUIER vista (Gantt, Lista, Kanban, Calendario, Jerárquica, Organigrama)
+  // Auto-scroll al montar, al activarse desde keep-alive o al alternar entre CUALQUIER vista
   useEffect(() => {
-    const t1 = setTimeout(() => scrollToFilters(true), 120);
-    const t2 = setTimeout(() => scrollToFilters(true), 380);
+    const t1 = setTimeout(() => scrollToFilters(true), 80);
+    const t2 = setTimeout(() => scrollToFilters(true), 280);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
   }, [viewMode, scrollToFilters]);
 
-  // Manejador bidireccional inteligente de rueda (wheel):
-  // 1. Cuando las tarjetas métricas están visibles (delta > 4) y se hace scroll hacia abajo, desplaza .qm-canvas.
-  // 2. Cuando el scroll interno está en su tope (scrollTop <= 0) y se hace scroll hacia arriba, revela las métricas.
   useEffect(() => {
     const ws = workspaceRef.current;
-    if (!ws) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (e.shiftKey || e.ctrlKey || Math.abs(e.deltaY) < 1) return;
-
-      const scrollCanvas = (ws.closest('.qm-canvas') as HTMLElement | null) ||
-                           (document.querySelector('.qm-canvas') as HTMLElement | null);
-      if (!scrollCanvas) return;
-
-      const target = document.getElementById('edt-workspace-toolbar');
-      if (!target) return;
-
-      const targetRect = target.getBoundingClientRect();
-      const canvasRect = scrollCanvas.getBoundingClientRect();
-      const delta = targetRect.top - canvasRect.top - 8;
-
-      // Desplazamiento hacia abajo para ocultar métricas si aún están visibles
-      if (delta > 4 && e.deltaY > 0) {
-        e.preventDefault();
-        const step = Math.min(e.deltaY, delta);
-        scrollCanvas.scrollBy({ top: step, behavior: 'auto' });
-        return;
+    if (!ws || typeof ResizeObserver === 'undefined') return;
+    let wasVisible = ws.getBoundingClientRect().height > 0;
+    const ro = new ResizeObserver((entries) => {
+      const h = entries[0]?.contentRect?.height ?? 0;
+      if (h > 0 && !wasVisible) {
+        wasVisible = true;
+        setTimeout(() => scrollToFilters(true), 60);
+      } else if (h === 0) {
+        wasVisible = false;
       }
-
-      // Desplazamiento hacia arriba para revelar métricas cuando el contenedor interno esté al tope
-      if (e.deltaY < 0 && scrollCanvas.scrollTop > 0) {
-        const activeScrollEl = ws.querySelector(
-          '.gantt-scroll, .cronograma-lista-table-wrap, .organigrama-canvas-scroll, .kanban-board'
-        ) as HTMLElement | null;
-
-        if (!activeScrollEl || activeScrollEl.scrollTop <= 0) {
-          e.preventDefault();
-          scrollCanvas.scrollBy({ top: e.deltaY, behavior: 'auto' });
-        }
-      }
-    };
-
-    ws.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      ws.removeEventListener('wheel', handleWheel);
-    };
-  }, []);
+    });
+    ro.observe(ws);
+    return () => ro.disconnect();
+  }, [scrollToFilters]);
 
   const ganttColumns = useMemo<ColumnDef<Item>[]>(
     () => [
@@ -3731,10 +3701,10 @@ export default function CronogramaGanttView({
             </label>
 
             {/* Filtro Desplegable de Niveles WBS (PM4R / BID) */}
-            <div className="filter-dropdown-wrap">
+            <div className="filter-dropdown-wrap wbs-filter-wrap">
               <button
                 type="button"
-                className={`filter-card-btn ${activeMenu === 'wbsLevel' ? 'active' : ''} ${
+                className={`filter-card-btn wbs-card-btn ${activeMenu === 'wbsLevel' ? 'active' : ''} ${
                   wbsLevelFilter !== 'todos' ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('wbsLevel')}
@@ -3806,10 +3776,10 @@ export default function CronogramaGanttView({
             </div>
 
             {/* Filtro Desplegable de Vencimientos y Alertas Críticas (Misma forma que Nivel WBS, juntos) */}
-            <div className="filter-dropdown-wrap">
+            <div className="filter-dropdown-wrap vencimientos-filter-wrap">
               <button
                 type="button"
-                className={`filter-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
+                className={`filter-card-btn vencimientos-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
                   vencimientosFilter !== 'todos' ? 'filtered' : ''
                 }`}
                 onClick={() => toggleMenu('vencimientos')}
@@ -6450,6 +6420,7 @@ export default function CronogramaGanttView({
               items={shown}
               allItems={items}
               onSelectItem={openEditorForItem}
+              todayIso={currentTodayIso}
               onAddItem={(targetStatus) => {
                 add('subproceso', undefined, true, targetStatus);
               }}

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useMemo, useEffect } from 'react';
-import './gantt.css';
+import '../cronograma-gantt/gantt.css';
 import type { Integrante, SedeFrente, UnidadOrganizacional, AsignacionViva, PresetVista, EstadoOperativo } from './types';
 import {
   getStoredIntegrantes,

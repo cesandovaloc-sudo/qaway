@@ -186,7 +186,6 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   display: block;
-  scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }

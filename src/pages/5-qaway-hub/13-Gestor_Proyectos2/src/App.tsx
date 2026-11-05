@@ -168,6 +168,64 @@ function App() {
   }, [activeProjectId]);
 
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
+  const canvasRef = useRef<HTMLElement | null>(null);
+
+  // Coordinación universal de scroll en .qm-canvas para todos los módulos y vistas:
+  // Al girar la rueda hacia abajo, primero oculta las tarjetas superiores hasta fijar la cápsula (.workspace).
+  // Al girar la rueda hacia arriba estando en el tope del contenedor interno, vuelve a mostrar las tarjetas.
+  useEffect(() => {
+    const scrollCanvas = canvasRef.current;
+    if (!scrollCanvas) return;
+
+    const findScrollableUp = (el: HTMLElement | null, boundary: HTMLElement): HTMLElement | null => {
+      let cur = el;
+      while (cur && cur !== boundary && cur !== document.body) {
+        const style = window.getComputedStyle(cur);
+        const overflowY = style.overflowY;
+        if ((overflowY === 'auto' || overflowY === 'scroll') && cur.scrollHeight > cur.clientHeight + 1) {
+          return cur;
+        }
+        cur = cur.parentElement;
+      }
+      return null;
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.defaultPrevented || e.shiftKey || e.ctrlKey || Math.abs(e.deltaY) < 1) return;
+      const targetEl = e.target as HTMLElement | null;
+      if (targetEl?.closest('.drawer, .modal, .cols-pop, .filter-card-dropdown, .adv-filter-pop, [role="dialog"]')) {
+        return;
+      }
+
+      const activePane = scrollCanvas.querySelector('.qm-pane-active') as HTMLElement | null;
+      const ws = (activePane?.querySelector('.workspace') || scrollCanvas.querySelector('.workspace')) as HTMLElement | null;
+      if (!ws) return;
+
+      const wsRect = ws.getBoundingClientRect();
+      const canvasRect = scrollCanvas.getBoundingClientRect();
+      const delta = wsRect.top - canvasRect.top - 8;
+      const maxCanvasScroll = scrollCanvas.scrollHeight - scrollCanvas.clientHeight;
+
+      if (e.deltaY > 0 && delta > 2 && scrollCanvas.scrollTop < maxCanvasScroll - 1) {
+        e.preventDefault();
+        scrollCanvas.scrollTop += Math.min(e.deltaY, delta);
+        return;
+      }
+
+      if (e.deltaY < 0 && scrollCanvas.scrollTop > 0) {
+        const innerScroll = findScrollableUp(targetEl, ws);
+        if (!innerScroll || innerScroll.scrollTop <= 0) {
+          e.preventDefault();
+          scrollCanvas.scrollTop = Math.max(0, scrollCanvas.scrollTop + e.deltaY);
+        }
+      }
+    };
+
+    scrollCanvas.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      scrollCanvas.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   // Sincronizar y redirigir a ruta canónica con prefijo /hub/gestor_proyecto
   useEffect(() => {
@@ -356,7 +414,7 @@ function App() {
           onToggleSidebar={toggleSidebar}
           activeProject={activeProject}
         />
-        <main className="qm-canvas">
+        <main ref={canvasRef} className="qm-canvas">
           <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ResumenProyectoView
               userRole={userRole}

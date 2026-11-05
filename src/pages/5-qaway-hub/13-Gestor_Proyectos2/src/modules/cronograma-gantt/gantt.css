@@ -29,7 +29,7 @@
 
 .gantt-v2 .app {
   min-height: 100%;
-  padding: 16px 24px 240px;
+  padding: 16px 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -620,6 +620,53 @@
 .gantt-v2 .filter-card-btn.filtered {
   border-color: #0066ff;
   background: #f0f7ff;
+}
+
+/* Delimitación fija y estable de los filtros desplegables para evitar saltos en la barra */
+.gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap,
+.gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap .filter-card-btn {
+  width: 205px;
+  min-width: 205px;
+  max-width: 205px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap .filter-card-copy {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap .filter-card-copy span {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gantt-v2 .filter-dropdown-wrap.vencimientos-filter-wrap,
+.gantt-v2 .filter-dropdown-wrap.vencimientos-filter-wrap .filter-card-btn {
+  width: 175px;
+  min-width: 175px;
+  max-width: 175px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.gantt-v2 .filter-dropdown-wrap.vencimientos-filter-wrap .filter-card-copy {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.gantt-v2 .filter-dropdown-wrap.vencimientos-filter-wrap .filter-card-copy span {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gantt-v2 .filter-card-copy {
@@ -5291,7 +5338,8 @@ body.gantt-resizing {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   padding: 12px;
-  max-height: calc(100vh - 280px);
+  height: 100%;
+  min-height: 0;
 }
 
 .kanban-column-header {
@@ -5543,7 +5591,7 @@ body.gantt-resizing {
 .cronograma-lista-table-wrap {
   flex: 1;
   overflow: auto;
-  max-height: calc(100vh - 280px);
+  min-height: 0;
 }
 
 .cronograma-lista-table {
@@ -7393,10 +7441,13 @@ body.gantt-resizing {
    ESTRUCTURA JERÁRQUICA WBS (VISTA ÁRBOL / DESGLOSE DE TRABAJO - IMAGEN 1)
    ========================================================================== */
 .gantt-v2 .arbol-wbs-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   width: 100%;
   padding: 20px 24px 48px;
   background: #fbfcfd;
-  min-height: 580px;
   box-sizing: border-box;
 }
 
@@ -7997,6 +8048,8 @@ body.gantt-resizing {
 .gantt-v2 .organigrama-wbs-container {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   height: 100%;
   width: 100%;
   background: #f8fafc;

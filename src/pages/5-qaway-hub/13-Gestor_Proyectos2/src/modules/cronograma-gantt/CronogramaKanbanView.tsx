@@ -10,6 +10,7 @@ import {
   Check
 } from 'lucide-react';
 import type { Item, Status } from './CronogramaGanttView';
+import { getDeviationDays, formatDeviation, getDeviationTone } from './scheduleMetrics';
 
 interface CronogramaKanbanViewProps {
   items: Item[];
@@ -18,6 +19,7 @@ interface CronogramaKanbanViewProps {
   onAddItem?: (status: Status) => void;
   onUpdateStatus?: (itemId: string, nextStatus: Status) => void;
   formatDatePE: (iso: string) => string;
+  todayIso?: string;
 }
 
 interface ColumnConfig {
@@ -90,6 +92,7 @@ export default function CronogramaKanbanView({
   onAddItem,
   onUpdateStatus,
   formatDatePE,
+  todayIso,
 }: CronogramaKanbanViewProps) {
   const [openStatusMenuId, setOpenStatusMenuId] = useState<string | null>(null);
 
@@ -238,12 +241,28 @@ export default function CronogramaKanbanView({
                           </div>
                         )}
 
-                        {/* Fechas de Ejecución */}
-                        <div className="kanban-card-dates">
-                          <CalendarDays size={12} className="kanban-card-icon" />
-                          <span>
-                            {formatDatePE(item.start)} – {formatDatePE(item.end)}
-                          </span>
+                        {/* Fechas de Ejecución y Desviación de Línea Base */}
+                        <div className="kanban-card-dates" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, overflow: 'hidden' }}>
+                            <CalendarDays size={12} className="kanban-card-icon" style={{ flexShrink: 0 }} />
+                            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {formatDatePE(item.start)} – {formatDatePE(item.end)}
+                            </span>
+                          </div>
+                          {(() => {
+                            const dev = getDeviationDays(item, todayIso || new Date().toISOString().slice(0, 10));
+                            if (dev === undefined) return null;
+                            const tone = getDeviationTone(dev);
+                            return (
+                              <span
+                                className={`dev-pill ${tone}`}
+                                style={{ fontSize: '10.5px', padding: '1px 5px', lineHeight: '1.2', flexShrink: 0 }}
+                                title={`Desviación respecto a línea base: ${formatDeviation(dev)}`}
+                              >
+                                {formatDeviation(dev)}
+                              </span>
+                            );
+                          })()}
                         </div>
 
                         {/* Pie de Tarjeta: Avatar + Región + Barra de Avance */}
