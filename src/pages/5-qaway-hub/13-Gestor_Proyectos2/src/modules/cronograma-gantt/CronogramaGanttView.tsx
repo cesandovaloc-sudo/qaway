@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
 import {
   applyActuals,
@@ -1970,7 +1970,7 @@ export default function CronogramaGanttView({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
-  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol') => {
+  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama') => {
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
@@ -1988,6 +1988,7 @@ export default function CronogramaGanttView({
     setVisibleCols(nextCols);
     prevViewModeRef.current = newMode;
     setViewMode(newMode);
+    setTimeout(() => scrollToFilters(true), 60);
   };
 
   useEffect(() => {
@@ -2018,29 +2019,91 @@ export default function CronogramaGanttView({
     }
   }, [visibleCols, viewMode]);
 
-  // DIRECTIVA TÉCNICA: Auto-scroll / enfoque al lienzo al conmutar a Organigrama (scrollIntoView)
-  useEffect(() => {
-    if (viewMode === 'organigrama') {
-      const timer = setTimeout(() => {
-        const target = document.getElementById('edt-workspace-toolbar');
-        if (target) {
-          try {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } catch (_) {}
+  // DIRECTIVA TÉCNICA: Auto-scroll y fijación al lienzo del workspace en TODAS las vistas
+  const scrollToFilters = useCallback((smooth = true) => {
+    const target = document.getElementById('edt-workspace-toolbar');
+    const scrollContainer = (target?.closest('.qm-canvas') as HTMLElement | null) ||
+                            (document.querySelector('.qm-canvas') as HTMLElement | null) ||
+                            (target?.closest('.gantt-v2') as HTMLElement | null);
+    if (!target || !scrollContainer) return;
 
-          // Compatibilidad con contenedores de scroll anidados del shell (qm-canvas / gantt-v2)
-          const scrollParent = (target.closest('.qm-canvas') as HTMLElement | null) ||
-                               (document.querySelector('.qm-canvas') as HTMLElement | null) ||
-                               (target.closest('.gantt-v2') as HTMLElement | null);
-          if (scrollParent) {
-            const targetTop = target.offsetTop - 8;
-            scrollParent.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
-          }
-        }
-      }, 150);
-      return () => clearTimeout(timer);
+    try {
+      const targetRect = target.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+      // Distancia exacta hasta el toolbar con 8px de resguardo superior
+      const delta = targetRect.top - containerRect.top - 8;
+      const targetScroll = scrollContainer.scrollTop + delta;
+
+      if (Math.abs(delta) > 2) {
+        scrollContainer.scrollTo({
+          top: Math.max(0, targetScroll),
+          behavior: smooth ? 'smooth' : 'auto',
+        });
+      }
+    } catch (_) {
+      try {
+        target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+      } catch (_) {}
     }
-  }, [viewMode]);
+  }, []);
+
+  // Auto-scroll al montar o al alternar entre CUALQUIER vista (Gantt, Lista, Kanban, Calendario, Jerárquica, Organigrama)
+  useEffect(() => {
+    const t1 = setTimeout(() => scrollToFilters(true), 120);
+    const t2 = setTimeout(() => scrollToFilters(true), 380);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [viewMode, scrollToFilters]);
+
+  // Manejador bidireccional inteligente de rueda (wheel):
+  // 1. Cuando las tarjetas métricas están visibles (delta > 4) y se hace scroll hacia abajo, desplaza .qm-canvas.
+  // 2. Cuando el scroll interno está en su tope (scrollTop <= 0) y se hace scroll hacia arriba, revela las métricas.
+  useEffect(() => {
+    const ws = workspaceRef.current;
+    if (!ws) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.shiftKey || e.ctrlKey || Math.abs(e.deltaY) < 1) return;
+
+      const scrollCanvas = (ws.closest('.qm-canvas') as HTMLElement | null) ||
+                           (document.querySelector('.qm-canvas') as HTMLElement | null);
+      if (!scrollCanvas) return;
+
+      const target = document.getElementById('edt-workspace-toolbar');
+      if (!target) return;
+
+      const targetRect = target.getBoundingClientRect();
+      const canvasRect = scrollCanvas.getBoundingClientRect();
+      const delta = targetRect.top - canvasRect.top - 8;
+
+      // Desplazamiento hacia abajo para ocultar métricas si aún están visibles
+      if (delta > 4 && e.deltaY > 0) {
+        e.preventDefault();
+        const step = Math.min(e.deltaY, delta);
+        scrollCanvas.scrollBy({ top: step, behavior: 'auto' });
+        return;
+      }
+
+      // Desplazamiento hacia arriba para revelar métricas cuando el contenedor interno esté al tope
+      if (e.deltaY < 0 && scrollCanvas.scrollTop > 0) {
+        const activeScrollEl = ws.querySelector(
+          '.gantt-scroll, .cronograma-lista-table-wrap, .organigrama-canvas-scroll, .kanban-board'
+        ) as HTMLElement | null;
+
+        if (!activeScrollEl || activeScrollEl.scrollTop <= 0) {
+          e.preventDefault();
+          scrollCanvas.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        }
+      }
+    };
+
+    ws.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      ws.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   const ganttColumns = useMemo<ColumnDef<Item>[]>(
     () => [
@@ -3430,7 +3493,14 @@ export default function CronogramaGanttView({
 
         {/* Tarjetas Métricas Directivas */}
         <section className="metrics">
-          <article className="metric blue">
+          <article
+            className="metric blue"
+            onClick={() => {
+              setTab('Hitos');
+              setWbsLevelFilter('componentes');
+              scrollToFilters(true);
+            }}
+          >
             <span className="metric-icon">
               <CalendarDays size={22} />
             </span>
@@ -3442,7 +3512,15 @@ export default function CronogramaGanttView({
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          <article className="metric green" title="46 Paquetes de Trabajo finales (nodos terminales ejecutables) y 6 agrupadores intermedios (PM4R / BID)">
+          <article
+            className="metric green"
+            title="46 Paquetes de Trabajo finales (nodos terminales ejecutables) y 6 agrupadores intermedios (PM4R / BID)"
+            onClick={() => {
+              setTab('Todos');
+              setWbsLevelFilter('terminales');
+              scrollToFilters(true);
+            }}
+          >
             <span className="metric-icon">
               <Layers3 size={22} />
             </span>
@@ -3454,7 +3532,14 @@ export default function CronogramaGanttView({
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          <article className="metric amber">
+          <article
+            className="metric amber"
+            onClick={() => {
+              setTab('En proceso');
+              setWbsLevelFilter('todos');
+              scrollToFilters(true);
+            }}
+          >
             <span className="metric-icon">
               <Clock3 size={22} />
             </span>
@@ -3466,7 +3551,14 @@ export default function CronogramaGanttView({
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          <article className="metric red">
+          <article
+            className="metric red"
+            onClick={() => {
+              setTab('Con retraso');
+              setWbsLevelFilter('todos');
+              scrollToFilters(true);
+            }}
+          >
             <span className="metric-icon">
               <AlertTriangle size={22} />
             </span>
@@ -3478,7 +3570,14 @@ export default function CronogramaGanttView({
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          <article className="metric overall">
+          <article
+            className="metric overall"
+            onClick={() => {
+              setTab('Todos');
+              setWbsLevelFilter('todos');
+              scrollToFilters(true);
+            }}
+          >
             <div className="ring" style={{ '--p': `${overall}%` } as React.CSSProperties}>
               <b>{overall}%</b>
             </div>
@@ -3520,6 +3619,7 @@ export default function CronogramaGanttView({
                 onClick={() => {
                   setTab('Todos');
                   setWbsLevelFilter('todos');
+                  scrollToFilters(true);
                 }}
               >
                 Todos <span>({items.length})</span>
@@ -3531,6 +3631,7 @@ export default function CronogramaGanttView({
                 onClick={() => {
                   setTab('Hitos');
                   setWbsLevelFilter('componentes');
+                  scrollToFilters(true);
                 }}
               >
                 Componentes <span>({hitos.length})</span>
@@ -3547,6 +3648,7 @@ export default function CronogramaGanttView({
                   onClick={() => {
                     setTab(t.n);
                     setWbsLevelFilter('todos');
+                    scrollToFilters(true);
                   }}
                 >
                   {t.label} <span>({t.c})</span>
