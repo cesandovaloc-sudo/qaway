@@ -116,6 +116,8 @@ import {
   UserCheck,
   UserPlus,
   Users,
+  Network,
+  Zap,
   X
 } from 'lucide-react';
 
@@ -1786,6 +1788,13 @@ export default function CronogramaGanttView({
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
   const [listaTemporalFilter, setListaTemporalFilter] = useState<'Todos' | 'Hoy' | 'Semana' | 'Mes' | 'Trimestre'>('Todos');
+  // Modo Alertas Críticas (Punto 1 - Botón Único sin desplegables)
+  const [isAlertModeActive, setIsAlertModeActive] = useState<boolean>(false);
+  const [alertPeriod, setAlertPeriod] = useState<'Hoy' | 'Día' | 'Semana' | 'Mes' | 'Trimestre'>('Semana');
+
+  // Clasificación de niveles WBS según PM4R / BID (Punto 2)
+  const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'componentes' | 'intermedios' | 'paquetes'>('todos');
+  const [isWbsLevelDropdownOpen, setIsWbsLevelDropdownOpen] = useState(false);
   const [zoom, setZoom] = useState('Mes');
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
   const [hoveredTask, setHoveredTask] = useState<{
@@ -2686,6 +2695,20 @@ export default function CronogramaGanttView({
   const complete = items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length;
   const overall = items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0;
 
+  // Desglose oficial de niveles WBS según taxonomía PM4R (BID)
+  const intermediosCount = useMemo(() => {
+    return items.filter((x) => Boolean(x.parentId) && items.some((c) => c.parentId === x.id)).length;
+  }, [items]);
+
+  const paquetesCount = useMemo(() => {
+    return items.filter((x) => !items.some((c) => c.parentId === x.id)).length;
+  }, [items]);
+
+  // Conteo de elementos con alerta crítica (con retraso o pendientes de vencimiento)
+  const criticalItemsCount = useMemo(() => {
+    return items.filter(isItemLate).length;
+  }, [items, currentTodayIso]);
+
   /* Rango predeterminado del botón Limpiar */
   const DEFAULT_RANGE = { from: RANGE_MIN, to: RANGE_MAX };
   const isRangeActive = rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX;
@@ -2831,6 +2854,54 @@ export default function CronogramaGanttView({
         });
       }
 
+      // Filtro metodológico WBS PM4R / BID
+      let matchWbsLevel = true;
+      if (wbsLevelFilter === 'componentes') {
+        matchWbsLevel = !x.parentId;
+      } else if (wbsLevelFilter === 'intermedios') {
+        const hasChildren = items.some((c) => c.parentId === x.id);
+        matchWbsLevel = Boolean(x.parentId) && hasChildren;
+      } else if (wbsLevelFilter === 'paquetes') {
+        const hasChildren = items.some((c) => c.parentId === x.id);
+        matchWbsLevel = !hasChildren;
+      }
+
+      // Filtro de Modo Alertas Críticas (Punto 1: activado por botón único)
+      let matchAlertFilter = true;
+      if (isAlertModeActive) {
+        const isLate = isItemLate(x);
+        const curr = new Date(currentTodayIso + 'T12:00:00');
+        if (alertPeriod === 'Hoy') {
+          matchAlertFilter = isLate || (x.end === currentTodayIso && x.status !== 'Completado' && x.status !== 'Cumple');
+        } else if (alertPeriod === 'Día') {
+          const nextDay = new Date(curr);
+          nextDay.setDate(nextDay.getDate() + 1);
+          const nextIso = nextDay.toISOString().slice(0, 10);
+          matchAlertFilter = isLate || (x.end <= nextIso && x.end >= currentTodayIso && x.status !== 'Completado' && x.status !== 'Cumple');
+        } else if (alertPeriod === 'Semana') {
+          const dayOfWeek = (curr.getDay() + 6) % 7;
+          const monday = new Date(curr);
+          monday.setDate(curr.getDate() - dayOfWeek);
+          const sunday = new Date(monday);
+          sunday.setDate(monday.getDate() + 6);
+          const monIso = monday.toISOString().slice(0, 10);
+          const sunIso = sunday.toISOString().slice(0, 10);
+          matchAlertFilter = isLate || (x.end >= monIso && x.end <= sunIso && x.status !== 'Completado' && x.status !== 'Cumple');
+        } else if (alertPeriod === 'Mes') {
+          const y = curr.getFullYear();
+          const m = curr.getMonth();
+          const firstDay = new Date(y, m, 1).toISOString().slice(0, 10);
+          const lastDay = new Date(y, m + 1, 0).toISOString().slice(0, 10);
+          matchAlertFilter = isLate || (x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple');
+        } else if (alertPeriod === 'Trimestre') {
+          const y = curr.getFullYear();
+          const q = Math.floor(curr.getMonth() / 3);
+          const firstDay = new Date(y, q * 3, 1).toISOString().slice(0, 10);
+          const lastDay = new Date(y, q * 3 + 3, 0).toISOString().slice(0, 10);
+          matchAlertFilter = isLate || (x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple');
+        }
+      }
+
       return (
         matchSearch &&
         matchState &&
@@ -2843,6 +2914,8 @@ export default function CronogramaGanttView({
         notCollapsed &&
         matchCustom &&
         matchEngine &&
+        matchWbsLevel &&
+        matchAlertFilter &&
         (() => {
           if (viewMode !== 'lista' || listaTemporalFilter === 'Todos') return true;
           const targetIso = currentTodayIso;
@@ -2919,7 +2992,10 @@ export default function CronogramaGanttView({
     collapsedByMode,
     viewMode,
     listaTemporalFilter,
-    currentTodayIso
+    currentTodayIso,
+    wbsLevelFilter,
+    isAlertModeActive,
+    alertPeriod
   ]);
 
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
@@ -3012,7 +3088,7 @@ export default function CronogramaGanttView({
   const todayPos = calcPosition(currentTodayIso);
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
-  const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false) => {
+  const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false, initialStatus?: Status) => {
     const id = (kind === 'hito' ? 'comp-' : 'sub-') + Date.now();
     const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
     let code = `${hitos.length + 1}.`;
@@ -3050,7 +3126,7 @@ export default function CronogramaGanttView({
       start: defaultStart,
       end: defaultEnd,
       progress: 0,
-      status: 'Pendiente',
+      status: initialStatus || 'Pendiente',
       expanded: true,
       description: '',
       deliverable: '',
@@ -3265,14 +3341,14 @@ export default function CronogramaGanttView({
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
-          <article className="metric green">
+          <article className="metric green" title="46 Paquetes de Trabajo finales (nodos terminales ejecutables) y 6 Productos intermedios (PM4R / BID)">
             <span className="metric-icon">
               <Layers3 size={22} />
             </span>
             <div className="metric-copy">
-              <b>{subs.length}</b>
-              <strong>Subcomponentes</strong>
-              <small>y paquetes de trabajo</small>
+              <b>{paquetesCount}</b>
+              <strong>Paquetes de Trabajo</strong>
+              <small>{paquetesCount} terminales · {intermediosCount} productos</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -3337,10 +3413,102 @@ export default function CronogramaGanttView({
           {/* Tabs Superiores con Switcher de Modos a la Derecha */}
           <nav className="tabs">
             <div className="tabs-list">
+              <button
+                type="button"
+                className={tab === 'Todos' && wbsLevelFilter === 'todos' ? 'active' : ''}
+                onClick={() => {
+                  setTab('Todos');
+                  setWbsLevelFilter('todos');
+                }}
+              >
+                Todos <span>({items.length})</span>
+              </button>
+
+              <button
+                type="button"
+                className={tab === 'Hitos' || wbsLevelFilter === 'componentes' ? 'active' : ''}
+                onClick={() => {
+                  setTab('Hitos');
+                  setWbsLevelFilter('componentes');
+                }}
+              >
+                Componentes <span>({hitos.length})</span>
+              </button>
+
+              {/* Selector Desplegable de Niveles WBS (PM4R / BID - Punto 2) */}
+              <div className="wbs-level-dropdown-wrap">
+                <button
+                  type="button"
+                  className={`wbs-level-btn ${wbsLevelFilter !== 'todos' ? 'active' : ''}`}
+                  onClick={() => setIsWbsLevelDropdownOpen((p) => !p)}
+                  title="Filtrar por nivel metodológico WBS (PM4R/BID)"
+                >
+                  <span>
+                    {wbsLevelFilter === 'todos'
+                      ? `Nivel WBS: Todos (${items.length})`
+                      : wbsLevelFilter === 'componentes'
+                      ? `Componentes (${hitos.length})`
+                      : wbsLevelFilter === 'intermedios'
+                      ? `Productos intermedios (${intermediosCount})`
+                      : `Paquetes de Trabajo (${paquetesCount})`}
+                  </span>
+                  <ChevronDown size={13} />
+                </button>
+
+                {isWbsLevelDropdownOpen && (
+                  <div className="wbs-level-menu">
+                    <button
+                      type="button"
+                      className={`wbs-level-item ${wbsLevelFilter === 'todos' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setWbsLevelFilter('todos');
+                        setIsWbsLevelDropdownOpen(false);
+                      }}
+                    >
+                      <span>Todos los niveles</span>
+                      <span className="wbs-level-badge">{items.length}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`wbs-level-item ${wbsLevelFilter === 'componentes' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setWbsLevelFilter('componentes');
+                        setTab('Hitos');
+                        setIsWbsLevelDropdownOpen(false);
+                      }}
+                    >
+                      <span>Componentes Principales (Nivel 1)</span>
+                      <span className="wbs-level-badge">{hitos.length}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`wbs-level-item ${wbsLevelFilter === 'intermedios' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setWbsLevelFilter('intermedios');
+                        setTab('Todos');
+                        setIsWbsLevelDropdownOpen(false);
+                      }}
+                    >
+                      <span>Productos / Entregables intermedios</span>
+                      <span className="wbs-level-badge">{intermediosCount}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`wbs-level-item ${wbsLevelFilter === 'paquetes' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setWbsLevelFilter('paquetes');
+                        setTab('Todos');
+                        setIsWbsLevelDropdownOpen(false);
+                      }}
+                    >
+                      <span>Paquetes de Trabajo finales</span>
+                      <span className="wbs-level-badge">{paquetesCount}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {[
-                { n: 'Todos', label: 'Todos', c: items.length },
-                { n: 'Hitos', label: 'Componentes', c: hitos.length },
-                { n: 'Subprocesos', label: 'Subcomponentes', c: items.length - hitos.length },
                 { n: 'En proceso', label: 'En proceso', c: inprog },
                 { n: 'Con retraso', label: 'Con retraso', c: late },
                 { n: 'Completados', label: 'Completados', c: complete },
@@ -3348,7 +3516,10 @@ export default function CronogramaGanttView({
                 <button
                   key={t.n}
                   className={tab === t.n ? 'active' : ''}
-                  onClick={() => setTab(t.n)}
+                  onClick={() => {
+                    setTab(t.n);
+                    setWbsLevelFilter('todos');
+                  }}
                 >
                   {t.label} <span>({t.c})</span>
                 </button>
@@ -3396,10 +3567,10 @@ export default function CronogramaGanttView({
                 type="button"
                 className={`view-mode-btn ${viewMode === 'arbol' ? 'active' : ''}`}
                 onClick={() => handleViewModeChange('arbol')}
-                title="Vista Estructura Jerárquica WBS (Árbol de trabajo)"
+                title="Vista Estructura Desglosada de Trabajo (EDT / WBS - Organigrama)"
               >
-                <GitFork size={14} />
-                <span>Jerárquica</span>
+                <Network size={14} />
+                <span>EDT (Organigrama)</span>
               </button>
             </div>
           </nav>
@@ -3826,7 +3997,7 @@ export default function CronogramaGanttView({
                 </div>
 
                 <div className="zoom">
-                  {(['Mes', 'Semana', 'Día', 'Agenda'] as const).map((v) => (
+                  {(['Mes', 'Semana', 'Día'] as const).map((v) => (
                     <button
                       type="button"
                       key={v}
@@ -3843,44 +4014,57 @@ export default function CronogramaGanttView({
               <>
                 <button
                   type="button"
-                  className={`today-pill ${listaTemporalFilter === 'Hoy' ? 'active' : ''}`}
+                  className={`today-pill ${listaTemporalFilter === 'Hoy' || (isAlertModeActive && alertPeriod === 'Hoy') ? 'active' : ''}`}
                   onClick={() => {
-                    const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
-                    setListaTemporalFilter(next);
-                    notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
+                    if (isAlertModeActive) {
+                      setAlertPeriod('Hoy');
+                    } else {
+                      const next = listaTemporalFilter === 'Hoy' ? 'Todos' : 'Hoy';
+                      setListaTemporalFilter(next);
+                      notify(next === 'Hoy' ? 'Filtrando actividades de Hoy' : 'Mostrando todas las actividades');
+                    }
                   }}
                   title={listaTemporalFilter === 'Hoy' ? 'Quitar filtro de Hoy' : `Actividades en curso hoy (${formatDatePE(currentTodayIso)})`}
-                  style={{
-                    background: listaTemporalFilter === 'Hoy' ? '#0066ff' : '#ffffff',
-                    color: listaTemporalFilter === 'Hoy' ? '#ffffff' : '#334155',
-                    border: listaTemporalFilter === 'Hoy' ? '1px solid #0066ff' : '1px solid #cbd5e1',
-                    boxShadow: listaTemporalFilter === 'Hoy' ? '0 2px 6px rgba(0, 102, 255, 0.28)' : 'none',
-                  }}
+                  style={isAlertModeActive && alertPeriod === 'Hoy' ? { background: '#e11d48', color: '#fff', borderColor: '#e11d48' } : undefined}
                 >
                   Hoy
                 </button>
 
+                {/* Botón Único de Alertas Críticas (Punto 1: sin menú desplegable) */}
+                <button
+                  type="button"
+                  className={`alert-criticos-pill ${isAlertModeActive ? 'active' : ''}`}
+                  onClick={() => {
+                    const next = !isAlertModeActive;
+                    setIsAlertModeActive(next);
+                    if (next) setAlertPeriod('Semana');
+                    notify(next ? 'Modo Alertas Críticas activado' : 'Modo estándar restaurado');
+                  }}
+                  title={isAlertModeActive ? 'Desactivar modo alertas de fechas críticas' : 'Activar modo alertas: convierte los botones en activadores de vencimiento'}
+                >
+                  <Zap size={13} />
+                  <span>Críticos</span>
+                  {criticalItemsCount > 0 && <span className="alert-badge">{criticalItemsCount}</span>}
+                </button>
+
                 <div className="zoom" title="Filtrar actividades por período de corte">
                   {(['Todos', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
-                    const isActive = listaTemporalFilter === x;
-                    const tooltipText =
-                      x === 'Todos'
-                        ? 'Mostrar todas las actividades sin filtro de fecha'
-                        : x === 'Semana'
-                        ? 'Actividades en curso esta semana'
-                        : x === 'Mes'
-                        ? 'Actividades en curso este mes'
-                        : 'Actividades en curso en el trimestre';
+                    const isActive = isAlertModeActive ? alertPeriod === x : listaTemporalFilter === x;
                     return (
                       <button
                         type="button"
                         key={x}
                         className={isActive ? 'active' : ''}
+                        style={isAlertModeActive && isActive ? { background: '#e11d48', color: '#fff', borderColor: '#e11d48' } : undefined}
                         onClick={() => {
-                          setListaTemporalFilter(x);
-                          notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
+                          if (isAlertModeActive) {
+                            if (x === 'Todos') setIsAlertModeActive(false);
+                            else setAlertPeriod(x);
+                          } else {
+                            setListaTemporalFilter(x);
+                            notify(x === 'Todos' ? 'Mostrando todas las actividades' : `Filtrando actividades en: ${x}`);
+                          }
                         }}
-                        title={tooltipText}
                       >
                         {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
                       </button>
@@ -3894,41 +4078,89 @@ export default function CronogramaGanttView({
                 <button
                   type="button"
                   className="today-pill"
-                  onClick={scrollToToday}
-                  title="Ir y centrar en la fecha actual de hoy"
+                  onClick={() => {
+                    if (isAlertModeActive) {
+                      setAlertPeriod('Hoy');
+                    } else {
+                      scrollToToday();
+                    }
+                  }}
+                  title={isAlertModeActive ? 'Filtrar entregables que vencen Hoy' : 'Ir y centrar en la fecha actual de hoy'}
+                  style={isAlertModeActive && alertPeriod === 'Hoy' ? { background: '#e11d48', color: '#fff', borderColor: '#e11d48' } : undefined}
                 >
                   Hoy
                 </button>
 
+                {/* Botón Único de Alertas Críticas (Punto 1: sin menú desplegable) */}
+                <button
+                  type="button"
+                  className={`alert-criticos-pill ${isAlertModeActive ? 'active' : ''}`}
+                  onClick={() => {
+                    const next = !isAlertModeActive;
+                    setIsAlertModeActive(next);
+                    if (next) setAlertPeriod('Semana');
+                    notify(next ? 'Modo Alertas Críticas activado: usa los botones Día, Semana, Mes o Trimestre para filtrar' : 'Modo estándar de escala restaurado');
+                  }}
+                  title={isAlertModeActive ? 'Desactivar modo de alertas críticas' : 'Activar modo de alertas: convierte Día, Semana, Mes y Trimestre en activadores de vencimiento'}
+                >
+                  <Zap size={13} />
+                  <span>Críticos</span>
+                  {criticalItemsCount > 0 && <span className="alert-badge">{criticalItemsCount}</span>}
+                </button>
+
                 <div className="zoom">
-                  <button
-                    type="button"
-                    className="zoom-nav-arrow"
-                    onClick={() => scrollTimeline('left')}
-                    title="Desplazar línea de tiempo a la izquierda"
-                    aria-label="Desplazar hacia el pasado"
-                  >
-                    <ChevronLeft size={15} />
-                  </button>
-                  {['Día', 'Semana', 'Mes', 'Trimestre'].map((x) => (
+                  {!isAlertModeActive && (
                     <button
                       type="button"
-                      key={x}
-                      className={zoom === x ? 'active' : ''}
-                      onClick={() => handleZoomChange(x)}
+                      className="zoom-nav-arrow"
+                      onClick={() => scrollTimeline('left')}
+                      title="Desplazar línea de tiempo a la izquierda"
+                      aria-label="Desplazar hacia el pasado"
                     >
-                      {x}
+                      <ChevronLeft size={15} />
                     </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="zoom-nav-arrow"
-                    onClick={() => scrollTimeline('right')}
-                    title="Desplazar línea de tiempo a la derecha"
-                    aria-label="Desplazar hacia el futuro"
-                  >
-                    <ChevronRight size={15} />
-                  </button>
+                  )}
+                  {(['Día', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => {
+                    const isSelected = isAlertModeActive ? alertPeriod === x : zoom === x;
+                    return (
+                      <button
+                        type="button"
+                        key={x}
+                        className={isSelected ? 'active' : ''}
+                        style={
+                          isAlertModeActive && isSelected
+                            ? { background: '#e11d48', color: '#ffffff', borderColor: '#e11d48', fontWeight: 700 }
+                            : undefined
+                        }
+                        onClick={() => {
+                          if (isAlertModeActive) {
+                            setAlertPeriod(x);
+                            notify(`Filtrando alertas críticas con vencimiento en: ${x}`);
+                          } else {
+                            handleZoomChange(x);
+                          }
+                        }}
+                        title={
+                          isAlertModeActive
+                            ? `Filtrar entregables críticos en: ${x}`
+                            : `Escala ${x}`
+                        }
+                      >
+                        {x}
+                      </button>
+                    );
+                  })}
+                  {!isAlertModeActive && (
+                    <button
+                      type="button"
+                      className="zoom-nav-arrow"
+                      onClick={() => scrollTimeline('right')}
+                      title="Desplazar línea de tiempo a la derecha"
+                      aria-label="Desplazar hacia el futuro"
+                    >
+                      <ChevronRight size={15} />
+                    </button>
+                  )}
                 </div>
               </>
             )}
@@ -6209,13 +6441,42 @@ export default function CronogramaGanttView({
             </div>
           )}
 
-          {/* Presentación 3: Tablero Visual Kanban */}
+          {/* Presentación 3: Tablero Visual Kanban (Punto 3 Conectado) */}
           {viewMode === 'kanban' && (
             <CronogramaKanbanView
               items={shown}
               allItems={items}
               onSelectItem={openEditorForItem}
-              onAddItem={() => add('hito')}
+              onAddItem={(targetStatus) => {
+                add('subproceso', undefined, true, targetStatus);
+              }}
+              onUpdateStatus={(itemId, nextStatus) => {
+                setItems((prev) => {
+                  const updated = prev.map((x) =>
+                    x.id === itemId
+                      ? {
+                          ...x,
+                          status: nextStatus,
+                          progress:
+                            nextStatus === 'Completado' || nextStatus === 'Cumple'
+                              ? 100
+                              : nextStatus === 'Pendiente'
+                              ? 0
+                              : x.progress > 0
+                              ? x.progress
+                              : 40,
+                        }
+                      : x
+                  );
+                  const recomputed = computeWbsHierarchy(updated, rawTasks);
+                  try {
+                    localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
+                    window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+                  } catch {}
+                  return recomputed;
+                });
+                notify(`Estado actualizado a: ${nextStatus}`);
+              }}
               formatDatePE={formatDatePE}
             />
           )}

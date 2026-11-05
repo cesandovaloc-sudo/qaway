@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   CalendarDays,
   CheckCircle2,
@@ -6,7 +6,8 @@ import {
   Flag,
   MoreHorizontal,
   Plus,
-  Target
+  Target,
+  Check
 } from 'lucide-react';
 import type { Item, Status } from './CronogramaGanttView';
 
@@ -15,6 +16,7 @@ interface CronogramaKanbanViewProps {
   allItems: Item[];
   onSelectItem: (item: Item) => void;
   onAddItem?: (status: Status) => void;
+  onUpdateStatus?: (itemId: string, nextStatus: Status) => void;
   formatDatePE: (iso: string) => string;
 }
 
@@ -86,8 +88,11 @@ export default function CronogramaKanbanView({
   allItems,
   onSelectItem,
   onAddItem,
+  onUpdateStatus,
   formatDatePE,
 }: CronogramaKanbanViewProps) {
+  const [openStatusMenuId, setOpenStatusMenuId] = useState<string | null>(null);
+
   const getParentHito = (parentId?: string) => {
     if (!parentId) return null;
     return allItems.find((x) => x.id === parentId);
@@ -157,17 +162,65 @@ export default function CronogramaKanbanView({
                               {item.name}
                             </span>
                           </div>
-                          <button
-                            type="button"
-                            className="kanban-card-menu-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onSelectItem(item);
-                            }}
-                            title="Opciones del elemento"
-                          >
-                            <MoreHorizontal size={14} />
-                          </button>
+                          <div style={{ position: 'relative' }}>
+                            <button
+                              type="button"
+                              className="kanban-card-menu-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenStatusMenuId((prev) => (prev === item.id ? null : item.id));
+                              }}
+                              title="Cambiar estado o ver opciones"
+                            >
+                              <MoreHorizontal size={14} />
+                            </button>
+
+                            {openStatusMenuId === item.id && (
+                              <div
+                                className="kanban-status-popover"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 700, padding: '4px 6px', borderBottom: '1px solid #f1f5f9' }}>
+                                  Mover a estado:
+                                </div>
+                                {(
+                                  [
+                                    { st: 'Pendiente', label: 'Pendiente', dot: '#94a3b8' },
+                                    { st: 'En proceso', label: 'En proceso', dot: '#0066ff' },
+                                    { st: 'Con retraso', label: 'Con retraso', dot: '#eab308' },
+                                    { st: 'Completado', label: 'Completado', dot: '#10b981' },
+                                  ] as const
+                                ).map((opt) => (
+                                  <button
+                                    key={opt.st}
+                                    type="button"
+                                    className="kanban-status-opt"
+                                    onClick={() => {
+                                      setOpenStatusMenuId(null);
+                                      onUpdateStatus?.(item.id, opt.st);
+                                    }}
+                                  >
+                                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: opt.dot }} />
+                                    <span>{opt.label}</span>
+                                    {item.status === opt.st && <Check size={11} style={{ marginLeft: 'auto', color: '#0066ff' }} />}
+                                  </button>
+                                ))}
+                                <div style={{ borderTop: '1px solid #f1f5f9', marginTop: 2, paddingTop: 2 }}>
+                                  <button
+                                    type="button"
+                                    className="kanban-status-opt"
+                                    style={{ color: '#0066ff' }}
+                                    onClick={() => {
+                                      setOpenStatusMenuId(null);
+                                      onSelectItem(item);
+                                    }}
+                                  >
+                                    <span>Ver detalle completo...</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Componente Principal Padre (si es subcomponente) */}

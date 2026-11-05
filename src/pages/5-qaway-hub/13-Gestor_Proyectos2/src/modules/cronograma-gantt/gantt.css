@@ -470,9 +470,9 @@
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
   overflow: hidden;
   position: sticky;
-  top: 12px;
-  height: calc(100vh - 275px);
-  max-height: calc(100vh - 275px);
+  top: 10px;
+  height: calc(100vh - 76px);
+  max-height: calc(100vh - 76px);
   z-index: 25;
 }
 
@@ -3658,9 +3658,9 @@
 /* --- B) Viewport Inteligente: scroll interno contenido en la tabla --- */
 .gantt-v2 .workspace {
   position: sticky;
-  top: 12px;
-  height: calc(100vh - 275px);
-  max-height: calc(100vh - 275px);
+  top: 10px;
+  height: calc(100vh - 76px);
+  max-height: calc(100vh - 76px);
   z-index: 25;
 }
 
@@ -7746,4 +7746,220 @@ body.gantt-resizing {
 .gantt-v2 .arbol-card.leaf-card:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
+}
+
+/* =========================================================
+   ESTILOS: BOTÓN ÚNICO CRÍTICOS Y DROPDOWN WBS PM4R/BID
+   ========================================================= */
+
+.gantt-v2 .alert-criticos-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.gantt-v2 .alert-criticos-pill:hover {
+  background: #ffe4e6;
+  border-color: #fda4af;
+  transform: translateY(-1px);
+}
+
+.gantt-v2 .alert-criticos-pill.active {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #e11d48;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.32);
+}
+
+.gantt-v2 .alert-criticos-pill .alert-badge {
+  background: rgba(225, 29, 72, 0.14);
+  color: #be123c;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.gantt-v2 .alert-criticos-pill.active .alert-badge {
+  background: #ffffff;
+  color: #e11d48;
+}
+
+.gantt-v2 .alert-banner-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: #fff1f2;
+  border-bottom: 1px solid #fecdd3;
+  font-size: 12px;
+  color: #9f1239;
+  font-weight: 600;
+}
+
+.gantt-v2 .alert-banner-bar button {
+  background: #e11d48;
+  color: #fff;
+  border: 0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Dropdown WBS PM4R en tabs */
+.gantt-v2 .wbs-level-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.gantt-v2 .wbs-level-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .wbs-level-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.gantt-v2 .wbs-level-btn.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.gantt-v2 .wbs-level-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 120;
+  min-width: 250px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gantt-v2 .wbs-level-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 550;
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.gantt-v2 .wbs-level-item:hover {
+  background: #f1f5f9;
+}
+
+.gantt-v2 .wbs-level-item.selected {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.gantt-v2 .wbs-level-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.gantt-v2 .wbs-level-item.selected .wbs-level-badge {
+  background: #bfdbfe;
+  color: #1e40af;
+}
+
+/* Kanban quick status dropdown */
+.gantt-v2 .kanban-status-popover {
+  position: absolute;
+  right: 0;
+  top: 24px;
+  z-index: 50;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+  padding: 4px;
+  min-width: 145px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gantt-v2 .kanban-status-opt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  border: 0;
+  background: transparent;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+}
+
+.gantt-v2 .kanban-status-opt:hover {
+  background: #f1f5f9;
+}
+
+/* Calendario: alto contraste tipográfico en barras naranjas */
+.gantt-v2 .cal-gantt-bar.orange,
+.gantt-v2 .cal-gantt-bar.amber,
+.gantt-v2 .cal-gantt-bar[data-status="En proceso"] {
+  color: #ffffff !important;
+}
+
+.gantt-v2 .cal-gantt-bar .cal-gantt-content {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
+}
+
+.gantt-v2 .cal-gantt-bar .cal-gantt-code,
+.gantt-v2 .cal-gantt-bar .cal-gantt-name,
+.gantt-v2 .cal-gantt-bar .cal-gantt-pct {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
 }

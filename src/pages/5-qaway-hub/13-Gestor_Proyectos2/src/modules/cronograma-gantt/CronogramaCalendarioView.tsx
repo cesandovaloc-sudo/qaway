@@ -1,15 +1,29 @@
 import React, { useMemo } from 'react';
 import {
+  CalendarDays,
   FileText,
   Clock,
   ArrowRight,
   MoreHorizontal,
   Check,
-  Plus,
 } from 'lucide-react';
 import type { Item, Status } from './CronogramaGanttView';
 
-export interface CalendarProjectEvent {
+export interface CalendarWeekDay {
+  date: Date;
+  iso: string;
+  dayNumber: number;
+  isCurrentMonth: boolean;
+}
+
+export interface CalendarWeek {
+  weekIndex: number;
+  days: CalendarWeekDay[];
+  startDateIso: string;
+  endDateIso: string;
+}
+
+export interface DynamicCalendarEvent {
   id: string;
   code: string;
   name: string;
@@ -18,12 +32,13 @@ export interface CalendarProjectEvent {
   progress: number;
   start: string;
   end: string;
-  weekIndex: number; // 0 a 4 (Semana 1 a Semana 5)
-  colStart: number;  // 1 a 7 (Lunes = 1, Domingo = 7)
-  colSpan: number;   // 1 a 7
-  row: number;       // 1, 2, 3...
-  owner: string;
+  weekIndex: number;
+  colStart: number;
+  colSpan: number;
+  row: number;
+  gestor: string;
   region: string;
+  item: Item;
 }
 
 interface CronogramaCalendarioViewProps {
@@ -31,13 +46,13 @@ interface CronogramaCalendarioViewProps {
   onSelectItem: (item: Item) => void;
   formatDatePE: (iso: string) => string;
   calYear: number;
-  calMonth: number; // 0-indexed: 9 = Octubre
+  calMonth: number; // 0-indexed: 0 = Enero, 9 = Octubre
   calDay: number;
-  calSubView: 'Mes' | 'Semana' | 'Día' | 'Agenda';
+  calSubView: 'Mes' | 'Semana' | 'Día';
   onNavPrev: () => void;
   onNavNext: () => void;
   onNavToday: () => void;
-  onSubViewChange: (view: 'Mes' | 'Semana' | 'Día' | 'Agenda') => void;
+  onSubViewChange: (view: 'Mes' | 'Semana' | 'Día') => void;
   typeFilter?: string;
   tab?: string;
   stateFilter?: string;
@@ -47,338 +62,30 @@ interface CronogramaCalendarioViewProps {
 }
 
 const WEEK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-
-// Programación Oficial de Hitos Rectores y Subprocesos · MINEDU Dotación 2027 (Octubre 2026)
-// Exclusivo para Hitos y Entregables del Proyecto (Reuniones pertenece a su propio módulo)
-const OCTOBER_PROJECT_EVENTS: CalendarProjectEvent[] = [
-  // SEMANA 1: 28 Sep al 04 Oct (Jueves 1 al Domingo 4)
-  {
-    id: 'cal-sp-02-1',
-    code: 'SP-02.1',
-    name: 'Elaboración y entrega del plan de distribución',
-    kind: 'subproceso',
-    status: 'En proceso',
-    progress: 55,
-    start: '2026-10-01',
-    end: '2026-10-04',
-    weekIndex: 0,
-    colStart: 4,
-    colSpan: 4,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Junín',
-  },
-
-  // SEMANA 2: 05 al 11 Oct
-  {
-    id: 'cal-sp-02-2',
-    code: 'SP-02.2',
-    name: 'Identificación y directorio de almacenes',
-    kind: 'subproceso',
-    status: 'Completado',
-    progress: 100,
-    start: '2026-10-05',
-    end: '2026-10-08',
-    weekIndex: 1,
-    colStart: 1,
-    colSpan: 4,
-    row: 1,
-    owner: 'María Salazar',
-    region: 'Junín',
-  },
-  {
-    id: 'cal-sp-02-3',
-    code: 'SP-02.3',
-    name: 'Registro y corte de stock inicial',
-    kind: 'subproceso',
-    status: 'En proceso',
-    progress: 40,
-    start: '2026-10-09',
-    end: '2026-10-10',
-    weekIndex: 1,
-    colStart: 5,
-    colSpan: 2,
-    row: 1,
-    owner: 'Ana Paredes',
-    region: 'Junín',
-  },
-  {
-    id: 'cal-h-02',
-    code: 'H-02',
-    name: 'Gestión de Almacenes y Recepción en MC SIGA',
-    kind: 'hito',
-    status: 'En proceso',
-    progress: 42,
-    start: '2026-10-05',
-    end: '2026-10-11',
-    weekIndex: 1,
-    colStart: 1,
-    colSpan: 7,
-    row: 2,
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-  },
-
-  // SEMANA 3: 12 al 18 Oct
-  {
-    id: 'cal-sp-02-4',
-    code: 'SP-02.4',
-    name: 'Validación física de almacenes territoriales',
-    kind: 'subproceso',
-    status: 'Completado',
-    progress: 100,
-    start: '2026-10-13',
-    end: '2026-10-15',
-    weekIndex: 2,
-    colStart: 2,
-    colSpan: 3,
-    row: 1,
-    owner: 'Lucía Castillo',
-    region: 'Lima Provincias',
-  },
-  {
-    id: 'cal-sp-03-1',
-    code: 'SP-03.1',
-    name: 'Validación de evidencias y requerimientos',
-    kind: 'subproceso',
-    status: 'En proceso',
-    progress: 60,
-    start: '2026-10-16',
-    end: '2026-10-18',
-    weekIndex: 2,
-    colStart: 5,
-    colSpan: 3,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Junín',
-  },
-
-  // SEMANA 4: 19 al 25 Oct
-  {
-    id: 'cal-sp-02-5',
-    code: 'SP-02.5',
-    name: 'Cierre de fase y conciliación de almacén',
-    kind: 'subproceso',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-21',
-    end: '2026-10-23',
-    weekIndex: 3,
-    colStart: 3,
-    colSpan: 3,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Junín',
-  },
-  {
-    id: 'cal-sp-03-2',
-    code: 'SP-03.2',
-    name: 'Consolidado de requerimientos II.EE.',
-    kind: 'subproceso',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-24',
-    end: '2026-10-25',
-    weekIndex: 3,
-    colStart: 6,
-    colSpan: 2,
-    row: 1,
-    owner: 'María Salazar',
-    region: 'Junín',
-  },
-
-  // SEMANA 5: 26 Oct al 01 Nov
-  {
-    id: 'cal-h-03',
-    code: 'H-03',
-    name: 'Acta de conformidad y asignación presupuestal',
-    kind: 'hito',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-27',
-    end: '2026-10-29',
-    weekIndex: 4,
-    colStart: 2,
-    colSpan: 3,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-  },
-  {
-    id: 'cal-sp-04-1',
-    code: 'SP-04.1',
-    name: 'Informe técnico territorial consolidado',
-    kind: 'subproceso',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-30',
-    end: '2026-11-01',
-    weekIndex: 4,
-    colStart: 5,
-    colSpan: 3,
-    row: 2,
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-  },
+const CAL_MONTH_NAMES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
+const CAL_SHORT_MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
 
-// Estructura de las 5 semanas de Octubre 2026
-const OCTOBER_2026_WEEKS = [
-  {
-    weekIndex: 0,
-    days: [
-      { dayNumber: 28, isCurrentMonth: false },
-      { dayNumber: 29, isCurrentMonth: false },
-      { dayNumber: 30, isCurrentMonth: false },
-      { dayNumber: 1, isCurrentMonth: true },
-      { dayNumber: 2, isCurrentMonth: true },
-      { dayNumber: 3, isCurrentMonth: true },
-      { dayNumber: 4, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 1,
-    days: [
-      { dayNumber: 5, isCurrentMonth: true },
-      { dayNumber: 6, isCurrentMonth: true },
-      { dayNumber: 7, isCurrentMonth: true },
-      { dayNumber: 8, isCurrentMonth: true },
-      { dayNumber: 9, isCurrentMonth: true },
-      { dayNumber: 10, isCurrentMonth: true },
-      { dayNumber: 11, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 2,
-    days: [
-      { dayNumber: 12, isCurrentMonth: true },
-      { dayNumber: 13, isCurrentMonth: true },
-      { dayNumber: 14, isCurrentMonth: true },
-      { dayNumber: 15, isCurrentMonth: true },
-      { dayNumber: 16, isCurrentMonth: true },
-      { dayNumber: 17, isCurrentMonth: true },
-      { dayNumber: 18, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 3,
-    days: [
-      { dayNumber: 19, isCurrentMonth: true },
-      { dayNumber: 20, isCurrentMonth: true },
-      { dayNumber: 21, isCurrentMonth: true },
-      { dayNumber: 22, isCurrentMonth: true },
-      { dayNumber: 23, isCurrentMonth: true },
-      { dayNumber: 24, isCurrentMonth: true },
-      { dayNumber: 25, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 4,
-    days: [
-      { dayNumber: 26, isCurrentMonth: true },
-      { dayNumber: 27, isCurrentMonth: true },
-      { dayNumber: 28, isCurrentMonth: true },
-      { dayNumber: 29, isCurrentMonth: true },
-      { dayNumber: 30, isCurrentMonth: true },
-      { dayNumber: 31, isCurrentMonth: true },
-      { dayNumber: 1, isCurrentMonth: false },
-    ],
-  },
-];
+const GESTOR_COLORS: Record<string, { bg: string; color: string; initials: string }> = {
+  'Carlos Mendoza': { bg: '#eff6ff', color: '#1d4ed8', initials: 'CM' },
+  'María Salazar': { bg: '#ecfdf5', color: '#047857', initials: 'MS' },
+  'Javier Rivas': { bg: '#fef3c7', color: '#b45309', initials: 'JR' },
+  'Ana Paredes': { bg: '#fff7ed', color: '#c2410c', initials: 'AP' },
+  'Lucía Castillo': { bg: '#f3e8ff', color: '#7e22ce', initials: 'LC' },
+  'Sofía Alva': { bg: '#fef2f2', color: '#b91c1c', initials: 'SA' },
+};
 
-// Próximos Entregables y Fechas Clave del Proyecto (Sidebar Derecho)
-const UPCOMING_PROJECT_DELIVERABLES = [
-  {
-    id: 'up-1',
-    day: '01',
-    month: 'OCT',
-    code: 'SP-02.1',
-    title: 'Elaboración y entrega del plan de distribución',
-    kind: 'subproceso' as const,
-    status: 'En proceso' as Status,
-    progress: 55,
-    time: 'Plazo oficial',
-    initials: 'CM',
-    avatarBg: '#eff6ff',
-    avatarColor: '#1d4ed8',
-    owner: 'Carlos Mendoza',
-  },
-  {
-    id: 'up-2',
-    day: '05',
-    month: 'OCT',
-    code: 'SP-02.2',
-    title: 'Identificación y directorio de almacenes',
-    kind: 'subproceso' as const,
-    status: 'Completado' as Status,
-    progress: 100,
-    time: 'Entregado',
-    initials: 'MS',
-    avatarBg: '#ecfdf5',
-    avatarColor: '#047857',
-    owner: 'María Salazar',
-  },
-  {
-    id: 'up-3',
-    day: '09',
-    month: 'OCT',
-    code: 'SP-02.3',
-    title: 'Registro y corte de stock inicial',
-    kind: 'subproceso' as const,
-    status: 'En proceso' as Status,
-    progress: 40,
-    time: 'En verificación',
-    initials: 'AP',
-    avatarBg: '#fff7ed',
-    avatarColor: '#c2410c',
-    owner: 'Ana Paredes',
-  },
-  {
-    id: 'up-4',
-    day: '13',
-    month: 'OCT',
-    code: 'SP-02.4',
-    title: 'Validación física de almacenes territoriales',
-    kind: 'subproceso' as const,
-    status: 'Completado' as Status,
-    progress: 100,
-    time: 'Entregado',
-    initials: 'LC',
-    avatarBg: '#ecfdf5',
-    avatarColor: '#047857',
-    owner: 'Lucía Castillo',
-  },
-  {
-    id: 'up-5',
-    day: '16',
-    month: 'OCT',
-    code: 'SP-03.1',
-    title: 'Validación de evidencias y requerimientos',
-    kind: 'subproceso' as const,
-    status: 'En proceso' as Status,
-    progress: 60,
-    time: 'En curso',
-    initials: 'CM',
-    avatarBg: '#eff6ff',
-    avatarColor: '#1d4ed8',
-    owner: 'Carlos Mendoza',
-  },
-  {
-    id: 'up-6',
-    day: '27',
-    month: 'OCT',
-    code: 'H-03',
-    title: 'Acta de conformidad y asignación presupuestal',
-    kind: 'hito' as const,
-    status: 'Pendiente' as Status,
-    progress: 0,
-    time: 'Programado',
-    initials: 'CM',
-    avatarBg: '#f1f5f9',
-    avatarColor: '#475569',
-    owner: 'Carlos Mendoza',
-  },
-];
+const getGestorBadge = (name?: string) => {
+  if (!name || name === 'Sin asignar') {
+    return { bg: '#f1f5f9', color: '#475569', initials: 'SA' };
+  }
+  if (GESTOR_COLORS[name]) return GESTOR_COLORS[name];
+  const parts = name.trim().split(/\s+/);
+  const initials = parts.map((p) => p[0]?.toUpperCase() || '').slice(0, 2).join('');
+  return { bg: '#eff6ff', color: '#1d4ed8', initials: initials || 'CM' };
+};
 
 export default function CronogramaCalendarioView({
   items,
@@ -399,86 +106,174 @@ export default function CronogramaCalendarioView({
   regionFilter = 'Todas',
   search = '',
 }: CronogramaCalendarioViewProps) {
-  // Manejador para abrir el drawer con un item real del cronograma
-  const handleOpenItem = (code: string) => {
-    const found = items.find((x) => x.code === code || code.startsWith(x.code));
-    if (found) {
-      onSelectItem(found);
-    } else if (items[0]) {
-      onSelectItem(items[0]);
+
+  // Generación dinámica de semanas para el mes/año seleccionado
+  const monthWeeks = useMemo(() => {
+    const weeks: CalendarWeek[] = [];
+    const firstDayOfMonth = new Date(calYear, calMonth, 1);
+    const lastDayOfMonth = new Date(calYear, calMonth + 1, 0);
+
+    // Ajuste al lunes anterior de la primera semana
+    const firstDayDow = (firstDayOfMonth.getDay() + 6) % 7; // 0 = Lunes, ..., 6 = Domingo
+    const cursor = new Date(calYear, calMonth, 1 - firstDayDow);
+
+    let weekIdx = 0;
+    while (cursor <= lastDayOfMonth || cursor.getDay() !== 1 || weekIdx < 4) {
+      const days: CalendarWeekDay[] = [];
+      for (let d = 0; d < 7; d++) {
+        const y = cursor.getFullYear();
+        const m = String(cursor.getMonth() + 1).padStart(2, '0');
+        const day = String(cursor.getDate()).padStart(2, '0');
+        const iso = `${y}-${m}-${day}`;
+        days.push({
+          date: new Date(cursor),
+          iso,
+          dayNumber: cursor.getDate(),
+          isCurrentMonth: cursor.getMonth() === calMonth,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      weeks.push({
+        weekIndex: weekIdx,
+        days,
+        startDateIso: days[0].iso,
+        endDateIso: days[6].iso,
+      });
+      weekIdx++;
+      if (weekIdx >= 6) break;
     }
-  };
+    return weeks;
+  }, [calYear, calMonth]);
 
-  // Filtrado reactivo de eventos según Filtro Tipo, Tab, Estado, Ubicación (Multi-región) y Búsqueda
-  const filteredEvents = useMemo(() => {
-    return OCTOBER_PROJECT_EVENTS.filter((ev) => {
-      // 1. Filtro Tipo (Todos / Hitos / Subprocesos)
+  // Filtrado de items reales que aplican a los filtros globales
+  const matchingItems = useMemo(() => {
+    return items.filter((it) => {
       if (typeFilter && typeFilter !== 'Todos') {
-        if (typeFilter === 'Hitos' && ev.kind !== 'hito') return false;
-        if (typeFilter === 'Subprocesos' && ev.kind !== 'subproceso') return false;
+        if (typeFilter === 'Hitos' && it.kind !== 'hito') return false;
+        if (typeFilter === 'Subprocesos' && it.kind !== 'subproceso') return false;
       }
-
-      // 2. Filtro Tab general (Cápsulas de Gantt)
       if (tab && tab !== 'Todos') {
-        if (tab === 'Hitos' && ev.kind !== 'hito') return false;
-        if (tab === 'Subprocesos' && ev.kind !== 'subproceso') return false;
-        if (tab === 'Completados' && ev.status !== 'Completado' && ev.status !== 'Cumple') return false;
-        if (tab === 'En proceso' && ev.status !== 'En proceso' && ev.status !== 'En curso') return false;
-        if (tab === 'Con retraso' && ev.status !== 'Con retraso') return false;
-        if (tab === 'Pendiente' && ev.status !== 'Pendiente') return false;
+        if (tab === 'Hitos' && it.kind !== 'hito') return false;
+        if (tab === 'Subprocesos' && it.kind !== 'subproceso') return false;
+        if (tab === 'Completados' && it.status !== 'Completado' && it.status !== 'Cumple') return false;
+        if (tab === 'En proceso' && it.status !== 'En proceso' && it.status !== 'En curso') return false;
+        if (tab === 'Con retraso' && it.status !== 'Con retraso') return false;
+        if (tab === 'Pendiente' && it.status !== 'Pendiente') return false;
       }
-
-      // 3. Filtro Estado
-      if (stateFilter && stateFilter !== 'Todos') {
-        if (ev.status !== stateFilter) return false;
-      }
-
-      // 4. Filtro Ubicación (Multi-región y territorial)
+      if (stateFilter && stateFilter !== 'Todos' && it.status !== stateFilter) return false;
       if (selectedRegions && selectedRegions.length > 0) {
-        if (ev.region !== 'Todas las Regiones' && !selectedRegions.includes(ev.region)) return false;
+        if (it.region !== 'Todas' && it.region !== 'Todas las Regiones' && !selectedRegions.includes(it.region)) return false;
       } else if (regionFilter && regionFilter !== 'Todas') {
-        if (ev.region !== 'Todas las Regiones' && ev.region !== regionFilter) return false;
+        if (it.region !== 'Todas' && it.region !== 'Todas las Regiones' && it.region !== regionFilter) return false;
       }
-
-      // 5. Búsqueda por texto
       if (search && search.trim()) {
         const q = search.trim().toLowerCase();
-        const match = `${ev.code} ${ev.name}`.toLowerCase().includes(q);
-        if (!match) return false;
+        if (!`${it.code} ${it.name}`.toLowerCase().includes(q)) return false;
       }
-
       return true;
     });
-  }, [typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
+  }, [items, typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
 
-  // Agrupación de eventos por semana para la cuadrícula del mes
+  // Eventos proyectados en la rejilla del mes de forma dinámica
   const weekEvents = useMemo(() => {
-    const map: Record<number, CalendarProjectEvent[]> = { 0: [], 1: [], 2: [], 3: [], 4: [] };
-    filteredEvents.forEach((ev) => {
-      const bucket = map[ev.weekIndex];
-      if (bucket) {
-        bucket.push(ev);
-      }
+    const map: Record<number, DynamicCalendarEvent[]> = {};
+    monthWeeks.forEach((w) => {
+      map[w.weekIndex] = [];
     });
+
+    monthWeeks.forEach((w) => {
+      const activeInWeek = matchingItems.filter((it) => it.start <= w.endDateIso && it.end >= w.startDateIso);
+      let rowSlot = 1;
+      activeInWeek.slice(0, 6).forEach((it) => {
+        const startIso = it.start < w.startDateIso ? w.startDateIso : it.start;
+        const endIso = it.end > w.endDateIso ? w.endDateIso : it.end;
+
+        const startIdx = Math.max(0, Math.min(6, Math.round((new Date(startIso + 'T12:00:00').getTime() - new Date(w.startDateIso + 'T12:00:00').getTime()) / (1000 * 60 * 60 * 24))));
+        const endIdx = Math.max(0, Math.min(6, Math.round((new Date(endIso + 'T12:00:00').getTime() - new Date(w.startDateIso + 'T12:00:00').getTime()) / (1000 * 60 * 60 * 24))));
+        const colStart = startIdx + 1;
+        const colSpan = Math.max(1, endIdx - startIdx + 1);
+
+        map[w.weekIndex].push({
+          id: `${it.id}-w${w.weekIndex}`,
+          code: it.code,
+          name: it.name,
+          kind: it.kind,
+          status: it.status,
+          progress: it.progress,
+          start: it.start,
+          end: it.end,
+          weekIndex: w.weekIndex,
+          colStart,
+          colSpan,
+          row: rowSlot,
+          gestor: it.gestor || 'Carlos Mendoza',
+          region: it.region || 'Junín',
+          item: it,
+        });
+        rowSlot = (rowSlot % 3) + 1;
+      });
+    });
+
     return map;
-  }, [filteredEvents]);
+  }, [monthWeeks, matchingItems]);
+
+  // Total de actividades activas durante este mes
+  const totalMonthActivities = useMemo(() => {
+    const startMonthIso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+    const endMonthIso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    return matchingItems.filter((it) => it.start <= endMonthIso && it.end >= startMonthIso).length;
+  }, [matchingItems, calYear, calMonth]);
+
+  // Próximos entregables reales calculados a partir de la WBS
+  const upcomingDeliverables = useMemo(() => {
+    const curIso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-01`;
+    const sorted = [...matchingItems]
+      .filter((it) => it.end >= curIso)
+      .sort((a, b) => a.end.localeCompare(b.end))
+      .slice(0, 8);
+
+    return sorted.map((it) => {
+      const parts = it.end.split('-');
+      const day = parts[2] || '01';
+      const mIdx = Math.max(0, Math.min(11, (parseInt(parts[1] || '1', 10) - 1)));
+      const badge = getGestorBadge(it.gestor);
+      return {
+        id: it.id,
+        code: it.code,
+        title: it.name,
+        kind: it.kind,
+        status: it.status,
+        progress: it.progress,
+        day,
+        month: CAL_SHORT_MONTHS[mIdx] || 'MES',
+        gestor: it.gestor || 'Carlos Mendoza',
+        avatarBg: badge.bg,
+        avatarColor: badge.color,
+        initials: badge.initials,
+        rawItem: it,
+      };
+    });
+  }, [matchingItems, calYear, calMonth]);
 
   return (
     <div className="cronograma-cal-container cal-master-layout">
       {/* Área Principal de Calendario */}
       <div className="cal-main-area">
-        {/* Cabecera Limpia Institucional: Icono + Octubre 2026 */}
+        {/* Cabecera Dinámica Limpia: Icono + Mes y Año Real (Punto 5 Homologado) */}
         <div className="cal-title-header-clean">
-          <div className="cal-plus-icon-wrap" title="Agregar evento o hito al calendario">
-            <Plus size={16} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+            <CalendarDays size={18} color="#0066ff" />
+            <h2 className="cal-clean-title" style={{ margin: 0, fontSize: '17px', fontWeight: 750, color: '#0f172a' }}>
+              {CAL_MONTH_NAMES[calMonth]} {calYear}
+            </h2>
           </div>
-          <h2 className="cal-clean-title">Octubre 2026</h2>
           <span className="cal-total-count-badge">
-            {filteredEvents.length} {filteredEvents.length === 1 ? 'actividad programada' : 'actividades programadas'}
+            {totalMonthActivities} {totalMonthActivities === 1 ? 'actividad programada' : 'actividades programadas'}
           </span>
         </div>
 
-        {/* 1. SUB-VISTA: MES (Cuadrícula Mensual con Barras de Gantt) */}
+        {/* 1. SUB-VISTA: MES (Cuadrícula Dinámica con Barras de Gantt) */}
         {calSubView === 'Mes' && (
           <div className="cal-month-canvas">
             {/* Cabecera de Días de la Semana: Lunes a Domingo */}
@@ -490,9 +285,9 @@ export default function CronogramaCalendarioView({
               ))}
             </div>
 
-            {/* Rejilla de las 5 Semanas de Octubre */}
+            {/* Rejilla de Semanas calculadas dinámicamente */}
             <div className="cal-grid-body">
-              {OCTOBER_2026_WEEKS.map((week) => (
+              {monthWeeks.map((week) => (
                 <div key={week.weekIndex} className="cal-week-row-grid">
                   {/* Celdas de fondo con número de día */}
                   {week.days.map((day, idx) => (
@@ -512,8 +307,6 @@ export default function CronogramaCalendarioView({
                       const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
                       const isLate = ev.status === 'Con retraso';
 
-                      // Si es Hito Rector, su barra es SIEMPRE bar-major (Azul Oficial Gantt con Rombo ◆).
-                      // Si no es Hito Rector, toma el color según su estado operativo (verde, naranja, rojo o gris).
                       const barColorClass = isMajor
                         ? 'bar-major'
                         : isComplete
@@ -532,7 +325,7 @@ export default function CronogramaCalendarioView({
                             gridColumn: `${ev.colStart} / span ${ev.colSpan}`,
                             gridRow: ev.row,
                           }}
-                          onClick={() => handleOpenItem(ev.code)}
+                          onClick={() => onSelectItem(ev.item)}
                           title={`${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status})`}
                         >
                           {/* Barra de avance interior con física y color Gantt */}
@@ -543,19 +336,19 @@ export default function CronogramaCalendarioView({
                             }}
                           />
 
-                          {/* Contenido legible del entregable */}
-                          <div className="cal-gantt-content">
+                          {/* Contenido legible del entregable con alto contraste */}
+                          <div className="cal-gantt-content" style={{ color: '#ffffff' }}>
                             {isMajor ? (
                               <span className="cal-gantt-hito-badge">◆</span>
                             ) : isComplete ? (
                               <Check size={11} strokeWidth={3} className="cal-gantt-check-icon" />
                             ) : null}
-                            <strong className="cal-gantt-code">{ev.code}</strong>
-                            <span className="cal-gantt-name">{ev.name}</span>
-                            <span className="cal-gantt-pct">{ev.progress}%</span>
+                            <strong className="cal-gantt-code" style={{ color: '#ffffff' }}>{ev.code}</strong>
+                            <span className="cal-gantt-name" style={{ color: '#ffffff' }}>{ev.name}</span>
+                            <span className="cal-gantt-pct" style={{ color: '#ffffff' }}>{ev.progress}%</span>
                           </div>
 
-                          {/* Diamante característico al final del Componente Principal (idéntico a Gantt) */}
+                          {/* Diamante característico al final del Componente Principal */}
                           {isMajor && (
                             <span className="cal-gantt-diamond-badge" title="Componente Principal">
                               <span className="cal-diamond-shape" />
@@ -575,16 +368,18 @@ export default function CronogramaCalendarioView({
         {calSubView === 'Semana' && (
           <div className="cal-subview-semana">
             <div className="cal-semana-headers">
-              {['Lun 05', 'Mar 06', 'Mié 07', 'Jue 08', 'Vie 09', 'Sáb 10', 'Dom 11'].map((d) => (
-                <div key={d} className="cal-semana-col-title">{d}</div>
+              {monthWeeks[0]?.days.map((d, i) => (
+                <div key={d.iso} className="cal-semana-col-title">
+                  {WEEK_DAY_LABELS[i].slice(0, 3)} {String(d.dayNumber).padStart(2, '0')}
+                </div>
               ))}
             </div>
             <div className="cal-semana-content">
-              {filteredEvents.slice(0, 5).map((ev) => {
-                const isMajor = ev.kind === 'hito';
-                const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
-                const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
-                const isLate = ev.status === 'Con retraso';
+              {matchingItems.slice(0, 6).map((it) => {
+                const isMajor = it.kind === 'hito';
+                const isComplete = it.status === 'Completado' || it.status === 'Cumple';
+                const isProgress = it.status === 'En proceso' || it.status === 'En curso';
+                const isLate = it.status === 'Con retraso';
                 const barColorClass = isMajor
                   ? 'bar-major'
                   : isComplete
@@ -597,26 +392,21 @@ export default function CronogramaCalendarioView({
 
                 return (
                   <div
-                    key={ev.id}
+                    key={it.id}
                     className={`cal-gantt-bar ${barColorClass}`}
-                    onClick={() => handleOpenItem(ev.code)}
+                    onClick={() => onSelectItem(it)}
                     style={{ marginBottom: 8, height: '32px' }}
                   >
                     <div
                       className="cal-gantt-progress-fill"
-                      style={{ width: `${ev.progress}%` }}
+                      style={{ width: `${it.progress}%` }}
                     />
-                    <div className="cal-gantt-content">
-                      {ev.kind === 'hito' && <span className="cal-gantt-hito-badge">◆</span>}
-                      <strong className="cal-gantt-code">{ev.code}</strong>
-                      <span className="cal-gantt-name">{ev.name}</span>
-                      <span className="cal-gantt-pct">{ev.progress}%</span>
+                    <div className="cal-gantt-content" style={{ color: '#ffffff' }}>
+                      {isMajor && <span className="cal-gantt-hito-badge">◆</span>}
+                      <strong className="cal-gantt-code" style={{ color: '#ffffff' }}>{it.code}</strong>
+                      <span className="cal-gantt-name" style={{ color: '#ffffff' }}>{it.name}</span>
+                      <span className="cal-gantt-pct" style={{ color: '#ffffff' }}>{it.progress}%</span>
                     </div>
-                    {ev.kind === 'hito' && (
-                      <span className="cal-gantt-diamond-badge">
-                        <span className="cal-diamond-shape" />
-                      </span>
-                    )}
                   </div>
                 );
               })}
@@ -628,7 +418,9 @@ export default function CronogramaCalendarioView({
         {calSubView === 'Día' && (
           <div className="cal-subview-dia">
             <div className="cal-dia-head-row">
-              <h3>Martes 27 de Octubre, 2026</h3>
+              <h3>
+                {WEEK_DAY_LABELS[(new Date(calYear, calMonth, calDay).getDay() + 6) % 7]} {calDay} de {CAL_MONTH_NAMES[calMonth]}, {calYear}
+              </h3>
               <span className="cal-dia-tag">Corte Oficial</span>
             </div>
             <div className="cal-dia-schedule">
@@ -636,17 +428,17 @@ export default function CronogramaCalendarioView({
                 <div key={h} className="cal-dia-slot-row">
                   <span className="cal-dia-hour">{h}</span>
                   <div className="cal-dia-event-box">
-                    {i === 1 && (
+                    {matchingItems[i] && (
                       <div
                         className="cal-gantt-bar bar-progress"
-                        onClick={() => handleOpenItem('SP-02.1')}
+                        onClick={() => onSelectItem(matchingItems[i])}
                         style={{ height: '30px' }}
                       >
-                        <div className="cal-gantt-progress-fill" style={{ width: '55%' }} />
-                        <div className="cal-gantt-content">
-                          <strong className="cal-gantt-code">SP-02.1</strong>
-                          <span className="cal-gantt-name">Elaboración y validación del plan de distribución</span>
-                          <span className="cal-gantt-pct">55%</span>
+                        <div className="cal-gantt-progress-fill" style={{ width: `${matchingItems[i].progress}%` }} />
+                        <div className="cal-gantt-content" style={{ color: '#ffffff' }}>
+                          <strong className="cal-gantt-code" style={{ color: '#ffffff' }}>{matchingItems[i].code}</strong>
+                          <span className="cal-gantt-name" style={{ color: '#ffffff' }}>{matchingItems[i].name}</span>
+                          <span className="cal-gantt-pct" style={{ color: '#ffffff' }}>{matchingItems[i].progress}%</span>
                         </div>
                       </div>
                     )}
@@ -656,78 +448,27 @@ export default function CronogramaCalendarioView({
             </div>
           </div>
         )}
-
-        {/* 4. SUB-VISTA: AGENDA */}
-        {calSubView === 'Agenda' && (
-          <div className="cal-subview-agenda">
-            {UPCOMING_PROJECT_DELIVERABLES.map((it) => (
-              <div
-                key={it.id}
-                className="cal-agenda-row"
-                onClick={() => handleOpenItem(it.code)}
-              >
-                <div className="cal-date-badge-box">
-                  <span className="cal-badge-day">{it.day}</span>
-                  <span className="cal-badge-mon">{it.month}</span>
-                </div>
-                <div className="cal-agenda-info">
-                  <div className="cal-agenda-title-line">
-                    <span
-                      className={`cal-status-pill-mini ${
-                        it.status === 'Completado'
-                          ? 'pill-complete'
-                          : it.status === 'En proceso'
-                          ? 'pill-progress'
-                          : 'pill-pending'
-                      }`}
-                    >
-                      {it.status}
-                    </span>
-                    <strong>{it.code} · {it.title}</strong>
-                  </div>
-                  <span className="cal-agenda-sub">
-                    {it.kind === 'hito' ? 'Componente Principal' : 'Subcomponente'} · Responsable: {it.owner}
-                  </span>
-                </div>
-                <div
-                  className="cal-agenda-avatar"
-                  style={{ backgroundColor: it.avatarBg, color: it.avatarColor }}
-                  title={it.owner}
-                >
-                  {it.initials}
-                </div>
-                <ArrowRight size={14} className="cal-agenda-arrow" />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Barra Lateral Derecha Institucional: Próximos Entregables y Leyenda (Solo en Mes, Semana y Día) */}
-      {calSubView !== 'Agenda' && (
-        <aside className="cal-sidebar-clean">
-        {/* Sección: Próximos Entregables */}
+      {/* Barra Lateral Derecha Institucional: Próximos Entregables y Leyenda */}
+      <aside className="cal-sidebar-clean">
+        {/* Sección: Próximos Entregables Dinámicos */}
         <div className="cal-sidebar-section">
           <div className="cal-sidebar-head">
             <h3 className="cal-sidebar-title">Próximos entregables</h3>
-            <button
-              type="button"
-              className="cal-ver-todos-btn"
-              onClick={() => onSubViewChange('Agenda')}
-            >
-              <span>Ver todos</span>
-              <ArrowRight size={12} />
-            </button>
+            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>
+              {upcomingDeliverables.length} pendientes
+            </span>
           </div>
 
           <div className="cal-upcoming-stack">
-            {UPCOMING_PROJECT_DELIVERABLES.map((ev) => (
+            {upcomingDeliverables.map((ev) => (
               <div
                 key={ev.id}
                 className="cal-upcoming-card-row"
-                onClick={() => handleOpenItem(ev.code)}
+                onClick={() => onSelectItem(ev.rawItem)}
               >
-                {/* Badge de fecha a la izquierda: 01 OCT */}
+                {/* Badge de fecha a la izquierda: día + mes */}
                 <div className="cal-clean-date-badge">
                   <span className="badge-day-number">{ev.day}</span>
                   <span className="badge-month-text">{ev.month}</span>
@@ -752,7 +493,7 @@ export default function CronogramaCalendarioView({
 
                   <div className="cal-upcoming-cat-line">
                     <FileText size={11} className="cat-icon-sub" />
-                    <span>{ev.code} · {ev.kind === 'hito' ? 'Componente Principal' : 'Subcomponente'}</span>
+                    <span>{ev.code} · {ev.kind === 'hito' ? 'Componente' : 'Paquete de Trabajo'}</span>
                   </div>
 
                   {/* Barra de progreso estilo Gantt */}
@@ -778,17 +519,17 @@ export default function CronogramaCalendarioView({
                   <div
                     className="cal-user-avatar-circle"
                     style={{ backgroundColor: ev.avatarBg, color: ev.avatarColor }}
-                    title={ev.owner}
+                    title={ev.gestor}
                   >
                     {ev.initials}
                   </div>
                   <button
                     type="button"
                     className="cal-more-dots-btn"
-                    title="Opciones de entregable"
+                    title="Ver detalle"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleOpenItem(ev.code);
+                      onSelectItem(ev.rawItem);
                     }}
                   >
                     <MoreHorizontal size={14} />
@@ -799,7 +540,7 @@ export default function CronogramaCalendarioView({
           </div>
         </div>
 
-        {/* Sección: Leyenda (Estricto Sistema Gantt) */}
+        {/* Sección: Leyenda Oficial */}
         <div className="cal-sidebar-section cal-legend-section">
           <h3 className="cal-sidebar-title">Leyenda</h3>
           <div className="cal-clean-legend-grid">
@@ -822,7 +563,6 @@ export default function CronogramaCalendarioView({
           </div>
         </div>
       </aside>
-      )}
     </div>
   );
 }
