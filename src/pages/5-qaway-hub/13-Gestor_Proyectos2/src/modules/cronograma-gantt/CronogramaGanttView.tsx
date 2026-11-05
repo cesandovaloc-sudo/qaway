@@ -2909,52 +2909,52 @@ export default function CronogramaGanttView({
         });
       }
 
-      // Filtro metodológico WBS PM4R / BID
+      // Filtro metodológico WBS PMI / PMBOK (1 a 5 niveles)
       let matchWbsLevel = true;
-      if (wbsLevelFilter === 'componentes') {
+      const itemDepth = itemDepthMap.get(x.id) ?? (x.parentId ? 1 : 0);
+      if (wbsLevelFilter === 'nivel-1') {
         matchWbsLevel = !x.parentId;
-      } else if (wbsLevelFilter === 'intermedios') {
-        const hasChildren = items.some((c) => c.parentId === x.id);
-        matchWbsLevel = Boolean(x.parentId) && hasChildren;
-      } else if (wbsLevelFilter === 'paquetes') {
-        const hasChildren = items.some((c) => c.parentId === x.id);
-        matchWbsLevel = !hasChildren;
+      } else if (wbsLevelFilter === 'nivel-2') {
+        matchWbsLevel = itemDepth === 1;
+      } else if (wbsLevelFilter === 'nivel-3') {
+        matchWbsLevel = itemDepth === 2;
+      } else if (wbsLevelFilter === 'nivel-4') {
+        matchWbsLevel = itemDepth === 3;
+      } else if (wbsLevelFilter === 'nivel-5') {
+        matchWbsLevel = itemDepth >= 4;
       }
 
-      // Filtro de Modo Alertas Críticas (Punto 1: activado por botón único)
-      let matchAlertFilter = true;
-      if (isAlertModeActive) {
-        const isLate = isItemLate(x);
+      // Filtro de Vencimientos y Alertas Críticas (Desplegable formal)
+      let matchVencimiento = true;
+      if (vencimientosFilter === 'retraso') {
+        matchVencimiento = isItemLate(x);
+      } else if (vencimientosFilter === 'hoy') {
+        matchVencimiento = x.end === currentTodayIso && x.status !== 'Completado' && x.status !== 'Cumple';
+      } else if (vencimientosFilter === 'semana') {
         const curr = new Date(currentTodayIso + 'T12:00:00');
-        if (alertPeriod === 'Hoy') {
-          matchAlertFilter = isLate || (x.end === currentTodayIso && x.status !== 'Completado' && x.status !== 'Cumple');
-        } else if (alertPeriod === 'Día') {
-          const nextDay = new Date(curr);
-          nextDay.setDate(nextDay.getDate() + 1);
-          const nextIso = nextDay.toISOString().slice(0, 10);
-          matchAlertFilter = isLate || (x.end <= nextIso && x.end >= currentTodayIso && x.status !== 'Completado' && x.status !== 'Cumple');
-        } else if (alertPeriod === 'Semana') {
-          const dayOfWeek = (curr.getDay() + 6) % 7;
-          const monday = new Date(curr);
-          monday.setDate(curr.getDate() - dayOfWeek);
-          const sunday = new Date(monday);
-          sunday.setDate(monday.getDate() + 6);
-          const monIso = monday.toISOString().slice(0, 10);
-          const sunIso = sunday.toISOString().slice(0, 10);
-          matchAlertFilter = isLate || (x.end >= monIso && x.end <= sunIso && x.status !== 'Completado' && x.status !== 'Cumple');
-        } else if (alertPeriod === 'Mes') {
-          const y = curr.getFullYear();
-          const m = curr.getMonth();
-          const firstDay = new Date(y, m, 1).toISOString().slice(0, 10);
-          const lastDay = new Date(y, m + 1, 0).toISOString().slice(0, 10);
-          matchAlertFilter = isLate || (x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple');
-        } else if (alertPeriod === 'Trimestre') {
-          const y = curr.getFullYear();
-          const q = Math.floor(curr.getMonth() / 3);
-          const firstDay = new Date(y, q * 3, 1).toISOString().slice(0, 10);
-          const lastDay = new Date(y, q * 3 + 3, 0).toISOString().slice(0, 10);
-          matchAlertFilter = isLate || (x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple');
-        }
+        const dayOfWeek = (curr.getDay() + 6) % 7;
+        const monday = new Date(curr);
+        monday.setDate(curr.getDate() - dayOfWeek);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        const monIso = monday.toISOString().slice(0, 10);
+        const sunIso = sunday.toISOString().slice(0, 10);
+        matchVencimiento = x.end >= monIso && x.end <= sunIso && x.status !== 'Completado' && x.status !== 'Cumple';
+      } else if (vencimientosFilter === 'mes') {
+        const curr = new Date(currentTodayIso + 'T12:00:00');
+        const y = curr.getFullYear();
+        const m = curr.getMonth();
+        const firstDay = new Date(y, m, 1).toISOString().slice(0, 10);
+        const lastDay = new Date(y, m + 1, 0).toISOString().slice(0, 10);
+        matchVencimiento = x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple';
+      } else if (vencimientosFilter === 'trimestre') {
+        const curr = new Date(currentTodayIso + 'T12:00:00');
+        const y = curr.getFullYear();
+        const m = curr.getMonth();
+        const qStartMonth = Math.floor(m / 3) * 3;
+        const firstDay = new Date(y, qStartMonth, 1).toISOString().slice(0, 10);
+        const lastDay = new Date(y, qStartMonth + 3, 0).toISOString().slice(0, 10);
+        matchVencimiento = x.end >= firstDay && x.end <= lastDay && x.status !== 'Completado' && x.status !== 'Cumple';
       }
 
       return (
@@ -2970,7 +2970,7 @@ export default function CronogramaGanttView({
         matchCustom &&
         matchEngine &&
         matchWbsLevel &&
-        matchAlertFilter &&
+        matchVencimiento &&
         (() => {
           if (viewMode !== 'lista' || listaTemporalFilter === 'Todos') return true;
           const targetIso = currentTodayIso;
@@ -3049,8 +3049,8 @@ export default function CronogramaGanttView({
     listaTemporalFilter,
     currentTodayIso,
     wbsLevelFilter,
-    isAlertModeActive,
-    alertPeriod
+    vencimientosFilter,
+    itemDepthMap
   ]);
 
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
