@@ -233,3 +233,261 @@
   justify-content: flex-end;
   gap: 10px;
 }
+
+/* ==========================================================================
+   CRONOGRAMA TERRITORIAL POR UGEL (ESTILO PROYECTO / GANTT MAESTRO)
+   ========================================================================== */
+
+.sd-territorial-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sd-territorial-selectors {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sd-territorial-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.sd-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sd-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.sd-territorial-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.sd-territorial-split.with-drawer {
+  grid-template-columns: 1fr 370px;
+}
+
+@media (max-width: 1180px) {
+  .sd-territorial-split.with-drawer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sd-territorial-gantt-wrap {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.sd-territorial-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+}
+
+.sd-territorial-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sd-territorial-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.sd-territorial-row {
+  transition: background 0.12s ease;
+  cursor: pointer;
+}
+
+.sd-territorial-row:hover {
+  background: #f8fafc;
+}
+
+.sd-territorial-row.selected {
+  background: #eff6ff;
+}
+
+.sd-territorial-row.row-hierarchy-root {
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+.sd-territorial-row.row-hierarchy-comp {
+  background: #fcfdff;
+  font-weight: 650;
+}
+
+.sd-territorial-row.row-hierarchy-pkg {
+  background: #f0fdf4;
+  font-weight: 700;
+}
+
+/* Badges de Estado Territorial */
+.sd-ugel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.sd-ugel-badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.sd-ugel-badge.cumple {
+  background: #dcfce7;
+  color: #15803d;
+}
+.sd-ugel-badge.cumple i { background: #16a34a; }
+
+.sd-ugel-badge.proceso {
+  background: #fef3c7;
+  color: #b45309;
+}
+.sd-ugel-badge.proceso i { background: #f59e0b; }
+
+.sd-ugel-badge.nocumple {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.sd-ugel-badge.nocumple i { background: #ef4444; }
+
+.sd-ugel-badge.sininfo {
+  background: #f1f5f9;
+  color: #64748b;
+}
+.sd-ugel-badge.sininfo i { background: #94a3b8; }
+
+/* Pista Gantt Territorial */
+.sd-gantt-track-cell {
+  position: relative;
+  min-width: 390px;
+  padding: 6px 14px !important;
+  background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px);
+  background-size: 25% 100%;
+}
+
+.sd-gantt-bar-wrap {
+  position: relative;
+  height: 22px;
+  display: flex;
+  align-items: center;
+}
+
+.sd-gantt-bar-outer {
+  position: relative;
+  height: 16px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.sd-gantt-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sd-gantt-bar-pct {
+  margin-left: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+/* Panel Lateral Integrado de UGEL (3 Pestañas) */
+.sd-ugel-panel {
+  border-left: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sd-ugel-panel-head {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sd-ugel-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 18px;
+  gap: 18px;
+  background: #f8fafc;
+}
+
+.sd-ugel-tab-btn {
+  padding: 10px 2px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sd-ugel-tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.sd-ugel-panel-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+

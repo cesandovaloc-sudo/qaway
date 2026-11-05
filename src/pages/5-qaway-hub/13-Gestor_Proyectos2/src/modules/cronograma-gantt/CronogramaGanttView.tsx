@@ -253,10 +253,11 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
   });
 
   // Clasificación de tipología de nodo y avance en nodos hoja
+  // Si un nodo de Nivel 1 no tiene hijos, actúa como Entregable Directo (PAQUETE_TRABAJO) sin forzar rollup
   items.forEach((it) => {
     const hasChildren = parentToChildren.has(it.id) && parentToChildren.get(it.id)!.length > 0;
     if (!it.parentId) {
-      it.wbsNodeType = it.kind === 'hito' || hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO';
+      it.wbsNodeType = hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO';
     } else if (hasChildren) {
       it.wbsNodeType = 'SUBCOMPONENTE';
     } else {
@@ -1090,8 +1091,8 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (hasLegacyMocks || parsed.length !== 62 || !parsed.some((it) => it.id === 'comp-11')) {
-              // Limpieza y migración automática y definitiva a los 62 registros oficiales del Excel DRE Junín
+            if (hasLegacyMocks || parsed.length < 62 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-7.2')) {
+              // Limpieza y migración automática y definitiva a los 63 registros oficiales del Excel DRE Junín (con desglose de comp-7)
               try {
                 localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
                 localStorage.removeItem('qaway-collapsed-by-mode-v1');
@@ -1173,8 +1174,11 @@ export default function CronogramaGanttView({
               (!it.parentId || cloudItems.some((p) => p.id === it.parentId))
           ) as Item[]
         );
-        if (cleanCloudItems.length >= 50) {
-          setItems(cleanCloudItems);
+        if (projectId === 'p1' && !cleanCloudItems.some((it) => it.id === 'pt-7.2')) {
+          setItems(INITIAL_ITEMS);
+          syncAllCronogramaItemsToSupabase('p1', INITIAL_ITEMS as GanttItemData[]);
+        } else if (cleanCloudItems.length >= 50) {
+          setItems(computeWbsHierarchy(cleanCloudItems, rawTasks));
         }
       }
     });

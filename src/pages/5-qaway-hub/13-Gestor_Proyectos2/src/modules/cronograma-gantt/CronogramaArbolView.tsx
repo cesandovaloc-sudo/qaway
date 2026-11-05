@@ -16,7 +16,7 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
-import type { Item } from './CronogramaGanttView';
+import { getLinkedTasksSummary, type Item } from './CronogramaGanttView';
 
 interface CronogramaArbolViewProps {
   items: Item[];
@@ -62,9 +62,18 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
     setCollapsedNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const rawTasks = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('qaway-tasks-v1');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  }, [items]);
+
   // Agrupación jerárquica en base a items
   const { hitos, subprocesosByParent } = useMemo(() => {
-    const hitosList = items.filter((x) => x.kind === 'hito');
+    const hitosList = items.filter((x) => !x.parentId);
     const subMap: Record<string, Item[]> = {};
 
     items.forEach((x) => {
@@ -130,42 +139,80 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
             {hitos.map((hito, hIdx) => {
               const isHitoCollapsed = collapsedNodes[hito.id];
               const children = subprocesosByParent[hito.id] || [];
+              const isDirectDeliverable = children.length === 0;
+              const taskSummary = isDirectDeliverable ? getLinkedTasksSummary(hito, rawTasks) : null;
               const isSelected = selectedId === hito.id;
 
               // Color de barra según avance
               const barColor =
-                hito.progress >= 100 ? '#10b981' : hito.progress >= 40 ? '#0066ff' : hito.progress > 0 ? '#f59e0b' : '#cbd5e1';
+                hito.progress >= 100
+                  ? '#10b981'
+                  : isDirectDeliverable
+                  ? '#e11d48'
+                  : hito.progress >= 40
+                  ? '#0066ff'
+                  : hito.progress > 0
+                  ? '#f59e0b'
+                  : '#cbd5e1';
 
               return (
                 <div key={hito.id} className="arbol-branch-item">
                   {/* Conector vertical y brazo hacia el nodo */}
                   <div className="arbol-connector-arm" />
 
-                  {/* Tarjeta del Componente */}
+                  {/* Tarjeta del Componente o Entregable Directo (Nivel 1 sin subdivisiones) */}
                   <div
-                    className={`arbol-card hito-card ${isSelected ? 'selected' : ''}`}
+                    className={`arbol-card hito-card ${isDirectDeliverable ? 'direct-deliverable-card' : ''} ${isSelected ? 'selected' : ''}`}
+                    style={
+                      isDirectDeliverable
+                        ? { borderLeft: '3.5px solid #e11d48', background: '#fffbfc' }
+                        : undefined
+                    }
                     onClick={() => onSelectItem(hito)}
                   >
                     <div className="arbol-card-left">
-                      <button
-                        type="button"
-                        className="arbol-collapse-btn"
-                        onClick={(e) => toggleCollapse(hito.id, e)}
-                        title={isHitoCollapsed ? 'Expandir subcomponentes' : 'Colapsar subcomponentes'}
-                      >
-                        {isHitoCollapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
-                      </button>
+                      {!isDirectDeliverable ? (
+                        <button
+                          type="button"
+                          className="arbol-collapse-btn"
+                          onClick={(e) => toggleCollapse(hito.id, e)}
+                          title={isHitoCollapsed ? 'Expandir subcomponentes' : 'Colapsar subcomponentes'}
+                        >
+                          {isHitoCollapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
+                        </button>
+                      ) : (
+                        <div className="arbol-collapse-spacer" />
+                      )}
 
-                      <div className="arbol-node-icon hito-icon">
-                        <Folder size={16} color="#0066ff" />
+                      <div
+                        className="arbol-node-icon hito-icon"
+                        style={
+                          isDirectDeliverable
+                            ? { background: 'rgba(225, 29, 72, 0.1)', color: '#e11d48' }
+                            : undefined
+                        }
+                      >
+                        {isDirectDeliverable ? (
+                          <FileText size={16} color="#e11d48" />
+                        ) : (
+                          <Folder size={16} color="#0066ff" />
+                        )}
                       </div>
 
                       <div className="arbol-card-titles">
                         <div className="arbol-card-title">
-                          <span className="arbol-code">{hito.code}.</span> {hito.name}
+                          <span className="arbol-code">{hito.code.endsWith('.') ? hito.code : `${hito.code}.`}</span> {hito.name}
                         </div>
                         <div className="arbol-card-sub">
-                          {hito.distrito || hito.sede ? `${hito.distrito || ''} · ${hito.sede || ''}` : 'Alcance Regional'}
+                          {isDirectDeliverable ? (
+                            <span style={{ color: '#be123c', fontWeight: 600 }}>
+                              Entregable Directo · {hito.deliverable || 'Paquete ejecutable'}
+                            </span>
+                          ) : hito.distrito || hito.sede ? (
+                            `${hito.distrito || ''} · ${hito.sede || ''}`
+                          ) : (
+                            'Alcance Regional'
+                          )}
                         </div>
                       </div>
                     </div>
@@ -187,6 +234,23 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
                     </div>
 
                     <div className="arbol-card-right">
+                      {isDirectDeliverable && (
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            padding: '3px 8px',
+                            borderRadius: '999px',
+                            background: 'rgba(225, 29, 72, 0.08)',
+                            color: '#be123c',
+                            border: '1px solid rgba(225, 29, 72, 0.2)',
+                          }}
+                          title="Tareas operativas asociadas a este entregable directo"
+                        >
+                          📋 {taskSummary ? `${taskSummary.completed}/${taskSummary.total}` : `${hito.done || 0}/${hito.tasks || 0}`} Tareas
+                        </span>
+                      )}
+
                       <span className={`arbol-status-badge ${hito.status.toLowerCase().replace(/\s+/g, '-')}`}>
                         {hito.status}
                       </span>

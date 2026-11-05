@@ -24,6 +24,9 @@ import {
   Users,
   X,
   ChartNoAxesColumnIncreasing,
+  FileText,
+  ExternalLink,
+  FolderKanban,
 } from 'lucide-react';
 
 export interface SedeItem {
@@ -199,6 +202,401 @@ const getInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase();
 };
 
+
+export type UgelStatus = 'Cumple' | 'En proceso' | 'No cumple' | 'Sin información';
+
+export interface UgelTask {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+export interface UgelDoc {
+  id: string;
+  name: string;
+  updatedAt: string;
+  type: 'excel' | 'pdf';
+  verified: boolean;
+}
+
+export interface UgelExecutionRow {
+  id: string;
+  ugelName: string;
+  status: UgelStatus;
+  start: string;
+  end: string;
+  durationLabel: string;
+  progress: number;
+  responsable: string;
+  cargo: string;
+  faseActual: string;
+  observaciones: string;
+  tasks: UgelTask[];
+  docs: UgelDoc[];
+  barLeftPct: number;
+  barWidthPct: number;
+}
+
+export interface DeliverableOption {
+  id: string;
+  code: string;
+  name: string;
+  componentName: string;
+  start: string;
+  end: string;
+  durationLabel: string;
+}
+
+const DEFAULT_DELIVERABLES: DeliverableOption[] = [
+  {
+    id: 'pt-1.6',
+    code: '1.6',
+    name: 'Elaboración del CDL en MC SIGA',
+    componentName: 'I. Planificación de la distribución',
+    start: '12/10/2026',
+    end: '30/11/2026',
+    durationLabel: '2 meses',
+  },
+  {
+    id: 'pt-4.2',
+    code: '4.2',
+    name: 'Contratación del servicio de transporte a II.EE.',
+    componentName: 'IV. Gestión de contratos de distribución',
+    start: '01/12/2026',
+    end: '01/02/2027',
+    durationLabel: '2 meses',
+  },
+  {
+    id: 'pt-6.2',
+    code: '6.2',
+    name: 'Despacho y emisión de PECOSA en MC SIGA',
+    componentName: 'VI. Despacho de ME de UGEL a II.EE.',
+    start: '02/02/2027',
+    end: '26/02/2027',
+    durationLabel: '1 mes',
+  },
+  {
+    id: 'pt-7.1',
+    code: '7.1',
+    name: 'Recepción física, verificación y suscripción de PECOSA en IE',
+    componentName: 'VII. Recepción de ME en la IE',
+    start: '15/01/2027',
+    end: '26/02/2027',
+    durationLabel: '1.5 meses',
+  },
+  {
+    id: 'pt-7.2',
+    code: '7.2',
+    name: 'Tratamiento, formulación y reporte de Actas de Incidencia',
+    componentName: 'VII. Recepción de ME en la IE',
+    start: '15/01/2027',
+    end: '26/02/2027',
+    durationLabel: '1.5 meses',
+  },
+];
+
+const INITIAL_UGEL_ROWS: UgelExecutionRow[] = [
+  {
+    id: 'ugel-chupaca',
+    ugelName: 'UGEL Chupaca',
+    status: 'Cumple',
+    start: '12/10/2026',
+    end: '15/11/2026',
+    durationLabel: '1 mes',
+    progress: 100,
+    responsable: 'Esp. CDL Chupaca',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 3 – Validación DEI completada',
+    observaciones: 'Cuadro de Distribución Local validado al 100% y acta suscrita sin observaciones.',
+    barLeftPct: 18,
+    barWidthPct: 28,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: true },
+      { id: 't3', text: 'Validar asignación modular sin inconsistencias', done: true },
+      { id: 't4', text: 'Remitir oficio de conformidad CDL a DRE Junín', done: true },
+    ],
+    docs: [
+      { id: 'd1', name: 'CDL Chupaca - Consolidado Final.xlsx', updatedAt: 'Actualizado 14 nov. 2026', type: 'excel', verified: true },
+      { id: 'd2', name: 'Acta_Comite_UGEL_Chupaca.pdf', updatedAt: 'Actualizado 15 oct. 2026', type: 'pdf', verified: true },
+      { id: 'd3', name: 'Sustento_PECOSA_Preliminar.pdf', updatedAt: 'Actualizado 15 nov. 2026', type: 'pdf', verified: true },
+    ],
+  },
+  {
+    id: 'ugel-concepcion',
+    ugelName: 'UGEL Concepción',
+    status: 'Cumple',
+    start: '12/10/2026',
+    end: '15/11/2026',
+    durationLabel: '1 mes',
+    progress: 100,
+    responsable: 'Esp. CDL Concepción',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 3 – Validación DEI completada',
+    observaciones: 'Registro MC SIGA y validación de matrícula cerrados en plazo.',
+    barLeftPct: 18,
+    barWidthPct: 28,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: true },
+      { id: 't3', text: 'Validar asignación modular sin inconsistencias', done: true },
+      { id: 't4', text: 'Remitir oficio de conformidad CDL a DRE Junín', done: true },
+    ],
+    docs: [
+      { id: 'd1', name: 'CDL Concepción - Fase 3.xlsx', updatedAt: 'Actualizado 15 nov. 2026', type: 'excel', verified: true },
+      { id: 'd2', name: 'Resolucion_Comite_Concepcion.pdf', updatedAt: 'Actualizado 16 oct. 2026', type: 'pdf', verified: true },
+    ],
+  },
+  {
+    id: 'ugel-huancayo',
+    ugelName: 'UGEL Huancayo',
+    status: 'En proceso',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 75,
+    responsable: 'Esp. CDL Huancayo',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 2 – Registro MC SIGA',
+    observaciones: 'Pendiente validación de DEI y envío de acta de comité.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: true },
+      { id: 't3', text: 'Registro de NEA en sistema MC SIGA', done: true },
+      { id: 't4', text: 'Validación DEI y cierre de brechas nivel inicial', done: false },
+    ],
+    docs: [
+      { id: 'd1', name: 'CDL Huancayo - Fase 2.xlsx', updatedAt: 'Actualizado 12 oct. 2026', type: 'excel', verified: true },
+      { id: 'd2', name: 'Acta_Instalacion_Huancayo.pdf', updatedAt: 'Actualizado 18 oct. 2026', type: 'pdf', verified: true },
+      { id: 'd3', name: 'Reporte_NEA_Preliminar.pdf', updatedAt: 'Actualizado 04 nov. 2026', type: 'pdf', verified: false },
+    ],
+  },
+  {
+    id: 'ugel-jauja',
+    ugelName: 'UGEL Jauja',
+    status: 'En proceso',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 50,
+    responsable: 'Ana Torres · Esp. Jauja',
+    cargo: 'Especialista de Materiales',
+    faseActual: 'Fase 2 – Registro MC SIGA',
+    observaciones: 'En proceso de conciliación de códigos modulares de zona rural.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: true },
+      { id: 't3', text: 'Registro de NEA en sistema MC SIGA', done: false },
+      { id: 't4', text: 'Validación DEI y envío de oficio CDL', done: false },
+    ],
+    docs: [
+      { id: 'd1', name: 'CDL Jauja - Preliminar.xlsx', updatedAt: 'Actualizado 20 oct. 2026', type: 'excel', verified: true },
+      { id: 'd2', name: 'Oficio_Comite_Jauja.pdf', updatedAt: 'Actualizado 19 oct. 2026', type: 'pdf', verified: false },
+    ],
+  },
+  {
+    id: 'ugel-junin',
+    ugelName: 'UGEL Junín',
+    status: 'En proceso',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 50,
+    responsable: 'María Jara · Esp. Junín',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 2 – Registro MC SIGA',
+    observaciones: 'Avance al 50% en carga de cuadros de distribución local.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: true },
+      { id: 't3', text: 'Validar registro sin inconsistencias', done: false },
+      { id: 't4', text: 'Confirmar 100% de NEA registradas', done: false },
+    ],
+    docs: [
+      { id: 'd1', name: 'CDL Junín - Fase 2.xlsx', updatedAt: 'Actualizado 22 oct. 2026', type: 'excel', verified: true },
+    ],
+  },
+  {
+    id: 'ugel-satipo',
+    ugelName: 'UGEL Satipo',
+    status: 'No cumple',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 33,
+    responsable: 'Javier Ruiz · Esp. Satipo',
+    cargo: 'Responsable Logístico',
+    faseActual: 'Fase 1 – Planificación y CDL preliminar',
+    observaciones: 'Demora en validación de códigos modulares de escuelas bilingües.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+      { id: 't3', text: 'Validar padrón de II.EE. EIB', done: false },
+    ],
+    docs: [
+      { id: 'd1', name: 'CDL Satipo - Borrador.xlsx', updatedAt: 'Actualizado 18 oct. 2026', type: 'excel', verified: false },
+    ],
+  },
+  {
+    id: 'ugel-tarma',
+    ugelName: 'UGEL Tarma',
+    status: 'No cumple',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 20,
+    responsable: 'Lucía Ramos · Esp. Tarma',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 1 – Planificación',
+    observaciones: 'Se solicitó asistencia técnica a DIGERE para desbloqueo de usuario SIGA.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+      { id: 't3', text: 'Registro de NEA', done: false },
+      { id: 't4', text: 'Suscripción de CDL validado', done: false },
+      { id: 't5', text: 'Envío de expediente a DRE', done: false },
+    ],
+    docs: [
+      { id: 'd1', name: 'Acta_Conformacion_Tarma.pdf', updatedAt: 'Actualizado 15 oct. 2026', type: 'pdf', verified: true },
+    ],
+  },
+  {
+    id: 'ugel-chanchamayo',
+    ugelName: 'UGEL Chanchamayo',
+    status: 'No cumple',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 20,
+    responsable: 'Juan Pérez · Esp. Chanchamayo',
+    cargo: 'Responsable de Logística',
+    faseActual: 'Fase 1 – Planificación',
+    observaciones: 'Pendiente remisión de resolución directoral del comité UGEL.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: true },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+      { id: 't3', text: 'Validar asignación modular', done: false },
+      { id: 't4', text: 'Cierre de CDL en SIGA', done: false },
+      { id: 't5', text: 'Firma de conformidad', done: false },
+    ],
+    docs: [
+      { id: 'd1', name: 'CDL Chanchamayo - Inicial.xlsx', updatedAt: 'Actualizado 14 oct. 2026', type: 'excel', verified: false },
+    ],
+  },
+  {
+    id: 'ugel-yauli',
+    ugelName: 'UGEL Yauli',
+    status: 'No cumple',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 10,
+    responsable: 'Esp. CDL Yauli - La Oroya',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 1 – Planificación',
+    observaciones: 'En revisión de metas de atención por reubicación de locales escolares.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Instalar comité UGEL', done: false },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+    ],
+    docs: [],
+  },
+  {
+    id: 'ugel-pichanaqui',
+    ugelName: 'UGEL Pichanaqui',
+    status: 'No cumple',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 0,
+    responsable: 'Esp. CDL Pichanaqui',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 1 – Planificación',
+    observaciones: 'Requerimiento de regularización urgente emitido por coordinación regional.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: false },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+    ],
+    docs: [],
+  },
+  {
+    id: 'ugel-riotambo',
+    ugelName: 'UGEL Río Tambo',
+    status: 'No cumple',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 0,
+    responsable: 'Esp. CDL Río Tambo',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 1 – Planificación',
+    observaciones: 'En coordinación para acceso satelital y carga de matriz SIGA.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: false },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+    ],
+    docs: [],
+  },
+  {
+    id: 'ugel-pangoa',
+    ugelName: 'UGEL Pangoa',
+    status: 'Sin información',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 0,
+    responsable: 'Esp. CDL Pangoa',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Pendiente de reporte inicial',
+    observaciones: 'Sin reporte registrado en el corte semanal.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: false },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+    ],
+    docs: [],
+  },
+  {
+    id: 'ugel-perene',
+    ugelName: 'UGEL Perené',
+    status: 'No cumple',
+    start: '14/10/2026',
+    end: '28/11/2026',
+    durationLabel: '1.5 meses',
+    progress: 0,
+    responsable: 'Esp. CDL Perené',
+    cargo: 'Ejecutor Operativo',
+    faseActual: 'Fase 1 – Planificación',
+    observaciones: 'Pendiente acreditación de responsable SIGA ante la DRE Junín.',
+    barLeftPct: 21,
+    barWidthPct: 36,
+    tasks: [
+      { id: 't1', text: 'Conformar comité de distribución UGEL', done: false },
+      { id: 't2', text: 'Cargar archivo RAR en MC SIGA', done: false },
+    ],
+    docs: [],
+  },
+];
+
 export default function SedesView({
   onActions,
   activeProjectId,
@@ -220,7 +618,61 @@ export default function SedesView({
 
   // Pestañas y Vistas
   const [selectedTab, setSelectedTab] = useState<string>('Todas');
-  const [viewMode, setViewMode] = useState<'Tarjetas' | 'Lista'>('Tarjetas');
+  const [viewMode, setViewMode] = useState<'Tarjetas' | 'Lista' | 'Territorial'>('Territorial');
+
+  // Estados de la Vista Cronograma Territorial por UGEL
+  const [selectedDeliverableId, setSelectedDeliverableId] = useState<string>('pt-1.6');
+  const [ugelStatusFilter, setUgelStatusFilter] = useState<string>('Todos');
+  const [ugelRowsByDeliverable, setUgelRowsByDeliverable] = useState<Record<string, UgelExecutionRow[]>>(() => {
+    try {
+      const saved = localStorage.getItem('qaway-sedes-territorial-v1');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return { 'pt-1.6': INITIAL_UGEL_ROWS };
+  });
+  const [selectedUgelId, setSelectedUgelId] = useState<string | null>('ugel-huancayo');
+  const [ugelDrawerTab, setUgelDrawerTab] = useState<'info' | 'tareas' | 'docs'>('info');
+  const [newTaskText, setNewTaskText] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('qaway-sedes-territorial-v1', JSON.stringify(ugelRowsByDeliverable));
+    } catch {}
+  }, [ugelRowsByDeliverable]);
+
+  const currentDeliverable = useMemo(
+    () => DEFAULT_DELIVERABLES.find((d) => d.id === selectedDeliverableId) || DEFAULT_DELIVERABLES[0],
+    [selectedDeliverableId]
+  );
+
+  const currentUgelRows = useMemo(() => {
+    const list = ugelRowsByDeliverable[selectedDeliverableId] || INITIAL_UGEL_ROWS;
+    return list.filter((r) => {
+      const matchSearch = search === '' || r.ugelName.toLowerCase().includes(search.toLowerCase()) || r.responsable.toLowerCase().includes(search.toLowerCase());
+      const matchSt = ugelStatusFilter === 'Todos' || r.status === ugelStatusFilter;
+      return matchSearch && matchSt;
+    });
+  }, [ugelRowsByDeliverable, selectedDeliverableId, search, ugelStatusFilter]);
+
+  const allCurrentUgelRows = ugelRowsByDeliverable[selectedDeliverableId] || INITIAL_UGEL_ROWS;
+  const deliverableRollupProgress = useMemo(() => {
+    if (allCurrentUgelRows.length === 0) return 0;
+    const sum = allCurrentUgelRows.reduce((acc, r) => acc + (r.progress || 0), 0);
+    return Math.round(sum / allCurrentUgelRows.length);
+  }, [allCurrentUgelRows]);
+
+  const selectedUgelRow = useMemo(
+    () => allCurrentUgelRows.find((r) => r.id === selectedUgelId) || null,
+    [allCurrentUgelRows, selectedUgelId]
+  );
+
+  const updateUgelRow = (ugelId: string, updater: (row: UgelExecutionRow) => UgelExecutionRow) => {
+    setUgelRowsByDeliverable((prev) => {
+      const baseList = prev[selectedDeliverableId] || INITIAL_UGEL_ROWS;
+      const nextList = baseList.map((r) => (r.id === ugelId ? updater(r) : r));
+      return { ...prev, [selectedDeliverableId]: nextList };
+    });
+  };
 
   // Filtros
   const [search, setSearch] = useState('');
@@ -503,16 +955,16 @@ export default function SedesView({
               ))}
             </div>
 
-            {/* Switcher de Modos (Tarjetas / Lista) */}
+            {/* Switcher de Modos (Fichas de Sedes / Lista / Cronograma Territorial) */}
             <div className="view-mode-switcher" role="tablist">
               <button
                 type="button"
                 className={`view-mode-btn ${viewMode === 'Tarjetas' ? 'active' : ''}`}
                 onClick={() => setViewMode('Tarjetas')}
-                title="Vista Cuadrícula de Tarjetas"
+                title="Vista Cuadrícula de Fichas de Sedes"
               >
                 <LayoutGrid size={14} />
-                <span>Tarjetas</span>
+                <span>Fichas de Sedes</span>
               </button>
               <button
                 type="button"
@@ -522,6 +974,15 @@ export default function SedesView({
               >
                 <List size={14} />
                 <span>Lista</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'Territorial' ? 'active' : ''}`}
+                onClick={() => setViewMode('Territorial')}
+                title="Cronograma de Ejecución Territorial por UGEL"
+              >
+                <Calendar size={14} />
+                <span>Cronograma Territorial</span>
               </button>
             </div>
           </nav>
@@ -728,8 +1189,653 @@ export default function SedesView({
             )}
           </div>
 
-          {/* Contenido de Sedes: Vista Tarjetas o Vista Lista */}
-          {viewMode === 'Tarjetas' ? (
+          {/* Contenido de Sedes: Cronograma Territorial por UGEL, Vista Tarjetas o Vista Lista */}
+          {viewMode === 'Territorial' ? (
+            <div className={`sd-territorial-split ${selectedUgelRow ? 'with-drawer' : ''}`}>
+              <div className="sd-territorial-gantt-wrap">
+                {/* Barra de Selectores y Leyenda del Cronograma Territorial */}
+                <div className="sd-territorial-toolbar">
+                  <div className="sd-territorial-selectors">
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                        Entregable WBS ejecutado por UGEL
+                      </span>
+                      <select
+                        value={selectedDeliverableId}
+                        onChange={(e) => setSelectedDeliverableId(e.target.value)}
+                        style={{
+                          padding: '7px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          background: '#ffffff',
+                          fontSize: '12.5px',
+                          fontWeight: 650,
+                          color: '#0f172a',
+                          outline: 'none',
+                          minWidth: '300px',
+                        }}
+                      >
+                        {DEFAULT_DELIVERABLES.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.code} {d.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                        Estado UGEL
+                      </span>
+                      <select
+                        value={ugelStatusFilter}
+                        onChange={(e) => setUgelStatusFilter(e.target.value)}
+                        style={{
+                          padding: '7px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          background: '#ffffff',
+                          fontSize: '12.5px',
+                          fontWeight: 600,
+                          color: '#0f172a',
+                          outline: 'none',
+                        }}
+                      >
+                        <option value="Todos">Todos los estados</option>
+                        <option value="Cumple">Cumple</option>
+                        <option value="En proceso">En proceso</option>
+                        <option value="No cumple">No cumple</option>
+                        <option value="Sin información">Sin información</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  {/* Leyenda Semafórica Oficial */}
+                  <div className="sd-territorial-legend">
+                    <span className="sd-legend-item">
+                      <i className="sd-legend-dot" style={{ background: '#16a34a' }} /> Cumple
+                    </span>
+                    <span className="sd-legend-item">
+                      <i className="sd-legend-dot" style={{ background: '#f59e0b' }} /> En proceso
+                    </span>
+                    <span className="sd-legend-item">
+                      <i className="sd-legend-dot" style={{ background: '#ef4444' }} /> No cumple
+                    </span>
+                    <span className="sd-legend-item">
+                      <i className="sd-legend-dot" style={{ background: '#94a3b8' }} /> Sin información
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tabla Jerárquica Gantt de las 13 UGEL de Junín */}
+                <table className="sd-territorial-table">
+                  <thead>
+                    <tr>
+                      <th style={{ minWidth: '250px' }}>Sede / UGEL</th>
+                      <th style={{ width: '125px' }}>Estado</th>
+                      <th style={{ width: '95px' }}>Inicio</th>
+                      <th style={{ width: '95px' }}>Fin</th>
+                      <th style={{ width: '85px' }}>Duración</th>
+                      <th>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', textAlign: 'center', fontSize: '11px' }}>
+                          <span>Octubre 2026</span>
+                          <span>Noviembre 2026</span>
+                          <span>Diciembre 2026</span>
+                          <span>Enero 2027</span>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Fila 0: Raíz del Proyecto */}
+                    <tr className="sd-territorial-row row-hierarchy-root">
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                          <ChevronDown size={14} color="#475569" />
+                          <FolderKanban size={15} color="#2563eb" />
+                          <span>MINEDU · Dotación 2027</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="sd-ugel-badge proceso">
+                          <i /> En proceso
+                        </span>
+                      </td>
+                      <td>04/09/2026</td>
+                      <td>30/07/2027</td>
+                      <td>11 meses</td>
+                      <td className="sd-gantt-track-cell">
+                        <div className="sd-gantt-bar-wrap">
+                          <div className="sd-gantt-bar-outer" style={{ width: '90%', marginLeft: '2%' }}>
+                            <div className="sd-gantt-bar-fill" style={{ width: '28%', background: '#64748b' }} />
+                          </div>
+                          <span className="sd-gantt-bar-pct">28%</span>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Fila 1: Componente Padre */}
+                    <tr className="sd-territorial-row row-hierarchy-comp">
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', paddingLeft: '16px' }}>
+                          <ChevronDown size={14} color="#475569" />
+                          <Building2 size={15} color="#0284c7" />
+                          <span>{currentDeliverable.componentName}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="sd-ugel-badge proceso">
+                          <i /> En proceso
+                        </span>
+                      </td>
+                      <td>04/09/2026</td>
+                      <td>30/11/2026</td>
+                      <td>3 meses</td>
+                      <td className="sd-gantt-track-cell">
+                        <div className="sd-gantt-bar-wrap">
+                          <div className="sd-gantt-bar-outer" style={{ width: '48%', marginLeft: '10%' }}>
+                            <div className="sd-gantt-bar-fill" style={{ width: '57%', background: '#2563eb' }} />
+                          </div>
+                          <span className="sd-gantt-bar-pct">57%</span>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Fila 2: Paquete / Entregable Seleccionado (Rollup de las 13 UGELs) */}
+                    <tr className="sd-territorial-row row-hierarchy-pkg">
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', paddingLeft: '32px' }}>
+                          <ChevronDown size={14} color="#15803d" />
+                          <FileText size={15} color="#16a34a" />
+                          <span>
+                            {currentDeliverable.code} {currentDeliverable.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="sd-ugel-badge proceso">
+                          <i /> En proceso
+                        </span>
+                      </td>
+                      <td>{currentDeliverable.start}</td>
+                      <td>{currentDeliverable.end}</td>
+                      <td>{currentDeliverable.durationLabel}</td>
+                      <td className="sd-gantt-track-cell">
+                        <div className="sd-gantt-bar-wrap">
+                          <div className="sd-gantt-bar-outer" style={{ width: '38%', marginLeft: '18%' }}>
+                            <div
+                              className="sd-gantt-bar-fill"
+                              style={{ width: `${deliverableRollupProgress}%`, background: '#16a34a' }}
+                            />
+                          </div>
+                          <span className="sd-gantt-bar-pct">{deliverableRollupProgress}%</span>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Filas 3..15: Las 13 UGEL de la Región Junín */}
+                    {currentUgelRows.map((row) => {
+                      const isSelected = selectedUgelId === row.id;
+                      const badgeClass =
+                        row.status === 'Cumple'
+                          ? 'cumple'
+                          : row.status === 'En proceso'
+                          ? 'proceso'
+                          : row.status === 'No cumple'
+                          ? 'nocumple'
+                          : 'sininfo';
+
+                      const fillColor =
+                        row.status === 'Cumple'
+                          ? '#16a34a'
+                          : row.status === 'En proceso'
+                          ? '#f59e0b'
+                          : row.status === 'No cumple'
+                          ? '#ef4444'
+                          : '#94a3b8';
+
+                      return (
+                        <tr
+                          key={row.id}
+                          className={`sd-territorial-row ${isSelected ? 'selected' : ''}`}
+                          onClick={() => setSelectedUgelId(row.id)}
+                        >
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '50px' }}>
+                              <Building2 size={14} color={isSelected ? '#2563eb' : '#64748b'} />
+                              <span style={{ fontWeight: isSelected ? 700 : 600, color: '#0f172a' }}>{row.ugelName}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`sd-ugel-badge ${badgeClass}`}>
+                              <i /> {row.status}
+                            </span>
+                          </td>
+                          <td style={{ color: '#475569', fontSize: '12.5px' }}>{row.start}</td>
+                          <td style={{ color: '#475569', fontSize: '12.5px' }}>{row.end}</td>
+                          <td style={{ color: '#64748b', fontSize: '12.5px' }}>{row.durationLabel}</td>
+                          <td className="sd-gantt-track-cell">
+                            <div className="sd-gantt-bar-wrap">
+                              <div
+                                className="sd-gantt-bar-outer"
+                                style={{ width: `${row.barWidthPct}%`, marginLeft: `${row.barLeftPct}%` }}
+                              >
+                                <div
+                                  className="sd-gantt-bar-fill"
+                                  style={{
+                                    width: `${Math.max(row.progress, row.status === 'No cumple' ? 18 : 0)}%`,
+                                    background: fillColor,
+                                  }}
+                                />
+                              </div>
+                              <span className="sd-gantt-bar-pct">{row.progress}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Drawer / Panel Lateral Interactivo de UGEL Seleccionada */}
+              {selectedUgelRow && (
+                <aside className="sd-ugel-panel">
+                  <div className="sd-ugel-panel-head">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+                        {selectedUgelRow.ugelName}
+                      </h3>
+                      <span
+                        className={`sd-ugel-badge ${
+                          selectedUgelRow.status === 'Cumple'
+                            ? 'cumple'
+                            : selectedUgelRow.status === 'En proceso'
+                            ? 'proceso'
+                            : selectedUgelRow.status === 'No cumple'
+                            ? 'nocumple'
+                            : 'sininfo'
+                        }`}
+                      >
+                        <i /> {selectedUgelRow.status}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedUgelId(null)}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        color: '#64748b',
+                        display: 'grid',
+                        placeItems: 'center',
+                      }}
+                      title="Cerrar panel de UGEL"
+                    >
+                      <X size={17} />
+                    </button>
+                  </div>
+
+                  {/* Navegación de 3 Pestañas: Información | Tareas | Documentos */}
+                  <div className="sd-ugel-tabs">
+                    <button
+                      type="button"
+                      className={`sd-ugel-tab-btn ${ugelDrawerTab === 'info' ? 'active' : ''}`}
+                      onClick={() => setUgelDrawerTab('info')}
+                    >
+                      Información
+                    </button>
+                    <button
+                      type="button"
+                      className={`sd-ugel-tab-btn ${ugelDrawerTab === 'tareas' ? 'active' : ''}`}
+                      onClick={() => setUgelDrawerTab('tareas')}
+                    >
+                      Tareas ({selectedUgelRow.tasks.filter((t) => t.done).length}/{selectedUgelRow.tasks.length})
+                    </button>
+                    <button
+                      type="button"
+                      className={`sd-ugel-tab-btn ${ugelDrawerTab === 'docs' ? 'active' : ''}`}
+                      onClick={() => setUgelDrawerTab('docs')}
+                    >
+                      Documentos ({selectedUgelRow.docs.length})
+                    </button>
+                  </div>
+
+                  {/* Cuerpo de la Pestaña Activa */}
+                  <div className="sd-ugel-panel-body">
+                    {ugelDrawerTab === 'info' && (
+                      <>
+                        {/* Avance General */}
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>Avance general</span>
+                            <b style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>{selectedUgelRow.progress}%</b>
+                          </div>
+                          <div className="sd-progress-track" style={{ height: '8px', marginBottom: '8px' }}>
+                            <div
+                              className="sd-progress-fill"
+                              style={{
+                                width: `${selectedUgelRow.progress}%`,
+                                background:
+                                  selectedUgelRow.status === 'Cumple'
+                                    ? '#16a34a'
+                                    : selectedUgelRow.status === 'En proceso'
+                                    ? '#f59e0b'
+                                    : selectedUgelRow.status === 'No cumple'
+                                    ? '#ef4444'
+                                    : '#94a3b8',
+                              }}
+                            />
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={selectedUgelRow.progress}
+                            onChange={(e) => {
+                              const val = +e.target.value;
+                              updateUgelRow(selectedUgelRow.id, (r) => ({
+                                ...r,
+                                progress: val,
+                                status: val === 100 ? 'Cumple' : val > 0 ? 'En proceso' : r.status,
+                              }));
+                            }}
+                            style={{ width: '100%', accentColor: '#2563eb', cursor: 'pointer' }}
+                          />
+                        </div>
+
+                        {/* Estado Operativo */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Estado UGEL</span>
+                          <select
+                            value={selectedUgelRow.status}
+                            onChange={(e) => {
+                              const st = e.target.value as UgelStatus;
+                              updateUgelRow(selectedUgelRow.id, (r) => ({
+                                ...r,
+                                status: st,
+                                progress: st === 'Cumple' ? 100 : st === 'Sin información' ? 0 : r.progress,
+                              }));
+                            }}
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '12px',
+                              fontWeight: 650,
+                              color: '#0f172a',
+                            }}
+                          >
+                            <option value="Cumple">Cumple</option>
+                            <option value="En proceso">En proceso</option>
+                            <option value="No cumple">No cumple</option>
+                            <option value="Sin información">Sin información</option>
+                          </select>
+                        </div>
+
+                        {/* Periodo */}
+                        <div>
+                          <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Periodo</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#1e293b' }}>
+                            <Calendar size={14} color="#64748b" />
+                            <span>
+                              {selectedUgelRow.start} – {selectedUgelRow.end}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Responsable */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b' }}>Responsable</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span
+                              className="sd-avatar-circle"
+                              style={{ width: '28px', height: '28px', fontSize: '11px', background: '#dbeafe', color: '#1e40af' }}
+                            >
+                              {getInitials(selectedUgelRow.responsable)}
+                            </span>
+                            <div>
+                              <b style={{ display: 'block', fontSize: '12.5px', color: '#0f172a' }}>{selectedUgelRow.responsable}</b>
+                              <small style={{ fontSize: '11px', color: '#64748b' }}>{selectedUgelRow.cargo}</small>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Fase actual */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b' }}>Fase actual</span>
+                          <span style={{ fontSize: '12.5px', fontWeight: 650, color: '#0f172a' }}>{selectedUgelRow.faseActual}</span>
+                        </div>
+
+                        {/* Tareas resumen */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b' }}>Tareas</span>
+                          <div style={{ flex: 1, height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                            <div
+                              style={{
+                                width: `${
+                                  selectedUgelRow.tasks.length
+                                    ? Math.round((selectedUgelRow.tasks.filter((t) => t.done).length / selectedUgelRow.tasks.length) * 100)
+                                    : 0
+                                }%`,
+                                height: '100%',
+                                background: '#1e3a8a',
+                              }}
+                            />
+                          </div>
+                          <b style={{ fontSize: '12px', color: '#0f172a' }}>
+                            {selectedUgelRow.tasks.filter((t) => t.done).length}/{selectedUgelRow.tasks.length}
+                          </b>
+                        </div>
+
+                        {/* Observaciones */}
+                        <div>
+                          <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '6px' }}>Observaciones</span>
+                          <textarea
+                            rows={3}
+                            value={selectedUgelRow.observaciones}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              updateUgelRow(selectedUgelRow.id, (r) => ({ ...r, observaciones: val }));
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: '#f8fafc',
+                              fontSize: '12.5px',
+                              color: '#334155',
+                              resize: 'vertical',
+                              outline: 'none',
+                            }}
+                          />
+                        </div>
+
+                        {/* Enlaces */}
+                        {selectedUgelRow.docs.length > 0 && (
+                          <div>
+                            <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '6px' }}>Enlaces</span>
+                            {selectedUgelRow.docs.slice(0, 2).map((doc) => (
+                              <div
+                                key={doc.id}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '10px',
+                                  padding: '8px 10px',
+                                  borderRadius: '8px',
+                                  background: '#f8fafc',
+                                  border: '1px solid #e2e8f0',
+                                  marginBottom: '6px',
+                                }}
+                              >
+                                <FileText size={16} color="#2563eb" />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <b
+                                    style={{
+                                      display: 'block',
+                                      fontSize: '12.5px',
+                                      color: '#2563eb',
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                    }}
+                                  >
+                                    {doc.name}
+                                  </b>
+                                  <small style={{ fontSize: '11px', color: '#64748b' }}>{doc.updatedAt}</small>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {ugelDrawerTab === 'tareas' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                          Checklist operativo de la UGEL (impacta el avance de la sede):
+                        </div>
+                        {selectedUgelRow.tasks.map((task) => (
+                          <label
+                            key={task.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '10px',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: task.done ? '#f0fdf4' : '#ffffff',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={task.done}
+                              onChange={() => {
+                                updateUgelRow(selectedUgelRow.id, (r) => {
+                                  const nextTasks = r.tasks.map((t) => (t.id === task.id ? { ...t, done: !t.done } : t));
+                                  const doneCount = nextTasks.filter((t) => t.done).length;
+                                  const nextProg = nextTasks.length > 0 ? Math.round((doneCount / nextTasks.length) * 100) : r.progress;
+                                  return {
+                                    ...r,
+                                    tasks: nextTasks,
+                                    progress: nextProg,
+                                    status: nextProg === 100 ? 'Cumple' : nextProg > 0 ? 'En proceso' : r.status,
+                                  };
+                                });
+                              }}
+                              style={{ marginTop: '2px', accentColor: '#16a34a' }}
+                            />
+                            <span
+                              style={{
+                                fontSize: '12.5px',
+                                color: task.done ? '#15803d' : '#1e293b',
+                                textDecoration: task.done ? 'line-through' : 'none',
+                                fontWeight: task.done ? 600 : 500,
+                              }}
+                            >
+                              {task.text}
+                            </span>
+                          </label>
+                        ))}
+
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            if (!newTaskText.trim()) return;
+                            updateUgelRow(selectedUgelRow.id, (r) => {
+                              const nextTasks = [...r.tasks, { id: 't-' + Date.now(), text: newTaskText.trim(), done: false }];
+                              const doneCount = nextTasks.filter((t) => t.done).length;
+                              const nextProg = Math.round((doneCount / nextTasks.length) * 100);
+                              return {
+                                ...r,
+                                tasks: nextTasks,
+                                progress: nextProg,
+                              };
+                            });
+                            setNewTaskText('');
+                          }}
+                          style={{ display: 'flex', gap: '6px', marginTop: '6px' }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Añadir subtarea UGEL..."
+                            value={newTaskText}
+                            onChange={(e) => setNewTaskText(e.target.value)}
+                            style={{
+                              flex: 1,
+                              padding: '8px 10px',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              fontSize: '12.5px',
+                              outline: 'none',
+                            }}
+                          />
+                          <button type="submit" className="btn primary" style={{ height: '34px', padding: '0 12px', fontSize: '12px' }}>
+                            <Plus size={14} />
+                          </button>
+                        </form>
+                      </div>
+                    )}
+
+                    {ugelDrawerTab === 'docs' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                          Sustentos y entregables verificables (PECOSA, CDL, Actas):
+                        </div>
+                        {selectedUgelRow.docs.length === 0 ? (
+                          <div style={{ padding: '20px', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', color: '#64748b', fontSize: '12.5px' }}>
+                            Sin documentos cargados por esta UGEL.
+                          </div>
+                        ) : (
+                          selectedUgelRow.docs.map((doc) => (
+                            <div
+                              key={doc.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '10px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                                background: '#ffffff',
+                              }}
+                            >
+                              <FileText size={18} color={doc.type === 'excel' ? '#16a34a' : '#2563eb'} />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <b style={{ display: 'block', fontSize: '12.5px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {doc.name}
+                                </b>
+                                <small style={{ fontSize: '11px', color: '#64748b' }}>{doc.updatedAt}</small>
+                              </div>
+                              <span
+                                style={{
+                                  fontSize: '10.5px',
+                                  fontWeight: 700,
+                                  padding: '2px 7px',
+                                  borderRadius: '999px',
+                                  background: doc.verified ? '#dcfce7' : '#fef3c7',
+                                  color: doc.verified ? '#15803d' : '#b45309',
+                                }}
+                              >
+                                {doc.verified ? 'Verificado' : 'En revisión'}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </aside>
+              )}
+            </div>
+          ) : viewMode === 'Tarjetas' ? (
             <div className="sd-grid-container">
               {filteredSedes.map((s) => (
                 <div key={s.id} className="sd-card">

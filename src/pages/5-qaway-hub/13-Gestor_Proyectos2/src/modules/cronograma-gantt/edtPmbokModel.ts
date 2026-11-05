@@ -724,7 +724,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
   {
     id: 'pt-7.1',
     code: '7.1',
-    name: 'Recepción física, conteo, verificación del ME en la IE y suscripción de PECOSA / Acta de Incidencia',
+    name: 'Recepción física, verificación y suscripción de PECOSA en la IE',
     edtType: 'PAQUETE_TRABAJO',
     kind: 'subproceso',
     faseId: 'FASE-EJECUCION',
@@ -733,7 +733,21 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     start: '2027-01-15',
     end: '2027-02-26',
     entidadResponsable: 'UGEL / II.EE.',
-    entregableVerificable: 'PECOSA original firmado, sellado o Acta de Incidencia levantada',
+    entregableVerificable: 'PECOSA original firmado y sellado',
+  },
+  {
+    id: 'pt-7.2',
+    code: '7.2',
+    name: 'Tratamiento, formulación y reporte de Actas de Incidencia de recepción',
+    edtType: 'PAQUETE_TRABAJO',
+    kind: 'subproceso',
+    faseId: 'FASE-EJECUCION',
+    parentId: 'comp-7',
+    subprocesoGroup: 'Recepción en IE',
+    start: '2027-01-15',
+    end: '2027-02-26',
+    entidadResponsable: 'UGEL / II.EE.',
+    entregableVerificable: 'Actas de Incidencia y registro fotográfico de mermas/daños',
   },
 
   // =========================================================================

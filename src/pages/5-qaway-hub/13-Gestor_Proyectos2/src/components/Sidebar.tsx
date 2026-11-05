@@ -231,7 +231,7 @@ export default function Sidebar({
         onClick={() => onModule('cronograma')}
       >
         <CalendarDays size={18} />
-        <span>Cronograma</span>
+        <span>Proyecto</span>
       </button>
 
       <button
