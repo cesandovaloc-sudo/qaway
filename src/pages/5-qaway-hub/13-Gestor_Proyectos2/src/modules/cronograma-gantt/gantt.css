@@ -6056,17 +6056,22 @@ body.gantt-resizing {
 
 /* 1. Hito Rector (Azul Oficial con Degradado y Diamante ◆) - Candado Visual Maestro */
 .cal-gantt-bar.bar-major {
-  background: rgba(0, 102, 255, 0.16) !important;
-  border: 1px solid rgba(0, 102, 255, 0.45) !important;
+  background: #eff6ff !important;
+  border: 1px solid #93c5fd !important;
+  border-left: 3px solid #2563eb !important;
   border-radius: 5px;
 }
 .cal-gantt-bar.bar-major .cal-gantt-progress-fill {
-  background: linear-gradient(90deg, #0052cc 0%, #0066ff 100%) !important;
-  border-radius: 4px 0 0 4px;
+  background: rgba(37, 99, 235, 0.22) !important;
+  border-radius: 3px 0 0 3px;
 }
 .cal-gantt-bar.bar-major .cal-gantt-content {
-  color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  color: #1e3a8a !important;
+  text-shadow: none;
+  padding-right: 22px;
+}
+.cal-gantt-bar.bar-major .cal-gantt-hito-badge {
+  color: #2563eb;
 }
 
 /* Diamante característico en la punta del Hito Rector */
@@ -6098,53 +6103,57 @@ body.gantt-resizing {
   background: #0052cc;
 }
 
-/* 2. Completado (Verde Esmeralda Sólido / 100%) */
+/* 2. Completado (Verde Esmeralda / 100%) */
 .cal-gantt-bar.bar-complete {
-  background: rgba(0, 185, 107, 0.18);
-  border: 1px solid rgba(0, 185, 107, 0.5);
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  border-left: 3px solid #16a34a;
 }
 .cal-gantt-bar.bar-complete .cal-gantt-progress-fill {
-  background: #00b96b;
+  background: rgba(22, 163, 74, 0.22);
   border-radius: 3px;
 }
 .cal-gantt-bar.bar-complete .cal-gantt-content {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  color: #14532d;
+  text-shadow: none;
 }
 
-/* 3. En Proceso (Bicolor Naranja Gantt con Pista Suave) */
+/* 3. En Proceso (Naranja Gantt con alto contraste de lectura) */
 .cal-gantt-bar.bar-progress {
-  background: rgba(250, 140, 22, 0.18);
-  border: 1px solid rgba(250, 140, 22, 0.45);
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-left: 3px solid #ea580c;
 }
 .cal-gantt-bar.bar-progress .cal-gantt-progress-fill {
-  background: #fa8c16;
+  background: rgba(234, 88, 12, 0.22);
   border-radius: 3px 0 0 3px;
 }
 .cal-gantt-bar.bar-progress .cal-gantt-content {
-  color: #431407;
+  color: #7c2d12;
   font-weight: 600;
 }
 
 /* 4. Pendiente (Gris Neutro Gantt 0%) */
 .cal-gantt-bar.bar-pending {
-  background: #f1f5f9;
+  background: #f8fafc;
   border: 1px solid #cbd5e1;
+  border-left: 3px solid #64748b;
 }
 .cal-gantt-bar.bar-pending .cal-gantt-progress-fill {
   display: none;
 }
 .cal-gantt-bar.bar-pending .cal-gantt-content {
-  color: #475569;
+  color: #334155;
 }
 
 /* 5. Con Retraso (Alerta Roja) */
 .cal-gantt-bar.bar-late {
-  background: rgba(239, 68, 68, 0.18);
-  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-left: 3px solid #dc2626;
 }
 .cal-gantt-bar.bar-late .cal-gantt-progress-fill {
-  background: #ef4444;
+  background: rgba(220, 38, 38, 0.22);
   border-radius: 3px 0 0 3px;
 }
 .cal-gantt-bar.bar-late .cal-gantt-content {
@@ -6186,7 +6195,7 @@ body.gantt-resizing {
   font-weight: 700;
   margin-left: auto;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(15, 23, 42, 0.08);
   padding: 1px 5px;
   border-radius: 3px;
 }

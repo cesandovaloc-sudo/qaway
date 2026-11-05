@@ -183,7 +183,9 @@ export default function CronogramaCalendarioView({
 
     monthWeeks.forEach((w) => {
       const activeInWeek = matchingItems.filter((it) => it.start <= w.endDateIso && it.end >= w.startDateIso);
-      let rowSlot = 1;
+      // Asignación inteligente de carriles (lanes) sin colisiones para que ninguna barra se superponga
+      const laneEndCols: number[] = [];
+
       activeInWeek.slice(0, 6).forEach((it) => {
         const startIso = it.start < w.startDateIso ? w.startDateIso : it.start;
         const endIso = it.end > w.endDateIso ? w.endDateIso : it.end;
@@ -192,6 +194,20 @@ export default function CronogramaCalendarioView({
         const endIdx = Math.max(0, Math.min(6, Math.round((new Date(endIso + 'T12:00:00').getTime() - new Date(w.startDateIso + 'T12:00:00').getTime()) / (1000 * 60 * 60 * 24))));
         const colStart = startIdx + 1;
         const colSpan = Math.max(1, endIdx - startIdx + 1);
+        const colEnd = colStart + colSpan - 1;
+
+        let assignedLane = -1;
+        for (let l = 0; l < laneEndCols.length; l++) {
+          if (laneEndCols[l] < colStart) {
+            assignedLane = l;
+            laneEndCols[l] = colEnd;
+            break;
+          }
+        }
+        if (assignedLane === -1) {
+          assignedLane = laneEndCols.length;
+          laneEndCols.push(colEnd);
+        }
 
         map[w.weekIndex].push({
           id: `${it.id}-w${w.weekIndex}`,
@@ -205,12 +221,11 @@ export default function CronogramaCalendarioView({
           weekIndex: w.weekIndex,
           colStart,
           colSpan,
-          row: rowSlot,
+          row: assignedLane + 1,
           gestor: it.gestor || 'Carlos Mendoza',
           region: it.region || 'Junín',
           item: it,
         });
-        rowSlot = (rowSlot % 3) + 1;
       });
     });
 
@@ -287,8 +302,16 @@ export default function CronogramaCalendarioView({
 
             {/* Rejilla de Semanas calculadas dinámicamente */}
             <div className="cal-grid-body">
-              {monthWeeks.map((week) => (
-                <div key={week.weekIndex} className="cal-week-row-grid">
+              {monthWeeks.map((week) => {
+                const evs = weekEvents[week.weekIndex] || [];
+                const maxRow = evs.reduce((acc, e) => Math.max(acc, e.row), 0);
+                const dynamicMinHeight = Math.max(126, 42 + maxRow * 32);
+                return (
+                <div
+                  key={week.weekIndex}
+                  className="cal-week-row-grid"
+                  style={{ minHeight: `${dynamicMinHeight}px` }}
+                >
                   {/* Celdas de fondo con número de día */}
                   {week.days.map((day, idx) => (
                     <div
@@ -301,7 +324,7 @@ export default function CronogramaCalendarioView({
 
                   {/* Capa de Barras de Gantt Oficiales sobre los días */}
                   <div className="cal-week-events-overlay">
-                    {weekEvents[week.weekIndex]?.map((ev) => {
+                    {evs.map((ev) => {
                       const isMajor = ev.kind === 'hito';
                       const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
                       const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
@@ -337,15 +360,15 @@ export default function CronogramaCalendarioView({
                           />
 
                           {/* Contenido legible del entregable con alto contraste */}
-                          <div className="cal-gantt-content" style={{ color: '#ffffff' }}>
+                          <div className="cal-gantt-content">
                             {isMajor ? (
                               <span className="cal-gantt-hito-badge">◆</span>
                             ) : isComplete ? (
                               <Check size={11} strokeWidth={3} className="cal-gantt-check-icon" />
                             ) : null}
-                            <strong className="cal-gantt-code" style={{ color: '#ffffff' }}>{ev.code}</strong>
-                            <span className="cal-gantt-name" style={{ color: '#ffffff' }}>{ev.name}</span>
-                            <span className="cal-gantt-pct" style={{ color: '#ffffff' }}>{ev.progress}%</span>
+                            <strong className="cal-gantt-code">{ev.code}</strong>
+                            <span className="cal-gantt-name">{ev.name}</span>
+                            <span className="cal-gantt-pct">{ev.progress}%</span>
                           </div>
 
                           {/* Diamante característico al final del Componente Principal */}
@@ -359,7 +382,8 @@ export default function CronogramaCalendarioView({
                     })}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -401,11 +425,11 @@ export default function CronogramaCalendarioView({
                       className="cal-gantt-progress-fill"
                       style={{ width: `${it.progress}%` }}
                     />
-                    <div className="cal-gantt-content" style={{ color: '#ffffff' }}>
+                    <div className="cal-gantt-content">
                       {isMajor && <span className="cal-gantt-hito-badge">◆</span>}
-                      <strong className="cal-gantt-code" style={{ color: '#ffffff' }}>{it.code}</strong>
-                      <span className="cal-gantt-name" style={{ color: '#ffffff' }}>{it.name}</span>
-                      <span className="cal-gantt-pct" style={{ color: '#ffffff' }}>{it.progress}%</span>
+                      <strong className="cal-gantt-code">{it.code}</strong>
+                      <span className="cal-gantt-name">{it.name}</span>
+                      <span className="cal-gantt-pct">{it.progress}%</span>
                     </div>
                   </div>
                 );
@@ -435,10 +459,10 @@ export default function CronogramaCalendarioView({
                         style={{ height: '30px' }}
                       >
                         <div className="cal-gantt-progress-fill" style={{ width: `${matchingItems[i].progress}%` }} />
-                        <div className="cal-gantt-content" style={{ color: '#ffffff' }}>
-                          <strong className="cal-gantt-code" style={{ color: '#ffffff' }}>{matchingItems[i].code}</strong>
-                          <span className="cal-gantt-name" style={{ color: '#ffffff' }}>{matchingItems[i].name}</span>
-                          <span className="cal-gantt-pct" style={{ color: '#ffffff' }}>{matchingItems[i].progress}%</span>
+                        <div className="cal-gantt-content">
+                          <strong className="cal-gantt-code">{matchingItems[i].code}</strong>
+                          <span className="cal-gantt-name">{matchingItems[i].name}</span>
+                          <span className="cal-gantt-pct">{matchingItems[i].progress}%</span>
                         </div>
                       </div>
                     )}
