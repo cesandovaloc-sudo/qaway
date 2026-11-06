@@ -25,16 +25,12 @@ import {
   Link as LinkIcon,
   Package,
 } from 'lucide-react';
-import {
+import type {
   Item,
   Status,
   DeliverableItem,
   AttachmentItem,
   DeliverableType,
-  MiniCalendar,
-  formatDate,
-  STATUS_CLASS,
-  getLinkedTasksSummary,
 } from './CronogramaGanttView';
 import { getDeviationDays } from './scheduleMetrics';
 import { getEdtNodeDisplayLabel } from './edtPmbokModel';
@@ -42,10 +38,205 @@ import {
   REGIONES_PROYECTO,
   MACROREGIONES,
   getRegionCoordinador,
-  getGestoresPorAmbito,
-  getGestorColor,
   getMacroById,
 } from './regionalCoordinationModel';
+
+
+// ── Helpers locales para aislar completamente el Drawer y evitar dependencias circulares ──
+const RANGE_MIN = '2026-09-01';
+const RANGE_MAX = '2027-04-30';
+const TODAY_ISO = '2026-10-27';
+
+const STATUS_CLASS: Record<Status, string> = {
+  'Cumple': 'complete',
+  'Completado': 'complete',
+  'En curso': 'progress',
+  'En proceso': 'progress',
+  'Pendiente': 'pending',
+  'Con retraso': 'late',
+};
+
+const formatDate = (s: string) =>
+  new Date(s + 'T12:00:00')
+    .toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
+    .replace('.', '');
+
+function getLinkedTasksSummary(
+  item: Item,
+  rawTasks?: any[]
+): { total: number; completed: number; progress: number } | null {
+  if (!rawTasks || !Array.isArray(rawTasks) || rawTasks.length === 0) return null;
+  const itemLabel = `${item.code ? (item.code.endsWith('.') ? item.code : `${item.code} `) : ''}${item.name}`.trim().toLowerCase();
+  const itemName = (item.name || '').trim().toLowerCase();
+  const itemId = (item.id || '').trim().toLowerCase();
+  const itemCode = (item.code || '').trim().toLowerCase();
+
+  const linked = rawTasks.filter((t) => {
+    if (!t || !t.milestone || t.milestone === '—' || t.milestone === '-') return false;
+    const m = String(t.milestone).trim().toLowerCase();
+    if (m === itemLabel || m === itemName || m === itemId) return true;
+    if (itemCode && m.startsWith(itemCode)) return true;
+    if (m.includes(itemName) || itemName.includes(m)) return true;
+    if (t.wbsId && String(t.wbsId).toLowerCase() === itemId) return true;
+    if (t.componentId && String(t.componentId).toLowerCase() === itemId) return true;
+    return false;
+  });
+
+  if (linked.length === 0) return null;
+  const completed = linked.filter((t) => {
+    const s = String(t.status || '').toLowerCase();
+    return s === 'completado' || s === 'cumple' || s === 'completada' || Number(t.progress || 0) >= 100;
+  }).length;
+  const avgProgress = Math.round(
+    linked.reduce((acc, t) => acc + (Number(t.progress) || 0), 0) / linked.length
+  );
+  return {
+    total: linked.length,
+    completed,
+    progress: avgProgress,
+  };
+}
+
+function MiniCalendar({
+  value,
+  onChange,
+  min = RANGE_MIN,
+  max = RANGE_MAX,
+  onClose,
+  align = 'left',
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  min?: string;
+  max?: string;
+  onClose: () => void;
+  align?: 'left' | 'right';
+}) {
+  const [viewDate, setViewDate] = useState(() =>
+    value ? new Date(value + 'T12:00:00') : new Date('2026-10-27T12:00:00')
+  );
+
+  useEffect(() => {
+    if (value) {
+      setViewDate(new Date(value + 'T12:00:00'));
+    }
+  }, [value]);
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const monthName = viewDate.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
+  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  const firstDayOfWeek = (new Date(year, month, 1).getDay() + 6) % 7;
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const prevMonthTotalDays = new Date(year, month, 0).getDate();
+
+  const prevMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setViewDate(new Date(year, month - 1, 1, 12));
+  };
+
+  const nextMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setViewDate(new Date(year, month + 1, 1, 12));
+  };
+
+  const days: { day: number; currentMonth: boolean; iso: string }[] = [];
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    const d = prevMonthTotalDays - i;
+    const prevDate = new Date(year, month - 1, d, 12);
+    const mStr = String(prevDate.getMonth() + 1).padStart(2, '0');
+    const dStr = String(d).padStart(2, '0');
+    days.push({ day: d, currentMonth: false, iso: `${prevDate.getFullYear()}-${mStr}-${dStr}` });
+  }
+  for (let d = 1; d <= totalDays; d++) {
+    const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    days.push({ day: d, currentMonth: true, iso });
+  }
+  const remaining = (7 - (days.length % 7)) % 7;
+  for (let d = 1; d <= remaining; d++) {
+    const nextDate = new Date(year, month + 1, d, 12);
+    const mStr = String(nextDate.getMonth() + 1).padStart(2, '0');
+    const dStr = String(d).padStart(2, '0');
+    days.push({ day: d, currentMonth: false, iso: `${nextDate.getFullYear()}-${mStr}-${dStr}` });
+  }
+
+  return (
+    <div
+      className={`custom-calendar-pop ${align === 'right' ? 'align-right' : 'align-left'}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="cal-head">
+        <span className="cal-title">{capitalizedMonth}</span>
+        <div className="cal-arrows">
+          <button type="button" onClick={prevMonth} title="Mes anterior">
+            <ChevronLeft size={14} />
+          </button>
+          <button type="button" onClick={nextMonth} title="Mes siguiente">
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+      <div className="cal-weekdays">
+        <span>LU</span>
+        <span>MA</span>
+        <span>MI</span>
+        <span>JU</span>
+        <span>VI</span>
+        <span>SA</span>
+        <span>DO</span>
+      </div>
+      <div className="cal-grid">
+        {days.map((item, idx) => {
+          const isSelected = item.iso === value;
+          const isToday = item.iso === TODAY_ISO;
+          const isDisabled = (min && item.iso < min) || (max && item.iso > max);
+          return (
+            <button
+              key={idx}
+              type="button"
+              disabled={isDisabled}
+              className={`cal-day ${item.currentMonth ? '' : 'outside'} ${isSelected ? 'selected' : ''} ${
+                isToday ? 'today-day' : ''
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled) {
+                  onChange(item.iso);
+                  onClose();
+                }
+              }}
+            >
+              {item.day}
+            </button>
+          );
+        })}
+      </div>
+      <div className="cal-footer">
+        <button
+          type="button"
+          className="cal-today-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onChange(TODAY_ISO);
+            onClose();
+          }}
+        >
+          Hoy
+        </button>
+        <button
+          type="button"
+          className="cal-close-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  );
+}
 
 interface GanttEditorDrawerProps {
   panelOpen: boolean;
