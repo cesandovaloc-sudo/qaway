@@ -3426,7 +3426,8 @@
   background: #ffffff;
   border-left: 1px solid #e2e8f0;
   box-shadow: -10px 0 35px rgba(15, 23, 42, 0.14);
-  animation: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideInRight 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform;
 }
 
 .gantt-v2 .editor-head {
@@ -9457,4 +9458,15 @@ body.gantt-resizing {
 .gantt-v2 .filters [data-tooltip]:hover::before,
 .gantt-v2 .bar-tools-accordion [data-tooltip]:hover::before {
   transform: translateX(-50%) translateY(0);
+}
+/* Animacion acelerada por hardware para el Drawer Lateral a 60 FPS */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
