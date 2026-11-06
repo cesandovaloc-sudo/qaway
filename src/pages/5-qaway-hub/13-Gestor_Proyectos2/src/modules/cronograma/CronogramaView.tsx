@@ -56,7 +56,7 @@ function App({
 }) {
  const location = useLocation();
  const navigate = useNavigate();
- const cronogramaBase = '/hub/gestor_proyecto/cronograma';
+ const cronogramaBase = '/hub/gestor_proyectos/proyecto';
  const requestedTab = location.pathname.replace(`${cronogramaBase}/`, '').replace(/\/+$/, '');
  const initialTab = SLUG_TABS[requestedTab] || 'Gantt';
  const [items,setItems]=useState<Item[]>(seed); const [tab,setTab]=useState<string>(initialTab); const [selected,setSelected]=useState('a5'); const [region,setRegion]=useState('Junín'); const [unit,setUnit]=useState('Todas las unidades'); const [kind,setKind]=useState('Todos los niveles'); const [status,setStatus]=useState('Todos los estados'); const [phase,setPhase]=useState('Todas las fases'); const [query,setQuery]=useState(''); const [scale,setScale]=useState('Meses'); const [offset,setOffset]=useState(0); const [showPanel,setShowPanel]=useState(true); const [expanded,setExpanded]=useState<Set<string>>(new Set(['p','proc1','sub1','f1','f2','f3','proc2'])); const [modal,setModal]=useState(false); const [toast,setToast]=useState(''); const [draft,setDraft]=useState({name:'',kind:'Actividad' as Kind,parent:'sub1',start:'2026-12-01',end:'2026-12-10',unit:'Todas las unidades',owner:'',description:'',deliverable:''});

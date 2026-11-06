@@ -453,6 +453,15 @@ export default function AppRouter() {
           path="/hub/gestor_proyecto"
           element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
         />
+        {/* Ruta canónica pública: Gestor de Proyectos. */}
+        <Route
+          path="/hub/gestor_proyectos/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="/hub/gestor_proyectos"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
+        />
         {/* RAG Hub (12-qaway_empresarial): nativo con shell oficial Hub */}
         <Route
           path="/hub/rag/*"

@@ -1,8 +1,11 @@
 // Tipos compartidos del shell maestro.
 export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'configuracion';
 
-// Prefijo base del Gestor de Proyectos acoplado al Hub
-export const BASE_PATH = '/hub/gestor_proyecto';
+// Ruta pública canónica del módulo dentro del Hub.
+// La aplicación se llama Gestor de Proyectos (plural) y sus vistas de proyecto
+// viven bajo /proyecto. Las rutas antiguas en singular se conservan únicamente
+// como compatibilidad en el router principal.
+export const BASE_PATH = '/hub/gestor_proyectos/proyecto';
 
 // Slugs canónicos para cada módulo en la URL
 export const MODULE_SLUGS: Record<ModuleKey, string> = {
@@ -20,7 +23,7 @@ export const MODULE_SLUGS: Record<ModuleKey, string> = {
 
 // Mapeo inverso de slugs (y alias compatibles) hacia la clave de módulo interna
 export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
-  // Rutas canónicas con prefijo /hub/gestor_proyecto
+  // Rutas canónicas con prefijo /hub/gestor_proyectos/proyecto
   [`${BASE_PATH}/resumen`]: 'resumen',
   [`${BASE_PATH}/cronograma`]: 'cronograma',
   [`${BASE_PATH}/sedes`]: 'sedes',
@@ -36,7 +39,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   [`${BASE_PATH}/actas-y-acuerdos`]: 'actas',
   [`${BASE_PATH}/configuracion`]: 'configuracion',
 
-  // Rutas cortas sin prefijo (compatibilidad y redirección si el usuario entra a /reuniones, etc.)
+  // Rutas cortas sin prefijo (compatibilidad interna).
   '/resumen': 'resumen',
   '/cronograma': 'cronograma',
   '/sedes': 'sedes',
