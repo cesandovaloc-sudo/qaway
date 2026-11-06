@@ -170,8 +170,8 @@ export interface Item {
   edtType?: EdtNodeType;
   wbsNodeType?: WbsNodeType;
   /** Contenedor macro de ciclo de vida temporal (opcional / nullable) */
-  faseId?: string | null;
-  parentId?: string;
+  faseId?: string | null | undefined;
+  parentId?: string | undefined;
   children?: Item[];
   start: string;
   end: string;
@@ -194,12 +194,14 @@ export interface Item {
   phase?: string | null;
   /** Línea base aprobada (fechas originales contra las que se mide la desviación). */
   baselineStart?: string;
-  baselineEnd?: string;
+  baselineEnd?: string | undefined;
   /** Fechas reales de ejecución (se registran al iniciar/completar; editables). */
   actualStart?: string;
   actualEnd?: string;
   /** Tareas o hitos predecesores en la cadena de prelación / ruta crítica. */
   dependencies?: string[];
+  /** Entidad responsable oficial del componente (DRE / UGEL / región). */
+  entidadResponsable?: string;
 }
 
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
@@ -318,10 +320,10 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
       const totalProgress = children.reduce((sum, c) => sum + (typeof c.progress === 'number' ? c.progress : 0), 0);
       parent.progress = Math.min(100, Math.max(0, Math.round(totalProgress / children.length)));
 
-      const validStarts = children.map((c) => c.start).filter((s) => s && /^\d{4}-\d{2}-\d{2}/.test(s)).sort();
-      const validEnds = children.map((c) => c.end).filter((e) => e && /^\d{4}-\d{2}-\d{2}/.test(e)).sort();
-      if (validStarts.length > 0) parent.start = validStarts[0];
-      if (validEnds.length > 0) parent.end = validEnds[validEnds.length - 1];
+      const validStarts = children.map((c) => c.start).filter((s): s is string => !!s && /^\d{4}-\d{2}-\d{2}/.test(s)).sort();
+      const validEnds = children.map((c) => c.end).filter((e): e is string => !!e && /^\d{4}-\d{2}-\d{2}/.test(e)).sort();
+      if (validStarts.length > 0) parent.start = validStarts[0] ?? parent.start;
+      if (validEnds.length > 0) parent.end = validEnds[validEnds.length - 1] ?? parent.end;
 
       if (parent.progress === 100) {
         parent.status = 'Completado';
@@ -534,8 +536,10 @@ const GESTOR_COLORS: Record<string, string> = {
 const getGestorInitials = (name: string): string => {
   if (!name) return '??';
   const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  const first = parts[0] ?? '';
+  const last = parts[parts.length - 1] ?? '';
+  if (parts.length === 1) return first.slice(0, 2).toUpperCase();
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
 };
 
 const getGestorColor = (name: string): string => {
@@ -543,7 +547,7 @@ const getGestorColor = (name: string): string => {
   const colors = ['#2563eb', '#0284c7', '#7c3aed', '#059669', '#d97706', '#dc2626'];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
-  return colors[Math.abs(hash) % colors.length];
+  return colors[Math.abs(hash) % colors.length] ?? '#2563eb';
 };
 
 const getItemGestores = (item: Item): string[] => {
@@ -574,7 +578,7 @@ const RANGE_MAX = '2027-04-30';
 
 const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'actions'];
 
-const DEFAULT_COLS: Record<string, number> = {
+const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
   name: 440,
   kind: 110,
@@ -592,7 +596,7 @@ const DEFAULT_COLS: Record<string, number> = {
   actions: 80,
 };
 
-const MIN_COLS: Record<string, number> = {
+const MIN_COLS: Record<ColKey, number> = {
   code: 60,
   name: 200,
   kind: 80,
@@ -795,7 +799,7 @@ export function MiniCalendar({
         {days.map((item, idx) => {
           const isSelected = item.iso === value;
           const isToday = item.iso === TODAY_ISO;
-          const isDisabled = (min && item.iso < min) || (max && item.iso > max);
+          const isDisabled = (!!min && item.iso < min) || (!!max && item.iso > max);
           return (
             <button
               key={idx}
@@ -1208,7 +1212,7 @@ export default function CronogramaGanttView({
           const upgraded = parsed.map((it: Item) => {
             const init = initialMap.get(it.id);
             const isEntity = it.gestor === 'DRE / UGEL' || it.gestor === 'DRE' || it.gestor === 'UGEL' || it.gestor === 'DRE/UGEL' || !it.gestor;
-            const finalGestor = isEntity ? (init?.gestor || resolveDefaultGestor(it.code, it.name)) : it.gestor;
+            const finalGestor = isEntity ? (init?.gestor || resolveDefaultGestor(it.code, it.name)) : (it.gestor ?? '');
             const finalGestores = isEntity ? [finalGestor] : (it.gestores && it.gestores.length > 0 ? it.gestores : [finalGestor]);
             return {
               ...it,
@@ -2469,6 +2473,10 @@ export default function CronogramaGanttView({
       return;
     }
     const [previous, ...rest] = history;
+    if (!previous) {
+      notify('No hay cambios previos para deshacer');
+      return;
+    }
     setRedoHistory((r) => [items, ...r].slice(0, 30));
     setItems(previous);
     setHistory(rest);
@@ -2481,6 +2489,10 @@ export default function CronogramaGanttView({
       return;
     }
     const [next, ...rest] = redoHistory;
+    if (!next) {
+      notify('No hay cambios posteriores para rehacer');
+      return;
+    }
     setHistory((h) => [items, ...h].slice(0, 30));
     setItems(next);
     setRedoHistory(rest);
@@ -3561,9 +3573,11 @@ export default function CronogramaGanttView({
 
             let lastChildIdx = parentIdx;
             for (let idx = parentIdx + 1; idx < withExpanded.length; idx++) {
-              if (withExpanded[idx].parentId === pId || isDescendant(withExpanded[idx].id, pId)) {
+              const row = withExpanded[idx];
+              if (!row) break;
+              if (row.parentId === pId || isDescendant(row.id, pId)) {
                 lastChildIdx = idx;
-              } else if (withExpanded[idx].kind === 'hito') {
+              } else if (row.kind === 'hito') {
                 break;
               }
             }
@@ -5055,7 +5069,7 @@ export default function CronogramaGanttView({
                     setCalShowBaseline(true);
                     setShowCriticalPath(false);
                     engine.clearAllFilters();
-                    engine.clearAllSort();
+                    engine.clearSort();
                     resetColWidths();
                     closeMenus();
                     if (viewMode === 'calendario') {
@@ -6113,7 +6127,7 @@ export default function CronogramaGanttView({
                   )}
 
                   {visibleCols.includes('progress') && (() => {
-                    const isContainer = Boolean(x.hasChildren || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === x.id));
+                    const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === x.id));
                     const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
 
                     if (isContainer) {
@@ -6222,7 +6236,7 @@ export default function CronogramaGanttView({
                         title={
                           dev === undefined
                             ? 'Clic para fijar línea base y medir desviación'
-                            : `Desviación: ${formatDeviation(dev)} · Fin aprobado: ${formatDate(x.baselineEnd)} · Clic para ajustar fecha base`
+                            : `Desviación: ${formatDeviation(dev)} · Fin aprobado: ${formatDate(x.baselineEnd ?? '')} · Clic para ajustar fecha base`
                         }
                         onClick={(e) => {
                           e.stopPropagation();
@@ -6399,7 +6413,7 @@ export default function CronogramaGanttView({
                             );
                           }
                           if (gestoresList.length === 1) {
-                            const gName = gestoresList[0];
+                            const gName = gestoresList[0] ?? '';
                             return (
                               <div className="gestor-single-badge" title={gName}>
                                 <span
@@ -7394,7 +7408,7 @@ export default function CronogramaGanttView({
         {/* Panel Lateral Editor Aislado y Memoizado (Cero re-renders en el Gantt al escribir) */}
         <GanttEditorDrawer
           panelOpen={panelOpen}
-          selectedItem={selected}
+          selectedItem={selected ?? null}
           isNewDraft={isNewDraft}
           items={items}
           hitos={hitos}

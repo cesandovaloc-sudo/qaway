@@ -9044,10 +9044,12 @@ body.gantt-resizing {
 
 /* Fila 2: Filtros Contextuales (Región y Coord. Macro-regional) */
 .gantt-v2 .filters .search {
+  width: 210px !important;
+  min-width: 210px !important;
   max-width: 210px !important;
-  min-width: 170px !important;
   height: 38px !important;
-  flex-shrink: 0;
+  flex: 0 0 210px !important;
+  flex-shrink: 0 !important;
   border: 1px solid #cbd5e1;
   background: #ffffff;
 }
@@ -9413,15 +9415,15 @@ body.gantt-resizing {
   overflow: hidden;
   pointer-events: none;
   transform: translateX(-4px);
-  transition: max-width 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.22s ease-in-out,
-              transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: max-width 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 
 .gantt-v2 .bar-tools-accordion:hover .accordion-expandable-items,
 .gantt-v2 .bar-tools-accordion:focus-within .accordion-expandable-items {
-  max-width: 180px;
+  max-width: 116px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);

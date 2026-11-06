@@ -1,4 +1,4 @@
-// @ts-nocheck
+// Verificación de tipado activada: este archivo será validado por tsc -b
 import React, { useState, useEffect, useRef, memo } from 'react';
 import {
   ChevronLeft,
