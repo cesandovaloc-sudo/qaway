@@ -1174,8 +1174,8 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (hasLegacyMocks || parsed.length < 62 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-7.2')) {
-              // Limpieza y migración automática y definitiva a los 63 registros oficiales del Excel DRE Junín (con desglose de comp-7)
+            if (hasLegacyMocks || parsed.length < 76 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo')) {
+              // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes (DRE + 13 UGEL)
               try {
                 localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
                 localStorage.removeItem('qaway-collapsed-by-mode-v1');
@@ -1890,6 +1890,8 @@ export default function CronogramaGanttView({
   const depHoverTimeoutRef = useRef<any>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
+  const [calShowBarLabels, setCalShowBarLabels] = useState(true);
+  const [calShowBaseline, setCalShowBaseline] = useState(true);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [showBarAvatars, setShowBarAvatars] = useState(false);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
@@ -3909,55 +3911,19 @@ export default function CronogramaGanttView({
               )}
             </div>
 
-            {/* Botón Limpiar para Calendario */}
-            {viewMode === 'calendario' && (
-              <button
-                type="button"
-                className="btn secondary clear-btn"
-                onClick={() => {
-                  setSearch('');
-                  setTypeFilter('Todos');
-                  setStateFilter('Todos');
-                  setSelectedRegions([]);
-                  setGestorFilter('Todos');
-                  setTab('Todos');
-                  handleTodayCal();
-                  closeMenus();
-                  notify('Filtros del calendario restablecidos');
-                }}
-                style={{
-                  height: '42px',
-                  padding: '0 12px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  color: '#475569',
-                  borderRadius: '10px',
-                }}
-                title="Limpiar filtros del calendario"
-              >
-                <RotateCcw size={14} />
-                <span>Limpiar</span>
-              </button>
-            )}
-
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
-            {viewMode !== 'calendario' && (
-              <button
-                type="button"
-                className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
-                onClick={() => setAdvancedFiltersOpen((v) => !v)}
-                data-tooltip="Filtros avanzados"
-                aria-label="Condiciones de filtrado avanzado"
-              >
-                <Filter size={15} />
-                {customRules.length > 0 && (
-                  <span className="custom-filter-counter-badge">{customRules.length}</span>
-                )}
-              </button>
-            )}
+            <button
+              type="button"
+              className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
+              onClick={() => setAdvancedFiltersOpen((v) => !v)}
+              data-tooltip="Filtros avanzados"
+              aria-label="Condiciones de filtrado avanzado"
+            >
+              <Filter size={15} />
+              {customRules.length > 0 && (
+                <span className="custom-filter-counter-badge">{customRules.length}</span>
+              )}
+            </button>
 
             {/* Separador vertical: Bloque 2 (Datos del proyecto) | Bloque 3 (Navegación temporal / corte) */}
             <div className="filter-group-divider" aria-hidden="true" />
@@ -4133,13 +4099,19 @@ export default function CronogramaGanttView({
             {/* Separador vertical: Bloque 3 (Tiempo) | Bloque 4 (Herramientas y Acciones) */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Controles exclusivos de visualización Gantt (Capas y dependencias) */}
-            {viewMode === 'gantt' && (
+            {/* Controles de visualización de barras (Capas, línea base, dependencias y responsables en Gantt y Calendario) */}
+            {(viewMode === 'gantt' || viewMode === 'calendario') && (
               <>
                 <button
                   type="button"
-                  className={`btn-toggle-labels qm-btn-icon ${showBarLabels ? "active" : ""}`}
-                  onClick={() => setShowBarLabels((prev) => !prev)}
+                  className={`btn-toggle-labels qm-btn-icon ${(viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? "active" : ""}`}
+                  onClick={() => {
+                    if (viewMode === 'calendario') {
+                      setCalShowBarLabels((prev) => !prev);
+                    } else {
+                      setShowBarLabels((prev) => !prev);
+                    }
+                  }}
                   data-tooltip="Mostrar % en barras"
                   aria-label="Mostrar u ocultar porcentaje de avance en barras"
                 >
@@ -4148,10 +4120,15 @@ export default function CronogramaGanttView({
 
                 <button
                   type="button"
-                  className={`btn secondary qm-btn-icon ${showBaseline ? "active" : ""}`}
+                  className={`btn secondary qm-btn-icon ${(viewMode === 'calendario' ? calShowBaseline : showBaseline) ? "active" : ""}`}
                   onClick={() => {
-                    setShowBaseline((v) => !v);
-                    notify(showBaseline ? "Línea base oculta" : "Línea base oficial visible");
+                    if (viewMode === 'calendario') {
+                      setCalShowBaseline((v) => !v);
+                      notify(calShowBaseline ? "Línea base oculta" : "Línea base oficial visible");
+                    } else {
+                      setShowBaseline((v) => !v);
+                      notify(showBaseline ? "Línea base oculta" : "Línea base oficial visible");
+                    }
                   }}
                   data-tooltip="Línea base"
                   aria-label="Mostrar u ocultar línea base oficial"
@@ -4189,8 +4166,8 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Controles de expansión y pantalla completa para modo Gantt y Lista */}
-            {(viewMode === 'gantt' || viewMode === 'lista') && (
+            {/* Controles de expansión y pantalla completa para modo Gantt, Lista y Calendario */}
+            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario') && (
               <>
                 <button
                   type="button"
@@ -4218,8 +4195,8 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Controles de columnas y línea base para Gantt y Lista */}
-            {viewMode !== 'calendario' && (
+            {/* Controles de columnas, historial, línea base y limpieza universal para todas las vistas */}
+            {(
               <>
                 {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
                 <button
@@ -4415,12 +4392,18 @@ export default function CronogramaGanttView({
                     setAdvancedFiltersOpen(false);
                     setColFilterOpen(null);
                     setShowBaseline(false);
+                    setCalShowBarLabels(true);
+                    setCalShowBaseline(true);
                     setShowCriticalPath(false);
                     engine.clearAllFilters();
                     engine.clearAllSort();
                     resetColWidths();
                     closeMenus();
-                    scrollToDate(RANGE_MIN);
+                    if (viewMode === 'calendario') {
+                      handleTodayCal();
+                    } else {
+                      scrollToDate(RANGE_MIN);
+                    }
                     notify('Todos los filtros restablecidos');
                   }}
                   data-tooltip="Borrar todos los filtros"
@@ -6575,6 +6558,9 @@ export default function CronogramaGanttView({
               stateFilter={stateFilter}
               selectedRegions={selectedRegions}
               search={search}
+              showBarLabels={calShowBarLabels}
+              showBaseline={calShowBaseline}
+              showBarAvatars={showBarAvatars}
             />
           )}
 

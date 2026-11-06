@@ -59,6 +59,9 @@ interface CronogramaCalendarioViewProps {
   selectedRegions?: string[];
   regionFilter?: string;
   search?: string;
+  showBarLabels?: boolean;
+  showBaseline?: boolean;
+  showBarAvatars?: boolean;
 }
 
 const WEEK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -105,6 +108,9 @@ export default function CronogramaCalendarioView({
   selectedRegions = [],
   regionFilter = 'Todas',
   search = '',
+  showBarLabels = true,
+  showBaseline = true,
+  showBarAvatars = false,
 }: CronogramaCalendarioViewProps) {
 
   // Generación dinámica de semanas para el mes/año seleccionado
@@ -277,6 +283,7 @@ export default function CronogramaCalendarioView({
       const slot = slots[slotIdx];
       let colStart = slot.colStart;
       let colSpan = slot.colSpan;
+      let targetRow = slot.row;
 
       // Si la fecha de fin del paquete cae exactamente en esta semana, anclar la barra a su día real con máximo 3-4 días de ancho
       const weekObj = monthWeeks[finalWeekIdx];
@@ -294,8 +301,7 @@ export default function CronogramaCalendarioView({
         );
         const span = Math.min(3, endDayIdx + 1);
         const computedStart = Math.max(1, endDayIdx + 2 - span);
-        // Usar posición real si no colisiona en la misma fila
-        const existingInRow = map[finalWeekIdx].filter((e) => e.row === slot.row);
+        const existingInRow = map[finalWeekIdx].filter((e) => e.row === targetRow);
         const collides = existingInRow.some(
           (e) => !(computedStart + span - 1 < e.colStart || computedStart > e.colStart + e.colSpan - 1)
         );
@@ -303,6 +309,15 @@ export default function CronogramaCalendarioView({
           colStart = computedStart;
           colSpan = span;
         }
+      }
+
+      // Garantizar cero colisión horizontal en la fila asignada (si el slot por defecto choca con una barra previa movida, bajar a la siguiente fila libre)
+      while (
+        map[finalWeekIdx]
+          .filter((e) => e.row === targetRow)
+          .some((e) => !(colStart + colSpan - 1 < e.colStart || colStart > e.colStart + e.colSpan - 1))
+      ) {
+        targetRow += 1;
       }
 
       map[finalWeekIdx].push({
@@ -317,7 +332,7 @@ export default function CronogramaCalendarioView({
         weekIndex: finalWeekIdx,
         colStart,
         colSpan,
-        row: slot.row,
+        row: targetRow,
         gestor: it.gestor || 'Carlos Mendoza',
         region: it.region || 'Junín',
         item: it,
@@ -466,14 +481,34 @@ export default function CronogramaCalendarioView({
                               )}
                               <strong className="cal-gantt-code">{ev.code}</strong>
                               <span className="cal-gantt-name">{ev.name}</span>
-                              <span className="cal-gantt-pct">{ev.progress}%</span>
+                              {showBarAvatars && (
+                                <span
+                                  className="cal-gantt-pct"
+                                  style={{
+                                    background: getGestorBadge(ev.gestor).bg,
+                                    color: getGestorBadge(ev.gestor).color,
+                                    borderRadius: '999px',
+                                    padding: '1px 5px',
+                                    fontSize: '9.5px',
+                                    fontWeight: 800,
+                                  }}
+                                  title={`Responsable: ${ev.gestor}`}
+                                >
+                                  {getGestorBadge(ev.gestor).initials}
+                                </span>
+                              )}
+                              {showBarLabels && (
+                                <span className="cal-gantt-pct">{ev.progress}%</span>
+                              )}
                             </div>
                           </div>
                           {/* Sombra de Línea Base idéntica a la vista Gantt */}
-                          <div
-                            className="cal-baseline-shadow-bar"
-                            title={`Línea base aprobada: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}`}
-                          />
+                          {showBaseline && (
+                            <div
+                              className="cal-baseline-shadow-bar"
+                              title={`Línea base aprobada: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}`}
+                            />
+                          )}
                         </div>
                       );
                     })}
