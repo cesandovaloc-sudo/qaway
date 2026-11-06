@@ -101,7 +101,7 @@ export default function ConfiguracionView({
     return projects.find((p) => p.id === activeProjectId) || projects[0] || {
       id: 'p1',
       code: 'PRJ-MIN-2027-01',
-      name: 'MINEDU · Dotación 2027',
+      name: 'Distribución de Materiales DOT 2027',
       region: 'Junín',
       subtext: 'Seguimiento de operaciones',
     };

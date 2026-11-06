@@ -307,7 +307,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [newTaskCalOpen, setNewTaskCalOpen] = useState(false);
   const [newTaskForm, setNewTaskForm] = useState({
     title: '',
-    owner: 'Carlos Mendoza',
+    owner: 'Carlos Sandoval',
     due: '2026-11-30',
     priority: 'Media' as 'Alta' | 'Media' | 'Baja',
   });
@@ -533,7 +533,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
     setNewTaskCalOpen(false);
     setNewTaskForm({
       title: '',
-      owner: activeItem?.gestor || 'Carlos Mendoza',
+      owner: activeItem?.gestor || 'Carlos Sandoval',
       due: activeItem?.end || '2026-11-30',
       priority: 'Media',
     });

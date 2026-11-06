@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * SERVICIO RAG TERRITORIAL: GOOGLE GEMINI INFERENCE & PROMPT GOVERNANCE
- * Módulo: Gestor de Proyectos Territoriales · Qaway Lab (Dotación 2027)
+ * Módulo: Gestor de Proyectos Territoriales · Qaway Lab (Distribución de Materiales DOT 2027)
  *
  * Cumplimiento de la Ley Peruana Nº 31814 (Uso y Gobernanza de la IA)
  * Conexión REST nativa sin dependencias npm externas para portabilidad total.
@@ -70,9 +70,9 @@ export const AVAILABLE_MODELS = [
 
 export const AGENT_PROFILES: Record<AgentProfileId, { label: string; desc: string; systemPersona: string }> = {
   coordinador_territorial: {
-    label: 'Coordinador Territorial General',
+    label: 'Coordinador General',
     desc: 'Visión estratégica, seguimiento macro de hitos MINEDU, articulación con DRE y UGEL.',
-    systemPersona: 'Actúas como el Coordinador Territorial General del Proyecto de Dotación 2027 en Perú. Tu enfoque es estratégico, orientas en la articulación entre DRE, UGEL y MINEDU, supervisando los comités, planes de distribución y cronograma general.'
+    systemPersona: 'Actúas como el Coordinador General del Proyecto de Distribución de Materiales DOT 2027 en Perú. Tu enfoque es estratégico, orientas en la articulación entre DRE, UGEL y MINEDU, supervisando los comités, planes de distribución y cronograma general.'
   },
   auditor_plazos: {
     label: 'Auditor de Plazos y Cumplimiento',
@@ -238,7 +238,7 @@ ESTILO Y TONO:
 ${toneInfo.instruction}
 
 CONTEXTO OPERATIVO:
-- Proyecto activo: ${params.projectName || 'MINEDU · Dotación de Materiales Educativos 2027'}
+ - Proyecto activo: ${params.projectName || 'Distribución de Materiales DOT 2027'}
 - Región de operación prioritaria: DRE Junín (13 UGEL: Huancayo, Concepción, Chupaca, Jauja, Tarma, Yauli, Junín, Chanchamayo, Satipo, Pichanaki, Pangoa, Río Tambo, Río Ene Mantaro).
 - Módulo del sistema donde se encuentra el usuario: ${params.activeModule || 'General'}
 - Fecha operativa del sistema: 28 de Octubre de 2026.

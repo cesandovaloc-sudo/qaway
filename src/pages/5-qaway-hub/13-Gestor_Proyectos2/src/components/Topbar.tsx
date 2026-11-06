@@ -74,7 +74,7 @@ export default function Topbar({
     setIsProfileMenuOpen(false);
     notify(
       newRole === 'coordinador'
-        ? 'Perspectiva cambiada: Carlos Mendoza (Coordinador General · Creación de Proyectos y Gantt)'
+        ? 'Perspectiva cambiada: Carlos Sandoval (Coordinador General · Creación de Proyectos y Gantt)'
         : 'Perspectiva cambiada: María Salazar (Gestora Territorial · Monitoreo Operativo)'
     );
   };
@@ -139,10 +139,10 @@ export default function Topbar({
               boxShadow: '0 2px 6px rgba(0, 102, 255, 0.28)',
             }}
           >
-            CM
+             CS
           </div>
           <div className="qm-topbar-profile-info">
-            <b>Carlos Mendoza</b>
+            <b>Carlos Sandoval</b>
             <small>Coordinador General</small>
           </div>
           <ChevronDown
@@ -196,10 +196,10 @@ export default function Topbar({
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <b style={{ fontSize: '14px', color: '#0f172a', display: 'block', fontWeight: 700, lineHeight: 1.3 }}>
-                  Carlos Mendoza
+                  Carlos Sandoval
                 </b>
                 <span style={{ fontSize: '12px', color: '#64748b', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                  cmendoza@qawaylab.com
+                  csandoval.digere@gmail.com
                 </span>
                 <span
                   style={{

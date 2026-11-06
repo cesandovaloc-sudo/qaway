@@ -16,7 +16,7 @@ interface CronogramaListaViewProps {
 }
 
 const GESTOR_INITIALS_MAP: Record<string, { initials: string; bg: string }> = {
-  'Carlos Mendoza': { initials: 'CM', bg: '#0066ff' },
+  'Carlos Sandoval': { initials: 'CM', bg: '#0066ff' },
   'María Salazar': { initials: 'MS', bg: '#8b5cf6' },
   'Javier Rivas': { initials: 'JR', bg: '#10b981' },
   'Sofía Alva': { initials: 'SA', bg: '#f59e0b' },

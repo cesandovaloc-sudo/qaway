@@ -75,7 +75,7 @@ const CAL_SHORT_MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO'
 const MINI_WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 const GESTOR_COLORS: Record<string, { bg: string; color: string; initials: string }> = {
-  'Carlos Mendoza': { bg: '#eff6ff', color: '#1d4ed8', initials: 'CM' },
+  'Carlos Sandoval': { bg: '#eff6ff', color: '#1d4ed8', initials: 'CS' },
   'María Salazar': { bg: '#ecfdf5', color: '#047857', initials: 'MS' },
   'Javier Rivas': { bg: '#fef3c7', color: '#b45309', initials: 'JR' },
   'Ana Paredes': { bg: '#fff7ed', color: '#c2410c', initials: 'AP' },
@@ -333,7 +333,7 @@ export default function CronogramaCalendarioView({
         colStart,
         colSpan,
         row: targetRow,
-        gestor: it.gestor || 'Carlos Mendoza',
+        gestor: it.gestor || 'Carlos Sandoval',
         region: it.region || 'Junín',
         item: it,
       });
@@ -372,7 +372,7 @@ export default function CronogramaCalendarioView({
         progress: it.progress,
         day,
         month: CAL_SHORT_MONTHS[mIdx] || 'MES',
-        gestor: it.gestor || 'Carlos Mendoza',
+        gestor: it.gestor || 'Carlos Sandoval',
         avatarBg: badge.bg,
         avatarColor: badge.color,
         initials: badge.initials,

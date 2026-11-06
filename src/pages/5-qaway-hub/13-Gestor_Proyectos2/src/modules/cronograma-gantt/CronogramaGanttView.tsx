@@ -1,4 +1,4 @@
-﻿import { GanttEditorDrawer } from './GanttEditorDrawer';
+import { GanttEditorDrawer } from './GanttEditorDrawer';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
@@ -347,20 +347,20 @@ const resolveDefaultGestor = (code: string, name: string): string => {
   const c = code || '';
   const n = (name || '').toLowerCase();
   if (n.includes('chupaca') || n.includes('concepción') || n.includes('concepcion') || n.includes('satipo') || n.includes('río tambo') || n.includes('rio tambo') || n.includes('dre junín') || n.includes('dre junin')) return 'María Salazar';
-  if (n.includes('huancayo') || n.includes('jauja') || n.includes('tarma') || n.includes('yauli')) return 'Carlos Mendoza';
+  if (n.includes('huancayo') || n.includes('jauja') || n.includes('tarma') || n.includes('yauli')) return 'Carlos Sandoval';
   if (n.includes('chanchamayo') || n.includes('pichanaki') || n.includes('perené') || n.includes('perene')) return 'Lucía Ramos';
   if (n.includes('pangoa')) return 'Javier Ruiz';
   if (c.startsWith('1.') || c === '1.') {
     if (n.includes('siga') || n.includes('código') || n.includes('cdl')) return 'Lucía Flores';
     if (n.includes('comunicación') || n.includes('capacitación')) return 'María Jara';
-    return 'Carlos Mendoza';
+    return 'Carlos Sandoval';
   }
   if (c.startsWith('2.') || c === '2.' || n.includes('almacén') || n.includes('pecosa')) return 'Javier Ruiz';
   if (c.startsWith('3.') || c === '3.' || n.includes('transporte') || n.includes('distribución') || n.includes('ruta')) return 'Juan Pérez';
   if (c.startsWith('4.') || c === '4.' || n.includes('cierre') || n.includes('auditoría')) return 'Ana Torres';
   if (c.startsWith('5.') || c === '5.' || n.includes('informe') || n.includes('balance')) return 'María Jara';
   if (n.includes('siga') || n.includes('matriz')) return 'Lucía Flores';
-  return 'Carlos Mendoza';
+  return 'Carlos Sandoval';
 };
 
 const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
@@ -515,7 +515,7 @@ const REGION_OPTIONS = [
 
 const GESTOR_OPTIONS = [
   { value: 'Todos', label: 'Todos los Responsables' },
-  { value: 'Carlos Mendoza', label: 'Carlos Mendoza (Coordinador Territorial)' },
+  { value: 'Carlos Sandoval', label: 'Carlos Sandoval (Coordinador General)' },
   { value: 'María Jara', label: 'María Jara (Directora de Operaciones)' },
   { value: 'Lucía Flores', label: 'Lucía Flores (Especialista SIGA)' },
   { value: 'Javier Ruiz', label: 'Javier Ruiz (Logística y Almacenes)' },
@@ -525,7 +525,7 @@ const GESTOR_OPTIONS = [
 ];
 
 const GESTOR_COLORS: Record<string, string> = {
-  'Carlos Mendoza': '#0284c7',
+  'Carlos Sandoval': '#0284c7',
   'María Jara': '#2563eb',
   'Lucía Flores': '#7c3aed',
   'Javier Ruiz': '#059669',
@@ -1424,7 +1424,7 @@ export default function CronogramaGanttView({
   const [newTaskCalOpen, setNewTaskCalOpen] = useState(false);
   const [newTaskForm, setNewTaskForm] = useState({
     title: '',
-    owner: 'Carlos Mendoza',
+    owner: 'Carlos Sandoval',
     due: '2026-11-30',
     priority: 'Media' as 'Alta' | 'Media' | 'Baja',
   });
@@ -1593,7 +1593,7 @@ export default function CronogramaGanttView({
     setNewTaskCalOpen(false);
     setNewTaskForm({
       title: '',
-      owner: activeItem?.gestor || 'Carlos Mendoza',
+      owner: activeItem?.gestor || 'Carlos Sandoval',
       due: activeItem?.end || '2026-11-30',
       priority: 'Media',
     });
@@ -7265,7 +7265,7 @@ export default function CronogramaGanttView({
               items={shown}
               allItems={items}
               selectedId={selectedId}
-              projectName={activeProject?.name || 'Programa Maestro Operativo 2027'}
+              projectName={activeProject?.name || 'Distribución de Materiales DOT 2027'}
               zoomLevel={organigramaZoom}
               onZoomChange={setOrganigramaZoom}
               fitViewTrigger={organigramaFitTrigger}

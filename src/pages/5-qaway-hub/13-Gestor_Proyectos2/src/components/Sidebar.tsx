@@ -50,7 +50,7 @@ export default function Sidebar({
   collapsed = false,
   onToggleCollapse,
   projects = [
-    { id: 'p1', code: 'PRJ-MIN-2027-01', name: 'MINEDU · Dotación 2027', region: 'Junín', subtext: 'Seguimiento de operaciones' },
+    { id: 'p1', code: 'PRJ-MIN-2027-01', name: 'Distribución de Materiales DOT 2027', region: 'Junín', subtext: 'Seguimiento de operaciones' },
   ],
   activeProjectId = 'p1',
   onSelectProject,
@@ -99,7 +99,7 @@ export default function Sidebar({
         >
           <i style={{ background: userRole === 'coordinador' ? '#60a5fa' : '#7388e2' }} />
           <div>
-            <b>{activeProject?.name || 'MINEDU · Dotación 2027'}</b>
+            <b>{activeProject?.name || 'Distribución de Materiales DOT 2027'}</b>
             {activeProject?.code && <small>{activeProject.code}</small>}
           </div>
           <ChevronDown

@@ -32,8 +32,7 @@ type Person = {
 };
 
 const initialPeople: Person[] = [
-  { id: 1, name: 'María Jara', email: 'm.jara@minedu.gob.pe', role: 'Directora de Programa', type: 'Equipo interno', org: 'Dirección de Programa', status: 'Activo', lastAccess: '26 oct. 2026 · 10:24', phone: '+51 987 654 321', area: 'Dirección de Programa', location: 'Lima, Perú', initials: 'MJ', assignments: 4, avatar: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=100&h=100&fit=crop&crop=faces' },
-  { id: 2, name: 'Carlos Mendoza', email: 'c.mendoza@minedu.gob.pe', role: 'Coordinador Territorial', type: 'Coordinador', org: 'DRE Junín', status: 'Activo', lastAccess: '26 oct. 2026 · 09:12', phone: '+51 964 234 567', area: 'Coordinación territorial', location: 'Huancayo, Junín', initials: 'CM', assignments: 8 },
+  { id: 1, name: 'Carlos Sandoval', email: 'csandoval.digere@gmail.com', role: 'Coordinador General', type: 'Coordinador', org: 'MINEDU', status: 'Pendiente', lastAccess: '—', phone: '—', area: 'Coordinación General', location: 'Lima, Perú', initials: 'CS', assignments: 0 },
   { id: 3, name: 'Lucía Flores', email: 'l.flores@minedu.gob.pe', role: 'Especialista SIGA', type: 'Gestor', org: 'DRE Junín', status: 'Activo', lastAccess: '25 oct. 2026 · 16:45', phone: '+51 955 123 456', area: 'Distribución de materiales', location: 'Huancayo, Junín', initials: 'LF', assignments: 6, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces' },
   { id: 4, name: 'Juan Pérez', email: 'j.perez@ugelchanchamayo.gob.pe', role: 'Responsable de Logística', type: 'Equipo UGEL', org: 'UGEL Chanchamayo', status: 'Pendiente', lastAccess: '—', phone: '+51 945 123 890', area: 'Logística y almacén', location: 'Chanchamayo, Junín', initials: 'JP', assignments: 2 },
   { id: 5, name: 'Ana Torres', email: 'a.torres@ugeljauja.gob.pe', role: 'Especialista de Materiales', type: 'Equipo UGEL', org: 'UGEL Jauja', status: 'Activo', lastAccess: '25 oct. 2026 · 14:30', phone: '+51 966 789 012', area: 'Materiales educativos', location: 'Jauja, Junín', initials: 'AT', assignments: 3, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=faces' },
@@ -280,7 +279,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
   };
 
   const sendEmail = (p: Person) => {
-    window.location.href = `mailto:${p.email}?subject=${encodeURIComponent('Coordinación de actividades · Dotación 2027')}`;
+    window.location.href = `mailto:${p.email}?subject=${encodeURIComponent('Coordinación de actividades · Distribución de Materiales DOT 2027')}`;
   };
 
   const sendWhatsApp = (p: Person) => {
@@ -298,7 +297,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
       {/* Topbar unificada del Canvas */}
       <header className="topbar">
         <div>
-          Proyecto <ChevronRight size={13} /> <b>MINEDU · Dotación 2027</b> <ChevronRight size={13} /> <b>Equipo y Usuarios</b>
+          Proyecto <ChevronRight size={13} /> <b>Distribución de Materiales DOT 2027</b> <ChevronRight size={13} /> <b>Equipo y Usuarios</b>
         </div>
         <div className="top-actions">
           <button className="iconbtn" onClick={() => notify('Directorio vinculado al marco operativo MINEDU / DRE Junín.')}>
@@ -740,7 +739,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
                 {Array.from({ length: selected.assignments }, (_, i) => (
                   <div key={i} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', background: '#f8fafc' }}>
                     <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
-                      {['MINEDU · Dotación 2027', 'Hito 1.6 · Elaboración del CDL', 'Seguimiento regional Junín', 'Validación de entregables'][i % 4]}
+                      {['Distribución de Materiales DOT 2027', 'Hito 1.6 · Elaboración del CDL', 'Seguimiento regional Junín', 'Validación de entregables'][i % 4]}
                     </b>
                     <small style={{ color: '#64748b' }}>{i % 2 === 0 ? 'Responsable principal' : 'Colaborador técnico'}</small>
                   </div>

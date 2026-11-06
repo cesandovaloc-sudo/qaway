@@ -42,7 +42,7 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
   items,
   allItems,
   selectedId,
-  projectName = 'Programa Maestro Operativo 2027',
+  projectName = 'Distribución de Materiales DOT 2027',
   onSelectItem,
   formatDatePE,
   onMoveNode,

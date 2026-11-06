@@ -163,7 +163,7 @@ export function getEdtNodeDisplayLabel(
 }
 
 /**
- * Estructura tipada de referencia oficial del Cronograma Regional DRE Junín - Dotación 2027
+ * Estructura tipada de referencia oficial del Cronograma Regional DRE Junín - Distribución de Materiales DOT 2027
  * (11 Componentes de Nivel 1, Subcomponentes intermedios, Paquetes de Trabajo y Entregables)
  */
 export interface OfficialEdtReferenceRow {
@@ -200,7 +200,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
   {
     id: 'pt-1.1',
     code: '1.1',
-    name: 'Conformación del Comité Regional para el Seguimiento y Monitoreo a la distribución del ME Dotación 2027',
+    name: 'Conformación del Comité Regional para el Seguimiento y Monitoreo a la distribución del ME Distribución de Materiales DOT 2027',
     edtType: 'PAQUETE_TRABAJO',
     kind: 'subproceso',
     faseId: 'FASE-PLANIFICACION',
@@ -479,7 +479,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
   {
     id: 'pt-1.7a',
     code: '1.7a',
-    name: 'Comunicación a las II.EE. (Directores y COGECO) sobre pautas y distribución del ME Dotación 2027',
+    name: 'Comunicación a las II.EE. (Directores y COGECO) sobre pautas y distribución del ME Distribución de Materiales DOT 2027',
     edtType: 'PAQUETE_TRABAJO',
     kind: 'subproceso',
     faseId: 'FASE-PLANIFICACION',
@@ -1229,7 +1229,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
   {
     id: 'pt-11.1',
     code: '11.1',
-    name: 'Balance general y evaluación de lecciones aprendidas de los subprocesos de la Dotación 2027',
+    name: 'Balance general y evaluación de lecciones aprendidas de los subprocesos de la Distribución de Materiales DOT 2027',
     edtType: 'PAQUETE_TRABAJO',
     kind: 'subproceso',
     faseId: 'FASE-CIERRE',

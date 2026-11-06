@@ -41,7 +41,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 'p1',
     code: 'PRJ-OPS-2027-01',
-    name: 'Programa Maestro Operativo 2027',
+    name: 'Distribución de Materiales DOT 2027',
     region: 'Junín',
     subtext: 'Seguimiento de operaciones',
     budget: 'S/ 850,000',
@@ -381,7 +381,7 @@ function App() {
     setCronogramaPerspective(next === 'coordinador' ? 'maestro' : 'territorial');
     notifyActive(
       next === 'coordinador'
-        ? 'Perspectiva: Carlos Mendoza (Coordinador General - Control de Proyectos y Gantt)'
+        ? 'Perspectiva: Carlos Sandoval (Coordinador General - Control de Proyectos y Gantt)'
         : 'Perspectiva: María Salazar (Gestora Territorial - Monitoreo Operativo)'
     );
   };

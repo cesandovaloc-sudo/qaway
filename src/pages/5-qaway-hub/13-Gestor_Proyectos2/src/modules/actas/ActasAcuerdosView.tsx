@@ -61,7 +61,7 @@ const INITIAL_AGREEMENTS: AgreementItem[] = [
     actCode: 'ACT-2026-089',
     ugel: 'UGEL Huancavelica',
     description: 'Remitir resolución directoral de conformación del comité de distribución 2027 visada.',
-    responsible: 'Prof. Carlos Mendoza (Punto Focal)',
+    responsible: 'Prof. Carlos Sandoval (Punto Focal)',
     deadline: '25/09/2026',
     status: 'cumplido',
   },

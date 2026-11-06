@@ -99,7 +99,7 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
     <div className="arbol-wbs-container">
       {/* ── Breadcrumb de Navegación Jerárquica ── */}
       <div className="arbol-breadcrumb-bar">
-        <span className="arbol-crumb root">MINEDU - Dotación 2027</span>
+        <span className="arbol-crumb root">Distribución de Materiales DOT 2027</span>
         <span className="arbol-crumb-sep">/</span>
         <span className="arbol-crumb active">Estructura Desglosada de Trabajo (WBS)</span>
       </div>
@@ -113,7 +113,7 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
                 <FolderOpen size={18} color="#ffffff" />
               </div>
               <div className="arbol-card-titles">
-                <div className="arbol-master-title">MINEDU · Dotación 2027</div>
+                <div className="arbol-master-title">Distribución de Materiales DOT 2027</div>
                 <div className="arbol-card-sub">Distribución Nacional y Regional de Materiales Educativos</div>
               </div>
             </div>

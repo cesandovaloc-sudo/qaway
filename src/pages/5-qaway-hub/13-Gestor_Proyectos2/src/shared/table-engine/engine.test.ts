@@ -41,9 +41,9 @@ const COLUMNS: ColumnDef<TestItem>[] = [
 ];
 
 const ITEMS: TestItem[] = [
-  { id: '1', name: 'Plan de distribución', priority: 'Media', status: 'En proceso', progress: 60, startDate: '2026-09-04', endDate: '2026-11-30', responsible: ['Carlos Mendoza'] },
+  { id: '1', name: 'Plan de distribución', priority: 'Media', status: 'En proceso', progress: 60, startDate: '2026-09-04', endDate: '2026-11-30', responsible: ['Carlos Sandoval'] },
   { id: '1.1', name: 'Comité provincial', priority: 'Alta', status: 'Completado', progress: 100, startDate: '2026-09-10', endDate: '2026-09-20', responsible: ['María Salazar'], parentId: '1' },
-  { id: '1.2', name: 'Validación de rutas', priority: 'Crítica', status: 'Pendiente', progress: 0, startDate: '2026-09-21', endDate: '2026-10-15', responsible: ['Carlos Mendoza', 'Jorge Ramos'], parentId: '1' },
+  { id: '1.2', name: 'Validación de rutas', priority: 'Crítica', status: 'Pendiente', progress: 0, startDate: '2026-09-21', endDate: '2026-10-15', responsible: ['Carlos Sandoval', 'Jorge Ramos'], parentId: '1' },
   { id: '2', name: 'Capacitación territorial', priority: 'Baja', status: 'Pendiente', progress: 0, startDate: '2026-10-01', endDate: '2026-12-15', responsible: ['Lucía Torres'] },
 ];
 

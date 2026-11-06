@@ -1,6 +1,6 @@
 /**
  * QAWAY LAB · Modelo de Cobertura Territorial y Coordinación Macro-regional
- * Proyecto MINEDU · Dotación 2027
+ * Proyecto Distribución de Materiales DOT 2027
  *
  * Jerarquía de cargos territoriales:
  *  - Coordinador General (nivel proyecto)
