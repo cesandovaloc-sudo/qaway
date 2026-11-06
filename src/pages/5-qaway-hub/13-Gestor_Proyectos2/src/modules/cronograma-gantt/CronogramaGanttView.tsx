@@ -184,8 +184,8 @@ export interface Item {
   attachments?: AttachmentItem[];
   reportType?: string;
   region?: string;
-  distrito?: string;
-  sede?: string;
+  distrito?: string | undefined;
+  sede?: string | undefined;
   gestor?: string;
   gestores?: string[];
   tasks?: number;
@@ -201,7 +201,7 @@ export interface Item {
   /** Tareas o hitos predecesores en la cadena de prelación / ruta crítica. */
   dependencies?: string[];
   /** Entidad responsable oficial del componente (DRE / UGEL / región). */
-  entidadResponsable?: string;
+  entidadResponsable?: string | undefined;
 }
 
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
@@ -594,6 +594,8 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   deviation: 120,
   actualEnd: 130,
   actions: 80,
+  distrito: 130,
+  sede: 130,
 };
 
 const MIN_COLS: Record<ColKey, number> = {
@@ -612,6 +614,8 @@ const MIN_COLS: Record<ColKey, number> = {
   deviation: 90,
   actualEnd: 100,
   actions: 60,
+  distrito: 90,
+  sede: 90,
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
@@ -1364,7 +1368,7 @@ export default function CronogramaGanttView({
       if (saved && typeof saved === 'object') {
         const merged: Record<ColKey, number> = { ...DEFAULT_COLS };
         (Object.keys(DEFAULT_COLS) as ColKey[]).forEach((k) => {
-          if (typeof saved[k] === 'number' && saved[k] >= MIN_COLS[k]) merged[k] = saved[k];
+          if (typeof saved[k] === 'number' && saved[k] >= (MIN_COLS[k] ?? 0)) merged[k] = saved[k];
         });
         return merged;
       }
@@ -1789,6 +1793,7 @@ export default function CronogramaGanttView({
     const dateStr = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
+      if (!file) continue;
       newItems.push({
         id: `att-${Date.now()}-${i}`,
         name: file.name,
@@ -2659,7 +2664,7 @@ export default function CronogramaGanttView({
     const container = scrollRef.current;
     const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
     const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-    const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.70);
+    const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.45);
     container.scrollTo({ left: targetScroll, behavior: 'smooth' });
     if (headScrollRef.current) {
       headScrollRef.current.scrollLeft = targetScroll;
@@ -2722,7 +2727,7 @@ export default function CronogramaGanttView({
       const container = scrollRef.current;
       const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
       const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-      const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.70);
+      const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.45);
       container.scrollTo({ left: targetScroll, behavior: 'smooth' });
       if (headScrollRef.current) {
         headScrollRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
@@ -6718,7 +6723,7 @@ export default function CronogramaGanttView({
                       // Vive dentro de la barra si el relleno físico tiene al menos 42px para el texto
                       const fitsInsideBar = fillWidthPx >= 42;
                       const barStartX = getDatePixelOffset(x.start);
-                      const labelPosition = fitsInsideBar ? 'in-bar' : (barStartX < 85 ? 'after-bar' : 'before-bar');
+                      const labelPosition = fitsInsideBar ? 'in-bar' : 'before-bar';
 
                       return (
                         <div
