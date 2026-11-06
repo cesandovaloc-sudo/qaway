@@ -33,6 +33,16 @@ import {
   compareWbsCodes,
   isLegacyCronogramaItem,
 } from './edtPmbokModel';
+import {
+  MACROREGIONES,
+  REGIONES_PROYECTO,
+  REGIONAL_NODE_SEEDS,
+  MULTI_REGION_VALUE,
+  getRegionalSeed,
+  getRegionCoordinador,
+  getMacroById,
+  resolveItemRegion,
+} from './regionalCoordinationModel';
 
 export {
   type EdtNodeType,
@@ -347,8 +357,15 @@ const resolveDefaultGestor = (code: string, name: string): string => {
   return 'Carlos Mendoza';
 };
 
-const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOTACION_2027_EDT.map((r) => {
-  const defaultGestor = resolveDefaultGestor(r.code, r.name);
+const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
+  ...DRE_JUNIN_DOTACION_2027_EDT,
+  ...REGIONAL_NODE_SEEDS.map((s) => s.row),
+].map((r) => {
+  // Paquetes regionales (DRE fuera de Junín): responsable = Coordinador Regional de su región
+  const regionalSeed = getRegionalSeed(r.id);
+  const defaultGestor = regionalSeed
+    ? getRegionCoordinador(regionalSeed.region) || resolveDefaultGestor(r.code, r.name)
+    : resolveDefaultGestor(r.code, r.name);
   return {
     id: r.id,
     code: r.code,
@@ -360,8 +377,9 @@ const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOT
     start: r.start,
     end: r.end,
     dependencies: OFFICIAL_WBS_DEPENDENCIES[r.id] || [],
-    progress:
-      r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion'
+    progress: regionalSeed
+      ? regionalSeed.progress
+      : r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion'
         ? 100
         : r.id === 'pt-1.6-dre-junin' || r.id === 'pt-1.6-huancayo'
         ? 75
@@ -376,8 +394,9 @@ const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOT
         : r.id.startsWith('pt-1.6-')
         ? 0
         : r.kind === 'hito' ? 18 : (r.code === '1.1' || r.code === '2.1' ? 100 : (r.code.startsWith('1.') ? 50 : 0)),
-    status:
-      r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion'
+    status: regionalSeed
+      ? regionalSeed.status
+      : r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion'
         ? 'Cumple'
         : r.id === 'pt-1.6-dre-junin' || r.id === 'pt-1.6-huancayo' || r.id === 'pt-1.6-jauja' || r.id === 'pt-1.6-junin'
         ? 'En proceso'
@@ -394,7 +413,7 @@ const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOT
       name: r.entregableVerificable,
       type: r.entregableVerificable.toLowerCase().includes('resolución') || r.entregableVerificable.toLowerCase().includes('informe') || r.entregableVerificable.toLowerCase().includes('oficio') ? 'document' : (r.entregableVerificable.toLowerCase().includes('excel') || r.entregableVerificable.toLowerCase().includes('directorio') || r.entregableVerificable.toLowerCase().includes('cuadro') ? 'spreadsheet' : 'document'),
     }] : [],
-    region: 'Junín',
+    region: resolveItemRegion(r.id),
     sede: r.name.includes('UGEL') || r.name.includes('DRE') ? r.name : undefined,
     gestor: defaultGestor,
     gestores: [defaultGestor],
@@ -1174,7 +1193,7 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (hasLegacyMocks || parsed.length < 76 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo')) {
+            if (hasLegacyMocks || parsed.length < 76 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo') || !parsed.some((it) => it.id === 'pt-1.6-dre-pasco')) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes (DRE + 13 UGEL)
               try {
                 localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
@@ -1842,6 +1861,13 @@ export default function CronogramaGanttView({
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
   const [typeFilter, setTypeFilter] = useState('Todos');
+  // Multiselección de estados operativos
+  const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const toggleState = (st: string) => {
+    setSelectedStates((prev) =>
+      prev.includes(st) ? prev.filter((x) => x !== st) : [...prev, st]
+    );
+  };
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
 
@@ -1863,13 +1889,24 @@ export default function CronogramaGanttView({
   }, [selectedRegions]);
   const [phaseFilter, setPhaseFilter] = useState('Todas');
   const [gestorFilter, setGestorFilter] = useState('Todos');
+  // Filtro de cargo territorial: Coordinador Macro-regional (supervisa 2 regiones)
+  const [macroFilter, setMacroFilter] = useState<string>('Todos');
+  const regionItemCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    items.forEach((it) => {
+      if (it.region && it.region !== MULTI_REGION_VALUE) counts[it.region] = (counts[it.region] || 0) + 1;
+    });
+    return counts;
+  }, [items]);
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
   const [listaTemporalFilter, setListaTemporalFilter] = useState<'Todos' | 'Hoy' | 'Semana' | 'Mes' | 'Trimestre'>('Todos');
   // Control de Vencimientos y Alertas Críticas mediante Desplegable Formal
   const [vencimientosFilter, setVencimientosFilter] = useState<'todos' | 'hoy' | 'semana' | 'mes' | 'trimestre' | 'retraso'>('todos');
 
-  // Clasificación y filtro de niveles WBS según PM4R / BID (Todos, Componentes, Intermedios, Paquetes)
+  // Selector doble ESTRUCTURA WBS: Profundidad Jerárquica + Rol Metodológico (PM4R / BID)
+  const [wbsDepthFilter, setWbsDepthFilter] = useState<number | 'todos'>('todos');
+  const [wbsRoleFilter, setWbsRoleFilter] = useState<'todos' | 'componentes' | 'productos' | 'paquetes'>('todos');
   const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'componentes' | 'intermedios' | 'paquetes'>('todos');
   const [zoom, setZoom] = useState('Mes');
   const [organigramaZoom, setOrganigramaZoom] = useState<number>(100);
@@ -1917,7 +1954,7 @@ export default function CronogramaGanttView({
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
   
-  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | null;
+  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
@@ -2507,7 +2544,7 @@ export default function CronogramaGanttView({
     const container = scrollRef.current;
     const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
     const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-    const targetScroll = Math.max(0, todayPx - timelineVisibleWidth / 2);
+    const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.65);
     container.scrollTo({ left: targetScroll, behavior: 'smooth' });
     if (headScrollRef.current) {
       headScrollRef.current.scrollLeft = targetScroll;
@@ -2570,7 +2607,7 @@ export default function CronogramaGanttView({
       const container = scrollRef.current;
       const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
       const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-      const targetScroll = Math.max(0, todayPx - timelineVisibleWidth / 2);
+      const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.65);
       container.scrollTo({ left: targetScroll, behavior: 'smooth' });
       if (headScrollRef.current) {
         headScrollRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
@@ -2803,14 +2840,39 @@ export default function CronogramaGanttView({
     return dMap;
   }, [items]);
 
-  const levelCounts = useMemo(() => {
-    const counts = [0, 0, 0, 0, 0];
+  // Profundidad máxima real presente en los datos
+  const maxProjectDepth = useMemo(() => {
+    let maxD = 0;
     items.forEach((it) => {
       const d = itemDepthMap.get(it.id) ?? 0;
-      if (d < 5) counts[d]++;
+      if (d > maxD) maxD = d;
     });
-    return counts;
+    return maxD;
   }, [items, itemDepthMap]);
+
+  // Conteos por piso jerárquico dinámico
+  const dynamicLevelCounts = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (let d = 0; d <= maxProjectDepth; d++) {
+      map[d] = 0;
+    }
+    items.forEach((it) => {
+      const d = itemDepthMap.get(it.id) ?? 0;
+      map[d] = (map[d] || 0) + 1;
+    });
+    return map;
+  }, [items, itemDepthMap, maxProjectDepth]);
+
+  // Roles metodológicos PM4R / BID:
+  // Componentes: parentId === null
+  // Productos / Entregables: hasChildren === true && parentId !== null
+  // Paquetes de trabajo: hasChildren === false (nodos terminales con fechas y entregable)
+  const rolesCounts = useMemo(() => {
+    const componentes = items.filter((x) => !x.parentId).length;
+    const productos = items.filter((x) => Boolean(x.parentId) && items.some((c) => c.parentId === x.id)).length;
+    const paquetes = items.filter((x) => !items.some((c) => c.parentId === x.id)).length;
+    return { componentes, productos, paquetes };
+  }, [items]);
 
   // Desglose oficial de niveles WBS según taxonomía PM4R (BID)
   const intermediosCount = useMemo(() => {
@@ -2934,20 +2996,34 @@ export default function CronogramaGanttView({
         (stateFilter === 'Cumple' && x.status === 'Completado');
       const matchType =
         typeFilter === 'Todos' || (typeFilter === 'Hitos' ? x.kind === 'hito' : x.kind === 'subproceso');
+      const isLateItem = isItemLate(x);
+      const matchStateMulti =
+        selectedStates.length === 0 ||
+        selectedStates.some((st) => {
+          if (st === 'En proceso') return x.status === 'En proceso' || x.status === 'En curso';
+          if (st === 'Con retraso') return isLateItem;
+          if (st === 'Completados') return x.status === 'Completado' || x.status === 'Cumple';
+          if (st === 'Pendiente') return x.status === 'Pendiente';
+          return x.status === st;
+        });
       const matchTab =
-        tab === 'Todos' ||
-        (tab === 'Hitos' && x.kind === 'hito') ||
-        (tab === 'Subprocesos' && x.kind === 'subproceso') ||
-        (tab === 'Completados' && (x.status === 'Completado' || x.status === 'Cumple')) ||
-        (tab === 'En proceso' && (x.status === 'En proceso' || x.status === 'En curso')) ||
-        (tab === 'Con retraso' && isItemLate(x)) ||
-        x.status === tab;
+        matchStateMulti &&
+        (tab === 'Todos' ||
+          (tab === 'Hitos' && x.kind === 'hito') ||
+          (tab === 'Subprocesos' && x.kind === 'subproceso') ||
+          (tab === 'Completados' && (x.status === 'Completado' || x.status === 'Cumple')) ||
+          (tab === 'En proceso' && (x.status === 'En proceso' || x.status === 'En curso')) ||
+          (tab === 'Con retraso' && isLateItem) ||
+          x.status === tab);
       const matchRegion =
         selectedRegions.length === 0 ||
         x.region === 'Todas las Regiones' ||
         (x.region && selectedRegions.includes(x.region));
       const matchGestor =
         gestorFilter === 'Todos' || x.gestor === gestorFilter || getItemGestores(x).includes(gestorFilter);
+      const macroDef = macroFilter !== 'Todos' ? getMacroById(macroFilter) : undefined;
+      const matchMacro =
+        !macroDef || !x.region || x.region === MULTI_REGION_VALUE || macroDef.regiones.includes(x.region);
       const matchPhase =
         phaseFilter === 'Todas' || x.phase === phaseFilter || parent?.phase === phaseFilter;
 
@@ -3018,17 +3094,27 @@ export default function CronogramaGanttView({
         });
       }
 
-      // Filtro metodológico WBS PM4R / BID (Componentes, Intermedios, Paquetes)
-      let matchWbsLevel = true;
-      if (wbsLevelFilter === 'componentes') {
-        matchWbsLevel = !x.parentId;
-      } else if (wbsLevelFilter === 'intermedios') {
-        const hasChildren = items.some((c) => c.parentId === x.id);
-        matchWbsLevel = Boolean(x.parentId) && hasChildren;
-      } else if (wbsLevelFilter === 'paquetes') {
-        const hasChildren = items.some((c) => c.parentId === x.id);
-        matchWbsLevel = !hasChildren;
+      // Filtro doble Estructura WBS: Sección 1 Profundidad + Sección 2 Rol PM4R
+      const depth = itemDepthMap.get(x.id) ?? 0;
+      const matchDepth = wbsDepthFilter === 'todos' || depth === wbsDepthFilter;
+
+      const hasChildren = items.some((c) => c.parentId === x.id);
+      let matchRole = true;
+      if (wbsRoleFilter === 'componentes') {
+        matchRole = !x.parentId;
+      } else if (wbsRoleFilter === 'productos') {
+        matchRole = Boolean(x.parentId) && hasChildren;
+      } else if (wbsRoleFilter === 'paquetes') {
+        matchRole = !hasChildren;
       }
+
+      // Compatibilidad con accesos directos existentes (tarjetas métricas)
+      let matchWbsLegacy = true;
+      if (wbsLevelFilter === 'componentes') matchWbsLegacy = !x.parentId;
+      else if (wbsLevelFilter === 'intermedios') matchWbsLegacy = Boolean(x.parentId) && hasChildren;
+      else if (wbsLevelFilter === 'paquetes') matchWbsLegacy = !hasChildren;
+
+      const matchWbsLevel = matchDepth && matchRole && matchWbsLegacy;
 
       // Filtro de Vencimientos y Alertas Críticas (Desplegable formal)
       let matchVencimiento = true;
@@ -3070,6 +3156,7 @@ export default function CronogramaGanttView({
         matchTab &&
         matchRegion &&
         matchGestor &&
+        matchMacro &&
         matchPhase &&
         matchRange &&
         notCollapsed &&
@@ -3154,8 +3241,12 @@ export default function CronogramaGanttView({
     viewMode,
     listaTemporalFilter,
     currentTodayIso,
+    wbsDepthFilter,
+    wbsRoleFilter,
     wbsLevelFilter,
     vencimientosFilter,
+    selectedStates,
+    macroFilter,
     itemDepthMap
   ]);
 
@@ -3535,19 +3626,19 @@ export default function CronogramaGanttView({
 
           <article
             className="metric green"
-            title="46 Paquetes de Trabajo finales (nodos terminales ejecutables) y 6 agrupadores intermedios (PM4R / BID)"
+            title="Hitos y paquetes de trabajo completados / cumplidos"
             onClick={() => {
-              setTab('Todos');
-              setWbsLevelFilter('terminales');
+              setTab('Completados');
+              setWbsLevelFilter('todos');
             }}
           >
             <span className="metric-icon">
-              <Layers3 size={22} />
+              <CheckCircle2 size={22} />
             </span>
             <div className="metric-copy">
-              <b>{paquetesCount}</b>
-              <strong>Paquetes de Trabajo</strong>
-              <small>{paquetesCount} terminales ejecutables · {intermediosCount} agrupadores intermedios</small>
+              <b>{complete}</b>
+              <strong>Completados</strong>
+              <small>metas y entregables cumplidos</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
@@ -3564,7 +3655,7 @@ export default function CronogramaGanttView({
             </span>
             <div className="metric-copy">
               <b>{inprog}</b>
-              <strong>En Curso</strong>
+              <strong>En proceso</strong>
               <small>en ejecución activa</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
@@ -3582,7 +3673,7 @@ export default function CronogramaGanttView({
             </span>
             <div className="metric-copy">
               <b>{late}</b>
-              <strong>Con Retraso</strong>
+              <strong>Con retraso</strong>
               <small>atención requerida</small>
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
@@ -3632,42 +3723,347 @@ export default function CronogramaGanttView({
             <div className="tabs-list">
               <button
                 type="button"
-                className={tab === 'Todos' && wbsLevelFilter === 'todos' ? 'active' : ''}
+                className={tab === 'Todos' && wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos' && wbsLevelFilter === 'todos' && vencimientosFilter === 'todos' && selectedStates.length === 0 ? 'active' : ''}
                 onClick={() => {
                   setTab('Todos');
+                  setSelectedStates([]);
+                  setWbsDepthFilter('todos');
+                  setWbsRoleFilter('todos');
                   setWbsLevelFilter('todos');
+                  setVencimientosFilter('todos');
+                  closeMenus();
                 }}
               >
                 Todos <span>({items.length})</span>
               </button>
 
-              <button
-                type="button"
-                className={tab === 'Hitos' || wbsLevelFilter === 'componentes' ? 'active' : ''}
-                onClick={() => {
-                  setTab('Hitos');
-                  setWbsLevelFilter('componentes');
-                }}
-              >
-                Componentes <span>({hitos.length})</span>
-              </button>
-
-              {[
-                { n: 'En proceso', label: 'En proceso', c: inprog },
-                { n: 'Con retraso', label: 'Con retraso', c: late },
-                { n: 'Completados', label: 'Completados', c: complete },
-              ].map((t) => (
+              {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
+              <div className="filter-dropdown-wrap wbs-filter-wrap tabs-filter-wrap">
                 <button
-                  key={t.n}
-                  className={tab === t.n ? 'active' : ''}
-                  onClick={() => {
-                    setTab(t.n);
-                    setWbsLevelFilter('todos');
-                  }}
+                  type="button"
+                  className={`filter-card-btn wbs-card-btn ${activeMenu === 'wbsLevel' ? 'active' : ''} ${
+                    wbsDepthFilter !== 'todos' || wbsRoleFilter !== 'todos' || wbsLevelFilter !== 'todos' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('wbsLevel')}
+                  title="Filtrar por estructura WBS (profundidad jerárquica y rol metodológico PM4R)"
                 >
-                  {t.label} <span>({t.c})</span>
+                  <div className="filter-card-copy">
+                    <small>Nivel</small>
+                    <span>
+                      {(() => {
+                        const depthLabels: Record<string, string> = {
+                          todos: 'Todos los niveles',
+                          0: 'Nivel 1',
+                          1: 'Nivel 2',
+                          2: 'Nivel 3',
+                          3: 'Nivel 4',
+                          4: 'Nivel 5',
+                        };
+                        const roleLabels: Record<string, string> = {
+                          todos: 'Todos los roles',
+                          componentes: 'Componentes',
+                          productos: 'Productos / Entregables',
+                          paquetes: 'Paquetes de trabajo',
+                        };
+
+                        const dStr = depthLabels[String(wbsDepthFilter)];
+                        const rStr = roleLabels[wbsRoleFilter];
+
+                        if (wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos') {
+                          return `Todos los niveles (${items.length})`;
+                        }
+                        if (wbsDepthFilter !== 'todos' && wbsRoleFilter === 'todos') {
+                          return dStr;
+                        }
+                        if (wbsDepthFilter === 'todos' && wbsRoleFilter !== 'todos') {
+                          return rStr;
+                        }
+                        return `${dStr} · ${rStr}`;
+                      })()}
+                    </span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
                 </button>
-              ))}
+                {activeMenu === 'wbsLevel' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 280 }}
+                  >
+                    {/* Cabecera general */}
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Estructura WBS</span>
+                      {(wbsDepthFilter !== 'todos' || wbsRoleFilter !== 'todos' || wbsLevelFilter !== 'todos') && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => {
+                            setWbsDepthFilter('todos');
+                            setWbsRoleFilter('todos');
+                            setWbsLevelFilter('todos');
+                          }}
+                        >
+                          Restablecer
+                        </button>
+                      )}
+                    </div>
+
+                    {/* SECCIÓN 1: PROFUNDIDAD JERÁRQUICA (DINÁMICA SEGÚN NIVELES REALES) */}
+                    <div className="filter-popover-title filter-popover-subtitle">
+                      <span>Profundidad jerárquica</span>
+                    </div>
+                    <div className="filter-popover-list">
+                      {/* Todos los niveles */}
+                      <button
+                        type="button"
+                        className={`filter-item-btn filter-item-check ${wbsDepthFilter === 'todos' ? 'selected' : ''}`}
+                        onClick={() => {
+                          setWbsDepthFilter('todos');
+                          setWbsLevelFilter('todos');
+                        }}
+                      >
+                        <span className="filter-item-main">
+                          <span className={`filter-radio ${wbsDepthFilter === 'todos' ? 'checked' : ''}`}>
+                            {wbsDepthFilter === 'todos' && <span className="filter-radio-dot" />}
+                          </span>
+                          <span className="filter-item-text">
+                            <strong>Todos los niveles</strong>
+                          </span>
+                        </span>
+                        <span className="wbs-level-badge">{items.length}</span>
+                      </button>
+
+                      {/* Niveles dinámicos 1..n existentes en el proyecto (no se renderizan si el conteo es 0) */}
+                      {Array.from({ length: maxProjectDepth + 1 }, (_, idx) => idx).map((depthIdx) => {
+                        const count = dynamicLevelCounts[depthIdx] || 0;
+                        if (count === 0) return null;
+                        const isSelected = wbsDepthFilter === depthIdx;
+                        return (
+                          <button
+                            key={depthIdx}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setWbsDepthFilter(depthIdx);
+                              setWbsLevelFilter('todos');
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <span className="filter-item-text">
+                                <strong>Nivel {depthIdx + 1}</strong>
+                              </span>
+                            </span>
+                            <span className="wbs-level-badge">{count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* SECCIÓN 2: ROL METODOLÓGICO (PM4R / BID) */}
+                    <div className="filter-popover-title filter-popover-subtitle">
+                      <span>Rol metodológico</span>
+                    </div>
+                    <div className="filter-popover-list">
+                      {[
+                        { id: 'todos', label: 'Todos los roles', count: items.length },
+                        { id: 'componentes', label: 'Componentes', count: rolesCounts.componentes },
+                        { id: 'productos', label: 'Productos / Entregables', count: rolesCounts.productos },
+                        { id: 'paquetes', label: 'Paquetes de trabajo', count: rolesCounts.paquetes },
+                      ].map((role) => {
+                        const isSelected = wbsRoleFilter === role.id && wbsLevelFilter === 'todos';
+                        return (
+                          <button
+                            key={role.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setWbsRoleFilter(role.id as any);
+                              setWbsLevelFilter('todos');
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <span className="filter-item-text">
+                                <strong>{role.label}</strong>
+                              </span>
+                            </span>
+                            <span className="wbs-level-badge">{role.count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Filtro Universal 2: Estado de avance (Multiselección) + plazos de vencimiento */}
+              <div className="filter-dropdown-wrap estado-filter-wrap tabs-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn estado-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
+                    selectedStates.length > 0 || vencimientosFilter !== 'todos' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('state')}
+                  title="Filtrar por estado de avance y plazos de vencimiento"
+                >
+                  <div className="filter-card-copy">
+                    <small>Estado</small>
+                    <span>
+                      {(() => {
+                        const vencLabels: Record<string, string> = {
+                          hoy: 'Vencen hoy',
+                          semana: 'Vencen esta semana',
+                          mes: 'Vencen este mes',
+                          trimestre: 'Vencen este trimestre',
+                          retraso: 'Retraso crítico',
+                        };
+                        const venc = vencLabels[vencimientosFilter];
+                        if (selectedStates.length === 0) {
+                          return venc || 'Todos los estados';
+                        }
+                        if (selectedStates.length === 1) {
+                          return venc ? `${selectedStates[0]} · ${venc}` : selectedStates[0];
+                        }
+                        const multiStr = `${selectedStates.length} seleccionados`;
+                        return venc ? `${multiStr} · ${venc}` : multiStr;
+                      })()}
+                    </span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'state' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 300 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Estado de avance</span>
+                      {(selectedStates.length > 0 || vencimientosFilter !== 'todos') && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => {
+                            setSelectedStates([]);
+                            setTab('Todos');
+                            setVencimientosFilter('todos');
+                          }}
+                        >
+                          Restablecer
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list">
+                      {/* Opción Todos los estados: limpia la multiselección */}
+                      <button
+                        type="button"
+                        className={`filter-item-btn filter-item-check ${selectedStates.length === 0 ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedStates([]);
+                          setTab('Todos');
+                        }}
+                      >
+                        <span className="filter-item-main">
+                          <span className={`filter-radio ${selectedStates.length === 0 ? 'checked' : ''}`}>
+                            {selectedStates.length === 0 && <span className="filter-radio-dot" />}
+                          </span>
+                          <span className="filter-item-text">
+                            <strong>Todos los estados</strong>
+                          </span>
+                        </span>
+                        <span className="wbs-level-badge">{items.length}</span>
+                      </button>
+
+                      {/* Estados con multiselección via Checkbox */}
+                      {[
+                        { id: 'Completados', label: 'Completados', count: complete, dotColor: '#16a34a', badgeClass: 'badge-cumple' },
+                        { id: 'En proceso', label: 'En proceso', count: inprog, dotColor: '#0284c7', badgeClass: 'badge-enproceso' },
+                        { id: 'Con retraso', label: 'Con retraso', count: late, dotColor: '#dc2626', badgeClass: 'badge-retraso' },
+                        { id: 'Pendiente', label: 'Pendientes', count: items.filter((x) => x.status === 'Pendiente').length, dotColor: '#94a3b8', badgeClass: 'badge-pendiente' },
+                      ].map((opt) => {
+                        const isChecked = selectedStates.includes(opt.id);
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                            onClick={() => toggleState(opt.id)}
+                            aria-pressed={isChecked}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                {isChecked && <Check size={10} strokeWidth={3} />}
+                              </span>
+                              <span className="filter-status-dot" style={{ background: opt.dotColor }} />
+                              <span className="filter-item-text">
+                                <strong>{opt.label}</strong>
+                              </span>
+                            </span>
+                            <span className={`wbs-level-badge ${opt.badgeClass}`}>{opt.count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="filter-popover-title filter-popover-subtitle">
+                      <span>Plazos de vencimiento</span>
+                    </div>
+                    <div className="filter-popover-list">
+                      {[
+                        { id: 'todos', label: 'Todos los plazos', badge: items.length, icon: CalendarDays },
+                        { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount, icon: Clock, alert: vencenHoyCount > 0 },
+                        { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount, icon: Clock3, alert: vencenSemanaCount > 0 },
+                        { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount, icon: CalendarRange, alert: false },
+                        { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount, icon: CalendarRange, alert: false },
+                        { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, icon: AlertTriangle, alert: criticalItemsCount > 0 },
+                      ].map((opt) => {
+                        const isSelected = vencimientosFilter === opt.id;
+                        const IconComponent = opt.icon;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setVencimientosFilter(opt.id as any);
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <IconComponent size={14} className={opt.alert ? 'filter-icon-alert' : 'filter-icon-muted'} />
+                              <span className="filter-item-text">
+                                <strong style={opt.alert ? { color: '#b91c1c' } : undefined}>{opt.label}</strong>
+                              </span>
+                            </span>
+                            <span className={`wbs-level-badge ${opt.alert ? 'is-late' : ''}`}>{opt.badge}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
@@ -3735,177 +4131,160 @@ export default function CronogramaGanttView({
               )}
             </label>
 
-            {/* Filtro Desplegable de Niveles WBS (PM4R / BID) */}
-            <div className="filter-dropdown-wrap wbs-filter-wrap">
+            {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
+            <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
               <button
                 type="button"
-                className={`filter-card-btn wbs-card-btn ${activeMenu === 'wbsLevel' ? 'active' : ''} ${
-                  wbsLevelFilter !== 'todos' ? 'filtered' : ''
+                className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
+                  selectedRegions.length > 0 ? 'filtered' : ''
                 }`}
-                onClick={() => toggleMenu('wbsLevel')}
-                title="Filtrar por nivel metodológico EDT / WBS (PM4R / BID)"
+                onClick={() => toggleMenu('region')}
+                title="Filtrar por región (DRE) del proyecto"
               >
                 <div className="filter-card-copy">
-                  <small>Nivel WBS</small>
-                  <span>
-                    {wbsLevelFilter === 'todos'
-                      ? `Todos los niveles (${items.length})`
-                      : wbsLevelFilter === 'componentes'
-                      ? `Componentes Principales (${hitos.length})`
-                      : wbsLevelFilter === 'intermedios'
-                      ? `Agrupadores Intermedios (${intermediosCount})`
-                      : `Paquetes de Trabajo Terminales (${paquetesCount})`}
-                  </span>
+                  <small>Región</small>
+                  <span>{selectedRegions.length === 0 ? 'Todas las regiones' : regionButtonText}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
-              {activeMenu === 'wbsLevel' && (
+              {activeMenu === 'region' && (
                 <div
                   className="filter-card-popover"
                   onClick={(e) => e.stopPropagation()}
-                  style={{ minWidth: 260 }}
+                  onWheel={(e) => {
+                    e.stopPropagation();
+                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                    if (list && e.target !== list && !list.contains(e.target as Node)) {
+                      list.scrollTop += e.deltaY;
+                    }
+                  }}
+                  style={{ minWidth: 270 }}
                 >
-                  <div className="filter-popover-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Nivel Metodológico WBS</span>
-                    {wbsLevelFilter !== 'todos' && (
-                      <button
-                        type="button"
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#0066ff',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          padding: 0,
-                        }}
-                        onClick={() => setWbsLevelFilter('todos')}
-                      >
-                        Restablecer
+                  <div className="filter-popover-title filter-popover-title-row">
+                    <span>Regiones del proyecto</span>
+                    {selectedRegions.length > 0 && (
+                      <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions([])}>
+                        Limpiar ({selectedRegions.length})
                       </button>
                     )}
                   </div>
-                  <div className="filter-popover-list">
-                    {[
-                      { id: 'todos', label: 'Todos los niveles', count: items.length },
-                      { id: 'componentes', label: 'Componentes Principales', count: hitos.length },
-                      { id: 'intermedios', label: 'Agrupadores Intermedios', count: intermediosCount },
-                      { id: 'paquetes', label: 'Paquetes de Trabajo Terminales', count: paquetesCount },
-                    ].map((lvl) => (
-                      <button
-                        key={lvl.id}
-                        type="button"
-                        className={`filter-item-btn ${wbsLevelFilter === lvl.id ? 'selected' : ''}`}
-                        onClick={() => {
-                          setWbsLevelFilter(lvl.id as any);
-                          closeMenus();
-                        }}
-                      >
-                        <span>{lvl.label}</span>
-                        <span className="wbs-level-badge">{lvl.count}</span>
-                      </button>
+                  <div className="filter-popover-list" style={{ maxHeight: 320 }}>
+                    <button
+                      type="button"
+                      className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
+                      onClick={() => setSelectedRegions([])}
+                    >
+                      <span>Todas las regiones</span>
+                      <span className="wbs-level-badge">{REGIONES_PROYECTO.length}</span>
+                    </button>
+                    {MACROREGIONES.map((macro) => (
+                      <React.Fragment key={macro.id}>
+                        <div className="filter-popover-group-label">{macro.name}</div>
+                        {macro.regiones.map((regName) => {
+                          const isChecked = selectedRegions.includes(regName);
+                          return (
+                            <button
+                              key={regName}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                              onClick={() => toggleRegion(regName)}
+                              aria-pressed={isChecked}
+                            >
+                              <span className="filter-item-main">
+                                <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                  {isChecked && <Check size={10} strokeWidth={3} />}
+                                </span>
+                                <span className="filter-item-text">
+                                  <strong>{regName}</strong>
+                                  <small>Coord. regional: {getRegionCoordinador(regName)}</small>
+                                </span>
+                              </span>
+                              <span className="wbs-level-badge">{regionItemCounts[regName] || 0}</span>
+                            </button>
+                          );
+                        })}
+                      </React.Fragment>
                     ))}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Filtro Desplegable de Vencimientos y Alertas Críticas (Misma forma que Nivel WBS, juntos) */}
-            <div className="filter-dropdown-wrap vencimientos-filter-wrap">
+            {/* Filtro Contextual 2 (Vista Proyecto): Cargo · Coordinador Macro-regional */}
+            <div className="filter-dropdown-wrap contextual-filter-wrap macro-filter-wrap">
               <button
                 type="button"
-                className={`filter-card-btn vencimientos-card-btn ${activeMenu === 'vencimientos' ? 'active' : ''} ${
-                  vencimientosFilter !== 'todos' ? 'filtered' : ''
+                className={`filter-card-btn ${activeMenu === 'macro' ? 'active' : ''} ${
+                  macroFilter !== 'Todos' ? 'filtered' : ''
                 }`}
-                onClick={() => toggleMenu('vencimientos')}
-                title="Control de plazos de vencimiento y retraso"
+                onClick={() => toggleMenu('macro')}
+                title="Filtrar por Coordinador Macro-regional (2 regiones por coordinación)"
               >
                 <div className="filter-card-copy">
-                  <small>Vencimientos</small>
-                  <span>
-                    {vencimientosFilter === 'todos'
-                      ? 'Todos los plazos'
-                      : vencimientosFilter === 'hoy'
-                      ? 'Vencen hoy'
-                      : vencimientosFilter === 'semana'
-                      ? 'Esta semana'
-                      : vencimientosFilter === 'mes'
-                      ? 'Este mes'
-                      : vencimientosFilter === 'trimestre'
-                      ? 'Este trimestre'
-                      : 'Con retraso'}
-                  </span>
+                  <small>Coord. Macro-regional</small>
+                  <span>{getMacroById(macroFilter)?.coordinador || 'Todas las coordinaciones'}</span>
                 </div>
-                {criticalItemsCount > 0 && (
-                  <span
-                    className="wbs-level-badge"
-                    style={{
-                      background: '#fee2e2',
-                      color: '#b91c1c',
-                      fontWeight: 700,
-                      fontSize: '11px',
-                      padding: '2px 6px',
-                      borderRadius: '6px',
-                    }}
-                  >
-                    {criticalItemsCount}
-                  </span>
-                )}
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
-              {activeMenu === 'vencimientos' && (
+              {activeMenu === 'macro' && (
                 <div
                   className="filter-card-popover"
                   onClick={(e) => e.stopPropagation()}
-                  style={{ minWidth: 230 }}
+                  onWheel={(e) => {
+                    e.stopPropagation();
+                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                    if (list && e.target !== list && !list.contains(e.target as Node)) {
+                      list.scrollTop += e.deltaY;
+                    }
+                  }}
+                  style={{ minWidth: 290 }}
                 >
-                  <div className="filter-popover-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Control de Vencimientos</span>
-                    {vencimientosFilter !== 'todos' && (
-                      <button
-                        type="button"
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#0066ff',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          padding: 0,
-                        }}
-                        onClick={() => setVencimientosFilter('todos')}
-                      >
+                  <div className="filter-popover-title filter-popover-title-row">
+                    <span>Coordinación Macro-regional</span>
+                    {macroFilter !== 'Todos' && (
+                      <button type="button" className="filter-reset-link" onClick={() => setMacroFilter('Todos')}>
                         Restablecer
                       </button>
                     )}
                   </div>
                   <div className="filter-popover-list">
-                    {[
-                      { id: 'todos', label: 'Todos los plazos', badge: items.length },
-                      { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount },
-                      { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount },
-                      { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount },
-                      { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount },
-                      { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, isLate: true },
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        className={`filter-item-btn ${vencimientosFilter === opt.id ? 'selected' : ''}`}
-                        onClick={() => {
-                          setVencimientosFilter(opt.id as any);
-                          closeMenus();
-                        }}
-                      >
-                        <span>{opt.label}</span>
-                        <span
-                          className="wbs-level-badge"
-                          style={opt.isLate && opt.badge > 0 ? { background: '#fee2e2', color: '#b91c1c' } : undefined}
+                    <button
+                      type="button"
+                      className={`filter-item-btn ${macroFilter === 'Todos' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setMacroFilter('Todos');
+                        closeMenus();
+                      }}
+                    >
+                      <span>Todas las coordinaciones</span>
+                      <span className="wbs-level-badge">{MACROREGIONES.length}</span>
+                    </button>
+                    {MACROREGIONES.map((macro) => {
+                      const isSelected = macroFilter === macro.id;
+                      return (
+                        <button
+                          key={macro.id}
+                          type="button"
+                          className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setMacroFilter(macro.id);
+                            closeMenus();
+                          }}
                         >
-                          {opt.badge}
-                        </span>
-                      </button>
-                    ))}
+                          <span className="filter-item-main">
+                            <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                              {isSelected && <span className="filter-radio-dot" />}
+                            </span>
+                            <span className="filter-avatar macro-avatar">{getGestorInitials(macro.coordinador)}</span>
+                            <span className="filter-item-text">
+                              <strong>{macro.coordinador}</strong>
+                              <small>{macro.name} · {macro.regiones.join(' y ')}</small>
+                            </span>
+                          </span>
+                          <span className="macro-scope-pill">{macro.regiones.length} regiones</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -4074,35 +4453,24 @@ export default function CronogramaGanttView({
             {/* Separador vertical: Bloque 3 (Tiempo) | Bloque 4 (Herramientas y Acciones) */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Controles de visualización de barras (Capas, línea base, dependencias y responsables en Gantt y Calendario) */}
+            {/* Controles de visualización de barras en Acordeón al Hover (Línea base principal + %, dependencias y responsables) */}
             {(viewMode === 'gantt' || viewMode === 'calendario') && (
-              <>
+              <div
+                className={'bar-tools-accordion ' + (
+                  (viewMode === 'calendario' ? (calShowBarLabels || calShowBaseline) : (showBarLabels || showBaseline || showCriticalPath || showBarAvatars)) ? 'has-active' : ''
+                )}
+              >
+                {/* Botón Principal siempre visible: Línea base */}
                 <button
                   type="button"
-                  className={`btn-toggle-labels qm-btn-icon ${(viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? "active" : ""}`}
-                  onClick={() => {
-                    if (viewMode === 'calendario') {
-                      setCalShowBarLabels((prev) => !prev);
-                    } else {
-                      setShowBarLabels((prev) => !prev);
-                    }
-                  }}
-                  data-tooltip="Mostrar % en barras"
-                  aria-label="Mostrar u ocultar porcentaje de avance en barras"
-                >
-                  <Percent size={14} />
-                </button>
-
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${(viewMode === 'calendario' ? calShowBaseline : showBaseline) ? "active" : ""}`}
+                  className={'btn secondary qm-btn-icon accordion-primary-btn ' + ((viewMode === 'calendario' ? calShowBaseline : showBaseline) ? 'active' : '')}
                   onClick={() => {
                     if (viewMode === 'calendario') {
                       setCalShowBaseline((v) => !v);
-                      notify(calShowBaseline ? "Línea base oculta" : "Línea base oficial visible");
+                      notify(calShowBaseline ? 'Línea base oculta' : 'Línea base oficial visible');
                     } else {
                       setShowBaseline((v) => !v);
-                      notify(showBaseline ? "Línea base oculta" : "Línea base oficial visible");
+                      notify(showBaseline ? 'Línea base oculta' : 'Línea base oficial visible');
                     }
                   }}
                   data-tooltip="Línea base"
@@ -4111,35 +4479,54 @@ export default function CronogramaGanttView({
                   <Layers3 size={15} />
                 </button>
 
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${showCriticalPath ? "active" : ""}`}
-                  onClick={() => {
-                    setShowCriticalPath((v) => !v);
-                    notify(!showCriticalPath ? "Líneas de dependencia y prelación visibles" : "Líneas de dependencia ocultas");
-                  }}
-                  data-tooltip={showCriticalPath ? "Ocultar dependencias" : "Mostrar líneas de dependencia"}
-                  aria-label="Conmutar líneas de dependencia y prelación entre tareas"
-                >
-                  <Link2 size={15} />
-                </button>
+                {/* Botones secundarios desacordeonables hacia la derecha al pasar el mouse */}
+                <div className="accordion-expandable-items">
+                  <button
+                    type="button"
+                    className={'btn-toggle-labels qm-btn-icon ' + ((viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? 'active' : '')}
+                    onClick={() => {
+                      if (viewMode === 'calendario') {
+                        setCalShowBarLabels((prev) => !prev);
+                      } else {
+                        setShowBarLabels((prev) => !prev);
+                      }
+                    }}
+                    data-tooltip="Mostrar % en barras"
+                    aria-label="Mostrar u ocultar porcentaje de avance en barras"
+                  >
+                    <Percent size={14} />
+                  </button>
 
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${showBarAvatars ? "active" : ""}`}
-                  onClick={() => {
-                    setShowBarAvatars((v) => !v);
-                    notify(!showBarAvatars ? "Responsables visibles en las barras" : "Responsables ocultos de las barras");
-                  }}
-                  data-tooltip={showBarAvatars ? "Ocultar responsables en barras" : "Mostrar responsables en barras"}
-                  aria-label="Conmutar avatares de responsables en barras de Gantt"
-                >
-                  <UserCheck size={15} />
-                </button>
+                  <button
+                    type="button"
+                    className={'btn secondary qm-btn-icon ' + (showCriticalPath ? 'active' : '')}
+                    onClick={() => {
+                      setShowCriticalPath((v) => !v);
+                      notify(!showCriticalPath ? 'Líneas de dependencia visibles' : 'Líneas de dependencia ocultas');
+                    }}
+                    data-tooltip={showCriticalPath ? 'Ocultar dependencias' : 'Mostrar dependencias'}
+                    aria-label="Conmutar líneas de dependencia y prelación entre tareas"
+                  >
+                    <Link2 size={15} />
+                  </button>
 
-                <div className="filter-group-divider" aria-hidden="true" />
-              </>
+                  <button
+                    type="button"
+                    className={'btn secondary qm-btn-icon ' + (showBarAvatars ? 'active' : '')}
+                    onClick={() => {
+                      setShowBarAvatars((v) => !v);
+                      notify(!showBarAvatars ? 'Responsables visibles en las barras' : 'Responsables ocultos de las barras');
+                    }}
+                    data-tooltip={showBarAvatars ? 'Ocultar responsables' : 'Mostrar responsables'}
+                    aria-label="Conmutar avatares de responsables en barras de Gantt"
+                  >
+                    <UserCheck size={15} />
+                  </button>
+                </div>
+              </div>
             )}
+
+            <div className="filter-group-divider" aria-hidden="true" />
 
             {/* Controles de expansión y pantalla completa para modo Gantt, Lista y Calendario */}
             {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario') && (
@@ -4241,13 +4628,16 @@ export default function CronogramaGanttView({
                       setColsMenuOpen((v) => !v);
                     }}
                     style={{
-                      height: 32,
-                      padding: '0 10px',
+                      height: 42,
+                      minHeight: 42,
+                      padding: '0 12px',
+                      borderRadius: 10,
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 6,
-                      fontSize: '12px',
+                      fontSize: '13px',
                       fontWeight: 600,
+                      boxSizing: 'border-box',
                     }}
                     title={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
                     aria-label="Configurar columnas visibles de la tabla"
@@ -4257,7 +4647,18 @@ export default function CronogramaGanttView({
                   </button>
 
                   {colsMenuOpen && (
-                    <div className="cols-popover" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                    <div
+                      className="cols-popover"
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onWheel={(e) => {
+                        e.stopPropagation();
+                        const list = e.currentTarget.querySelector('.cols-pop-list') as HTMLElement | null;
+                        if (list && e.target !== list && !list.contains(e.target as Node)) {
+                          list.scrollTop += e.deltaY;
+                        }
+                      }}
+                    >
                       <div className="cols-pop-head">
                         <div>
                           <strong>Columnas de la vista</strong>
@@ -4357,6 +4758,10 @@ export default function CronogramaGanttView({
                     setSelectedRegions([]);
                     setPhaseFilter('Todas');
                     setGestorFilter('Todos');
+                    setMacroFilter('Todos');
+                    setSelectedStates([]);
+                    setWbsDepthFilter('todos');
+                    setWbsRoleFilter('todos');
                     setWbsLevelFilter('todos');
                     setVencimientosFilter('todos');
                     setListaTemporalFilter('Todos');
@@ -4664,7 +5069,7 @@ export default function CronogramaGanttView({
                     }}
                     title={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
                   >
-                    <ChevronsUpDown size={13} />
+                    <ChevronsUpDown size={14} />
                   </button>
                   {viewMode === 'gantt' && (
                     <button
@@ -4676,7 +5081,7 @@ export default function CronogramaGanttView({
                       }}
                       title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
                     >
-                      {visibleCols.length === 1 ? <PanelLeftOpen size={13} /> : <PanelLeftClose size={13} />}
+                      {visibleCols.length === 1 ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
                     </button>
                   )}
                 </div>

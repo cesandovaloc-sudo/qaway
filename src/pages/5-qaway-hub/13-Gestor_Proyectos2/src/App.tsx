@@ -232,7 +232,7 @@ function App() {
     const handleWheel = (e: WheelEvent) => {
       if (e.defaultPrevented || e.shiftKey || e.ctrlKey || Math.abs(e.deltaY) < 1) return;
       const targetEl = e.target as HTMLElement | null;
-      if (targetEl?.closest('.drawer, .modal, .cols-pop, .filter-card-dropdown, .adv-filter-pop, [role="dialog"]')) {
+      if (targetEl?.closest('.drawer, .modal, .cols-pop, .cols-popover, .cols-dropdown-wrap, .filter-card-dropdown, .filter-card-popover, .filter-popover-list, .filter-dropdown-wrap, .adv-filter-pop, .cell-pop, .th-popover, .column-header-menu, .table-engine-filter-popover, [role="dialog"], [role="menu"], [role="listbox"]')) {
         return;
       }
 
