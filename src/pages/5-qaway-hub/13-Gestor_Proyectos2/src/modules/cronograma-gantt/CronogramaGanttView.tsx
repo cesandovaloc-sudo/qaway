@@ -2647,7 +2647,7 @@ export default function CronogramaGanttView({
     const container = scrollRef.current;
     const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
     const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-    const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.65);
+    const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.70);
     container.scrollTo({ left: targetScroll, behavior: 'smooth' });
     if (headScrollRef.current) {
       headScrollRef.current.scrollLeft = targetScroll;
@@ -2710,7 +2710,7 @@ export default function CronogramaGanttView({
       const container = scrollRef.current;
       const todayPx = getDatePixelOffset(currentTodayIso, zoom) + (zoom === 'Día' ? 17 : 0);
       const timelineVisibleWidth = Math.max(200, container.clientWidth - fixedWidth);
-      const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.65);
+      const targetScroll = Math.max(0, todayPx - timelineVisibleWidth * 0.70);
       container.scrollTo({ left: targetScroll, behavior: 'smooth' });
       if (headScrollRef.current) {
         headScrollRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
@@ -6704,7 +6704,7 @@ export default function CronogramaGanttView({
                       // Vive dentro de la barra si el relleno físico tiene al menos 42px para el texto
                       const fitsInsideBar = fillWidthPx >= 42;
                       const barStartX = getDatePixelOffset(x.start);
-                      const labelPosition = fitsInsideBar ? 'in-bar' : (barStartX < 55 ? 'after-bar' : 'before-bar');
+                      const labelPosition = fitsInsideBar ? 'in-bar' : (barStartX < 85 ? 'after-bar' : 'before-bar');
 
                       return (
                         <div
