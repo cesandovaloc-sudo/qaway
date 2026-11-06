@@ -1889,6 +1889,108 @@ export default function CronogramaGanttView({
   }, [selectedRegions]);
   const [phaseFilter, setPhaseFilter] = useState('Todas');
   const [gestorFilter, setGestorFilter] = useState('Todos');
+  const [sedeFilter, setSedeFilter] = useState('Todas');
+
+  const availableSedes = useMemo(() => {
+    const list = [
+      'DRE Junín (Sede Regional Matriz)',
+      'UGEL Huancayo',
+      'UGEL Concepción',
+      'UGEL Chupaca',
+      'UGEL Jauja',
+      'UGEL Junín',
+      'UGEL Tarma',
+      'UGEL Yauli',
+      'UGEL Chanchamayo',
+      'UGEL Satipo',
+      'UGEL Pichanaki',
+      'UGEL Pangoa',
+      'UGEL Río Tambo',
+      'UGEL Perené',
+    ];
+    if (items && Array.isArray(items)) {
+      items.forEach((it) => {
+        if (it?.sede && !list.includes(it.sede)) list.push(it.sede);
+        if (it?.name?.startsWith('UGEL ') && !list.includes(it.name)) list.push(it.name);
+      });
+    }
+    return list;
+  }, [items]);
+
+  const availableSedesCascaded = useMemo(() => {
+    if (selectedRegions.length === 0) {
+      return availableSedes;
+    }
+    return availableSedes.filter((sedeName) => {
+      return items.some((it) => {
+        const matchRegion = it.region && selectedRegions.includes(it.region);
+        const matchSede =
+          it.sede === sedeName ||
+          it.distrito === sedeName ||
+          (it.name && it.name.includes(sedeName));
+        return matchRegion && matchSede;
+      });
+    });
+  }, [availableSedes, selectedRegions, items]);
+
+  const availableGestores = useMemo(() => {
+    const set = new Set<string>();
+    if (items && Array.isArray(items)) {
+      items.forEach((it) => {
+        getItemGestores(it).forEach((g) => {
+          if (g && g !== 'Sin asignar') set.add(g);
+        });
+      });
+    }
+    GESTOR_OPTIONS.forEach((g) => {
+      if (g.value !== 'Todos' && g.value !== 'Sin asignar') set.add(g.value);
+    });
+    return Array.from(set);
+  }, [items]);
+
+  const availableGestoresCascaded = useMemo(() => {
+    if (sedeFilter !== 'Todas') {
+      const gSet = new Set<string>();
+      items.forEach((it) => {
+        const matchSede =
+          it.sede === sedeFilter ||
+          it.distrito === sedeFilter ||
+          (it.name && it.name.includes(sedeFilter));
+        if (matchSede) {
+          getItemGestores(it).forEach((g) => {
+            if (g && g !== 'Sin asignar') gSet.add(g);
+          });
+        }
+      });
+      if (gSet.size > 0) return Array.from(gSet);
+    }
+    if (selectedRegions.length > 0) {
+      const gSet = new Set<string>();
+      items.forEach((it) => {
+        if (it.region && selectedRegions.includes(it.region)) {
+          getItemGestores(it).forEach((g) => {
+            if (g && g !== 'Sin asignar') gSet.add(g);
+          });
+        }
+      });
+      if (gSet.size > 0) return Array.from(gSet);
+    }
+    return availableGestores;
+  }, [availableGestores, sedeFilter, selectedRegions, items]);
+
+  const sedeButtonText = useMemo(() => {
+    if (sedeFilter !== 'Todas' && gestorFilter !== 'Todos') {
+      const shortSede = sedeFilter.replace(' (Sede Regional Matriz)', '');
+      return `${shortSede} · ${gestorFilter.split(' ')[0]}`;
+    }
+    if (sedeFilter !== 'Todas') {
+      return sedeFilter.replace(' (Sede Regional Matriz)', '');
+    }
+    if (gestorFilter !== 'Todos') {
+      return gestorFilter;
+    }
+    return 'Todas las sedes';
+  }, [sedeFilter, gestorFilter]);
   // Filtro de cargo territorial: Coordinador Macro-regional (supervisa 2 regiones)
   const [macroFilter, setMacroFilter] = useState<string>('Todos');
   const regionItemCounts = useMemo(() => {
@@ -1954,7 +2056,7 @@ export default function CronogramaGanttView({
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
   
-  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | null;
+  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
@@ -3027,6 +3129,23 @@ export default function CronogramaGanttView({
       const matchPhase =
         phaseFilter === 'Todas' || x.phase === phaseFilter || parent?.phase === phaseFilter;
 
+      let matchSede = true;
+      if (sedeFilter !== 'Todas') {
+        const targetLower = sedeFilter.toLowerCase();
+        const directMatch =
+          Boolean(x.sede && x.sede.toLowerCase().includes(targetLower)) ||
+          Boolean(x.distrito && x.distrito.toLowerCase().includes(targetLower)) ||
+          Boolean(x.name && x.name.toLowerCase().includes(targetLower));
+        const hasMatchingDescendant = items.some(
+          (c) =>
+            c.parentId === x.id &&
+            (Boolean(c.sede && c.sede.toLowerCase().includes(targetLower)) ||
+             Boolean(c.distrito && c.distrito.toLowerCase().includes(targetLower)) ||
+             Boolean(c.name && c.name.toLowerCase().includes(targetLower)))
+        );
+        matchSede = directMatch || hasMatchingDescendant;
+      }
+
       // Solapamiento de fechas con el período oficial consultado
       let matchRange = true;
       if (isRangeActive) {
@@ -3157,6 +3276,7 @@ export default function CronogramaGanttView({
         matchRegion &&
         matchGestor &&
         matchMacro &&
+        matchSede &&
         matchPhase &&
         matchRange &&
         notCollapsed &&
@@ -3247,6 +3367,7 @@ export default function CronogramaGanttView({
     vencimientosFilter,
     selectedStates,
     macroFilter,
+    sedeFilter,
     itemDepthMap
   ]);
 
@@ -4211,7 +4332,162 @@ export default function CronogramaGanttView({
             </div>
 
             {/* Filtro Contextual 2 (Vista Proyecto): Cargo · Coordinador Macro-regional */}
-            <div className="filter-dropdown-wrap contextual-filter-wrap macro-filter-wrap">
+            {perspective === 'territorial' ? (
+              <div className="filter-dropdown-wrap contextual-filter-wrap sede-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'sede' ? 'active' : ''} ${
+                    sedeFilter !== 'Todas' || gestorFilter !== 'Todos' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('sede')}
+                  title="Filtrar por Sede Territorial / UGEL o Gestor de Campo"
+                >
+                  <div className="filter-card-copy">
+                    <small>Sede / UGEL</small>
+                    <span>{sedeButtonText}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'sede' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 310 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Sedes y Gestores de Campo</span>
+                      {(sedeFilter !== 'Todas' || gestorFilter !== 'Todos') && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => {
+                            setSedeFilter('Todas');
+                            setGestorFilter('Todos');
+                          }}
+                        >
+                          Restablecer
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list" style={{ maxHeight: 360 }}>
+                      {/* Sección 1: Sedes / UGEL */}
+                      <div className="filter-popover-group-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Sedes / UGEL Operativas</span>
+                        <span className="wbs-level-badge">{availableSedesCascaded.length}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`filter-item-btn filter-item-check ${sedeFilter === 'Todas' ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSedeFilter('Todas');
+                          closeMenus();
+                        }}
+                      >
+                        <span className="filter-item-main">
+                          <span className={`filter-radio ${sedeFilter === 'Todas' ? 'checked' : ''}`}>
+                            {sedeFilter === 'Todas' && <span className="filter-radio-dot" />}
+                          </span>
+                          <span className="filter-item-text">
+                            <strong>Todas las sedes</strong>
+                            <small>{selectedRegions.length > 0 ? `Ámbito: ${selectedRegions.join(', ')}` : 'Ámbito general'}</small>
+                          </span>
+                        </span>
+                        <span className="wbs-level-badge">{items.length}</span>
+                      </button>
+                      {availableSedesCascaded.map((sede) => {
+                        const isSelected = sedeFilter === sede;
+                        const count = items.filter(
+                          (it) =>
+                            it.sede === sede ||
+                            it.distrito === sede ||
+                            (it.name && it.name.includes(sede))
+                        ).length;
+                        return (
+                          <button
+                            key={sede}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setSedeFilter(sede);
+                              closeMenus();
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <span className="filter-item-text">
+                                <strong>{sede}</strong>
+                              </span>
+                            </span>
+                            {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                          </button>
+                        );
+                      })}
+
+                      {/* Sección 2: Gestores de Campo Asignados */}
+                      <div className="filter-popover-group-label" style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Gestor de Campo Asignado</span>
+                        <span className="wbs-level-badge">{availableGestoresCascaded.length}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`filter-item-btn filter-item-check ${gestorFilter === 'Todos' ? 'selected' : ''}`}
+                        onClick={() => {
+                          setGestorFilter('Todos');
+                          closeMenus();
+                        }}
+                      >
+                        <span className="filter-item-main">
+                          <span className={`filter-radio ${gestorFilter === 'Todos' ? 'checked' : ''}`}>
+                            {gestorFilter === 'Todos' && <span className="filter-radio-dot" />}
+                          </span>
+                          <span className="filter-item-text">
+                            <strong>Todos los gestores</strong>
+                            <small>Sin filtro de responsable</small>
+                          </span>
+                        </span>
+                      </button>
+                      {availableGestoresCascaded.map((gName) => {
+                        const isSelected = gestorFilter === gName;
+                        const count = items.filter((it) => getItemGestores(it).includes(gName)).length;
+                        return (
+                          <button
+                            key={gName}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setGestorFilter(gName);
+                              closeMenus();
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <span className="filter-avatar macro-avatar">{getGestorInitials(gName)}</span>
+                              <span className="filter-item-text">
+                                <strong>{gName}</strong>
+                                <small>Gestor territorial de campo</small>
+                              </span>
+                            </span>
+                            {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="filter-dropdown-wrap contextual-filter-wrap macro-filter-wrap">
               <button
                 type="button"
                 className={`filter-card-btn ${activeMenu === 'macro' ? 'active' : ''} ${
@@ -4253,6 +4529,7 @@ export default function CronogramaGanttView({
                       className={`filter-item-btn ${macroFilter === 'Todos' ? 'selected' : ''}`}
                       onClick={() => {
                         setMacroFilter('Todos');
+                    setSedeFilter('Todas');
                         closeMenus();
                       }}
                     >
@@ -4289,6 +4566,7 @@ export default function CronogramaGanttView({
                 </div>
               )}
             </div>
+            )}
 
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
             <button
@@ -6424,6 +6702,8 @@ export default function CronogramaGanttView({
                       const fillWidthPx = barWidthPx * (Math.min(100, Math.max(0, x.progress)) / 100);
                       // Vive dentro de la barra si el relleno físico tiene al menos 42px para el texto
                       const fitsInsideBar = fillWidthPx >= 42;
+                      const barStartX = getDatePixelOffset(x.start);
+                      const labelPosition = fitsInsideBar ? 'in-bar' : (barStartX < 55 ? 'after-bar' : 'before-bar');
 
                       return (
                         <div
@@ -6464,10 +6744,10 @@ export default function CronogramaGanttView({
 
                           {/* Contenido interior secuencial: 1° Porcentaje (%) + 2° Iconos de responsables (sin salir del nodo) */}
                           {(showBarLabels || showBarAvatars) && (
-                            <div className={`bar-inner-content ${fitsInsideBar ? 'in-bar' : 'before-bar'}`}>
+                            <div className={`bar-inner-content ${labelPosition}`}>
                               {/* 1. Porcentaje de avance: espacio numérico natural (máx 100%) */}
                               {showBarLabels && (
-                                <span className={`bar-percent-tag ${fitsInsideBar ? 'in-bar' : 'before-bar'}`}>
+                                <span className={`bar-percent-tag ${labelPosition}`}>
                                   {x.progress}%
                                 </span>
                               )}
