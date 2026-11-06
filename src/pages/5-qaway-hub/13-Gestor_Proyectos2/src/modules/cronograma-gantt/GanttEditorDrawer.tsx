@@ -33,11 +33,11 @@ import {
   DeliverableType,
   MiniCalendar,
   formatDate,
-  getDeviationDays,
   STATUS_CLASS,
-  getEdtNodeDisplayLabel,
   getLinkedTasksSummary,
 } from './CronogramaGanttView';
+import { getDeviationDays } from './scheduleMetrics';
+import { getEdtNodeDisplayLabel } from './edtPmbokModel';
 import {
   REGIONES_PROYECTO,
   MACROREGIONES,
@@ -2189,4 +2189,5 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   );
 });
 
+export { GanttEditorDrawer };
 export default GanttEditorDrawer;

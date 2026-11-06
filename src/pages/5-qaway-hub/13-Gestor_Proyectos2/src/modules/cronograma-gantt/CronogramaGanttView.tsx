@@ -433,7 +433,7 @@ const MONTHS = [
   { label: 'Abr', start: '2027-04-01' },
 ];
 
-const STATUS_CLASS: Record<Status, string> = {
+export const STATUS_CLASS: Record<Status, string> = {
   'Cumple': 'complete',
   'Completado': 'complete',
   'En curso': 'progress',
@@ -678,7 +678,7 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
   { id: 'parent', label: 'Componente padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
 
-const formatDate = (s: string) =>
+export const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
     .toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
     .replace('.', '');
