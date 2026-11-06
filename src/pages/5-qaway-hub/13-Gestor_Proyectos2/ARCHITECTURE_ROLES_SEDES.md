@@ -1,46 +1,91 @@
-# ARQUITECTURA GENERAL: GOBERNANZA, ROLES Y MODELO MULTI-SEDE
+# Arquitectura de Gestor: organización, unidades y proyectos
 
-## 1. Concepto Rector del Sistema
-Este sistema es una plataforma de supervisión, planificación y control de operaciones desarrollada con estándar PM4R (BID) / PMI y ejecución ágil en territorio.
+## 1. Alcance
 
-- **Sede Central:** Somos nosotros (la Oficina de Coordinación Central / PMO / Gerencia de Supervisión). Desde aquí se planifica, se aprueban las líneas base, se definen los cronogramas maestros y se monitorea el avance consolidado.
-- **Sedes Supervisadas (Capa Territorial / Descentralizada):** Son los puntos o unidades descentralizadas donde ocurre la ejecución física o administrativa. Cada sede cuenta con su propio personal, avances locales, evidencias y nudos críticos.
+Gestor es la capa de planificación, seguimiento y control operativo de una organización. Usa la identidad y el acceso general del Qaway Hub, pero mantiene sus relaciones operativas propias.
 
-### Adaptabilidad por Sector de Negocio:
-1. **Educación / Sector Público:** Sede Central (MINEDU/DRE) monitorea a las UGEL y DRE (ej. UGEL Huancayo, UGEL Satipo, DRE Junín).
-2. **Construcción e Inmobiliaria:** Sede Central monitorea Obras / Proyectos (ej. Proyecto Casa Blanca, Edificio Monteverde).
-3. **Retail y Cafeterías:** Sede Central monitorea Sucursales, Locales comerciales o Puntos de venta.
-4. **Corporativo / Entidad Única:** Sede Central monitorea Direcciones Generales, Gerencias o Jefaturas internas.
+En esta fase se implementa el modelo de datos y su contexto explícito. **No se conecta todavía con login, `auth.uid()`, invitaciones ni asignaciones automáticas del Hub.** Esa conexión queda reservada para la fase de seguridad.
 
----
+## 2. Estructura funcional
 
-## 2. Jerarquía de Roles y Matriz de Responsabilidad
+```text
+Tenant / organización principal
+├── Unidades operativas
+│   ├── Central
+│   ├── UGEL
+│   ├── Obra
+│   ├── Jefatura
+│   ├── Tienda
+│   ├── Oficina
+│   └── Departamento
+├── Proyectos
+│   ├── Unidad central
+│   └── Unidades participantes
+├── Miembros y trabajadores
+└── Responsabilidades operativas
+```
 
-| Rol en el Sistema | Equivalencia Empresarial / Sectorial | Nivel de Decisión | Atribuciones y Permisos |
-| :--- | :--- | :--- | :--- |
-| **Coordinador General** | Gerente de Proyecto / Gerente General / Director Rector | Estratégico (Sede Central) | **Exclusividad total:** Aprobar y congelar Líneas Base, autorizar prórrogas formales, delegar permisos temporales de edición a coordinadores y reabrir planificación. |
-| **Coordinador Regional / Marco** | Jefe de Área / Gerente de Operaciones / Supervisor Zonal | Táctico / Supervisión | Supervisa el grupo de sedes asignadas, monitorea el cumplimiento de hitos y dependencias. Edición restringida a lo delegado por el Coordinador General. |
-| **Gestor de Campo / Especialista** | Residente de Obra / Especialista UGEL / Monitor Territorial / Trabajador de Campo | Operativo (En Sede) | Actualiza el avance físico (0-100%), completa checklists de tareas operativas, registra evidencias (actas, PECOSA) y reporta nudos críticos / bloqueos. **No puede modificar plazos marco del proyecto.** |
+“Unidad operativa” es el término universal. Puede representar una sede física, una obra, una UGEL, una jefatura o cualquier área de trabajo; no se presupone que sea una ubicación física.
 
----
+## 3. Entidades persistentes de Gestor
 
-## 3. Relación entre Módulos del Sistema
+### `gestor_unidades`
 
-1. **Módulo Proyecto (`/cronograma` o `/proyecto`):**
-   - Reside en la **Sede Central**.
-   - Alberga el Cronograma Maestro (Gantt) y la Estructura Desglosada del Trabajo (EDT / Organigrama).
-   - Administra la Línea Base oficial, la Ruta Crítica (CPM) y las dependencias (Fin-Inicio, Inicio-Inicio, Fin-Fin).
-2. **Módulo Sedes (`/sedes`):**
-   - Representa la **Capa de Supervisión Territorial**.
-   - Cada tarjeta o fila corresponde a una sede (ej. UGEL Huancayo, Edificio Monteverde).
-   - Su panel lateral (Drawer) permite actualizar el cumplimiento de esa sede específica para cada entregable sin romper el calendario general.
-3. **Módulo Tareas (`/tareas`):**
-   - Corresponde a la **Gestión Ágil / Micro-operativa** del personal de campo.
-   - Cada paquete de trabajo de la EDT se alimenta del checklist diario de actividades en este módulo.
+Catálogo de unidades pertenecientes a un tenant. Soporta jerarquía con `parent_unit_id`, región, macroregión y tipos operativos.
 
----
+### `gestor_unidad_miembros`
 
-## 4. Reglas Estrictas de Programación y UI
-- Las fechas contractuales del proyecto solo se editan desde la Sede Central con perfil de Coordinador General o permiso delegado.
-- Los menús y filtros WBS no deben contener niveles ficticios ni textos saturados.
-- Todo desarrollo nuevo debe consultar este archivo como Fuente Única de Verdad metodológica.
+Relación futura entre usuarios del Hub y unidades. Usa `public.users.id`, pero durante la fase actual `user_id` puede permanecer vacío para permitir preparar la estructura antes de conectar login.
+
+### `gestor_proyectos`
+
+Cada proyecto puede pertenecer a un tenant y tener una unidad central. Los registros históricos mantienen temporalmente esos campos vacíos hasta ejecutar la clasificación de datos.
+
+### `gestor_proyecto_unidades`
+
+Relaciona proyectos con una o varias unidades participantes.
+
+## 4. Acceso general y responsabilidades
+
+Los roles generales del Hub siguen siendo:
+
+```text
+admin · editor · viewer · guest
+```
+
+Gestor no crea otro sistema de roles. Las responsabilidades operativas son datos de contexto, por ejemplo:
+
+```text
+project_manager
+unit_responsible
+reviewer
+progress_editor
+field_collaborator
+```
+
+No se usan cargos como `RECTOR`, `SUPERVISOR` o `EJECUTOR` como permisos globales.
+
+## 5. Inventario y Gestor
+
+El módulo de Inventario tiene una interfaz de Sedes y la tabla `inventory_locations` para almacenes y ubicaciones internas. Esa tabla no es el catálogo universal de Gestor. No se enlazan automáticamente ambos dominios ni se reutilizan sus datos demo.
+
+Si en el futuro se requiere una integración, se hará mediante una relación explícita y aprobada, sin cambiar el significado de ninguna entidad.
+
+## 6. Contexto de transición
+
+Mientras login no esté conectado, las pantallas y servicios pueden recibir un `tenantId` explícito. No se debe interpretar ese contexto como seguridad: las políticas actuales del cronograma siguen pendientes de endurecimiento.
+
+La secuencia para activar seguridad será:
+
+1. Clasificar proyectos históricos y asignarles tenant.
+2. Completar unidades y miembros.
+3. Conectar `public.users` y `auth.uid()`.
+4. Sustituir el contexto manual por el tenant del usuario autenticado.
+5. Activar RLS tenant-aware en todas las tablas Gestor.
+
+## 7. Reglas de compatibilidad
+
+- El cronograma conserva sus IDs y comportamiento actual.
+- Los campos nuevos son aditivos y no sustituyen `region`, `gestor` ni `gestores` hasta completar la migración funcional.
+- Las relaciones nuevas no deben borrar ni reinterpretar datos históricos.
+- No se ejecutan migraciones automáticamente desde el frontend.

@@ -1,4 +1,4 @@
-import { GanttEditorDrawer } from './GanttEditorDrawer';
+﻿import { GanttEditorDrawer } from './GanttEditorDrawer';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
@@ -202,6 +202,9 @@ export interface Item {
   dependencies?: string[];
   /** Entidad responsable oficial del componente (DRE / UGEL / región). */
   entidadResponsable?: string | undefined;
+  /** Estado de Nudo Critico o Solicitud de Prorroga desde sede territorial.
+   *  Solo se popula en perspective="territorial"; ignorado en vista central. */
+  blockerInfo?: import('../../types').SedeBlockerRequest;
 }
 
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
@@ -6723,7 +6726,7 @@ export default function CronogramaGanttView({
                       // Vive dentro de la barra si el relleno físico tiene al menos 42px para el texto
                       const fitsInsideBar = fillWidthPx >= 42;
                       const barStartX = getDatePixelOffset(x.start);
-                      const labelPosition = fitsInsideBar ? 'in-bar' : 'before-bar';
+                      const labelPosition = fitsInsideBar || barStartX < 45 ? 'in-bar' : 'before-bar';
 
                       return (
                         <div

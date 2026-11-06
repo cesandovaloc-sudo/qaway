@@ -1,5 +1,6 @@
 // Tipos y contratos de datos para el Módulo Equipo (Qaway Gestor de Proyectos)
 // Regla: Neutralidad institucional estricta. Cero referencias fijas a organismos públicos o sedes geográficas concretas.
+import type { GovernanceArchetype, SedeBlockerRequest } from '../../types';
 
 export type EstadoOperativo = 'En funciones' | 'Licencia / Permiso' | 'Desvinculado';
 
@@ -16,6 +17,14 @@ export interface SedeFrente {
   responsableId?: string;
   responsableNombre?: string;
   dotacionRequerida: number;
+
+  // ─── CAMPOS ADITIVOS OPCIONALES (?) (ARCHITECTURE_ROLES_SEDES.md) ───
+  /** Estado de nudos críticos y solicitudes de prórroga desde sede (Doble Horizonte) */
+  blockerInfo?: SedeBlockerRequest;
+  /** Tipo de entidad configurable (UGEL, DRE, Obra, Frente, Sucursal) */
+  tipoEntidad?: 'ugel' | 'dre' | 'obra' | 'sede_propia' | 'sucursal';
+  /** Región administrativa a la que pertenece */
+  region?: string;
 }
 
 export interface UnidadOrganizacional {
@@ -98,6 +107,14 @@ export interface Integrante {
   // Sede territorial
   sedeId: string;
   sedeNombre: string;
+
+  // ─── CAMPOS ADITIVOS OPCIONALES (?) (ARCHITECTURE_ROLES_SEDES.md) ───
+  /** Cobertura territorial flexible: lista de sedes/UGELs asignadas */
+  assignedSedeIds?: string[];
+  /** Arquetipo de gobernanza PM4R derivado ('RECTOR' | 'SUPERVISOR' | 'EJECUTOR') */
+  governanceArchetype?: GovernanceArchetype;
+  /** Nivel en la cascada de toma de decisiones (1: Sede Central, 2..N: Territorial) */
+  nivelJerarquico?: number;
 
   // Carga de trabajo y capacidad
   capacidadNominalHorasSemana: number;

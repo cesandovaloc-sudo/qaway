@@ -9483,3 +9483,93 @@ body.gantt-resizing {
     opacity: 1;
   }
 }
+
+/* ==========================================================================
+   MINI-CALENDARIO LATERAL (Vista Calendario) · tokens del sidebar existente
+   ========================================================================== */
+.cal-minical {
+  gap: 10px;
+}
+
+.cal-minical-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-minical-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cal-minical-nav {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #475569;
+  transition: background 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cal-minical-nav:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.cal-minical-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 4px;
+  text-align: center;
+}
+
+.cal-minical-wd {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  padding-bottom: 4px;
+}
+
+.cal-minical-day {
+  position: relative;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-minical-day.outside {
+  color: #cbd5e1;
+}
+
+.cal-minical-day.today {
+  background: #0066ff;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.cal-minical-day.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 999px;
+  background: #0066ff;
+}
+
+.cal-minical-day.today.has-event::after {
+  background: #ffffff;
+}

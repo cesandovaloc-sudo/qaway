@@ -60,3 +60,69 @@ export const MODULE_STORAGE_KEY = 'qaway-gp-module-v1';
 
 export type UserRole = 'gestor' | 'coordinador';
 export const USER_ROLE_STORAGE_KEY = 'qaway-gp-user-role-v1';
+
+// ==============================================================================
+// EXTENSIÓN ADITIVA: GOBERNANZA TERRITORIAL, SEDES Y ALERTAS (ARCHITECTURE_ROLES_SEDES.md)
+// Todas las interfaces son opcionales (?) y 100% retrocompatibles.
+// ==============================================================================
+
+// 1. Los 3 Arquetipos de Gobernanza base (sin alterar UserRole)
+export type GovernanceArchetype = 'RECTOR' | 'SUPERVISOR' | 'EJECUTOR';
+
+// Helper de compatibilidad: deduce el arquetipo a partir del UserRole actual
+export const resolveArchetypeFromRole = (role: UserRole): GovernanceArchetype => {
+  return role === 'coordinador' ? 'RECTOR' : 'EJECUTOR';
+};
+
+// 2. Definición opcional de cargos dinámicos (2 a N niveles de cascada)
+export interface GovernanceRoleDefinition {
+  id: string;
+  name: string;                         // Ej: "Coordinador Macroregional", "Jefe de Zona", "Especialista UGEL"
+  archetype: GovernanceArchetype;        // 'RECTOR' | 'SUPERVISOR' | 'EJECUTOR'
+  level?: number;                       // 1 (Central), 2..N-1 (Táctico), N (Sede/Campo)
+  parentRoleId?: string;                // Para cascadas de reporte anidadas
+  canApproveBaseline?: boolean;         // Exclusivo Nivel 1 (Sede Central)
+}
+
+// 3. Estructura opcional de Delegación de Autoridad (Trazable)
+export interface DelegatedPermission {
+  id: string;
+  grantedToUserId: string;              // Usuario que recibe la facultad
+  grantedByUserId: string;              // Rector que autoriza
+  canEditWbsAndDates?: boolean;         // Permiso delegado para editar fechas marco
+  canManageStaffSedes?: boolean;        // Permiso para reasignar personal a sedes
+  scopeSedeIds?: string[] | 'ALL';       // Cobertura autorizada (sedes específicas o todas)
+  grantedAt?: string;
+  expiresAt?: string;                   // Vigencia temporal opcional
+  active: boolean;
+}
+
+// 4. Doble Horizonte en Sedes: Nudos Críticos y Prórrogas locales
+export interface SedeBlockerRequest {
+  hasBlocker?: boolean;                 // true si la sede tiene un nudo crítico activo
+  blockerReason?: string;               // Detalle del bloqueo (falta de personal, presupuesto, etc.)
+  requestedEndDate?: string;            // Solicitud de prórroga local de la sede
+  requestNote?: string;                 // Sustento de la prórroga para Sede Central
+  requestStatus?: 'pending' | 'approved' | 'rejected';
+}
+
+// 5. Taxonomía de Notificaciones para la Campana del Topbar (Estilo Trello / Linear)
+export type NotificationPriority = 'CRITICAL' | 'PREVENTIVE' | 'INFO';
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  description?: string;
+  priority: NotificationPriority;       // 'CRITICAL' (Badge rojo), 'PREVENTIVE', 'INFO'
+  category?: 'mencion' | 'nudo_critico' | 'prorroga' | 'hito_vencido' | 'asignacion';
+  recipientUserId?: string;
+  senderName?: string;
+  targetModule?: ModuleKey;             // Módulo destino al hacer clic (ej. 'sedes', 'cronograma')
+  targetEntityId?: string;              // ID de la tarea, UGEL o sede relacionada
+  read: boolean;
+  createdAt: string;
+}
+
+// Storage keys aditivas para persistencia segura
+export const DELEGATIONS_STORAGE_KEY = 'qaway-gp-delegations-v1';
+export const NOTIFICATIONS_STORAGE_KEY = 'qaway-gp-notifications-v1';

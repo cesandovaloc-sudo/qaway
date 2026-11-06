@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { ModuleKey, UserRole } from '../types';
+import { NotificationPopover } from './NotificationPopover';
 import {
   Bell,
   Check,
@@ -116,35 +117,7 @@ export default function Topbar({
           <CircleHelp size={18} />
         </button>
 
-        <button
-          className="qm-topbar-btn"
-          style={{ position: 'relative' }}
-          aria-label="Notificaciones"
-          title="Notificaciones y alertas preventivas"
-          onClick={() =>
-            notify('Tienes 3 alertas preventivas de seguimiento territorial')
-          }
-        >
-          <Bell size={18} />
-          <span
-            style={{
-              position: 'absolute',
-              top: '-3px',
-              right: '-3px',
-              width: '15px',
-              height: '15px',
-              borderRadius: '50%',
-              background: '#dc2626',
-              color: 'white',
-              fontSize: '9px',
-              fontWeight: 800,
-              display: 'grid',
-              placeItems: 'center',
-            }}
-          >
-            3
-          </span>
-        </button>
+        <NotificationPopover />
 
         {/* Botón de Perfil en Topbar */}
         <div

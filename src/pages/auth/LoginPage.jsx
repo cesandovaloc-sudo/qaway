@@ -26,6 +26,9 @@ export default function LoginPage() {
   const redirectTarget = (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//'))
     ? rawRedirect
     : '/hub/panel'
+  // Las invitaciones o enlaces directos de una aplicación conservan su destino
+  // y no pasan por el flujo comercial/onboarding del Hub.
+  const isGestorDirectEntry = redirectTarget === '/hub/gestor_proyecto' || redirectTarget.startsWith('/hub/gestor_proyecto/')
   const regEmail = searchParams.get('email') || ''
   const linkError = searchParams.get('linkError') || ''
   const linkErrorDesc = searchParams.get('linkErrorDesc') || ''
@@ -38,7 +41,7 @@ export default function LoginPage() {
     if (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')) return rawRedirect
     try {
       const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
-      if (me && !me.is_platform_admin) {
+        if (me && !me.is_platform_admin && !isGestorDirectEntry) {
         if (!me.tenant_id) return '/onboarding'
         // El wizard determina el paso correcto según el estado persistido.
         const { data: t } = await supabase.from('tenants').select('status, features').eq('id', me.tenant_id).maybeSingle()

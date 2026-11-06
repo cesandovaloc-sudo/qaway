@@ -21,6 +21,7 @@ import HitosView from './modules/hitos/HitosView';
 import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
 import ConfiguracionView from './modules/configuracion/ConfiguracionView';
 import FloatingChatAssistant from './components/FloatingChatAssistant';
+import { deleteGestorProject, listGestorProjects, upsertGestorProject } from './services/gestorProjectService';
 
 type Binds = { notify: (m: string) => void; setView?: (v: string) => void };
 
@@ -129,6 +130,8 @@ function App() {
     return 'p1';
   });
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  // Fase previa al login: se mantiene explícito y vacío hasta conectar el Hub.
+  const gestorTenantId: string | null = null;
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('qaway-sidebar-collapsed');
@@ -343,6 +346,24 @@ function App() {
     }
   }, [projects]);
 
+  // Sincronización tolerante: si Supabase aún no tiene la migración aplicada,
+  // el Gestor conserva el estado local y no bloquea la interfaz.
+  useEffect(() => {
+    let cancelled = false;
+    listGestorProjects(gestorTenantId)
+      .then((remoteProjects) => {
+        if (cancelled || remoteProjects.length === 0) return;
+        setProjects((current) => {
+          const localOnly = current.filter((project) => !remoteProjects.some((remote) => remote.id === project.id));
+          return [...remoteProjects, ...localOnly];
+        });
+      })
+      .catch((error) => console.warn('[Gestor Projects] modo local:', error?.message || error));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleSelectModule = (next: ModuleKey) => {
     try {
       localStorage.setItem(MODULE_STORAGE_KEY, next);
@@ -393,6 +414,9 @@ function App() {
       /* fallback */
     }
     setProjects((prev) => [item, ...prev]);
+    void upsertGestorProject(item, gestorTenantId).catch((error) => {
+      console.warn('[Gestor Projects] no se pudo persistir el proyecto:', error?.message || error);
+    });
     setActiveProjectId(item.id);
     navigate(MODULE_SLUGS['cronograma']);
     setCronogramaPerspective('maestro');
@@ -400,6 +424,9 @@ function App() {
   };
 
   const handleDeleteProject = (id: string) => {
+    void deleteGestorProject(id).catch((error) => {
+      console.warn('[Gestor Projects] no se pudo eliminar el proyecto:', error?.message || error);
+    });
     try {
       localStorage.removeItem(`qaway-gantt-items-${id}`);
     } catch {
@@ -445,6 +472,9 @@ function App() {
         /* fallback */
       }
       return next;
+    });
+    void upsertGestorProject(updated, gestorTenantId).catch((error) => {
+      console.warn('[Gestor Projects] no se pudo actualizar el proyecto:', error?.message || error);
     });
     notifyActive(`Proyecto "${updated.name}" actualizado con éxito.`);
   };
