@@ -7398,7 +7398,6 @@ export default function CronogramaGanttView({
           isNewDraft={isNewDraft}
           items={items}
           hitos={hitos}
-          fases={fases}
           currentTodayIso={currentTodayIso}
           onSave={(updated, isNew) => {
             if (isNew) {
