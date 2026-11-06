@@ -2189,5 +2189,4 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   );
 });
 
-export { GanttEditorDrawer };
 export default GanttEditorDrawer;
