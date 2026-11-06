@@ -39,11 +39,11 @@ interface ChatMessage {
     name: string;
     size: string;
     type: 'excel' | 'pdf' | 'image' | 'other';
-  };
+  } | undefined;
   actions?: Array<{
     label: string;
     actionKey: string;
-  }>;
+  }> | undefined;
 }
 
 const MODULE_CONTEXT_INFO: Record<ModuleKey, { title: string; hint: string; suggestions: string[] }> = {
@@ -237,7 +237,7 @@ export default function FloatingChatAssistant({
     try {
       // Preparar historial conversacional previo para el contexto multimodal RAG
       const historyForRAG = messages.slice(-6).map((m) => ({
-        role: m.sender === 'user' ? ('user' as const) : ('model' as const),
+        sender: m.sender,
         text: m.text
       }));
 

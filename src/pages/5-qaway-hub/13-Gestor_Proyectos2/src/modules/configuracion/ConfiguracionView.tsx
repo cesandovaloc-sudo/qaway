@@ -47,11 +47,11 @@ export interface ProjectItem {
   code: string;
   name: string;
   region: string;
-  subtext?: string;
-  budget?: string;
-  sponsor?: string;
-  riskLevel?: string;
-  metodologia?: string;
+  subtext?: string | undefined;
+  budget?: string | undefined;
+  sponsor?: string | undefined;
+  riskLevel?: string | undefined;
+  metodologia?: string | undefined;
 }
 
 export interface ConfiguracionViewProps {

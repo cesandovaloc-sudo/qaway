@@ -166,11 +166,13 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
           .filter((r) => r.parent_id && !validIds.has(r.parent_id))
           .map((r) => r.id);
         if (orphanIds.length > 0) {
-          supabase
-            .from('gestor_cronograma_items')
-            .delete()
-            .in('id', orphanIds)
-            .eq('project_id', projectId)
+          void Promise.resolve(
+            supabase
+              .from('gestor_cronograma_items')
+              .delete()
+              .in('id', orphanIds)
+              .eq('project_id', projectId)
+          )
             .then(() => {})
             .catch(() => {});
         }

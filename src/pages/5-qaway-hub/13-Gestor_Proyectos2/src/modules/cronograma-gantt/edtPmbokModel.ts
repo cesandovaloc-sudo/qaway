@@ -87,11 +87,11 @@ export function resolveEdtNodeType(
     id: string;
     kind?: 'hito' | 'subproceso';
     edtType?: EdtNodeType;
-    parentId?: string;
+    parentId?: string | undefined;
     start?: string;
     end?: string;
   },
-  allItems: Array<{ id: string; parentId?: string }> = []
+  allItems: Array<{ id: string; parentId?: string | undefined }> = []
 ): EdtNodeType {
   const hasChildren = allItems.length > 0 && allItems.some((c) => c.parentId === item.id);
 
@@ -131,11 +131,11 @@ export function getEdtNodeDisplayLabel(
     id: string;
     kind?: 'hito' | 'subproceso';
     edtType?: EdtNodeType;
-    parentId?: string;
+    parentId?: string | undefined;
     start?: string;
     end?: string;
   },
-  allItems: Array<{ id: string; parentId?: string }> = []
+  allItems: Array<{ id: string; parentId?: string | undefined }> = []
 ): string {
   const hasChildren = allItems.length > 0 && allItems.some((c) => c.parentId === item.id);
 
@@ -173,7 +173,7 @@ export interface OfficialEdtReferenceRow {
   edtType: EdtNodeType;
   kind: 'hito' | 'subproceso';
   faseId: string | null;
-  parentId?: string;
+  parentId?: string | undefined;
   subprocesoGroup?: string;
   start: string;
   end: string;
@@ -1275,10 +1275,10 @@ export function compareWbsCodes(codeA?: string, codeB?: string): number {
     const matchA = sA.match(/^(\d+)(.*)$/);
     const matchB = sB.match(/^(\d+)(.*)$/);
     if (matchA && matchB) {
-      const numA = parseInt(matchA[1], 10);
-      const numB = parseInt(matchB[1], 10);
+      const numA = parseInt(matchA[1] ?? '', 10);
+      const numB = parseInt(matchB[1] ?? '', 10);
       if (numA !== numB) return numA - numB;
-      const suffComp = matchA[2].localeCompare(matchB[2]);
+      const suffComp = (matchA[2] ?? '').localeCompare(matchB[2] ?? '');
       if (suffComp !== 0) return suffComp;
     } else {
       const cmp = sA.localeCompare(sB, undefined, { numeric: true });
@@ -1294,7 +1294,7 @@ export function compareWbsCodes(codeA?: string, codeB?: string): number {
  * 2. Hijos directamente anidados bajo su padre, ordenados por código WBS.
  * 3. Sub-hijos (Nivel 3) anidados bajo su respectivo subcomponente.
  */
-export function sortWbsHierarchy<T extends { id: string; code?: string; parentId?: string }>(items: T[]): T[] {
+export function sortWbsHierarchy<T extends { id: string; code?: string | undefined; parentId?: string | undefined }>(items: T[]): T[] {
   const ids = new Set(items.map((r) => r.id));
   const children = new Map<string, T[]>();
   const roots: T[] = [];

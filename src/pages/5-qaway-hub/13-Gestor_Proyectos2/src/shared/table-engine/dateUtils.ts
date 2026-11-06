@@ -2,7 +2,7 @@
 
 const toUtc = (iso: string) => {
   const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
-  return new Date(Date.UTC(y, (m || 1) - 1, d || 1));
+  return new Date(Date.UTC(y ?? 0, (m ?? 1) - 1, d ?? 1));
 };
 
 const fromUtc = (dt: Date) => dt.toISOString().slice(0, 10);
@@ -20,7 +20,7 @@ export const normIso = (s: unknown): string | null => {
   if (isIso(s)) return s.slice(0, 10);
   if (typeof s === 'string') {
     const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s.trim());
-    if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+    if (m) return `${m[3] ?? '0'}-${(m[2] ?? '').padStart(2, '0')}-${(m[1] ?? '').padStart(2, '0')}`;
   }
   return null;
 };

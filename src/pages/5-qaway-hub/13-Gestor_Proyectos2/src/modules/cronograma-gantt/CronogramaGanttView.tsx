@@ -149,7 +149,7 @@ export interface DeliverableItem {
   id: string;
   name: string;
   type: DeliverableType;
-  url?: string;
+  url?: string | undefined;
   fileName?: string;
 }
 
@@ -196,8 +196,8 @@ export interface Item {
   baselineStart?: string;
   baselineEnd?: string | undefined;
   /** Fechas reales de ejecución (se registran al iniciar/completar; editables). */
-  actualStart?: string;
-  actualEnd?: string;
+  actualStart?: string | undefined;
+  actualEnd?: string | undefined;
   /** Tareas o hitos predecesores en la cadena de prelación / ruta crítica. */
   dependencies?: string[];
   /** Entidad responsable oficial del componente (DRE / UGEL / región). */
@@ -1157,15 +1157,15 @@ export default function CronogramaGanttView({
   activeProject,
   perspective = 'maestro',
 }: {
-  onActions?: (h: any) => void;
+  onActions?: ((h: any) => void) | undefined;
   onSwitchPerspective?: (p: 'maestro' | 'territorial') => void;
   activeProject?: {
     id: string;
     code: string;
     name: string;
     region: string;
-    subtext?: string;
-  };
+    subtext?: string | undefined;
+  } | undefined;
   perspective?: 'maestro' | 'territorial';
 }) {
   const projectId = activeProject?.id || 'p1';
@@ -7443,6 +7443,7 @@ export default function CronogramaGanttView({
           }}
           onAddSubItem={(kind, parentId) => add(kind, parentId)}
           onSelectSubItem={(it) => openEditorForItem(it)}
+          onSelectItem={(id) => setSelectedId(id)}
           notify={notify}
           activeProject={activeProject}
         />

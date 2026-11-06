@@ -85,6 +85,7 @@ export default function EquipoSedesView({
   };
 
   const handleDesignarResponsable = (integrante: Integrante) => {
+    if (!activeSede) return;
     const updatedSede: SedeFrente = {
       ...activeSede,
       responsableId: integrante.id,
@@ -314,10 +315,12 @@ export default function EquipoSedesView({
       </div>
 
       {/* Footer que cierra la cápsula */}
-      <footer className="footer">
-        <span>Frente Operativo: {activeSede.nombre} ({activeSede.codigo})</span>
-        <span>Dotación actual: {integrantesActiveSede.length} de {activeSede.dotacionRequerida} requeridos</span>
-      </footer>
+      {activeSede && (
+        <footer className="footer">
+          <span>Frente Operativo: {activeSede.nombre} ({activeSede.codigo})</span>
+          <span>Dotación actual: {integrantesActiveSede.length} de {activeSede.dotacionRequerida} requeridos</span>
+        </footer>
+      )}
 
       {/* MODAL DE TRANSFERENCIA INDIVIDUAL */}
       {modalTransferir && (

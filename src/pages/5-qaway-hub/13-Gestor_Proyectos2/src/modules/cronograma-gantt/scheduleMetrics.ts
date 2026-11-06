@@ -17,10 +17,10 @@ export interface ScheduleFields {
   end: string;
   progress: number;
   status: string;
-  baselineStart?: string;
-  baselineEnd?: string;
-  actualStart?: string;
-  actualEnd?: string;
+  baselineStart?: string | undefined;
+  baselineEnd?: string | undefined;
+  actualStart?: string | undefined;
+  actualEnd?: string | undefined;
 }
 
 const DONE_STATUSES = ['Completado', 'Cumple'];

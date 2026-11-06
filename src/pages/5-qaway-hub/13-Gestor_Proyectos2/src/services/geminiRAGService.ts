@@ -27,7 +27,7 @@ export interface GeminiRAGQueryParams {
     type: string;
     contentSummary?: string;
     rawText?: string;
-  };
+  } | undefined;
   fileAttachment?: {
     mimeType: string;
     data: string; // Base64

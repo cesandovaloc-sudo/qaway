@@ -1,5 +1,5 @@
 import { getColumnType } from './columnTypes';
-import type { ColumnDef, EngineContext, FilterState, Hierarchy, SortCriterion } from './types';
+import { EMPTY_TOKEN, type ColumnDef, type EngineContext, type FilterState, type Hierarchy, type SortCriterion } from './types';
 
 /* ───────────── Filtrado ───────────── */
 
@@ -19,7 +19,7 @@ export function filterRows<R>(
   const active = columns.filter((c) => isFilterActive(filters[c.id]));
   if (!active.length) return rows;
 
-  const prepared = active.map((c) => ({ col: c, type: getColumnType(c.type), f: filters[c.id] }));
+  const prepared = active.map((c) => ({ col: c, type: getColumnType(c.type), f: filters[c.id] ?? { op: EMPTY_TOKEN } }));
   // Entre columnas: AND. Dentro de una columna: la lógica OR/exclusión vive en el tipo.
   const matches = (row: R) =>
     prepared.every(({ col, type, f }) => type.test(col.accessor(row), f, ctx, col as ColumnDef));
@@ -67,10 +67,10 @@ const cmpWbs = (a: any, b: any): number => {
     const matchA = sA.match(/^(\d+)(.*)$/);
     const matchB = sB.match(/^(\d+)(.*)$/);
     if (matchA && matchB) {
-      const numA = parseInt(matchA[1], 10);
-      const numB = parseInt(matchB[1], 10);
+      const numA = parseInt(matchA[1] ?? '', 10);
+      const numB = parseInt(matchB[1] ?? '', 10);
       if (numA !== numB) return numA - numB;
-      const suffComp = matchA[2].localeCompare(matchB[2]);
+      const suffComp = (matchA[2] ?? '').localeCompare(matchB[2] ?? '');
       if (suffComp !== 0) return suffComp;
     } else {
       const cmp = sA.localeCompare(sB, undefined, { numeric: true });
@@ -145,7 +145,9 @@ export function sortRows<R>(
     const ka = keys.get(a) as Key[];
     const kb = keys.get(b) as Key[];
     for (let i = 0; i < usable.length; i++) {
-      const r = cmpKeys(ka[i], kb[i], usable[i].c.dir === 'asc' ? 1 : -1);
+      const k = usable[i];
+      if (!k) continue;
+      const r = cmpKeys(ka[i] ?? null, kb[i] ?? null, k.c.dir === 'asc' ? 1 : -1);
       if (r !== 0) return r;
     }
     return cmpWbs(a, b);

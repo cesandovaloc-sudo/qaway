@@ -118,7 +118,11 @@ export function useTableEngine<R>(opts: TableEngineOptions<R>): TableEngine<R> {
       const j = i + delta;
       if (i < 0 || j < 0 || j >= s.sort.length) return s;
       const sort = [...s.sort];
-      [sort[i], sort[j]] = [sort[j], sort[i]];
+      const a = sort[i];
+      const b = sort[j];
+      if (!a || !b) return s;
+      sort[i] = b;
+      sort[j] = a;
       return { ...s, sort };
     });
   }, []);

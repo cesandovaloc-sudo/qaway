@@ -27,8 +27,8 @@ interface TopbarProps {
     code: string;
     name: string;
     region: string;
-    subtext?: string;
-  };
+    subtext?: string | undefined;
+  } | undefined;
 }
 
 const MODULE_LABELS: Record<ModuleKey, string> = {

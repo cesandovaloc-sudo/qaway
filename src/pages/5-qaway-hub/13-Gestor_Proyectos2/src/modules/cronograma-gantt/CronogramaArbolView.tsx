@@ -31,8 +31,10 @@ interface CronogramaArbolViewProps {
 const getInitials = (name?: string) => {
   if (!name || name === 'Sin asignar') return 'SA';
   const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  const first = parts[0] ?? '';
+  const last = parts[parts.length - 1] ?? '';
+  if (parts.length === 1) return first.slice(0, 2).toUpperCase();
+  return `${first[0] ?? ''}${last[0] ?? ''}`.toUpperCase();
 };
 
 // Color temático para avatar
@@ -79,7 +81,7 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
     items.forEach((x) => {
       if (x.parentId) {
         if (!subMap[x.parentId]) subMap[x.parentId] = [];
-        subMap[x.parentId].push(x);
+        subMap[x.parentId]?.push(x);
       }
     });
 

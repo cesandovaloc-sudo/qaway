@@ -1,15 +1,32 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
+  CalendarDays,
+  Calendar,
   FileText,
-  Clock,
-  ArrowRight,
-  MoreHorizontal,
+  Folder,
+  ChevronLeft,
+  ChevronRight,
   Check,
-  Plus,
+  Users,
+  X,
 } from 'lucide-react';
-import type { Item, Status } from './CronogramaGanttView';
+import type { Item, Status } from '../cronograma-gantt/CronogramaGanttView';
 
-export interface CalendarProjectEvent {
+export interface CalendarWeekDay {
+  date: Date;
+  iso: string;
+  dayNumber: number;
+  isCurrentMonth: boolean;
+}
+
+export interface CalendarWeek {
+  weekIndex: number;
+  days: CalendarWeekDay[];
+  startDateIso: string;
+  endDateIso: string;
+}
+
+export interface DynamicCalendarEvent {
   id: string;
   code: string;
   name: string;
@@ -18,12 +35,12 @@ export interface CalendarProjectEvent {
   progress: number;
   start: string;
   end: string;
-  weekIndex: number; // 0 a 4 (Semana 1 a Semana 5)
-  colStart: number;  // 1 a 7 (Lunes = 1, Domingo = 7)
-  colSpan: number;   // 1 a 7
-  row: number;       // 1, 2, 3...
-  owner: string;
-  region: string;
+  weekIndex: number;
+  colStart: number;
+  colSpan: number;
+  row: number;
+  color: 'blue' | 'purple' | 'pink' | 'amber';
+  item: Item;
 }
 
 interface CronogramaCalendarioViewProps {
@@ -31,7 +48,7 @@ interface CronogramaCalendarioViewProps {
   onSelectItem: (item: Item) => void;
   formatDatePE: (iso: string) => string;
   calYear: number;
-  calMonth: number; // 0-indexed: 9 = Octubre
+  calMonth: number; // 0-indexed: 0 = Enero, 7 = Agosto, 9 = Octubre
   calDay: number;
   calSubView: 'Mes' | 'Semana' | 'Día' | 'Agenda';
   onNavPrev: () => void;
@@ -44,340 +61,16 @@ interface CronogramaCalendarioViewProps {
   selectedRegions?: string[];
   regionFilter?: string;
   search?: string;
+  showBarLabels?: boolean;
+  showBaseline?: boolean;
+  showBarAvatars?: boolean;
 }
 
-const WEEK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-
-// Programación Oficial de Hitos Rectores y Subprocesos · MINEDU Dotación 2027 (Octubre 2026)
-// Exclusivo para Hitos y Entregables del Proyecto (Reuniones pertenece a su propio módulo)
-const OCTOBER_PROJECT_EVENTS: CalendarProjectEvent[] = [
-  // SEMANA 1: 28 Sep al 04 Oct (Jueves 1 al Domingo 4)
-  {
-    id: 'cal-sp-02-1',
-    code: 'SP-02.1',
-    name: 'Elaboración y entrega del plan de distribución',
-    kind: 'subproceso',
-    status: 'En proceso',
-    progress: 55,
-    start: '2026-10-01',
-    end: '2026-10-04',
-    weekIndex: 0,
-    colStart: 4,
-    colSpan: 4,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Junín',
-  },
-
-  // SEMANA 2: 05 al 11 Oct
-  {
-    id: 'cal-sp-02-2',
-    code: 'SP-02.2',
-    name: 'Identificación y directorio de almacenes',
-    kind: 'subproceso',
-    status: 'Completado',
-    progress: 100,
-    start: '2026-10-05',
-    end: '2026-10-08',
-    weekIndex: 1,
-    colStart: 1,
-    colSpan: 4,
-    row: 1,
-    owner: 'María Salazar',
-    region: 'Junín',
-  },
-  {
-    id: 'cal-sp-02-3',
-    code: 'SP-02.3',
-    name: 'Registro y corte de stock inicial',
-    kind: 'subproceso',
-    status: 'En proceso',
-    progress: 40,
-    start: '2026-10-09',
-    end: '2026-10-10',
-    weekIndex: 1,
-    colStart: 5,
-    colSpan: 2,
-    row: 1,
-    owner: 'Ana Paredes',
-    region: 'Junín',
-  },
-  {
-    id: 'cal-h-02',
-    code: 'H-02',
-    name: 'Gestión de Almacenes y Recepción en MC SIGA',
-    kind: 'hito',
-    status: 'En proceso',
-    progress: 42,
-    start: '2026-10-05',
-    end: '2026-10-11',
-    weekIndex: 1,
-    colStart: 1,
-    colSpan: 7,
-    row: 2,
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-  },
-
-  // SEMANA 3: 12 al 18 Oct
-  {
-    id: 'cal-sp-02-4',
-    code: 'SP-02.4',
-    name: 'Validación física de almacenes territoriales',
-    kind: 'subproceso',
-    status: 'Completado',
-    progress: 100,
-    start: '2026-10-13',
-    end: '2026-10-15',
-    weekIndex: 2,
-    colStart: 2,
-    colSpan: 3,
-    row: 1,
-    owner: 'Lucía Castillo',
-    region: 'Lima Provincias',
-  },
-  {
-    id: 'cal-sp-03-1',
-    code: 'SP-03.1',
-    name: 'Validación de evidencias y requerimientos',
-    kind: 'subproceso',
-    status: 'En proceso',
-    progress: 60,
-    start: '2026-10-16',
-    end: '2026-10-18',
-    weekIndex: 2,
-    colStart: 5,
-    colSpan: 3,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Junín',
-  },
-
-  // SEMANA 4: 19 al 25 Oct
-  {
-    id: 'cal-sp-02-5',
-    code: 'SP-02.5',
-    name: 'Cierre de fase y conciliación de almacén',
-    kind: 'subproceso',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-21',
-    end: '2026-10-23',
-    weekIndex: 3,
-    colStart: 3,
-    colSpan: 3,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Junín',
-  },
-  {
-    id: 'cal-sp-03-2',
-    code: 'SP-03.2',
-    name: 'Consolidado de requerimientos II.EE.',
-    kind: 'subproceso',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-24',
-    end: '2026-10-25',
-    weekIndex: 3,
-    colStart: 6,
-    colSpan: 2,
-    row: 1,
-    owner: 'María Salazar',
-    region: 'Junín',
-  },
-
-  // SEMANA 5: 26 Oct al 01 Nov
-  {
-    id: 'cal-h-03',
-    code: 'H-03',
-    name: 'Acta de conformidad y asignación presupuestal',
-    kind: 'hito',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-27',
-    end: '2026-10-29',
-    weekIndex: 4,
-    colStart: 2,
-    colSpan: 3,
-    row: 1,
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-  },
-  {
-    id: 'cal-sp-04-1',
-    code: 'SP-04.1',
-    name: 'Informe técnico territorial consolidado',
-    kind: 'subproceso',
-    status: 'Pendiente',
-    progress: 0,
-    start: '2026-10-30',
-    end: '2026-11-01',
-    weekIndex: 4,
-    colStart: 5,
-    colSpan: 3,
-    row: 2,
-    owner: 'Carlos Mendoza',
-    region: 'Todas las Regiones',
-  },
-];
-
-// Estructura de las 5 semanas de Octubre 2026
-const OCTOBER_2026_WEEKS = [
-  {
-    weekIndex: 0,
-    days: [
-      { dayNumber: 28, isCurrentMonth: false },
-      { dayNumber: 29, isCurrentMonth: false },
-      { dayNumber: 30, isCurrentMonth: false },
-      { dayNumber: 1, isCurrentMonth: true },
-      { dayNumber: 2, isCurrentMonth: true },
-      { dayNumber: 3, isCurrentMonth: true },
-      { dayNumber: 4, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 1,
-    days: [
-      { dayNumber: 5, isCurrentMonth: true },
-      { dayNumber: 6, isCurrentMonth: true },
-      { dayNumber: 7, isCurrentMonth: true },
-      { dayNumber: 8, isCurrentMonth: true },
-      { dayNumber: 9, isCurrentMonth: true },
-      { dayNumber: 10, isCurrentMonth: true },
-      { dayNumber: 11, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 2,
-    days: [
-      { dayNumber: 12, isCurrentMonth: true },
-      { dayNumber: 13, isCurrentMonth: true },
-      { dayNumber: 14, isCurrentMonth: true },
-      { dayNumber: 15, isCurrentMonth: true },
-      { dayNumber: 16, isCurrentMonth: true },
-      { dayNumber: 17, isCurrentMonth: true },
-      { dayNumber: 18, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 3,
-    days: [
-      { dayNumber: 19, isCurrentMonth: true },
-      { dayNumber: 20, isCurrentMonth: true },
-      { dayNumber: 21, isCurrentMonth: true },
-      { dayNumber: 22, isCurrentMonth: true },
-      { dayNumber: 23, isCurrentMonth: true },
-      { dayNumber: 24, isCurrentMonth: true },
-      { dayNumber: 25, isCurrentMonth: true },
-    ],
-  },
-  {
-    weekIndex: 4,
-    days: [
-      { dayNumber: 26, isCurrentMonth: true },
-      { dayNumber: 27, isCurrentMonth: true },
-      { dayNumber: 28, isCurrentMonth: true },
-      { dayNumber: 29, isCurrentMonth: true },
-      { dayNumber: 30, isCurrentMonth: true },
-      { dayNumber: 31, isCurrentMonth: true },
-      { dayNumber: 1, isCurrentMonth: false },
-    ],
-  },
-];
-
-// Próximos Entregables y Fechas Clave del Proyecto (Sidebar Derecho)
-const UPCOMING_PROJECT_DELIVERABLES = [
-  {
-    id: 'up-1',
-    day: '01',
-    month: 'OCT',
-    code: 'SP-02.1',
-    title: 'Elaboración y entrega del plan de distribución',
-    kind: 'subproceso' as const,
-    status: 'En proceso' as Status,
-    progress: 55,
-    time: 'Plazo oficial',
-    initials: 'CM',
-    avatarBg: '#eff6ff',
-    avatarColor: '#1d4ed8',
-    owner: 'Carlos Mendoza',
-  },
-  {
-    id: 'up-2',
-    day: '05',
-    month: 'OCT',
-    code: 'SP-02.2',
-    title: 'Identificación y directorio de almacenes',
-    kind: 'subproceso' as const,
-    status: 'Completado' as Status,
-    progress: 100,
-    time: 'Entregado',
-    initials: 'MS',
-    avatarBg: '#ecfdf5',
-    avatarColor: '#047857',
-    owner: 'María Salazar',
-  },
-  {
-    id: 'up-3',
-    day: '09',
-    month: 'OCT',
-    code: 'SP-02.3',
-    title: 'Registro y corte de stock inicial',
-    kind: 'subproceso' as const,
-    status: 'En proceso' as Status,
-    progress: 40,
-    time: 'En verificación',
-    initials: 'AP',
-    avatarBg: '#fff7ed',
-    avatarColor: '#c2410c',
-    owner: 'Ana Paredes',
-  },
-  {
-    id: 'up-4',
-    day: '13',
-    month: 'OCT',
-    code: 'SP-02.4',
-    title: 'Validación física de almacenes territoriales',
-    kind: 'subproceso' as const,
-    status: 'Completado' as Status,
-    progress: 100,
-    time: 'Entregado',
-    initials: 'LC',
-    avatarBg: '#ecfdf5',
-    avatarColor: '#047857',
-    owner: 'Lucía Castillo',
-  },
-  {
-    id: 'up-5',
-    day: '16',
-    month: 'OCT',
-    code: 'SP-03.1',
-    title: 'Validación de evidencias y requerimientos',
-    kind: 'subproceso' as const,
-    status: 'En proceso' as Status,
-    progress: 60,
-    time: 'En curso',
-    initials: 'CM',
-    avatarBg: '#eff6ff',
-    avatarColor: '#1d4ed8',
-    owner: 'Carlos Mendoza',
-  },
-  {
-    id: 'up-6',
-    day: '27',
-    month: 'OCT',
-    code: 'H-03',
-    title: 'Acta de conformidad y asignación presupuestal',
-    kind: 'hito' as const,
-    status: 'Pendiente' as Status,
-    progress: 0,
-    time: 'Programado',
-    initials: 'CM',
-    avatarBg: '#f1f5f9',
-    avatarColor: '#475569',
-    owner: 'Carlos Mendoza',
-  },
+const WORK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+const MINI_CAL_WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const CAL_MONTH_NAMES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
 export default function CronogramaCalendarioView({
@@ -390,8 +83,6 @@ export default function CronogramaCalendarioView({
   calSubView,
   onNavPrev,
   onNavNext,
-  onNavToday,
-  onSubViewChange,
   typeFilter = 'Todos',
   tab = 'Todos',
   stateFilter = 'Todos',
@@ -399,429 +90,534 @@ export default function CronogramaCalendarioView({
   regionFilter = 'Todas',
   search = '',
 }: CronogramaCalendarioViewProps) {
-  // Manejador para abrir el drawer con un item real del cronograma
-  const handleOpenItem = (code: string) => {
-    const found = items.find((x) => x.code === code || code.startsWith(x.code));
-    if (found) {
-      onSelectItem(found);
-    } else if (items[0]) {
-      onSelectItem(items[0]);
-    }
+  // Estado de visibilidad del panel lateral
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Estados del mini-calendario interactivo
+  const [miniYear, setMiniYear] = useState(calYear);
+  const [miniMonth, setMiniMonth] = useState(calMonth);
+  const [selectedDateDay, setSelectedDateDay] = useState(calDay || 13);
+
+  // Checkboxes de sugerencias de temas
+  const [checkedTopics, setCheckedTopics] = useState<Record<string, boolean>>({
+    'topic-1': false,
+    'topic-2': false,
+  });
+
+  useEffect(() => {
+    setMiniYear(calYear);
+    setMiniMonth(calMonth);
+  }, [calYear, calMonth]);
+
+  const toggleTopic = (id: string) => {
+    setCheckedTopics((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Filtrado reactivo de eventos según Filtro Tipo, Tab, Estado, Ubicación (Multi-región) y Búsqueda
-  const filteredEvents = useMemo(() => {
-    return OCTOBER_PROJECT_EVENTS.filter((ev) => {
-      // 1. Filtro Tipo (Todos / Hitos / Subprocesos)
+  // Generación de semanas con días laborables (Lunes a Viernes) para el lienzo principal
+  const monthWeeks = useMemo(() => {
+    const weeks: CalendarWeek[] = [];
+    const firstDayOfMonth = new Date(calYear, calMonth, 1);
+    const lastDayOfMonth = new Date(calYear, calMonth + 1, 0);
+
+    const firstDayDow = (firstDayOfMonth.getDay() + 6) % 7; // 0 = Lunes, ..., 6 = Domingo
+    const cursor = new Date(calYear, calMonth, 1 - firstDayDow);
+
+    let weekIdx = 0;
+    while (cursor <= lastDayOfMonth || cursor.getDay() !== 1 || weekIdx < 4) {
+      const allDays: CalendarWeekDay[] = [];
+      for (let d = 0; d < 7; d++) {
+        const y = cursor.getFullYear();
+        const m = String(cursor.getMonth() + 1).padStart(2, '0');
+        const day = String(cursor.getDate()).padStart(2, '0');
+        const iso = `${y}-${m}-${day}`;
+        allDays.push({
+          date: new Date(cursor),
+          iso,
+          dayNumber: cursor.getDate(),
+          isCurrentMonth: cursor.getMonth() === calMonth,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      weeks.push({
+        weekIndex: weekIdx,
+        days: allDays,
+        startDateIso: allDays[0]?.iso ?? '',
+        endDateIso: allDays[6]?.iso ?? '',
+      });
+      weekIdx++;
+      if (weekIdx >= 5) break;
+    }
+    return weeks;
+  }, [calYear, calMonth]);
+
+  // Filtrado de items reales que aplican a los filtros globales
+  const matchingItems = useMemo(() => {
+    return items.filter((it) => {
+      if (it.name.startsWith('UGEL') || it.name.startsWith('DRE Junín (Sede') || /^\d+\.\d+\.\d+/.test(it.code)) {
+        return false;
+      }
       if (typeFilter && typeFilter !== 'Todos') {
-        if (typeFilter === 'Hitos' && ev.kind !== 'hito') return false;
-        if (typeFilter === 'Subprocesos' && ev.kind !== 'subproceso') return false;
+        if (typeFilter === 'Hitos' && it.kind !== 'hito') return false;
+        if (typeFilter === 'Subprocesos' && it.kind !== 'subproceso') return false;
       }
-
-      // 2. Filtro Tab general (Cápsulas de Gantt)
       if (tab && tab !== 'Todos') {
-        if (tab === 'Hitos' && ev.kind !== 'hito') return false;
-        if (tab === 'Subprocesos' && ev.kind !== 'subproceso') return false;
-        if (tab === 'Completados' && ev.status !== 'Completado' && ev.status !== 'Cumple') return false;
-        if (tab === 'En proceso' && ev.status !== 'En proceso' && ev.status !== 'En curso') return false;
-        if (tab === 'Con retraso' && ev.status !== 'Con retraso') return false;
-        if (tab === 'Pendiente' && ev.status !== 'Pendiente') return false;
+        if (tab === 'Componentes' && it.kind !== 'hito') return false;
+        if (tab === 'Hitos' && it.kind !== 'hito') return false;
+        if (tab === 'Subprocesos' && it.kind !== 'subproceso') return false;
+        if (tab === 'Completados' && it.status !== 'Completado' && it.status !== 'Cumple') return false;
+        if (tab === 'En proceso' && it.status !== 'En proceso' && it.status !== 'En curso') return false;
+        if (tab === 'Con retraso' && it.status !== 'Con retraso') return false;
+        if (tab === 'Pendiente' && it.status !== 'Pendiente') return false;
       }
-
-      // 3. Filtro Estado
-      if (stateFilter && stateFilter !== 'Todos') {
-        if (ev.status !== stateFilter) return false;
-      }
-
-      // 4. Filtro Ubicación (Multi-región y territorial)
+      if (stateFilter && stateFilter !== 'Todos' && it.status !== stateFilter) return false;
       if (selectedRegions && selectedRegions.length > 0) {
-        if (ev.region !== 'Todas las Regiones' && !selectedRegions.includes(ev.region)) return false;
+        if (it.region !== 'Todas' && it.region !== 'Todas las Regiones' && !selectedRegions.includes(it.region ?? '')) return false;
       } else if (regionFilter && regionFilter !== 'Todas') {
-        if (ev.region !== 'Todas las Regiones' && ev.region !== regionFilter) return false;
+        if (it.region !== 'Todas' && it.region !== 'Todas las Regiones' && it.region !== regionFilter) return false;
       }
-
-      // 5. Búsqueda por texto
       if (search && search.trim()) {
         const q = search.trim().toLowerCase();
-        const match = `${ev.code} ${ev.name}`.toLowerCase().includes(q);
-        if (!match) return false;
+        if (!`${it.code} ${it.name}`.toLowerCase().includes(q)) return false;
       }
-
       return true;
     });
-  }, [typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
+  }, [items, typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
 
-  // Agrupación de eventos por semana para la cuadrícula del mes
+  // Asignación de paleta armónica pastel según taxonomía WBS / código
+  const getItemColor = (item: Item): 'blue' | 'purple' | 'pink' | 'amber' => {
+    const code = (item.code || '').trim();
+    if (code.startsWith('4') || item.kind === 'hito') return 'blue';
+    if (code.startsWith('5') || code.startsWith('3')) return 'purple';
+    if (code.startsWith('1') || code.startsWith('2')) return 'pink';
+    return 'blue';
+  };
+
+  // Mapeo exacto de barras en la cuadrícula de 5 columnas (L-V) con líneas punteadas
   const weekEvents = useMemo(() => {
-    const map: Record<number, CalendarProjectEvent[]> = { 0: [], 1: [], 2: [], 3: [], 4: [] };
-    filteredEvents.forEach((ev) => {
-      const bucket = map[ev.weekIndex];
-      if (bucket) {
-        bucket.push(ev);
+    const map: Record<number, DynamicCalendarEvent[]> = {};
+    monthWeeks.forEach((w) => {
+      map[w.weekIndex] = [];
+    });
+    if (monthWeeks.length === 0) return map;
+
+    // Buscar items destacados o representativos del proyecto
+    const item4 = matchingItems.find((x) => x.code.startsWith('4') || x.name.toLowerCase().includes('contrato')) || matchingItems[0];
+    const item5 = matchingItems.find((x) => x.code.startsWith('5.1') || x.name.toLowerCase().includes('personal') || x.name.toLowerCase().includes('apoyo')) || matchingItems[1];
+    const item1 = matchingItems.find((x) => x.code.startsWith('1.6') || x.name.toLowerCase().includes('necesidades') || x.code.startsWith('1')) || matchingItems[2];
+
+    // Semana 2 (Semana de los días 12 al 16):
+    if (monthWeeks.length > 1) {
+      if (item4) {
+        map[1]?.push({
+          id: `${item4.id}-w1-r1`,
+          code: item4.code.endsWith('.') ? item4.code : `${item4.code}.`,
+          name: item4.name,
+          kind: item4.kind,
+          status: item4.status,
+          progress: item4.progress,
+          start: item4.start,
+          end: item4.end,
+          weekIndex: 1,
+          colStart: 1,
+          colSpan: 5,
+          row: 1,
+          color: 'blue',
+          item: item4,
+        });
+      }
+
+      if (item5) {
+        map[1]?.push({
+          id: `${item5.id}-w1-r2`,
+          code: item5.code,
+          name: item5.name,
+          kind: item5.kind,
+          status: item5.status,
+          progress: item5.progress,
+          start: item5.start,
+          end: item5.end,
+          weekIndex: 1,
+          colStart: 2,
+          colSpan: 3,
+          row: 2,
+          color: 'purple',
+          item: item5,
+        });
+      }
+    }
+
+    // Semana 3 (Semana de los días 19 al 23):
+    if (monthWeeks.length > 2) {
+      if (item1) {
+        map[2]?.push({
+          id: `${item1.id}-w2-r1`,
+          code: item1.code,
+          name: item1.name,
+          kind: item1.kind,
+          status: item1.status,
+          progress: item1.progress,
+          start: item1.start,
+          end: item1.end,
+          weekIndex: 2,
+          colStart: 1,
+          colSpan: 4,
+          row: 1,
+          color: 'pink',
+          item: item1,
+        });
+      }
+    }
+
+    // Si hay más items en el mes y hay semanas libres, distribuirlos ordenadamente
+    const usedIds = new Set([item4?.id, item5?.id, item1?.id].filter(Boolean));
+    const extraItems = matchingItems.filter((x) => !usedIds.has(x.id)).slice(0, 3);
+
+    extraItems.forEach((it, i) => {
+      const targetWeek = (3 + i) % monthWeeks.length;
+      if (map[targetWeek] && map[targetWeek].length < 2) {
+        map[targetWeek].push({
+          id: `${it.id}-extra-${targetWeek}`,
+          code: it.code,
+          name: it.name,
+          kind: it.kind,
+          status: it.status,
+          progress: it.progress,
+          start: it.start,
+          end: it.end,
+          weekIndex: targetWeek,
+          colStart: 2,
+          colSpan: 3,
+          row: map[targetWeek].length + 1,
+          color: getItemColor(it),
+          item: it,
+        });
       }
     });
+
     return map;
-  }, [filteredEvents]);
+  }, [monthWeeks, matchingItems]);
+
+  // Celdas del mini-calendario (L M X J V S D)
+  const miniCalCells = useMemo(() => {
+    const cells: { dayNumber: number; isCurrentMonth: boolean; isPrev: boolean; isNext: boolean }[] = [];
+    const firstDay = new Date(miniYear, miniMonth, 1);
+    const dayOfWeek = (firstDay.getDay() + 6) % 7; // 0 lunes ... 6 domingo
+    const lastDayPrev = new Date(miniYear, miniMonth, 0).getDate();
+    const lastDayCurr = new Date(miniYear, miniMonth + 1, 0).getDate();
+
+    // Días mes previo
+    for (let i = dayOfWeek - 1; i >= 0; i--) {
+      cells.push({
+        dayNumber: lastDayPrev - i,
+        isCurrentMonth: false,
+        isPrev: true,
+        isNext: false,
+      });
+    }
+
+    // Días mes actual
+    for (let d = 1; d <= lastDayCurr; d++) {
+      cells.push({
+        dayNumber: d,
+        isCurrentMonth: true,
+        isPrev: false,
+        isNext: false,
+      });
+    }
+
+    // Días mes siguiente para completar la cuadrícula (35 celdas)
+    const remaining = 35 - cells.length;
+    for (let n = 1; n <= (remaining > 0 ? remaining : 7); n++) {
+      cells.push({
+        dayNumber: n,
+        isCurrentMonth: false,
+        isPrev: false,
+        isNext: true,
+      });
+    }
+
+    return cells.slice(0, 35);
+  }, [miniYear, miniMonth]);
+
+  const handleMiniPrev = () => {
+    if (miniMonth === 0) {
+      setMiniMonth(11);
+      setMiniYear((y) => y - 1);
+    } else {
+      setMiniMonth((m) => m - 1);
+    }
+    onNavPrev();
+  };
+
+  const handleMiniNext = () => {
+    if (miniMonth === 11) {
+      setMiniMonth(0);
+      setMiniYear((y) => y + 1);
+    } else {
+      setMiniMonth((m) => m + 1);
+    }
+    onNavNext();
+  };
 
   return (
     <div className="cronograma-cal-container cal-master-layout">
       {/* Área Principal de Calendario */}
       <div className="cal-main-area">
-        {/* Cabecera Limpia Institucional: Icono + Octubre 2026 */}
-        <div className="cal-title-header-clean">
-          <div className="cal-plus-icon-wrap" title="Agregar evento o hito al calendario">
-            <Plus size={16} />
-          </div>
-          <h2 className="cal-clean-title">Octubre 2026</h2>
-          <span className="cal-total-count-badge">
-            {filteredEvents.length} {filteredEvents.length === 1 ? 'actividad programada' : 'actividades programadas'}
-          </span>
-        </div>
-
-        {/* 1. SUB-VISTA: MES (Cuadrícula Mensual con Barras de Gantt) */}
+        {/* SUB-VISTA: MES (Cuadrícula Limpia de 5 Columnas Laborales Lunes-Viernes) */}
         {calSubView === 'Mes' && (
           <div className="cal-month-canvas">
-            {/* Cabecera de Días de la Semana: Lunes a Domingo */}
-            <div className="cal-weekdays-header">
-              {WEEK_DAY_LABELS.map((dayLabel) => (
+            {/* Cabecera de Días Laborales: Lunes a Viernes */}
+            <div className="cal-weekdays-header five-cols">
+              {WORK_DAY_LABELS.map((dayLabel) => (
                 <div key={dayLabel} className="cal-weekday-col">
                   {dayLabel}
                 </div>
               ))}
             </div>
 
-            {/* Rejilla de las 5 Semanas de Octubre */}
+            {/* Rejilla de Semanas */}
             <div className="cal-grid-body">
-              {OCTOBER_2026_WEEKS.map((week) => (
-                <div key={week.weekIndex} className="cal-week-row-grid">
-                  {/* Celdas de fondo con número de día */}
-                  {week.days.map((day, idx) => (
-                    <div
-                      key={idx}
-                      className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''}`}
-                    >
-                      <span className="cal-num">{day.dayNumber}</span>
-                    </div>
-                  ))}
+              {monthWeeks.map((week) => {
+                const evs = weekEvents[week.weekIndex] || [];
+                const maxRow = evs.reduce((acc, e) => Math.max(acc, e.row), 0);
+                const dynamicMinHeight = Math.max(136, 46 + maxRow * 48);
 
-                  {/* Capa de Barras de Gantt Oficiales sobre los días */}
-                  <div className="cal-week-events-overlay">
-                    {weekEvents[week.weekIndex]?.map((ev) => {
-                      const isMajor = ev.kind === 'hito';
-                      const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
-                      const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
-                      const isLate = ev.status === 'Con retraso';
-
-                      // Si es Hito Rector, su barra es SIEMPRE bar-major (Azul Oficial Gantt con Rombo ◆).
-                      // Si no es Hito Rector, toma el color según su estado operativo (verde, naranja, rojo o gris).
-                      const barColorClass = isMajor
-                        ? 'bar-major'
-                        : isComplete
-                        ? 'bar-complete'
-                        : isProgress
-                        ? 'bar-progress'
-                        : isLate
-                        ? 'bar-late'
-                        : 'bar-pending';
-
-                      return (
-                        <div
-                          key={ev.id}
-                          className={`cal-gantt-bar ${barColorClass}`}
-                          style={{
-                            gridColumn: `${ev.colStart} / span ${ev.colSpan}`,
-                            gridRow: ev.row,
-                          }}
-                          onClick={() => handleOpenItem(ev.code)}
-                          title={`${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status})`}
-                        >
-                          {/* Barra de avance interior con física y color Gantt */}
-                          <div
-                            className="cal-gantt-progress-fill"
-                            style={{
-                              width: `${Math.min(100, Math.max(0, ev.progress))}%`,
-                            }}
-                          />
-
-                          {/* Contenido legible del entregable */}
-                          <div className="cal-gantt-content">
-                            {isMajor ? (
-                              <span className="cal-gantt-hito-badge">◆</span>
-                            ) : isComplete ? (
-                              <Check size={11} strokeWidth={3} className="cal-gantt-check-icon" />
-                            ) : null}
-                            <strong className="cal-gantt-code">{ev.code}</strong>
-                            <span className="cal-gantt-name">{ev.name}</span>
-                            <span className="cal-gantt-pct">{ev.progress}%</span>
-                          </div>
-
-                          {/* Diamante característico al final del Hito Principal (idéntico a Gantt) */}
-                          {isMajor && (
-                            <span className="cal-gantt-diamond-badge" title="Hito Principal">
-                              <span className="cal-diamond-shape" />
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 2. SUB-VISTA: SEMANA */}
-        {calSubView === 'Semana' && (
-          <div className="cal-subview-semana">
-            <div className="cal-semana-headers">
-              {['Lun 05', 'Mar 06', 'Mié 07', 'Jue 08', 'Vie 09', 'Sáb 10', 'Dom 11'].map((d) => (
-                <div key={d} className="cal-semana-col-title">{d}</div>
-              ))}
-            </div>
-            <div className="cal-semana-content">
-              {filteredEvents.slice(0, 5).map((ev) => {
-                const isMajor = ev.kind === 'hito';
-                const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
-                const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
-                const isLate = ev.status === 'Con retraso';
-                const barColorClass = isMajor
-                  ? 'bar-major'
-                  : isComplete
-                  ? 'bar-complete'
-                  : isProgress
-                  ? 'bar-progress'
-                  : isLate
-                  ? 'bar-late'
-                  : 'bar-pending';
+                // Solo tomamos los primeros 5 días (Lunes a Viernes)
+                const workDays = week.days.slice(0, 5);
 
                 return (
                   <div
-                    key={ev.id}
-                    className={`cal-gantt-bar ${barColorClass}`}
-                    onClick={() => handleOpenItem(ev.code)}
-                    style={{ marginBottom: 8, height: '32px' }}
+                    key={week.weekIndex}
+                    className="cal-week-row-grid five-cols"
+                    style={{ minHeight: `${dynamicMinHeight}px` }}
                   >
-                    <div
-                      className="cal-gantt-progress-fill"
-                      style={{ width: `${ev.progress}%` }}
-                    />
-                    <div className="cal-gantt-content">
-                      {ev.kind === 'hito' && <span className="cal-gantt-hito-badge">◆</span>}
-                      <strong className="cal-gantt-code">{ev.code}</strong>
-                      <span className="cal-gantt-name">{ev.name}</span>
-                      <span className="cal-gantt-pct">{ev.progress}%</span>
+                    {/* Celdas de fondo con número de día */}
+                    {workDays.map((day, idx) => {
+                      const isHighlighted = day.dayNumber === 13 || (day.isCurrentMonth && day.dayNumber === selectedDateDay);
+                      return (
+                        <div
+                          key={idx}
+                          className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''}`}
+                          onClick={() => setSelectedDateDay(day.dayNumber)}
+                        >
+                          <span className={`cal-num ${isHighlighted ? 'today' : ''}`}>
+                            {day.dayNumber}
+                          </span>
+                        </div>
+                      );
+                    })}
+
+                    {/* Capa de Barras de Entregables / Tareas con Línea de Rango Punteada */}
+                    <div className="cal-week-events-overlay five-cols">
+                      {evs.map((ev) => {
+                        const IconComponent = ev.color === 'blue' || ev.kind === 'hito' ? Folder : FileText;
+
+                        return (
+                          <div
+                            key={ev.id}
+                            className="cal-event-slot-wrap"
+                            style={{
+                              gridColumn: `${ev.colStart} / span ${ev.colSpan}`,
+                              gridRow: ev.row,
+                            }}
+                          >
+                            {/* Pastilla cromática limpia */}
+                            <div
+                              className={`cal-event-clean-pill ${ev.color}`}
+                              onClick={() => onSelectItem(ev.item)}
+                              title={`${ev.code} ${ev.name}`}
+                            >
+                              <IconComponent size={13} className="pill-icon" />
+                              <span className="pill-text">
+                                <b className="pill-code">{ev.code}</b> {ev.name}
+                              </span>
+                            </div>
+
+                            {/* Línea guía punteada con topes circulares exactos a la imagen */}
+                            <div className="cal-event-guideline">
+                              <span className="cal-guide-pin left" />
+                              <div className="cal-guide-dashed" />
+                              <span className="cal-guide-pin right" />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    {ev.kind === 'hito' && (
-                      <span className="cal-gantt-diamond-badge">
-                        <span className="cal-diamond-shape" />
-                      </span>
-                    )}
                   </div>
                 );
               })}
             </div>
           </div>
         )}
-
-        {/* 3. SUB-VISTA: DÍA */}
-        {calSubView === 'Día' && (
-          <div className="cal-subview-dia">
-            <div className="cal-dia-head-row">
-              <h3>Martes 27 de Octubre, 2026</h3>
-              <span className="cal-dia-tag">Corte Oficial</span>
-            </div>
-            <div className="cal-dia-schedule">
-              {['08:00', '10:00', '12:00', '14:00', '16:00'].map((h, i) => (
-                <div key={h} className="cal-dia-slot-row">
-                  <span className="cal-dia-hour">{h}</span>
-                  <div className="cal-dia-event-box">
-                    {i === 1 && (
-                      <div
-                        className="cal-gantt-bar bar-progress"
-                        onClick={() => handleOpenItem('SP-02.1')}
-                        style={{ height: '30px' }}
-                      >
-                        <div className="cal-gantt-progress-fill" style={{ width: '55%' }} />
-                        <div className="cal-gantt-content">
-                          <strong className="cal-gantt-code">SP-02.1</strong>
-                          <span className="cal-gantt-name">Elaboración y validación del plan de distribución</span>
-                          <span className="cal-gantt-pct">55%</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 4. SUB-VISTA: AGENDA */}
-        {calSubView === 'Agenda' && (
-          <div className="cal-subview-agenda">
-            {UPCOMING_PROJECT_DELIVERABLES.map((it) => (
-              <div
-                key={it.id}
-                className="cal-agenda-row"
-                onClick={() => handleOpenItem(it.code)}
-              >
-                <div className="cal-date-badge-box">
-                  <span className="cal-badge-day">{it.day}</span>
-                  <span className="cal-badge-mon">{it.month}</span>
-                </div>
-                <div className="cal-agenda-info">
-                  <div className="cal-agenda-title-line">
-                    <span
-                      className={`cal-status-pill-mini ${
-                        it.status === 'Completado'
-                          ? 'pill-complete'
-                          : it.status === 'En proceso'
-                          ? 'pill-progress'
-                          : 'pill-pending'
-                      }`}
-                    >
-                      {it.status}
-                    </span>
-                    <strong>{it.code} · {it.title}</strong>
-                  </div>
-                  <span className="cal-agenda-sub">
-                    {it.kind === 'hito' ? 'Hito Principal' : 'Subproceso'} · Responsable: {it.owner}
-                  </span>
-                </div>
-                <div
-                  className="cal-agenda-avatar"
-                  style={{ backgroundColor: it.avatarBg, color: it.avatarColor }}
-                  title={it.owner}
-                >
-                  {it.initials}
-                </div>
-                <ArrowRight size={14} className="cal-agenda-arrow" />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Barra Lateral Derecha Institucional: Próximos Entregables y Leyenda (Solo en Mes, Semana y Día) */}
-      {calSubView !== 'Agenda' && (
+      {/* Botón flotante para reabrir el panel lateral si se cerró */}
+      {!sidebarOpen && (
+        <button
+          type="button"
+          className="cal-sidebar-reopen-btn"
+          onClick={() => setSidebarOpen(true)}
+          title="Mostrar mini-calendario y agenda"
+        >
+          <CalendarDays size={16} />
+        </button>
+      )}
+
+      {/* Barra Lateral Derecha: Mini-Calendario + Agenda + Sugerencias */}
+      {sidebarOpen && (
         <aside className="cal-sidebar-clean">
-        {/* Sección: Próximos Entregables */}
-        <div className="cal-sidebar-section">
-          <div className="cal-sidebar-head">
-            <h3 className="cal-sidebar-title">Próximos entregables</h3>
+          {/* Pestaña Superior: Tareas sin programar + Botón X */}
+          <div className="cal-sidebar-top-tab">
+            <div className="cal-tab-active-pill">
+              <CalendarDays size={14} className="tab-icon" />
+              <span>Tareas sin programar</span>
+            </div>
             <button
               type="button"
-              className="cal-ver-todos-btn"
-              onClick={() => onSubViewChange('Agenda')}
+              className="cal-sidebar-close-btn"
+              onClick={() => setSidebarOpen(false)}
+              title="Cerrar panel lateral"
             >
-              <span>Ver todos</span>
-              <ArrowRight size={12} />
+              <X size={14} />
             </button>
           </div>
 
-          <div className="cal-upcoming-stack">
-            {UPCOMING_PROJECT_DELIVERABLES.map((ev) => (
-              <div
-                key={ev.id}
-                className="cal-upcoming-card-row"
-                onClick={() => handleOpenItem(ev.code)}
+          {/* 1. Mini-Calendario Mensual Interactivo */}
+          <div className="cal-mini-calendar-widget">
+            <div className="cal-mini-nav-header">
+              <button
+                type="button"
+                className="cal-mini-nav-btn"
+                onClick={handleMiniPrev}
+                title="Mes anterior"
               >
-                {/* Badge de fecha a la izquierda: 01 OCT */}
-                <div className="cal-clean-date-badge">
-                  <span className="badge-day-number">{ev.day}</span>
-                  <span className="badge-month-text">{ev.month}</span>
-                </div>
+                <ChevronLeft size={14} />
+              </button>
+              <span className="cal-mini-month-title">
+                {CAL_MONTH_NAMES[miniMonth]} de {miniYear}
+              </span>
+              <button
+                type="button"
+                className="cal-mini-nav-btn"
+                onClick={handleMiniNext}
+                title="Mes siguiente"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
 
-                {/* Info central */}
-                <div className="cal-upcoming-center-info">
-                  <div className="cal-upcoming-main-title">
-                    <span
-                      className={`cal-status-pill-mini ${
-                        ev.status === 'Completado'
-                          ? 'pill-complete'
-                          : ev.status === 'En proceso'
-                          ? 'pill-progress'
-                          : 'pill-pending'
-                      }`}
-                    >
-                      {ev.status}
-                    </span>
-                    <span className="upcoming-title-text" title={ev.title}>{ev.title}</span>
-                  </div>
+            {/* Días L M X J V S D */}
+            <div className="cal-mini-weekdays-row">
+              {MINI_CAL_WEEKDAYS.map((w, idx) => (
+                <span key={idx} className="cal-mini-weekday-cell">
+                  {w}
+                </span>
+              ))}
+            </div>
 
-                  <div className="cal-upcoming-cat-line">
-                    <FileText size={11} className="cat-icon-sub" />
-                    <span>{ev.code} · {ev.kind === 'hito' ? 'Hito Principal' : 'Subproceso'}</span>
-                  </div>
+            {/* Cuadrícula de 35 días */}
+            <div className="cal-mini-days-grid">
+              {miniCalCells.map((c, idx) => {
+                const isDay1 = c.isCurrentMonth && c.dayNumber === 1;
+                const isDay13 = c.isCurrentMonth && (c.dayNumber === 13 || c.dayNumber === selectedDateDay);
 
-                  {/* Barra de progreso estilo Gantt */}
-                  <div className="cal-upcoming-progress-row">
-                    <div className="cal-mini-track">
-                      <div
-                        className={`cal-mini-fill ${
-                          ev.status === 'Completado'
-                            ? 'fill-complete'
-                            : ev.status === 'En proceso'
-                            ? 'fill-progress'
-                            : 'fill-pending'
-                        }`}
-                        style={{ width: `${ev.progress}%` }}
-                      />
-                    </div>
-                    <span className="cal-mini-pct">{ev.progress}%</span>
-                  </div>
-                </div>
-
-                {/* Avatar iniciales + tres puntos */}
-                <div className="cal-upcoming-right-actions">
-                  <div
-                    className="cal-user-avatar-circle"
-                    style={{ backgroundColor: ev.avatarBg, color: ev.avatarColor }}
-                    title={ev.owner}
-                  >
-                    {ev.initials}
-                  </div>
+                return (
                   <button
+                    key={idx}
                     type="button"
-                    className="cal-more-dots-btn"
-                    title="Opciones de entregable"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenItem(ev.code);
+                    className={`cal-mini-day-cell ${!c.isCurrentMonth ? 'outside' : ''} ${
+                      isDay1 ? 'solid-blue' : ''
+                    } ${isDay13 && !isDay1 ? 'circle-outline' : ''}`}
+                    onClick={() => {
+                      if (c.isCurrentMonth) setSelectedDateDay(c.dayNumber);
                     }}
                   >
-                    <MoreHorizontal size={14} />
+                    {c.dayNumber}
                   </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2. Sección: Agenda de reuniones */}
+          <div className="cal-sidebar-mini-section">
+            <h4 className="cal-mini-section-title">Agenda de reuniones</h4>
+            <div className="cal-meetings-list">
+              <div className="cal-meeting-card">
+                <div className="cal-meeting-icon-box">
+                  <Calendar size={13} />
+                </div>
+                <div className="cal-meeting-text-box">
+                  <span className="cal-meeting-title">Plantilla de agenda de reunión</span>
+                  <span className="cal-meeting-sub">(Ejemplo)</span>
+                </div>
+                <div className="cal-meeting-attendees-badge" title="3 participantes">
+                  <Users size={12} />
+                  <span>3</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Sección: Leyenda (Estricto Sistema Gantt) */}
-        <div className="cal-sidebar-section cal-legend-section">
-          <h3 className="cal-sidebar-title">Leyenda</h3>
-          <div className="cal-clean-legend-grid">
-            <div className="cal-legend-row" title="Hito Principal oficial con rombo característico de Gantt">
-              <span className="cal-legend-diamond">◆</span>
-              <span>Hito Principal</span>
-            </div>
-            <div className="cal-legend-row" title="Subproceso en curso con avance parcial">
-              <span className="cal-legend-box box-progress" />
-              <span>En proceso</span>
-            </div>
-            <div className="cal-legend-row" title="Subproceso cumplido al 100%">
-              <span className="cal-legend-box box-complete" />
-              <span>Completado</span>
-            </div>
-            <div className="cal-legend-row" title="Subproceso pendiente de inicio">
-              <span className="cal-legend-box box-pending" />
-              <span>Pendiente</span>
+              <div className="cal-meeting-card">
+                <div className="cal-meeting-icon-box">
+                  <Calendar size={13} />
+                </div>
+                <div className="cal-meeting-text-box">
+                  <span className="cal-meeting-title">Agenda de reunión semanal</span>
+                  <span className="cal-meeting-sub">(Ejemplo)</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </aside>
+
+          {/* 3. Sección: Sugerencias de nuevos temas */}
+          <div className="cal-sidebar-mini-section">
+            <h4 className="cal-mini-section-title">Sugerencias de nuevos temas</h4>
+            <div className="cal-topics-stack">
+              <div
+                className={`cal-topic-card pink ${checkedTopics['topic-1'] ? 'checked' : ''}`}
+                onClick={() => toggleTopic('topic-1')}
+              >
+                <div className="cal-topic-icon-wrap pink">
+                  <FileText size={13} />
+                </div>
+                <div className="cal-topic-text-wrap">
+                  <span className="cal-topic-title">Resumen de avance trimestral</span>
+                  <span className="cal-topic-sub">(Ejemplo)</span>
+                </div>
+                <div className="cal-topic-checkbox pink">
+                  {checkedTopics['topic-1'] && <Check size={10} strokeWidth={3} />}
+                </div>
+              </div>
+
+              <div
+                className={`cal-topic-card amber ${checkedTopics['topic-2'] ? 'checked' : ''}`}
+                onClick={() => toggleTopic('topic-2')}
+              >
+                <div className="cal-topic-icon-wrap amber">
+                  <FileText size={13} />
+                </div>
+                <div className="cal-topic-text-wrap">
+                  <span className="cal-topic-title">
+                    Analizar cifras de abril y preparar hallazgos para la próxima reunión
+                  </span>
+                  <span className="cal-topic-sub">(Ejemplo)</span>
+                </div>
+                <div className="cal-topic-checkbox amber">
+                  {checkedTopics['topic-2'] && <Check size={10} strokeWidth={3} />}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Sección: Nuevas solicitudes */}
+          <div className="cal-sidebar-mini-section">
+            <h4 className="cal-mini-section-title">Nuevas solicitudes</h4>
+            <div className="cal-request-box">
+              <FileText size={13} className="cal-request-icon" />
+              <span className="cal-request-title">Prueba</span>
+            </div>
+          </div>
+        </aside>
       )}
     </div>
   );

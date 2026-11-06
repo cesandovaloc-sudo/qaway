@@ -8,7 +8,7 @@ import {
   Plus,
   Target
 } from 'lucide-react';
-import type { Item, Status } from './CronogramaGanttView';
+import type { Item, Status } from '../cronograma-gantt/CronogramaGanttView';
 
 interface CronogramaKanbanViewProps {
   items: Item[];

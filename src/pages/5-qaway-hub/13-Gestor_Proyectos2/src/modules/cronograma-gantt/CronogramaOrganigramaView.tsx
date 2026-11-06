@@ -137,8 +137,8 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
 
       if (validStarts.length > 0 && validEnds.length > 0) {
         return {
-          start: validStarts[0],
-          end: validEnds[validEnds.length - 1],
+          start: validStarts[0] ?? '',
+          end: validEnds[validEnds.length - 1] ?? '',
         };
       }
 
@@ -491,7 +491,7 @@ export const CronogramaOrganigramaView: React.FC<CronogramaOrganigramaViewProps>
   };
 
   // Clases dinámicas de Drag & Drop para cada tarjeta
-  const getDragStateClasses = (itemId: string): { className: string; hint?: string } => {
+  const getDragStateClasses = (itemId: string): { className: string; hint?: string | undefined } => {
     if (!draggedId) return { className: '' };
     if (draggedId === itemId) return { className: 'edt-dragging-source' };
     if (hoverTargetId === itemId) {

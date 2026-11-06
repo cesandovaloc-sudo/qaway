@@ -1,9 +1,15 @@
 // Verificación de tipado activada: este archivo será validado por tsc -b
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
 import {
   ChevronLeft,
+  ChevronRight,
   X,
   Calendar,
+  CalendarDays,
+  Anchor,
+  Target,
+  CheckSquare,
+  Paperclip,
   ChevronDown,
   Check,
   Plus,
@@ -33,7 +39,7 @@ import type {
   DeliverableType,
 } from './CronogramaGanttView';
 import { getDeviationDays } from './scheduleMetrics';
-import { getEdtNodeDisplayLabel } from './edtPmbokModel';
+import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, type EdtNodeType } from './edtPmbokModel';
 import {
   REGIONES_PROYECTO,
   MACROREGIONES,
@@ -55,6 +61,8 @@ const STATUS_CLASS: Record<Status, string> = {
   'Pendiente': 'pending',
   'Con retraso': 'late',
 };
+
+const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
 const formatDate = (s: string) =>
   new Date(s + 'T12:00:00')
@@ -189,7 +197,7 @@ function MiniCalendar({
         {days.map((item, idx) => {
           const isSelected = item.iso === value;
           const isToday = item.iso === TODAY_ISO;
-          const isDisabled = (min && item.iso < min) || (max && item.iso > max);
+          const isDisabled = (!!min && item.iso < min) || (!!max && item.iso > max);
           return (
             <button
               key={idx}
@@ -244,13 +252,14 @@ interface GanttEditorDrawerProps {
   isNewDraft: boolean;
   items: Item[];
   hitos: Item[];
-  fases?: any[];
   currentTodayIso: string;
   onSave: (updatedItem: Item, isNew: boolean) => void;
   onClose: () => void;
   onDeleteItem?: (item: Item) => void;
   onAddSubItem?: (kind: 'hito' | 'subproceso', parentId?: string) => void;
   onSelectSubItem?: (item: Item) => void;
+  /** Sincroniza la selección del Gantt padre cuando el Drawer cambia el ítem abierto */
+  onSelectItem?: (id: string) => void;
   notify: (msg: string) => void;
   activeProject?: any;
 }
@@ -261,13 +270,13 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   isNewDraft: initialIsNewDraft,
   items,
   hitos,
-  fases = [],
   currentTodayIso,
   onSave,
   onClose,
   onDeleteItem,
   onAddSubItem,
   onSelectSubItem,
+  onSelectItem,
   notify,
   activeProject,
 }: GanttEditorDrawerProps) {
@@ -280,7 +289,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
   const [editorReportTypeOpen, setEditorReportTypeOpen] = useState(false);
   const [editorStatusOpen, setEditorStatusOpen] = useState(false);
-  const [editorCalOpen, setEditorCalOpen] = useState<'start' | 'end' | null>(null);
+  const [editorCalOpen, setEditorCalOpen] = useState<'start' | 'end' | 'actualStart' | 'actualEnd' | null>(null);
   const [editorHitoSelectOpen, setEditorHitoSelectOpen] = useState(false);
   const [editorParentSelectOpen, setEditorParentSelectOpen] = useState(false);
   const [editorDepSelectOpen, setEditorDepSelectOpen] = useState(false);
@@ -310,7 +319,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
       setIsNewDraft(initialIsNewDraft);
       setEditorInitialSnapshot(captureSnapshot(selectedItem));
       setEditorTab('info');
-      setAttachment(selectedItem.attachments?.[0]?.name || selectedItem.attachment || '');
+      setAttachment(selectedItem.attachments?.[0]?.name || '');
     } else if (!panelOpen) {
       setDrawerDraft(null);
     }
@@ -324,6 +333,18 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   editorInitialSnapshotRef.current = editorInitialSnapshot;
   const selectedRef = useRef(selectedItem);
   selectedRef.current = selectedItem;
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  // Nonce local: fuerza relectura del listado de tareas vinculadas tras crear/toggle desde el Drawer
+  const [forceTasksNonce, setForceTasksNonce] = useState(0);
+  const rawTasks = useMemo(() => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }, [forceTasksNonce]);
 
   // Helpers auxiliares de fechas para el Drawer
   const formatDatePE = (iso: string): string => {
@@ -333,13 +354,15 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
     return iso;
   };
 
-  const getDeviationTone = (days: number): 'green' | 'amber' | 'red' => {
+  const getDeviationTone = (days: number | undefined): 'green' | 'amber' | 'red' | 'none' => {
+    if (days === undefined) return 'none';
     if (days <= 0) return 'green';
     if (days <= 7) return 'amber';
     return 'red';
   };
 
-  const formatDeviation = (days: number): string => {
+  const formatDeviation = (days: number | undefined): string => {
+    if (days === undefined) return '—';
     if (days === 0) return '0 días';
     if (days > 0) return `+${days} d${days === 1 ? 'ía' : 'ías'}`;
     return `${days} d${Math.abs(days) === 1 ? 'ía' : 'ías'}`;
@@ -418,7 +441,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   };
 
   const openEditorForItem = (item: Item, preserveTab: boolean = false) => {
-    setSelectedId(item.id);
+    onSelectItem?.(item.id);
     setDrawerDraft({ ...item });
     setIsNewDraft(false);
     setEditorInitialSnapshot(captureSnapshot(item));
@@ -469,21 +492,25 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
       notify('El nombre no puede estar vacío');
       return;
     }
-    if (isNewDraft) {
-      commitChange((old) =>
-        drawerDraft.kind === 'subproceso' && drawerDraft.parentId
-          ? old.flatMap((x) => (x.id === drawerDraft.parentId ? [x, drawerDraft] : [x]))
-          : [...old, drawerDraft]
-      );
-      notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'componente' : 'subcomponente'} guardado con éxito en el cronograma maestro`);
-    } else {
-      commitChange((old) => old.map((x) => (x.id === drawerDraft.id ? applyActuals(x, drawerDraft, currentTodayIso) : x)));
-      notify('Cambios guardados con éxito en el cronograma maestro');
-    }
+    // El padre ya implementa el commit (insert/replace + applyActuals + notify + cierre) vía prop onSave
+    onSave(drawerDraft, isNewDraft);
     setEditorInitialSnapshot('');
     setDrawerDraft(null);
     setIsNewDraft(false);
-    setPanelOpen(false);
+  };
+
+  // Eliminación fiel al monolito pre-extracción: descarta borradores o delega al flujo de confirmación del padre
+  const deleteItem = () => {
+    if (!activeItem) return;
+    if (isNewDraft) {
+      setPanelOpen(false);
+      setDrawerDraft(null);
+      setIsNewDraft(false);
+      setEditorInitialSnapshot('');
+      notify('Borrador descartado');
+      return;
+    }
+    onDeleteItem?.(activeItem);
   };
 
   const getLinkedTasks = (milestoneName?: string) => {
@@ -709,6 +736,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
     const dateStr = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
+      if (!file) continue;
       newItems.push({
         id: `att-${Date.now()}-${i}`,
         name: file.name,
@@ -1536,7 +1564,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     <span className="baseline-label">Línea base</span>
                     <span className="baseline-value">
                       {hasBaseline(activeItem)
-                        ? `${formatDatePE(activeItem.baselineStart)} — ${formatDatePE(activeItem.baselineEnd)}`
+                        ? `${formatDatePE(activeItem.baselineStart ?? '')} — ${formatDatePE(activeItem.baselineEnd ?? '')}`
                         : 'Sin línea base'}
                     </span>
                     <button
@@ -1664,7 +1692,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                 {/* 6. Avance */}
                 {(() => {
-                  const isContainer = Boolean(activeItem.hasChildren || activeItem.wbsNodeType === 'COMPONENTE' || activeItem.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === activeItem.id));
+                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || activeItem.wbsNodeType === 'COMPONENTE' || activeItem.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === activeItem.id));
                   const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
 
                   return (
@@ -2317,7 +2345,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     ¿Salir sin guardar cambios?
                   </h3>
                   <small style={{ fontSize: '12px', color: '#64748b' }}>
-                    Hay modificaciones o datos pendientes en este {selected?.kind === 'hito' ? 'componente' : 'subcomponente'}.
+                    Hay modificaciones o datos pendientes en este {activeItem?.kind === 'hito' ? 'componente' : 'subcomponente'}.
                   </small>
                 </div>
               </div>

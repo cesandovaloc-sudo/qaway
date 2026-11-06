@@ -64,7 +64,7 @@ const VIEW_H = 196;
 interface SelectionFilterProps {
   col: ColumnDef;
   options: CountedOption[];
-  value?: FilterValue;
+  value?: FilterValue | undefined;
   onApply: (v: FilterValue | null) => void;
   onCancel: () => void;
 }
@@ -228,7 +228,7 @@ const QUICK_DATE = Object.keys(DATE_PRESET_LABELS);
 
 interface ConditionFilterProps {
   col: ColumnDef;
-  value?: FilterValue;
+  value?: FilterValue | undefined;
   onApply: (v: FilterValue | null) => void;
 }
 

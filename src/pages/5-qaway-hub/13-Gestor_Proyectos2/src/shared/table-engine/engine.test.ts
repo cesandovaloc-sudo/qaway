@@ -125,7 +125,7 @@ describe('Table Engine - Filtrado y Ordenamiento Universal', () => {
     ];
     const res = sortRows(ITEMS, COLUMNS, criteria);
     // Pendientes primero (1.2 y 2), luego En proceso (1), luego Completado (1.1)
-    expect(res[0].status).toBe('Pendiente');
-    expect(res[res.length - 1].status).toBe('Completado');
+    expect(res[0]?.status).toBe('Pendiente');
+    expect(res[res.length - 1]?.status).toBe('Completado');
   });
 });

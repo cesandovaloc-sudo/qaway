@@ -66,7 +66,7 @@ const op = (id: string, label: string, inputs: 0 | 1 | 2 = 0, input?: OperatorDe
   id,
   label,
   inputs,
-  input,
+  ...(input !== undefined ? { input } : {}),
 });
 
 const TEXT_OPS: OperatorDef[] = [

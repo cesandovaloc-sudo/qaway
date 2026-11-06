@@ -23,7 +23,7 @@ export interface ProjectSummary {
   code: string;
   name: string;
   region: string;
-  subtext?: string;
+  subtext?: string | undefined;
 }
 
 type SidebarProps = {
