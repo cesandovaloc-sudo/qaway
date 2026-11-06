@@ -330,6 +330,10 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
 const resolveDefaultGestor = (code: string, name: string): string => {
   const c = code || '';
   const n = (name || '').toLowerCase();
+  if (n.includes('chupaca') || n.includes('concepción') || n.includes('concepcion') || n.includes('satipo') || n.includes('río tambo') || n.includes('rio tambo') || n.includes('dre junín') || n.includes('dre junin')) return 'María Salazar';
+  if (n.includes('huancayo') || n.includes('jauja') || n.includes('tarma') || n.includes('yauli')) return 'Carlos Mendoza';
+  if (n.includes('chanchamayo') || n.includes('pichanaki') || n.includes('perené') || n.includes('perene')) return 'Lucía Ramos';
+  if (n.includes('pangoa')) return 'Javier Ruiz';
   if (c.startsWith('1.') || c === '1.') {
     if (n.includes('siga') || n.includes('código') || n.includes('cdl')) return 'Lucía Flores';
     if (n.includes('comunicación') || n.includes('capacitación')) return 'María Jara';
@@ -356,8 +360,32 @@ const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOT
     start: r.start,
     end: r.end,
     dependencies: OFFICIAL_WBS_DEPENDENCIES[r.id] || [],
-    progress: r.kind === 'hito' ? 18 : (r.code === '1.1' || r.code === '2.1' ? 100 : (r.code.startsWith('1.') ? 50 : 0)),
-    status: r.code === '1.1' || r.code === '2.1' ? 'Completado' : (r.code.startsWith('1.') ? 'En proceso' : 'Pendiente'),
+    progress:
+      r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion'
+        ? 100
+        : r.id === 'pt-1.6-dre-junin' || r.id === 'pt-1.6-huancayo'
+        ? 75
+        : r.id === 'pt-1.6-jauja' || r.id === 'pt-1.6-junin'
+        ? 50
+        : r.id === 'pt-1.6-satipo'
+        ? 33
+        : r.id === 'pt-1.6-tarma' || r.id === 'pt-1.6-chanchamayo'
+        ? 20
+        : r.id === 'pt-1.6-yauli'
+        ? 10
+        : r.id.startsWith('pt-1.6-')
+        ? 0
+        : r.kind === 'hito' ? 18 : (r.code === '1.1' || r.code === '2.1' ? 100 : (r.code.startsWith('1.') ? 50 : 0)),
+    status:
+      r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion'
+        ? 'Cumple'
+        : r.id === 'pt-1.6-dre-junin' || r.id === 'pt-1.6-huancayo' || r.id === 'pt-1.6-jauja' || r.id === 'pt-1.6-junin'
+        ? 'En proceso'
+        : r.id === 'pt-1.6-pangoa'
+        ? 'Pendiente'
+        : r.id.startsWith('pt-1.6-')
+        ? 'Con retraso'
+        : r.code === '1.1' || r.code === '2.1' ? 'Completado' : (r.code.startsWith('1.') ? 'En proceso' : 'Pendiente'),
     expanded: true,
     description: r.entregableVerificable ? `Entregable oficial: ${r.entregableVerificable}` : '',
     deliverable: r.entregableVerificable || '',
@@ -367,6 +395,7 @@ const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(DRE_JUNIN_DOT
       type: r.entregableVerificable.toLowerCase().includes('resolución') || r.entregableVerificable.toLowerCase().includes('informe') || r.entregableVerificable.toLowerCase().includes('oficio') ? 'document' : (r.entregableVerificable.toLowerCase().includes('excel') || r.entregableVerificable.toLowerCase().includes('directorio') || r.entregableVerificable.toLowerCase().includes('cuadro') ? 'spreadsheet' : 'document'),
     }] : [],
     region: 'Junín',
+    sede: r.name.includes('UGEL') || r.name.includes('DRE') ? r.name : undefined,
     gestor: defaultGestor,
     gestores: [defaultGestor],
     entidadResponsable: r.entidadResponsable,

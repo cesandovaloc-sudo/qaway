@@ -6049,14 +6049,15 @@ body.gantt-resizing {
   pointer-events: auto;
 }
 
-/* Barras de Calendario Oficiales · Estricto Estándar Gantt */
+/* Barras de Calendario Oficiales · Exactos Colores Gantt (.bar.complete, .bar.progress, .bar.late, .bar.pending) */
+.gantt-v2 .cal-gantt-bar,
 .cal-gantt-bar {
   pointer-events: auto;
   position: relative;
   display: flex;
   align-items: center;
   height: 26px;
-  border-radius: 4px 12px 12px 4px;
+  border-radius: 4px;
   font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
@@ -6066,30 +6067,29 @@ body.gantt-resizing {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
+.gantt-v2 .cal-gantt-bar:hover,
 .cal-gantt-bar:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
   filter: brightness(0.98);
 }
 
-/* 1. Hito Rector (Azul Oficial con Degradado y Diamante ◆) - Candado Visual Maestro */
+/* 1. Hito / Componente (Azul Oficial Gantt) */
+.gantt-v2 .cal-gantt-bar.bar-major,
 .cal-gantt-bar.bar-major {
-  background: #eff6ff !important;
-  border: 1px solid #93c5fd !important;
-  border-left: 3px solid #2563eb !important;
-  border-radius: 5px;
+  background: rgba(0, 102, 255, 0.12) !important;
+  border: 1px solid rgba(0, 102, 255, 0.35) !important;
+  border-radius: 4px;
 }
+.gantt-v2 .cal-gantt-bar.bar-major .cal-gantt-progress-fill,
 .cal-gantt-bar.bar-major .cal-gantt-progress-fill {
-  background: rgba(37, 99, 235, 0.22) !important;
+  background: #0066ff !important;
   border-radius: 3px 0 0 3px;
 }
+.gantt-v2 .cal-gantt-bar.bar-major .cal-gantt-content,
 .cal-gantt-bar.bar-major .cal-gantt-content {
-  color: #1e3a8a !important;
-  text-shadow: none;
-  padding-right: 22px;
-}
-.cal-gantt-bar.bar-major .cal-gantt-hito-badge {
-  color: #2563eb;
+  color: #0f172a !important;
+  text-shadow: none !important;
 }
 
 /* Diamante característico en la punta del Hito Rector */
@@ -6116,66 +6116,89 @@ body.gantt-resizing {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   transition: transform 0.15s ease, background 0.15s ease;
 }
-.cal-gantt-bar.bar-major:hover .cal-gantt-diamond-badge .cal-diamond-shape {
-  transform: rotate(45deg) scale(1.2);
-  background: #0052cc;
-}
 
-/* 2. Completado (Verde Esmeralda / 100%) */
+/* 2. Completado (Verde Esmeralda Exacto Gantt #00b96b) */
+.gantt-v2 .cal-gantt-bar.bar-complete,
 .cal-gantt-bar.bar-complete {
-  background: #ecfdf5;
-  border: 1px solid #86efac;
-  border-left: 3px solid #16a34a;
+  background: rgba(0, 185, 107, 0.18) !important;
+  border: 1px solid rgba(0, 185, 107, 0.45) !important;
 }
+.gantt-v2 .cal-gantt-bar.bar-complete .cal-gantt-progress-fill,
 .cal-gantt-bar.bar-complete .cal-gantt-progress-fill {
-  background: rgba(22, 163, 74, 0.22);
+  background: #00b96b !important;
   border-radius: 3px;
 }
-.cal-gantt-bar.bar-complete .cal-gantt-content {
-  color: #14532d;
-  text-shadow: none;
+.gantt-v2 .cal-gantt-bar.bar-complete .cal-gantt-content,
+.gantt-v2 .cal-gantt-bar.bar-complete .cal-gantt-code,
+.gantt-v2 .cal-gantt-bar.bar-complete .cal-gantt-name,
+.gantt-v2 .cal-gantt-bar.bar-complete .cal-gantt-pct {
+  color: #ffffff !important;
+  text-shadow: none !important;
 }
 
-/* 3. En Proceso (Naranja Gantt con alto contraste de lectura) */
+/* 3. En Proceso (Naranja Exacto Gantt #fa8c16 + pista rgba(250, 140, 22, 0.18)) */
+.gantt-v2 .cal-gantt-bar.bar-progress,
 .cal-gantt-bar.bar-progress {
-  background: #fff7ed;
-  border: 1px solid #fdba74;
-  border-left: 3px solid #ea580c;
+  background: rgba(250, 140, 22, 0.18) !important;
+  border: 1px solid rgba(250, 140, 22, 0.45) !important;
 }
+.gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-progress-fill,
 .cal-gantt-bar.bar-progress .cal-gantt-progress-fill {
-  background: rgba(234, 88, 12, 0.22);
+  background: #fa8c16 !important;
   border-radius: 3px 0 0 3px;
 }
-.cal-gantt-bar.bar-progress .cal-gantt-content {
-  color: #7c2d12;
+.gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-content,
+.gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-code,
+.gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-name,
+.gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-pct {
+  color: #1e293b !important;
   font-weight: 600;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.65) !important;
 }
 
-/* 4. Pendiente (Gris Neutro Gantt 0%) */
+/* 4. Pendiente (Gris Neutro con trama diagonal exacta de Gantt .bar.pending) */
+.gantt-v2 .cal-gantt-bar.bar-pending,
 .cal-gantt-bar.bar-pending {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  border-left: 3px solid #64748b;
+  background-color: #e2e8f0 !important;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.45),
+    rgba(255, 255, 255, 0.45) 5px,
+    transparent 5px,
+    transparent 10px
+  ) !important;
+  border: 1px solid #cbd5e1 !important;
 }
+.gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-progress-fill,
 .cal-gantt-bar.bar-pending .cal-gantt-progress-fill {
-  display: none;
+  display: none !important;
 }
-.cal-gantt-bar.bar-pending .cal-gantt-content {
-  color: #334155;
+.gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-content,
+.gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-code,
+.gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-name,
+.gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-pct {
+  color: #334155 !important;
+  text-shadow: none !important;
 }
 
-/* 5. Con Retraso (Alerta Roja) */
+/* 5. Con Retraso (Rojo Exacto Gantt #ef4444 + pista rgba(239, 68, 68, 0.18)) */
+.gantt-v2 .cal-gantt-bar.bar-late,
 .cal-gantt-bar.bar-late {
-  background: #fef2f2;
-  border: 1px solid #fca5a5;
-  border-left: 3px solid #dc2626;
+  background: rgba(239, 68, 68, 0.18) !important;
+  border: 1px solid rgba(239, 68, 68, 0.45) !important;
 }
+.gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-progress-fill,
 .cal-gantt-bar.bar-late .cal-gantt-progress-fill {
-  background: rgba(220, 38, 38, 0.22);
+  background: #ef4444 !important;
   border-radius: 3px 0 0 3px;
 }
-.cal-gantt-bar.bar-late .cal-gantt-content {
-  color: #7f1d1d;
+.gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-content,
+.gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-code,
+.gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-name,
+.gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-pct {
+  color: #1e293b !important;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.65) !important;
 }
 
 /* Relleno y Contenido de Barras */
@@ -8146,24 +8169,7 @@ body.gantt-resizing {
   background: #f1f5f9;
 }
 
-/* Calendario: alto contraste tipográfico en barras naranjas */
-.gantt-v2 .cal-gantt-bar.orange,
-.gantt-v2 .cal-gantt-bar.amber,
-.gantt-v2 .cal-gantt-bar[data-status="En proceso"] {
-  color: #ffffff !important;
-}
-
-.gantt-v2 .cal-gantt-bar .cal-gantt-content {
-  color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
-}
-
-.gantt-v2 .cal-gantt-bar .cal-gantt-code,
-.gantt-v2 .cal-gantt-bar .cal-gantt-name,
-.gantt-v2 .cal-gantt-bar .cal-gantt-pct {
-  color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
-}
+/* Calendario: contraste limpio respetando cada estado de barra Gantt */
 
 /* =========================================================
    VISTA EDT / ORGANIGRAMA ESTRUCTURADA (DIAGRAMA JERÁRQUICO)
