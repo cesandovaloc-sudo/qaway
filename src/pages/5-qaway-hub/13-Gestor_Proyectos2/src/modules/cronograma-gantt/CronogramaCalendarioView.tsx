@@ -151,26 +151,21 @@ export default function CronogramaCalendarioView({
     return weeks;
   }, [calYear, calMonth]);
 
-  // Filtrado de items reales que aplican a los filtros globales (Excluyendo hitos/componentes agrupadores: solo paquetes de trabajo ejecutables)
-  const parentIds = useMemo(() => {
-    const set = new Set<string>();
-    items.forEach((it) => {
-      if (it.parentId) set.add(it.parentId);
-    });
-    return set;
-  }, [items]);
-
+  // Filtrado de items reales que aplican a los filtros globales (Vista Proyecto: Hitos y Entregables del Proyecto, excluyendo sedes/UGEL)
   const matchingItems = useMemo(() => {
     return items.filter((it) => {
-      // Un calendario operativo muestra paquetes de trabajo / entregables, no barras agrupadoras de Componentes/Hitos de 90+ días
-      if (it.kind === 'hito' || parentIds.has(it.id)) return false;
+      // Excluir registros desglosados a nivel UGEL o sede (código con 3 niveles numéricos '1.6.1' o nombre que comience con 'UGEL')
+      if (it.name.startsWith('UGEL') || it.name.startsWith('DRE Junín (Sede') || /^\d+\.\d+\.\d+/.test(it.code)) {
+        return false;
+      }
 
       if (typeFilter && typeFilter !== 'Todos') {
-        if (typeFilter === 'Hitos') return false;
+        if (typeFilter === 'Hitos' && it.kind !== 'hito') return false;
         if (typeFilter === 'Subprocesos' && it.kind !== 'subproceso') return false;
       }
       if (tab && tab !== 'Todos') {
-        if (tab === 'Componentes' || tab === 'Hitos') return false;
+        if (tab === 'Componentes' && it.kind !== 'hito') return false;
+        if (tab === 'Hitos' && it.kind !== 'hito') return false;
         if (tab === 'Subprocesos' && it.kind !== 'subproceso') return false;
         if (tab === 'Completados' && it.status !== 'Completado' && it.status !== 'Cumple') return false;
         if (tab === 'En proceso' && it.status !== 'En proceso' && it.status !== 'En curso') return false;
@@ -189,7 +184,7 @@ export default function CronogramaCalendarioView({
       }
       return true;
     });
-  }, [items, parentIds, typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
+  }, [items, typeFilter, tab, stateFilter, selectedRegions, regionFilter, search]);
 
   // Proyección de entregables en el calendario mensual como bloques discretos de calendario (2 a 4 días por hito de corte, sin repetir barras de 138 días en todas las semanas)
   const weekEvents = useMemo(() => {
@@ -324,7 +319,7 @@ export default function CronogramaCalendarioView({
         id: `${it.id}-w${finalWeekIdx}`,
         code: it.code,
         name: it.name,
-        kind: 'subproceso',
+        kind: it.kind,
         status: it.status,
         progress: it.progress,
         start: it.start,
@@ -432,14 +427,17 @@ export default function CronogramaCalendarioView({
                     </div>
                   ))}
 
-                  {/* Capa de Barras de Calendario con colores oficiales Gantt y sombra de Línea Base (sin hitos) */}
+                  {/* Capa de Barras de Calendario con colores oficiales Gantt y sombra de Línea Base */}
                   <div className="cal-week-events-overlay">
                     {evs.map((ev) => {
+                      const isMajor = ev.kind === 'hito';
                       const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
                       const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
                       const isLate = ev.status === 'Con retraso';
 
-                      const barColorClass = isComplete
+                      const barColorClass = isMajor
+                        ? 'bar-major'
+                        : isComplete
                         ? 'bar-complete'
                         : isProgress
                         ? 'bar-progress'
@@ -474,7 +472,11 @@ export default function CronogramaCalendarioView({
 
                             {/* Contenido legible del entregable con alto contraste */}
                             <div className="cal-gantt-content">
-                              {isComplete ? (
+                              {isMajor ? (
+                                <span className="cal-gantt-diamond-badge" title="Hito Principal">
+                                  <span className="cal-diamond-shape" />
+                                </span>
+                              ) : isComplete ? (
                                 <Check size={11} strokeWidth={3} className="cal-gantt-check-icon" />
                               ) : (
                                 <FileText size={11} className="cal-gantt-check-icon" />

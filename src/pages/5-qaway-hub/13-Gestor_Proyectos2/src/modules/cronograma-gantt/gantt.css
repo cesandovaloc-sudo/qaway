@@ -6088,7 +6088,7 @@ body.gantt-resizing {
 }
 .gantt-v2 .cal-gantt-bar.bar-major .cal-gantt-content,
 .cal-gantt-bar.bar-major .cal-gantt-content {
-  color: #0f172a !important;
+  color: #1e3a8a !important;
   text-shadow: none !important;
 }
 
@@ -6151,9 +6151,9 @@ body.gantt-resizing {
 .gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-code,
 .gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-name,
 .gantt-v2 .cal-gantt-bar.bar-progress .cal-gantt-pct {
-  color: #1e293b !important;
+  color: #334155 !important;
   font-weight: 600;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.65) !important;
+  text-shadow: none !important;
 }
 
 /* 4. Pendiente (Gris Neutro con trama diagonal exacta de Gantt .bar.pending) */
@@ -6177,7 +6177,7 @@ body.gantt-resizing {
 .gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-code,
 .gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-name,
 .gantt-v2 .cal-gantt-bar.bar-pending .cal-gantt-pct {
-  color: #334155 !important;
+  color: #475569 !important;
   text-shadow: none !important;
 }
 
@@ -6196,9 +6196,9 @@ body.gantt-resizing {
 .gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-code,
 .gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-name,
 .gantt-v2 .cal-gantt-bar.bar-late .cal-gantt-pct {
-  color: #1e293b !important;
+  color: #334155 !important;
   font-weight: 600;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.65) !important;
+  text-shadow: none !important;
 }
 
 /* Relleno y Contenido de Barras */
@@ -6223,17 +6223,18 @@ body.gantt-resizing {
   text-overflow: ellipsis;
 }
 .cal-gantt-code {
-  font-weight: 700;
+  font-weight: 650;
   flex-shrink: 0;
 }
 .cal-gantt-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
 }
 .cal-gantt-pct {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 650;
   margin-left: auto;
   flex-shrink: 0;
   background: rgba(15, 23, 42, 0.08);
