@@ -3928,53 +3928,8 @@ export default function CronogramaGanttView({
             {/* Separador vertical: Bloque 2 (Datos del proyecto) | Bloque 3 (Navegación temporal / corte) */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Bloque 3: Navegación temporal y selector de escala para todas las vistas */}
-            {viewMode === 'calendario' ? (
-              <>
-                <div className="timeline-nav" title="Navegar por el calendario">
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={handlePrevCalPeriod}
-                    title="Período anterior"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <span className="cal-nav-label" style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a', padding: '0 8px', whiteSpace: 'nowrap' }}>
-                    {calPeriodLabel}
-                  </span>
-                  <button
-                    type="button"
-                    className="nav-arrow"
-                    onClick={handleNextCalPeriod}
-                    title="Período siguiente"
-                  >
-                    <ChevronRight size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="today-pill"
-                    onClick={handleTodayCal}
-                    title="Ir a hoy (Octubre 2026)"
-                  >
-                    Hoy
-                  </button>
-                </div>
-
-                <div className="zoom">
-                  {(['Mes', 'Semana', 'Día'] as const).map((v) => (
-                    <button
-                      type="button"
-                      key={v}
-                      className={calSubView === v ? 'active' : ''}
-                      onClick={() => setCalSubView(v)}
-                    >
-                      {v}
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : viewMode === 'lista' ? (
+                        {/* Bloque 3: Navegación temporal y selector de escala para todas las vistas */}
+            {viewMode === 'lista' ? (
               /* En Modo Lista: Filtros Rápidos Semánticos de Fecha con Diseño Oficial Homologado */
               <>
                 <button
@@ -4051,13 +4006,13 @@ export default function CronogramaGanttView({
                 </div>
               </>
             ) : (
-              /* En Modo Gantt, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
+              /* En Modo Gantt, Calendario, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
               <>
                 <button
                   type="button"
                   className="today-pill"
-                  onClick={scrollToToday}
-                  title="Ir y centrar en la fecha actual de hoy"
+                  onClick={viewMode === 'calendario' ? handleTodayCal : scrollToToday}
+                  title={viewMode === 'calendario' ? "Ir a hoy en el calendario" : "Ir y centrar en la fecha actual de hoy"}
                 >
                   Hoy
                 </button>
@@ -4066,8 +4021,14 @@ export default function CronogramaGanttView({
                   <button
                     type="button"
                     className="zoom-nav-arrow"
-                    onClick={() => scrollTimeline('left')}
-                    title="Desplazar línea de tiempo a la izquierda"
+                    onClick={() => {
+                      if (viewMode === 'calendario') {
+                        handlePrevCalPeriod();
+                      } else {
+                        scrollTimeline('left');
+                      }
+                    }}
+                    title={viewMode === 'calendario' ? "Período anterior" : "Desplazar línea de tiempo a la izquierda"}
                     aria-label="Desplazar hacia el pasado"
                   >
                     <ChevronLeft size={15} />
@@ -4076,8 +4037,16 @@ export default function CronogramaGanttView({
                     <button
                       type="button"
                       key={x}
-                      className={zoom === x ? 'active' : ''}
-                      onClick={() => handleZoomChange(x)}
+                      className={(viewMode === 'calendario' ? (x === 'Día' ? calSubView === 'Día' : x === 'Semana' ? calSubView === 'Semana' : calSubView === 'Mes') : zoom === x) ? 'active' : ''}
+                      onClick={() => {
+                        if (viewMode === 'calendario') {
+                          if (x === 'Día' || x === 'Semana' || x === 'Mes') {
+                            setCalSubView(x);
+                          }
+                        } else {
+                          handleZoomChange(x);
+                        }
+                      }}
                       title={`Escala ${x}`}
                     >
                       {x}
@@ -4086,8 +4055,14 @@ export default function CronogramaGanttView({
                   <button
                     type="button"
                     className="zoom-nav-arrow"
-                    onClick={() => scrollTimeline('right')}
-                    title="Desplazar línea de tiempo a la derecha"
+                    onClick={() => {
+                      if (viewMode === 'calendario') {
+                        handleNextCalPeriod();
+                      } else {
+                        scrollTimeline('right');
+                      }
+                    }}
+                    title={viewMode === 'calendario' ? "Período siguiente" : "Desplazar línea de tiempo a la derecha"}
                     aria-label="Desplazar hacia el futuro"
                   >
                     <ChevronRight size={15} />

@@ -8829,3 +8829,108 @@ body.gantt-resizing {
   box-sizing: border-box;
   transition: left 0.05s linear, top 0.05s linear, width 0.1s ease, height 0.1s ease;
 }
+
+/* ==========================================================================
+   ARQUITECTURA DE FILTROS REORGANIZADOS: UNIVERSALES (FILA 1) + CONTEXTUALES (FILA 2)
+   ========================================================================== */
+
+/* Fila 1: Pestañas Superiores y Filtros Universales (Nivel WBS y Vencimientos) */
+.gantt-v2 .tabs {
+  position: relative;
+  z-index: 95 !important;
+  overflow-y: visible !important;
+  overflow-x: auto;
+}
+
+.gantt-v2 .tabs-list {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  height: 48px !important;
+  overflow-y: visible !important;
+  overflow-x: auto;
+}
+
+.gantt-v2 .tabs-list > button {
+  height: 48px !important;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .tabs-list .filter-dropdown-wrap.tabs-filter-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .tabs-list .filter-card-btn {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  border-radius: 8px !important;
+  padding: 2px 9px !important;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+}
+
+.gantt-v2 .tabs-list .filter-card-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.gantt-v2 .tabs-list .filter-card-btn.active {
+  background: #f8fbff;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.12);
+}
+
+.gantt-v2 .tabs-list .filter-card-popover {
+  top: calc(100% + 4px) !important;
+  z-index: 120 !important;
+}
+
+/* Fila 2: Filtros Contextuales para la Vista (Macro-región, Sedes/UGEL, Gestor de Campo) */
+.gantt-v2 .filters .search {
+  max-width: 200px !important;
+  min-width: 165px !important;
+  height: 38px !important;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .filter-dropdown-wrap.contextual-filter-wrap,
+.gantt-v2 .filter-dropdown-wrap.contextual-filter-wrap .filter-card-btn {
+  width: 155px !important;
+  min-width: 140px !important;
+  max-width: 165px !important;
+  height: 38px !important;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.gantt-v2 .contextual-filter-wrap .filter-card-btn {
+  padding: 2px 8px !important;
+  border-radius: 8px !important;
+}
+
+.gantt-v2 .contextual-filter-wrap .filter-card-copy small {
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  color: #64748b !important;
+  line-height: 1.1;
+}
+
+.gantt-v2 .contextual-filter-wrap .filter-card-copy span {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  line-height: 1.2;
+}
+
+.gantt-v2 .custom-filter-trigger-btn {
+  height: 38px !important;
+}
