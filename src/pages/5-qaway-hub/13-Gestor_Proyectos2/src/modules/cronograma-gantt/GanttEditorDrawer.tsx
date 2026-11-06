@@ -162,9 +162,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
     if (onAddSubItem) onAddSubItem(kind, parentId);
   };
 
-  const openEditorForItem = (it: Item, preserveTab: boolean = false) => {
-    if (onSelectSubItem) onSelectSubItem(it);
-  };
+
 
   const setPanelOpen = (val: boolean) => {
     if (!val) onClose();
