@@ -45,6 +45,11 @@ import {
   getMacroById,
   resolveItemRegion,
 } from './regionalCoordinationModel';
+import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
+import { listGestorUnits } from '../../services/gestorOrganizacionService';
+
+/** Cache a nivel de módulo: un solo fetch de gestor_unidades para todas las instancias montadas. */
+let UNIDADES_REMOTAS: { name: string; region: string; unitType: string; status: string }[] | null = null;
 
 export {
   type EdtNodeType,
@@ -1911,47 +1916,81 @@ export default function CronogramaGanttView({
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [sedeFilter, setSedeFilter] = useState('Todas');
 
+  // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
+  // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
+  const [unidades, setUnidades] = useState(() =>
+    MINEDU_UNIDADES.map((u) => ({ name: u.name, region: u.region, unitType: u.unitType, status: u.status }))
+  );
+
+  useEffect(() => {
+    if (UNIDADES_REMOTAS) {
+      setUnidades(UNIDADES_REMOTAS);
+      return;
+    }
+    let alive = true;
+    listGestorUnits(null)
+      .then((rows) => {
+        if (!alive || !rows || rows.length === 0) return;
+        const mapped = rows
+          .filter((u) => u.status !== 'archived')
+          .map((u) => ({
+            name: u.name,
+            region: u.region ?? '',
+            unitType: u.unitType ?? 'ugel',
+            status: u.status ?? 'active',
+          }));
+        if (mapped.length > 0) {
+          UNIDADES_REMOTAS = mapped;
+          setUnidades(mapped);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const availableSedes = useMemo(() => {
-    const list = [
-      'DRE Junín (Sede Regional Matriz)',
-      'UGEL Huancayo',
-      'UGEL Concepción',
-      'UGEL Chupaca',
-      'UGEL Jauja',
-      'UGEL Junín',
-      'UGEL Tarma',
-      'UGEL Yauli',
-      'UGEL Chanchamayo',
-      'UGEL Satipo',
-      'UGEL Pichanaki',
-      'UGEL Pangoa',
-      'UGEL Río Tambo',
-      'UGEL Perené',
-    ];
+    const set = new Set<string>();
+    unidades.forEach((u) => {
+      if (u.name) set.add(u.name);
+    });
     if (items && Array.isArray(items)) {
       items.forEach((it) => {
-        if (it?.sede && !list.includes(it.sede)) list.push(it.sede);
-        if (it?.name?.startsWith('UGEL ') && !list.includes(it.name)) list.push(it.name);
+        if (it?.sede) set.add(it.sede);
+        if (it?.name?.startsWith('UGEL ')) set.add(it.name);
       });
     }
-    return list;
-  }, [items]);
+    return Array.from(set);
+  }, [unidades, items]);
 
+  // El catálogo de unidades siembra la lista SIEMPRE; el filtro REGIÓN recorta por
+  // 'region' de la unidad (ambito). Las sedes que solo viven en los ítems del
+  // cronograma conservan la cascada original ítem-impulsada.
   const availableSedesCascaded = useMemo(() => {
-    if (selectedRegions.length === 0) {
-      return availableSedes;
-    }
-    return availableSedes.filter((sedeName) => {
-      return items.some((it) => {
-        const matchRegion = it.region && selectedRegions.includes(it.region);
-        const matchSede =
-          it.sede === sedeName ||
-          it.distrito === sedeName ||
-          (it.name && it.name.includes(sedeName));
-        return matchRegion && matchSede;
-      });
-    });
-  }, [availableSedes, selectedRegions, items]);
+    const regionsUpper = selectedRegions.map((r) => String(r).toUpperCase());
+    const enAmbito = unidades
+      .filter(
+        (u) => u.name && (regionsUpper.length === 0 || regionsUpper.includes(String(u.region).toUpperCase()))
+      )
+      .map((u) => u.name);
+    const unitNames = new Set(enAmbito);
+    const extras = availableSedes.filter((sede) => !unitNames.has(sede));
+    if (regionsUpper.length === 0) return [...enAmbito, ...extras];
+    return [
+      ...enAmbito,
+      ...extras.filter((sedeName) =>
+        items.some((it) => {
+          const matchRegion = it.region && selectedRegions.includes(it.region);
+          const matchSede =
+            it.sede === sedeName ||
+            it.distrito === sedeName ||
+            (it.name && it.name.includes(sedeName));
+          return matchRegion && matchSede;
+        })
+      ),
+    ];
+  }, [unidades, availableSedes, selectedRegions, items]);
 
   const availableGestores = useMemo(() => {
     const set = new Set<string>();
