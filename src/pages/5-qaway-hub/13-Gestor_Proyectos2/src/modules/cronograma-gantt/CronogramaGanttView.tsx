@@ -3713,7 +3713,6 @@ export default function CronogramaGanttView({
               aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
             >
               {showSummaryCards ? <EyeOff size={15} /> : <Eye size={15} />}
-              <span>{showSummaryCards ? 'Ocultar resumen' : 'Mostrar resumen'}</span>
             </button>
             <button
               className="btn secondary"
