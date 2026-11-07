@@ -1,7 +1,7 @@
 import { ArrowLeft, CalendarDays, CheckCircle2, FileText, Layers3, ListChecks, Paperclip, Users } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router';
 import { useMemo } from 'react';
-import type { Item } from './CronogramaGanttView';
+import { INITIAL_ITEMS, type Item } from './CronogramaGanttView';
 import './gantt.css';
 
 export default function GanttElementDetailView() {
@@ -10,9 +10,10 @@ export default function GanttElementDetailView() {
   const item = useMemo(() => {
     try {
       const projectId = localStorage.getItem('qaway-gp-active-project-id') || 'p1';
-      const raw = localStorage.getItem(`qaway-gantt-items-${projectId}`) || localStorage.getItem('qaway-gantt-items-p1');
-       const items = raw ? JSON.parse(raw) : [];
-       const flatItems = Array.isArray(items) ? items.flatMap((entry: Item) => [entry, ...(entry.children || [])]) : [];
+       const raw = localStorage.getItem(`qaway-gantt-items-${projectId}`) || localStorage.getItem('qaway-gantt-items-p1');
+       const items = raw ? JSON.parse(raw) : (projectId === 'p1' ? INITIAL_ITEMS : []);
+       const flatten = (entries: Item[]): Item[] => entries.flatMap((entry) => [entry, ...(entry.children ? flatten(entry.children) : [])]);
+       const flatItems = Array.isArray(items) ? flatten(items) : [];
        return flatItems.find((entry: Item) => String(entry.id) === String(elementoId)) as Item | undefined;
     } catch { return undefined; }
   }, [elementoId]);

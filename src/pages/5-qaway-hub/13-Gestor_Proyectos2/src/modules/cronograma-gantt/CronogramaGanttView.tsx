@@ -364,7 +364,7 @@ const resolveDefaultGestor = (code: string, name: string): string => {
   return 'Carlos Sandoval';
 };
 
-const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
+export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
   ...DRE_JUNIN_DOTACION_2027_EDT,
   ...REGIONAL_NODE_SEEDS.map((s) => s.row),
 ].map((r) => {
