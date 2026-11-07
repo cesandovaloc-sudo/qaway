@@ -5,6 +5,7 @@ import type { ModuleKey, UserRole } from '../types';
 import {
   BarChart3,
   Building2,
+  CalendarDays,
   Check,
   CheckSquare,
   ChevronDown,
@@ -225,8 +226,13 @@ export default function Sidebar({
         <span>Resumen del proyecto</span>
       </button>
 
-      {/* Cronograma oculto temporalmente mientras se prepara su nueva versión.
-          Se conserva el módulo, sus rutas y su implementación; no se elimina. */}
+      <button
+        className={active === 'cronograma' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('cronograma')}
+      >
+        <CalendarDays size={18} />
+        <span>Proyecto</span>
+      </button>
 
       <button
         className={active === 'sedes' ? 'side-link active' : 'side-link'}
