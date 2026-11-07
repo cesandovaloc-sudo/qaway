@@ -2007,6 +2007,36 @@ export default function CronogramaGanttView({
     ];
   }, [unidades, availableSedes, selectedRegions, items]);
 
+  // Dropdown SEDE agrupado por región: mismos títulos de región que el picker REGIÓN
+  // (orden macro-regional del catálogo). La cascada ítem-impulsada queda intacta;
+  // sedes fuera del catálogo (ítems) caen al grupo final "Otras sedes".
+  const sedesAgrupadas = useMemo(() => {
+    const regionDeSede = new Map<string, string>();
+    unidades.forEach((u) => {
+      if (u.name && !regionDeSede.has(u.name)) regionDeSede.set(u.name, normalizeRegionKey(u.region));
+    });
+    const grupos: { region: string; sedes: string[] }[] = [];
+    const enGrupo = new Set<string>();
+    MACROREGIONES_NACIONAL.forEach((macro) => {
+      macro.regiones.forEach((regName) => {
+        const key = normalizeRegionKey(regName);
+        const sedes = availableSedesCascaded
+          .filter((sede) => regionDeSede.get(sede) === key)
+          .sort((a, b) => a.localeCompare(b, 'es'));
+        if (sedes.length > 0) {
+          grupos.push({ region: regName, sedes });
+          sedes.forEach((s) => enGrupo.add(s));
+        }
+      });
+    });
+    const resto = availableSedesCascaded.filter((s) => !enGrupo.has(s));
+    if (resto.length > 0) {
+      if (grupos.length > 0) grupos.push({ region: 'Otras sedes', sedes: resto });
+      else grupos.push({ region: 'Sedes / UGEL Operativas', sedes: resto });
+    }
+    return grupos;
+  }, [unidades, availableSedesCascaded]);
+
   const availableGestores = useMemo(() => {
     const set = new Set<string>();
     if (items && Array.isArray(items)) {
@@ -4517,41 +4547,76 @@ export default function CronogramaGanttView({
                           </span>
                           <span className="filter-item-text">
                             <strong>Todas las sedes</strong>
-                            <small>{selectedRegions.length > 0 ? `Ámbito: ${selectedRegions.join(', ')}` : 'Ámbito general'}</small>
                           </span>
                         </span>
                         <span className="wbs-level-badge">{items.length}</span>
                       </button>
-                      {availableSedesCascaded.map((sede) => {
-                        const isSelected = sedeFilter === sede;
-                        const count = items.filter(
-                          (it) =>
-                            it.sede === sede ||
-                            it.distrito === sede ||
-                            (it.name && it.name.includes(sede))
-                        ).length;
-                        return (
-                          <button
-                            key={sede}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              setSedeFilter(sede);
-                              closeMenus();
-                            }}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-item-text">
-                                <strong>{sede}</strong>
-                              </span>
-                            </span>
-                            {count > 0 && <span className="wbs-level-badge">{count}</span>}
-                          </button>
-                        );
-                      })}
+                      {sedesAgrupadas.length > 1
+                        ? sedesAgrupadas.map((grupo) => (
+                            <React.Fragment key={grupo.region}>
+                              <div className="filter-popover-group-label">{grupo.region}</div>
+                              {grupo.sedes.map((sede) => {
+                                const isSelected = sedeFilter === sede;
+                                const count = items.filter(
+                                  (it) =>
+                                    it.sede === sede ||
+                                    it.distrito === sede ||
+                                    (it.name && it.name.includes(sede))
+                                ).length;
+                                return (
+                                  <button
+                                    key={sede}
+                                    type="button"
+                                    className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                                    onClick={() => {
+                                      setSedeFilter(sede);
+                                      closeMenus();
+                                    }}
+                                  >
+                                    <span className="filter-item-main">
+                                      <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                        {isSelected && <span className="filter-radio-dot" />}
+                                      </span>
+                                      <span className="filter-item-text">
+                                        <strong>{sede}</strong>
+                                      </span>
+                                    </span>
+                                    {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                                  </button>
+                                );
+                              })}
+                            </React.Fragment>
+                          ))
+                        : availableSedesCascaded.map((sede) => {
+                            const isSelected = sedeFilter === sede;
+                            const count = items.filter(
+                              (it) =>
+                                it.sede === sede ||
+                                it.distrito === sede ||
+                                (it.name && it.name.includes(sede))
+                            ).length;
+                            return (
+                              <button
+                                key={sede}
+                                type="button"
+                                className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setSedeFilter(sede);
+                                  closeMenus();
+                                }}
+                              >
+                                <span className="filter-item-main">
+                                  <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                    {isSelected && <span className="filter-radio-dot" />}
+                                  </span>
+                                  <span className="filter-item-text">
+                                    <strong>{sede}</strong>
+                                  </span>
+                                </span>
+                                {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                              </button>
+                            );
+                          })}
 
                       {/* Sección 2: Gestores de Campo Asignados */}
                       <div className="filter-popover-group-label" style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
