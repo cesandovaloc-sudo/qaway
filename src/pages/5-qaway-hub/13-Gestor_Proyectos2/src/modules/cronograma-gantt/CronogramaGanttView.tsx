@@ -1870,6 +1870,7 @@ export default function CronogramaGanttView({
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama'>('gantt');
+  const [showSummaryCards, setShowSummaryCards] = useState(true);
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -3707,6 +3708,15 @@ export default function CronogramaGanttView({
             </button>
             <button
               className="btn secondary"
+              onClick={() => setShowSummaryCards((visible) => !visible)}
+              title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+              aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+            >
+              {showSummaryCards ? <EyeOff size={15} /> : <Eye size={15} />}
+              <span>{showSummaryCards ? 'Ocultar resumen' : 'Mostrar resumen'}</span>
+            </button>
+            <button
+              className="btn secondary"
               onClick={() => {
                 setImportOpen(true);
                 setPickedFile('');
@@ -3749,7 +3759,7 @@ export default function CronogramaGanttView({
         </header>
 
         {/* Tarjetas Métricas Directivas */}
-        <section className="metrics">
+         {showSummaryCards && <section className="metrics">
           <article
             className="metric blue"
             onClick={() => {
@@ -3839,7 +3849,7 @@ export default function CronogramaGanttView({
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
-        </section>
+         </section>}
 
         {/* Workspace Central */}
         <main ref={workspaceRef} id="edt-workspace-toolbar" className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''} ${isDocked ? 'is-docked' : ''}`}>
