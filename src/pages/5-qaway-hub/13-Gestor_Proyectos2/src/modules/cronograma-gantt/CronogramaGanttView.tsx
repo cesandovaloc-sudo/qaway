@@ -65,7 +65,6 @@ import {
   Building2,
   CalendarDays,
   CalendarRange,
-  ChartNoAxesColumnIncreasing,
   Check,
   CheckCircle2,
   CheckSquare,
@@ -1872,7 +1871,26 @@ export default function CronogramaGanttView({
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama'>('gantt');
-  const [showSummaryCards, setShowSummaryCards] = useState(true);
+  // Tarjetas métricas: visibles en escritorio, colapsadas de entrada en pantallas
+  // pequeñas (<1024px) para no empujar la tabla fuera del primer pantallazo.
+  const showSummaryCardsDefault = typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(min-width: 1024px)').matches
+    : true;
+  const userToggledSummaryRef = useRef(false);
+  const [showSummaryCards, setShowSummaryCards] = useState(showSummaryCardsDefault);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const sync = (e: MediaQueryListEvent | MediaQueryList) => {
+      // Solo impone el estado del breakpoint si el usuario no prefirió lo contrario.
+      if (userToggledSummaryRef.current) return;
+      setShowSummaryCards(mq.matches);
+    };
+    sync(mq);
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -3702,7 +3720,10 @@ export default function CronogramaGanttView({
           <div className="head-actions">
             <button
               className="btn secondary"
-              onClick={() => setShowSummaryCards((visible) => !visible)}
+              onClick={() => {
+                userToggledSummaryRef.current = true;
+                setShowSummaryCards((visible) => !visible);
+              }}
               title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
               aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
             >
@@ -3776,7 +3797,6 @@ export default function CronogramaGanttView({
               <strong>Componentes Principales</strong>
               <small>del proyecto (EDT Nivel 1)</small>
             </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
           <article
@@ -3795,7 +3815,6 @@ export default function CronogramaGanttView({
               <strong>Completados</strong>
               <small>metas y entregables cumplidos</small>
             </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
           <article
@@ -3813,7 +3832,6 @@ export default function CronogramaGanttView({
               <strong>En proceso</strong>
               <small>en ejecución activa</small>
             </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
           <article
@@ -3831,7 +3849,6 @@ export default function CronogramaGanttView({
               <strong>Con retraso</strong>
               <small>atención requerida</small>
             </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
           </article>
 
           <article
@@ -3848,7 +3865,6 @@ export default function CronogramaGanttView({
               <strong>Avance Global</strong>
               <small>según cronograma</small>
             </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
           </article>
          </section>}
 
