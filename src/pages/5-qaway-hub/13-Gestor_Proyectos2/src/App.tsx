@@ -88,13 +88,9 @@ const readStoredRole = (): UserRole => {
   return 'coordinador';
 };
 
-function App() {
+function GestorProyectosApp() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  if (/\/hub\/gestor_proyectos\/proyecto\/gantt\/elemento\/[^/]+/.test(location.pathname)) {
-    return <GanttElementDetailView />;
-  }
 
   // Módulo activo unificado: la URL canónica es la fuente única de verdad (cero rebotes)
   const active: ModuleKey = resolveModuleFromPath(location.pathname);
@@ -618,6 +614,16 @@ function App() {
       />
     </div>
   );
+}
+
+function App() {
+  const location = useLocation();
+
+  if (/\/hub\/gestor_proyectos\/proyecto\/gantt\/elemento\/[^/]+/.test(location.pathname)) {
+    return <GanttElementDetailView />;
+  }
+
+  return <GestorProyectosApp />;
 }
 
 export default App;
