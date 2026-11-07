@@ -1036,6 +1036,31 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
             {editorTab === 'info' && (
               <div className="editor-body">
+                {/* Resumen ejecutivo: el detalle rápido se mantiene arriba; la edición
+                    avanzada continúa disponible debajo sin eliminar ninguna función. */}
+                <div className="drawer-summary-card">
+                  <div className="drawer-summary-title">
+                    <span className="drawer-summary-icon"><Folder size={17} /></span>
+                    <div className="drawer-summary-heading">
+                      <b>{getEdtNodeDisplayLabel(activeItem, items)}</b>
+                      <span>{activeItem.code || 'Elemento del cronograma'}</span>
+                    </div>
+                    <span className={`status ${STATUS_CLASS[activeItem.status]}`}>{activeItem.status}</span>
+                  </div>
+                  {activeItem.description && (
+                    <p className="drawer-summary-description">{activeItem.description}</p>
+                  )}
+                  <div className="drawer-summary-grid">
+                    <div><span>Periodo</span><b>{formatDatePE(activeItem.start)} – {formatDatePE(activeItem.end)}</b></div>
+                    <div><span>Duración</span><b>{Math.max(1, Math.ceil((new Date(`${activeItem.end}T12:00:00`).getTime() - new Date(`${activeItem.start}T12:00:00`).getTime()) / 86400000) + 1)} días</b></div>
+                    <div><span>Responsable</span><b>{activeItem.gestor || 'Sin asignar'}</b></div>
+                    <div><span>Avance</span><b>{activeItem.progress}%</b></div>
+                  </div>
+                  <div className="drawer-summary-progress"><span style={{ width: `${Math.max(0, Math.min(100, activeItem.progress))}%` }} /></div>
+                  {activeItem.deliverable && (
+                    <div className="drawer-summary-deliverable"><FileText size={15} /><div><span>Entregable principal</span><b>{activeItem.deliverable}</b></div></div>
+                  )}
+                </div>
                 {/* Selector de Elemento Padre si es subcomponente (admite Componentes y Subcomponentes para multinivel) */}
                 {activeItem.kind === 'subproceso' && (
                   <div className="field relative" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
