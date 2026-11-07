@@ -12,12 +12,15 @@ export default function GanttElementDetailView() {
     try {
       const projectId = localStorage.getItem('qaway-gp-active-project-id') || 'p1';
        const raw = localStorage.getItem(`qaway-gantt-items-${projectId}`) || localStorage.getItem('qaway-gantt-items-p1');
-       const fallbackItems = projectId === 'p1' ? DRE_JUNIN_DOTACION_2027_EDT : [];
+       // La ficha debe poder abrirse directamente, aunque el proyecto activo
+       // no tenga todavía una copia local del cronograma.
+       const fallbackItems = DRE_JUNIN_DOTACION_2027_EDT;
        const parsedItems = raw ? JSON.parse(raw) : [];
-       const items = Array.isArray(parsedItems) && parsedItems.length > 0 ? parsedItems : fallbackItems;
+       const items = Array.isArray(parsedItems) ? parsedItems : [];
        const flatten = (entries: Item[]): Item[] => entries.flatMap((entry) => [entry, ...(entry.children ? flatten(entry.children) : [])]);
-       const flatItems = Array.isArray(items) ? flatten(items) : [];
-       return flatItems.find((entry: Item) => String(entry.id) === String(elementoId)) as Item | undefined;
+       const storedMatch = flatten(items).find((entry: Item) => String(entry.id) === String(elementoId));
+       const fallbackMatch = fallbackItems.find((entry) => String(entry.id) === String(elementoId));
+       return (storedMatch || fallbackMatch) as Item | undefined;
     } catch { return undefined; }
   }, [elementoId]);
 
