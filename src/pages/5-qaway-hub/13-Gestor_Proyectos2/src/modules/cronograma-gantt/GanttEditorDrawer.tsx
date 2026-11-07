@@ -325,6 +325,22 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
     }
   }, [panelOpen, selectedItem?.id, initialIsNewDraft]);
 
+  // El drawer es una capa modal: mientras está abierto, el scroll debe quedar
+  // contenido en su cuerpo y no desplazarse detrás sobre la aplicación.
+  useEffect(() => {
+    if (!panelOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const previousOverscrollBehavior = document.body.style.overscrollBehavior;
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.overscrollBehavior = previousOverscrollBehavior;
+    };
+  }, [panelOpen]);
+
   const activeItem = drawerDraft || selectedItem;
 
   const drawerDraftRef = useRef(drawerDraft);
@@ -345,6 +361,30 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
       return [];
     }
   }, [forceTasksNonce]);
+
+  // Derivados estables del elemento activo. El panel contiene varios controles
+  // que cambian estado de forma independiente; estos datos no deben recalcularse
+  // cada vez que se abre un desplegable o se mueve el cursor.
+  const activeChildItems = useMemo(
+    () => (activeItem ? items.filter((item) => item.parentId === activeItem.id) : []),
+    [items, activeItem?.id]
+  );
+
+  const linkedTasks = useMemo(
+    () => (activeItem ? rawTasks.filter((task: any) => task.milestone === activeItem.name) : []),
+    [activeItem?.name, rawTasks]
+  );
+
+  const linkedTaskStats = useMemo(() => {
+    const completed = linkedTasks.filter((task: any) => (
+      task.status === 'Cumple' || task.status === 'Completado' || task.status === 'Completada'
+    )).length;
+    return {
+      total: linkedTasks.length,
+      completed,
+      progress: linkedTasks.length > 0 ? Math.round((completed / linkedTasks.length) * 100) : 0,
+    };
+  }, [linkedTasks]);
 
   // Helpers auxiliares de fechas para el Drawer
   const formatDatePE = (iso: string): string => {
@@ -515,15 +555,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
   const getLinkedTasks = (milestoneName?: string) => {
     if (!milestoneName) return [];
-    try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
-      if (Array.isArray(raw)) {
-        return raw.filter((t: any) => t.milestone === milestoneName);
-      }
-    } catch {
-      /* fallback */
-    }
-    return [];
+    return rawTasks.filter((task: any) => task.milestone === milestoneName);
   };
 
   const handleOpenCreateTaskModal = (milestoneName: string) => {
@@ -827,7 +859,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
             setEditorHitoSelectOpen(false);
             setEditorParentSelectOpen(false);
             setEditorDepSelectOpen(false);
-          }}>
+           }} onWheel={(event) => event.stopPropagation()}>
             <div className="editor-head">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
                 <button
@@ -1693,7 +1725,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                 {/* 6. Avance */}
                 {(() => {
                   const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || activeItem.wbsNodeType === 'COMPONENTE' || activeItem.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === activeItem.id));
-                  const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
+                   const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
 
                   return (
                     <div className="progress-edit">
@@ -1786,10 +1818,10 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                 {/* 8. Desglose de Tareas vinculadas (100% Dinámico) */}
                 {(() => {
-                  const tasks = getLinkedTasks(activeItem.name);
-                  const total = tasks.length;
-                  const completed = tasks.filter((t: any) => t.status === 'Cumple' || t.status === 'Completado' || t.status === 'Completada').length;
-                  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+                   const tasks = linkedTasks;
+                   const total = linkedTaskStats.total;
+                   const completed = linkedTaskStats.completed;
+                   const pct = linkedTaskStats.progress;
                   return (
                     <div className="field" style={{ marginTop: '8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
@@ -2051,7 +2083,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                   <div>
                     <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
-                      {activeItem.kind === 'hito' ? 'Subcomponentes' : 'Sub-elementos / Paquetes de trabajo'} ({items.filter((x) => x.parentId === activeItem.id).length})
+                       {activeItem.kind === 'hito' ? 'Subcomponentes' : 'Sub-elementos / Paquetes de trabajo'} ({activeChildItems.length})
                     </b>
                     <span style={{ fontSize: '12px', color: '#64748b' }}>
                       {activeItem.kind === 'hito'
@@ -2071,7 +2103,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {items.filter((x) => x.parentId === activeItem.id).map((sub) => (
+                   {activeChildItems.map((sub) => (
                     <div
                       key={sub.id}
                       style={{
@@ -2115,7 +2147,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                       </div>
                     </div>
                   ))}
-                  {items.filter((x) => x.parentId === activeItem.id).length === 0 && (
+                   {activeChildItems.length === 0 && (
                     <div style={{ textAlign: 'center', padding: '36px 16px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
                       <FileText size={28} style={{ color: '#94a3b8', margin: '0 auto 8px' }} />
                       <b style={{ fontSize: '13px', color: '#334155', display: 'block' }}>
