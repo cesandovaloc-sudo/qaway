@@ -1908,6 +1908,19 @@ export default function CronogramaGanttView({
     });
   };
 
+  // Selecciona / quita todas las regiones de una macro-region (preserva las demas).
+  const toggleMacroRegions = (regiones: string[]) => {
+    setSelectedRegions((prev) => {
+      const todasMarcadas = regiones.every((r) => prev.includes(r));
+      if (todasMarcadas) return prev.filter((r) => !regiones.includes(r));
+      const next = [...prev];
+      regiones.forEach((r) => {
+        if (!next.includes(r)) next.push(r);
+      });
+      return next;
+    });
+  };
+
   const regionButtonText = useMemo(() => {
     if (selectedRegions.length === 0) return 'Todas';
     if (selectedRegions.length === 1) return selectedRegions[0];
@@ -4382,9 +4395,26 @@ export default function CronogramaGanttView({
                       </span>
                       <span className="wbs-level-badge">{unidades.length}</span>
                     </button>
-                    {MACROREGIONES_NACIONAL.map((macro) => (
-                      <React.Fragment key={macro.id}>
-                        <div className="filter-popover-group-label">{macro.name}</div>
+                    {MACROREGIONES_NACIONAL.map((macro) => {
+                      const todasMacro = macro.regiones.every((r) => selectedRegions.includes(r));
+                      return (
+                        <React.Fragment key={macro.id}>
+                          <div className="filter-popover-group-label macro-group-row">
+                            <span>{macro.name}</span>
+                            <button
+                              type="button"
+                              className={`filter-reset-link ${todasMacro ? 'macro-all-active' : ''}`}
+                              onClick={() => toggleMacroRegions(macro.regiones)}
+                              aria-pressed={todasMacro}
+                              title={
+                                todasMacro
+                                  ? `Quitar las ${macro.regiones.length} regiones de esta macro`
+                                  : `Seleccionar las ${macro.regiones.length} regiones de esta macro`
+                              }
+                            >
+                              {todasMacro ? `Quitar (${macro.regiones.length})` : `Todas (${macro.regiones.length})`}
+                            </button>
+                          </div>
                         {macro.regiones.map((regName) => {
                           const isChecked = selectedRegions.includes(regName);
                           const coordinador = getRegionCoordinador(regName);
@@ -4414,11 +4444,12 @@ export default function CronogramaGanttView({
                             </button>
                           );
                         })}
-                      </React.Fragment>
-                    ))}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
 
             {/* Filtro Contextual 2 (Vista Proyecto): Cargo · Coordinador Macro-regional */}

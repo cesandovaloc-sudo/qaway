@@ -9372,6 +9372,32 @@ body.gantt-resizing {
   letter-spacing: 0.04em !important;
 }
 
+/* Fila de macro-región: nombre + acción "Todas" alineada, mesmo estilo del popover */
+.gantt-v2 .filter-popover-group-label.macro-group-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+
+.gantt-v2 .macro-group-row .filter-reset-link {
+  font-size: 10px !important;
+  padding: 1px 6px !important;
+  border-radius: 5px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.gantt-v2 .macro-group-row .filter-reset-link:hover {
+  background: #f1f5f9 !important;
+  text-decoration: none !important;
+}
+
+.gantt-v2 .macro-group-row .filter-reset-link.macro-all-active {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+
 .gantt-v2 .filter-item-check {
   display: flex !important;
   align-items: center !important;
