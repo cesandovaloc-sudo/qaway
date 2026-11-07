@@ -1077,6 +1077,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     </button>
                   )}
                 </div>
+                <div className="drawer-advanced-content">
                 {/* Selector de Elemento Padre si es subcomponente (admite Componentes y Subcomponentes para multinivel) */}
                 {activeItem.kind === 'subproceso' && (
                   <div className="field relative" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
@@ -2078,6 +2079,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                       }
                     }}
                   />
+                </div>
                 </div>
               </div>
             )}
