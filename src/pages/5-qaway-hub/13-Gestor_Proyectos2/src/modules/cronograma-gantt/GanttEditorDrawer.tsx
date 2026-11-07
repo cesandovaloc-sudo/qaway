@@ -1175,56 +1175,45 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   </div>
                 )}
 
-                {/* Contenedor Opcional PMBOK: Fase del Ciclo de Vida y Clasificación EDT */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '4px' }}>
-                  <label className="field" style={{ margin: 0 }}>
-                    <span>Clasificación EDT (PMBOK)</span>
-                    <select
+                 {/* Clasificación operativa y fase del proyecto. Los nombres técnicos
+                     se conservan internamente, pero no se exponen al usuario. */}
+                 <div className="drawer-select-grid">
+                   <label className="field" style={{ margin: 0 }}>
+                     <span>Nivel del elemento</span>
+                     <select
+                       className="drawer-native-select"
                       value={activeItem.edtType || resolveEdtNodeType(activeItem, items)}
                       onChange={(e) => updateDraft({ edtType: e.target.value as EdtNodeType })}
                       style={{
-                        height: '34px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        padding: '0 8px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        color: '#0f172a',
-                        background: '#ffffff',
+                         width: '100%',
                       }}
                     >
                       {activeItem.kind === 'hito' ? (
                         <>
-                          <option value="COMPONENTE">Componente (Nivel 1 EDT)</option>
-                          <option value="HITO">Hito (Control Duración 0)</option>
+                           <option value="COMPONENTE">Componente</option>
+                           <option value="HITO">Hito</option>
                         </>
                       ) : (
                         <>
-                          <option value="SUBCOMPONENTE">Subcomponente (Subdivisión EDT)</option>
-                          <option value="PAQUETE_TRABAJO">Paquete de Trabajo (Ejecutable)</option>
-                          <option value="ENTREGABLE">Entregable (Producto / Evidencia)</option>
-                          <option value="HITO">Hito (Control Duración 0)</option>
+                           <option value="SUBCOMPONENTE">Subcomponente</option>
+                           <option value="PAQUETE_TRABAJO">Paquete de trabajo</option>
+                           <option value="ENTREGABLE">Entregable</option>
+                           <option value="HITO">Hito</option>
                         </>
                       )}
                     </select>
                   </label>
                   <label className="field" style={{ margin: 0 }}>
-                    <span>Fase del Ciclo de Vida (Opcional)</span>
-                    <select
+                     <span>Fase del proyecto</span>
+                     <select
+                       className="drawer-native-select"
                       value={activeItem.faseId || ''}
                       onChange={(e) => updateDraft({ faseId: e.target.value ? e.target.value : null })}
                       style={{
-                        height: '34px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        padding: '0 8px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        color: '#0f172a',
-                        background: '#ffffff',
+                         width: '100%',
                       }}
                     >
-                      <option value="">Sin fase asignada (Directo en EDT)</option>
+                       <option value="">Sin fase asignada</option>
                       {PROJECT_PHASES_CATALOG.map((f) => (
                         <option key={f.id} value={f.id}>
                           {f.code} · {f.name}
