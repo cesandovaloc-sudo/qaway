@@ -7452,10 +7452,11 @@ export default function CronogramaGanttView({
           onSelectItem={(id) => setSelectedId(id)}
           notify={notify}
            activeProject={activeProject}
-           onOpenFullDetail={(item) => {
-             setPanelOpen(false);
-             navigate(`/hub/gestor_proyectos/proyecto/gantt/elemento/${encodeURIComponent(item.id)}`);
-           }}
+            onOpenFullDetail={(item) => {
+              setPanelOpen(false);
+              window.history.pushState({}, '', `/hub/gestor_proyectos/proyecto/gantt/elemento/${encodeURIComponent(item.id)}`);
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
          />
 
                 {/* Modal Institucional: Confirmar Eliminación de Hito / Subproceso */}

@@ -1060,6 +1060,12 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   {activeItem.description && (
                     <p className="drawer-summary-description">{activeItem.description}</p>
                   )}
+                  <div className="drawer-summary-context">
+                    <div><span>Fase</span><b>{activeItem.phase || 'Sin fase definida'}</b></div>
+                    <div><span>Entidad responsable</span><b>{activeItem.entidadResponsable || activeItem.region || 'Gestión del proyecto'}</b></div>
+                    <div><span>Elementos asociados</span><b>{items.filter((child) => child.parentId === activeItem.id).length}</b></div>
+                    <div><span>Tareas vinculadas</span><b>{activeItem.tasks ?? 0}</b></div>
+                  </div>
                   <div className="drawer-summary-grid">
                     <div><span>Periodo</span><b>{formatDatePE(activeItem.start)} – {formatDatePE(activeItem.end)}</b></div>
                     <div><span>Duración</span><b>{Math.max(1, Math.ceil((new Date(`${activeItem.end}T12:00:00`).getTime() - new Date(`${activeItem.start}T12:00:00`).getTime()) / 86400000) + 1)} días</b></div>
@@ -1070,8 +1076,15 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   {activeItem.deliverable && (
                     <div className="drawer-summary-deliverable"><FileText size={15} /><div><span>Entregable principal</span><b>{activeItem.deliverable}</b></div></div>
                   )}
+                  <div className="drawer-summary-meta">
+                    <span>{activeItem.deliverables?.length || 0} entregables registrados</span>
+                    <span>{activeItem.attachments?.length || 0} documentos adjuntos</span>
+                  </div>
                   {!isNewDraft && (
-                    <button type="button" className="drawer-summary-detail-action" onClick={() => onOpenFullDetail?.(activeItem)}>
+                    <button type="button" className="drawer-summary-detail-action" onClick={(event) => {
+                      event.stopPropagation();
+                      onOpenFullDetail?.(activeItem);
+                    }}>
                       Ver componente completo
                       <ArrowUpRight size={15} />
                     </button>
