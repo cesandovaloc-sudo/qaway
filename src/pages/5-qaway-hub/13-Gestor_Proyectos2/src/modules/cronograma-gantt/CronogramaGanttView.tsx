@@ -3700,19 +3700,19 @@ export default function CronogramaGanttView({
           <div className="head-actions">
             <button
               className="btn secondary"
-              onClick={exportExcelTemplate}
-              title="Descargar plantilla de cronograma para completar en Excel"
-            >
-              <FileSpreadsheet size={15} />
-              <span>Plantilla Excel</span>
-            </button>
-            <button
-              className="btn secondary"
               onClick={() => setShowSummaryCards((visible) => !visible)}
               title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
               aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
             >
               {showSummaryCards ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+            <button
+              className="btn secondary"
+              onClick={exportExcelTemplate}
+              title="Descargar plantilla de cronograma para completar en Excel"
+            >
+              <FileSpreadsheet size={15} />
+              <span>Plantilla Excel</span>
             </button>
             <button
               className="btn secondary"
