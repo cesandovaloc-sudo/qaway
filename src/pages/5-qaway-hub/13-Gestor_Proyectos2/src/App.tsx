@@ -14,6 +14,7 @@ import TareasView from './modules/tareas/TareasView';
 import SedesView from './modules/sedes/SedesView';
 import CronogramaView from './modules/cronograma/CronogramaView';
 import CronogramaGanttView from './modules/cronograma-gantt/CronogramaGanttView';
+import GanttElementDetailView from './modules/cronograma-gantt/GanttElementDetailView';
 import ReunionesView from './modules/reuniones/ReunionesView';
 import ReporteadorView from './modules/reporteador/ReporteadorView';
 import EquipoView from './modules/equipo/EquipoView';
@@ -90,6 +91,10 @@ const readStoredRole = (): UserRole => {
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  if (/\/hub\/gestor_proyectos\/proyecto\/gantt\/elemento\/[^/]+/.test(location.pathname)) {
+    return <GanttElementDetailView />;
+  }
 
   // Módulo activo unificado: la URL canónica es la fuente única de verdad (cero rebotes)
   const active: ModuleKey = resolveModuleFromPath(location.pathname);

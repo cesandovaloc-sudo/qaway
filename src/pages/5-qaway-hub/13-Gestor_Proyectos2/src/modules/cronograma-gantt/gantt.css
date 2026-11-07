@@ -3619,6 +3619,43 @@
   color: #2563eb;
 }
 
+.gantt-v2 .drawer-summary-detail-action {
+  width: 100%;
+  min-height: 36px;
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.gantt-v2 .drawer-summary-detail-action:hover { background: #dbeafe; }
+
+.gantt-v2 .drawer-summary-detail-action {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  margin-top: 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.gantt-v2 .drawer-summary-detail-action:hover { background: #dbeafe; }
+.gantt-v2 .drawer-advanced-content { display: none; }
+
 .gantt-v2 .drawer-select-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -3676,6 +3713,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+.gantt-element-page { min-height: 100%; padding: 28px 34px 48px; background: #f8fafc; color: #0f172a; }
+.gantt-element-page-head { display: flex; align-items: center; gap: 14px; max-width: 1120px; margin: 0 auto 24px; }
+.gantt-element-page-head span, .gantt-element-eyebrow { color: #64748b; font-size: 12px; font-weight: 650; }
+.gantt-element-page h1 { margin: 3px 0; font-size: 24px; line-height: 1.25; }
+.gantt-element-page small { color: #64748b; font-size: 12px; }
+.gantt-element-hero, .gantt-element-sections article { max-width: 1120px; margin: 0 auto 16px; padding: 22px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.gantt-element-hero { display: flex; justify-content: space-between; gap: 20px; }
+.gantt-element-hero h2 { margin: 5px 0 8px; font-size: 18px; }
+.gantt-element-hero p, .gantt-element-sections p { margin: 0; color: #475569; font-size: 13px; line-height: 1.55; }
+.gantt-element-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 1120px; margin: 0 auto 16px; }
+.gantt-element-grid article { display: flex; flex-direction: column; gap: 7px; padding: 17px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #2563eb; }
+.gantt-element-grid span { color: #64748b; font-size: 11px; }.gantt-element-grid b { color: #1e293b; font-size: 13px; }
+.gantt-element-progress { height: 5px; overflow: hidden; border-radius: 99px; background: #e2e8f0; }.gantt-element-progress i { display: block; height: 100%; background: #2563eb; }
+.gantt-element-sections article h3 { display: flex; align-items: center; gap: 7px; margin: 0 0 10px; color: #1e293b; font-size: 14px; }
+@media (max-width: 760px) { .gantt-element-page { padding: 20px 16px 36px; }.gantt-element-grid { grid-template-columns: 1fr 1fr; }.gantt-element-hero { flex-direction: column; } }
 
 .gantt-v2 .field {
   display: flex;

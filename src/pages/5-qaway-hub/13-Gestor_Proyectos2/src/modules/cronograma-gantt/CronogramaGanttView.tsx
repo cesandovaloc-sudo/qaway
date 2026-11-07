@@ -1,6 +1,7 @@
 import { GanttEditorDrawer } from './GanttEditorDrawer';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router';
 import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
 import {
   applyActuals,
@@ -729,6 +730,7 @@ export function MiniCalendar({
   onClose: () => void;
   align?: 'left' | 'right';
 }) {
+  const navigate = useNavigate();
   const [viewDate, setViewDate] = useState(() =>
     value ? new Date(value + 'T12:00:00') : new Date('2026-10-27T12:00:00')
   );
@@ -7449,8 +7451,12 @@ export default function CronogramaGanttView({
           onSelectSubItem={(it) => openEditorForItem(it)}
           onSelectItem={(id) => setSelectedId(id)}
           notify={notify}
-          activeProject={activeProject}
-        />
+           activeProject={activeProject}
+           onOpenFullDetail={(item) => {
+             setPanelOpen(false);
+             navigate(`/hub/gestor_proyectos/proyecto/gantt/elemento/${encodeURIComponent(item.id)}`);
+           }}
+         />
 
                 {/* Modal Institucional: Confirmar Eliminación de Hito / Subproceso */}
         {deleteConfirmModalOpen && activeItem && (

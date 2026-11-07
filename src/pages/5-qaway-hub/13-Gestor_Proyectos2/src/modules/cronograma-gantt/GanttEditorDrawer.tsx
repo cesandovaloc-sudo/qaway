@@ -30,6 +30,7 @@ import {
   Presentation,
   Link as LinkIcon,
   Package,
+  ArrowUpRight,
 } from 'lucide-react';
 import type {
   Item,
@@ -267,6 +268,7 @@ interface GanttEditorDrawerProps {
   onSelectItem?: (id: string) => void;
   notify: (msg: string) => void;
   activeProject?: any;
+  onOpenFullDetail?: (item: Item) => void;
 }
 
 export const GanttEditorDrawer = memo(function GanttEditorDrawer({
@@ -284,6 +286,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   onSelectItem,
   notify,
   activeProject,
+  onOpenFullDetail,
 }: GanttEditorDrawerProps) {
   // ESTADO LOCAL DEL BORRADOR (Aislamiento total: escribir aqui NO re-renderiza el Gantt)
   const [drawerDraft, setDrawerDraft] = useState<Item | null>(null);
@@ -1066,6 +1069,12 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   <div className="drawer-summary-progress"><span style={{ width: `${Math.max(0, Math.min(100, activeItem.progress))}%` }} /></div>
                   {activeItem.deliverable && (
                     <div className="drawer-summary-deliverable"><FileText size={15} /><div><span>Entregable principal</span><b>{activeItem.deliverable}</b></div></div>
+                  )}
+                  {!isNewDraft && (
+                    <button type="button" className="drawer-summary-detail-action" onClick={() => onOpenFullDetail?.(activeItem)}>
+                      Ver componente completo
+                      <ArrowUpRight size={15} />
+                    </button>
                   )}
                 </div>
                 {/* Selector de Elemento Padre si es subcomponente (admite Componentes y Subcomponentes para multinivel) */}
