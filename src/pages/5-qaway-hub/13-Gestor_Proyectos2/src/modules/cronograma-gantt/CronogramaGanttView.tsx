@@ -4247,15 +4247,7 @@ export default function CronogramaGanttView({
                 <CalendarDays size={14} />
                 <span>Calendario</span>
               </button>
-              <button
-                type="button"
-                className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
-                onClick={() => handleViewModeChange('organigrama')}
-                title="Vista Organigrama WBS / EDT por Niveles (Diagrama de bloques)"
-              >
-                <Network size={14} />
-                <span>Organigrama</span>
-              </button>
+              {/* Vista conservada para una fase posterior; se oculta temporalmente del selector. */}
             </div>
           </nav>
 
