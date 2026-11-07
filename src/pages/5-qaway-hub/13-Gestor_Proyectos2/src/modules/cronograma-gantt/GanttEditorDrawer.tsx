@@ -69,6 +69,11 @@ const formatDate = (s: string) =>
     .toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
     .replace('.', '');
 
+const getPhaseLabel = (phaseId: string) => {
+  const phase = PROJECT_PHASES_CATALOG.find((item) => item.id === phaseId);
+  return phase ? `${phase.code} · ${phase.name}` : 'Sin fase asignada';
+};
+
 function getLinkedTasksSummary(
   item: Item,
   rawTasks?: any[]
@@ -293,6 +298,8 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [editorHitoSelectOpen, setEditorHitoSelectOpen] = useState(false);
   const [editorParentSelectOpen, setEditorParentSelectOpen] = useState(false);
   const [editorDepSelectOpen, setEditorDepSelectOpen] = useState(false);
+  const [editorLevelSelectOpen, setEditorLevelSelectOpen] = useState(false);
+  const [editorPhaseSelectOpen, setEditorPhaseSelectOpen] = useState(false);
 
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
   const [newDelivName, setNewDelivName] = useState('');
@@ -1180,46 +1187,21 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                  <div className="drawer-select-grid">
                    <label className="field" style={{ margin: 0 }}>
                      <span>Nivel del elemento</span>
-                     <select
-                       className="drawer-native-select"
-                      value={activeItem.edtType || resolveEdtNodeType(activeItem, items)}
-                      onChange={(e) => updateDraft({ edtType: e.target.value as EdtNodeType })}
-                      style={{
-                         width: '100%',
-                      }}
-                    >
-                      {activeItem.kind === 'hito' ? (
-                        <>
-                           <option value="COMPONENTE">Componente</option>
-                           <option value="HITO">Hito</option>
-                        </>
-                      ) : (
-                        <>
-                           <option value="SUBCOMPONENTE">Subcomponente</option>
-                           <option value="PAQUETE_TRABAJO">Paquete de trabajo</option>
-                           <option value="ENTREGABLE">Entregable</option>
-                           <option value="HITO">Hito</option>
-                        </>
-                      )}
-                    </select>
+                      <div className="drawer-choice-wrap">
+                        <button type="button" className={`drawer-choice ${editorLevelSelectOpen ? 'active' : ''}`} onClick={() => setEditorLevelSelectOpen((v) => !v)}>
+                          <span>{({ COMPONENTE: 'Componente', HITO: 'Hito', SUBCOMPONENTE: 'Subcomponente', PAQUETE_TRABAJO: 'Paquete de trabajo', ENTREGABLE: 'Entregable' } as Record<string, string>)[activeItem.edtType || resolveEdtNodeType(activeItem, items)] || 'Componente'}</span><ChevronDown size={14} />
+                        </button>
+                        {editorLevelSelectOpen && <div className="drawer-choice-menu">
+                          {(activeItem.kind === 'hito' ? [['COMPONENTE', 'Componente'], ['HITO', 'Hito']] : [['SUBCOMPONENTE', 'Subcomponente'], ['PAQUETE_TRABAJO', 'Paquete de trabajo'], ['ENTREGABLE', 'Entregable'], ['HITO', 'Hito']]).map(([value, label]) => <button type="button" key={value} className={(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value ? 'selected' : ''} onClick={() => { updateDraft({ edtType: value as EdtNodeType }); setEditorLevelSelectOpen(false); }}>{label}{(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value && <Check size={14} />}</button>)}
+                        </div>}
+                      </div>
                   </label>
                   <label className="field" style={{ margin: 0 }}>
                      <span>Fase del proyecto</span>
-                     <select
-                       className="drawer-native-select"
-                      value={activeItem.faseId || ''}
-                      onChange={(e) => updateDraft({ faseId: e.target.value ? e.target.value : null })}
-                      style={{
-                         width: '100%',
-                      }}
-                    >
-                       <option value="">Sin fase asignada</option>
-                      {PROJECT_PHASES_CATALOG.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.code} · {f.name}
-                        </option>
-                      ))}
-                    </select>
+                      <div className="drawer-choice-wrap">
+                        <button type="button" className={`drawer-choice ${editorPhaseSelectOpen ? 'active' : ''}`} onClick={() => setEditorPhaseSelectOpen((v) => !v)}><span>{activeItem.faseId ? `${getPhaseLabel(activeItem.faseId)}` : 'Sin fase asignada'}</span><ChevronDown size={14} /></button>
+                        {editorPhaseSelectOpen && <div className="drawer-choice-menu">{[['', 'Sin fase asignada'], ...PROJECT_PHASES_CATALOG.map((f) => [f.id, `${f.code} · ${f.name}`])].map(([value, label]) => <button type="button" key={value} className={(activeItem.faseId || '') === value ? 'selected' : ''} onClick={() => { updateDraft({ faseId: value || null }); setEditorPhaseSelectOpen(false); }}>{label}{(activeItem.faseId || '') === value && <Check size={14} />}</button>)}</div>}
+                      </div>
                   </label>
                 </div>
 
