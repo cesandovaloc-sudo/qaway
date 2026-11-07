@@ -45,6 +45,26 @@ export const REGIONES_PROYECTO: RegionProyecto[] = [
   { name: 'Ucayali', dre: 'DRE Ucayali', macroId: 'macro-oriente', coordinadorRegional: 'Renzo Tapia' },
 ];
 
+/** 
+ * Grupo macro-regional del catálogo nacional (sin cargos demo; el piloto sigue en MACROREGIONES).
+ * Cobertura total: 26 regiones de REGION_UGEL.xlsx. Lima Metropolitana pertenece a Macro Centro.
+ */
+export interface MacroCatalogo {
+  id: string;
+  name: string;
+  regiones: string[];
+}
+
+export const MACROREGIONES_NACIONAL: MacroCatalogo[] = [
+  { id: 'nac-norte', name: 'MACRO NORTE', regiones: ['Áncash', 'Lambayeque', 'La Libertad', 'Piura', 'Tumbes'] },
+  { id: 'nac-nor-oriente', name: 'MACRO NOR ORIENTE', regiones: ['Amazonas', 'Cajamarca', 'San Martín'] },
+  { id: 'nac-centro', name: 'MACRO CENTRO', regiones: ['Callao', 'Lima Metropolitana', 'Lima Provincias', 'Junín', 'Pasco'] },
+  { id: 'nac-oriente', name: 'MACRO ORIENTE', regiones: ['Huánuco', 'Ucayali', 'Loreto'] },
+  { id: 'nac-centro-sur', name: 'MACRO CENTRO SUR', regiones: ['Huancavelica', 'Ayacucho'] },
+  { id: 'nac-sur', name: 'MACRO SUR', regiones: ['Ica', 'Arequipa', 'Moquegua', 'Tacna'] },
+  { id: 'nac-sur-oriente', name: 'MACRO SUR ORIENTE', regiones: ['Apurímac', 'Cusco', 'Puno', 'Madre de Dios'] },
+];
+
 export interface RegionalNodeSeed {
   row: OfficialEdtReferenceRow;
   region: string;
@@ -103,5 +123,13 @@ export const resolveItemRegion = (id: string): string => {
 
 export const getRegionCoordinador = (region: string): string | undefined =>
   REGIONES_PROYECTO.find((r) => r.name === region)?.coordinadorRegional;
+
+/** Clave de región insensible a acentos/espacios: el Excel combina HUÁNUCO y ANCASH sin tilde. */
+export const normalizeRegionKey = (region: string | null | undefined): string =>
+  String(region ?? '')
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
 
 export const getMacroById = (id: string): Macroregion | undefined => MACROREGIONES.find((m) => m.id === id);

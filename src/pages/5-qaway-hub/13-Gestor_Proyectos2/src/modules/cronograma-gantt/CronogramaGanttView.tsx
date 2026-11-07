@@ -44,6 +44,8 @@ import {
   getRegionCoordinador,
   getMacroById,
   resolveItemRegion,
+  MACROREGIONES_NACIONAL,
+  normalizeRegionKey,
 } from './regionalCoordinationModel';
 import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
@@ -1968,10 +1970,10 @@ export default function CronogramaGanttView({
   // 'region' de la unidad (ambito). Las sedes que solo viven en los ítems del
   // cronograma conservan la cascada original ítem-impulsada.
   const availableSedesCascaded = useMemo(() => {
-    const regionsUpper = selectedRegions.map((r) => String(r).toUpperCase());
+    const regionsUpper = selectedRegions.map((r) => normalizeRegionKey(r));
     const enAmbito = unidades
       .filter(
-        (u) => u.name && (regionsUpper.length === 0 || regionsUpper.includes(String(u.region).toUpperCase()))
+        (u) => u.name && (regionsUpper.length === 0 || regionsUpper.includes(normalizeRegionKey(u.region)))
       )
       .map((u) => u.name);
     const unitNames = new Set(enAmbito);
@@ -2059,6 +2061,16 @@ export default function CronogramaGanttView({
     });
     return counts;
   }, [items]);
+
+  // Verificación en pantalla: número de sedes (DRE/UGEL) del catálogo por región.
+  const sedesPorRegion = useMemo(() => {
+    const m = new Map<string, number>();
+    unidades.forEach((u) => {
+      const region = normalizeRegionKey(u.region);
+      if (region) m.set(region, (m.get(region) || 0) + 1);
+    });
+    return m;
+  }, [unidades]);
   const [rangeFrom, setRangeFrom] = useState(RANGE_MIN);
   const [rangeTo, setRangeTo] = useState(RANGE_MAX);
   const [listaTemporalFilter, setListaTemporalFilter] = useState<'Todos' | 'Hoy' | 'Semana' | 'Mes' | 'Trimestre'>('Todos');
@@ -4351,7 +4363,7 @@ export default function CronogramaGanttView({
                   style={{ minWidth: 270 }}
                 >
                   <div className="filter-popover-title filter-popover-title-row">
-                    <span>Regiones del proyecto</span>
+                    <span>Regiones y sedes del catálogo</span>
                     {selectedRegions.length > 0 && (
                       <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions([])}>
                         Limpiar ({selectedRegions.length})
@@ -4364,14 +4376,18 @@ export default function CronogramaGanttView({
                       className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
                       onClick={() => setSelectedRegions([])}
                     >
-                      <span>Todas las regiones</span>
-                      <span className="wbs-level-badge">{REGIONES_PROYECTO.length}</span>
+                      <span className="filter-item-text">
+                        <strong>Todas las regiones</strong>
+                        <small>{MACROREGIONES_NACIONAL.length} macro-regiones · {unidades.length} sedes</small>
+                      </span>
+                      <span className="wbs-level-badge">{unidades.length}</span>
                     </button>
-                    {MACROREGIONES.map((macro) => (
+                    {MACROREGIONES_NACIONAL.map((macro) => (
                       <React.Fragment key={macro.id}>
                         <div className="filter-popover-group-label">{macro.name}</div>
                         {macro.regiones.map((regName) => {
                           const isChecked = selectedRegions.includes(regName);
+                          const coordinador = getRegionCoordinador(regName);
                           return (
                             <button
                               key={regName}
@@ -4386,10 +4402,15 @@ export default function CronogramaGanttView({
                                 </span>
                                 <span className="filter-item-text">
                                   <strong>{regName}</strong>
-                                  <small>Coord. regional: {getRegionCoordinador(regName)}</small>
+                                  <small>
+                                    {sedesPorRegion.get(normalizeRegionKey(regName)) || 0} sedes
+                                    {coordinador ? ` · Coord. regional: ${coordinador}` : ''}
+                                  </small>
                                 </span>
                               </span>
-                              <span className="wbs-level-badge">{regionItemCounts[regName] || 0}</span>
+                              {(regionItemCounts[regName] || 0) > 0 && (
+                                <span className="wbs-level-badge">{regionItemCounts[regName]}</span>
+                              )}
                             </button>
                           );
                         })}
