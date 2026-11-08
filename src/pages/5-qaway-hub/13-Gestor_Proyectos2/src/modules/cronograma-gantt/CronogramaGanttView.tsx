@@ -36,6 +36,10 @@ import {
   saveStoredAsignaciones,
 } from '../equipo/mockData';
 import {
+  fetchEquipoIntegrantesFromSupabase,
+  fetchEquipoSedesFromSupabase,
+} from '../../services/gestorEquipoService';
+import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
   deleteCronogramaItemFromSupabase,
@@ -1356,8 +1360,8 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (hasLegacyMocks || parsed.length < 800 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo') || !parsed.some((it) => it.id === 'pt-1.6-dre-pasco')) {
-              // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes (DRE + 13 UGEL)
+            if (hasLegacyMocks || parsed.length < 5000 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-2.1-unit-001') || !parsed.some((it) => it.id === 'pt-6.1-unit-002')) {
+              // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
                 localStorage.removeItem('qaway-collapsed-by-mode-v1');
@@ -1445,14 +1449,13 @@ export default function CronogramaGanttView({
               (!it.parentId || cloudItems.some((p) => p.id === it.parentId))
           ) as Item[]
         );
-        if (projectId === 'p1' && (cleanCloudItems.length < 800 || !cleanCloudItems.some((it) => it.id === 'pt-7.2'))) {
+        if (projectId === 'p1' && (cleanCloudItems.length < 5000 || !cleanCloudItems.some((it) => it.id === 'pt-2.1-unit-001'))) {
           setItems(INITIAL_ITEMS);
-          syncAllCronogramaItemsToSupabase('p1', INITIAL_ITEMS as GanttItemData[]);
           try {
             localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(INITIAL_ITEMS));
             window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
           } catch {}
-        } else if (cleanCloudItems.length >= 800) {
+        } else if (cleanCloudItems.length >= 5000) {
           const recomputed = computeWbsHierarchy(cleanCloudItems, rawTasks);
           setItems(recomputed);
           try {
@@ -2084,6 +2087,32 @@ export default function CronogramaGanttView({
   const [equipoEstadoCuentaFilter, setEquipoEstadoCuentaFilter] = useState('todos');
   const [equipoAreaFilter, setEquipoAreaFilter] = useState('todas');
   const [equipoPill, setEquipoPill] = useState('Todos');
+
+  // Carga reactiva de integrantes y sedes desde Supabase (cero hardcodeo local)
+  useEffect(() => {
+    if (perspective === 'equipo') {
+      let isMounted = true;
+      fetchEquipoIntegrantesFromSupabase().then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setEquipoIntegrantes(data);
+        }
+      }).catch((e) => {
+        console.warn('[CronogramaGanttView] Error cargando integrantes Supabase:', e);
+      });
+
+      fetchEquipoSedesFromSupabase().then((sedes) => {
+        if (isMounted && Array.isArray(sedes) && sedes.length > 0) {
+          setEquipoSedes(sedes);
+        }
+      }).catch((e) => {
+        console.warn('[CronogramaGanttView] Error cargando sedes Supabase:', e);
+      });
+
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [perspective]);
 
   const equipoMetrics = useMemo(() => {
     const total = equipoIntegrantes.length;
@@ -4014,6 +4043,55 @@ export default function CronogramaGanttView({
     return ids;
   }, [items, selectedEdtCodes]);
 
+  const matchingRegionIds = useMemo(() => {
+    if (selectedRegions.length === 0) return null;
+    const ids = new Set<string>();
+    const normSelected = selectedRegions.map((r) => normalizeRegionKey(r));
+
+    const parentMap = new Map<string, string>();
+    items.forEach((it) => {
+      if (it.parentId) parentMap.set(it.id, it.parentId);
+    });
+
+    items.forEach((it) => {
+      const itReg = it.region ? normalizeRegionKey(it.region) : '';
+      if (itReg && normSelected.includes(itReg)) {
+        ids.add(it.id);
+        let curr = it.parentId;
+        while (curr) {
+          ids.add(curr);
+          curr = parentMap.get(curr);
+        }
+      }
+    });
+
+    return ids;
+  }, [items, selectedRegions]);
+
+  const matchingGestorIds = useMemo(() => {
+    if (gestorFilter === 'Todos') return null;
+    const ids = new Set<string>();
+
+    const parentMap = new Map<string, string>();
+    items.forEach((it) => {
+      if (it.parentId) parentMap.set(it.id, it.parentId);
+    });
+
+    items.forEach((it) => {
+      const gList = getItemGestores(it);
+      if (it.gestor === gestorFilter || gList.includes(gestorFilter)) {
+        ids.add(it.id);
+        let curr = it.parentId;
+        while (curr) {
+          ids.add(curr);
+          curr = parentMap.get(curr);
+        }
+      }
+    });
+
+    return ids;
+  }, [items, gestorFilter]);
+
   const shownBase = useMemo(() => {
     return items.filter((x) => {
       const parent = items.find((p) => p.id === x.parentId);
@@ -4047,30 +4125,16 @@ export default function CronogramaGanttView({
 
       const isExplicitSedeMatch = Boolean(matchingSedeIds && matchingSedeIds.has(x.id));
 
-      const hasChildMatchingRegion = items.some(
-        (c) =>
-          (c.parentId === x.id || (c.parentId === 'pt-1.6' && x.id === 'comp-1')) &&
-          c.region &&
-          selectedRegions.some((r) => normalizeRegionKey(r) === normalizeRegionKey(c.region))
-      );
       const matchRegion =
         selectedRegions.length === 0 ||
         isExplicitSedeMatch ||
         x.region === 'Todas las Regiones' ||
-        (x.region && selectedRegions.some((r) => normalizeRegionKey(r) === normalizeRegionKey(x.region))) ||
-        hasChildMatchingRegion;
+        (matchingRegionIds ? matchingRegionIds.has(x.id) : false);
 
-      const hasChildMatchingGestor = items.some(
-        (c) =>
-          (c.parentId === x.id || (c.parentId === 'pt-1.6' && x.id === 'comp-1')) &&
-          (c.gestor === gestorFilter || getItemGestores(c).includes(gestorFilter))
-      );
       const matchGestor =
         gestorFilter === 'Todos' ||
         isExplicitSedeMatch ||
-        x.gestor === gestorFilter ||
-        getItemGestores(x).includes(gestorFilter) ||
-        hasChildMatchingGestor;
+        (matchingGestorIds ? matchingGestorIds.has(x.id) : false);
 
       const macroDef = macroFilter !== 'Todos' ? getMacroById(macroFilter) : undefined;
       const matchMacro =
@@ -4323,6 +4387,8 @@ export default function CronogramaGanttView({
     macroFilter,
     selectedSedes,
     matchingSedeIds,
+    matchingRegionIds,
+    matchingGestorIds,
     selectedEdtCodes,
     matchingEdtIds,
     itemDepthMap

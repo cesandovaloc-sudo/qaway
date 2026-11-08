@@ -157,7 +157,7 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
       .from('gestor_cronograma_items')
       .select('*')
       .eq('project_id', projectId)
-      .limit(3000);
+      .limit(15000);
 
     if (error) {
       console.warn('[Supabase Cronograma] Aviso al leer (se usará respaldo local):', error.message);

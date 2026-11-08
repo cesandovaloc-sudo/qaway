@@ -13,4 +13,12 @@
 .pruebas-chart { height: 490px; width: 100%; }
 .pruebas-placeholder { min-height: 490px; display: grid; place-content: center; text-align: center; padding: 40px; color: #52606d; }
 .pruebas-placeholder strong { color: #1769d2; font-size: 18px; }
+.pruebas-kepler { min-height: 490px; padding: 22px; overflow: auto; color: #52606d; }
+.pruebas-kepler > strong { color: #1769d2; font-size: 18px; }
+.pruebas-kepler > p { margin: 8px 0 18px; }
+.pruebas-data-grid { display: grid; gap: 7px; }
+.pruebas-data-grid > div { display: grid; grid-template-columns: 84px minmax(0, 1fr) 60px; gap: 12px; align-items: center; padding: 9px 11px; border: 1px solid #e5edf5; border-radius: 7px; background: #f8fafc; }
+.pruebas-data-grid b { color: #1769d2; }
+.pruebas-data-grid span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pruebas-data-grid em { color: #16803c; font-style: normal; text-align: right; font-weight: 600; }
 @media (max-width: 800px) { .pruebas-workspace { grid-template-columns: 1fr; } .pruebas-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
