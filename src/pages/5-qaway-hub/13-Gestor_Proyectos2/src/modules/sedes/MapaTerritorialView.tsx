@@ -843,6 +843,50 @@ export default function MapaTerritorialView({
                   </div>
                 </div>
               )}
+              {/* DOCK FLOTANTE SOBRE EL MAPA (Solo iconos, estilo app) */}
+              <div className="territorial-floating-dock" role="tablist" aria-label="Modos de Vista del Mapa">
+                <button
+                  type="button"
+                  className={`floating-dock-btn ${subView === 'geo-real' ? 'is-active' : ''}`}
+                  onClick={() => setSubView('geo-real')}
+                  title="Mapa Geográfico Satelital (Ubicaciones)"
+                  aria-label="Mapa Geográfico"
+                >
+                  <Globe2 size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  className={`floating-dock-btn ${subView === 'tematico-regional' ? 'is-active' : ''}`}
+                  onClick={() => setSubView('tematico-regional')}
+                  title="Mapa Temático Poligonal (Regiones)"
+                  aria-label="Mapa Temático Poligonal"
+                >
+                  <Layers size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  className={`floating-dock-btn ${subView === 'powerbi-analitico' ? 'is-active' : ''}`}
+                  onClick={() => setSubView('powerbi-analitico')}
+                  title="Tablero Analítico Territorial (Indicadores Power BI)"
+                  aria-label="Analítica Power BI"
+                >
+                  <BarChart3 size={16} />
+                </button>
+
+                <span className="floating-dock-divider" />
+
+                <button
+                  type="button"
+                  className="floating-dock-btn"
+                  onClick={toggleFullscreen}
+                  title={isFullscreen ? 'Salir de pantalla completa' : 'Ver mapa en pantalla completa'}
+                  aria-label="Pantalla Completa"
+                >
+                  {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                </button>
+              </div>
             </div>
 
             {/* TOPPLIN FLOTANTE MINIMALISTA */}
@@ -868,53 +912,6 @@ export default function MapaTerritorialView({
                 <div className="topplin-region-sub">FC: {hoveredUgel.fc} · MINEDU Dotación 2027</div>
               </div>
             )}
-
-            {/* BOTONERA DOCK INFERIOR */}
-            <footer className="territorial-bottom-dock">
-              <div className="dock-left-modes" role="tablist" aria-label="Modos de Vista del Mapa">
-                <button
-                  type="button"
-                  className={`dock-btn ${subView === 'geo-real' ? 'is-active' : ''}`}
-                  onClick={() => setSubView('geo-real')}
-                  title="Vista 1: Mapa Geográfico Satelital Interactivo con Pines"
-                >
-                  <Globe2 size={14} />
-                  <span>Ubicaciones</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`dock-btn ${subView === 'tematico-regional' ? 'is-active' : ''}`}
-                  onClick={() => setSubView('tematico-regional')}
-                  title="Vista 2: Mapa Regional Temático por Provincias y Fases (HubPro)"
-                >
-                  <Layers size={14} />
-                  <span>Regiones</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`dock-btn ${subView === 'powerbi-analitico' ? 'is-active' : ''}`}
-                  onClick={() => setSubView('powerbi-analitico')}
-                  title="Vista 3: Tablero Analítico Territorial tipo Power BI"
-                >
-                  <BarChart3 size={14} />
-                  <span>Indicadores</span>
-                </button>
-              </div>
-
-              <div className="dock-right-controls">
-                <button
-                  type="button"
-                  className="dock-zoom-btn"
-                  onClick={toggleFullscreen}
-                  title={isFullscreen ? 'Salir de pantalla completa' : 'Ver mapa en pantalla completa'}
-                >
-                  {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-                  <span>{isFullscreen ? 'Salir' : 'Pantalla Completa'}</span>
-                </button>
-              </div>
-            </footer>
           </div>
         </main>
       </div>

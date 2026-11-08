@@ -144,7 +144,7 @@
 
 .gantt-v2 .secondary:hover {
   background: #f8fafc;
-  border-color: #94a3b8;
+  border-color: #b0bccd;
 }
 
 .gantt-v2 .square {
@@ -635,7 +635,7 @@
 }
 
 .gantt-v2 .filter-card-btn:hover {
-  border-color: #94a3b8;
+  border-color: #b0bccd;
   background: #fcfdfe;
 }
 
@@ -1204,7 +1204,7 @@
 
 .gantt-v2 .nav-arrow:hover {
   background: #f8fafc;
-  border-color: #94a3b8;
+  border-color: #b0bccd;
   color: #0f172a;
 }
 
@@ -1322,7 +1322,7 @@
 .gantt-v2 .clear-btn:hover {
   background: #f8fafc;
   color: #0f172a;
-  border-color: #94a3b8;
+  border-color: #b0bccd;
 }
 
 .gantt-v2 .undo-btn:disabled {
@@ -1369,7 +1369,7 @@
 .gantt-v2 .custom-filter-trigger-btn:hover {
   background: #f8fafc;
   color: #0f172a;
-  border-color: #94a3b8;
+  border-color: #b0bccd;
 }
 
 .gantt-v2 .custom-filter-trigger-btn.active {
@@ -1445,7 +1445,7 @@
 .gantt-v2 .qm-btn-icon:hover {
   background: #f8fafc;
   color: #0f172a;
-  border-color: #94a3b8;
+  border-color: #b0bccd;
 }
 
 .gantt-v2 .qm-btn-icon.active {
@@ -9327,7 +9327,7 @@ body.gantt-resizing {
 
 .gantt-v2 .tabs-list .filter-card-btn:hover {
   background: #f1f5f9;
-  border-color: #94a3b8;
+  border-color: #b0bccd;
 }
 
 .gantt-v2 .tabs-list .filter-card-btn.active,
@@ -9405,7 +9405,7 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .contextual-filter-wrap .filter-card-btn:hover {
-  border-color: #94a3b8;
+  border-color: #b0bccd;
   background: #fcfdfe;
 }
 
@@ -9706,7 +9706,7 @@ body.gantt-resizing {
 .gantt-v2 .tabs-list .filter-card-btn:hover,
 .gantt-v2 .filters .filter-card-btn:hover {
   background: #f8fafc !important;
-  border-color: #94a3b8 !important;
+  border-color: #b0bccd !important;
 }
 
 /* Estado activo / abierto: mínima variación con sutil contorno azul */
@@ -9772,7 +9772,7 @@ body.gantt-resizing {
 .gantt-v2 .bar-tools-accordion:hover,
 .gantt-v2 .bar-tools-accordion:focus-within {
   background: #ffffff;
-  border-color: #94a3b8;
+  border-color: #b0bccd;
   box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
 }
 
@@ -11482,80 +11482,57 @@ body.gantt-resizing {
   to { opacity: 1; transform: translate(-50%, -100%); }
 }
 
-/* 4. BOTONERA DOCK INFERIOR */
-.territorial-bottom-dock {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
-  background: #ffffff;
-  border-top: 1px solid #e2e8f0;
-  gap: 12px;
-  flex-wrap: wrap;
-  z-index: 10;
-}
-
-.dock-left-modes {
+/* 4. BOTONERA DOCK FLOTANTE SOBRE EL MAPA (Estilo App Moderna) */
+.territorial-floating-dock {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: #f1f5f9;
-  padding: 4px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 5px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.16), 0 2px 6px -1px rgba(15, 23, 42, 0.08);
+  z-index: 25;
 }
 
-.dock-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.floating-dock-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   border: 0;
   background: transparent;
   color: #475569;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 6px 11px;
-  border-radius: 6px;
+  display: grid;
+  place-items: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
 
-.dock-btn:hover {
-  background: #e2e8f0;
+.floating-dock-btn:hover {
+  background: #f1f5f9;
   color: #0f172a;
+  transform: translateY(-1px);
 }
 
-.dock-btn.is-active {
-  background: #ffffff;
-  color: #0066ff;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+.floating-dock-btn.is-active {
+  background: #0066ff;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.35);
 }
 
-.dock-right-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-}
-
-.dock-zoom-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #0066ff;
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.dock-zoom-btn:hover {
-  background: #dbeafe;
-  color: #0052cc;
+.floating-dock-divider {
+  width: 1px;
+  height: 20px;
+  background: #e2e8f0;
+  margin: 0 3px;
+  flex-shrink: 0;
 }
 
 .territorial-hub-wrapper.is-fullscreen-territorial {
@@ -11727,4 +11704,69 @@ body.gantt-resizing {
 .gantt-v2 .batch-cancel-btn:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.12);
+}
+
+
+/* ==========================================================================
+   Alineación de Modo Lista y Formatos de Gráfico de Porcentaje
+   ========================================================================== */
+.gantt-v2 .view-lista-fullwidth .row .fixed-cols {
+  position: static !important;
+}
+
+/* Tipografía de Porcentajes y Celdas de Tabla sin negritas excesivas */
+.gantt-v2 .progress.editable b,
+.gantt-v2 .progress.is-rollup b,
+.gantt-v2 .progress.is-linked-tasks b,
+.gantt-v2 .progress-num-text {
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  color: #334155 !important;
+  min-width: 30px !important;
+}
+
+.gantt-v2 .deviation-cell,
+.gantt-v2 .dev-pill,
+.gantt-v2 .dev-text {
+  font-weight: 500 !important;
+}
+
+.gantt-v2 .type-text-label.is-hito {
+  font-weight: 500 !important;
+}
+
+.gantt-v2 .status {
+  font-weight: 500 !important;
+}
+
+/* Formato Circular / Anillo para Porcentaje (estilo Notion) */
+.progress-ring-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-ring-svg {
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+}
+
+.progress-ring-bg {
+  stroke: #e2e8f0;
+}
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.35s ease;
+}
+
+/* Formato Solo Número para Porcentaje */
+.progress-num-only {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #1e293b;
+  font-size: 11.5px;
+  font-weight: 500;
 }

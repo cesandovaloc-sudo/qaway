@@ -16,6 +16,7 @@ import {
   Hash,
   Pencil,
   Percent,
+  PieChart,
   Pin,
   RotateCcw,
   Search,
@@ -403,6 +404,8 @@ interface ColumnHeaderMenuProps<R> {
   isFrozen?: boolean | undefined;
   onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
   onChangeType?: ((columnId: string, newType: string) => void) | undefined;
+  graphFormat?: 'bar' | 'ring' | 'number' | undefined;
+  onChangeGraphFormat?: ((columnId: string, format: 'bar' | 'ring' | 'number') => void) | undefined;
   onToggleWrap?: ((columnId: string) => void) | undefined;
   isWrapped?: boolean | undefined;
   onCalculate?: ((columnId: string, calculation: string) => void) | undefined;
@@ -425,6 +428,8 @@ export function ColumnHeaderMenu<R>({
   isFrozen,
   onRenameColumn,
   onChangeType,
+  graphFormat,
+  onChangeGraphFormat,
   onToggleWrap,
   isWrapped,
   onCalculate,
@@ -541,6 +546,8 @@ export function ColumnHeaderMenu<R>({
               isFrozen={isFrozen}
               onRenameColumn={onRenameColumn}
               onChangeType={onChangeType}
+              graphFormat={graphFormat}
+              onChangeGraphFormat={onChangeGraphFormat}
               onToggleWrap={onToggleWrap}
               isWrapped={isWrapped}
               onCalculate={onCalculate}
@@ -566,6 +573,8 @@ function MenuBody<R>({
   isFrozen,
   onRenameColumn,
   onChangeType,
+  graphFormat,
+  onChangeGraphFormat,
   onToggleWrap,
   isWrapped,
   onCalculate,
@@ -583,6 +592,8 @@ function MenuBody<R>({
   isFrozen?: boolean | undefined;
   onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
   onChangeType?: ((columnId: string, newType: string) => void) | undefined;
+  graphFormat?: 'bar' | 'ring' | 'number' | undefined;
+  onChangeGraphFormat?: ((columnId: string, format: 'bar' | 'ring' | 'number') => void) | undefined;
   onToggleWrap?: ((columnId: string) => void) | undefined;
   isWrapped?: boolean | undefined;
   onCalculate?: ((columnId: string, calculation: string) => void) | undefined;
@@ -604,7 +615,9 @@ function MenuBody<R>({
   // Submenús desplegables con puente de hover seguro + anclaje por clic
   const [activeFlyout, setActiveFlyout] = useState<'filter' | 'property' | null>(null);
   const [pinnedFlyout, setPinnedFlyout] = useState<'filter' | 'property' | null>(null);
-  const [nestedFlyout, setNestedFlyout] = useState<'type' | 'calc' | null>(null);
+  const [nestedFlyout, setNestedFlyout] = useState<'type' | 'calc' | 'format' | null>(null);
+  const [currentFormat, setCurrentFormat] = useState(graphFormat || 'bar');
+  useEffect(() => { if (graphFormat) setCurrentFormat(graphFormat); }, [graphFormat]);
   const [selectedOp, setSelectedOp] = useState<OperatorDef | null>(null);
   const [opVal, setOpVal] = useState('');
   const [opVal2, setOpVal2] = useState('');
@@ -620,6 +633,7 @@ function MenuBody<R>({
   const propBtnRef = useRef<HTMLButtonElement>(null);
   const typeBtnRef = useRef<HTMLButtonElement>(null);
   const calcBtnRef = useRef<HTMLButtonElement>(null);
+  const formatBtnRef = useRef<HTMLButtonElement>(null);
 
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const nestedTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -642,7 +656,7 @@ function MenuBody<R>({
     }, 220); // 220ms de gracia para cruzar el mouse sin perder el foco
   };
 
-  const cancelCloseNested = (target: 'type' | 'calc') => {
+  const cancelCloseNested = (target: 'type' | 'calc' | 'format') => {
     if (nestedTimerRef.current) {
       clearTimeout(nestedTimerRef.current);
       nestedTimerRef.current = null;
@@ -684,7 +698,7 @@ function MenuBody<R>({
       setNestedPos(null);
       return;
     }
-    const btn = nestedFlyout === 'type' ? typeBtnRef.current : calcBtnRef.current;
+    const btn = nestedFlyout === 'type' ? typeBtnRef.current : nestedFlyout === 'calc' ? calcBtnRef.current : formatBtnRef.current;
     if (!btn) return;
     const r = btn.getBoundingClientRect();
     const vw = window.innerWidth;
@@ -748,6 +762,12 @@ function MenuBody<R>({
     const next = selectedCalc === calcId ? '' : calcId;
     setSelectedCalc(next);
     onCalculate?.(col.id, next);
+    setNestedFlyout(null);
+  };
+
+  const handleSelectFormat = (fmt: 'bar' | 'ring' | 'number') => {
+    setCurrentFormat(fmt);
+    onChangeGraphFormat?.(col.id, fmt);
     setNestedFlyout(null);
   };
 
@@ -1084,6 +1104,32 @@ function MenuBody<R>({
             <ChevronRight size={12} style={{ color: '#94a3b8' }} />
           </button>
 
+                    {/* Formato de gráfico (solo para porcentaje) › */}
+          {(currentType === 'percent' || col.id === 'progress') && (
+            <button
+              ref={formatBtnRef}
+              type="button"
+              className={`te-flyout-item ${nestedFlyout === 'format' ? 'open' : ''}`}
+              onMouseEnter={() => cancelCloseNested('format')}
+              onMouseLeave={scheduleCloseNested}
+              onClick={(e) => {
+                e.stopPropagation();
+                setNestedFlyout((prev) => (prev === 'format' ? null : 'format'));
+              }}
+            >
+              <div className="te-submenu-left">
+                <PieChart size={12} />
+                <span>Formato de gráfico</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <span className="te-calc-badge">
+                  {currentFormat === 'ring' ? 'Circular' : currentFormat === 'number' ? 'Número' : 'Barra'}
+                </span>
+                <ChevronRight size={12} style={{ color: '#94a3b8' }} />
+              </div>
+            </button>
+          )}
+
           {/* Calcular al pie › */}
           <button
             ref={calcBtnRef}
@@ -1211,6 +1257,53 @@ function MenuBody<R>({
               </div>
             </button>
           )}
+        </div>,
+        document.body
+      )}
+
+            {nestedFlyout === 'format' && nestedPos && createPortal(
+        <div
+          className="te-nested-flyout"
+          style={{ top: nestedPos.top, left: nestedPos.left }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseEnter={() => cancelCloseNested('format')}
+          onMouseLeave={scheduleCloseNested}
+        >
+          <div className="te-flyout-title" style={{ padding: '3px 6px' }}>Estilo de visualización</div>
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => handleSelectFormat('bar')}
+          >
+            <div className="te-submenu-left">
+              <Sliders size={12} />
+              <span>Barra horizontal</span>
+            </div>
+            {(!currentFormat || currentFormat === 'bar') && <Check size={12} className="te-tick" />}
+          </button>
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => handleSelectFormat('ring')}
+          >
+            <div className="te-submenu-left">
+              <PieChart size={12} />
+              <span>Circular / Anillo</span>
+            </div>
+            {currentFormat === 'ring' && <Check size={12} className="te-tick" />}
+          </button>
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => handleSelectFormat('number')}
+          >
+            <div className="te-submenu-left">
+              <Percent size={12} />
+              <span>Solo número (%)</span>
+            </div>
+            {currentFormat === 'number' && <Check size={12} className="te-tick" />}
+          </button>
         </div>,
         document.body
       )}

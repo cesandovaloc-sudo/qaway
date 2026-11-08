@@ -1884,6 +1884,7 @@ export default function CronogramaGanttView({
     colTypeOverrides: Record<string, string>;
     colCustomLabels: Record<string, string>;
     colCalculations: Record<string, string>;
+    percentGraphFormats: Record<string, 'bar' | 'ring' | 'number'>;
     wrappedCols: string[];
     frozenCols: string[];
   }
@@ -2275,6 +2276,14 @@ export default function CronogramaGanttView({
       return new Set(Array.isArray(saved) ? saved : []);
     } catch {
       return new Set();
+    }
+  });
+
+  const [percentGraphFormats, setPercentGraphFormats] = useState<Record<string, 'bar' | 'ring' | 'number'>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('qaway-percent-formats-v1') || '{}');
+    } catch {
+      return {};
     }
   });
 
@@ -2673,6 +2682,7 @@ export default function CronogramaGanttView({
     colTypeOverrides: { ...colTypeOverrides },
     colCustomLabels: { ...colCustomLabels },
     colCalculations: { ...colCalculations },
+    percentGraphFormats: { ...percentGraphFormats },
     wrappedCols: Array.from(wrappedCols),
     frozenCols: Array.from(frozenCols),
   }), [visibleCols, customCols, colTypeOverrides, colCustomLabels, colCalculations, wrappedCols, frozenCols]);
@@ -2684,6 +2694,7 @@ export default function CronogramaGanttView({
     setColTypeOverrides(snap.colTypeOverrides || {});
     setColCustomLabels(snap.colCustomLabels || {});
     setColCalculations(snap.colCalculations || {});
+    setPercentGraphFormats(snap.percentGraphFormats || {});
     setWrappedCols(new Set(snap.wrappedCols || []));
     setFrozenCols(new Set(snap.frozenCols || []));
     try {
@@ -2691,6 +2702,7 @@ export default function CronogramaGanttView({
       localStorage.setItem('qaway-col-types-v1', JSON.stringify(snap.colTypeOverrides || {}));
       localStorage.setItem('qaway-col-labels-v1', JSON.stringify(snap.colCustomLabels || {}));
       localStorage.setItem('qaway-col-calcs-v1', JSON.stringify(snap.colCalculations || {}));
+      localStorage.setItem('qaway-percent-formats-v1', JSON.stringify(snap.percentGraphFormats || {}));
       localStorage.setItem('qaway-wrapped-cols-v1', JSON.stringify(snap.wrappedCols || []));
       localStorage.setItem('qaway-frozen-cols-v1', JSON.stringify(snap.frozenCols || []));
     } catch {}
@@ -2711,6 +2723,16 @@ export default function CronogramaGanttView({
       return next;
     });
     notify(`Columna renombrada a "${newLabel}"`);
+  }, [recordColumnChange, notify]);
+
+  const handleChangeGraphFormat = useCallback((columnId: string, format: 'bar' | 'ring' | 'number') => {
+    recordColumnChange();
+    setPercentGraphFormats((prev) => {
+      const next = { ...prev, [columnId]: format };
+      try { localStorage.setItem('qaway-percent-formats-v1', JSON.stringify(next)); } catch {}
+      return next;
+    });
+    notify(`Formato visual cambiado a "${format === 'ring' ? 'Circular / Anillo' : format === 'number' ? 'Solo número' : 'Barra horizontal'}"`);
   }, [recordColumnChange, notify]);
 
   const handleChangeType = useCallback((columnId: string, newType: string) => {
@@ -2849,6 +2871,8 @@ export default function CronogramaGanttView({
       isFrozen={frozenCols.has(columnId)}
       onRenameColumn={handleRenameColumn}
       onChangeType={handleChangeType}
+      graphFormat={percentGraphFormats[columnId] || 'bar'}
+      onChangeGraphFormat={handleChangeGraphFormat}
       onToggleWrap={handleToggleWrap}
       isWrapped={wrappedCols.has(columnId)}
       onCalculate={handleCalculate}
@@ -3085,9 +3109,8 @@ export default function CronogramaGanttView({
   };
 
   const effectiveRenderedCols = useMemo(() => {
-    const validCanonical = CANONICAL_COLS.filter((k) => visibleCols.includes(k));
-    const validCustom = customCols.filter((c) => visibleCols.includes(c.key as ColKey)).map((c) => c.key as ColKey);
-    return [...validCanonical, ...validCustom];
+    const allAllowed = new Set([...CANONICAL_COLS, ...customCols.map((c) => c.key as ColKey)]);
+    return visibleCols.filter((k) => allAllowed.has(k));
   }, [visibleCols, customCols]);
 
   const fixedWidth = useMemo(
@@ -4200,6 +4223,1007 @@ export default function CronogramaGanttView({
     setSelectedId(null);
     setPanelOpen(false);
     notify('Elemento y sus dependientes eliminados con éxito del cronograma maestro');
+  };
+
+  const renderProgressVisual = (progressVal: number, statusTone: string, colId: string) => {
+    const format = percentGraphFormats[colId] || 'bar';
+    if (format === 'ring') {
+      const radius = 7.5;
+      const circ = 2 * Math.PI * radius;
+      const offset = circ * (1 - Math.min(100, Math.max(0, progressVal)) / 100);
+      const strokeColor =
+        progressVal === 100 ? '#10b981' : statusTone === 'red' ? '#ef4444' : statusTone === 'gray' ? '#94a3b8' : '#2563eb';
+      return (
+        <div className="progress-ring-wrap" title={`${progressVal}%`}>
+          <svg width="20" height="20" viewBox="0 0 20 20" className="progress-ring-svg">
+            <circle cx="10" cy="10" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
+            <circle
+              cx="10"
+              cy="10"
+              r={radius}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth="2.5"
+              strokeDasharray={circ}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              className="progress-ring-circle"
+            />
+          </svg>
+          <span className="progress-num-text">{progressVal}%</span>
+        </div>
+      );
+    }
+    if (format === 'number') {
+      return (
+        <div className="progress-num-only" title={`${progressVal}%`}>
+          <span>{progressVal}%</span>
+        </div>
+      );
+    }
+    // 'bar' (default)
+    const barColorClass =
+      progressVal === 100 ? 'green' : statusTone === 'red' ? 'red' : statusTone === 'gray' ? 'gray' : 'blue';
+    return (
+      <div className="progress" style={{ width: '100%' }}>
+        <span>
+          <i className={barColorClass} style={{ width: `${progressVal}%` }} />
+        </span>
+        <span className="progress-num-text">{progressVal}%</span>
+      </div>
+    );
+  };
+
+  const renderHeaderCell = (colKey: ColKey) => {
+    if (colKey === 'code') {
+      return (
+        <div key="code" className="th-col-header th-col-code">
+          <input
+            type="checkbox"
+            aria-label="Seleccionar todos los registros visibles"
+            checked={shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id))}
+            ref={(input) => {
+              if (input) {
+                const allSel = shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id));
+                const someSel = shown.some((it) => selectedRowIds.has(it.id));
+                input.indeterminate = !allSel && someSel;
+              }
+            }}
+            onChange={() => toggleSelectAllShown(shown)}
+            title={
+              shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id))
+                ? 'Deseleccionar todos'
+                : 'Seleccionar todos los registros visibles'
+            }
+          />
+          <span className="th-label">Código</span>
+          <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('code'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
+        </div>
+      );
+    }
+    if (colKey === 'name') {
+      return (
+        <div key="name" className="name-head">
+          <span>{getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE')}</span>
+          <div className="head-col-actions">
+            {renderColumnHeaderMenu("name", "cols-trigger-btn")}
+            <button
+              type="button"
+              className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleAllHitosExpand();
+              }}
+              title={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
+            >
+              <ChevronsUpDown size={14} />
+            </button>
+            {viewMode === 'gantt' && (
+              <button
+                type="button"
+                className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCompactColumns();
+                }}
+                title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
+              >
+                {visibleCols.length === 1 ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
+              </button>
+            )}
+          </div>
+          <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('name'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
+        </div>
+      );
+    }
+    if (colKey === 'actions') {
+      return (
+        <div key="actions" className="th-col-header th-col-actions">
+          <span className="th-label">Acciones</span>
+        </div>
+      );
+    }
+
+    const customDef = customCols.find((c) => c.key === colKey);
+    const defaultLabel = customDef?.label || ALL_COL_META.find((c) => c.key === colKey)?.label || colKey;
+    const label = getColLabel(colKey, defaultLabel);
+
+    return (
+      <div key={colKey} className="th-col-header">
+        <span className="th-label">{label}</span>
+        <div className="th-actions">
+          <button
+            type="button"
+            className="th-action-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleColVisibility(colKey as ColKey);
+              notify(`Columna "${label}" ocultada.`);
+            }}
+            title={`Ocultar columna ${label}`}
+          >
+            <EyeOff size={11} />
+          </button>
+          {renderColumnHeaderMenu(colKey)}
+        </div>
+        <div
+          className={`col-resizer ${resizingCol === colKey ? 'is-resizing' : ''}`}
+          onMouseDown={(e) => startResize(e, colKey as ColKey)}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            resetSingleColWidth(colKey as ColKey);
+          }}
+          title="Arrastra para redimensionar · Doble clic para auto-ajustar"
+        />
+      </div>
+    );
+  };
+
+  const renderRowCell = (x: Item, colKey: ColKey) => {
+    if (colKey === 'code') {
+      return (
+        <div key="code" className="code-cell-col" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={selectedRowIds.has(x.id)}
+            aria-label={`Seleccionar ${x.code} ${x.name}`}
+            onChange={(e) => {
+              e.stopPropagation();
+              toggleSelectRow(x.id);
+            }}
+          />
+          {x.kind === 'hito' ? (
+            <Flag size={13} className="code-icon-flag is-hito" />
+          ) : (
+            <FileText size={13} className="code-icon-flag is-sub" />
+          )}
+          <span className="code-num">{x.code}</span>
+        </div>
+      );
+    }
+
+    if (colKey === 'name') {
+      return (
+        <div key="name" className="name-cell">
+          {getItemDepth(x) > 0 && (
+            <span style={{ width: `${getItemDepth(x) * 20}px`, flexShrink: 0 }} />
+          )}
+          {items.some((c) => c.parentId === x.id) ? (
+            <button
+              className="expand"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleItemExpand(x.id, x.expanded !== false);
+              }}
+            >
+              {isItemExpanded(x.id, x.expanded !== false) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="row-icon-action"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEditorForItem(x);
+              }}
+            >
+              <FileText size={15} className="file" />
+            </button>
+          )}
+          {viewMode === 'gantt' && (
+            <span className="code" style={{ fontWeight: 500 }}>
+              {x.kind === 'hito' && (
+                <span className="hito-micro-diamond">◆</span>
+              )}
+              {x.code}
+            </span>
+          )}
+          {isEditing(x, 'name') ? (
+            <input
+              className="cell-editor cell-input name-edit"
+              autoFocus
+              onFocus={(e) => e.currentTarget.select()}
+              defaultValue={x.name}
+              title="Enter para guardar · Shift+Enter para agregar otro · Esc para cancelar"
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                  commitChange((old) => old.filter((it) => it.id !== x.id));
+                  setInlineDraftCreatedId(null);
+                  closeEdit();
+                  notify('Borrador sin nombre descartado.');
+                  return;
+                }
+                update(x.id, { name: val || x.name });
+                setInlineDraftCreatedId(null);
+                closeEdit();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const val = e.currentTarget.value.trim();
+                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                    commitChange((old) => old.filter((it) => it.id !== x.id));
+                    setInlineDraftCreatedId(null);
+                    closeEdit();
+                    notify('Borrador sin nombre descartado.');
+                    return;
+                  }
+                  update(x.id, { name: val || x.name });
+                  setInlineDraftCreatedId(null);
+                  closeEdit();
+                  if (e.shiftKey) {
+                    setTimeout(() => {
+                      add(x.kind, x.parentId, true);
+                    }, 50);
+                  }
+                }
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  if (inlineDraftCreatedId === x.id) {
+                    commitChange((old) => old.filter((it) => it.id !== x.id));
+                    setInlineDraftCreatedId(null);
+                    closeEdit();
+                    notify('Creación cancelada.');
+                    return;
+                  }
+                  closeEdit();
+                }
+              }}
+            />
+          ) : (
+            <span
+              className="name"
+              title="Clic para editar nombre · Doble clic para detalle"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedId(x.id);
+                toggleEdit(x, 'name');
+              }}
+            >
+              {x.name}
+            </span>
+          )}
+
+          {/* Micro-acciones rápidas inline */}
+          {edit?.id !== x.id && (
+            <div className="quick-inline-actions" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="quick-inline-icon-btn"
+                title={`Crear nueva tarea rápida subordinada a "${x.name}"`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  add('subproceso', x.id, true);
+                }}
+              >
+                <Plus size={13} style={{ color: '#0066ff' }} />
+              </button>
+              {x.wbsNodeType === 'COMPONENTE' && (
+                <>
+                  <button
+                    type="button"
+                    className="quick-inline-icon-btn"
+                    title={`Agregar subcomponente hijo para este componente (${x.code})`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      add('subproceso', x.id, true);
+                    }}
+                  >
+                    <CornerDownRight size={13} style={{ color: '#0284c7' }} />
+                  </button>
+                  <button
+                    type="button"
+                    className="quick-inline-icon-btn"
+                    title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar subcomponentes" : "Expandir subcomponentes"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleItemExpand(x.id, x.expanded !== false);
+                    }}
+                  >
+                    {isItemExpanded(x.id, x.expanded !== false) ? (
+                      <ChevronDown size={13} style={{ color: '#0284c7' }} />
+                    ) : (
+                      <ChevronRight size={13} style={{ color: '#64748b' }} />
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'kind') {
+      return (
+        <div key="kind" className="kind-cell-col">
+          <span className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
+            {getEdtNodeDisplayLabel(x, items)}
+          </span>
+        </div>
+      );
+    }
+
+    if (colKey === 'parent') {
+      const parentItem = x.parentId ? items.find((p) => p.id === x.parentId) : null;
+      return (
+        <div
+          key="parent"
+          className="parent-cell-col editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'parent');
+          }}
+        >
+          {isEditing(x, 'parent') ? (
+            <select
+              className="cell-editor cell-select"
+              autoFocus
+              defaultValue={x.parentId || ''}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                update(x.id, { parentId: e.target.value || undefined });
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            >
+              <option value="">— Ninguno (Nivel raíz) —</option>
+              {items
+                .filter((p) => p.id !== x.id)
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.code} {p.name}
+                  </option>
+                ))}
+            </select>
+          ) : (
+            <span className="cell-text">
+              {parentItem ? `${parentItem.code} ${parentItem.name}` : '—'}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'start') {
+      return (
+        <div
+          key="start"
+          className="start editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'start');
+          }}
+        >
+          {isEditing(x, 'start') ? (
+            <input
+              className="cell-editor cell-input date-edit"
+              type="date"
+              autoFocus
+              defaultValue={x.start}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                setStart(x, e.target.value);
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            />
+          ) : (
+            <span className="cell-text">{formatDatePE(x.start)}</span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'end') {
+      return (
+        <div
+          key="end"
+          className="end editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'end');
+          }}
+        >
+          {isEditing(x, 'end') ? (
+            <input
+              className="cell-editor cell-input date-edit"
+              type="date"
+              autoFocus
+              defaultValue={x.end}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                setEnd(x, e.target.value);
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            />
+          ) : (
+            <span className="cell-text">{formatDatePE(x.end)}</span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'duration') {
+      const isPercent = colTypeOverrides['duration'] === 'percent';
+      const isPlainNum = colTypeOverrides['duration'] === 'number';
+      const durationVal = getDays(x.start, x.end);
+      return (
+        <div
+          key="duration"
+          className="duration editable"
+          title="Editar días: recalcula la fecha de fin"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'duration');
+          }}
+        >
+          {isEditing(x, 'duration') ? (
+            <input
+              className="cell-editor cell-input num-edit"
+              type="number"
+              min={1}
+              max={365}
+              autoFocus
+              defaultValue={durationVal}
+              onClick={(e) => e.stopPropagation()}
+              onBlur={(e) => {
+                setDuration(x, e.target.value);
+                closeEdit();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+                if (e.key === 'Escape') closeEdit();
+              }}
+            />
+          ) : isPercent ? (
+            renderProgressVisual(durationVal, 'blue', 'duration')
+          ) : (
+            <span className="cell-text">
+              {isPlainNum ? durationVal : `${durationVal} días`}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'progress') {
+      const statusTone = x.progress === 100 ? 'green' : x.status === 'Con retraso' ? 'red' : x.status === 'Pendiente' ? 'gray' : 'blue';
+      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === x.id));
+      const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
+
+      if (isContainer || linkedTaskSummary) {
+        return (
+          <div key="progress" className="progress" style={{ width: '100%', cursor: 'default' }}>
+            {renderProgressVisual(x.progress, statusTone, 'progress')}
+          </div>
+        );
+      }
+
+      return (
+        <div
+          key="progress"
+          className="progress editable"
+          title="Clic para ajustar el avance (0–100%)"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'progress');
+          }}
+        >
+          {isEditing(x, 'progress') ? (
+            <div className="cell-editor cell-pop progress-pop">
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={x.progress}
+                onChange={(e) => setProgress(x, +e.target.value)}
+              />
+              <span className="progress-num-text">{x.progress}%</span>
+            </div>
+          ) : (
+            renderProgressVisual(x.progress, statusTone, 'progress')
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'deviation') {
+      const dev = getDeviationDays(x, currentTodayIso);
+      const tone = getDeviationTone(dev);
+      const isEditingDev = isEditing(x, 'deviation');
+      return (
+        <div
+          key="deviation"
+          className="deviation-cell editable"
+          style={{ cursor: 'pointer', position: 'relative' }}
+          title={
+            dev === undefined
+              ? 'Clic para fijar línea base y medir desviación'
+              : `Desviación: ${formatDeviation(dev)} · Fin aprobado: ${formatDate(x.baselineEnd ?? '')} · Clic para ajustar fecha base`
+          }
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'deviation');
+          }}
+        >
+          <span className={`dev-text ${tone}`} style={{ fontWeight: 500 }}>
+            {formatDeviation(dev)}
+          </span>
+          {isEditingDev && (
+            <div
+              className="cell-editor cell-pop dev-baseline-pop"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="dev-baseline-pop-title">Línea base contractual</div>
+              <label className="dev-baseline-pop-field">
+                <span>Fin aprobado:</span>
+                <input
+                  type="date"
+                  defaultValue={x.baselineEnd || x.end}
+                  onChange={(e) => {
+                    const nextEnd = e.target.value;
+                    if (!nextEnd) return;
+                    update(x.id, {
+                      baselineStart: x.baselineStart || x.start,
+                      baselineEnd: nextEnd,
+                    });
+                  }}
+                />
+              </label>
+              <div className="dev-baseline-pop-actions">
+                {!hasBaseline(x) ? (
+                  <button
+                    type="button"
+                    className="btn primary"
+                    onClick={() => {
+                      update(x.id, freezeBaseline(x));
+                      closeEdit();
+                      notify(`Línea base fijada en ${formatDate(x.end)}`);
+                    }}
+                  >
+                    Fijar línea base actual
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => {
+                      const next = { ...x };
+                      delete next.baselineStart;
+                      delete next.baselineEnd;
+                      commitChange((old) => old.map((it) => (it.id === x.id ? next : it)));
+                      closeEdit();
+                      notify('Línea base restablecida');
+                    }}
+                  >
+                    Restablecer
+                  </button>
+                )}
+                <button type="button" className="btn secondary" onClick={closeEdit}>
+                  Listo
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'status') {
+      const isEditingStatus = isEditing(x, 'status');
+      return (
+        <div
+          key="status"
+          className="status-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'status');
+          }}
+        >
+          {isEditingStatus ? (
+            <div
+              className="cell-editor cell-pop status-popover"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="status-popover-title">Seleccionar estado</div>
+              <div className="status-popover-list">
+                {(['Completado', 'En curso', 'En proceso', 'Pendiente', 'Con retraso', 'Cumple'] as Status[]).map(
+                  (st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      className={`status-popover-option ${x.status === st ? 'is-selected' : ''}`}
+                      onClick={() => {
+                        update(x.id, { status: st });
+                        closeEdit();
+                      }}
+                    >
+                      <span className={`status-popover-dot ${STATUS_CLASS[st]}`} />
+                      <span className="status-popover-label">{st}</span>
+                      {x.status === st && <Check size={13} className="status-popover-check" />}
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
+          ) : (
+            <span
+              className={`status ${STATUS_CLASS[x.status]}`}
+              style={{ fontWeight: 500 }}
+              title="Clic para cambiar estado"
+            >
+              {x.status}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'dependencies') {
+      const deps = (x.dependencies ?? []).filter((id) => id && id !== x.id);
+      return (
+        <div
+          key="dependencies"
+          className="dependencies editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'dependencies');
+          }}
+        >
+          {isEditing(x, 'dependencies') ? (
+            <div className="cell-editor cell-pop dep-picker-pop" onClick={(e) => e.stopPropagation()}>
+              <div className="dep-picker-header">
+                <span>Predecesores de {x.code}</span>
+                <button type="button" className="dep-picker-close" onClick={closeEdit}>
+                  <X size={12} />
+                </button>
+              </div>
+              <div className="dep-picker-list">
+                {items
+                  .filter((c) => c.id !== x.id)
+                  .map((c) => {
+                    const isChecked = deps.includes(c.id);
+                    return (
+                      <label key={c.id} className="dep-picker-item">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...deps, c.id]
+                              : deps.filter((id) => id !== c.id);
+                            update(x.id, { dependencies: next });
+                          }}
+                        />
+                        <span className="dep-code">{c.code}</span>
+                        <span className="dep-name">{c.name}</span>
+                      </label>
+                    );
+                  })}
+              </div>
+            </div>
+          ) : (
+            <div className="dep-tags">
+              {deps.length > 0 ? (
+                deps.map((depId) => {
+                  const depItem = items.find((it) => it.id === depId);
+                  return (
+                    <span key={depId} className="dep-tag" title={depItem ? `${depItem.code} - ${depItem.name}` : depId}>
+                      {depItem?.code || depId}
+                    </span>
+                  );
+                })
+              ) : (
+                <span className="cell-text" style={{ color: '#94a3b8' }}>—</span>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'gestor') {
+      return (
+        <div
+          key="gestor"
+          className="gestor editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'gestor');
+          }}
+        >
+          {isEditing(x, 'gestor') ? (
+            <select
+              className="cell-editor cell-select"
+              autoFocus
+              defaultValue={x.gestor || 'Carlos Sandoval'}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                update(x.id, { gestor: e.target.value });
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            >
+              <option value="Carlos Sandoval">Carlos Sandoval</option>
+              <option value="Lucía Flores">Lucía Flores</option>
+              <option value="María Salazar">María Salazar</option>
+              <option value="Juan Pérez">Juan Pérez</option>
+            </select>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  background: x.gestor === 'Lucía Flores' ? '#9333ea' : '#0284c7',
+                  color: '#fff',
+                  fontSize: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 600,
+                  flexShrink: 0,
+                }}
+              >
+                {(x.gestor || 'CS')
+                  .split(' ')
+                  .map((w: string) => w[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </span>
+              <span className="cell-text">{x.gestor || 'Carlos Sandoval'}</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'region') {
+      return (
+        <div
+          key="region"
+          className="region-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'region');
+          }}
+        >
+          {isEditing(x, 'region') ? (
+            <select
+              className="cell-editor cell-select"
+              autoFocus
+              defaultValue={x.region || 'Todas las Regiones'}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                update(x.id, { region: e.target.value });
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            >
+              <option value="Todas las Regiones">Todas las Regiones</option>
+              <option value="Amazonas">Amazonas</option>
+              <option value="Áncash">Áncash</option>
+              <option value="Apurímac">Apurímac</option>
+              <option value="Arequipa">Arequipa</option>
+              <option value="Ayacucho">Ayacucho</option>
+              <option value="Cajamarca">Cajamarca</option>
+              <option value="Cusco">Cusco</option>
+              <option value="Huancavelica">Huancavelica</option>
+              <option value="Huánuco">Huánuco</option>
+              <option value="Ica">Ica</option>
+              <option value="Junín">Junín</option>
+              <option value="La Libertad">La Libertad</option>
+              <option value="Lambayeque">Lambayeque</option>
+              <option value="Lima">Lima</option>
+              <option value="Loreto">Loreto</option>
+              <option value="Madre de Dios">Madre de Dios</option>
+              <option value="Moquegua">Moquegua</option>
+              <option value="Pasco">Pasco</option>
+              <option value="Piura">Piura</option>
+              <option value="Puno">Puno</option>
+              <option value="San Martín">San Martín</option>
+              <option value="Tacna">Tacna</option>
+              <option value="Tumbes">Tumbes</option>
+              <option value="Ucayali">Ucayali</option>
+            </select>
+          ) : (
+            <span className="cell-text">{x.region || 'Todas las Regiones'}</span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'actualEnd') {
+      return (
+        <div
+          key="actualEnd"
+          className="actual-end-cell editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'actualEnd');
+          }}
+        >
+          {isEditing(x, 'actualEnd') ? (
+            <input
+              className="cell-editor cell-input date-edit"
+              type="date"
+              autoFocus
+              defaultValue={x.actualEnd || ''}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                update(x.id, { actualEnd: e.target.value || undefined });
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            />
+          ) : (
+            <span className="cell-text">{x.actualEnd ? formatDate(x.actualEnd) : '—'}</span>
+          )}
+        </div>
+      );
+    }
+
+    if (colKey === 'actions') {
+      return (
+        <div
+          key="actions"
+          className="actions-cell-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="row-action-btn"
+            title="Ver detalle del registro"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditorForItem(x);
+            }}
+          >
+            <MoreHorizontal size={14} />
+          </button>
+        </div>
+      );
+    }
+
+    // Custom column
+    const cCol = customCols.find((c) => c.key === colKey);
+    if (!cCol) return <div key={colKey} />;
+
+    const cellVal = (x as any)[cCol.key];
+    const isEditingCol = isEditing(x, cCol.key as ColKey);
+    const effectiveType = colTypeOverrides[cCol.key] || cCol.type || 'text';
+
+    return (
+      <div
+        key={cCol.key}
+        className="custom-cell-col editable"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 10px',
+          minWidth: 0,
+          cursor: 'pointer',
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleEdit(x, cCol.key as ColKey);
+        }}
+      >
+        {isEditingCol ? (
+          effectiveType === 'number' || effectiveType === 'percent' ? (
+            <input
+              className="cell-editor cell-input num-edit"
+              type="number"
+              autoFocus
+              defaultValue={cellVal ?? ''}
+              onClick={(e) => e.stopPropagation()}
+              onBlur={(e) => {
+                const val = e.target.value === '' ? undefined : Number(e.target.value);
+                update(x.id, { [cCol.key]: val } as any);
+                closeEdit();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+                if (e.key === 'Escape') closeEdit();
+              }}
+            />
+          ) : effectiveType === 'date' ? (
+            <input
+              className="cell-editor cell-input date-edit"
+              type="date"
+              autoFocus
+              defaultValue={cellVal || ''}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                update(x.id, { [cCol.key]: e.target.value || undefined } as any);
+                closeEdit();
+              }}
+              onBlur={closeEdit}
+            />
+          ) : effectiveType === 'select' ? (
+            <div className="cell-editor cell-pop" onClick={(e) => e.stopPropagation()} style={{ padding: 6, minWidth: 120 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>Etiqueta rápida</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {['Alta', 'Media', 'Baja', 'Urgente', 'Revisión', 'Aprobado'].map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    style={{ fontSize: 10.5, padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', background: cellVal === tag ? '#dbeafe' : '#f8fafc', cursor: 'pointer' }}
+                    onClick={() => {
+                      update(x.id, { [cCol.key]: tag } as any);
+                      closeEdit();
+                    }}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <input
+              className="cell-editor cell-input"
+              type="text"
+              autoFocus
+              defaultValue={cellVal || ''}
+              onClick={(e) => e.stopPropagation()}
+              onBlur={(e) => {
+                update(x.id, { [cCol.key]: e.target.value.trim() } as any);
+                closeEdit();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+                if (e.key === 'Escape') closeEdit();
+              }}
+            />
+          )
+        ) : effectiveType === 'percent' ? (
+          renderProgressVisual(Number(cellVal) || 0, 'blue', cCol.key)
+        ) : effectiveType === 'select' ? (
+          cellVal ? (
+            <span style={{ fontSize: 11.5, fontWeight: 500, background: '#f1f5f9', color: '#1e293b', padding: '2px 8px', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+              {cellVal}
+            </span>
+          ) : (
+            <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>
+          )
+        ) : effectiveType === 'date' ? (
+          <span style={{ fontSize: 12, color: '#334155' }}>
+            {cellVal ? formatDatePE(cellVal) : '—'}
+          </span>
+        ) : (
+          <span style={{ fontSize: 12, color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {cellVal !== undefined && cellVal !== '' ? String(cellVal) : '—'}
+          </span>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -5922,356 +6946,17 @@ export default function CronogramaGanttView({
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>
             <div
-              className="fixed-cols"
-              style={{
-                width: `${fixedWidth}px`,
-                minWidth: `${fixedWidth}px`,
-                gridTemplateColumns: fixedGridCols,
-              }}
-            >
-              {/* ── Columna Código (Primera en modo lista) ── */}
-              {visibleCols.includes('code') && (
-                <div className="th-col-header th-col-code">
-                  <input
-                    type="checkbox"
-                    aria-label="Seleccionar todos los registros visibles"
-                    checked={shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id))}
-                    ref={(input) => {
-                      if (input) {
-                        const allSel = shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id));
-                        const someSel = shown.some((it) => selectedRowIds.has(it.id));
-                        input.indeterminate = !allSel && someSel;
-                      }
+                    className="fixed-cols"
+                    style={{
+                      width: `${fixedWidth}px`,
+                      minWidth: `${fixedWidth}px`,
+                      gridTemplateColumns: fixedGridCols,
                     }}
-                    onChange={() => toggleSelectAllShown(shown)}
-                    title={
-                      shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id))
-                        ? 'Deseleccionar todos'
-                        : 'Seleccionar todos los registros visibles'
-                    }
-                  />
-                  <span className="th-label">Código</span>
-                  <div className={`col-resizer ${resizingCol === 'code' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'code')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('code'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-
-              {/* ── Columna Nombre (Segunda en lista, primera en Gantt) ── */}
-              <div className="name-head">
-                <span>{viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE'}</span>
-                <div className="head-col-actions">
-                  {renderColumnHeaderMenu("name", "cols-trigger-btn")}
-                  <button
-                    type="button"
-                    className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleAllHitosExpand();
-                    }}
-                    title={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
                   >
-                    <ChevronsUpDown size={14} />
-                  </button>
+                    {effectiveRenderedCols.map((colKey) => renderHeaderCell(colKey))}
+                  </div>
+
                   {viewMode === 'gantt' && (
-                    <button
-                      type="button"
-                      className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCompactColumns();
-                      }}
-                      title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
-                    >
-                      {visibleCols.length === 1 ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
-                    </button>
-                  )}
-                </div>
-
-                <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('name'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-              </div>
-              {visibleCols.includes('kind') && (
-                <div className="th-col-header">
-                  <span className="th-label">Tipo</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('kind');
-                        notify('Columna "Tipo" ocultada.');
-                      }}
-                      title="Ocultar columna Tipo"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("kind")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('kind'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('parent') && (
-                <div className="th-col-header">
-                  <span className="th-label">Componente padre</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('parent');
-                        notify('Columna "Componente padre" ocultada.');
-                      }}
-                      title="Ocultar columna Componente padre"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("parent")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('parent'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('start') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("start", "Inicio")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('start');
-                        notify('Columna "Inicio" ocultada. Recupérala desde el icono de columnas.');
-                      }}
-                      title="Ocultar columna Inicio"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("start")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'start' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'start')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('start'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('end') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("end", "Fin")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('end');
-                        notify('Columna "Fin" ocultada. Recupérala desde el icono de columnas.');
-                      }}
-                      title="Ocultar columna Fin"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("end")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'end' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'end')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('end'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('duration') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("duration", "Duración")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('duration');
-                        notify('Columna "Duración" ocultada.');
-                      }}
-                      title="Ocultar columna Duración"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("duration")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'duration' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'duration')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('duration'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('progress') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("progress", "Avance")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('progress');
-                        notify('Columna "Avance" ocultada.');
-                      }}
-                      title="Ocultar columna Avance"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("progress")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('progress'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('deviation') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("deviation", "Desviación")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('deviation');
-                        notify('Columna "Desviación" ocultada.');
-                      }}
-                      title="Ocultar columna Desviación"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("deviation")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'deviation' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'deviation')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('deviation'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('status') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("status", "Estado")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('status');
-                        notify('Columna "Estado" ocultada.');
-                      }}
-                      title="Ocultar columna Estado"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("status")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('status'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('dependencies') && (
-                <div className="th-col-header">
-                  <span className="th-label">Predecesores</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('dependencies');
-                        notify('Columna "Predecesores" ocultada.');
-                      }}
-                      title="Ocultar columna Predecesores"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("dependencies")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'dependencies' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'dependencies')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('dependencies'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('gestor') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("gestor", "Responsable")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('gestor');
-                        notify('Columna "Responsable" ocultada.');
-                      }}
-                      title="Ocultar columna Responsable"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("gestor")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'gestor' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'gestor')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('gestor'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('region') && (
-                <div className="th-col-header">
-                  <span className="th-label">{getColLabel("region", "Ámbito")}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('region');
-                        notify('Columna "Ámbito" ocultada.');
-                      }}
-                      title="Ocultar columna Ámbito"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("region")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('region'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('actualEnd') && (
-                <div className="th-col-header">
-                  <span className="th-label">Fecha real</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility('actualEnd');
-                        notify('Columna "Fecha real" ocultada.');
-                      }}
-                      title="Ocultar columna Fecha real"
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu("actualEnd")}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === 'actualEnd' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'actualEnd')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('actualEnd'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              )}
-              {visibleCols.includes('actions') && (
-                <div className="th-col-header th-col-actions">
-                  <span className="th-label">Acciones</span>
-                </div>
-              )}
-
-              {/* Columnas personalizadas Notion en cabecera con micro-filtro y resizer sincronizado */}
-              {customCols.map((cCol) => visibleCols.includes(cCol.key as ColKey) && (
-                <div key={cCol.key} className="th-col-header">
-                  <span className="th-label">{getColLabel(cCol.key, cCol.label)}</span>
-                  <div className="th-actions">
-                    <button
-                      type="button"
-                      className="th-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleColVisibility(cCol.key as ColKey);
-                        notify(`Columna "${cCol.label}" ocultada.`);
-                      }}
-                      title={`Ocultar ${cCol.label}`}
-                    >
-                      <EyeOff size={11} />
-                    </button>
-                    {renderColumnHeaderMenu(cCol.key)}
-                  </div>
-                  <div className={`col-resizer ${resizingCol === cCol.key ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, cCol.key as ColKey)} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth(cCol.key as ColKey); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
-                </div>
-              ))}
-            </div>
-
-            {viewMode === 'gantt' && (
               <div className="timeline-head-viewport" ref={headScrollRef}>
                 <div className="timeline-head" style={{ width: timelineMinWidth, minWidth: timelineMinWidth }}>
                   <div
