@@ -53,9 +53,11 @@ export const customRank = (value: string, col: ColumnDef): number => {
 };
 
 export const hasCustomOrder = (col: ColumnDef) =>
-  !!col.sortOrder?.length ||
-  staticOptions(col).some((o) => o.order !== undefined) ||
-  (col.type === 'processState' && staticOptions(col).length > 0);
+  col.type !== 'person' && (
+    !!col.sortOrder?.length ||
+    staticOptions(col).some((o) => o.order !== undefined) ||
+    (col.type === 'processState' && staticOptions(col).length > 0)
+  );
 
 const labelOf = (value: string, col: ColumnDef) =>
   staticOptions(col).find((o) => o.value === value)?.label ?? value;
@@ -138,6 +140,7 @@ const SELECTION_OPS: OperatorDef[] = [op('in', 'Incluir valores'), op('not_in', 
 /* ───────────── Pruebas de coincidencia ───────────── */
 
 const testText = (raw: unknown, f: FilterValue) => {
+  if (f.values !== undefined) return testSelection(raw, f);
   const v = toText(raw).toLowerCase();
   const q = (f.value ?? '').trim().toLowerCase();
   switch (f.op) {
@@ -196,6 +199,7 @@ const resolveBounds = (f: FilterValue, ctx: EngineContext): [string | null, stri
 };
 
 const testDate = (raw: unknown, f: FilterValue, ctx: EngineContext) => {
+  if (f.values !== undefined) return testSelection(raw, f);
   const d = normIso(raw);
   if (f.op === 'empty') return d === null;
   if (f.op === 'not_empty') return d !== null;
@@ -211,6 +215,7 @@ const testDate = (raw: unknown, f: FilterValue, ctx: EngineContext) => {
 };
 
 const testDateRange = (raw: unknown, f: FilterValue, ctx: EngineContext) => {
+  if (f.values !== undefined) return testSelection(raw, f);
   const [s, e] = toRange(raw);
   if (f.op === 'empty') return !s && !e;
   if (f.op === 'not_empty') return !!s || !!e;
@@ -237,6 +242,7 @@ const testSelection = (raw: unknown, f: FilterValue) => {
 };
 
 const testBoolean = (raw: unknown, f: FilterValue) => {
+  if (f.values !== undefined) return testSelection(raw, f);
   const isEmpty = raw === null || raw === undefined || raw === '';
   if (f.op === 'empty') return isEmpty;
   const truthy = raw === true || raw === 'true' || raw === 'Sí' || raw === 'Si' || raw === 1 || raw === '1';
@@ -261,8 +267,8 @@ const selectionModes = (customAsc: string, customDesc: string) => (col: ColumnDe
     modes.push({ mode: 'custom', dir: 'asc', label: pick(col, 'customAsc', customAsc) });
     modes.push({ mode: 'custom', dir: 'desc', label: pick(col, 'customDesc', customDesc) });
   }
-  modes.push({ mode: 'alpha', dir: 'asc', label: pick(col, 'asc', 'A a Z') });
-  modes.push({ mode: 'alpha', dir: 'desc', label: pick(col, 'desc', 'Z a A') });
+  modes.push({ mode: 'alpha', dir: 'asc', label: pick(col, 'asc', 'Ordenar de A a Z') });
+  modes.push({ mode: 'alpha', dir: 'desc', label: pick(col, 'desc', 'Ordenar de Z a A') });
   return modes;
 };
 
@@ -283,7 +289,7 @@ const textType: ColumnTypeDef = {
   kind: 'text',
   operators: filterOpsOf(TEXT_OPS),
   test: (raw, f) => testText(raw, f),
-  sortModes: scalarModes('A a Z', 'Z a A'),
+  sortModes: scalarModes('Ordenar de A a Z', 'Ordenar de Z a A'),
   sortKey: (raw) => {
     const s = toText(raw);
     return s ? s : null;
@@ -295,7 +301,7 @@ const numberType: ColumnTypeDef = {
   kind: 'number',
   operators: filterOpsOf(NUMBER_OPS),
   test: (raw, f) => testNumber(raw, f),
-  sortModes: scalarModes('Menor a mayor', 'Mayor a menor'),
+  sortModes: scalarModes('Ordenar de menor a mayor', 'Ordenar de mayor a menor'),
   sortKey: (raw) => toNum(raw),
 };
 
@@ -304,7 +310,7 @@ const percentType: ColumnTypeDef = {
   kind: 'percent',
   operators: filterOpsOf(PERCENT_OPS),
   test: (raw, f) => testNumber(raw, f, true),
-  sortModes: scalarModes('Menor avance a mayor avance', 'Mayor avance a menor avance'),
+  sortModes: scalarModes('Ordenar de menor a mayor avance', 'Ordenar de mayor a menor avance'),
   sortKey: (raw) => toNum(raw),
 };
 
@@ -313,7 +319,7 @@ const dateType: ColumnTypeDef = {
   kind: 'date',
   operators: filterOpsOf(DATE_OPS),
   test: testDate,
-  sortModes: scalarModes('Más antigua a más reciente', 'Más reciente a más antigua'),
+  sortModes: scalarModes('Ordenar de más antiguo a más reciente', 'Ordenar de más reciente a más antiguo'),
   sortKey: (raw) => normIso(raw),
 };
 
@@ -364,7 +370,7 @@ export const registerColumnType = (def: ColumnTypeDef) => {
   booleanType,
   selectionType('select', 'Según jerarquía definida', 'Jerarquía inversa'),
   selectionType('multiSelect', 'Según orden definido', 'Orden definido inverso'),
-  selectionType('person', 'Según orden definido', 'Orden definido inverso'),
+  selectionType('person', 'Ordenar de A a Z', 'Ordenar de Z a A'),
   selectionType('relation', 'Según orden definido', 'Orden definido inverso'),
   selectionType('processState', 'Según flujo del proceso', 'Flujo del proceso inverso'),
 ].forEach(registerColumnType);

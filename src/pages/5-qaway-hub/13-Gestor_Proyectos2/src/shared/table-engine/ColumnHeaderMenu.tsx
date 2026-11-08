@@ -32,16 +32,40 @@ function buildOptions<R>(col: ColumnDef<R>, rows: R[]): CountedOption[] {
 
   const known = new Set(base.map((o) => o.value));
   const extra: ColumnOption[] = [];
+  const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic'];
+
   counts.forEach((_, value) => {
-    if (!known.has(value)) extra.push({ value, label: value });
+    if (!known.has(value)) {
+      let label = value;
+      if (col.type === 'percent') {
+        label = `${value}%`;
+      } else if (col.id === 'duration') {
+        label = `${value} días`;
+      } else if (col.type === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const parts = value.split('-');
+        const y = parts[0] ?? '';
+        const m = parts[1] ?? '1';
+        const d = parts[2] ?? '';
+        const mIdx = parseInt(m, 10) - 1;
+        label = `${d} ${monthNames[mIdx] ?? m} ${y}`;
+      }
+      extra.push({ value, label });
+    }
   });
-  extra.sort((a, b) => a.label.localeCompare(b.label, 'es', { numeric: true, sensitivity: 'base' }));
+
+  if (col.type === 'number' || col.type === 'percent') {
+    extra.sort((a, b) => Number(a.value) - Number(b.value));
+  } else if (col.type === 'date') {
+    extra.sort((a, b) => a.value.localeCompare(b.value));
+  } else {
+    extra.sort((a, b) => a.label.localeCompare(b.label, 'es', { numeric: true, sensitivity: 'base' }));
+  }
 
   let list = [...base, ...extra];
   const withBase = { ...col, options: base } as ColumnDef;
   if (base.length && hasCustomOrder(withBase)) {
     list = [...list].sort((a, b) => customRank(a.value, withBase) - customRank(b.value, withBase));
-  } else if (!base.length) {
+  } else if (!base.length && (col.type !== 'number' && col.type !== 'percent' && col.type !== 'date')) {
     list.sort((a, b) => a.label.localeCompare(b.label, 'es', { numeric: true, sensitivity: 'base' }));
   }
 
@@ -72,7 +96,10 @@ interface SelectionFilterProps {
 const SelectionFilter: React.FC<SelectionFilterProps> = ({ col, options, value, onApply, onCancel }) => {
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'in' | 'not_in'>(value?.op === 'not_in' ? 'not_in' : 'in');
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(value?.values ?? []));
+  const [selected, setSelected] = useState<Set<string>>(() => {
+    if (value?.values) return new Set(value.values);
+    return new Set(options.map((o) => o.value));
+  });
   const [scroll, setScroll] = useState(0);
 
   const visible = useMemo(() => {
@@ -116,26 +143,6 @@ const SelectionFilter: React.FC<SelectionFilterProps> = ({ col, options, value, 
 
   return (
     <div className="te-section te-selection">
-      {col.type === 'processState' && options.length > 0 && (
-        <div className="te-quick" role="group" aria-label="Filtros rápidos de estado">
-          {options
-            .filter((o) => o.value !== EMPTY_TOKEN)
-            .map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                className="te-chip"
-                onClick={() => onApply({ op: 'in', values: [o.value] })}
-              >
-                Solo {o.label.toLowerCase()}
-              </button>
-            ))}
-          <button type="button" className="te-chip te-chip-all" onClick={() => onApply(null)}>
-            Mostrar todos
-          </button>
-        </div>
-      )}
-
       <div className="te-search">
         <Search size={13} />
         <input
@@ -213,7 +220,7 @@ const SelectionFilter: React.FC<SelectionFilterProps> = ({ col, options, value, 
             Cancelar
           </button>
           <button type="button" className="te-btn te-btn-primary" onClick={apply}>
-            Aplicar
+            Aceptar
           </button>
         </div>
       </div>
@@ -258,21 +265,6 @@ const ConditionFilter: React.FC<ConditionFilterProps> = ({ col, value, onApply }
 
   return (
     <div className="te-section te-condition">
-      {quick.length > 0 && (
-        <div className="te-quick" role="group" aria-label="Filtros rápidos">
-          {quick.map((o) => (
-            <button
-              key={o.id}
-              type="button"
-              className={`te-chip ${value?.op === o.id ? 'on' : ''}`}
-              onClick={() => onApply({ op: o.id })}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-      )}
-
       {selectable.length > 0 && (
         <>
           <select
@@ -468,9 +460,9 @@ function MenuBody<R>({
   const filter = engine.filters[col.id];
 
   const options = useMemo(
-    () => (type.kind === 'selection' ? buildOptions(col, engine.rows as unknown[]) : []),
+    () => buildOptions(col, engine.rows as unknown[]),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [col, engine.rows, type.kind]
+    [col, engine.rows]
   );
 
   const applyFilter = (v: FilterValue | null) => {
@@ -542,18 +534,15 @@ function MenuBody<R>({
 
       {filterable && modes.length > 0 && <div className="te-sep" />}
 
-      {filterable &&
-        (type.kind === 'selection' ? (
-          <SelectionFilter
-            col={col}
-            options={options}
-            value={filter}
-            onApply={applyFilter}
-            onCancel={() => close(true)}
-          />
-        ) : (
-          <ConditionFilter col={col} value={filter} onApply={applyFilter} />
-        ))}
+      {filterable && (
+        <SelectionFilter
+          col={col}
+          options={options}
+          value={filter}
+          onApply={applyFilter}
+          onCancel={() => close(true)}
+        />
+      )}
 
       {(isFilterActive(filter) || engine.sort.length > 0) && (
         <div className="te-section te-clears">

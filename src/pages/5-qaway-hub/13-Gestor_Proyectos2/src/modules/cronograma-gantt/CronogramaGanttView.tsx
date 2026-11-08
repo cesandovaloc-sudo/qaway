@@ -1930,6 +1930,33 @@ export default function CronogramaGanttView({
     return `${selectedRegions.length} regiones`;
   }, [selectedRegions]);
   const [phaseFilter, setPhaseFilter] = useState('Todas');
+  const selectedPhaseLabel = useMemo(() => {
+    if (phaseFilter === 'Todas') return 'Todas las fases';
+    const found = PROJECT_PHASES_CATALOG.find((p) => p.id === phaseFilter || p.name === phaseFilter);
+    return found ? found.name : phaseFilter;
+  }, [phaseFilter]);
+
+  const getPhaseItemCount = useCallback(
+    (phaseIdOrName: string) => {
+      const pObj = PROJECT_PHASES_CATALOG.find((p) => p.id === phaseIdOrName || p.name === phaseIdOrName);
+      const targetId = pObj?.id || phaseIdOrName;
+      const targetName = pObj?.name || phaseIdOrName;
+      return items.filter((it) => {
+        const parent = it.parentId ? items.find((p) => p.id === it.parentId) : undefined;
+        return (
+          it.phase === targetId ||
+          it.phase === targetName ||
+          it.faseId === targetId ||
+          it.faseId === targetName ||
+          parent?.phase === targetId ||
+          parent?.phase === targetName ||
+          parent?.faseId === targetId ||
+          parent?.faseId === targetName
+        );
+      }).length;
+    },
+    [items]
+  );
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [sedeFilter, setSedeFilter] = useState('Todas');
 
@@ -2172,7 +2199,7 @@ export default function CronogramaGanttView({
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
   
-  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | null;
+  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | 'phase' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [mapSubView, setMapSubView] = useState<TerritorialSubView>('geo-real');
   const [mapFullscreen, setMapFullscreen] = useState(false);
@@ -2611,6 +2638,57 @@ export default function CronogramaGanttView({
     setRedoHistory(rest);
     notify('Cambio rehecho con éxito');
   };
+
+  /* ---------- Selección masiva en lote (Modo Lista) ---------- */
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
+
+  const toggleSelectRow = useCallback((id: string) => {
+    setSelectedRowIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAllShown = useCallback((shownItems: Item[]) => {
+    setSelectedRowIds((prev) => {
+      const allShownSelected = shownItems.length > 0 && shownItems.every((it) => prev.has(it.id));
+      if (allShownSelected) {
+        return new Set();
+      } else {
+        return new Set(shownItems.map((it) => it.id));
+      }
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedRowIds(new Set());
+  }, []);
+
+  const handleBulkStatusChange = useCallback(
+    (newStatus: Status) => {
+      if (selectedRowIds.size === 0) return;
+      commitChange((prev) =>
+        prev.map((item) => {
+          if (selectedRowIds.has(item.id)) {
+            return {
+              ...item,
+              status: newStatus,
+              progress: newStatus === 'Completado' || newStatus === 'Cumple' ? 100 : item.progress,
+            };
+          }
+          return item;
+        })
+      );
+      notify(`${selectedRowIds.size} registros actualizados a "${newStatus}"`);
+      setSelectedRowIds(new Set());
+    },
+    [selectedRowIds, notify]
+  );
 
   const toggleFullscreen = () => {
     if (!isFullscreen) {
@@ -3252,8 +3330,22 @@ export default function CronogramaGanttView({
       const macroDef = macroFilter !== 'Todos' ? getMacroById(macroFilter) : undefined;
       const matchMacro =
         !macroDef || !x.region || x.region === MULTI_REGION_VALUE || macroDef.regiones.includes(x.region);
+      const targetPhaseDef =
+        phaseFilter !== 'Todas'
+          ? PROJECT_PHASES_CATALOG.find((p) => p.id === phaseFilter || p.name === phaseFilter)
+          : undefined;
+      const targetPhaseId = targetPhaseDef?.id || phaseFilter;
+      const targetPhaseName = targetPhaseDef?.name || phaseFilter;
       const matchPhase =
-        phaseFilter === 'Todas' || x.phase === phaseFilter || parent?.phase === phaseFilter;
+        phaseFilter === 'Todas' ||
+        x.phase === targetPhaseId ||
+        x.phase === targetPhaseName ||
+        x.faseId === targetPhaseId ||
+        x.faseId === targetPhaseName ||
+        parent?.phase === targetPhaseId ||
+        parent?.phase === targetPhaseName ||
+        parent?.faseId === targetPhaseId ||
+        parent?.faseId === targetPhaseName;
 
       let matchSede = true;
       if (sedeFilter !== 'Todas') {
@@ -4373,22 +4465,8 @@ export default function CronogramaGanttView({
             </div>
           </nav>
 
-          {/* Filtros Macro para Coordinador */}
+          {/* Filtros Contextuales y Macro */}
           <div className="filters">
-            <label className="search">
-              <Search size={16} />
-              <input
-                placeholder="Buscar componente, subcomponente o código..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              {search && (
-                <button onClick={() => setSearch('')}>
-                  <X size={14} />
-                </button>
-              )}
-            </label>
-
             {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
             <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
               <button
@@ -4686,85 +4764,87 @@ export default function CronogramaGanttView({
                 )}
               </div>
             ) : (
-              <div className="filter-dropdown-wrap contextual-filter-wrap macro-filter-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'macro' ? 'active' : ''} ${
-                  macroFilter !== 'Todos' ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('macro')}
-                title="Filtrar por Coordinador Macro-regional (2 regiones por coordinación)"
-              >
-                <div className="filter-card-copy">
-                  <small>Coord. Macro-regional</small>
-                  <span>{getMacroById(macroFilter)?.coordinador || 'Todas las coordinaciones'}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'macro' && (
-                <div
-                  className="filter-card-popover"
-                  onClick={(e) => e.stopPropagation()}
-                  onWheel={(e) => {
-                    e.stopPropagation();
-                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                    if (list && e.target !== list && !list.contains(e.target as Node)) {
-                      list.scrollTop += e.deltaY;
-                    }
-                  }}
-                  style={{ minWidth: 290 }}
+              <div className="filter-dropdown-wrap contextual-filter-wrap phase-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'phase' ? 'active' : ''} ${
+                    phaseFilter !== 'Todas' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('phase')}
+                  title="Filtrar por Fase del Proyecto (PMBOK / Metodología de Dotación)"
                 >
-                  <div className="filter-popover-title filter-popover-title-row">
-                    <span>Coordinación Macro-regional</span>
-                    {macroFilter !== 'Todos' && (
-                      <button type="button" className="filter-reset-link" onClick={() => setMacroFilter('Todos')}>
-                        Restablecer
-                      </button>
-                    )}
+                  <div className="filter-card-copy">
+                    <small>Fase</small>
+                    <span title={selectedPhaseLabel}>{selectedPhaseLabel}</span>
                   </div>
-                  <div className="filter-popover-list">
-                    <button
-                      type="button"
-                      className={`filter-item-btn ${macroFilter === 'Todos' ? 'selected' : ''}`}
-                      onClick={() => {
-                        setMacroFilter('Todos');
-                    setSedeFilter('Todas');
-                        closeMenus();
-                      }}
-                    >
-                      <span>Todas las coordinaciones</span>
-                      <span className="wbs-level-badge">{MACROREGIONES.length}</span>
-                    </button>
-                    {MACROREGIONES.map((macro) => {
-                      const isSelected = macroFilter === macro.id;
-                      return (
-                        <button
-                          key={macro.id}
-                          type="button"
-                          className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                          onClick={() => {
-                            setMacroFilter(macro.id);
-                            closeMenus();
-                          }}
-                        >
-                          <span className="filter-item-main">
-                            <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                              {isSelected && <span className="filter-radio-dot" />}
-                            </span>
-                            <span className="filter-avatar macro-avatar">{getGestorInitials(macro.coordinador)}</span>
-                            <span className="filter-item-text">
-                              <strong>{macro.coordinador}</strong>
-                              <small>{macro.name} · {macro.regiones.join(' y ')}</small>
-                            </span>
-                          </span>
-                          <span className="macro-scope-pill">{macro.regiones.length} regiones</span>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'phase' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 280 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Fases del Proyecto</span>
+                      {phaseFilter !== 'Todas' && (
+                        <button type="button" className="filter-reset-link" onClick={() => setPhaseFilter('Todas')}>
+                          Restablecer
                         </button>
-                      );
-                    })}
+                      )}
+                    </div>
+                    <div className="filter-popover-list">
+                      <button
+                        type="button"
+                        className={`filter-item-btn ${phaseFilter === 'Todas' ? 'selected' : ''}`}
+                        onClick={() => {
+                          setPhaseFilter('Todas');
+                          closeMenus();
+                        }}
+                      >
+                        <span className="filter-item-text">
+                          <strong>Todas las fases</strong>
+                          <small>Ciclo de vida completo del proyecto</small>
+                        </span>
+                        <span className="wbs-level-badge">{items.length}</span>
+                      </button>
+                      {PROJECT_PHASES_CATALOG.map((fase) => {
+                        const isSelected = phaseFilter === fase.id || phaseFilter === fase.name;
+                        const count = getPhaseItemCount(fase.id);
+                        return (
+                          <button
+                            key={fase.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setPhaseFilter(fase.id);
+                              closeMenus();
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <span className="filter-item-text">
+                                <strong>{fase.code} · {fase.name}</strong>
+                                <small>{fase.description}</small>
+                              </span>
+                            </span>
+                            {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
             )}
 
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
@@ -5548,8 +5628,19 @@ export default function CronogramaGanttView({
                   <input
                     type="checkbox"
                     aria-label="Seleccionar todos los registros visibles"
-                    onChange={(e) =>
-                      notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
+                    checked={shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id))}
+                    ref={(input) => {
+                      if (input) {
+                        const allSel = shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id));
+                        const someSel = shown.some((it) => selectedRowIds.has(it.id));
+                        input.indeterminate = !allSel && someSel;
+                      }
+                    }}
+                    onChange={() => toggleSelectAllShown(shown)}
+                    title={
+                      shown.length > 0 && shown.every((it) => selectedRowIds.has(it.id))
+                        ? 'Deseleccionar todos'
+                        : 'Seleccionar todos los registros visibles'
                     }
                   />
                   <span className="th-label">Código</span>
@@ -5559,15 +5650,6 @@ export default function CronogramaGanttView({
 
               {/* ── Columna Nombre (Segunda en lista, primera en Gantt) ── */}
               <div className="name-head">
-                {viewMode === 'gantt' && (
-                  <input
-                    type="checkbox"
-                    aria-label="Seleccionar todos los registros visibles"
-                    onChange={(e) =>
-                      notify(e.target.checked ? 'Registros visibles seleccionados' : 'Selección cancelada')
-                    }
-                  />
-                )}
                 <span>{viewMode === 'lista' ? 'Nombre' : 'Componente / Subcomponente'}</span>
                 <div className="head-col-actions">
                   <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
@@ -5988,7 +6070,7 @@ export default function CronogramaGanttView({
                   key={x.id}
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
                     selectedId === x.id ? 'selected' : ''
-                  } ${edit?.id === x.id ? 'is-editing-row' : ''}`}
+                  } ${selectedRowIds.has(x.id) ? 'batch-selected-row' : ''} ${edit?.id === x.id ? 'is-editing-row' : ''}`}
                   onClick={() => {
                     setSelectedId(x.id);
                   }}
@@ -6009,8 +6091,12 @@ export default function CronogramaGanttView({
                       <div className="code-cell-col" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
+                          checked={selectedRowIds.has(x.id)}
                           aria-label={`Seleccionar ${x.code} ${x.name}`}
-                          onChange={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleSelectRow(x.id);
+                          }}
                         />
                         {x.kind === 'hito' ? (
                           <Flag size={13} className="code-icon-flag is-hito" />
@@ -7597,6 +7683,56 @@ export default function CronogramaGanttView({
                 notify('Diagrama EDT autoordenado según jerarquía y numeración WBS');
               }}
             />
+          )}
+
+          {/* Barra Flotante de Acciones en Lote (Modo Lista) */}
+          {viewMode === 'lista' && selectedRowIds.size > 0 && (
+            <aside className="batch-floating-bar" aria-label="Acciones en lote para registros seleccionados">
+              <div className="batch-pill-count">
+                <span className="count-number">{selectedRowIds.size}</span>
+                <span>{selectedRowIds.size === 1 ? 'fila seleccionada' : 'filas seleccionadas'}</span>
+              </div>
+              <div className="batch-divider" />
+              <div className="batch-actions-group">
+                <span className="batch-group-title">Cambiar estado:</span>
+                <button
+                  type="button"
+                  className="batch-action-btn is-success"
+                  onClick={() => handleBulkStatusChange('Completado')}
+                  title="Marcar registros seleccionados como Completado"
+                >
+                  <Check size={13} />
+                  <span>Completado</span>
+                </button>
+                <button
+                  type="button"
+                  className="batch-action-btn is-progress"
+                  onClick={() => handleBulkStatusChange('En proceso')}
+                  title="Marcar registros seleccionados como En proceso"
+                >
+                  <Clock size={13} />
+                  <span>En proceso</span>
+                </button>
+                <button
+                  type="button"
+                  className="batch-action-btn is-pending"
+                  onClick={() => handleBulkStatusChange('Pendiente')}
+                  title="Marcar registros seleccionados como Pendiente"
+                >
+                  <span>Pendiente</span>
+                </button>
+              </div>
+              <div className="batch-divider" />
+              <button
+                type="button"
+                className="batch-cancel-btn"
+                onClick={clearSelection}
+                title="Deseleccionar todos los registros"
+              >
+                <X size={14} />
+                <span>Deseleccionar</span>
+              </button>
+            </aside>
           )}
 
           {/* Footer de Paginación */}

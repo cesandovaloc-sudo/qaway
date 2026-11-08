@@ -9284,43 +9284,65 @@ body.gantt-resizing {
   background: #f0f7ff !important;
 }
 
-/* Fila 2: Filtros Contextuales (Región y Coord. Macro-regional) */
-.gantt-v2 .filters .search {
-  width: 210px !important;
-  min-width: 210px !important;
-  max-width: 210px !important;
-  height: 38px !important;
-  flex: 0 0 210px !important;
-  flex-shrink: 0 !important;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-}
-
+/* Fila 2: Filtros Contextuales Fijos y Homogéneos (Región y Fase / Sede) */
 .gantt-v2 .contextual-filter-wrap.region-filter-wrap,
-.gantt-v2 .contextual-filter-wrap.region-filter-wrap .filter-card-btn {
-  width: 185px !important;
-  min-width: 175px !important;
-  max-width: 195px !important;
-  height: 42px !important;
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-
+.gantt-v2 .contextual-filter-wrap.region-filter-wrap .filter-card-btn,
+.gantt-v2 .contextual-filter-wrap.phase-filter-wrap,
+.gantt-v2 .contextual-filter-wrap.phase-filter-wrap .filter-card-btn,
+.gantt-v2 .contextual-filter-wrap.sede-filter-wrap,
+.gantt-v2 .contextual-filter-wrap.sede-filter-wrap .filter-card-btn,
 .gantt-v2 .contextual-filter-wrap.macro-filter-wrap,
 .gantt-v2 .contextual-filter-wrap.macro-filter-wrap .filter-card-btn {
-  width: 215px !important;
-  min-width: 200px !important;
-  max-width: 225px !important;
+  width: 165px !important;
+  min-width: 165px !important;
+  max-width: 165px !important;
   height: 42px !important;
-  flex-shrink: 0;
-  box-sizing: border-box;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .gantt-v2 .contextual-filter-wrap .filter-card-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   padding: 2px 10px !important;
   border-radius: 6px !important;
   background: #ffffff;
   border: 1px solid #cbd5e1;
+  overflow: hidden !important;
+}
+
+.gantt-v2 .contextual-filter-wrap .filter-card-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  text-align: left !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.gantt-v2 .contextual-filter-wrap .filter-card-copy small {
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+  color: #64748b !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.gantt-v2 .contextual-filter-wrap .filter-card-copy span {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  max-width: 115px !important;
 }
 
 .gantt-v2 .contextual-filter-wrap .filter-card-btn:hover {
@@ -11421,4 +11443,147 @@ body.gantt-resizing {
   .powerbi-grid-container {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   SELECCIÓN MASIVA Y BARRA FLOTANTE DE ACCIONES EN LOTE (MODO LISTA)
+   ========================================================================== */
+
+/* Fila seleccionada en lote */
+.gantt-v2 .row.batch-selected-row {
+  background: #f0f7ff !important;
+}
+
+.gantt-v2 .row.batch-selected-row .code-cell-col {
+  border-left: 3px solid #0066ff !important;
+}
+
+.gantt-v2 .row.batch-selected-row .code-num {
+  font-weight: 700 !important;
+  color: #0052cc !important;
+}
+
+/* Barra flotante de acciones masivas */
+.gantt-v2 .batch-floating-bar {
+  position: absolute;
+  bottom: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.4), 0 4px 10px -2px rgba(15, 23, 42, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  animation: batchBarFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes batchBarFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.gantt-v2 .batch-pill-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.gantt-v2 .batch-pill-count .count-number {
+  background: #0066ff;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.gantt-v2 .batch-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.gantt-v2 .batch-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gantt-v2 .batch-group-title {
+  font-size: 11.5px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+.gantt-v2 .batch-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .batch-action-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.gantt-v2 .batch-action-btn.is-success:hover {
+  background: #16a34a !important;
+  border-color: #22c55e !important;
+}
+
+.gantt-v2 .batch-action-btn.is-progress:hover {
+  background: #d97706 !important;
+  border-color: #f59e0b !important;
+}
+
+.gantt-v2 .batch-action-btn.is-pending:hover {
+  background: #475569 !important;
+  border-color: #64748b !important;
+}
+
+.gantt-v2 .batch-cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gantt-v2 .batch-cancel-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
 }
