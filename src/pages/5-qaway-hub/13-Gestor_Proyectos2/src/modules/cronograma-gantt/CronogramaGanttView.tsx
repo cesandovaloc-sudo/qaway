@@ -19,6 +19,22 @@ import CronogramaCalendarioView from './CronogramaCalendarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
+import EquipoDirectorioView from '../equipo/EquipoDirectorioView';
+import EquipoOrganigramaView from '../equipo/EquipoOrganigramaView';
+import EquipoSedesView from '../equipo/EquipoSedesView';
+import EquipoCargaView from '../equipo/EquipoCargaView';
+import EquipoDrawer from '../equipo/EquipoDrawer';
+import EquipoExpedienteModal from '../equipo/EquipoExpedienteModal';
+import EquipoNuevoModal from '../equipo/EquipoNuevoModal';
+import {
+  getStoredIntegrantes,
+  saveStoredIntegrantes,
+  getStoredSedes,
+  saveStoredSedes,
+  getStoredAreas,
+  getStoredAsignaciones,
+  saveStoredAsignaciones,
+} from '../equipo/mockData';
 import {
   fetchCronogramaFromSupabase,
   syncAllCronogramaItemsToSupabase,
@@ -49,6 +65,7 @@ import {
   MACROREGIONES_NACIONAL,
   normalizeRegionKey,
 } from './regionalCoordinationModel';
+import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 
@@ -68,6 +85,8 @@ export {
   isLegacyCronogramaItem,
 };
 import {
+  Activity,
+  GitBranch,
   AlertTriangle,
   ArrowLeftRight,
   ArrowRight,
@@ -360,24 +379,63 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
 const resolveDefaultGestor = (code: string, name: string): string => {
   const c = code || '';
   const n = (name || '').toLowerCase();
-  if (n.includes('chupaca') || n.includes('concepción') || n.includes('concepcion') || n.includes('satipo') || n.includes('río tambo') || n.includes('rio tambo') || n.includes('dre junín') || n.includes('dre junin')) return 'María Salazar';
-  if (n.includes('huancayo') || n.includes('jauja') || n.includes('tarma') || n.includes('yauli')) return 'Carlos Sandoval';
-  if (n.includes('chanchamayo') || n.includes('pichanaki') || n.includes('perené') || n.includes('perene')) return 'Lucía Ramos';
-  if (n.includes('pangoa')) return 'Javier Ruiz';
+  if (n.includes('dre junín') || n.includes('dre junin') || n.includes('comité regional') || n.includes('plan de monitoreo regional')) return 'María Salazar';
+  if (n.includes('chanchamayo') || n.includes('pichanaki') || n.includes('perené') || n.includes('perene') || n.includes('satipo') || n.includes('río tambo') || n.includes('rio tambo') || n.includes('pangoa')) {
+    return 'Lucía Ramos';
+  }
+  if (n.includes('huancayo') || n.includes('jauja') || n.includes('tarma') || n.includes('yauli') || n.includes('chupaca') || n.includes('concepción') || n.includes('concepcion') || n.includes('plan de distribución local') || n.includes('comité de distribución')) {
+    return 'Javier Ruiz';
+  }
+  if (n.includes('siga') || n.includes('código') || n.includes('cdl') || n.includes('matriz')) return 'Lucía Flores';
   if (c.startsWith('1.') || c === '1.') {
-    if (n.includes('siga') || n.includes('código') || n.includes('cdl')) return 'Lucía Flores';
     if (n.includes('comunicación') || n.includes('capacitación')) return 'María Jara';
-    return 'Carlos Sandoval';
+    return 'Javier Ruiz';
   }
   if (c.startsWith('2.') || c === '2.' || n.includes('almacén') || n.includes('pecosa')) return 'Javier Ruiz';
   if (c.startsWith('3.') || c === '3.' || n.includes('transporte') || n.includes('distribución') || n.includes('ruta')) return 'Juan Pérez';
   if (c.startsWith('4.') || c === '4.' || n.includes('cierre') || n.includes('auditoría')) return 'Ana Torres';
   if (c.startsWith('5.') || c === '5.' || n.includes('informe') || n.includes('balance')) return 'María Jara';
-  if (n.includes('siga') || n.includes('matriz')) return 'Lucía Flores';
-  return 'Carlos Sandoval';
+  return 'Javier Ruiz';
 };
 
-export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
+const baseEdtIds = new Set([
+  ...DRE_JUNIN_DOTACION_2027_EDT.map((r) => r.id),
+  ...REGIONAL_NODE_SEEDS.map((s) => s.row.id),
+]);
+
+const extraSedesItems: Item[] = ALL_SEDES_EDT_ITEMS.filter((s) => !baseEdtIds.has(s.id)).map((s) => ({
+  id: s.id,
+  code: s.code,
+  name: s.name,
+  kind: 'subproceso' as const,
+  edtType: 'PAQUETE_TRABAJO' as const,
+  faseId: 'FASE-PLANIFICACION',
+  parentId: 'pt-1.6',
+  start: s.start,
+  end: s.end,
+  dependencies: [],
+  progress: s.progress,
+  status: s.status,
+  expanded: true,
+  description: `Seguimiento territorial de CDL y distribución en ${s.name}`,
+  deliverable: `CDL Validado y Registrado en SIGA - ${s.name}`,
+  deliverables: [{
+    id: `deliv-${s.id}`,
+    name: `CDL Validado y Registrado en SIGA - ${s.name}`,
+    type: 'spreadsheet' as const,
+  }],
+  region: s.region,
+  sede: s.name,
+  gestor: s.gestor,
+  gestores: [s.gestor],
+  entidadResponsable: s.entidadResponsable,
+  tasks: 0,
+  done: 0,
+  baselineStart: s.start,
+  baselineEnd: s.end,
+}));
+
+export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
   ...DRE_JUNIN_DOTACION_2027_EDT,
   ...REGIONAL_NODE_SEEDS.map((s) => s.row),
 ].map((r) => {
@@ -414,7 +472,7 @@ export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
         : r.id.startsWith('pt-1.6-')
         ? 0
         : r.kind === 'hito' ? 18 : (r.code === '1.1' || r.code === '2.1' ? 100 : (r.code.startsWith('1.') ? 50 : 0)),
-    status: regionalSeed
+    status: (regionalSeed
       ? regionalSeed.status
       : r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion'
         ? 'Cumple'
@@ -424,7 +482,7 @@ export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
         ? 'Pendiente'
         : r.id.startsWith('pt-1.6-')
         ? 'Con retraso'
-        : r.code === '1.1' || r.code === '2.1' ? 'Completado' : (r.code.startsWith('1.') ? 'En proceso' : 'Pendiente'),
+        : r.code === '1.1' || r.code === '2.1' ? 'Completado' : (r.code.startsWith('1.') ? 'En proceso' : 'Pendiente')) as Status,
     expanded: true,
     description: r.entregableVerificable ? `Entregable oficial: ${r.entregableVerificable}` : '',
     deliverable: r.entregableVerificable || '',
@@ -439,7 +497,7 @@ export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy([
     gestores: [defaultGestor],
     entidadResponsable: r.entidadResponsable,
   };
-})));
+}) as Item[]).concat(extraSedesItems)));
 
 const MONTHS = [
   { label: 'Sep', start: '2026-09-01' },
@@ -565,6 +623,84 @@ const getGestorColor = (name: string): string => {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
   return colors[Math.abs(hash) % colors.length] ?? '#2563eb';
+};
+
+export const getPersonInstitutionalRole = (name: string): string => {
+  switch (name) {
+    case 'Carlos Mendoza':
+    case 'Carlos Sandoval':
+      return 'Coordinador General (MINEDU)';
+    case 'María Salazar':
+      return 'Coordinadora Regional Junín';
+    case 'Javier Ruiz':
+      return 'Gestor Territorial de Campo (Valle / Andina)';
+    case 'Lucía Ramos':
+      return 'Gestora Territorial de Campo (Selva Central)';
+    case 'Lucía Flores':
+      return 'Especialista SIGA / CDL';
+    case 'Rosa Quispe':
+      return 'Coord. Macro-regional (Centro)';
+    case 'Ana Torres':
+      return 'Coord. Macro-regional (Centro Sur)';
+    case 'Miguel Paredes':
+      return 'Coord. Macro-regional (Oriente)';
+    case 'Luis Ccori':
+      return 'Coordinador Regional Pasco';
+    case 'Elena Rojas':
+      return 'Coordinadora Regional Huancavelica';
+    case 'Jorge Huamán':
+      return 'Coordinador Regional Ayacucho';
+    case 'Patricia Vela':
+      return 'Coordinadora Regional Huánuco';
+    case 'Renzo Tapia':
+      return 'Coordinador Regional Ucayali';
+    case 'Roberto Méndez':
+      return 'Gestor Territorial Áncash';
+    case 'Gabriel Delgado':
+      return 'Gestor Territorial Arequipa';
+    case 'Ronald Quispe':
+      return 'Gestor Territorial Cusco';
+    case 'Carlos Vílchez':
+      return 'Gestor Territorial Piura';
+    case 'Walter Mamani':
+      return 'Gestor Territorial Puno';
+    case 'Segundo Díaz':
+      return 'Gestor Territorial Cajamarca';
+    case 'Víctor Chávez':
+      return 'Gestor Territorial La Libertad';
+    case 'Miguel Benites':
+      return 'Gestor Territorial Lambayeque';
+    case 'Marcos Reátegui':
+      return 'Gestor Territorial Loreto';
+    case 'Dante Arévalo':
+      return 'Gestor Territorial San Martín';
+    case 'Wilson Valqui':
+      return 'Gestor Territorial Amazonas';
+    case 'Julio Morales':
+      return 'Gestor Territorial Ica';
+    case 'Edwin Palomino':
+      return 'Gestor Territorial Apurímac';
+    case 'Hernán Castro':
+      return 'Gestor Territorial Lima Provincias';
+    case 'César Farfán':
+      return 'Gestor Territorial Lima Metro';
+    case 'Jorge Barreto':
+      return 'Gestor Territorial Callao';
+    case 'Daniel Condori':
+      return 'Gestor Territorial Moquegua';
+    case 'Óscar Calizaya':
+      return 'Gestor Territorial Tacna';
+    case 'Pedro Morán':
+      return 'Gestor Territorial Tumbes';
+    case 'Néstor Rengifo':
+      return 'Gestor Territorial Madre de Dios';
+    case 'María Jara':
+      return 'Directora de Operaciones';
+    case 'Juan Pérez':
+      return 'Gestor Logístico / Transporte';
+    default:
+      return 'Gestor Territorial de Campo';
+  }
 };
 
 const getItemGestores = (item: Item): string[] => {
@@ -1176,7 +1312,7 @@ export default function CronogramaGanttView({
   perspective = 'maestro',
 }: {
   onActions?: ((h: any) => void) | undefined;
-  onSwitchPerspective?: (p: 'maestro' | 'territorial') => void;
+  onSwitchPerspective?: ((p: any) => void) | undefined;
   activeProject?: {
     id: string;
     code: string;
@@ -1184,7 +1320,7 @@ export default function CronogramaGanttView({
     region: string;
     subtext?: string | undefined;
   } | undefined;
-  perspective?: 'maestro' | 'territorial';
+  perspective?: 'maestro' | 'territorial' | 'equipo';
 }) {
   const projectId = activeProject?.id || 'p1';
   const currentPidRef = useRef(projectId);
@@ -1220,7 +1356,7 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (hasLegacyMocks || parsed.length < 76 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo') || !parsed.some((it) => it.id === 'pt-1.6-dre-pasco')) {
+            if (hasLegacyMocks || parsed.length < 200 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo') || !parsed.some((it) => it.id === 'pt-1.6-dre-pasco')) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes (DRE + 13 UGEL)
               try {
                 localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
@@ -1313,7 +1449,12 @@ export default function CronogramaGanttView({
           setItems(INITIAL_ITEMS);
           syncAllCronogramaItemsToSupabase('p1', INITIAL_ITEMS as GanttItemData[]);
         } else if (cleanCloudItems.length >= 50) {
-          setItems(computeWbsHierarchy(cleanCloudItems, rawTasks));
+          const recomputed = computeWbsHierarchy(cleanCloudItems, rawTasks);
+          setItems(recomputed);
+          try {
+            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
+            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+          } catch {}
         }
       }
     });
@@ -1898,7 +2039,115 @@ export default function CronogramaGanttView({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
-  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama'>('gantt');
+  const [viewMode, setViewMode] = useState<
+    'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
+  >(() => (perspective === 'equipo' ? 'directorio' : 'gantt'));
+
+  // Estado dedicado para perspectiva equipo
+  const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>(() => {
+    try {
+      return getStoredIntegrantes();
+    } catch {
+      return [];
+    }
+  });
+  const [equipoSedes, setEquipoSedes] = useState<any[]>(() => {
+    try {
+      return getStoredSedes();
+    } catch {
+      return [];
+    }
+  });
+  const [equipoAreas] = useState<any[]>(() => {
+    try {
+      return getStoredAreas();
+    } catch {
+      return [];
+    }
+  });
+  const [equipoAsignaciones, setEquipoAsignaciones] = useState<any[]>(() => {
+    try {
+      return getStoredAsignaciones();
+    } catch {
+      return [];
+    }
+  });
+  const [equipoSelectedId, setEquipoSelectedId] = useState<string | null>(null);
+  const [equipoExpediente, setEquipoExpediente] = useState<any | null>(null);
+  const [isEquipoNuevoOpen, setIsEquipoNuevoOpen] = useState(false);
+  const [equipoSedeFilter, setEquipoSedeFilter] = useState('todas');
+  const [equipoEstadoOpFilter, setEquipoEstadoOpFilter] = useState('todos');
+  const [equipoEstadoCuentaFilter, setEquipoEstadoCuentaFilter] = useState('todos');
+  const [equipoAreaFilter, setEquipoAreaFilter] = useState('todas');
+  const [equipoPill, setEquipoPill] = useState('Todos');
+
+  const equipoMetrics = useMemo(() => {
+    const total = equipoIntegrantes.length;
+    const activos = equipoIntegrantes.filter((i) => i.estadoOperativo === 'En funciones').length;
+    const licencias = equipoIntegrantes.filter((i) => i.estadoOperativo === 'Licencia / Permiso').length;
+    const pendientesCuenta = equipoIntegrantes.filter((i) => i.estadoCuenta === 'Invitación Pendiente').length;
+    const alertasAtrasadas = equipoAsignaciones.filter((a) => a.estado === 'Atrasado').length;
+    const totalEsfuerzoActivo = equipoAsignaciones
+      .filter((a) => a.estado !== 'Completado')
+      .reduce((sum, a) => sum + (a.esfuerzoHoras || 0), 0);
+    const totalCapacidad = equipoIntegrantes.reduce((sum, i) => sum + (i.capacidadNominalHorasSemana || 40), 0);
+    const ocupacionPromedio = totalCapacidad > 0 ? Math.round((totalEsfuerzoActivo / totalCapacidad) * 100) : 0;
+    return { total, activos, licencias, pendientesCuenta, alertasAtrasadas, ocupacionPromedio };
+  }, [equipoIntegrantes, equipoAsignaciones]);
+
+  const equipoSelectedIntegrante = useMemo(() => {
+    return equipoIntegrantes.find((i) => i.id === equipoSelectedId) || null;
+  }, [equipoIntegrantes, equipoSelectedId]);
+
+  const handleUpdateIntegrante = (updated: any) => {
+    const next = equipoIntegrantes.map((i) => (i.id === updated.id ? updated : i));
+    setEquipoIntegrantes(next);
+    saveStoredIntegrantes(next);
+    notify(`Integrante "${updated.nombreCompleto}" actualizado`);
+  };
+
+  const handleCreateIntegrante = (nuevo: any) => {
+    const next = [nuevo, ...equipoIntegrantes];
+    setEquipoIntegrantes(next);
+    saveStoredIntegrantes(next);
+    notify(`Integrante "${nuevo.nombreCompleto}" registrado exitosamente`);
+  };
+
+  const handleBulkUpdateSede = (ids: string[], targetSedeId: string) => {
+    const sedeObj = equipoSedes.find((s) => s.id === targetSedeId);
+    const next = equipoIntegrantes.map((i) =>
+      ids.includes(i.id) ? { ...i, sedeId: targetSedeId, sedeNombre: sedeObj?.nombre || i.sedeNombre } : i
+    );
+    setEquipoIntegrantes(next);
+    saveStoredIntegrantes(next);
+    notify(`${ids.length} integrantes reasignados a ${sedeObj?.nombre || 'nueva sede'}`);
+  };
+
+  const handleBulkUpdateEstadoOperativo = (ids: string[], targetEstado: any) => {
+    const next = equipoIntegrantes.map((i) => (ids.includes(i.id) ? { ...i, estadoOperativo: targetEstado } : i));
+    setEquipoIntegrantes(next);
+    saveStoredIntegrantes(next);
+    notify(`${ids.length} integrantes actualizados a estado "${targetEstado}"`);
+  };
+
+  const handleBulkReenviarInvitaciones = (ids: string[]) => {
+    notify(`Invitaciones de acceso reenviadas a ${ids.length} integrantes`);
+  };
+
+  const handleUpdateSede = (updatedSede: any) => {
+    const next = equipoSedes.map((s) => (s.id === updatedSede.id ? updatedSede : s));
+    setEquipoSedes(next);
+    saveStoredSedes(next);
+    notify(`Sede "${updatedSede.nombre}" actualizada`);
+  };
+
+  const handleReasignarTarea = (asignacionId: string, nuevoIntegranteId: string) => {
+    const nuevoIntegrante = equipoIntegrantes.find((i) => i.id === nuevoIntegranteId);
+    const next = equipoAsignaciones.map((a) => (a.id === asignacionId ? { ...a, integranteId: nuevoIntegranteId } : a));
+    setEquipoAsignaciones(next);
+    saveStoredAsignaciones(next);
+    notify(`Tarea reasignada a ${nuevoIntegrante?.nombreCompleto || 'nuevo integrante'}`);
+  };
   // Las tarjetas superiores se ocultan de entrada en pantallas pequeñas (<1024px),
   // tal como se pidió; el botón del ojo alterna como siempre.
   // Las tarjetas superiores cargan ocultas por defecto en todas las resoluciones;
@@ -1976,7 +2225,7 @@ export default function CronogramaGanttView({
     [items]
   );
   const [gestorFilter, setGestorFilter] = useState('Todos');
-  const [sedeFilter, setSedeFilter] = useState('Todas');
+  const [selectedSedes, setSelectedSedes] = useState<string[]>([]);
 
   // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
   // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
@@ -2100,13 +2349,17 @@ export default function CronogramaGanttView({
   }, [items]);
 
   const availableGestoresCascaded = useMemo(() => {
-    if (sedeFilter !== 'Todas') {
+    if (selectedSedes.length > 0) {
       const gSet = new Set<string>();
       items.forEach((it) => {
-        const matchSede =
-          it.sede === sedeFilter ||
-          it.distrito === sedeFilter ||
-          (it.name && it.name.includes(sedeFilter));
+        const matchSede = selectedSedes.some((s) => {
+          const tLower = s.toLowerCase();
+          return (
+            (it.sede && it.sede.toLowerCase().includes(tLower)) ||
+            (it.distrito && it.distrito.toLowerCase().includes(tLower)) ||
+            (it.name && it.name.toLowerCase().includes(tLower))
+          );
+        });
         if (matchSede) {
           getItemGestores(it).forEach((g) => {
             if (g && g !== 'Sin asignar') gSet.add(g);
@@ -2127,21 +2380,23 @@ export default function CronogramaGanttView({
       if (gSet.size > 0) return Array.from(gSet);
     }
     return availableGestores;
-  }, [availableGestores, sedeFilter, selectedRegions, items]);
+  }, [availableGestores, selectedSedes, selectedRegions, items]);
 
   const sedeButtonText = useMemo(() => {
-    if (sedeFilter !== 'Todas' && gestorFilter !== 'Todos') {
-      const shortSede = sedeFilter.replace(' (Sede Regional Matriz)', '');
-      return `${shortSede} · ${gestorFilter.split(' ')[0]}`;
+    if (selectedSedes.length === 0) {
+      if (gestorFilter !== 'Todos') return gestorFilter;
+      return 'Todas las sedes';
     }
-    if (sedeFilter !== 'Todas') {
-      return sedeFilter.replace(' (Sede Regional Matriz)', '');
+    if (selectedSedes.length === 1) {
+      const short = (selectedSedes[0] || '').replace(' (Sede Regional Matriz)', '');
+      if (gestorFilter !== 'Todos') {
+        return `${short} · ${gestorFilter.split(' ')[0]}`;
+      }
+      return short;
     }
-    if (gestorFilter !== 'Todos') {
-      return gestorFilter;
-    }
-    return 'Todas las sedes';
-  }, [sedeFilter, gestorFilter]);
+    return `${selectedSedes.length} sedes`;
+  }, [selectedSedes, gestorFilter]);
+
   // Filtro de cargo territorial: Coordinador Macro-regional (supervisa 2 regiones)
   const [macroFilter, setMacroFilter] = useState<string>('Todos');
   const regionItemCounts = useMemo(() => {
@@ -2217,7 +2472,7 @@ export default function CronogramaGanttView({
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
   
-  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | 'phase' | null;
+  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | 'phase' | 'equipoSede' | 'equipoEstado' | 'equipoCuenta' | 'equipoArea' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [mapSubView, setMapSubView] = useState<TerritorialSubView>('geo-real');
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
@@ -2398,7 +2653,7 @@ export default function CronogramaGanttView({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
-  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama') => {
+  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
@@ -3605,6 +3860,10 @@ export default function CronogramaGanttView({
   });
 
   const isItemExpanded = (id: string, defaultExpanded: boolean = true): boolean => {
+    // Si hay un filtro de sedes activo y este nodo forma parte del árbol de la sede seleccionada, mantenerlo siempre expandido
+    if (matchingSedeIds && matchingSedeIds.has(id)) {
+      return true;
+    }
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
     const modeMap = collapsedByMode[mode];
     if (modeMap && id in modeMap) {
@@ -3645,6 +3904,39 @@ export default function CronogramaGanttView({
     }
   };
 
+  const matchingSedeIds = useMemo(() => {
+    if (selectedSedes.length === 0) return null;
+    const ids = new Set<string>();
+    const parentMap = new Map<string, string>();
+    items.forEach((it) => {
+      if (it.parentId) parentMap.set(it.id, it.parentId);
+    });
+
+    items.forEach((it) => {
+      const itNameLower = (it.name || '').toLowerCase().trim();
+      const itSedeLower = (it.sede || '').toLowerCase().trim();
+      const itDistritoLower = (it.distrito || '').toLowerCase().trim();
+
+      const matches = selectedSedes.some((target) => {
+        const targetLower = target.toLowerCase().trim();
+        return (
+          (itSedeLower && (itSedeLower.includes(targetLower) || targetLower.includes(itSedeLower))) ||
+          (itDistritoLower && (itDistritoLower.includes(targetLower) || targetLower.includes(itDistritoLower))) ||
+          (itNameLower && (itNameLower.includes(targetLower) || targetLower.includes(itNameLower)))
+        );
+      });
+
+      if (matches) {
+        let curr: string | undefined = it.id;
+        while (curr) {
+          ids.add(curr);
+          curr = parentMap.get(curr);
+        }
+      }
+    });
+    return ids;
+  }, [items, selectedSedes]);
+
   const shownBase = useMemo(() => {
     return items.filter((x) => {
       const parent = items.find((p) => p.id === x.parentId);
@@ -3675,12 +3967,34 @@ export default function CronogramaGanttView({
           (tab === 'En proceso' && (x.status === 'En proceso' || x.status === 'En curso')) ||
           (tab === 'Con retraso' && isLateItem) ||
           x.status === tab);
+
+      const isExplicitSedeMatch = Boolean(matchingSedeIds && matchingSedeIds.has(x.id));
+
+      const hasChildMatchingRegion = items.some(
+        (c) =>
+          (c.parentId === x.id || (c.parentId === 'pt-1.6' && x.id === 'comp-1')) &&
+          c.region &&
+          selectedRegions.some((r) => normalizeRegionKey(r) === normalizeRegionKey(c.region))
+      );
       const matchRegion =
         selectedRegions.length === 0 ||
+        isExplicitSedeMatch ||
         x.region === 'Todas las Regiones' ||
-        (x.region && selectedRegions.includes(x.region));
+        (x.region && selectedRegions.some((r) => normalizeRegionKey(r) === normalizeRegionKey(x.region))) ||
+        hasChildMatchingRegion;
+
+      const hasChildMatchingGestor = items.some(
+        (c) =>
+          (c.parentId === x.id || (c.parentId === 'pt-1.6' && x.id === 'comp-1')) &&
+          (c.gestor === gestorFilter || getItemGestores(c).includes(gestorFilter))
+      );
       const matchGestor =
-        gestorFilter === 'Todos' || x.gestor === gestorFilter || getItemGestores(x).includes(gestorFilter);
+        gestorFilter === 'Todos' ||
+        isExplicitSedeMatch ||
+        x.gestor === gestorFilter ||
+        getItemGestores(x).includes(gestorFilter) ||
+        hasChildMatchingGestor;
+
       const macroDef = macroFilter !== 'Todos' ? getMacroById(macroFilter) : undefined;
       const matchMacro =
         !macroDef || !x.region || x.region === MULTI_REGION_VALUE || macroDef.regiones.includes(x.region);
@@ -3701,22 +4015,7 @@ export default function CronogramaGanttView({
         parent?.faseId === targetPhaseId ||
         parent?.faseId === targetPhaseName;
 
-      let matchSede = true;
-      if (sedeFilter !== 'Todas') {
-        const targetLower = sedeFilter.toLowerCase();
-        const directMatch =
-          Boolean(x.sede && x.sede.toLowerCase().includes(targetLower)) ||
-          Boolean(x.distrito && x.distrito.toLowerCase().includes(targetLower)) ||
-          Boolean(x.name && x.name.toLowerCase().includes(targetLower));
-        const hasMatchingDescendant = items.some(
-          (c) =>
-            c.parentId === x.id &&
-            (Boolean(c.sede && c.sede.toLowerCase().includes(targetLower)) ||
-             Boolean(c.distrito && c.distrito.toLowerCase().includes(targetLower)) ||
-             Boolean(c.name && c.name.toLowerCase().includes(targetLower)))
-        );
-        matchSede = directMatch || hasMatchingDescendant;
-      }
+      const matchSede = !matchingSedeIds || matchingSedeIds.has(x.id);
 
       // Solapamiento de fechas con el período oficial consultado
       let matchRange = true;
@@ -3736,19 +4035,23 @@ export default function CronogramaGanttView({
 
       // Ocultar si cualquiera de sus ancestros en la jerarquía (padre, abuelo, etc.) está colapsado (independiente por vista)
       let notCollapsed = true;
-      let currParentId = x.parentId;
-      while (currParentId) {
-        const pNode = items.find((p) => p.id === currParentId);
-        if (!pNode) {
-          // Si el padre no existe en el conjunto de items, es un elemento huérfano. Ocultar.
-          notCollapsed = false;
-          break;
+      if (isExplicitSedeMatch) {
+        notCollapsed = true;
+      } else {
+        let currParentId = x.parentId;
+        while (currParentId) {
+          const pNode = items.find((p) => p.id === currParentId);
+          if (!pNode) {
+            // Si el padre no existe en el conjunto de items, es un elemento huérfano. Ocultar.
+            notCollapsed = false;
+            break;
+          }
+          if (!isItemExpanded(pNode.id, pNode.expanded !== false)) {
+            notCollapsed = false;
+            break;
+          }
+          currParentId = pNode.parentId;
         }
-        if (!isItemExpanded(pNode.id, pNode.expanded !== false)) {
-          notCollapsed = false;
-          break;
-        }
-        currParentId = pNode.parentId;
       }
 
       // Reglas de filtros personalizados avanzados
@@ -3939,7 +4242,8 @@ export default function CronogramaGanttView({
     vencimientosFilter,
     selectedStates,
     macroFilter,
-    sedeFilter,
+    selectedSedes,
+    matchingSedeIds,
     itemDepthMap
   ]);
 
@@ -5245,70 +5549,199 @@ export default function CronogramaGanttView({
         {/* Header Principal */}
         <ProjectShellHeader
           perspective={perspective}
-          title={perspective === 'territorial' ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}` : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`}
-          description={perspective === 'territorial' ? 'Seguimiento de entregables territoriales, sedes operativas, UGEL y DRE en tiempo real.' : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'}
-          actions={<>
-            <button
-              className="btn secondary"
-              onClick={() => setShowSummaryCards((visible) => !visible)}
-              title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
-              aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
-            >
-              {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
-            </button>
-            <button
-              className="btn secondary"
-              onClick={exportExcelTemplate}
-              title="Descargar plantilla de cronograma para completar en Excel"
-            >
-              <FileSpreadsheet size={15} />
-              <span>Plantilla Excel</span>
-            </button>
-            <button
-              className="btn secondary"
-              onClick={() => {
-                setImportOpen(true);
-                setPickedFile('');
-              }}
-            >
-              <Upload size={15} />
-              <span>Importar Cronograma</span>
-              <ChevronDown size={14} />
-            </button>
-            <div className="menu-wrap">
-              <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
-                <Plus size={16} />
-                <span>Agregar Componente</span>
-                <ChevronDown size={14} />
-              </button>
-              {newMenu && (
-                <div className="menu" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => {
-                      setNewMenu(false);
-                      add('hito');
-                    }}
-                  >
-                    <Folder size={15} />
-                    <span>Nuevo componente principal</span>
+          title={
+            perspective === 'equipo'
+              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2027'}`
+              : perspective === 'territorial'
+              ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
+              : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`
+          }
+          description={
+            perspective === 'equipo'
+              ? 'Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo.'
+              : perspective === 'territorial'
+              ? 'Seguimiento de entregables territoriales, sedes operativas, UGEL y DRE en tiempo real.'
+              : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'
+          }
+          actions={
+            perspective === 'equipo' ? (
+              <>
+                <button
+                  className="btn secondary"
+                  onClick={() => setShowSummaryCards((visible) => !visible)}
+                  title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+                  aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+                >
+                  {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
+                </button>
+                <button
+                  className="btn secondary"
+                  onClick={() => notify('Directorio del equipo exportado en formato Excel')}
+                  title="Exportar padrón del equipo en formato Excel"
+                >
+                  <Download size={15} />
+                  <span>Exportar Directorio</span>
+                </button>
+                <button
+                  className="btn primary"
+                  onClick={() => setIsEquipoNuevoOpen(true)}
+                  title="Registrar nuevo integrante en el equipo"
+                >
+                  <Plus size={16} />
+                  <span>Nuevo Integrante</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="btn secondary"
+                  onClick={() => setShowSummaryCards((visible) => !visible)}
+                  title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+                  aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+                >
+                  {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
+                </button>
+                <button
+                  className="btn secondary"
+                  onClick={exportExcelTemplate}
+                  title="Descargar plantilla de cronograma para completar en Excel"
+                >
+                  <FileSpreadsheet size={15} />
+                  <span>Plantilla Excel</span>
+                </button>
+                <button
+                  className="btn secondary"
+                  onClick={() => {
+                    setImportOpen(true);
+                    setPickedFile('');
+                  }}
+                >
+                  <Upload size={15} />
+                  <span>Importar Cronograma</span>
+                  <ChevronDown size={14} />
+                </button>
+                <div className="menu-wrap">
+                  <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
+                    <Plus size={16} />
+                    <span>Agregar Componente</span>
+                    <ChevronDown size={14} />
                   </button>
-                  <button
-                    onClick={() => {
-                      setNewMenu(false);
-                      add('subproceso');
-                    }}
-                  >
-                    <FileText size={15} />
-                    <span>Nuevo subcomponente / subproceso</span>
-                  </button>
+                  {newMenu && (
+                    <div className="menu" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => {
+                          setNewMenu(false);
+                          add('hito');
+                        }}
+                      >
+                        <Folder size={15} />
+                        <span>Nuevo componente principal</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setNewMenu(false);
+                          add('subproceso');
+                        }}
+                      >
+                        <FileText size={15} />
+                        <span>Nuevo subcomponente / subproceso</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </>}
+              </>
+            )
+          }
         />
 
         {/* Tarjetas Métricas Directivas */}
-         {showSummaryCards && <section className="metrics">
+        {showSummaryCards && (
+          perspective === 'equipo' ? (
+            <section className="metrics">
+              <article
+                className="metric blue"
+                onClick={() => {
+                  setEquipoPill('Todos');
+                  setEquipoEstadoOpFilter('todos');
+                }}
+              >
+                <span className="metric-icon">
+                  <Users size={22} />
+                </span>
+                <div className="metric-copy">
+                  <b>{equipoMetrics.total}</b>
+                  <strong>Total Integrantes</strong>
+                  <small>padrón del proyecto</small>
+                </div>
+                <ChartNoAxesColumnIncreasing className="bars" />
+              </article>
+
+              <article
+                className="metric green"
+                onClick={() => {
+                  setEquipoPill('En funciones');
+                  setEquipoEstadoOpFilter('En funciones');
+                }}
+              >
+                <span className="metric-icon">
+                  <UserCheck size={22} />
+                </span>
+                <div className="metric-copy">
+                  <b>{equipoMetrics.activos}</b>
+                  <strong>En Funciones</strong>
+                  <small>{equipoMetrics.total > 0 ? Math.round((equipoMetrics.activos / equipoMetrics.total) * 100) : 0}% operativos</small>
+                </div>
+                <ChartNoAxesColumnIncreasing className="bars" />
+              </article>
+
+              <article
+                className="metric amber"
+                onClick={() => {
+                  setEquipoPill('Cuentas por activar');
+                  setEquipoEstadoCuentaFilter('Invitación Pendiente');
+                }}
+              >
+                <span className="metric-icon">
+                  <Clock3 size={22} />
+                </span>
+                <div className="metric-copy">
+                  <b>{equipoMetrics.pendientesCuenta}</b>
+                  <strong>Cuentas por Activar</strong>
+                  <small>invitación pendiente</small>
+                </div>
+                <ChartNoAxesColumnIncreasing className="bars" />
+              </article>
+
+              <article
+                className="metric red"
+                onClick={() => {
+                  setEquipoPill('Con alerta');
+                }}
+              >
+                <span className="metric-icon">
+                  <AlertTriangle size={22} />
+                </span>
+                <div className="metric-copy">
+                  <b>{equipoMetrics.alertasAtrasadas}</b>
+                  <strong>Con Alerta</strong>
+                  <small>atención requerida</small>
+                </div>
+                <ChartNoAxesColumnIncreasing className="bars" />
+              </article>
+
+              <article className="metric overall">
+                <div className="circle-progress" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: '50%', background: '#f1f5f9', border: '3px solid #3b82f6', fontWeight: 700, fontSize: 13, color: '#1e40af' }}>
+                  <span>{equipoMetrics.ocupacionPromedio}%</span>
+                </div>
+                <div className="metric-copy">
+                  <strong>Carga Promedio</strong>
+                  <small>capacidad del equipo</small>
+                </div>
+                <ChartNoAxesColumnIncreasing className="bars" />
+              </article>
+            </section>
+          ) : (
+            <section className="metrics">
           <article
             className="metric blue"
             onClick={() => {
@@ -5398,7 +5831,8 @@ export default function CronogramaGanttView({
             </div>
             <ChartNoAxesColumnIncreasing className="bars" />
           </article>
-         </section>}
+        </section>
+      ))}
 
         {/* Workspace Central */}
         <ProjectShellWorkspace
@@ -5428,7 +5862,138 @@ export default function CronogramaGanttView({
 
           {/* Tabs Superiores con Switcher de Modos a la Derecha */}
           <nav className="tabs">
-            <div className="tabs-list">
+            {perspective === 'equipo' ? (
+              <div className="tabs-list">
+                <button
+                  type="button"
+                  className={equipoPill === 'Todos' && equipoSedeFilter === 'todas' && equipoEstadoOpFilter === 'todos' ? 'active' : ''}
+                  onClick={() => {
+                    setEquipoPill('Todos');
+                    setEquipoSedeFilter('todas');
+                    setEquipoEstadoOpFilter('todos');
+                    setEquipoEstadoCuentaFilter('todos');
+                    setSearch('');
+                    closeMenus();
+                  }}
+                >
+                  Todos <span>({equipoIntegrantes.length})</span>
+                </button>
+
+                {/* Filtro Sede / Frente */}
+                <div className="filter-dropdown-wrap tabs-filter-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${activeMenu === 'equipoSede' ? 'active' : ''} ${equipoSedeFilter !== 'todas' ? 'filtered' : ''}`}
+                    onClick={() => toggleMenu('equipoSede' as any)}
+                    title="Filtrar por Sede o Frente territorial"
+                  >
+                    <div className="filter-card-copy">
+                      <small>Sede / Frente</small>
+                      <span>{equipoSedeFilter === 'todas' ? `Todas las sedes (${equipoSedes.length})` : (equipoSedes.find((s) => s.id === equipoSedeFilter)?.nombre || equipoSedeFilter)}</span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
+                  </button>
+                  {activeMenu === 'equipoSede' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 260 }}>
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Sedes del Proyecto</span>
+                        {equipoSedeFilter !== 'todas' && (
+                          <button type="button" className="filter-reset-link" onClick={() => setEquipoSedeFilter('todas')}>
+                            Restablecer
+                          </button>
+                        )}
+                      </div>
+                      <div className="filter-popover-list" style={{ maxHeight: 280 }}>
+                        <button
+                          type="button"
+                          className={`filter-item-btn ${equipoSedeFilter === 'todas' ? 'selected' : ''}`}
+                          onClick={() => { setEquipoSedeFilter('todas'); closeMenus(); }}
+                        >
+                          <span className="filter-item-text">
+                            <strong>Todas las sedes</strong>
+                            <small>{equipoSedes.length} sedes registradas</small>
+                          </span>
+                          <span className="wbs-level-badge">{equipoIntegrantes.length}</span>
+                        </button>
+                        {equipoSedes.map((s) => {
+                          const count = equipoIntegrantes.filter((i) => i.sedeId === s.id).length;
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${equipoSedeFilter === s.id || equipoSedeFilter === s.nombre ? 'selected' : ''}`}
+                              onClick={() => { setEquipoSedeFilter(s.id); closeMenus(); }}
+                            >
+                              <span className="filter-item-main">
+                                <span className="filter-item-text">
+                                  <strong>{s.nombre}</strong>
+                                  <small>{s.tipo} · {s.departamento}</small>
+                                </span>
+                              </span>
+                              {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Filtro Estado Laboral */}
+                <div className="filter-dropdown-wrap tabs-filter-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${activeMenu === 'equipoEstado' ? 'active' : ''} ${equipoEstadoOpFilter !== 'todos' ? 'filtered' : ''}`}
+                    onClick={() => toggleMenu('equipoEstado' as any)}
+                    title="Filtrar por Estado Operativo / Laboral"
+                  >
+                    <div className="filter-card-copy">
+                      <small>Estado</small>
+                      <span>{equipoEstadoOpFilter === 'todos' ? 'Todos los estados' : equipoEstadoOpFilter}</span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
+                  </button>
+                  {activeMenu === 'equipoEstado' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 240 }}>
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Estado Laboral</span>
+                        {equipoEstadoOpFilter !== 'todos' && (
+                          <button type="button" className="filter-reset-link" onClick={() => setEquipoEstadoOpFilter('todos')}>
+                            Restablecer
+                          </button>
+                        )}
+                      </div>
+                      <div className="filter-popover-list">
+                        {[
+                          { id: 'todos', label: 'Todos los estados' },
+                          { id: 'En funciones', label: 'En funciones' },
+                          { id: 'Licencia / Permiso', label: 'Licencia / Permiso' },
+                          { id: 'Cesado / Inactivo', label: 'Cesado / Inactivo' },
+                        ].map((opt) => {
+                          const count = opt.id === 'todos'
+                            ? equipoIntegrantes.length
+                            : equipoIntegrantes.filter((i) => i.estadoOperativo === opt.id).length;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${equipoEstadoOpFilter === opt.id ? 'selected' : ''}`}
+                              onClick={() => { setEquipoEstadoOpFilter(opt.id); closeMenus(); }}
+                            >
+                              <span className="filter-item-main">
+                                <span className="filter-item-text"><strong>{opt.label}</strong></span>
+                              </span>
+                              {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="tabs-list">
               <button
                 type="button"
                 className={tab === 'Todos' && wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos' && wbsLevelFilter === 'todos' && vencimientosFilter === 'todos' && selectedStates.length === 0 ? 'active' : ''}
@@ -5494,7 +6059,7 @@ export default function CronogramaGanttView({
                 </button>
                 {activeMenu === 'wbsLevel' && (
                   <div
-                    className="filter-card-popover"
+                    className="filter-card-popover phase-filter-popover"
                     onClick={(e) => e.stopPropagation()}
                     onWheel={(e) => {
                       e.stopPropagation();
@@ -5503,7 +6068,7 @@ export default function CronogramaGanttView({
                         list.scrollTop += e.deltaY;
                       }
                     }}
-                    style={{ minWidth: 280 }}
+                    style={{ minWidth: 320, maxWidth: 380 }}
                   >
                     {/* Cabecera general */}
                     <div className="filter-popover-title filter-popover-title-row">
@@ -5773,59 +6338,201 @@ export default function CronogramaGanttView({
                 )}
               </div>
             </div>
+            )}
 
             <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
-              <button
-                type="button"
-                className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
-                onClick={() => handleViewModeChange('gantt')}
-                title="Vista Cronograma Gantt"
-              >
-                <FolderKanban size={14} />
-                <span>Gantt</span>
-              </button>
-              <button
-                type="button"
-                className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
-                onClick={() => handleViewModeChange('lista')}
-                title="Vista Tabla Analítica"
-              >
-                <List size={14} />
-                <span>Lista</span>
-              </button>
-              <button
-                type="button"
-                className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-                onClick={() => handleViewModeChange('kanban')}
-                title="Vista Tablero Kanban"
-              >
-                <LayoutDashboard size={14} />
-                <span>Kanban</span>
-              </button>
-              <button
-                type="button"
-                className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
-                onClick={() => handleViewModeChange('calendario')}
-                title="Vista Calendario Mensual"
-              >
-                <CalendarDays size={14} />
-                <span>Calendario</span>
-              </button>
-              <button
-                type="button"
-                className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
-                onClick={() => handleViewModeChange('mapa')}
-                title="Vista Mapa Territorial"
-              >
-                <MapPin size={14} />
-                <span>Mapa</span>
-              </button>
-              {/* Vista conservada para una fase posterior; se oculta temporalmente del selector. */}
+              {perspective === 'equipo' ? (
+                <>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'directorio' || viewMode === 'lista' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('directorio')}
+                    title="Directorio de Integrantes"
+                  >
+                    <Users size={14} />
+                    <span>Directorio</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('organigrama')}
+                    title="Organigrama Estructural"
+                  >
+                    <GitBranch size={14} />
+                    <span>Organigrama</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('sedes')}
+                    title="Frentes Territoriales y Sedes"
+                  >
+                    <Building2 size={14} />
+                    <span>Frentes Territoriales</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'carga' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('carga')}
+                    title="Carga de Trabajo Operativa"
+                  >
+                    <Activity size={14} />
+                    <span>Carga de Trabajo</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('gantt')}
+                    title="Vista Cronograma Gantt"
+                  >
+                    <FolderKanban size={14} />
+                    <span>Gantt</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('lista')}
+                    title="Vista Tabla Analítica"
+                  >
+                    <List size={14} />
+                    <span>Lista</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('kanban')}
+                    title="Vista Tablero Kanban"
+                  >
+                    <LayoutDashboard size={14} />
+                    <span>Kanban</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('calendario')}
+                    title="Vista Calendario Mensual"
+                  >
+                    <CalendarDays size={14} />
+                    <span>Calendario</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('mapa')}
+                    title="Vista Mapa Territorial"
+                  >
+                    <MapPin size={14} />
+                    <span>Mapa</span>
+                  </button>
+                </>
+              )}
             </div>
           </nav>
 
           {/* Filtros Contextuales y Macro */}
           <ProjectShellFilters>
+            {perspective === 'equipo' ? (
+              <>
+                {/* Filtro Contextual 1 (Equipo): Cuenta de acceso */}
+                <div className="filter-dropdown-wrap contextual-filter-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${activeMenu === 'equipoCuenta' ? 'active' : ''} ${equipoEstadoCuentaFilter !== 'todos' ? 'filtered' : ''}`}
+                    onClick={() => toggleMenu('equipoCuenta' as any)}
+                    title="Filtrar por acceso a cuenta"
+                  >
+                    <div className="filter-card-copy">
+                      <small>Cuenta</small>
+                      <span>{equipoEstadoCuentaFilter === 'todos' ? 'Todos los accesos' : equipoEstadoCuentaFilter}</span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
+                  </button>
+                  {activeMenu === 'equipoCuenta' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 240 }}>
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Cuenta de Acceso</span>
+                        {equipoEstadoCuentaFilter !== 'todos' && (
+                          <button type="button" className="filter-reset-link" onClick={() => setEquipoEstadoCuentaFilter('todos')}>
+                            Restablecer
+                          </button>
+                        )}
+                      </div>
+                      <div className="filter-popover-list">
+                        {[
+                          { id: 'todos', label: 'Todos los accesos' },
+                          { id: 'Habilitada', label: 'Habilitada' },
+                          { id: 'Invitación Pendiente', label: 'Invitación Pendiente' },
+                          { id: 'Suspendida', label: 'Suspendida' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn ${equipoEstadoCuentaFilter === opt.id ? 'selected' : ''}`}
+                            onClick={() => {
+                              setEquipoEstadoCuentaFilter(opt.id);
+                              closeMenus();
+                            }}
+                          >
+                            <span className="filter-item-text"><strong>{opt.label}</strong></span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Filtro Contextual 2 (Equipo): Área / Dependencia */}
+                <div className="filter-dropdown-wrap contextual-filter-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn ${activeMenu === 'equipoArea' ? 'active' : ''} ${equipoAreaFilter !== 'todas' ? 'filtered' : ''}`}
+                    onClick={() => toggleMenu('equipoArea' as any)}
+                    title="Filtrar por área funcional o dirección"
+                  >
+                    <div className="filter-card-copy">
+                      <small>Área</small>
+                      <span>{equipoAreaFilter === 'todas' ? 'Todas las áreas' : equipoAreaFilter}</span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
+                  </button>
+                  {activeMenu === 'equipoArea' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 260 }}>
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Áreas Funcionales</span>
+                        {equipoAreaFilter !== 'todas' && (
+                          <button type="button" className="filter-reset-link" onClick={() => setEquipoAreaFilter('todas')}>
+                            Restablecer
+                          </button>
+                        )}
+                      </div>
+                      <div className="filter-popover-list">
+                        <button
+                          type="button"
+                          className={`filter-item-btn ${equipoAreaFilter === 'todas' ? 'selected' : ''}`}
+                          onClick={() => { setEquipoAreaFilter('todas'); closeMenus(); }}
+                        >
+                          <span className="filter-item-text"><strong>Todas las áreas</strong></span>
+                        </button>
+                        {equipoAreas.map((a) => (
+                          <button
+                            key={a.id}
+                            type="button"
+                            className={`filter-item-btn ${equipoAreaFilter === a.nombre ? 'selected' : ''}`}
+                            onClick={() => { setEquipoAreaFilter(a.nombre); closeMenus(); }}
+                          >
+                            <span className="filter-item-text"><strong>{a.nombre}</strong></span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
             {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
             <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
               <button
@@ -5932,13 +6639,13 @@ export default function CronogramaGanttView({
                 )}
             </div>
 
-            {/* Filtro Contextual 2 (Vista Proyecto): Cargo · Coordinador Macro-regional */}
+            {/* Filtro Contextual 2 (Vista Territorial): Sede Territorial / UGEL o Gestor de Campo */}
             {perspective === 'territorial' ? (
               <div className="filter-dropdown-wrap contextual-filter-wrap sede-filter-wrap">
                 <button
                   type="button"
                   className={`filter-card-btn ${activeMenu === 'sede' ? 'active' : ''} ${
-                    sedeFilter !== 'Todas' || gestorFilter !== 'Todos' ? 'filtered' : ''
+                    selectedSedes.length > 0 || gestorFilter !== 'Todos' ? 'filtered' : ''
                   }`}
                   onClick={() => toggleMenu('sede')}
                   title="Filtrar por Sede Territorial / UGEL o Gestor de Campo"
@@ -5964,12 +6671,12 @@ export default function CronogramaGanttView({
                   >
                     <div className="filter-popover-title filter-popover-title-row">
                       <span>Sedes y Gestores de Campo</span>
-                      {(sedeFilter !== 'Todas' || gestorFilter !== 'Todos') && (
+                      {(selectedSedes.length > 0 || gestorFilter !== 'Todos') && (
                         <button
                           type="button"
                           className="filter-reset-link"
                           onClick={() => {
-                            setSedeFilter('Todas');
+                            setSelectedSedes([]);
                             setGestorFilter('Todos');
                           }}
                         >
@@ -5983,49 +6690,59 @@ export default function CronogramaGanttView({
                         <span>Sedes / UGEL Operativas</span>
                         <span className="wbs-level-badge">{availableSedesCascaded.length}</span>
                       </div>
-                      <button
-                        type="button"
-                        className={`filter-item-btn filter-item-check ${sedeFilter === 'Todas' ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSedeFilter('Todas');
-                          closeMenus();
-                        }}
-                      >
-                        <span className="filter-item-main">
-                          <span className={`filter-radio ${sedeFilter === 'Todas' ? 'checked' : ''}`}>
-                            {sedeFilter === 'Todas' && <span className="filter-radio-dot" />}
-                          </span>
-                          <span className="filter-item-text">
-                            <strong>Todas las sedes</strong>
-                          </span>
-                        </span>
-                        <span className="wbs-level-badge">{items.length}</span>
-                      </button>
+                      {(() => {
+                        const isAllSedes = selectedSedes.length === 0;
+                        return (
+                          <button
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isAllSedes ? 'selected' : ''}`}
+                            onClick={() => setSelectedSedes([])}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isAllSedes ? 'checked' : ''}`}>
+                                {isAllSedes && <span className="filter-radio-dot" />}
+                              </span>
+                              <span className="filter-item-text">
+                                <strong>Todas las sedes</strong>
+                              </span>
+                            </span>
+                            <span className="wbs-level-badge">{items.length}</span>
+                          </button>
+                        );
+                      })()}
                       {sedesAgrupadas.length > 1
                         ? sedesAgrupadas.map((grupo) => (
                             <React.Fragment key={grupo.region}>
                               <div className="filter-popover-group-label">{grupo.region}</div>
                               {grupo.sedes.map((sede) => {
-                                const isSelected = sedeFilter === sede;
-                                const count = items.filter(
-                                  (it) =>
-                                    it.sede === sede ||
-                                    it.distrito === sede ||
-                                    (it.name && it.name.includes(sede))
-                                ).length;
+                                const isChecked = selectedSedes.includes(sede);
+                                const sLower = sede.toLowerCase().trim();
+                                const count = items.filter((it) => {
+                                  const itS = (it.sede || '').toLowerCase().trim();
+                                  const itD = (it.distrito || '').toLowerCase().trim();
+                                  const itN = (it.name || '').toLowerCase().trim();
+                                  return (
+                                    (itS && (itS.includes(sLower) || sLower.includes(itS))) ||
+                                    (itD && (itD.includes(sLower) || sLower.includes(itD))) ||
+                                    (itN && (itN.includes(sLower) || sLower.includes(itN)))
+                                  );
+                                }).length;
                                 return (
                                   <button
                                     key={sede}
                                     type="button"
-                                    className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                                    className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
                                     onClick={() => {
-                                      setSedeFilter(sede);
-                                      closeMenus();
+                                      setSelectedSedes((prev) =>
+                                        prev.includes(sede)
+                                          ? prev.filter((s) => s !== sede)
+                                          : [...prev, sede]
+                                      );
                                     }}
                                   >
                                     <span className="filter-item-main">
-                                      <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                        {isSelected && <span className="filter-radio-dot" />}
+                                      <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                        {isChecked && <Check size={10} strokeWidth={3} />}
                                       </span>
                                       <span className="filter-item-text">
                                         <strong>{sede}</strong>
@@ -6038,26 +6755,34 @@ export default function CronogramaGanttView({
                             </React.Fragment>
                           ))
                         : availableSedesCascaded.map((sede) => {
-                            const isSelected = sedeFilter === sede;
-                            const count = items.filter(
-                              (it) =>
-                                it.sede === sede ||
-                                it.distrito === sede ||
-                                (it.name && it.name.includes(sede))
-                            ).length;
+                            const isChecked = selectedSedes.includes(sede);
+                            const sLower = sede.toLowerCase().trim();
+                            const count = items.filter((it) => {
+                              const itS = (it.sede || '').toLowerCase().trim();
+                              const itD = (it.distrito || '').toLowerCase().trim();
+                              const itN = (it.name || '').toLowerCase().trim();
+                              return (
+                                (itS && (itS.includes(sLower) || sLower.includes(itS))) ||
+                                (itD && (itD.includes(sLower) || sLower.includes(itD))) ||
+                                (itN && (itN.includes(sLower) || sLower.includes(itN)))
+                              );
+                            }).length;
                             return (
                               <button
                                 key={sede}
                                 type="button"
-                                className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                                className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
                                 onClick={() => {
-                                  setSedeFilter(sede);
-                                  closeMenus();
+                                  setSelectedSedes((prev) =>
+                                    prev.includes(sede)
+                                      ? prev.filter((s) => s !== sede)
+                                      : [...prev, sede]
+                                  );
                                 }}
                               >
                                 <span className="filter-item-main">
-                                  <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                    {isSelected && <span className="filter-radio-dot" />}
+                                  <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                    {isChecked && <Check size={10} strokeWidth={3} />}
                                   </span>
                                   <span className="filter-item-text">
                                     <strong>{sede}</strong>
@@ -6111,7 +6836,7 @@ export default function CronogramaGanttView({
                               <span className="filter-avatar macro-avatar">{getGestorInitials(gName)}</span>
                               <span className="filter-item-text">
                                 <strong>{gName}</strong>
-                                <small>Gestor territorial de campo</small>
+                                <small>{getPersonInstitutionalRole(gName)}</small>
                               </span>
                             </span>
                             {count > 0 && <span className="wbs-level-badge">{count}</span>}
@@ -6140,7 +6865,7 @@ export default function CronogramaGanttView({
                 </button>
                 {activeMenu === 'phase' && (
                   <div
-                    className="filter-card-popover"
+                    className="filter-card-popover phase-filter-popover"
                     onClick={(e) => e.stopPropagation()}
                     onWheel={(e) => {
                       e.stopPropagation();
@@ -6149,7 +6874,7 @@ export default function CronogramaGanttView({
                         list.scrollTop += e.deltaY;
                       }
                     }}
-                    style={{ minWidth: 280 }}
+                    style={{ minWidth: 320, maxWidth: 380 }}
                   >
                     <div className="filter-popover-title filter-popover-title-row">
                       <span>Fases del Proyecto</span>
@@ -6205,6 +6930,8 @@ export default function CronogramaGanttView({
                 )}
               </div>
             )}
+            </>
+          )}
 
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
             <button
@@ -6223,8 +6950,41 @@ export default function CronogramaGanttView({
             {/* Separador vertical: Bloque 2 (Datos del proyecto) | Bloque 3 (Navegación temporal / corte) */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-                        {/* Bloque 3: Navegación temporal y selector de escala para todas las vistas */}
-            {viewMode === 'mapa' ? (
+            {/* Bloque 3: Navegación temporal o búsqueda para perspectiva equipo */}
+            {perspective === 'equipo' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Search size={14} style={{ position: 'absolute', left: 10, color: '#94a3b8', pointerEvents: 'none' }} />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Buscar por integrante, cargo o sede..."
+                    className="search-input"
+                    style={{
+                      height: '32px',
+                      paddingLeft: '32px',
+                      paddingRight: '12px',
+                      fontSize: '13px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border, #e2e8f0)',
+                      background: 'var(--card-bg, #ffffff)',
+                      width: '280px',
+                      color: 'inherit',
+                    }}
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch('')}
+                      style={{ position: 'absolute', right: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : viewMode === 'mapa' ? (
               /* En Modo Mapa: Conmutador Oficial de Sub-Vistas Territoriales (Geográfico, Temático Poligonal, Analítica Power BI) */
               <div className="zoom map-subview-switcher" title="Modo de representación del mapa territorial">
                 <button
@@ -6499,7 +7259,7 @@ export default function CronogramaGanttView({
             <div className="filter-group-divider" aria-hidden="true" />
 
             {/* Bloque 5: Ajuste de Pantalla y Cuadrícula */}
-            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa') && (
+            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa' || perspective === 'equipo') && (
               <button
                 type="button"
                 className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
@@ -6567,6 +7327,13 @@ export default function CronogramaGanttView({
               onClick={(e) => {
                 e.stopPropagation();
                 setSearch('');
+                if (perspective === 'equipo') {
+                  setEquipoSedeFilter('todas');
+                  setEquipoEstadoOpFilter('todos');
+                  setEquipoEstadoCuentaFilter('todos');
+                  setEquipoAreaFilter('todas');
+                  setEquipoPill('Todos');
+                }
                 setStateFilter('Todos');
                 setTypeFilter('Todos');
                 setSelectedRegions([]);
@@ -6944,6 +7711,58 @@ export default function CronogramaGanttView({
           )}
 
 
+          {/* Vistas según perspectiva */}
+          {perspective === 'equipo' ? (
+            <>
+              {(viewMode === 'directorio' || viewMode === 'lista') && (
+                <EquipoDirectorioView
+                  integrantes={equipoIntegrantes}
+                  selectedId={equipoSelectedId}
+                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+                  onOpenExpediente={(i) => setEquipoExpediente(i)}
+                  onUpdateIntegrante={handleUpdateIntegrante}
+                  onBulkUpdateSede={handleBulkUpdateSede}
+                  onBulkUpdateEstadoOperativo={handleBulkUpdateEstadoOperativo}
+                  onBulkReenviarInvitaciones={handleBulkReenviarInvitaciones}
+                  sedes={equipoSedes}
+                  asignaciones={equipoAsignaciones}
+                  visibleColumns={['integrante', 'cargo', 'sede', 'estadoOperativo', 'estadoCuenta', 'carga']}
+                  searchQuery={search}
+                  sedeFilter={equipoSedeFilter}
+                  estadoOpFilter={equipoEstadoOpFilter}
+                  estadoCuentaFilter={equipoEstadoCuentaFilter}
+                  hideToolbar={true}
+                />
+              )}
+              {viewMode === 'organigrama' && (
+                <EquipoOrganigramaView
+                  integrantes={equipoIntegrantes}
+                  areas={equipoAreas}
+                  sedes={equipoSedes}
+                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+                />
+              )}
+              {viewMode === 'sedes' && (
+                <EquipoSedesView
+                  integrantes={equipoIntegrantes}
+                  sedes={equipoSedes}
+                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+                  onUpdateIntegrante={handleUpdateIntegrante}
+                  onUpdateSede={handleUpdateSede}
+                />
+              )}
+              {viewMode === 'carga' && (
+                <EquipoCargaView
+                  integrantes={equipoIntegrantes}
+                  asignaciones={equipoAsignaciones}
+                  sedes={equipoSedes}
+                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+                  onReasignarTarea={handleReasignarTarea}
+                />
+              )}
+            </>
+          ) : (
+            <>
           {/* Presentación Maestro: Gantt y Lista comparten 100% el mismo tablero unificado */}
           {(viewMode === 'gantt' || viewMode === 'lista') && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' ? 'view-lista-fullwidth' : ''}`}>
@@ -7646,8 +8465,19 @@ export default function CronogramaGanttView({
           {viewMode === 'mapa' && (
             <MapaTerritorialView
               items={shown}
+              allItems={items}
               subView={mapSubView}
               onSubViewChange={setMapSubView}
+              selectedRegion={selectedRegions.length > 0 ? (selectedRegions[0] ?? 'Todas') : 'Todas'}
+              onSelectRegion={(reg) => {
+                if (reg === 'Todas') {
+                  setSelectedRegions([]);
+                } else {
+                  setSelectedRegions([reg]);
+                }
+              }}
+              selectedPhase={phaseFilter}
+              unidades={unidades}
               isFullscreen={isFullscreen}
               onToggleFullscreen={toggleFullscreen}
             />
@@ -7832,9 +8662,11 @@ export default function CronogramaGanttView({
               </button>
             </aside>
           )}
+            </>
+          )}
 
           {/* Barra de Cálculos al pie Notion / Excel */}
-          {Object.keys(colCalculations).length > 0 && (
+          {perspective !== 'equipo' && Object.keys(colCalculations).length > 0 && (
             <div className="te-table-calc-bar" role="status" aria-label="Cálculos de columna activos">
               <div className="te-calc-bar-header">
                 <Sigma size={13} className="te-calc-bar-icon" />
@@ -7862,38 +8694,87 @@ export default function CronogramaGanttView({
           {/* Footer de Paginación */}
           <footer className="footer">
             <span>
-              Mostrando {shown.length ? 1 : 0}–{shown.length} de {items.length} registros
+              {perspective === 'equipo'
+                ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
+                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${items.length} registros`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button
-                className="btn secondary"
-                style={{ minHeight: '32px', fontSize: '12px' }}
-                onClick={() => {
-                  if (panelOpen) {
-                    requestCloseDrawer();
-                  } else {
-                    const target = selected || hitos[0] || items[0];
-                    if (target) {
-                      openEditorForItem(target);
-                    }
-                  }
-                }}
-                title="Abrir o cerrar panel de detalles del elemento seleccionado"
-              >
-                <PanelRightOpen size={14} />
-                <span>{panelOpen ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
-              </button>
-              <button
-                className="btn secondary"
-                style={{ minHeight: '32px', fontSize: '12px' }}
-                onClick={() => notify('Cronograma maestro sincronizado con el equipo')}
-              >
-                <CheckCircle2 size={14} color="#16a34a" />
-                <span>Publicar Cronograma</span>
-              </button>
+              {perspective === 'equipo' ? (
+                <button
+                  className="btn secondary"
+                  style={{ minHeight: '32px', fontSize: '12px' }}
+                  onClick={() => notify('Directorio del equipo descargado en CSV')}
+                >
+                  <Download size={14} />
+                  <span>Descargar Lista</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    className="btn secondary"
+                    style={{ minHeight: '32px', fontSize: '12px' }}
+                    onClick={() => {
+                      if (panelOpen) {
+                        requestCloseDrawer();
+                      } else {
+                        const target = selected || hitos[0] || items[0];
+                        if (target) {
+                          openEditorForItem(target);
+                        }
+                      }
+                    }}
+                    title="Abrir o cerrar panel de detalles del elemento seleccionado"
+                  >
+                    <PanelRightOpen size={14} />
+                    <span>{panelOpen ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
+                  </button>
+                  <button
+                    className="btn secondary"
+                    style={{ minHeight: '32px', fontSize: '12px' }}
+                    onClick={() => notify('Cronograma maestro sincronizado con el equipo')}
+                  >
+                    <CheckCircle2 size={14} color="#16a34a" />
+                    <span>Publicar Cronograma</span>
+                  </button>
+                </>
+              )}
             </div>
           </footer>
         </ProjectShellWorkspace>
+
+        {/* Modales y Drawer Exclusivos de la Perspectiva Equipo */}
+        {perspective === 'equipo' && (
+          <>
+            {equipoSelectedIntegrante && (
+              <EquipoDrawer
+                integrante={equipoSelectedIntegrante}
+                onClose={() => setEquipoSelectedId(null)}
+                onUpdateIntegrante={handleUpdateIntegrante}
+                onOpenExpediente={(i) => setEquipoExpediente(i)}
+                sedes={equipoSedes}
+                asignaciones={equipoAsignaciones}
+              />
+            )}
+
+            <EquipoExpedienteModal
+              isOpen={Boolean(equipoExpediente)}
+              onClose={() => setEquipoExpediente(null)}
+              integrante={equipoExpediente}
+              onUpdateIntegrante={handleUpdateIntegrante}
+              sedes={equipoSedes}
+              areas={equipoAreas}
+              asignaciones={equipoAsignaciones}
+            />
+
+            <EquipoNuevoModal
+              isOpen={isEquipoNuevoOpen}
+              onClose={() => setIsEquipoNuevoOpen(false)}
+              onSave={handleCreateIntegrante}
+              sedes={equipoSedes}
+              areas={equipoAreas}
+            />
+          </>
+        )}
 
         {/* Panel Lateral Editor Aislado y Memoizado (Cero re-renders en el Gantt al escribir) */}
         <GanttEditorDrawer

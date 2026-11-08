@@ -169,20 +169,46 @@ const JUNIN_POLYGONS: RegionPolygonDef[] = [
 
 export interface MapaTerritorialViewProps {
   items: any[];
+  allItems?: any[];
   subView?: TerritorialSubView;
   onSubViewChange?: (view: TerritorialSubView) => void;
+  selectedRegion?: string;
+  onSelectRegion?: (region: string) => void;
+  selectedPhase?: string;
+  unidades?: any[];
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
 }
 
 export default function MapaTerritorialView({
   items,
+  allItems = [],
   subView: controlledSubView,
   onSubViewChange,
+  selectedRegion: controlledSelectedRegion,
+  onSelectRegion,
+  selectedPhase,
+  unidades = [],
   isFullscreen: controlledIsFullscreen,
   onToggleFullscreen,
 }: MapaTerritorialViewProps) {
-  const [selectedRegion, setSelectedRegion] = useState<string>('JUNÍN');
+  const [internalRegion, setInternalRegion] = useState<string>(
+    controlledSelectedRegion && controlledSelectedRegion !== 'Todas' ? controlledSelectedRegion : 'JUNÍN'
+  );
+
+  useEffect(() => {
+    if (controlledSelectedRegion !== undefined) {
+      setInternalRegion(controlledSelectedRegion);
+    }
+  }, [controlledSelectedRegion]);
+
+  const selectedRegion = internalRegion;
+
+  const handleRegionChange = (reg: string) => {
+    setInternalRegion(reg);
+    onSelectRegion?.(reg);
+  };
+
   const [statusFilter, setStatusFilter] = useState<Status | 'Todos'>('Todos');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [internalSubView, setInternalSubView] = useState<TerritorialSubView>('geo-real');
@@ -213,17 +239,33 @@ export default function MapaTerritorialView({
   const analyticsMapRef = useRef<any>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
 
+  // Catálogo base de unidades operativas (prioriza Supabase gestor_unidades)
+  const baseUnits = useMemo(() => {
+    if (unidades && unidades.length > 0) {
+      return unidades.map((u, idx) => ({
+        id: u.id || `unit-${idx}`,
+        name: u.name,
+        code: u.code || '',
+        region: u.region || 'JUNÍN',
+        unitType: u.unitType || 'ugel',
+        address: u.address || '',
+      }));
+    }
+    return MINEDU_UNIDADES;
+  }, [unidades]);
+
   const allRows = useMemo(() => {
-    return MINEDU_UNIDADES.map((unit, idx) => {
+    const dataset = items.length > 0 ? items : allItems;
+    return baseUnits.map((unit, idx) => {
       const ugelKey = key(unit.name);
       const regKeyUnit = key(unit.region);
 
-      const related = items.filter((item) => {
+      const related = dataset.filter((item) => {
         const itemUgel = key(item.ugel || item.sede || '');
         const itemReg = key(item.region || '');
         return (
           (itemUgel && (itemUgel.includes(ugelKey) || ugelKey.includes(itemUgel))) ||
-          (itemReg && itemReg === regKeyUnit)
+          (itemReg && itemReg === regKeyUnit && !itemUgel)
         );
       });
 
@@ -233,8 +275,8 @@ export default function MapaTerritorialView({
           related.reduce((sum, item) => sum + Number(item.progress || 0), 0) / related.length
         );
       } else {
-        const mockPcts = [100, 100, 75, 50, 50, 33, 20, 20, 0, 0, 0, 0];
-        progress = mockPcts[idx % mockPcts.length] ?? 0;
+        const seedValues = [75, 50, 50, 33, 20];
+        progress = seedValues[idx % seedValues.length] ?? 0;
       }
 
       const state: Status =
@@ -256,12 +298,12 @@ export default function MapaTerritorialView({
         fcDate: '01-12-2026',
       };
     });
-  }, [items]);
+  }, [baseUnits, items, allItems]);
 
   const regionsList = useMemo(() => {
-    const set = new Set(MINEDU_UNIDADES.map((u) => u.region));
+    const set = new Set(baseUnits.map((u) => u.region));
     return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'));
-  }, []);
+  }, [baseUnits]);
 
   const visibleRows = useMemo(() => {
     return allRows.filter((row) => {
@@ -625,7 +667,13 @@ export default function MapaTerritorialView({
               {/* VISTA 2 */}
               {subView === 'tematico-regional' && (
                 <div className="stage-pane is-active thematic-svg-pane thematic-map-real-pane">
-                  <PeruChoroplethView rows={allRows} onRegionSelect={(region) => setSelectedRegion(region.name)} />
+                  <PeruChoroplethView
+                    rows={visibleRows.length > 0 ? visibleRows : allRows}
+                    selectedRegion={selectedRegion}
+                    selectedUgelId={selectedUgelId}
+                    onRegionSelect={(region) => handleRegionChange(region.name)}
+                    onUgelSelect={handleSelectUgel}
+                  />
                   {/* Fallback editorial anterior eliminado del flujo activo. */}
                   <div style={{ display: 'none' }}>
                   <div className="thematic-map-container">
@@ -747,7 +795,12 @@ export default function MapaTerritorialView({
               {/* VISTA 3 */}
               {subView === 'powerbi-analitico' && (
                 <div className="stage-pane is-active powerbi-analytics-pane">
-                  <PeruPowerBIMapView rows={allRows} />
+                  <PeruPowerBIMapView
+                    rows={visibleRows.length > 0 ? visibleRows : allRows}
+                    selectedRegion={selectedRegion}
+                    selectedUgelId={selectedUgelId}
+                    onUgelSelect={handleSelectUgel}
+                  />
                   <div style={{ display: 'none' }}>
                   <div className="powerbi-grid-container">
                       <div ref={analyticsLeafletRef} className="territorial-leaflet-canvas analytics-leaflet-canvas" aria-label="Mapa analítico territorial con burbujas" />

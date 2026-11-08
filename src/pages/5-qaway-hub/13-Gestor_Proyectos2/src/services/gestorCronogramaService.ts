@@ -157,28 +157,7 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
     }
 
     if (Array.isArray(data) && data.length > 0) {
-      // Reconciliación de integridad referencial: validar y depurar huérfanos sin padre
-      const validIds = new Set(data.map((r) => r.id));
-      const validRows = data.filter((row) => !row.parent_id || validIds.has(row.parent_id));
-
-      if (validRows.length < data.length) {
-        const orphanIds = data
-          .filter((r) => r.parent_id && !validIds.has(r.parent_id))
-          .map((r) => r.id);
-        if (orphanIds.length > 0) {
-          void Promise.resolve(
-            supabase
-              .from('gestor_cronograma_items')
-              .delete()
-              .in('id', orphanIds)
-              .eq('project_id', projectId)
-          )
-            .then(() => {})
-            .catch(() => {});
-        }
-      }
-
-      const mapped = sortWbsHierarchy(validRows.map(fromSupabaseRow));
+      const mapped = sortWbsHierarchy(data.map(fromSupabaseRow));
       // Si la BD aún no guarda línea base/fechas reales, se conservan las del respaldo local.
       try {
         const local = JSON.parse(localStorage.getItem(`qaway-gantt-items-${projectId}`) || '[]');
@@ -236,38 +215,14 @@ export async function upsertCronogramaItemInSupabase(projectId: string, item: Ga
  * 2. Elimina de Supabase cualquier ítem existente en BD que ya no figure en la lista local (soporte de borrado real y sin parches).
  */
 export async function syncAllCronogramaItemsToSupabase(projectId: string, items: GanttItemData[]): Promise<boolean> {
-  if (!supabase || !items) return true;
+  if (!supabase || !items || items.length === 0) return true;
   try {
-    const currentIds = new Set(items.map((it) => it.id));
+    const rows = items.map((it) => toSupabaseRow(projectId, it));
+    const error = await upsertRows(rows);
 
-    // Reconciliación: detectar y eliminar en Supabase los registros que fueron eliminados localmente
-    const { data: existingRows } = await supabase
-      .from('gestor_cronograma_items')
-      .select('id')
-      .eq('project_id', projectId);
-
-    if (Array.isArray(existingRows)) {
-      const toDelete = existingRows
-        .filter((r) => !currentIds.has(r.id))
-        .map((r) => r.id);
-
-      if (toDelete.length > 0) {
-        await supabase
-          .from('gestor_cronograma_items')
-          .delete()
-          .in('id', toDelete)
-          .eq('project_id', projectId);
-      }
-    }
-
-    if (items.length > 0) {
-      const rows = items.map((it) => toSupabaseRow(projectId, it));
-      const error = await upsertRows(rows);
-
-      if (error) {
-        console.warn('[Supabase Cronograma] No se pudo sincronizar lote en BD:', error.message);
-        return false;
-      }
+    if (error) {
+      console.warn('[Supabase Cronograma] No se pudo sincronizar lote en BD:', error.message);
+      return false;
     }
     return true;
   } catch (err) {

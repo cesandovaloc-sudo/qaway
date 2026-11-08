@@ -22,6 +22,11 @@ export interface GestorUnit {
   address: string | null;
   status: 'active' | 'inactive' | 'archived';
   metadata: Record<string, unknown>;
+  progress?: number;
+  complianceStatus?: string;
+  gestor?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface GestorUnitMember {
@@ -52,6 +57,11 @@ const mapUnit = (row: any): GestorUnit => ({
   address: row.address ?? null,
   status: row.status ?? 'active',
   metadata: row.metadata ?? {},
+  progress: typeof row.metadata?.progress === 'number' ? row.metadata.progress : undefined,
+  complianceStatus: row.metadata?.compliance_status,
+  gestor: row.metadata?.gestor,
+  startDate: row.metadata?.start_date,
+  endDate: row.metadata?.end_date,
 });
 
 const mapMember = (row: any): GestorUnitMember => ({

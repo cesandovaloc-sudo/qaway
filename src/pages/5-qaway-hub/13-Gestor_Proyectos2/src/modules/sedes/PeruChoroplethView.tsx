@@ -1,39 +1,24 @@
-// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import * as maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import 'leaflet/dist/leaflet.css';
 import PERU_GEOJSON from '../../data/peru_departamental_simple.json';
 
-const normalize = (value = '') =>
+const normalize = (value: any = '') =>
   String(value)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toUpperCase();
 
-const regionName = (p = {}) =>
-  p.NOMBDEP || p.name || p.NAME_1 || p.departamento || p.DEPARTAMENTO || 'Región';
-
-const getStatus = (value) =>
-  value == null ? 'sinReporte' : Number(value) >= 80 ? 'cumple' : Number(value) > 0 ? 'proceso' : 'incumple';
-
-const colors = {
-  cumple: '#16a36a',
-  proceso: '#f59e0b',
-  incumple: '#e5484d',
-  sinReporte: '#d8e2ec',
-};
-
-// Datos base representativos para regiones si no vienen en el dataset filtrado
 const BASE_REGION_PCTS: Record<string, number> = {
+  ANCASH: 68,
   JUNIN: 56,
+  'LA LIBERTAD': 74,
   LIMA: 78,
   CUSCO: 82,
   AREQUIPA: 85,
   PIURA: 64,
   LORETO: 42,
   PUNO: 50,
-  ANCASH: 68,
   CAJAMARCA: 60,
   SANMARTIN: 72,
   LAMBAYEQUE: 70,
@@ -51,204 +36,292 @@ const BASE_REGION_PCTS: Record<string, number> = {
   MADREDEDIOS: 35,
 };
 
-export default function PeruChoroplethView({ rows = [], onRegionSelect }) {
-  const host = useRef(null);
-  const mapRef = useRef(null);
-  const [selected, setSelected] = useState(null);
+export interface PeruChoroplethViewProps {
+  rows?: any[];
+  selectedRegion?: string;
+  selectedUgelId?: string | null;
+  onRegionSelect?: (region: { name: string; progress: number; status: string; ugel: number }) => void;
+  onUgelSelect?: (ugel: any) => void;
+}
 
-  const metrics = useMemo(() => {
-    return rows.reduce((acc, row) => {
-      const name = normalize(row.region);
-      if (!name) return acc;
-      acc[name] = acc[name] || { total: 0, sum: 0 };
-      acc[name].total += 1;
-      acc[name].sum += Number(row.progress || 0);
-      return acc;
-    }, {});
+export default function PeruChoroplethView({
+  rows = [],
+  selectedRegion,
+  selectedUgelId,
+  onRegionSelect,
+  onUgelSelect,
+}: PeruChoroplethViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<any>(null);
+  const markersRef = useRef<Map<string, any>>(new Map());
+  const geoJsonLayerRef = useRef<any>(null);
+  const [selected, setSelected] = useState<{
+    name: string;
+    progress: number;
+    status: string;
+    ugelCount: number;
+  } | null>(null);
+
+  // Mapeo consolidado por región desde rows reales
+  const regionStats = useMemo(() => {
+    const stats: Record<string, { totalProgress: number; count: number; progress: number }> = {};
+    rows.forEach((r) => {
+      const reg = normalize(r.region || r.departamento || '');
+      if (!reg) return;
+      if (!stats[reg]) {
+        stats[reg] = { totalProgress: 0, count: 0, progress: 0 };
+      }
+      const item = stats[reg];
+      if (item) {
+        item.totalProgress += Number(r.progress || 0);
+        item.count += 1;
+      }
+    });
+
+    Object.keys(stats).forEach((k) => {
+      const entry = stats[k];
+      if (entry) {
+        entry.progress = Math.round(entry.totalProgress / Math.max(1, entry.count));
+      }
+    });
+
+    return stats;
   }, [rows]);
 
-  const geoJsonData = useMemo(() => {
-    const raw = PERU_GEOJSON;
-    const features = raw.features.map((feature, index) => {
-      const name = regionName(feature.properties);
-      const normName = normalize(name);
-      const metric = metrics[normName];
-      let progress = metric ? Math.round(metric.sum / metric.total) : null;
-      if (progress == null && BASE_REGION_PCTS[normName] != null) {
-        progress = BASE_REGION_PCTS[normName];
-      }
-      const st = getStatus(progress);
-
-      return {
-        ...feature,
-        id: index + 1,
-        properties: {
-          ...feature.properties,
-          _mapId: index + 1,
-          _regionName: name,
-          _progress: progress,
-          _status: st,
-          _ugelCount: metric?.total || 1,
-        },
-      };
-    });
-    return { ...raw, features };
-  }, [metrics]);
-
   useEffect(() => {
-    if (!host.current) return;
+    if (!containerRef.current) return;
+    let disposed = false;
 
-    if (!mapRef.current) {
-      const map = new maplibregl.Map({
-        container: host.current,
-        style: 'https://tiles.openfreemap.org/styles/bright',
-        center: [-75.2, -9.2],
-        zoom: 4.4,
-        minZoom: 3.5,
-        maxZoom: 9,
-        maxBounds: [
-          [-85, -22],
-          [-65, 2],
-        ],
+    import('leaflet').then((LModule) => {
+      if (disposed || !containerRef.current) return;
+      const L = (LModule as any).default || LModule;
+
+      if ((containerRef.current as any)._leaflet_id && leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+      (containerRef.current as any)._leaflet_id = null;
+
+      const map = L.map(containerRef.current, {
+        center: [-9.19, -75.0152],
+        zoom: 5,
+        minZoom: 4,
+        maxZoom: 12,
+        zoomControl: false,
       });
 
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-      mapRef.current = map;
+      L.control.zoom({ position: 'topright' }).addTo(map);
 
-      const addLayers = () => {
-        if (map.getSource('peru-regions')) return;
+      // Basemap de Esri Light Gray: 100% libre, oficial, nítido y SIN MARCAS DE AGUA
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+        maxZoom: 16,
+      }).addTo(map);
 
-        map.addSource('peru-regions', {
-          type: 'geojson',
-          data: geoJsonData,
-          promoteId: '_mapId',
-        });
+      // Capa Cloroplética Departamental usando GeoJSON local
+      const normSelectedReg = normalize(selectedRegion);
 
-        map.addLayer({
-          id: 'peru-regions-fill',
-          type: 'fill',
-          source: 'peru-regions',
-          paint: {
-            'fill-color': [
-              'match',
-              ['get', '_status'],
-              'cumple',
-              colors.cumple,
-              'proceso',
-              colors.proceso,
-              'incumple',
-              colors.incumple,
-              colors.sinReporte,
-            ],
-            'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.94, 0.78],
-          },
-        });
+      const geoJsonLayer = L.geoJSON(PERU_GEOJSON as any, {
+        style: (feature: any) => {
+          const name = normalize(feature?.properties?.NOMBDEP || feature?.properties?.name || '');
+          const stat = regionStats[name];
+          const progress = stat ? stat.progress : (BASE_REGION_PCTS[name] ?? 50);
+          const status = progress >= 80 ? 'cumple' : progress > 0 ? 'proceso' : 'incumple';
+          const isCurrentRegion = normSelectedReg && normSelectedReg !== 'TODAS' && name === normSelectedReg;
 
-        map.addLayer({
-          id: 'peru-regions-outline',
-          type: 'line',
-          source: 'peru-regions',
-          paint: {
-            'line-color': '#ffffff',
-            'line-width': 1.6,
-          },
-        });
+          const fillColor = status === 'cumple' ? '#16a36a' : status === 'proceso' ? '#f59e0b' : '#e5484d';
 
-        // Capa de nombres de departamento con fuente soportada por OpenFreeMap
-        map.addLayer({
-          id: 'peru-regions-labels',
-          type: 'symbol',
-          source: 'peru-regions',
-          layout: {
-            'text-field': ['get', '_regionName'],
-            'text-size': 11,
-            'text-font': ['Noto Sans Bold'],
-          },
-          paint: {
-            'text-color': '#0f172a',
-            'text-halo-color': '#ffffff',
-            'text-halo-width': 2,
-          },
-        });
-
-        let hoveredId = null;
-        map.on('mousemove', 'peru-regions-fill', (e) => {
-          const f = e.features?.[0];
-          if (!f) return;
-          map.getCanvas().style.cursor = 'pointer';
-          if (hoveredId != null) {
-            map.setFeatureState({ source: 'peru-regions', id: hoveredId }, { hover: false });
-          }
-          hoveredId = f.id;
-          map.setFeatureState({ source: 'peru-regions', id: hoveredId }, { hover: true });
-        });
-
-        map.on('mouseleave', 'peru-regions-fill', () => {
-          map.getCanvas().style.cursor = '';
-          if (hoveredId != null) {
-            map.setFeatureState({ source: 'peru-regions', id: hoveredId }, { hover: false });
-          }
-          hoveredId = null;
-        });
-
-        map.on('click', 'peru-regions-fill', (e) => {
-          const p = e.features?.[0]?.properties;
-          if (!p) return;
-          const res = {
-            name: p._regionName,
-            progress: p._progress,
-            status: p._status,
-            ugel: p._ugelCount,
+          return {
+            fillColor,
+            weight: isCurrentRegion ? 2.8 : 1.2,
+            opacity: 1,
+            color: isCurrentRegion ? '#0066ff' : '#ffffff',
+            fillOpacity: isCurrentRegion ? 0.88 : 0.68,
           };
-          setSelected(res);
-          onRegionSelect?.(res);
+        },
+        onEachFeature: (feature: any, layer: any) => {
+          const name = feature?.properties?.NOMBDEP || feature?.properties?.name || 'Región';
+          const normName = normalize(name);
+          const stat = regionStats[normName];
+          const progress = stat ? stat.progress : (BASE_REGION_PCTS[normName] ?? 50);
+          const status = progress >= 80 ? 'Cumple' : progress > 0 ? 'En proceso' : 'No cumple';
+          const ugelCount = stat?.count || 1;
+
+          layer.bindTooltip(
+            `<div style="font-family: inherit; font-size: 12px; line-height: 1.4; padding: 2px 4px;">
+              <strong style="color: #0f172a; font-size: 13px;">${name}</strong><br/>
+              <span style="color: #64748b;">Avance:</span> <b>${progress}%</b><br/>
+              <span style="color: #64748b;">Estado:</span> <span style="font-weight: 600; color: ${
+                status === 'Cumple' ? '#16a36a' : status === 'En proceso' ? '#d97706' : '#dc2626'
+              }">${status}</span>
+            </div>`,
+            { sticky: true, className: 'leaflet-territorial-tooltip' }
+          );
+
+          layer.on({
+            mouseover: (e: any) => {
+              const target = e.target;
+              target.setStyle({
+                weight: 3,
+                color: '#0f172a',
+                fillOpacity: 0.92,
+              });
+              if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                target.bringToFront();
+              }
+            },
+            mouseout: (e: any) => {
+              geoJsonLayer.resetStyle(e.target);
+            },
+            click: () => {
+              const res = { name, progress, status, ugel: ugelCount };
+              setSelected({ name, progress, status, ugelCount });
+              onRegionSelect?.(res);
+            },
+          });
+        },
+      }).addTo(map);
+
+      geoJsonLayerRef.current = geoJsonLayer;
+
+      // Centrado inteligente en región seleccionada o en todo el Perú
+      let regionBoundsFound = false;
+      if (normSelectedReg && normSelectedReg !== 'TODAS') {
+        geoJsonLayer.eachLayer((layer: any) => {
+          const lName = normalize(layer.feature?.properties?.NOMBDEP || layer.feature?.properties?.name || '');
+          if (lName === normSelectedReg) {
+            try {
+              map.fitBounds(layer.getBounds(), { padding: [30, 30] });
+              regionBoundsFound = true;
+            } catch (_) {}
+          }
+        });
+      }
+
+      if (!regionBoundsFound) {
+        try {
+          map.fitBounds(geoJsonLayer.getBounds(), { padding: [16, 16] });
+        } catch (_) {}
+      }
+
+      // Renderizar pines de las UGEL sobre el mapa temático
+      markersRef.current.clear();
+      rows.forEach((row) => {
+        if (!row.coords || !Array.isArray(row.coords) || row.coords.length < 2) return;
+        const pinColor =
+          row.state === 'Cumple'
+            ? '#00b96b'
+            : row.state === 'En proceso'
+            ? '#fa8c16'
+            : '#ef4444';
+        const isSelected = row.id === selectedUgelId;
+
+        const customIconHtml = `
+          <div class="qaway-map-pin ${isSelected ? 'is-selected' : ''}" style="--pin-color: ${pinColor}">
+            ${isSelected ? '<span class="pin-pulse"></span>' : ''}
+          </div>
+        `;
+
+        const icon = L.divIcon({
+          html: customIconHtml,
+          className: 'qaway-div-icon',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+          popupAnchor: [0, -12],
         });
 
-        map.resize();
-      };
+        const popupContent = `
+          <div class="qaway-minimal-topplin" style="font-family: inherit; font-size: 12px; min-width: 160px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${pinColor}; flex-shrink: 0;"></span>
+              <strong style="color: #0f172a; font-size: 12.5px;">${row.name}</strong>
+            </div>
+            <div style="color: #475569; display: flex; flex-direction: column; gap: 2px;">
+              <div>Avance actual: <b style="color: #0f172a;">${row.progress}%</b></div>
+              <div>Estado: <b style="color: ${pinColor};">${row.state}</b></div>
+              <small style="color: #64748b;">${row.region}</small>
+            </div>
+          </div>
+        `;
 
-      if (map.loaded()) {
-        addLayers();
-      } else {
-        map.once('load', addLayers);
+        const marker = L.marker(row.coords, { icon, zIndexOffset: isSelected ? 1000 : 100 })
+          .addTo(map)
+          .bindPopup(popupContent, { closeButton: true });
+
+        marker.on('click', () => {
+          onUgelSelect?.(row);
+        });
+
+        markersRef.current.set(row.id, marker);
+
+        if (isSelected) {
+          marker.openPopup();
+        }
+      });
+
+      leafletMapRef.current = map;
+      setTimeout(() => { map.invalidateSize(); }, 200);
+    });
+
+    return () => {
+      disposed = true;
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
       }
-    } else {
-      const src = mapRef.current.getSource('peru-regions');
-      if (src) {
-        src.setData(geoJsonData);
+    };
+  }, [regionStats, selectedRegion, rows, onRegionSelect, onUgelSelect]);
+
+  // Reaccionar inmediatamente cuando cambia la UGEL seleccionada
+  useEffect(() => {
+    if (!leafletMapRef.current || !selectedUgelId) return;
+    const selectedRow = rows.find((r) => r.id === selectedUgelId);
+    if (selectedRow && selectedRow.coords) {
+      const map = leafletMapRef.current;
+      map.flyTo(selectedRow.coords, Math.max(map.getZoom(), 8), { duration: 0.6 });
+      const m = markersRef.current.get(selectedUgelId);
+      if (m) {
+        m.openPopup();
       }
-      setTimeout(() => mapRef.current?.resize(), 80);
     }
-  }, [geoJsonData, onRegionSelect]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      mapRef.current?.resize();
-    };
-    window.addEventListener('resize', handleResize);
-    const timer = setTimeout(handleResize, 150);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, []);
+  }, [selectedUgelId, rows]);
 
   return (
-    <div className="peru-choropleth-embedded">
-      <div ref={host} className="peru-choropleth-map" />
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 400 }}>
+      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+
       {selected && (
-        <div className="choropleth-selection">
-          <strong>{selected.name}</strong> ·{' '}
-          {selected.progress == null ? 'Sin reporte' : `${selected.progress}% avance`} · {selected.ugel} UGEL
+        <div className="choropleth-floating-info-card" style={{
+          position: 'absolute',
+          top: 14,
+          left: 14,
+          background: '#ffffff',
+          borderRadius: 8,
+          boxShadow: '0 8px 24px rgba(15, 23, 42, 0.15)',
+          border: '1px solid #cbd5e1',
+          padding: '10px 14px',
+          zIndex: 1000,
+          minWidth: 200,
+          pointerEvents: 'auto',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <strong style={{ fontSize: 13, color: '#0f172a' }}>{selected.name}</strong>
+            <span style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: 4,
+              background: selected.status === 'Cumple' ? '#ecfdf5' : selected.status === 'En proceso' ? '#fffbeb' : '#fef2f2',
+              color: selected.status === 'Cumple' ? '#047857' : selected.status === 'En proceso' ? '#b45309' : '#b91c1c',
+              border: `1px solid ${selected.status === 'Cumple' ? '#a7f3d0' : selected.status === 'En proceso' ? '#fde68a' : '#fecaca'}`,
+            }}>
+              {selected.status}
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: '#475569', display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <div>Avance consolidado: <b style={{ color: '#0f172a' }}>{selected.progress}%</b></div>
+            <div>UGEL / Sedes: <b style={{ color: '#0f172a' }}>{selected.ugelCount}</b></div>
+          </div>
         </div>
       )}
     </div>

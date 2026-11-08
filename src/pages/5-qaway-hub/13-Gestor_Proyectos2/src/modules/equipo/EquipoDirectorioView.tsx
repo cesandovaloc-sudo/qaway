@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 
 interface EquipoDirectorioViewProps {
+  hideToolbar?: boolean;
   integrantes: Integrante[];
   selectedId: string | null;
   onSelectIntegrante: (id: string) => void;
@@ -41,22 +42,23 @@ interface EquipoDirectorioViewProps {
   sedes: SedeFrente[];
   asignaciones: AsignacionViva[];
   visibleColumns: string[];
-  onOpenColumnasModal: () => void;
-  activePresetId: string;
-  presets: PresetVista[];
-  onSelectPreset: (preset: PresetVista) => void;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
-  sedeFilter: string;
-  setSedeFilter: (s: string) => void;
-  estadoOpFilter: string;
-  setEstadoOpFilter: (s: string) => void;
-  estadoCuentaFilter: string;
-  setEstadoCuentaFilter: (s: string) => void;
-  onClearFilters: () => void;
+  onOpenColumnasModal?: () => void;
+  activePresetId?: string;
+  presets?: PresetVista[];
+  onSelectPreset?: (preset: PresetVista) => void;
+  searchQuery?: string;
+  setSearchQuery?: (q: string) => void;
+  sedeFilter?: string;
+  setSedeFilter?: (s: string) => void;
+  estadoOpFilter?: string;
+  setEstadoOpFilter?: (s: string) => void;
+  estadoCuentaFilter?: string;
+  setEstadoCuentaFilter?: (s: string) => void;
+  onClearFilters?: () => void;
 }
 
 export default function EquipoDirectorioView({
+  hideToolbar = false,
   integrantes,
   selectedId,
   onSelectIntegrante,
@@ -68,19 +70,19 @@ export default function EquipoDirectorioView({
   sedes,
   asignaciones,
   visibleColumns,
-  onOpenColumnasModal,
-  activePresetId,
-  presets,
-  onSelectPreset,
-  searchQuery,
-  setSearchQuery,
-  sedeFilter,
-  setSedeFilter,
-  estadoOpFilter,
-  setEstadoOpFilter,
-  estadoCuentaFilter,
-  setEstadoCuentaFilter,
-  onClearFilters,
+  onOpenColumnasModal = () => {},
+  activePresetId = 'preset-todos',
+  presets = [],
+  onSelectPreset = () => {},
+  searchQuery = '',
+  setSearchQuery = () => {},
+  sedeFilter = 'todas',
+  setSedeFilter = () => {},
+  estadoOpFilter = 'todos',
+  setEstadoOpFilter = () => {},
+  estadoCuentaFilter = 'todos',
+  setEstadoCuentaFilter = () => {},
+  onClearFilters = () => {},
 }: EquipoDirectorioViewProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [modalBulkSede, setModalBulkSede] = useState(false);
@@ -201,8 +203,9 @@ export default function EquipoDirectorioView({
   return (
     <div className="cronograma-lista-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       {/* Barra de Filtros Nativa compartida estilo Cronograma */}
-      <ProjectShellFilters>
-        {/* Filtro Contextual 1: Cuenta de Acceso */}
+      {!hideToolbar && (
+        <ProjectShellFilters>
+          {/* Filtro Contextual 1: Cuenta de Acceso */}
         <div className="filter-dropdown-wrap contextual-filter-wrap">
           <button
             type="button"
@@ -352,6 +355,7 @@ export default function EquipoDirectorioView({
           </button>
         </div>
       </ProjectShellFilters>
+      )}
 
       {/* Contenedor de Tabla con Scroll Interno Encapsulado */}
       <div className="cronograma-lista-table-wrap" style={{ flex: 1, overflow: 'auto' }}>
@@ -579,27 +583,29 @@ export default function EquipoDirectorioView({
       </div>
 
       {/* Footer de Paginación que cierra la cápsula (Idéntico a Proyecto) */}
-      <footer className="footer">
-        <span>
-          Mostrando {filteredIntegrantes.length ? 1 : 0}–{filteredIntegrantes.length} de {integrantes.length} registros
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {selectedIds.size > 0 && (
-            <span style={{ fontWeight: 600, color: '#0066ff' }}>
-              {selectedIds.size} seleccionados
-            </span>
-          )}
-          <button
-            type="button"
-            className="btn secondary"
-            style={{ minHeight: '32px', fontSize: '12px' }}
-            onClick={exportarSeleccionCsv}
-          >
-            <Download size={13} />
-            <span>Exportar CSV</span>
-          </button>
-        </div>
-      </footer>
+      {!hideToolbar && (
+        <footer className="footer">
+          <span>
+            Mostrando {filteredIntegrantes.length ? 1 : 0}–{filteredIntegrantes.length} de {integrantes.length} registros
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {selectedIds.size > 0 && (
+              <span style={{ fontWeight: 600, color: '#0066ff' }}>
+                {selectedIds.size} seleccionados
+              </span>
+            )}
+            <button
+              type="button"
+              className="btn secondary"
+              style={{ minHeight: '32px', fontSize: '12px' }}
+              onClick={exportarSeleccionCsv}
+            >
+              <Download size={13} />
+              <span>Exportar CSV</span>
+            </button>
+          </div>
+        </footer>
+      )}
 
       {/* BARRA FLOTANTE INFERIOR DE ACCIONES MASIVAS */}
       {selectedIds.size > 0 && (
