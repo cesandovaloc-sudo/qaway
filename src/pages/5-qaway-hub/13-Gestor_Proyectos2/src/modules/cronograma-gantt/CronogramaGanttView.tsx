@@ -5369,37 +5369,77 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Separador vertical: Bloque 2 (Tiempo) | Bloque 3 (Visualización de Barras) */}
-            <div className="filter-group-divider" aria-hidden="true" />
+            {/* Separador vertical: Bloque 2 (Tiempo) | Bloque 3 (Capas y Visualización de Cronograma) */}
+            {(viewMode === 'gantt' || viewMode === 'calendario') && (
+              <div className="filter-group-divider" aria-hidden="true" />
+            )}
 
-            {/* Bloque 3: Visualización de barras en Acordeón al Hover (%, dependencias y responsables) */}
+            {/* Bloque 3: Acordeón Maestro de Capas y Visualización de Barras (Línea Base + %, dependencias y responsables) */}
             {(viewMode === 'gantt' || viewMode === 'calendario') && (
               <div
                 className={'bar-tools-accordion ' + (
-                  (viewMode === 'calendario' ? calShowBarLabels : (showBarLabels || showCriticalPath || showBarAvatars)) ? 'has-active' : ''
+                  (viewMode === 'calendario' ? (calShowBaseline || calShowBarLabels) : (showBaseline || showBarLabels || showCriticalPath || showBarAvatars)) ? 'has-active' : ''
                 )}
               >
+                {/* Botón Principal siempre visible: Conmutar Línea Base Oficial */}
                 <button
                   type="button"
-                  className={'btn secondary qm-btn-icon accordion-primary-btn ' + ((viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? 'active' : '')}
+                  className={'btn secondary qm-btn-icon accordion-primary-btn ' + ((viewMode === 'calendario' ? calShowBaseline : showBaseline) ? 'active' : '')}
                   onClick={() => {
                     if (viewMode === 'calendario') {
-                      setCalShowBarLabels((prev) => !prev);
+                      setCalShowBaseline((v) => !v);
+                      notify(calShowBaseline ? 'Línea base oculta' : 'Línea base oficial visible');
                     } else {
-                      setShowBarLabels((prev) => !prev);
+                      setShowBaseline((v) => !v);
+                      notify(showBaseline ? 'Línea base oculta' : 'Línea base oficial visible');
                     }
                   }}
-                  data-tooltip="Visualización de barras"
-                  aria-label="Controles de visualización de barras"
+                  data-tooltip={(viewMode === 'calendario' ? calShowBaseline : showBaseline) ? "Ocultar línea base oficial" : "Mostrar línea base oficial"}
+                  aria-label="Conmutar visualización de la línea base oficial"
                 >
-                  <Percent size={14} />
+                  <Layers3 size={15} />
                 </button>
 
+                {/* Despliegue suave al pasar el mouse (hover): Fijar Línea Base + Porcentaje + Dependencias + Responsables */}
                 <div className="accordion-expandable-items">
+                  {/* [ ⚓ ] Fijar / Congelar fechas actuales como Línea Base Oficial */}
+                  <button
+                    type="button"
+                    className="btn secondary qm-btn-icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      freezeBaselines();
+                    }}
+                    data-tooltip="Fijar / Congelar fechas actuales como línea base oficial"
+                    aria-label="Fijar línea base del cronograma (PMBOK)"
+                  >
+                    <Anchor size={14} />
+                  </button>
+
+                  {/* [ % ] Conmutar etiquetas de Porcentaje en barras */}
+                  <button
+                    type="button"
+                    className={'btn secondary qm-btn-icon ' + ((viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? 'active' : '')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (viewMode === 'calendario') {
+                        setCalShowBarLabels((prev) => !prev);
+                      } else {
+                        setShowBarLabels((prev) => !prev);
+                      }
+                    }}
+                    data-tooltip={(viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? "Ocultar porcentaje en barras" : "Mostrar porcentaje en barras"}
+                    aria-label="Mostrar u ocultar porcentaje de avance en barras"
+                  >
+                    <Percent size={14} />
+                  </button>
+
+                  {/* [ ☍ ] Conmutar Líneas de Dependencia y Ruta Crítica */}
                   <button
                     type="button"
                     className={'btn secondary qm-btn-icon ' + (showCriticalPath ? 'active' : '')}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setShowCriticalPath((v) => !v);
                       notify(!showCriticalPath ? 'Líneas de dependencia visibles' : 'Líneas de dependencia ocultas');
                     }}
@@ -5409,10 +5449,12 @@ export default function CronogramaGanttView({
                     <Link2 size={15} />
                   </button>
 
+                  {/* [ 👤 ] Conmutar Avatares de Responsables en Barras */}
                   <button
                     type="button"
                     className={'btn secondary qm-btn-icon ' + (showBarAvatars ? 'active' : '')}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setShowBarAvatars((v) => !v);
                       notify(!showBarAvatars ? 'Responsables visibles en las barras' : 'Responsables ocultos de las barras');
                     }}
@@ -5425,68 +5467,7 @@ export default function CronogramaGanttView({
               </div>
             )}
 
-            {/* Separador vertical: Visualización de barras | Línea Base */}
-            {(viewMode === 'gantt' || viewMode === 'calendario') && (
-              <div className="filter-group-divider" aria-hidden="true" />
-            )}
-
-            {/* Bloque 4: Gobernanza y Control de Línea Base (El Ancla y su familia PMI/PMBOK) */}
-            {viewMode !== 'mapa' && (
-              <div
-                className={'baseline-tools-accordion ' + (showBaseline || (viewMode === 'calendario' && calShowBaseline) ? 'has-active' : '')}
-              >
-                {/* Botón Principal: Fijar / Congelar Línea Base Oficial */}
-                <button
-                  type="button"
-                  className="btn secondary qm-btn-icon baseline-primary-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    freezeBaselines();
-                  }}
-                  data-tooltip="Fijar / Congelar Línea Base oficial"
-                  aria-label="Fijar línea base del cronograma (PMBOK)"
-                >
-                  <Anchor size={14} />
-                </button>
-
-                {/* Parientes de Línea Base desplegables al pasar el mouse */}
-                <div className="baseline-expandable-items">
-                  <button
-                    type="button"
-                    className={'btn secondary qm-btn-icon ' + ((viewMode === 'calendario' ? calShowBaseline : showBaseline) ? 'active' : '')}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (viewMode === 'calendario') {
-                        setCalShowBaseline((v) => !v);
-                        notify(calShowBaseline ? 'Comparación de línea base oculta' : 'Línea base oficial visible');
-                      } else {
-                        setShowBaseline((v) => !v);
-                        notify(showBaseline ? 'Comparación de línea base oculta' : 'Línea base oficial visible');
-                      }
-                    }}
-                    data-tooltip={(viewMode === 'calendario' ? calShowBaseline : showBaseline) ? "Ocultar variación de línea base" : "Ver desviación / varianza vs línea base"}
-                    aria-label="Comparar visualmente fechas actuales vs línea base"
-                  >
-                    <GitCompareArrows size={14} />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn secondary qm-btn-icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      resetBaselines();
-                    }}
-                    data-tooltip="Recalibrar línea base (Adenda MINEDU)"
-                    aria-label="Restablecer línea base contractual"
-                  >
-                    <RotateCcw size={13} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Separador vertical: Línea Base | Pantalla y Ajuste */}
+            {/* Separador vertical: Capas y Visualización | Pantalla y Ajuste */}
             <div className="filter-group-divider" aria-hidden="true" />
 
             {/* Bloque 5: Ajuste de Pantalla y Cuadrícula */}

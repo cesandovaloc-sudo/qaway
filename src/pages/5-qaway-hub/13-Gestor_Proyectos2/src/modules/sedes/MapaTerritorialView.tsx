@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
 import PeruChoroplethView from './PeruChoroplethView';
+import PeruPowerBIMapView from './PeruPowerBIMapView';
 
 type Status = 'Cumple' | 'En proceso' | 'No cumple';
 export type TerritorialSubView = 'geo-real' | 'tematico-regional' | 'powerbi-analitico';
@@ -738,7 +739,9 @@ export default function MapaTerritorialView({
               {/* VISTA 3 */}
               {subView === 'powerbi-analitico' && (
                 <div className="stage-pane is-active powerbi-analytics-pane">
-                    <div className="powerbi-grid-container">
+                  <PeruPowerBIMapView rows={allRows} />
+                  <div style={{ display: 'none' }}>
+                  <div className="powerbi-grid-container">
                       <div ref={analyticsLeafletRef} className="territorial-leaflet-canvas analytics-leaflet-canvas" aria-label="Mapa analítico territorial con burbujas" />
                     <div className="powerbi-card">
                       <div className="card-top">
@@ -836,6 +839,7 @@ export default function MapaTerritorialView({
                           ))}
                       </div>
                     </div>
+                  </div>
                   </div>
                 </div>
               )}

@@ -1,0 +1,94 @@
+.powerbi-territorial {
+  width: 100%;
+  color: #172b45;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.powerbi-territorial__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 17px 19px;
+  border-bottom: 1px solid #edf1f6;
+}
+.powerbi-territorial__header h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.powerbi-territorial__header p { margin: 4px 0 0; color: #718096; font-size: 12px; }
+.powerbi-territorial__legend { display: flex; flex-wrap: wrap; gap: 11px; color: #64748b; font-size: 11px; }
+.powerbi-territorial__legend span { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.powerbi-territorial__legend i { width: 8px; height: 8px; border-radius: 50%; }
+
+.powerbi-territorial__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, .85fr);
+  gap: 14px;
+  padding: 14px;
+  background: #f7f9fc;
+}
+.powerbi-territorial__map-panel,
+.powerbi-territorial__card,
+.powerbi-territorial__kpis {
+  background: #fff;
+  border: 1px solid #e5eaf1;
+  border-radius: 11px;
+}
+.powerbi-territorial__panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px;
+  border-bottom: 1px solid #edf1f6;
+}
+.powerbi-territorial__panel-title strong { font-size: 13px; }
+.powerbi-territorial__panel-title span { color: #8290a3; font-size: 10px; }
+.powerbi-territorial__map-wrap { position: relative; background: #edf3f7; }
+.powerbi-territorial__map { width: 100%; height: 480px; }
+.powerbi-territorial__overlay,
+.powerbi-territorial__error {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  padding: 20px; background: #ffffffdf; color: #64748b; text-align: center; font-size: 13px;
+}
+.powerbi-territorial__error { color: #b42318; }
+.powerbi-territorial__bubble-key {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 13px;
+  padding: 12px 15px; border-top: 1px solid #edf1f6; color: #64748b; font-size: 10px;
+}
+.powerbi-territorial__bubble-key span { display: flex; align-items: center; gap: 5px; }
+.powerbi-territorial__bubble-key small { margin-left: auto; color: #94a3b8; }
+.bubble { display: inline-block; border-radius: 50%; background: #94a3b8; border: 1px solid #64748b; }
+.bubble-sm { width: 7px; height: 7px; }
+.bubble-md { width: 12px; height: 12px; }
+.bubble-lg { width: 18px; height: 18px; }
+
+.powerbi-territorial__analytics { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.powerbi-territorial__card, .powerbi-territorial__kpis { padding: 14px; }
+.powerbi-territorial__card-heading { font-size: 12px; font-weight: 700; padding-bottom: 10px; border-bottom: 1px solid #edf1f6; }
+.powerbi-territorial__distribution { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
+.powerbi-territorial__dist-row > div:first-child { display: flex; justify-content: space-between; gap: 10px; color: #64748b; font-size: 10px; }
+.powerbi-territorial__dist-row strong { color: #26384d; }
+.powerbi-territorial__track { height: 7px; margin-top: 6px; border-radius: 10px; overflow: hidden; background: #e8edf3; }
+.powerbi-territorial__track i { display: block; height: 100%; border-radius: inherit; }
+.powerbi-territorial__kpi-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; padding-top: 11px; }
+.powerbi-territorial__kpi-grid > div { display: flex; flex-direction: column; gap: 5px; padding: 13px 10px; background: #f7f9fc; border: 1px solid #edf1f6; border-radius: 8px; }
+.powerbi-territorial__kpi-grid strong { color: #1769d2; font-size: 21px; line-height: 1; }
+.powerbi-territorial__kpi-grid span { color: #718096; font-size: 10px; }
+.powerbi-territorial__selected > strong { display: block; padding: 11px 0 8px; font-size: 14px; }
+.powerbi-territorial__selected p { margin: 12px 0 2px; color: #8290a3; font-size: 11px; }
+.powerbi-territorial__selected-line { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid #f0f2f5; font-size: 11px; }
+.powerbi-territorial__selected-line span { color: #8290a3; }
+.powerbi-territorial__selected-line b { color: #26384d; }
+
+@media(max-width: 950px) {
+  .powerbi-territorial__body { grid-template-columns: 1fr; }
+  .powerbi-territorial__map { height: 390px; }
+}
+@media(max-width: 600px) {
+  .powerbi-territorial__header { align-items: flex-start; flex-direction: column; }
+  .powerbi-territorial__map { height: 330px; }
+  .powerbi-territorial__bubble-key small { width: 100%; margin-left: 0; }
+}

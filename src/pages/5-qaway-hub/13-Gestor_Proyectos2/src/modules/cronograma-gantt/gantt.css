@@ -9750,10 +9750,9 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
-   ACORDEÓN DESPLEGABLE EN HOVER PARA HERRAMIENTAS DE BARRAS Y LÍNEA BASE
+   ACORDEÓN DESPLEGABLE EN HOVER PARA HERRAMIENTAS DE CAPAS Y LÍNEA BASE
    ========================================================================== */
-.gantt-v2 .bar-tools-accordion,
-.gantt-v2 .baseline-tools-accordion {
+.gantt-v2 .bar-tools-accordion {
   display: inline-flex;
   align-items: center;
   position: relative;
@@ -9761,7 +9760,7 @@ body.gantt-resizing {
   max-height: 42px !important;
   box-sizing: border-box !important;
   border-radius: 8px;
-  background: #ffffff;
+  background: #f8fafc;
   border: 1px solid #cbd5e1;
   padding: 2px;
   gap: 3px;
@@ -9771,22 +9770,18 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .bar-tools-accordion:hover,
-.gantt-v2 .bar-tools-accordion:focus-within,
-.gantt-v2 .baseline-tools-accordion:hover,
-.gantt-v2 .baseline-tools-accordion:focus-within {
+.gantt-v2 .bar-tools-accordion:focus-within {
   background: #ffffff;
   border-color: #94a3b8;
   box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
 }
 
-.gantt-v2 .bar-tools-accordion.has-active,
-.gantt-v2 .baseline-tools-accordion.has-active {
+.gantt-v2 .bar-tools-accordion.has-active {
   border-color: #93c5fd;
-  background: #f0f7ff;
+  background: #eff6ff;
 }
 
-.gantt-v2 .bar-tools-accordion .accordion-primary-btn,
-.gantt-v2 .baseline-tools-accordion .baseline-primary-btn {
+.gantt-v2 .bar-tools-accordion .accordion-primary-btn {
   flex-shrink: 0 !important;
   z-index: 2;
   height: 36px !important;
@@ -9798,8 +9793,7 @@ body.gantt-resizing {
   padding: 0 !important;
 }
 
-.gantt-v2 .bar-tools-accordion .accordion-expandable-items,
-.gantt-v2 .baseline-tools-accordion .baseline-expandable-items {
+.gantt-v2 .bar-tools-accordion .accordion-expandable-items {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -9814,8 +9808,7 @@ body.gantt-resizing {
   white-space: nowrap;
 }
 
-.gantt-v2 .bar-tools-accordion .accordion-expandable-items .qm-btn-icon,
-.gantt-v2 .baseline-tools-accordion .baseline-expandable-items .qm-btn-icon {
+.gantt-v2 .bar-tools-accordion .accordion-expandable-items .qm-btn-icon {
   height: 36px !important;
   min-height: 36px !important;
   max-height: 36px !important;
@@ -9828,15 +9821,7 @@ body.gantt-resizing {
 
 .gantt-v2 .bar-tools-accordion:hover .accordion-expandable-items,
 .gantt-v2 .bar-tools-accordion:focus-within .accordion-expandable-items {
-  max-width: 116px;
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(0);
-}
-
-.gantt-v2 .baseline-tools-accordion:hover .baseline-expandable-items,
-.gantt-v2 .baseline-tools-accordion:focus-within .baseline-expandable-items {
-  max-width: 82px;
+  max-width: 156px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
@@ -9854,8 +9839,7 @@ body.gantt-resizing {
 
 /* Tooltips institucionales en la barra de herramientas y filtros (hacia abajo y fondo blanco pulido) */
 .gantt-v2 .filters [data-tooltip]::after,
-.gantt-v2 .bar-tools-accordion [data-tooltip]::after,
-.gantt-v2 .baseline-tools-accordion [data-tooltip]::after {
+.gantt-v2 .bar-tools-accordion [data-tooltip]::after {
   top: calc(100% + 8px);
   bottom: auto;
   transform: translateX(-50%) translateY(-4px);
@@ -9871,8 +9855,7 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .filters [data-tooltip]::before,
-.gantt-v2 .bar-tools-accordion [data-tooltip]::before,
-.gantt-v2 .baseline-tools-accordion [data-tooltip]::before {
+.gantt-v2 .bar-tools-accordion [data-tooltip]::before {
   top: calc(100% + 3px);
   bottom: auto;
   transform: translateX(-50%) translateY(-4px);
@@ -9883,10 +9866,8 @@ body.gantt-resizing {
 
 .gantt-v2 .filters [data-tooltip]:hover::after,
 .gantt-v2 .bar-tools-accordion [data-tooltip]:hover::after,
-.gantt-v2 .baseline-tools-accordion [data-tooltip]:hover::after,
 .gantt-v2 .filters [data-tooltip]:hover::before,
-.gantt-v2 .bar-tools-accordion [data-tooltip]:hover::before,
-.gantt-v2 .baseline-tools-accordion [data-tooltip]:hover::before {
+.gantt-v2 .bar-tools-accordion [data-tooltip]:hover::before {
   transform: translateX(-50%) translateY(0);
 }
 /* Animacion acelerada por hardware para el Drawer Lateral a 60 FPS */
@@ -11047,7 +11028,20 @@ body.gantt-resizing {
 .thematic-map-real-pane { padding: 0 !important; display: block !important; overflow: hidden !important; }
 .thematic-map-real-pane .peru-choropleth-embedded { min-height: 480px; height: 100%; }
 .thematic-map-real-pane .peru-choropleth-map { min-height: 480px; height: 100%; }
+.thematic-map-real-pane > .peru-choropleth-embedded { height: 480px; flex: 0 0 480px; }
 .choropleth-selection { position: absolute; left: 14px; bottom: 14px; z-index: 5; padding: 8px 11px; border-radius: 6px; background: rgba(255,255,255,.94); color: #17324d; font-size: 12px; box-shadow: 0 4px 16px rgba(15,23,42,.16); }
+.pbi-native-view { display: grid; grid-template-columns: minmax(0, 1fr) 250px; width: 100%; min-height: 480px; height: 100%; background: #f8fafc; }
+.pbi-native-map { min-height: 480px; height: 100%; }
+.pbi-native-side { display: flex; flex-direction: column; gap: 14px; padding: 18px; background: #fff; border-left: 1px solid #e2e8f0; color: #26384d; }
+.pbi-native-side > strong { font-size: 14px; }
+.pbi-native-side > div { display: flex; flex-direction: column; gap: 3px; padding: 12px; background: #f7f9fc; border: 1px solid #edf1f6; border-radius: 8px; }
+.pbi-native-side b { color: #1769d2; font-size: 22px; }
+.pbi-native-side span { color: #718096; font-size: 11px; }
+.pbi-native-legend { flex-wrap: wrap; flex-direction: row !important; align-items: center; font-size: 11px; }
+.pbi-native-legend i { width: 8px; height: 8px; border-radius: 50%; }
+.pbi-native-selected { margin-top: auto; }
+.pbi-native-selected strong { font-size: 13px; }
+@media (max-width: 900px) { .pbi-native-view { grid-template-columns: 1fr; } .pbi-native-side { border-left: 0; border-top: 1px solid #e2e8f0; } }
 
 .thematic-map-container,
 .powerbi-analytics-pane {
