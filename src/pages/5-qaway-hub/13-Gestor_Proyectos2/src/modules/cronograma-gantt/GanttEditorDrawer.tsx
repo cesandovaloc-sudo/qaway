@@ -1046,51 +1046,6 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
             {editorTab === 'info' && (
               <div className="editor-body">
-                {/* Resumen ejecutivo: el detalle rápido se mantiene arriba; la edición
-                    avanzada continúa disponible debajo sin eliminar ninguna función. */}
-                <div className="drawer-summary-card">
-                  <div className="drawer-summary-title">
-                    <span className="drawer-summary-icon"><Folder size={17} /></span>
-                    <div className="drawer-summary-heading">
-                      <b>{getEdtNodeDisplayLabel(activeItem, items)}</b>
-                      <span>{activeItem.code || 'Elemento del cronograma'}</span>
-                    </div>
-                    <span className={`status ${STATUS_CLASS[activeItem.status]}`}>{activeItem.status}</span>
-                  </div>
-                  {activeItem.description && (
-                    <p className="drawer-summary-description">{activeItem.description}</p>
-                  )}
-                  <div className="drawer-summary-context">
-                    <div><span>Fase</span><b>{activeItem.phase || 'Sin fase definida'}</b></div>
-                    <div><span>Entidad responsable</span><b>{activeItem.entidadResponsable || activeItem.region || 'Gestión del proyecto'}</b></div>
-                    <div><span>Elementos asociados</span><b>{items.filter((child) => child.parentId === activeItem.id).length}</b></div>
-                    <div><span>Tareas vinculadas</span><b>{activeItem.tasks ?? 0}</b></div>
-                  </div>
-                  <div className="drawer-summary-grid">
-                    <div><span>Periodo</span><b>{formatDatePE(activeItem.start)} – {formatDatePE(activeItem.end)}</b></div>
-                    <div><span>Duración</span><b>{Math.max(1, Math.ceil((new Date(`${activeItem.end}T12:00:00`).getTime() - new Date(`${activeItem.start}T12:00:00`).getTime()) / 86400000) + 1)} días</b></div>
-                    <div><span>Responsable</span><b>{activeItem.gestor || 'Sin asignar'}</b></div>
-                    <div><span>Avance</span><b>{activeItem.progress}%</b></div>
-                  </div>
-                  <div className="drawer-summary-progress"><span style={{ width: `${Math.max(0, Math.min(100, activeItem.progress))}%` }} /></div>
-                  {activeItem.deliverable && (
-                    <div className="drawer-summary-deliverable"><FileText size={15} /><div><span>Entregable principal</span><b>{activeItem.deliverable}</b></div></div>
-                  )}
-                  <div className="drawer-summary-meta">
-                    <span>{activeItem.deliverables?.length || 0} entregables registrados</span>
-                    <span>{activeItem.attachments?.length || 0} documentos adjuntos</span>
-                  </div>
-                  {!isNewDraft && (
-                    <button type="button" className="drawer-summary-detail-action" onClick={(event) => {
-                      event.stopPropagation();
-                      onOpenFullDetail?.(activeItem);
-                    }}>
-                      Ver componente completo
-                      <ArrowUpRight size={15} />
-                    </button>
-                  )}
-                </div>
-                <div className="drawer-advanced-content">
                 {/* Selector de Elemento Padre si es subcomponente (admite Componentes y Subcomponentes para multinivel) */}
                 {activeItem.kind === 'subproceso' && (
                   <div className="field relative" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '10px' }}>
@@ -1207,26 +1162,17 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                  {/* Clasificación operativa y fase del proyecto. Los nombres técnicos
                      se conservan internamente, pero no se exponen al usuario. */}
-                 <div className="drawer-select-grid">
-                   <label className="field" style={{ margin: 0 }}>
-                     <span>Nivel del elemento</span>
-                      <div className="drawer-choice-wrap">
-                        <button type="button" className={`drawer-choice ${editorLevelSelectOpen ? 'active' : ''}`} onClick={() => setEditorLevelSelectOpen((v) => !v)}>
-                          <span>{({ COMPONENTE: 'Componente', HITO: 'Hito', SUBCOMPONENTE: 'Subcomponente', PAQUETE_TRABAJO: 'Paquete de trabajo', ENTREGABLE: 'Entregable' } as Record<string, string>)[activeItem.edtType || resolveEdtNodeType(activeItem, items)] || 'Componente'}</span><ChevronDown size={14} />
-                        </button>
-                        {editorLevelSelectOpen && <div className="drawer-choice-menu">
-                          {(activeItem.kind === 'hito' ? [['COMPONENTE', 'Componente'], ['HITO', 'Hito']] : [['SUBCOMPONENTE', 'Subcomponente'], ['PAQUETE_TRABAJO', 'Paquete de trabajo'], ['ENTREGABLE', 'Entregable'], ['HITO', 'Hito']]).map(([value, label]) => <button type="button" key={value} className={(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value ? 'selected' : ''} onClick={() => { updateDraft({ edtType: value as EdtNodeType }); setEditorLevelSelectOpen(false); }}>{label}{(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value && <Check size={14} />}</button>)}
-                        </div>}
-                      </div>
-                  </label>
-                  <label className="field" style={{ margin: 0 }}>
-                     <span>Fase del proyecto</span>
-                      <div className="drawer-choice-wrap">
-                        <button type="button" className={`drawer-choice ${editorPhaseSelectOpen ? 'active' : ''}`} onClick={() => setEditorPhaseSelectOpen((v) => !v)}><span>{activeItem.faseId ? `${getPhaseLabel(activeItem.faseId)}` : 'Sin fase asignada'}</span><ChevronDown size={14} /></button>
-                        {editorPhaseSelectOpen && <div className="drawer-choice-menu">{[['', 'Sin fase asignada'], ...PROJECT_PHASES_CATALOG.map((f) => [f.id, `${f.code} · ${f.name}`])].map(([value, label]) => <button type="button" key={value} className={(activeItem.faseId || '') === value ? 'selected' : ''} onClick={() => { updateDraft({ faseId: value || null }); setEditorPhaseSelectOpen(false); }}>{label}{(activeItem.faseId || '') === value && <Check size={14} />}</button>)}</div>}
-                      </div>
-                  </label>
-                </div>
+                 <label className="field" style={{ marginBottom: '10px' }}>
+                   <span>Nivel del elemento</span>
+                   <div className="drawer-choice-wrap">
+                     <button type="button" className={`drawer-choice ${editorLevelSelectOpen ? 'active' : ''}`} onClick={() => setEditorLevelSelectOpen((v) => !v)}>
+                       <span>{({ COMPONENTE: 'Componente', HITO: 'Hito', SUBCOMPONENTE: 'Subcomponente', PAQUETE_TRABAJO: 'Paquete de trabajo', ENTREGABLE: 'Entregable' } as Record<string, string>)[activeItem.edtType || resolveEdtNodeType(activeItem, items)] || 'Componente'}</span><ChevronDown size={14} />
+                     </button>
+                     {editorLevelSelectOpen && <div className="drawer-choice-menu">
+                       {(activeItem.kind === 'hito' ? [['COMPONENTE', 'Componente'], ['HITO', 'Hito']] : [['SUBCOMPONENTE', 'Subcomponente'], ['PAQUETE_TRABAJO', 'Paquete de trabajo'], ['ENTREGABLE', 'Entregable'], ['HITO', 'Hito']]).map(([value, label]) => <button type="button" key={value} className={(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value ? 'selected' : ''} onClick={() => { updateDraft({ edtType: value as EdtNodeType }); setEditorLevelSelectOpen(false); }}>{label}{(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value && <Check size={14} />}</button>)}
+                     </div>}
+                   </div>
+                 </label>
 
                 {/* 1. Nombre */}
                 <label className="field">
@@ -1602,92 +1548,6 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   </div>
                 </div>
 
-                {/* 4b. Línea base y cumplimiento real */}
-                <div className="baseline-box">
-                  <div className="baseline-head">
-                    <b>Línea base y cumplimiento</b>
-                    {(() => {
-                      const dev = getDeviationDays(activeItem, currentTodayIso);
-                      return <span className={`dev-pill ${getDeviationTone(dev)}`}>{formatDeviation(dev)}</span>;
-                    })()}
-                  </div>
-                  <div className="baseline-row">
-                    <span className="baseline-label">Línea base</span>
-                    <span className="baseline-value">
-                      {hasBaseline(activeItem)
-                        ? `${formatDatePE(activeItem.baselineStart ?? '')} — ${formatDatePE(activeItem.baselineEnd ?? '')}`
-                        : 'Sin línea base'}
-                    </span>
-                    <button
-                      type="button"
-                      className="baseline-btn"
-                      onClick={() => updateDraft({ baselineStart: activeItem.start, baselineEnd: activeItem.end })}
-                      title="Congela las fechas de inicio y fin actuales como planificación aprobada"
-                    >
-                      <Anchor size={12} />
-                      {hasBaseline(activeItem) ? 'Actualizar con fechas actuales' : 'Fijar con fechas actuales'}
-                    </button>
-                  </div>
-                  <div className="date-fields">
-                    <div className="field relative">
-                      <span>Inicio real</span>
-                      <button
-                        type="button"
-                        className={`custom-date-btn ${editorCalOpen === 'actualStart' ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditorReportTypeOpen(false);
-                          setEditorStatusOpen(false);
-                          setEditorCalOpen((p) => (p === 'actualStart' ? null : 'actualStart'));
-                        }}
-                        title="Fecha en que realmente comenzó (se registra sola al iniciar)"
-                      >
-                        <span>{activeItem.actualStart ? formatDatePE(activeItem.actualStart) : '—'}</span>
-                        <CalendarDays size={14} className="date-btn-icon" />
-                      </button>
-                      {editorCalOpen === 'actualStart' && (
-                        <MiniCalendar
-                          value={activeItem.actualStart || activeItem.start}
-                          onChange={(newDate) => {
-                            updateDraft({ actualStart: newDate || undefined });
-                            setEditorCalOpen(null);
-                          }}
-                          onClose={() => setEditorCalOpen(null)}
-                          align="left"
-                        />
-                      )}
-                    </div>
-                    <div className="field relative">
-                      <span>Fin real</span>
-                      <button
-                        type="button"
-                        className={`custom-date-btn ${editorCalOpen === 'actualEnd' ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditorReportTypeOpen(false);
-                          setEditorStatusOpen(false);
-                          setEditorCalOpen((p) => (p === 'actualEnd' ? null : 'actualEnd'));
-                        }}
-                        title="Fecha en que realmente se cumplió (se registra sola al completar)"
-                      >
-                        <span>{activeItem.actualEnd ? formatDatePE(activeItem.actualEnd) : '—'}</span>
-                        <CalendarDays size={14} className="date-btn-icon" />
-                      </button>
-                      {editorCalOpen === 'actualEnd' && (
-                        <MiniCalendar
-                          value={activeItem.actualEnd || activeItem.end}
-                          onChange={(newDate) => {
-                            updateDraft({ actualEnd: newDate || undefined });
-                            setEditorCalOpen(null);
-                          }}
-                          onClose={() => setEditorCalOpen(null)}
-                          align="right"
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-
                 {/* 5. Estado de cumplimiento */}
                 <div className="field relative">
                   <span>Estado de cumplimiento</span>
@@ -1748,9 +1608,29 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                   return (
                     <div className="progress-edit">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                         <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Avance</span>
                         <b style={{ fontSize: '13px', color: '#0f172a' }}>{activeItem.progress}%</b>
+                      </div>
+                      <div
+                        style={{
+                          height: '7px',
+                          width: '100%',
+                          backgroundColor: '#e2e8f0',
+                          borderRadius: '999px',
+                          overflow: 'hidden',
+                          marginBottom: isContainer || linkedTaskSummary ? '8px' : '6px',
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: '100%',
+                            width: `${Math.max(0, Math.min(100, activeItem.progress))}%`,
+                            backgroundColor: activeItem.progress >= 100 ? '#16a34a' : '#2563eb',
+                            borderRadius: 'inherit',
+                            transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                          }}
+                        />
                       </div>
                       {isContainer ? (
                         <div style={{ padding: '7px 10px', background: '#f1f5f9', borderRadius: '6px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '7px' }}>
@@ -1775,65 +1655,6 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     </div>
                   );
                 })()}
-
-                {/* 7. Tipo de reporte */}
-                {activeItem.kind === 'hito' && (
-                  <div className="field relative">
-                    <span>Tipo de reporte</span>
-                    <div className="filter-dropdown-wrap">
-                      <button
-                        type="button"
-                        className={`filter-card-btn ${editorReportTypeOpen ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditorCalOpen(null);
-                          setEditorStatusOpen(false);
-                          setEditorReportTypeOpen((v) => !v);
-                        }}
-                      >
-                        <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#0f172a' }}>
-                          {activeItem.reportType || 'Línea de tiempo'}
-                        </span>
-                        <ChevronDown
-                          size={14}
-                          className="filter-chevron"
-                          style={{
-                            transform: editorReportTypeOpen ? 'rotate(180deg)' : 'none',
-                            transition: 'transform 0.15s ease',
-                            color: '#64748b',
-                          }}
-                        />
-                      </button>
-                      {editorReportTypeOpen && (
-                        <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
-                          <div className="filter-popover-title">Formato de Reporte</div>
-                          {[
-                            'Línea de tiempo',
-                            'Matriz de entregables',
-                            'Registro de entregas',
-                            'Consolidado de datos',
-                            'Informe de cierre',
-                          ].map((opt) => (
-                            <button
-                              key={opt}
-                              type="button"
-                              className={`filter-item-btn ${(activeItem.reportType || 'Línea de tiempo') === opt ? 'selected' : ''}`}
-                              onClick={() => {
-                                updateDraft({ reportType: opt });
-                                setEditorReportTypeOpen(false);
-                              }}
-                            >
-                              <span>{opt}</span>
-                              {(activeItem.reportType || 'Línea de tiempo') === opt && (
-                                <Check size={14} className="item-check" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 {/* 8. Desglose de Tareas vinculadas (100% Dinámico) */}
                 {(() => {
@@ -1958,143 +1779,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   );
                 })()}
 
-                {/* 9. Documentos de Sustento (Múltiples con apertura en pestaña nueva) */}
-                <div className="field" style={{ marginTop: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                      <Paperclip size={15} style={{ color: '#0284c7' }} />
-                      Documentos de Sustento ({getActiveAttachments(activeItem).length})
-                    </span>
-                    <button
-                      type="button"
-                      style={{
-                        background: '#f0f9ff',
-                        border: '1px solid #bae6fd',
-                        borderRadius: '6px',
-                        color: '#0284c7',
-                        fontSize: '12px',
-                        fontWeight: 650,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '4px 10px',
-                        transition: 'all 0.15s ease',
-                      }}
-                      onClick={() => fileRef.current?.click()}
-                    >
-                      <Plus size={13} />
-                      <span>Adjuntar archivo</span>
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {getActiveAttachments(activeItem).map((att) => {
-                      const isPdf = att.name.toLowerCase().endsWith('.pdf');
-                      const isExcel = att.name.toLowerCase().endsWith('.xls') || att.name.toLowerCase().endsWith('.xlsx') || att.name.toLowerCase().endsWith('.csv');
-                      return (
-                        <div
-                          key={att.id}
-                          className="file-card"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            padding: '10px 14px',
-                            background: '#ffffff',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                          }}
-                        >
-                          <span
-                            className={isPdf ? 'pdf' : isExcel ? 'status' : 'pdf'}
-                            style={{
-                              background: isExcel ? '#16a34a' : isPdf ? '#dc2626' : '#2563eb',
-                              color: '#ffffff',
-                              fontSize: '10.5px',
-                              fontWeight: 750,
-                              padding: '3px 7px',
-                              borderRadius: '5px',
-                              flexShrink: 0,
-                            }}
-                          >
-                            {isPdf ? 'PDF' : isExcel ? 'XLS' : 'DOC'}
-                          </span>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <b style={{ fontSize: '13px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#0f172a' }}>
-                              {att.name}
-                            </b>
-                            <small style={{ fontSize: '11.5px', color: '#64748b' }}>
-                              {att.date || 'Sustento oficial'}
-                            </small>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenAttachment(att)}
-                              style={{
-                                background: '#f1f5f9',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '6px',
-                                padding: '4px 9px',
-                                color: '#0f172a',
-                                fontSize: '11.5px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                cursor: 'pointer',
-                                fontWeight: 600,
-                              }}
-                              title="Abrir documento en pestaña nueva"
-                            >
-                              <ExternalLink size={12} color="#0284c7" />
-                              <span>Ver</span>
-                            </button>
-                            <button
-                              type="button"
-                              style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: '4px', color: '#94a3b8' }}
-                              onClick={() => handleRemoveAttachment(att.id)}
-                              title="Eliminar archivo"
-                            >
-                              <X size={15} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {getActiveAttachments(activeItem).length === 0 && (
-                      <div
-                        style={{
-                          padding: '16px',
-                          border: '1px dashed #cbd5e1',
-                          borderRadius: '8px',
-                          textAlign: 'center',
-                          color: '#64748b',
-                          fontSize: '12.5px',
-                          background: '#f8fafc',
-                        }}
-                      >
-                        Sin documentos de sustento adjuntos
-                      </div>
-                    )}
-                  </div>
-
-                  <input
-                    ref={fileRef}
-                    hidden
-                    type="file"
-                    multiple
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        handleAddAttachments(e.target.files);
-                      }
-                    }}
-                  />
                 </div>
-                </div>
-              </div>
             )}
 
             {/* Pestaña: Subcomponentes del Componente */}

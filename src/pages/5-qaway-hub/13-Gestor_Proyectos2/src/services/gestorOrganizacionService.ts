@@ -95,5 +95,9 @@ export async function listGestorProjectUnits(projectId: string): Promise<GestorP
     .select('project_id, unit_id, responsibility')
     .eq('project_id', projectId);
   if (error) throw error;
-  return (data ?? []) as GestorProjectUnit[];
+  return (data ?? []).map((row: any) => ({
+    projectId: row.project_id,
+    unitId: row.unit_id,
+    responsibility: row.responsibility ?? null,
+  }));
 }

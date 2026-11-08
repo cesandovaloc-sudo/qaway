@@ -15,6 +15,7 @@ import './gantt.css';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
+import MapaTerritorialView from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
 import {
@@ -1878,12 +1879,12 @@ export default function CronogramaGanttView({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
-  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama'>('gantt');
+  const [viewMode, setViewMode] = useState<'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama'>('gantt');
   // Las tarjetas superiores se ocultan de entrada en pantallas pequeñas (<1024px),
   // tal como se pidió; el botón del ojo alterna como siempre.
-  const [showSummaryCards, setShowSummaryCards] = useState(
-    () => (typeof window === 'undefined' ? true : window.innerWidth >= 1024)
-  );
+  // Las tarjetas superiores cargan ocultas por defecto en todas las resoluciones;
+  // el usuario las activa haciendo clic en el botón del ojo.
+  const [showSummaryCards, setShowSummaryCards] = useState(false);
   const [tab, setTab] = useState('Todos');
   const [search, setSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('Todos');
@@ -1933,7 +1934,7 @@ export default function CronogramaGanttView({
 
   // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
   // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
-  const [unidades, setUnidades] = useState(() =>
+  const [unidades, setUnidades] = useState<any[]>(() =>
     MINEDU_UNIDADES.map((u) => ({ name: u.name, region: u.region, unitType: u.unitType, status: u.status }))
   );
 
@@ -2300,7 +2301,7 @@ export default function CronogramaGanttView({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
-  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'arbol' | 'organigrama') => {
+  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama') => {
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
@@ -4355,6 +4356,15 @@ export default function CronogramaGanttView({
               >
                 <CalendarDays size={14} />
                 <span>Calendario</span>
+              </button>
+              <button
+                type="button"
+                className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
+                onClick={() => handleViewModeChange('mapa')}
+                title="Vista Mapa Territorial"
+              >
+                <MapPinned size={14} />
+                <span>Mapa</span>
               </button>
               {/* Vista conservada para una fase posterior; se oculta temporalmente del selector. */}
             </div>
@@ -7408,6 +7418,11 @@ export default function CronogramaGanttView({
               showBaseline={calShowBaseline}
               showBarAvatars={showBarAvatars}
             />
+          )}
+
+          {/* Presentación Mapa Territorial */}
+          {viewMode === 'mapa' && (
+            <MapaTerritorialView items={shown} />
           )}
 
           {/* Presentación 5: Estructura Jerárquica WBS / Árbol (Imagen de referencia 1) */}

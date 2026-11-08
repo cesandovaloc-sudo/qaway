@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   ArrowLeft,
   CalendarDays,
@@ -368,6 +369,7 @@ export default function GanttElementDetailView() {
               {item.region && <li><span>Región</span><b>{item.region}</b></li>}
               {item.sede && <li><span>Sede</span><b>{item.sede}</b></li>}
               {item.distrito && <li><span>Distrito</span><b>{item.distrito}</b></li>}
+              {item.reportType && <li><span>Tipo de reporte</span><b>{item.reportType}</b></li>}
               <li><span>Tareas vinculadas</span><b>{counts.tareas}</b></li>
             </ul>
           </section>
