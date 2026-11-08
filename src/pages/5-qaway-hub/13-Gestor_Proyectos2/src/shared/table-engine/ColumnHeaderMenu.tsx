@@ -1,6 +1,33 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, ChevronUp, EyeOff, Filter, Pin, RotateCcw, Search, Sliders, X } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Copy,
+  EyeOff,
+  Filter,
+  Hash,
+  Pencil,
+  Percent,
+  Pin,
+  RotateCcw,
+  Search,
+  Sigma,
+  Sliders,
+  Tag,
+  Trash2,
+  Type,
+  User,
+  WrapText,
+  X,
+} from 'lucide-react';
 import {
   customRank,
   DATE_PRESET_LABELS,
@@ -13,6 +40,22 @@ import type { TableEngine } from './useTableEngine';
 import { EMPTY_TOKEN, type ColumnDef, type ColumnOption, type FilterValue, type OperatorDef } from './types';
 import './tableEngine.css';
 
+
+
+function getPropertyIcon(type: string): React.ReactNode {
+  switch (type) {
+    case 'text': return <Type size={13} />;
+    case 'number': return <Hash size={13} />;
+    case 'percent': return <Percent size={13} />;
+    case 'date':
+    case 'dateRange': return <Calendar size={13} />;
+    case 'person': return <User size={13} />;
+    case 'processState':
+    case 'select':
+    case 'multiSelect': return <Tag size={13} />;
+    default: return <Sliders size={13} />;
+  }
+}
 
 function getPropertyTypeName(type: string): string {
   switch (type) {
@@ -358,6 +401,15 @@ interface ColumnHeaderMenuProps<R> {
   onHideColumn?: ((columnId: string) => void) | undefined;
   onFreezeColumn?: ((columnId: string) => void) | undefined;
   onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
+  onChangeType?: ((columnId: string, newType: string) => void) | undefined;
+  onToggleWrap?: ((columnId: string) => void) | undefined;
+  isWrapped?: boolean | undefined;
+  onCalculate?: ((columnId: string, calculation: string) => void) | undefined;
+  activeCalculation?: string | undefined;
+  onInsertLeft?: ((columnId: string) => void) | undefined;
+  onInsertRight?: ((columnId: string) => void) | undefined;
+  onDuplicate?: ((columnId: string) => void) | undefined;
+  onDelete?: ((columnId: string) => void) | undefined;
 }
 
 const MENU_W = 285;
@@ -370,6 +422,15 @@ export function ColumnHeaderMenu<R>({
   onHideColumn,
   onFreezeColumn,
   onRenameColumn,
+  onChangeType,
+  onToggleWrap,
+  isWrapped,
+  onCalculate,
+  activeCalculation,
+  onInsertLeft,
+  onInsertRight,
+  onDuplicate,
+  onDelete,
 }: ColumnHeaderMenuProps<R>) {
   const col = engine.columns.find((c) => c.id === columnId) as ColumnDef | undefined;
   const [open, setOpen] = useState(false);
@@ -397,7 +458,7 @@ export function ColumnHeaderMenu<R>({
     if (!open) return;
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (popRef.current?.contains(t) || btnRef.current?.contains(t) || (t instanceof Element && t.closest('.te-flyout'))) return;
+      if (popRef.current?.contains(t) || btnRef.current?.contains(t) || (t instanceof Element && (t.closest('.te-flyout') || t.closest('.te-nested-flyout')))) return;
       close();
     };
     const onKey = (e: KeyboardEvent) => {
@@ -469,7 +530,23 @@ export function ColumnHeaderMenu<R>({
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <MenuBody engine={engine} col={col} close={close} onHideColumn={onHideColumn} onFreezeColumn={onFreezeColumn} onRenameColumn={onRenameColumn} />
+            <MenuBody
+              engine={engine}
+              col={col}
+              close={close}
+              onHideColumn={onHideColumn}
+              onFreezeColumn={onFreezeColumn}
+              onRenameColumn={onRenameColumn}
+              onChangeType={onChangeType}
+              onToggleWrap={onToggleWrap}
+              isWrapped={isWrapped}
+              onCalculate={onCalculate}
+              activeCalculation={activeCalculation}
+              onInsertLeft={onInsertLeft}
+              onInsertRight={onInsertRight}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+            />
           </div>,
           document.body
         )}
@@ -484,6 +561,15 @@ function MenuBody<R>({
   onHideColumn,
   onFreezeColumn,
   onRenameColumn,
+  onChangeType,
+  onToggleWrap,
+  isWrapped,
+  onCalculate,
+  activeCalculation,
+  onInsertLeft,
+  onInsertRight,
+  onDuplicate,
+  onDelete,
 }: {
   engine: TableEngine<R>;
   col: ColumnDef;
@@ -491,6 +577,15 @@ function MenuBody<R>({
   onHideColumn?: ((columnId: string) => void) | undefined;
   onFreezeColumn?: ((columnId: string) => void) | undefined;
   onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
+  onChangeType?: ((columnId: string, newType: string) => void) | undefined;
+  onToggleWrap?: ((columnId: string) => void) | undefined;
+  isWrapped?: boolean | undefined;
+  onCalculate?: ((columnId: string, calculation: string) => void) | undefined;
+  activeCalculation?: string | undefined;
+  onInsertLeft?: ((columnId: string) => void) | undefined;
+  onInsertRight?: ((columnId: string) => void) | undefined;
+  onDuplicate?: ((columnId: string) => void) | undefined;
+  onDelete?: ((columnId: string) => void) | undefined;
 }) {
   const type = getColumnType(col.type);
   const sortable = col.sortable !== false;
@@ -501,20 +596,70 @@ function MenuBody<R>({
   const othersSorted = engine.sort.some((c) => c.columnId !== col.id);
   const filter = engine.filters[col.id];
 
-  // Submenús desplegables portaleados a body para evitar barras de desplazamiento
+  // Submenús desplegables con puente de hover seguro + anclaje por clic
   const [activeFlyout, setActiveFlyout] = useState<'filter' | 'property' | null>(null);
+  const [pinnedFlyout, setPinnedFlyout] = useState<'filter' | 'property' | null>(null);
+  const [nestedFlyout, setNestedFlyout] = useState<'type' | 'calc' | null>(null);
   const [selectedOp, setSelectedOp] = useState<OperatorDef | null>(null);
   const [opVal, setOpVal] = useState('');
   const [opVal2, setOpVal2] = useState('');
   const [propLabel, setPropLabel] = useState(col.label);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [wrappedState, setWrappedState] = useState(isWrapped ?? false);
+  const [selectedCalc, setSelectedCalc] = useState(activeCalculation ?? '');
+
   const [flyoutPos, setFlyoutPos] = useState<{ top: number; left: number } | null>(null);
+  const [nestedPos, setNestedPos] = useState<{ top: number; left: number } | null>(null);
 
   const filterBtnRef = useRef<HTMLButtonElement>(null);
   const propBtnRef = useRef<HTMLButtonElement>(null);
+  const typeBtnRef = useRef<HTMLButtonElement>(null);
+  const calcBtnRef = useRef<HTMLButtonElement>(null);
+
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const nestedTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const cancelCloseFlyout = (target: 'filter' | 'property') => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setActiveFlyout(target);
+  };
+
+  const scheduleCloseFlyout = () => {
+    if (pinnedFlyout) return; // Si fue fijado por clic, no se cierra al mover el mouse
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
+      setActiveFlyout(null);
+      setNestedFlyout(null);
+      setSelectedOp(null);
+    }, 220); // 220ms de gracia para cruzar el mouse sin perder el foco
+  };
+
+  const cancelCloseNested = (target: 'type' | 'calc') => {
+    if (nestedTimerRef.current) {
+      clearTimeout(nestedTimerRef.current);
+      nestedTimerRef.current = null;
+    }
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setNestedFlyout(target);
+  };
+
+  const scheduleCloseNested = () => {
+    if (nestedTimerRef.current) clearTimeout(nestedTimerRef.current);
+    nestedTimerRef.current = setTimeout(() => {
+      setNestedFlyout(null);
+    }, 220);
+  };
 
   useLayoutEffect(() => {
     if (!activeFlyout) {
       setFlyoutPos(null);
+      setNestedFlyout(null);
       return;
     }
     const btn = activeFlyout === 'filter' ? filterBtnRef.current : propBtnRef.current;
@@ -522,11 +667,28 @@ function MenuBody<R>({
     const r = btn.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const flyoutW = 230;
-    const left = r.right + 4 + flyoutW > vw - 12 ? Math.max(12, r.left - flyoutW - 4) : r.right + 4;
-    const top = Math.max(8, Math.min(r.top - 4, vh - 260));
+    const flyoutW = 240;
+    // Solapamiento de 2px para eliminar cualquier espacio muerto entre botones y flyout
+    const left = r.right - 2 + flyoutW > vw - 12 ? Math.max(12, r.left - flyoutW + 2) : r.right - 2;
+    const top = Math.max(8, Math.min(r.top - 4, vh - 360));
     setFlyoutPos({ top, left });
   }, [activeFlyout, selectedOp]);
+
+  useLayoutEffect(() => {
+    if (!nestedFlyout) {
+      setNestedPos(null);
+      return;
+    }
+    const btn = nestedFlyout === 'type' ? typeBtnRef.current : calcBtnRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const flyoutW = 210;
+    const left = r.right - 2 + flyoutW > vw - 12 ? Math.max(12, r.left - flyoutW + 2) : r.right - 2;
+    const top = Math.max(8, Math.min(r.top - 4, vh - 260));
+    setNestedPos({ top, left });
+  }, [nestedFlyout]);
 
   const allOperators = useMemo(() => type.operators(col), [type, col]);
 
@@ -564,8 +726,58 @@ function MenuBody<R>({
       col.label = trimmed;
       onRenameColumn?.(col.id, trimmed);
     }
-    setActiveFlyout(null);
+    setIsRenaming(false);
   };
+
+  const handleSelectType = (newType: string) => {
+    col.type = newType;
+    onChangeType?.(col.id, newType);
+    setNestedFlyout(null);
+    setActiveFlyout(null);
+    close();
+  };
+
+  const handleSelectCalc = (calcId: string) => {
+    const next = selectedCalc === calcId ? '' : calcId;
+    setSelectedCalc(next);
+    onCalculate?.(col.id, next);
+    setNestedFlyout(null);
+    setActiveFlyout(null);
+    close();
+  };
+
+  const handleToggleWrap = () => {
+    const next = !wrappedState;
+    setWrappedState(next);
+    onToggleWrap?.(col.id);
+  };
+
+  const TYPE_OPTIONS = [
+    { id: 'text', label: 'Texto', icon: <Type size={12} /> },
+    { id: 'number', label: 'Número', icon: <Hash size={12} /> },
+    { id: 'percent', label: 'Porcentaje', icon: <Percent size={12} /> },
+    { id: 'date', label: 'Fecha', icon: <Calendar size={12} /> },
+    { id: 'select', label: 'Selección única', icon: <Tag size={12} /> },
+    { id: 'person', label: 'Persona / Responsable', icon: <User size={12} /> },
+  ];
+
+  const isNumeric = col.type === 'number' || col.type === 'percent' || col.id === 'duration';
+  const CALC_OPTIONS = isNumeric
+    ? [
+        { id: 'sum', label: 'Suma total' },
+        { id: 'avg', label: 'Promedio / Media' },
+        { id: 'min', label: 'Valor mínimo' },
+        { id: 'max', label: 'Valor máximo' },
+        { id: 'range', label: 'Rango (Máx - Mín)' },
+        { id: 'count', label: 'Contar todos' },
+        { id: 'count_empty', label: 'Contar vacíos' },
+      ]
+    : [
+        { id: 'count', label: 'Contar todos' },
+        { id: 'unique', label: 'Contar valores únicos' },
+        { id: 'count_empty', label: 'Contar vacíos (Sin asignar)' },
+        { id: 'filled_percent', label: '% de registros completos' },
+      ];
 
   return (
     <>
@@ -621,16 +833,24 @@ function MenuBody<R>({
         {filterable && allOperators.length > 0 && (
           <div
             className="te-submenu-item"
-            onMouseEnter={() => { setActiveFlyout('filter'); setSelectedOp(null); }}
-            onMouseLeave={() => { if (!selectedOp) setActiveFlyout(null); }}
+            onMouseEnter={() => cancelCloseFlyout('filter')}
+            onMouseLeave={scheduleCloseFlyout}
           >
             <button
               ref={filterBtnRef}
               type="button"
               className={`te-submenu-trigger ${activeFlyout === 'filter' ? 'open' : ''}`}
-              onClick={() => {
-                setActiveFlyout((prev) => (prev === 'filter' ? null : 'filter'));
-                setSelectedOp(null);
+              onClick={(e) => {
+                e.stopPropagation();
+                if (pinnedFlyout === 'filter') {
+                  setPinnedFlyout(null);
+                  setActiveFlyout(null);
+                } else {
+                  setPinnedFlyout('filter');
+                  setActiveFlyout('filter');
+                  setSelectedOp(null);
+                  setNestedFlyout(null);
+                }
               }}
             >
               <div className="te-submenu-left">
@@ -642,21 +862,30 @@ function MenuBody<R>({
           </div>
         )}
 
-        {/* Desplegable de Editar propiedad tipo Notion */}
+        {/* Desplegable de Configuración de propiedad tipo Notion */}
         <div
           className="te-submenu-item"
-          onMouseEnter={() => setActiveFlyout('property')}
-          onMouseLeave={() => setActiveFlyout(null)}
+          onMouseEnter={() => cancelCloseFlyout('property')}
+          onMouseLeave={scheduleCloseFlyout}
         >
           <button
             ref={propBtnRef}
             type="button"
             className={`te-submenu-trigger ${activeFlyout === 'property' ? 'open' : ''}`}
-            onClick={() => setActiveFlyout((prev) => (prev === 'property' ? null : 'property'))}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (pinnedFlyout === 'property') {
+                setPinnedFlyout(null);
+                setActiveFlyout(null);
+              } else {
+                setPinnedFlyout('property');
+                setActiveFlyout('property');
+              }
+            }}
           >
             <div className="te-submenu-left">
               <Sliders size={12} />
-              <span>Editar propiedad</span>
+              <span>Configuración de propiedad</span>
             </div>
             <ChevronRight size={13} style={{ color: '#94a3b8' }} />
           </button>
@@ -719,15 +948,15 @@ function MenuBody<R>({
         )}
       </div>
 
-      {/* 5. Flyouts portaleados directamente a document.body (0 scrollbars en menú) */}
+      {/* 5. Flyout de Filtros portaleado a document.body */}
       {activeFlyout === 'filter' && flyoutPos && createPortal(
         <div
           className="te-flyout"
           style={{ top: flyoutPos.top, left: flyoutPos.left }}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          onMouseEnter={() => setActiveFlyout('filter')}
-          onMouseLeave={() => { if (!selectedOp) setActiveFlyout(null); }}
+          onMouseEnter={() => cancelCloseFlyout('filter')}
+          onMouseLeave={scheduleCloseFlyout}
         >
           {selectedOp ? (
             <div className="te-flyout-form">
@@ -777,37 +1006,260 @@ function MenuBody<R>({
         document.body
       )}
 
+      {/* 6. Flyout completo de Configuración de Propiedad (Notion) portaleado a document.body */}
       {activeFlyout === 'property' && flyoutPos && createPortal(
         <div
           className="te-flyout"
-          style={{ top: flyoutPos.top, left: flyoutPos.left }}
+          style={{ top: flyoutPos.top, left: flyoutPos.left, width: 240 }}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          onMouseEnter={() => setActiveFlyout('property')}
-          onMouseLeave={() => setActiveFlyout(null)}
+          onMouseEnter={() => cancelCloseFlyout('property')}
+          onMouseLeave={scheduleCloseFlyout}
         >
-          <div className="te-flyout-form">
-            <div className="te-flyout-title">Nombre de columna</div>
-            <input
-              type="text"
-              className="te-field"
-              value={propLabel}
-              onChange={(e) => setPropLabel(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && savePropLabel()}
-              autoFocus
-            />
-            <div className="te-prop-type-badge">
-              <span className="te-prop-type-tag">Tipo: {getPropertyTypeName(col.type)}</span>
+          {/* Cabecera editable con tipo */}
+          <div className="te-prop-header">
+            <div className="te-prop-title-row">
+              <span className="te-prop-icon">{getPropertyIcon(col.type)}</span>
+              {isRenaming ? (
+                <input
+                  type="text"
+                  className="te-field te-rename-input"
+                  value={propLabel}
+                  onChange={(e) => setPropLabel(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') savePropLabel();
+                    if (e.key === 'Escape') setIsRenaming(false);
+                  }}
+                  onBlur={savePropLabel}
+                  autoFocus
+                />
+              ) : (
+                <span
+                  className="te-prop-name"
+                  onClick={() => setIsRenaming(true)}
+                  title="Clic para renombrar"
+                >
+                  {col.label}
+                </span>
+              )}
             </div>
-            <div className="te-foot-btns" style={{ marginTop: 4 }}>
-              <button type="button" className="te-btn" onClick={() => setActiveFlyout(null)}>
-                Cancelar
-              </button>
-              <button type="button" className="te-btn te-btn-primary" onClick={savePropLabel}>
-                Guardar
-              </button>
-            </div>
+            <span className="te-prop-type-tag">{getPropertyTypeName(col.type)}</span>
           </div>
+
+          <div className="te-sep" />
+
+          {/* Opciones de Notion */}
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => setIsRenaming(true)}
+          >
+            <div className="te-submenu-left">
+              <Pencil size={12} />
+              <span>Renombrar propiedad</span>
+            </div>
+          </button>
+
+          {/* Cambiar tipo › */}
+          <button
+            ref={typeBtnRef}
+            type="button"
+            className={`te-flyout-item ${nestedFlyout === 'type' ? 'open' : ''}`}
+            onMouseEnter={() => cancelCloseNested('type')}
+            onMouseLeave={scheduleCloseNested}
+            onClick={(e) => {
+              e.stopPropagation();
+              setNestedFlyout((prev) => (prev === 'type' ? null : 'type'));
+            }}
+          >
+            <div className="te-submenu-left">
+              <Sliders size={12} />
+              <span>Cambiar tipo de dato</span>
+            </div>
+            <ChevronRight size={12} style={{ color: '#94a3b8' }} />
+          </button>
+
+          {/* Calcular al pie › */}
+          <button
+            ref={calcBtnRef}
+            type="button"
+            className={`te-flyout-item ${nestedFlyout === 'calc' ? 'open' : ''}`}
+            onMouseEnter={() => cancelCloseNested('calc')}
+            onMouseLeave={scheduleCloseNested}
+            onClick={(e) => {
+              e.stopPropagation();
+              setNestedFlyout((prev) => (prev === 'calc' ? null : 'calc'));
+            }}
+          >
+            <div className="te-submenu-left">
+              <Sigma size={12} />
+              <span>Calcular al pie</span>
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {selectedCalc && <span className="te-calc-badge">{selectedCalc}</span>}
+              <ChevronRight size={12} style={{ color: '#94a3b8' }} />
+            </div>
+          </button>
+
+          {/* Ajustar contenido (Wrap text) */}
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={handleToggleWrap}
+          >
+            <div className="te-submenu-left">
+              <WrapText size={12} />
+              <span>Ajustar contenido</span>
+            </div>
+            {wrappedState && <Check size={12} className="te-tick" />}
+          </button>
+
+          {/* Inmovilizar (Freeze) */}
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => {
+              onFreezeColumn?.(col.id);
+              close();
+            }}
+          >
+            <div className="te-submenu-left">
+              <Pin size={12} />
+              <span>Inmovilizar columna</span>
+            </div>
+          </button>
+
+          {/* Ocultar */}
+          {col.id !== 'name' && (
+            <button
+              type="button"
+              className="te-flyout-item te-danger-hover"
+              onClick={() => {
+                onHideColumn?.(col.id);
+                close();
+              }}
+            >
+              <div className="te-submenu-left">
+                <EyeOff size={12} />
+                <span>Ocultar columna</span>
+              </div>
+            </button>
+          )}
+
+          <div className="te-sep" />
+
+          {/* Estructurales: Insertar a la izquierda / derecha */}
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => {
+              onInsertLeft?.(col.id);
+              close();
+            }}
+          >
+            <div className="te-submenu-left">
+              <ArrowLeft size={12} />
+              <span>Insertar a la izquierda</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => {
+              onInsertRight?.(col.id);
+              close();
+            }}
+          >
+            <div className="te-submenu-left">
+              <ArrowRight size={12} />
+              <span>Insertar a la derecha</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => {
+              onDuplicate?.(col.id);
+              close();
+            }}
+          >
+            <div className="te-submenu-left">
+              <Copy size={12} />
+              <span>Duplicar columna</span>
+            </div>
+          </button>
+
+          {onDelete && col.id !== 'name' && col.id !== 'code' && (
+            <button
+              type="button"
+              className="te-flyout-item te-danger-hover"
+              onClick={() => {
+                onDelete(col.id);
+                close();
+              }}
+            >
+              <div className="te-submenu-left">
+                <Trash2 size={12} />
+                <span>Eliminar propiedad</span>
+              </div>
+            </button>
+          )}
+        </div>,
+        document.body
+      )}
+
+      {/* 7. Sub-flyouts anidados (Cambiar tipo / Calcular) portaleados a document.body */}
+      {nestedFlyout === 'type' && nestedPos && createPortal(
+        <div
+          className="te-nested-flyout"
+          style={{ top: nestedPos.top, left: nestedPos.left }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseEnter={() => cancelCloseNested('type')}
+          onMouseLeave={scheduleCloseNested}
+        >
+          <div className="te-flyout-title" style={{ padding: '3px 6px' }}>Tipos de dato</div>
+          {TYPE_OPTIONS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className="te-flyout-item"
+              onClick={() => handleSelectType(t.id)}
+            >
+              <div className="te-submenu-left">
+                {t.icon}
+                <span>{t.label}</span>
+              </div>
+              {col.type === t.id && <Check size={12} className="te-tick" />}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
+
+      {nestedFlyout === 'calc' && nestedPos && createPortal(
+        <div
+          className="te-nested-flyout"
+          style={{ top: nestedPos.top, left: nestedPos.left }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseEnter={() => cancelCloseNested('calc')}
+          onMouseLeave={scheduleCloseNested}
+        >
+          <div className="te-flyout-title" style={{ padding: '3px 6px' }}>Cálculos al pie</div>
+          {CALC_OPTIONS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className="te-flyout-item"
+              onClick={() => handleSelectCalc(c.id)}
+            >
+              <span>{c.label}</span>
+              {selectedCalc === c.id && <Check size={12} className="te-tick" />}
+            </button>
+          ))}
         </div>,
         document.body
       )}

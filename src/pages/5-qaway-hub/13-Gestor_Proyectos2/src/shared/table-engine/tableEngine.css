@@ -694,3 +694,88 @@
   color: #0066ff;
   font-weight: 600;
 }
+
+/* ───────────── Estilos de Configuración de Propiedad (Estilo Notion) ───────────── */
+.te-prop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px 6px;
+}
+
+.te-prop-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.te-prop-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.te-prop-name {
+  font-weight: 700;
+  font-size: 12px;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: 4px;
+  transition: background 0.1s ease;
+}
+
+.te-prop-name:hover {
+  background: #f1f5f9;
+}
+
+.te-rename-input {
+  padding: 2px 6px;
+  font-size: 11.5px;
+  height: 24px;
+}
+
+.te-nested-flyout {
+  position: fixed;
+  z-index: 10002;
+  min-width: 200px;
+  max-width: 240px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.16), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: teEntrance 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.te-calc-badge {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Puente invisible anti-mouseleave para submenús */
+.te-flyout::before,
+.te-nested-flyout::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: -12px;
+  width: 16px;
+  pointer-events: auto;
+}

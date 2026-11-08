@@ -7208,6 +7208,48 @@ body.gantt-resizing {
   position: relative;
 }
 
+/* Alineación al extremo derecho del botón de columnas */
+.gantt-v2 .cols-dropdown-wrap.cols-right-aligned {
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+/* Estilo azul App Primario institucional para el botón Columnas */
+.gantt-v2 .cols-dropdown-wrap .btn-primary-blue {
+  background: #0066ff !important;
+  color: #ffffff !important;
+  border: 1px solid #005ce6 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  box-shadow: 0 1px 3px rgba(0, 102, 255, 0.25) !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer !important;
+}
+
+.gantt-v2 .cols-dropdown-wrap .btn-primary-blue:hover {
+  background: #0052cc !important;
+  border-color: #0047b3 !important;
+  box-shadow: 0 3px 8px rgba(0, 102, 255, 0.35) !important;
+}
+
+.gantt-v2 .cols-dropdown-wrap .btn-primary-blue.active {
+  background: #0047b3 !important;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.3) !important;
+}
+
+.gantt-v2 .cols-dropdown-wrap .btn-primary-blue svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
 /* En pantallas pequeñas o medianas, el botón de columnas se compacta a solo icono para optimizar el espacio horizontal */
 @media (max-width: 1360px) {
   .gantt-v2 .cols-dropdown-wrap .cols-trigger-main-btn {
@@ -9256,7 +9298,11 @@ body.gantt-resizing {
   align-items: center !important;
   gap: 8px !important;
   flex-wrap: nowrap !important;
-  padding: 8px 18px !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  max-height: 58px !important;
+  box-sizing: border-box !important;
+  padding: 0 18px !important;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
 }
@@ -9704,14 +9750,18 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
-   ACORDEÓN DESPLEGABLE EN HOVER PARA HERRAMIENTAS DE LÍNEA BASE Y TOOLTIPS
+   ACORDEÓN DESPLEGABLE EN HOVER PARA HERRAMIENTAS DE BARRAS Y LÍNEA BASE
    ========================================================================== */
-.gantt-v2 .bar-tools-accordion {
+.gantt-v2 .bar-tools-accordion,
+.gantt-v2 .baseline-tools-accordion {
   display: inline-flex;
   align-items: center;
   position: relative;
+  height: 42px !important;
+  max-height: 42px !important;
+  box-sizing: border-box !important;
   border-radius: 8px;
-  background: #f8fafc;
+  background: #ffffff;
   border: 1px solid #cbd5e1;
   padding: 2px;
   gap: 3px;
@@ -9721,18 +9771,35 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .bar-tools-accordion:hover,
-.gantt-v2 .bar-tools-accordion:focus-within {
+.gantt-v2 .bar-tools-accordion:focus-within,
+.gantt-v2 .baseline-tools-accordion:hover,
+.gantt-v2 .baseline-tools-accordion:focus-within {
   background: #ffffff;
   border-color: #94a3b8;
   box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
 }
 
-.gantt-v2 .bar-tools-accordion .accordion-primary-btn {
-  flex-shrink: 0 !important;
-  z-index: 2;
+.gantt-v2 .bar-tools-accordion.has-active,
+.gantt-v2 .baseline-tools-accordion.has-active {
+  border-color: #93c5fd;
+  background: #f0f7ff;
 }
 
-.gantt-v2 .bar-tools-accordion .accordion-expandable-items {
+.gantt-v2 .bar-tools-accordion .accordion-primary-btn,
+.gantt-v2 .baseline-tools-accordion .baseline-primary-btn {
+  flex-shrink: 0 !important;
+  z-index: 2;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  padding: 0 !important;
+}
+
+.gantt-v2 .bar-tools-accordion .accordion-expandable-items,
+.gantt-v2 .baseline-tools-accordion .baseline-expandable-items {
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -9747,9 +9814,29 @@ body.gantt-resizing {
   white-space: nowrap;
 }
 
+.gantt-v2 .bar-tools-accordion .accordion-expandable-items .qm-btn-icon,
+.gantt-v2 .baseline-tools-accordion .baseline-expandable-items .qm-btn-icon {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
+
 .gantt-v2 .bar-tools-accordion:hover .accordion-expandable-items,
 .gantt-v2 .bar-tools-accordion:focus-within .accordion-expandable-items {
   max-width: 116px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.gantt-v2 .baseline-tools-accordion:hover .baseline-expandable-items,
+.gantt-v2 .baseline-tools-accordion:focus-within .baseline-expandable-items {
+  max-width: 82px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
@@ -9767,7 +9854,8 @@ body.gantt-resizing {
 
 /* Tooltips institucionales en la barra de herramientas y filtros (hacia abajo y fondo blanco pulido) */
 .gantt-v2 .filters [data-tooltip]::after,
-.gantt-v2 .bar-tools-accordion [data-tooltip]::after {
+.gantt-v2 .bar-tools-accordion [data-tooltip]::after,
+.gantt-v2 .baseline-tools-accordion [data-tooltip]::after {
   top: calc(100% + 8px);
   bottom: auto;
   transform: translateX(-50%) translateY(-4px);
@@ -9783,7 +9871,8 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .filters [data-tooltip]::before,
-.gantt-v2 .bar-tools-accordion [data-tooltip]::before {
+.gantt-v2 .bar-tools-accordion [data-tooltip]::before,
+.gantt-v2 .baseline-tools-accordion [data-tooltip]::before {
   top: calc(100% + 3px);
   bottom: auto;
   transform: translateX(-50%) translateY(-4px);
@@ -9794,8 +9883,10 @@ body.gantt-resizing {
 
 .gantt-v2 .filters [data-tooltip]:hover::after,
 .gantt-v2 .bar-tools-accordion [data-tooltip]:hover::after,
+.gantt-v2 .baseline-tools-accordion [data-tooltip]:hover::after,
 .gantt-v2 .filters [data-tooltip]:hover::before,
-.gantt-v2 .bar-tools-accordion [data-tooltip]:hover::before {
+.gantt-v2 .bar-tools-accordion [data-tooltip]:hover::before,
+.gantt-v2 .baseline-tools-accordion [data-tooltip]:hover::before {
   transform: translateX(-50%) translateY(0);
 }
 /* Animacion acelerada por hardware para el Drawer Lateral a 60 FPS */
@@ -10431,7 +10522,7 @@ body.gantt-resizing {
   height: 100%;
   max-height: calc(100vh - 210px);
   background: #f8fafc;
-  padding: 12px 16px;
+  padding: 0 16px 12px !important;
   gap: 10px;
   color: #0f172a;
   overflow: hidden;

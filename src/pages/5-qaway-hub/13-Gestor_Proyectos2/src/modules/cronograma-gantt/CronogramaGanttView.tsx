@@ -109,6 +109,7 @@ import {
   LayoutDashboard,
   List,
   FolderKanban,
+  GitCompareArrows,
   GitFork,
   GripVertical,
   Link2,
@@ -3010,6 +3011,24 @@ export default function CronogramaGanttView({
     notify(`Línea base fijada en ${pending} registro${pending === 1 ? '' : 's'} (Ctrl+Z para deshacer)`);
   };
 
+  /* Recalibra o limpia la línea base contractual en caso de adenda formal MINEDU */
+  const resetBaselines = () => {
+    const withBaseline = items.filter((x) => hasBaseline(x)).length;
+    if (withBaseline === 0) {
+      notify('No hay líneas base fijadas para recalibrar');
+      return;
+    }
+    commitChange((old) =>
+      old.map((x) => {
+        const next = { ...x };
+        delete next.baselineStart;
+        delete next.baselineEnd;
+        return next;
+      })
+    );
+    notify(`Línea base restablecida en ${withBaseline} registro${withBaseline === 1 ? '' : 's'} (Ctrl+Z para deshacer)`);
+  };
+
   const setStart = (x: Item, v: string) => {
     if (!v) return;
     update(x.id, v > x.end ? { start: v, end: v } : { start: v });
@@ -5039,53 +5058,33 @@ export default function CronogramaGanttView({
               </>
             )}
 
-            {/* Separador vertical: Bloque 3 (Tiempo) | Bloque 4 (Herramientas y Acciones) */}
+            {/* Separador vertical: Bloque 2 (Tiempo) | Bloque 3 (Visualización de Barras) */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Controles de visualización de barras en Acordeón al Hover (Línea base principal + %, dependencias y responsables) */}
+            {/* Bloque 3: Visualización de barras en Acordeón al Hover (%, dependencias y responsables) */}
             {(viewMode === 'gantt' || viewMode === 'calendario') && (
               <div
                 className={'bar-tools-accordion ' + (
-                  (viewMode === 'calendario' ? (calShowBarLabels || calShowBaseline) : (showBarLabels || showBaseline || showCriticalPath || showBarAvatars)) ? 'has-active' : ''
+                  (viewMode === 'calendario' ? calShowBarLabels : (showBarLabels || showCriticalPath || showBarAvatars)) ? 'has-active' : ''
                 )}
               >
-                {/* Botón Principal siempre visible: Línea base */}
                 <button
                   type="button"
-                  className={'btn secondary qm-btn-icon accordion-primary-btn ' + ((viewMode === 'calendario' ? calShowBaseline : showBaseline) ? 'active' : '')}
+                  className={'btn secondary qm-btn-icon accordion-primary-btn ' + ((viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? 'active' : '')}
                   onClick={() => {
                     if (viewMode === 'calendario') {
-                      setCalShowBaseline((v) => !v);
-                      notify(calShowBaseline ? 'Línea base oculta' : 'Línea base oficial visible');
+                      setCalShowBarLabels((prev) => !prev);
                     } else {
-                      setShowBaseline((v) => !v);
-                      notify(showBaseline ? 'Línea base oculta' : 'Línea base oficial visible');
+                      setShowBarLabels((prev) => !prev);
                     }
                   }}
-                  data-tooltip="Línea base"
-                  aria-label="Mostrar u ocultar línea base oficial"
+                  data-tooltip="Visualización de barras"
+                  aria-label="Controles de visualización de barras"
                 >
-                  <Layers3 size={15} />
+                  <Percent size={14} />
                 </button>
 
-                {/* Botones secundarios desacordeonables hacia la derecha al pasar el mouse */}
                 <div className="accordion-expandable-items">
-                  <button
-                    type="button"
-                    className={'btn-toggle-labels qm-btn-icon ' + ((viewMode === 'calendario' ? calShowBarLabels : showBarLabels) ? 'active' : '')}
-                    onClick={() => {
-                      if (viewMode === 'calendario') {
-                        setCalShowBarLabels((prev) => !prev);
-                      } else {
-                        setShowBarLabels((prev) => !prev);
-                      }
-                    }}
-                    data-tooltip="Mostrar % en barras"
-                    aria-label="Mostrar u ocultar porcentaje de avance en barras"
-                  >
-                    <Percent size={14} />
-                  </button>
-
                   <button
                     type="button"
                     className={'btn secondary qm-btn-icon ' + (showCriticalPath ? 'active' : '')}
@@ -5115,262 +5114,292 @@ export default function CronogramaGanttView({
               </div>
             )}
 
-            <div className="filter-group-divider" aria-hidden="true" />
-
-            {/* Controles de expansión y pantalla completa para modo Gantt, Lista, Calendario y Mapa */}
-            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa') && (
-              <>
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "active" : ""}`}
-                  onClick={viewMode === 'mapa' ? () => setMapFullscreen((v) => !v) : toggleFullscreen}
-                  data-tooltip={(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "Salir de pantalla completa" : "Pantalla completa"}
-                  aria-label="Alternar modo pantalla completa"
-                >
-                  {(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-                </button>
-              </>
+            {/* Separador vertical: Visualización de barras | Línea Base */}
+            {(viewMode === 'gantt' || viewMode === 'calendario') && (
+              <div className="filter-group-divider" aria-hidden="true" />
             )}
 
-            {/* Controles de columnas, historial, línea base y limpieza universal para todas las vistas */}
-            {(
-              <>
-                {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
+            {/* Bloque 4: Gobernanza y Control de Línea Base (El Ancla y su familia PMI/PMBOK) */}
+            {viewMode !== 'mapa' && (
+              <div
+                className={'baseline-tools-accordion ' + (showBaseline || (viewMode === 'calendario' && calShowBaseline) ? 'has-active' : '')}
+              >
+                {/* Botón Principal: Fijar / Congelar Línea Base Oficial */}
                 <button
                   type="button"
-                  className="btn secondary qm-btn-icon"
+                  className="btn secondary qm-btn-icon baseline-primary-btn"
                   onClick={(e) => {
                     e.stopPropagation();
-                    resetColWidths();
+                    freezeBaselines();
                   }}
-                  data-tooltip="Ajustar anchos de columnas automáticamente"
-                  aria-label="Ajustar anchos de columnas al contenido"
+                  data-tooltip="Fijar / Congelar Línea Base oficial"
+                  aria-label="Fijar línea base del cronograma (PMBOK)"
                 >
-                  <ArrowLeftRight size={14} />
+                  <Anchor size={14} />
                 </button>
 
-                {/* Botón Retroceder / Deshacer (Buildern standard) */}
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleUndo();
-                  }}
-                  disabled={history.length === 0}
-                  data-tooltip={history.length > 0 ? "Retroceder / Deshacer (Ctrl+Z)" : "Sin cambios para retroceder"}
-                  aria-label="Retroceder o deshacer último cambio"
-                >
-                  <Undo2 size={14} />
-                </button>
+                {/* Parientes de Línea Base desplegables al pasar el mouse */}
+                <div className="baseline-expandable-items">
+                  <button
+                    type="button"
+                    className={'btn secondary qm-btn-icon ' + ((viewMode === 'calendario' ? calShowBaseline : showBaseline) ? 'active' : '')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (viewMode === 'calendario') {
+                        setCalShowBaseline((v) => !v);
+                        notify(calShowBaseline ? 'Comparación de línea base oculta' : 'Línea base oficial visible');
+                      } else {
+                        setShowBaseline((v) => !v);
+                        notify(showBaseline ? 'Comparación de línea base oculta' : 'Línea base oficial visible');
+                      }
+                    }}
+                    data-tooltip={(viewMode === 'calendario' ? calShowBaseline : showBaseline) ? "Ocultar variación de línea base" : "Ver desviación / varianza vs línea base"}
+                    aria-label="Comparar visualmente fechas actuales vs línea base"
+                  >
+                    <GitCompareArrows size={14} />
+                  </button>
 
-                {/* Botón Adelantar / Rehacer (Buildern standard) */}
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRedo();
-                  }}
-                  disabled={redoHistory.length === 0}
-                  data-tooltip={redoHistory.length > 0 ? "Adelantar / Rehacer (Ctrl+Y)" : "Sin cambios para adelantar"}
-                  aria-label="Adelantar o rehacer último cambio"
-                >
-                  <Redo2 size={14} />
-                </button>
-
-                {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base (en Gantt y Lista, no aplica a Mapa) */}
-                {viewMode !== 'mapa' && (
                   <button
                     type="button"
                     className="btn secondary qm-btn-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      freezeBaselines();
+                      resetBaselines();
                     }}
-                    data-tooltip="Fijar línea base (fechas actuales) en registros sin línea base"
-                    aria-label="Fijar línea base del cronograma"
+                    data-tooltip="Recalibrar línea base (Adenda MINEDU)"
+                    aria-label="Restablecer línea base contractual"
                   >
-                    <Anchor size={14} />
+                    <RotateCcw size={13} />
                   </button>
-                )}
+                </div>
+              </div>
+            )}
 
-                {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion / HubPro) */}
-                <div className="filter-dropdown-wrap cols-dropdown-wrap">
-                  <button
-                    type="button"
-                    className={`btn secondary cols-trigger-main-btn ${colsMenuOpen ? "active" : ""}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setColsMenuOpen((v) => !v);
-                    }}
-                    style={{
-                      height: 42,
-                      minHeight: 42,
-                      padding: '0 12px',
-                      borderRadius: 10,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      boxSizing: 'border-box',
-                    }}
-                    title={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
-                    data-tooltip="Columnas visibles"
-                    aria-label="Configurar columnas visibles de la tabla"
-                  >
-                    <Columns3 size={14} />
-                    <span className="cols-btn-label">Columnas</span>
-                  </button>
+            {/* Separador vertical: Línea Base | Pantalla y Ajuste */}
+            <div className="filter-group-divider" aria-hidden="true" />
 
-                  {colsMenuOpen && (
-                    <div
-                      className="cols-popover"
-                      onClick={(e) => e.stopPropagation()}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onWheel={(e) => {
-                        e.stopPropagation();
-                        const list = e.currentTarget.querySelector('.cols-pop-list') as HTMLElement | null;
-                        if (list && e.target !== list && !list.contains(e.target as Node)) {
-                          list.scrollTop += e.deltaY;
-                        }
+            {/* Bloque 5: Ajuste de Pantalla y Cuadrícula */}
+            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa') && (
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "active" : ""}`}
+                onClick={viewMode === 'mapa' ? () => setMapFullscreen((v) => !v) : toggleFullscreen}
+                data-tooltip={(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "Salir de pantalla completa" : "Pantalla completa"}
+                aria-label="Alternar modo pantalla completa"
+              >
+                {(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              </button>
+            )}
+
+            {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
+            <button
+              type="button"
+              className="btn secondary qm-btn-icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetColWidths();
+              }}
+              data-tooltip="Ajustar anchos de columnas automáticamente"
+              aria-label="Ajustar anchos de columnas al contenido"
+            >
+              <ArrowLeftRight size={14} />
+            </button>
+
+            {/* Separador vertical: Ajustes | Historial de Deshacer */}
+            <div className="filter-group-divider" aria-hidden="true" />
+
+            {/* Bloque 6: Historial de Deshacer y Rehacer */}
+            <button
+              type="button"
+              className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUndo();
+              }}
+              disabled={history.length === 0}
+              data-tooltip={history.length > 0 ? "Retroceder / Deshacer (Ctrl+Z)" : "Sin cambios para retroceder"}
+              aria-label="Retroceder o deshacer último cambio"
+            >
+              <Undo2 size={14} />
+            </button>
+
+            <button
+              type="button"
+              className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRedo();
+              }}
+              disabled={redoHistory.length === 0}
+              data-tooltip={redoHistory.length > 0 ? "Adelantar / Rehacer (Ctrl+Y)" : "Sin cambios para adelantar"}
+              aria-label="Adelantar o rehacer último cambio"
+            >
+              <Redo2 size={14} />
+            </button>
+
+            {/* Separador vertical: Historial | Restablecer filtros */}
+            <div className="filter-group-divider" aria-hidden="true" />
+
+            {/* Bloque 7: Restablecimiento Universal de Todos los Filtros y Orden */}
+            <button
+              type="button"
+              className="btn secondary clear-btn qm-btn-icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSearch('');
+                setStateFilter('Todos');
+                setTypeFilter('Todos');
+                setSelectedRegions([]);
+                setPhaseFilter('Todas');
+                setGestorFilter('Todos');
+                setMacroFilter('Todos');
+                setSelectedStates([]);
+                setWbsDepthFilter('todos');
+                setWbsRoleFilter('todos');
+                setWbsLevelFilter('todos');
+                setVencimientosFilter('todos');
+                setListaTemporalFilter('Todos');
+                setRangeFrom(DEFAULT_RANGE.from);
+                setRangeTo(DEFAULT_RANGE.to);
+                setTab('Todos');
+                setCustomRules([]);
+                setAdvancedFiltersOpen(false);
+                setColFilterOpen(null);
+                setShowBaseline(false);
+                setCalShowBarLabels(true);
+                setCalShowBaseline(true);
+                setShowCriticalPath(false);
+                engine.clearAllFilters();
+                engine.clearSort();
+                resetColWidths();
+                closeMenus();
+                if (viewMode === 'calendario') {
+                  handleTodayCal();
+                } else {
+                  scrollToDate(RANGE_MIN);
+                }
+                notify('Todos los filtros restablecidos');
+              }}
+              data-tooltip="Restablecer todos los filtros"
+              aria-label="Restablecer todos los filtros y limpiar vista"
+            >
+              <RotateCcw size={15} />
+            </button>
+
+            {/* Bloque 8: Extremo Derecho · Botón de Columnas en Azul App Primario */}
+            <div className="filter-dropdown-wrap cols-dropdown-wrap cols-right-aligned">
+              <button
+                type="button"
+                className={`btn primary cols-trigger-main-btn btn-primary-blue ${colsMenuOpen ? "active" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setColsMenuOpen((v) => !v);
+                }}
+                title={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
+                data-tooltip="Configurar columnas visibles"
+                aria-label="Configurar columnas visibles de la tabla"
+              >
+                <Columns3 size={15} />
+                <span className="cols-btn-label">Columnas</span>
+              </button>
+
+              {colsMenuOpen && (
+                <div
+                  className="cols-popover"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onWheel={(e) => {
+                    e.stopPropagation();
+                    const list = e.currentTarget.querySelector('.cols-pop-list') as HTMLElement | null;
+                    if (list && e.target !== list && !list.contains(e.target as Node)) {
+                      list.scrollTop += e.deltaY;
+                    }
+                  }}
+                >
+                  <div className="cols-pop-head">
+                    <div>
+                      <strong>Columnas de la vista</strong>
+                      <span className="cols-pop-subtitle">Selecciona las columnas que deseas mostrar.</span>
+                    </div>
+                    <button type="button" onClick={() => setColsMenuOpen(false)} title="Cerrar panel">
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <div className="cols-pop-list">
+                    {[
+                      ...ALL_COL_META,
+                      ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
+                    ].map((col) => {
+                      const isVisible = visibleCols.includes(col.key);
+                      return (
+                        <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={isVisible}
+                            disabled={col.fixed}
+                            onChange={() => toggleColVisibility(col.key)}
+                          />
+                          <span className="col-option-name">{col.label}</span>
+                          {col.fixed ? (
+                            <small className="fixed-pill">Fija</small>
+                          ) : (
+                            <GripVertical size={13} className="col-grip-icon" />
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {/* Botón Destacado: Crear campo personalizado (Abre Modal Centrado) */}
+                  <div className="cols-new-col-section">
+                    <button
+                      type="button"
+                      className="cols-new-col-toggle-btn"
+                      onClick={() => {
+                        setColsMenuOpen(false);
+                        setNewColModalOpen(true);
                       }}
                     >
-                      <div className="cols-pop-head">
-                        <div>
-                          <strong>Columnas de la vista</strong>
-                          <span className="cols-pop-subtitle">Selecciona las columnas que deseas mostrar.</span>
-                        </div>
-                        <button type="button" onClick={() => setColsMenuOpen(false)} title="Cerrar panel">
-                          <X size={14} />
-                        </button>
-                      </div>
-                      <div className="cols-pop-list">
-                        {[
-                          ...ALL_COL_META,
-                          ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
-                        ].map((col) => {
-                          const isVisible = visibleCols.includes(col.key);
-                          return (
-                            <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
-                              <input
-                                type="checkbox"
-                                checked={isVisible}
-                                disabled={col.fixed}
-                                onChange={() => toggleColVisibility(col.key)}
-                              />
-                              <span className="col-option-name">{col.label}</span>
-                              {col.fixed ? (
-                                <small className="fixed-pill">Fija</small>
-                              ) : (
-                                <GripVertical size={13} className="col-grip-icon" />
-                              )}
-                            </label>
-                          );
-                        })}
-                      </div>
+                      <Plus size={14} />
+                      <span>Crear campo personalizado</span>
+                    </button>
+                  </div>
 
-                      {/* Botón Destacado: Crear campo personalizado (Abre Modal Centrado) */}
-                      <div className="cols-new-col-section">
-                        <button
-                          type="button"
-                          className="cols-new-col-toggle-btn"
-                          onClick={() => {
-                            setColsMenuOpen(false);
-                            setNewColModalOpen(true);
-                          }}
-                        >
-                          <Plus size={14} />
-                          <span>Crear campo personalizado</span>
-                        </button>
-                      </div>
+                  <div className="cols-pop-foot">
+                    <button
+                      type="button"
+                      className="cols-reorder-btn"
+                      onClick={() => {
+                        resetColWidths();
+                        setColsMenuOpen(false);
+                        notify('Anchos de columna auto-ajustados al contenido');
+                      }}
+                    >
+                      <ArrowLeftRight size={13} />
+                      <span>Ajustar anchos al contenido</span>
+                    </button>
 
-                      <div className="cols-pop-foot">
-                        <button
-                          type="button"
-                          className="cols-reorder-btn"
-                          onClick={() => {
-                            resetColWidths();
-                            setColsMenuOpen(false);
-                            notify('Anchos de columna auto-ajustados al contenido');
-                          }}
-                        >
-                          <ArrowLeftRight size={13} />
-                          <span>Ajustar anchos al contenido</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className="cols-reset-defaults-btn"
-                          onClick={() => {
-                            const isLista = viewMode === 'lista';
-                            const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
-                            setVisibleCols(defaultCols);
-                            const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
-                            try {
-                              localStorage.setItem(storageKey, JSON.stringify(defaultCols));
-                            } catch {}
-                            notify('Columnas restablecidas al orden predeterminado');
-                          }}
-                        >
-                          <RotateCcw size={12} />
-                          <span>Restablecer columnas</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    <button
+                      type="button"
+                      className="cols-reset-defaults-btn"
+                      onClick={() => {
+                        const isLista = viewMode === 'lista';
+                        const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
+                        setVisibleCols(defaultCols);
+                        const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+                        try {
+                          localStorage.setItem(storageKey, JSON.stringify(defaultCols));
+                        } catch {}
+                        notify('Columnas restablecidas al orden predeterminado');
+                      }}
+                    >
+                      <RotateCcw size={12} />
+                      <span>Restablecer columnas</span>
+                    </button>
+                  </div>
                 </div>
-
-                <div className="filter-group-divider" aria-hidden="true" />
-
-                {/* Zona 4: Restablecimiento Universal de Todos los Filtros y Orden */}
-                <button
-                  type="button"
-                  className="btn secondary clear-btn qm-btn-icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSearch('');
-                    setStateFilter('Todos');
-                    setTypeFilter('Todos');
-                    setSelectedRegions([]);
-                    setPhaseFilter('Todas');
-                    setGestorFilter('Todos');
-                    setMacroFilter('Todos');
-                    setSelectedStates([]);
-                    setWbsDepthFilter('todos');
-                    setWbsRoleFilter('todos');
-                    setWbsLevelFilter('todos');
-                    setVencimientosFilter('todos');
-                    setListaTemporalFilter('Todos');
-                    setRangeFrom(DEFAULT_RANGE.from);
-                    setRangeTo(DEFAULT_RANGE.to);
-                    setTab('Todos');
-                    setCustomRules([]);
-                    setAdvancedFiltersOpen(false);
-                    setColFilterOpen(null);
-                    setShowBaseline(false);
-                    setCalShowBarLabels(true);
-                    setCalShowBaseline(true);
-                    setShowCriticalPath(false);
-                    engine.clearAllFilters();
-                    engine.clearSort();
-                    resetColWidths();
-                    closeMenus();
-                    if (viewMode === 'calendario') {
-                      handleTodayCal();
-                    } else {
-                      scrollToDate(RANGE_MIN);
-                    }
-                    notify('Todos los filtros restablecidos');
-                  }}
-                  data-tooltip="Restablecer todos los filtros"
-                  aria-label="Restablecer todos los filtros y limpiar vista"
-                >
-                  <RotateCcw size={15} />
-                </button>
-              </>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Fila extra expandible de Filtros Personalizados */}
