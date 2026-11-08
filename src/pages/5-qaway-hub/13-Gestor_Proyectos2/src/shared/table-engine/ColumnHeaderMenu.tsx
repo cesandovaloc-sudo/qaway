@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronUp, Filter, Search, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronRight, ChevronUp, EyeOff, Filter, Pin, RotateCcw, Search, Sliders, X } from 'lucide-react';
 import {
   customRank,
   DATE_PRESET_LABELS,
@@ -12,6 +12,36 @@ import { isFilterActive } from './engine';
 import type { TableEngine } from './useTableEngine';
 import { EMPTY_TOKEN, type ColumnDef, type ColumnOption, type FilterValue, type OperatorDef } from './types';
 import './tableEngine.css';
+
+
+function getPropertyTypeName(type: string): string {
+  switch (type) {
+    case 'text': return 'Texto';
+    case 'number': return 'Número';
+    case 'percent': return 'Porcentaje';
+    case 'date': return 'Fecha';
+    case 'dateRange': return 'Rango de fechas';
+    case 'person': return 'Persona / Responsable';
+    case 'processState': return 'Estado de proceso';
+    case 'select': return 'Selección';
+    case 'multiSelect': return 'Selección múltiple';
+    case 'boolean': return 'Booleano';
+    default: return 'Propiedad';
+  }
+}
+
+function getFilterSubmenuTitle(type: string): string {
+  switch (type) {
+    case 'text': return 'Filtros de texto';
+    case 'number':
+    case 'percent': return 'Filtros de número';
+    case 'date':
+    case 'dateRange': return 'Filtros de fecha';
+    case 'person': return 'Filtros de responsable';
+    case 'processState': return 'Filtros de estado';
+    default: return 'Filtros avanzados';
+  }
+}
 
 /* ───────────── Opciones del selector ───────────── */
 
@@ -83,7 +113,7 @@ function buildOptions<R>(col: ColumnDef<R>, rows: R[]): CountedOption[] {
 /* ───────────── Selector múltiple (estilo Excel) ───────────── */
 
 const ROW_H = 28;
-const VIEW_H = 196;
+const VIEW_H = 168;
 
 interface SelectionFilterProps {
   col: ColumnDef;
@@ -213,7 +243,7 @@ const SelectionFilter: React.FC<SelectionFilterProps> = ({ col, options, value, 
 
       <div className="te-foot">
         <span className="te-selected-count">
-          {selected.size} de {options.length} seleccionados
+          {selected.size} de {options.length}
         </span>
         <div className="te-foot-btns">
           <button type="button" className="te-btn" onClick={onCancel}>
@@ -325,15 +355,21 @@ interface ColumnHeaderMenuProps<R> {
   /** Clase del botón disparador (hereda el estilo del encabezado de cada tabla). */
   buttonClassName?: string;
   iconSize?: number;
+  onHideColumn?: ((columnId: string) => void) | undefined;
+  onFreezeColumn?: ((columnId: string) => void) | undefined;
+  onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
 }
 
-const MENU_W = 272;
+const MENU_W = 285;
 
 export function ColumnHeaderMenu<R>({
   engine,
   columnId,
   buttonClassName = 'te-trigger',
   iconSize = 11,
+  onHideColumn,
+  onFreezeColumn,
+  onRenameColumn,
 }: ColumnHeaderMenuProps<R>) {
   const col = engine.columns.find((c) => c.id === columnId) as ColumnDef | undefined;
   const [open, setOpen] = useState(false);
@@ -361,7 +397,7 @@ export function ColumnHeaderMenu<R>({
     if (!open) return;
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (popRef.current?.contains(t) || btnRef.current?.contains(t)) return;
+      if (popRef.current?.contains(t) || btnRef.current?.contains(t) || (t instanceof Element && t.closest('.te-flyout'))) return;
       close();
     };
     const onKey = (e: KeyboardEvent) => {
@@ -433,7 +469,7 @@ export function ColumnHeaderMenu<R>({
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <MenuBody engine={engine} col={col} close={close} />
+            <MenuBody engine={engine} col={col} close={close} onHideColumn={onHideColumn} onFreezeColumn={onFreezeColumn} onRenameColumn={onRenameColumn} />
           </div>,
           document.body
         )}
@@ -445,10 +481,16 @@ function MenuBody<R>({
   engine,
   col,
   close,
+  onHideColumn,
+  onFreezeColumn,
+  onRenameColumn,
 }: {
   engine: TableEngine<R>;
   col: ColumnDef;
   close: (returnFocus?: boolean) => void;
+  onHideColumn?: ((columnId: string) => void) | undefined;
+  onFreezeColumn?: ((columnId: string) => void) | undefined;
+  onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
 }) {
   const type = getColumnType(col.type);
   const sortable = col.sortable !== false;
@@ -458,6 +500,35 @@ function MenuBody<R>({
   const mine = engine.sort.find((c) => c.columnId === col.id);
   const othersSorted = engine.sort.some((c) => c.columnId !== col.id);
   const filter = engine.filters[col.id];
+
+  // Submenús desplegables portaleados a body para evitar barras de desplazamiento
+  const [activeFlyout, setActiveFlyout] = useState<'filter' | 'property' | null>(null);
+  const [selectedOp, setSelectedOp] = useState<OperatorDef | null>(null);
+  const [opVal, setOpVal] = useState('');
+  const [opVal2, setOpVal2] = useState('');
+  const [propLabel, setPropLabel] = useState(col.label);
+  const [flyoutPos, setFlyoutPos] = useState<{ top: number; left: number } | null>(null);
+
+  const filterBtnRef = useRef<HTMLButtonElement>(null);
+  const propBtnRef = useRef<HTMLButtonElement>(null);
+
+  useLayoutEffect(() => {
+    if (!activeFlyout) {
+      setFlyoutPos(null);
+      return;
+    }
+    const btn = activeFlyout === 'filter' ? filterBtnRef.current : propBtnRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const flyoutW = 230;
+    const left = r.right + 4 + flyoutW > vw - 12 ? Math.max(12, r.left - flyoutW - 4) : r.right + 4;
+    const top = Math.max(8, Math.min(r.top - 4, vh - 260));
+    setFlyoutPos({ top, left });
+  }, [activeFlyout, selectedOp]);
+
+  const allOperators = useMemo(() => type.operators(col), [type, col]);
 
   const options = useMemo(
     () => buildOptions(col, engine.rows as unknown[]),
@@ -470,8 +541,35 @@ function MenuBody<R>({
     close();
   };
 
+  const handleOpSelect = (o: OperatorDef) => {
+    if (o.inputs === 0) {
+      applyFilter({ op: o.id });
+    } else {
+      setSelectedOp(o);
+      setOpVal('');
+      setOpVal2('');
+    }
+  };
+
+  const applyCustomOp = () => {
+    if (!selectedOp) return;
+    if (selectedOp.inputs === 1 && !opVal.trim()) return;
+    if (selectedOp.inputs === 2 && (!opVal.trim() || !opVal2.trim())) return;
+    applyFilter({ op: selectedOp.id, value: opVal.trim(), value2: opVal2.trim() });
+  };
+
+  const savePropLabel = () => {
+    const trimmed = propLabel.trim();
+    if (trimmed && trimmed !== col.label) {
+      col.label = trimmed;
+      onRenameColumn?.(col.id, trimmed);
+    }
+    setActiveFlyout(null);
+  };
+
   return (
     <>
+      {/* 1. Opciones de Ordenar (1 sola fila limpia) */}
       {modes.length > 0 && (
         <div className="te-section te-sortlist" role="group" aria-label="Ordenar">
           {modes.map((m) => {
@@ -503,37 +601,70 @@ function MenuBody<R>({
         </div>
       )}
 
-      {engine.sort.length > 1 && (
-        <div className="te-section te-criteria" role="group" aria-label="Prioridad de ordenamiento">
-          {engine.sort.map((c, i) => {
-            const cc = engine.columns.find((x) => x.id === c.columnId);
-            return (
-              <div key={c.columnId} className="te-crit">
-                <b>{i + 1}</b>
-                <span className="te-crit-name">{cc?.label ?? c.columnId}</span>
-                {c.dir === 'asc' ? <ArrowUp size={11} /> : <ArrowDown size={11} />}
-                <button type="button" disabled={i === 0} onClick={() => engine.moveSort(c.columnId, -1)} aria-label="Subir prioridad">
-                  <ChevronUp size={12} />
-                </button>
-                <button
-                  type="button"
-                  disabled={i === engine.sort.length - 1}
-                  onClick={() => engine.moveSort(c.columnId, 1)}
-                  aria-label="Bajar prioridad"
-                >
-                  <ChevronDown size={12} />
-                </button>
-                <button type="button" onClick={() => engine.removeSort(c.columnId)} aria-label="Quitar criterio">
-                  <X size={12} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
+      {/* Opción de borrar filtro de la columna si está activo */}
+      {isFilterActive(filter) && (
+        <button
+          type="button"
+          className="te-row-btn te-clear-btn"
+          onClick={() => applyFilter(null)}
+          title={`Borrar filtro de "${col.label}"`}
+        >
+          <RotateCcw size={12} />
+          <span>Borrar filtro de "{col.label}"</span>
+        </button>
       )}
 
-      {filterable && modes.length > 0 && <div className="te-sep" />}
+      {/* 2. Desplegables con flecha › (Excel + Notion) */}
+      <div className="te-sep" />
+      <div className="te-section">
+        {/* Desplegable de Filtros condicionales tipo Excel */}
+        {filterable && allOperators.length > 0 && (
+          <div
+            className="te-submenu-item"
+            onMouseEnter={() => { setActiveFlyout('filter'); setSelectedOp(null); }}
+            onMouseLeave={() => { if (!selectedOp) setActiveFlyout(null); }}
+          >
+            <button
+              ref={filterBtnRef}
+              type="button"
+              className={`te-submenu-trigger ${activeFlyout === 'filter' ? 'open' : ''}`}
+              onClick={() => {
+                setActiveFlyout((prev) => (prev === 'filter' ? null : 'filter'));
+                setSelectedOp(null);
+              }}
+            >
+              <div className="te-submenu-left">
+                <Filter size={12} />
+                <span>{getFilterSubmenuTitle(col.type)}</span>
+              </div>
+              <ChevronRight size={13} style={{ color: '#94a3b8' }} />
+            </button>
+          </div>
+        )}
 
+        {/* Desplegable de Editar propiedad tipo Notion */}
+        <div
+          className="te-submenu-item"
+          onMouseEnter={() => setActiveFlyout('property')}
+          onMouseLeave={() => setActiveFlyout(null)}
+        >
+          <button
+            ref={propBtnRef}
+            type="button"
+            className={`te-submenu-trigger ${activeFlyout === 'property' ? 'open' : ''}`}
+            onClick={() => setActiveFlyout((prev) => (prev === 'property' ? null : 'property'))}
+          >
+            <div className="te-submenu-left">
+              <Sliders size={12} />
+              <span>Editar propiedad</span>
+            </div>
+            <ChevronRight size={13} style={{ color: '#94a3b8' }} />
+          </button>
+        </div>
+      </div>
+
+      {/* 3. Selector estilo Excel (Buscador + Checkboxes + Aceptar / Cancelar) */}
+      <div className="te-sep" />
       {filterable && (
         <SelectionFilter
           col={col}
@@ -544,26 +675,141 @@ function MenuBody<R>({
         />
       )}
 
-      {(isFilterActive(filter) || engine.sort.length > 0) && (
-        <div className="te-section te-clears">
-          {isFilterActive(filter) && (
-            <button type="button" className="te-clear" onClick={() => applyFilter(null)}>
-              Limpiar filtro
-            </button>
+      {/* 4. Acciones rápidas de columna estilo Notion al pie */}
+      <div className="te-sep" />
+      <div className="te-section">
+        {onHideColumn && col.id !== 'name' && (
+          <button
+            type="button"
+            className="te-row-btn te-danger-hover"
+            onClick={() => {
+              onHideColumn(col.id);
+              close();
+            }}
+          >
+            <EyeOff size={12} />
+            <span>Ocultar columna</span>
+          </button>
+        )}
+        {onFreezeColumn && (
+          <button
+            type="button"
+            className="te-row-btn"
+            onClick={() => {
+              onFreezeColumn(col.id);
+              close();
+            }}
+          >
+            <Pin size={12} />
+            <span>Inmovilizar columna</span>
+          </button>
+        )}
+        {engine.sort.length > 0 && (
+          <button
+            type="button"
+            className="te-row-btn"
+            onClick={() => {
+              engine.clearSort();
+              close();
+            }}
+          >
+            <RotateCcw size={12} />
+            <span>Limpiar orden</span>
+          </button>
+        )}
+      </div>
+
+      {/* 5. Flyouts portaleados directamente a document.body (0 scrollbars en menú) */}
+      {activeFlyout === 'filter' && flyoutPos && createPortal(
+        <div
+          className="te-flyout"
+          style={{ top: flyoutPos.top, left: flyoutPos.left }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseEnter={() => setActiveFlyout('filter')}
+          onMouseLeave={() => { if (!selectedOp) setActiveFlyout(null); }}
+        >
+          {selectedOp ? (
+            <div className="te-flyout-form">
+              <div className="te-flyout-title">{selectedOp.label}</div>
+              <input
+                type={selectedOp.input === 'number' ? 'number' : selectedOp.input === 'date' ? 'date' : 'text'}
+                className="te-field"
+                placeholder="Escribe el valor..."
+                value={opVal}
+                onChange={(e) => setOpVal(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && applyCustomOp()}
+                autoFocus
+              />
+              {selectedOp.inputs === 2 && (
+                <input
+                  type={selectedOp.input === 'number' ? 'number' : selectedOp.input === 'date' ? 'date' : 'text'}
+                  className="te-field"
+                  placeholder="Hasta..."
+                  value={opVal2}
+                  onChange={(e) => setOpVal2(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && applyCustomOp()}
+                />
+              )}
+              <div className="te-foot-btns" style={{ marginTop: 4 }}>
+                <button type="button" className="te-btn" onClick={() => setSelectedOp(null)}>
+                  Atrás
+                </button>
+                <button type="button" className="te-btn te-btn-primary" onClick={applyCustomOp}>
+                  Aceptar
+                </button>
+              </div>
+            </div>
+          ) : (
+            allOperators.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className="te-flyout-item"
+                onClick={() => handleOpSelect(o)}
+              >
+                <span>{o.label}</span>
+                {o.inputs > 0 && <span style={{ color: '#94a3b8', fontSize: 10 }}>...</span>}
+              </button>
+            ))
           )}
-          {engine.sort.length > 0 && (
-            <button
-              type="button"
-              className="te-clear"
-              onClick={() => {
-                engine.clearSort();
-                close();
-              }}
-            >
-              Limpiar orden
-            </button>
-          )}
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {activeFlyout === 'property' && flyoutPos && createPortal(
+        <div
+          className="te-flyout"
+          style={{ top: flyoutPos.top, left: flyoutPos.left }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseEnter={() => setActiveFlyout('property')}
+          onMouseLeave={() => setActiveFlyout(null)}
+        >
+          <div className="te-flyout-form">
+            <div className="te-flyout-title">Nombre de columna</div>
+            <input
+              type="text"
+              className="te-field"
+              value={propLabel}
+              onChange={(e) => setPropLabel(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && savePropLabel()}
+              autoFocus
+            />
+            <div className="te-prop-type-badge">
+              <span className="te-prop-type-tag">Tipo: {getPropertyTypeName(col.type)}</span>
+            </div>
+            <div className="te-foot-btns" style={{ marginTop: 4 }}>
+              <button type="button" className="te-btn" onClick={() => setActiveFlyout(null)}>
+                Cancelar
+              </button>
+              <button type="button" className="te-btn te-btn-primary" onClick={savePropLabel}>
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -16,6 +16,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
+import PeruChoroplethView from './PeruChoroplethView';
 
 type Status = 'Cumple' | 'En proceso' | 'No cumple';
 export type TerritorialSubView = 'geo-real' | 'tematico-regional' | 'powerbi-analitico';
@@ -204,7 +205,11 @@ export default function MapaTerritorialView({
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const leafletCanvasRef = useRef<HTMLDivElement>(null);
+  const thematicLeafletRef = useRef<HTMLDivElement>(null);
+  const analyticsLeafletRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<any>(null);
+  const thematicMapRef = useRef<any>(null);
+  const analyticsMapRef = useRef<any>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
 
   const allRows = useMemo(() => {
@@ -401,6 +406,54 @@ export default function MapaTerritorialView({
     };
   }, [subView, visibleRows, selectedRegion, refresh]);
 
+  // Las vistas territoriales comparten Leaflet. La Vista 2 queda lista para
+  // recibir límites UGEL oficiales; mientras no exista GeoJSON, muestra una
+  // capa territorial honesta basada en los centroides disponibles.
+  useEffect(() => {
+    if (subView === 'geo-real') return;
+    const host = subView === 'tematico-regional' ? thematicLeafletRef.current : analyticsLeafletRef.current;
+    if (!host) return;
+    let disposed = false;
+
+    import('leaflet').then((LModule) => {
+      if (disposed) return;
+      const L = (LModule as any).default || LModule;
+      const mapRef = subView === 'tematico-regional' ? thematicMapRef : analyticsMapRef;
+      const regKey = key(selectedRegion);
+      const conf = REGION_CONFIG[regKey] || { center: [-9.19, -75.01], zoom: 6 };
+
+      if (!mapRef.current) {
+        mapRef.current = L.map(host, { center: conf.center, zoom: conf.zoom, zoomControl: true, attributionControl: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18, subdomains: ['a', 'b', 'c'],
+        }).addTo(mapRef.current);
+      } else {
+        mapRef.current.setView(conf.center, conf.zoom, { animate: false });
+      }
+
+      const map = mapRef.current;
+      map.eachLayer((layer: any) => {
+        if (layer instanceof L.CircleMarker || layer instanceof L.GeoJSON) map.removeLayer(layer);
+      });
+
+      visibleRows.forEach((row) => {
+        const color = row.state === 'Cumple' ? '#00b96b' : row.state === 'En proceso' ? '#fa8c16' : '#ef4444';
+        const radius = subView === 'powerbi-analitico'
+          ? Math.max(8, Math.min(30, 8 + Math.sqrt(Math.max(1, row.progress)) * 1.8))
+          : 9;
+        const marker = L.circleMarker(row.coords, {
+          radius, color, fillColor: color, fillOpacity: subView === 'powerbi-analitico' ? 0.62 : 0.78,
+          weight: 2, opacity: 1,
+        }).addTo(map);
+        marker.bindTooltip(`<strong>${row.name}</strong><br/>${row.region}<br/>Avance: ${row.progress}%<br/>Estado: ${row.state}`, { direction: 'top' });
+        marker.on('click', () => setSelectedUgelId(row.id));
+      });
+      window.setTimeout(() => map.invalidateSize(), 150);
+    });
+
+    return () => { disposed = true; };
+  }, [subView, visibleRows, selectedRegion, refresh]);
+
   const handleSelectUgel = (row: typeof allRows[0]) => {
     setSelectedUgelId(row.id);
     if (subView === 'geo-real' && leafletRef.current && markersRef.current.has(row.id)) {
@@ -562,8 +615,15 @@ export default function MapaTerritorialView({
 
               {/* VISTA 2 */}
               {subView === 'tematico-regional' && (
-                <div className="stage-pane is-active thematic-svg-pane">
+                <div className="stage-pane is-active thematic-svg-pane thematic-map-real-pane">
+                  <PeruChoroplethView rows={allRows} onRegionSelect={(region) => setSelectedRegion(region.name)} />
+                  {/* Fallback editorial anterior eliminado del flujo activo. */}
+                  <div style={{ display: 'none' }}>
                   <div className="thematic-map-container">
+                    <div ref={thematicLeafletRef} className="territorial-leaflet-canvas thematic-leaflet-canvas" aria-label="Mapa coroplético territorial" />
+                    <div className="map-data-note">Capa temática por estado · GeoJSON oficial UGEL pendiente de incorporación</div>
+                    {/* Fallback editorial oculto: los polígonos manuales no se presentan como límites oficiales. */}
+                    <div className="thematic-svg-canvas" style={{ display: 'none' }} aria-hidden="true">
                     <svg
                       viewBox="0 0 540 480"
                       className="thematic-svg-canvas"
@@ -633,6 +693,7 @@ export default function MapaTerritorialView({
                         );
                       })}
                     </svg>
+                    </div>
 
                     <div className="thematic-phases-widget">
                       <div className="phases-header">
@@ -670,13 +731,15 @@ export default function MapaTerritorialView({
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
               )}
 
               {/* VISTA 3 */}
               {subView === 'powerbi-analitico' && (
                 <div className="stage-pane is-active powerbi-analytics-pane">
-                  <div className="powerbi-grid-container">
+                    <div className="powerbi-grid-container">
+                      <div ref={analyticsLeafletRef} className="territorial-leaflet-canvas analytics-leaflet-canvas" aria-label="Mapa analítico territorial con burbujas" />
                     <div className="powerbi-card">
                       <div className="card-top">
                         <BarChart3 size={14} className="card-top-icon" />
@@ -812,7 +875,7 @@ export default function MapaTerritorialView({
                   title="Vista 1: Mapa Geográfico Satelital Interactivo con Pines"
                 >
                   <Globe2 size={14} />
-                  <span>Mapa Geográfico</span>
+                  <span>Ubicaciones</span>
                 </button>
 
                 <button
@@ -822,7 +885,7 @@ export default function MapaTerritorialView({
                   title="Vista 2: Mapa Regional Temático por Provincias y Fases (HubPro)"
                 >
                   <Layers size={14} />
-                  <span>Mapa Regional Temático</span>
+                  <span>Regiones</span>
                 </button>
 
                 <button
@@ -832,7 +895,7 @@ export default function MapaTerritorialView({
                   title="Vista 3: Tablero Analítico Territorial tipo Power BI"
                 >
                   <BarChart3 size={14} />
-                  <span>Vista Analítica Power BI</span>
+                  <span>Indicadores</span>
                 </button>
               </div>
 

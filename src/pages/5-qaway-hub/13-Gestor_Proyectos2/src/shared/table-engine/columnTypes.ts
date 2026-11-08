@@ -267,8 +267,8 @@ const selectionModes = (customAsc: string, customDesc: string) => (col: ColumnDe
     modes.push({ mode: 'custom', dir: 'asc', label: pick(col, 'customAsc', customAsc) });
     modes.push({ mode: 'custom', dir: 'desc', label: pick(col, 'customDesc', customDesc) });
   }
-  modes.push({ mode: 'alpha', dir: 'asc', label: pick(col, 'asc', 'Ordenar de A a Z') });
-  modes.push({ mode: 'alpha', dir: 'desc', label: pick(col, 'desc', 'Ordenar de Z a A') });
+  modes.push({ mode: 'alpha', dir: 'asc', label: pick(col, 'asc', 'De A a Z') });
+  modes.push({ mode: 'alpha', dir: 'desc', label: pick(col, 'desc', 'De Z a A') });
   return modes;
 };
 
@@ -289,7 +289,7 @@ const textType: ColumnTypeDef = {
   kind: 'text',
   operators: filterOpsOf(TEXT_OPS),
   test: (raw, f) => testText(raw, f),
-  sortModes: scalarModes('Ordenar de A a Z', 'Ordenar de Z a A'),
+  sortModes: scalarModes('De A a Z', 'De Z a A'),
   sortKey: (raw) => {
     const s = toText(raw);
     return s ? s : null;
@@ -301,7 +301,7 @@ const numberType: ColumnTypeDef = {
   kind: 'number',
   operators: filterOpsOf(NUMBER_OPS),
   test: (raw, f) => testNumber(raw, f),
-  sortModes: scalarModes('Ordenar de menor a mayor', 'Ordenar de mayor a menor'),
+  sortModes: scalarModes('De menor a mayor', 'De mayor a menor'),
   sortKey: (raw) => toNum(raw),
 };
 
@@ -310,7 +310,7 @@ const percentType: ColumnTypeDef = {
   kind: 'percent',
   operators: filterOpsOf(PERCENT_OPS),
   test: (raw, f) => testNumber(raw, f, true),
-  sortModes: scalarModes('Ordenar de menor a mayor avance', 'Ordenar de mayor a menor avance'),
+  sortModes: scalarModes('De menor a mayor avance', 'De mayor a menor avance'),
   sortKey: (raw) => toNum(raw),
 };
 
@@ -319,7 +319,7 @@ const dateType: ColumnTypeDef = {
   kind: 'date',
   operators: filterOpsOf(DATE_OPS),
   test: testDate,
-  sortModes: scalarModes('Ordenar de más antiguo a más reciente', 'Ordenar de más reciente a más antiguo'),
+  sortModes: scalarModes('Más antiguos a más recientes', 'Más recientes a más antiguos'),
   sortKey: (raw) => normIso(raw),
 };
 
@@ -370,9 +370,9 @@ export const registerColumnType = (def: ColumnTypeDef) => {
   booleanType,
   selectionType('select', 'Según jerarquía definida', 'Jerarquía inversa'),
   selectionType('multiSelect', 'Según orden definido', 'Orden definido inverso'),
-  selectionType('person', 'Ordenar de A a Z', 'Ordenar de Z a A'),
+  selectionType('person', 'De A a Z', 'De Z a A'),
   selectionType('relation', 'Según orden definido', 'Orden definido inverso'),
-  selectionType('processState', 'Según flujo del proceso', 'Flujo del proceso inverso'),
+  selectionType('processState', 'Según flujo de proceso', 'Flujo de proceso inverso'),
 ].forEach(registerColumnType);
 
 export const getColumnType = (id: string): ColumnTypeDef => registry.get(id) ?? textType;

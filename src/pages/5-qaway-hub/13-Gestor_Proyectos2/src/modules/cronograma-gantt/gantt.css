@@ -1484,7 +1484,7 @@
   color: #0f172a;
   border: 1px solid #cbd5e1;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   padding: 6px 10px;
   border-radius: 7px;
@@ -7208,6 +7208,19 @@ body.gantt-resizing {
   position: relative;
 }
 
+/* En pantallas pequeñas o medianas, el botón de columnas se compacta a solo icono para optimizar el espacio horizontal */
+@media (max-width: 1360px) {
+  .gantt-v2 .cols-dropdown-wrap .cols-trigger-main-btn {
+    padding: 0 10px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    justify-content: center !important;
+  }
+  .gantt-v2 .cols-dropdown-wrap .cols-trigger-main-btn .cols-btn-label {
+    display: none !important;
+  }
+}
+
 .gantt-v2 .cols-dropdown-wrap .cols-popover {
   position: absolute;
   top: calc(100% + 6px);
@@ -9762,7 +9775,7 @@ body.gantt-resizing {
   color: #0f172a;
   border: 1px solid #cbd5e1;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 500;
   padding: 6px 10px;
   border-radius: 7px;
   box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
@@ -10928,6 +10941,49 @@ body.gantt-resizing {
   min-height: 480px;
   width: 100%;
   background: #e8eef3;
+}
+
+.thematic-leaflet-canvas,
+.analytics-leaflet-canvas {
+  position: absolute;
+  inset: 0;
+  min-height: 420px;
+  z-index: 1;
+}
+
+.peru-choropleth-embedded { position: relative; width: 100%; height: 100%; min-height: 420px; }
+.peru-choropleth-map { width: 100%; height: 100%; min-height: 420px; }
+.thematic-map-real-pane { padding: 0 !important; display: block !important; overflow: hidden !important; }
+.thematic-map-real-pane .peru-choropleth-embedded { min-height: 480px; height: 100%; }
+.thematic-map-real-pane .peru-choropleth-map { min-height: 480px; height: 100%; }
+.choropleth-selection { position: absolute; left: 14px; bottom: 14px; z-index: 5; padding: 8px 11px; border-radius: 6px; background: rgba(255,255,255,.94); color: #17324d; font-size: 12px; box-shadow: 0 4px 16px rgba(15,23,42,.16); }
+
+.thematic-map-container,
+.powerbi-analytics-pane {
+  position: relative;
+  min-height: 420px;
+}
+
+.map-data-note {
+  position: absolute;
+  z-index: 2;
+  left: 14px;
+  bottom: 14px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 6px;
+  background: rgba(15,23,42,.86);
+  color: #dbeafe;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.analytics-leaflet-canvas {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 390px;
+  min-height: 390px;
+  margin-bottom: 12px;
 }
 
 .qaway-div-icon {

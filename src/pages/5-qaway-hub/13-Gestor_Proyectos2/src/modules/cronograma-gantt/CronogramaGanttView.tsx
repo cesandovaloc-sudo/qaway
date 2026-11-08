@@ -130,6 +130,7 @@ import {
   ShieldCheck,
   Anchor,
   Columns3,
+  SlidersHorizontal,
   Tag,
   Target,
   Trash2,
@@ -632,7 +633,7 @@ const MIN_COLS: Record<ColKey, number> = {
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
-  { key: 'name', label: 'Componente / Subcomponente', fixed: true },
+  { key: 'name', label: 'COMPONENTE / SUBCOMPONENTE', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
   { key: 'parent', label: 'Componente padre' },
@@ -672,7 +673,7 @@ const GANTT_HIERARCHY: Hierarchy<Item> = {
 };
 
 const GANTT_COLUMNS: ColumnDef<Item>[] = [
-  { id: 'name', label: 'Componente / Subcomponente', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
+  { id: 'name', label: 'COMPONENTE / SUBCOMPONENTE', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
   { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r?.start },
   { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r?.end },
   { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r?.start, r?.end) },
@@ -4855,7 +4856,7 @@ export default function CronogramaGanttView({
               data-tooltip="Filtros avanzados"
               aria-label="Condiciones de filtrado avanzado"
             >
-              <Filter size={15} />
+              <SlidersHorizontal size={15} />
               {customRules.length > 0 && (
                 <span className="custom-filter-counter-badge">{customRules.length}</span>
               )}
@@ -5128,22 +5129,6 @@ export default function CronogramaGanttView({
                 >
                   {(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                 </button>
-
-                {viewMode !== 'mapa' && (
-                  <button
-                    type="button"
-                    className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleAllHitosExpand();
-                    }}
-                    data-tooltip={allHitosExpanded ? "Colapsar componentes" : "Expandir componentes"}
-                    aria-label={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
-                  >
-                    <ChevronsUpDown size={15} />
-                  </button>
-                )}
               </>
             )}
 
@@ -5214,7 +5199,7 @@ export default function CronogramaGanttView({
                 <div className="filter-dropdown-wrap cols-dropdown-wrap">
                   <button
                     type="button"
-                    className={`btn secondary ${colsMenuOpen ? "active" : ""}`}
+                    className={`btn secondary cols-trigger-main-btn ${colsMenuOpen ? "active" : ""}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       setColsMenuOpen((v) => !v);
@@ -5232,10 +5217,11 @@ export default function CronogramaGanttView({
                       boxSizing: 'border-box',
                     }}
                     title={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
+                    data-tooltip="Columnas visibles"
                     aria-label="Configurar columnas visibles de la tabla"
                   >
                     <Columns3 size={14} />
-                    <span>Columnas</span>
+                    <span className="cols-btn-label">Columnas</span>
                   </button>
 
                   {colsMenuOpen && (
@@ -5378,10 +5364,10 @@ export default function CronogramaGanttView({
                     }
                     notify('Todos los filtros restablecidos');
                   }}
-                  data-tooltip="Borrar todos los filtros"
-                  aria-label="Borrar todos los filtros y restablecer vista"
+                  data-tooltip="Restablecer todos los filtros"
+                  aria-label="Restablecer todos los filtros y limpiar vista"
                 >
-                  <FilterX size={15} />
+                  <RotateCcw size={15} />
                 </button>
               </>
             )}
@@ -5650,7 +5636,7 @@ export default function CronogramaGanttView({
 
               {/* ── Columna Nombre (Segunda en lista, primera en Gantt) ── */}
               <div className="name-head">
-                <span>{viewMode === 'lista' ? 'Nombre' : 'Componente / Subcomponente'}</span>
+                <span>{viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE'}</span>
                 <div className="head-col-actions">
                   <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
                   <button
@@ -5698,7 +5684,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="kind" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="kind" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('kind'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5719,7 +5705,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="parent" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="parent" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('parent'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5740,7 +5726,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="start" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="start" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'start' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'start')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('start'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5761,7 +5747,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="end" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="end" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'end' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'end')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('end'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5782,7 +5768,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="duration" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="duration" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'duration' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'duration')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('duration'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5803,7 +5789,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="progress" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="progress" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('progress'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5824,7 +5810,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="deviation" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="deviation" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'deviation' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'deviation')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('deviation'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5845,7 +5831,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="status" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="status" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('status'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5866,7 +5852,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="dependencies" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="dependencies" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'dependencies' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'dependencies')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('dependencies'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5887,7 +5873,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="gestor" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="gestor" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'gestor' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'gestor')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('gestor'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5908,7 +5894,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="region" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="region" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('region'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5929,7 +5915,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="actualEnd" buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId="actualEnd" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === 'actualEnd' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'actualEnd')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('actualEnd'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5957,7 +5943,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId={cCol.key} buttonClassName="th-action-btn" />
+                    <ColumnHeaderMenu engine={engine} columnId={cCol.key} buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
                   </div>
                   <div className={`col-resizer ${resizingCol === cCol.key ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, cCol.key as ColKey)} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth(cCol.key as ColKey); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
