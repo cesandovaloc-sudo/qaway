@@ -15,7 +15,7 @@ import './gantt.css';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
-import MapaTerritorialView from '../sedes/MapaTerritorialView';
+import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
 import {
@@ -70,6 +70,7 @@ import {
   AlertTriangle,
   ArrowLeftRight,
   ArrowRight,
+  BarChart3,
   Building2,
   CalendarDays,
   CalendarRange,
@@ -2173,6 +2174,8 @@ export default function CronogramaGanttView({
   
   type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
+  const [mapSubView, setMapSubView] = useState<TerritorialSubView>('geo-real');
+  const [mapFullscreen, setMapFullscreen] = useState(false);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
   const [colFilterOpen, setColFilterOpen] = useState<ColKey | null>(null);
@@ -4782,7 +4785,38 @@ export default function CronogramaGanttView({
             <div className="filter-group-divider" aria-hidden="true" />
 
                         {/* Bloque 3: Navegación temporal y selector de escala para todas las vistas */}
-            {viewMode === 'lista' ? (
+            {viewMode === 'mapa' ? (
+              /* En Modo Mapa: Conmutador Oficial de Sub-Vistas Territoriales (Geográfico, Temático Poligonal, Analítica Power BI) */
+              <div className="zoom map-subview-switcher" title="Modo de representación del mapa territorial">
+                <button
+                  type="button"
+                  className={mapSubView === 'geo-real' ? 'active' : ''}
+                  onClick={() => setMapSubView('geo-real')}
+                  title="Vista 1: Mapa Geográfico Satelital Interactivo con Pines"
+                >
+                  <MapPin size={13} style={{ marginRight: 4 }} />
+                  Geográfico
+                </button>
+                <button
+                  type="button"
+                  className={mapSubView === 'tematico-regional' ? 'active' : ''}
+                  onClick={() => setMapSubView('tematico-regional')}
+                  title="Vista 2: Mapa Regional Temático por Provincias y Fases (HubPro)"
+                >
+                  <Layers size={13} style={{ marginRight: 4 }} />
+                  Temático Poligonal
+                </button>
+                <button
+                  type="button"
+                  className={mapSubView === 'powerbi-analitico' ? 'active' : ''}
+                  onClick={() => setMapSubView('powerbi-analitico')}
+                  title="Vista 3: Tablero Analítico Territorial tipo Power BI"
+                >
+                  <BarChart3 size={13} style={{ marginRight: 4 }} />
+                  Analítica Power BI
+                </button>
+              </div>
+            ) : viewMode === 'lista' ? (
               /* En Modo Lista: Filtros Rápidos Semánticos de Fecha con Diseño Oficial Homologado */
               <>
                 <button
@@ -5002,32 +5036,34 @@ export default function CronogramaGanttView({
 
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Controles de expansión y pantalla completa para modo Gantt, Lista y Calendario */}
-            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario') && (
+            {/* Controles de expansión y pantalla completa para modo Gantt, Lista, Calendario y Mapa */}
+            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa') && (
               <>
                 <button
                   type="button"
-                  className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
-                  onClick={toggleFullscreen}
-                  data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                  className={`btn secondary qm-btn-icon ${(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "active" : ""}`}
+                  onClick={viewMode === 'mapa' ? () => setMapFullscreen((v) => !v) : toggleFullscreen}
+                  data-tooltip={(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "Salir de pantalla completa" : "Pantalla completa"}
                   aria-label="Alternar modo pantalla completa"
                 >
-                  {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                  {(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                 </button>
 
-                <button
-                  type="button"
-                  className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleAllHitosExpand();
-                  }}
-                  data-tooltip={allHitosExpanded ? "Colapsar componentes" : "Expandir componentes"}
-                  aria-label={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
-                >
-                  <ChevronsUpDown size={15} />
-                </button>
+                {viewMode !== 'mapa' && (
+                  <button
+                    type="button"
+                    className={`btn secondary qm-btn-icon ${!allHitosExpanded ? "collapsed" : ""}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleAllHitosExpand();
+                    }}
+                    data-tooltip={allHitosExpanded ? "Colapsar componentes" : "Expandir componentes"}
+                    aria-label={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
+                  >
+                    <ChevronsUpDown size={15} />
+                  </button>
+                )}
               </>
             )}
 
@@ -5078,19 +5114,21 @@ export default function CronogramaGanttView({
                   <Redo2 size={14} />
                 </button>
 
-                {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base (en Gantt y Lista) */}
-                <button
-                  type="button"
-                  className="btn secondary qm-btn-icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    freezeBaselines();
-                  }}
-                  data-tooltip="Fijar línea base (fechas actuales) en registros sin línea base"
-                  aria-label="Fijar línea base del cronograma"
-                >
-                  <Anchor size={14} />
-                </button>
+                {/* Fijar línea base: congela las fechas actuales de los registros que aún no tienen línea base (en Gantt y Lista, no aplica a Mapa) */}
+                {viewMode !== 'mapa' && (
+                  <button
+                    type="button"
+                    className="btn secondary qm-btn-icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      freezeBaselines();
+                    }}
+                    data-tooltip="Fijar línea base (fechas actuales) en registros sin línea base"
+                    aria-label="Fijar línea base del cronograma"
+                  >
+                    <Anchor size={14} />
+                  </button>
+                )}
 
                 {/* Configurar Columnas Visibles (Disponible en Gantt y Lista estilo Notion / HubPro) */}
                 <div className="filter-dropdown-wrap cols-dropdown-wrap">
@@ -7422,7 +7460,13 @@ export default function CronogramaGanttView({
 
           {/* Presentación Mapa Territorial */}
           {viewMode === 'mapa' && (
-            <MapaTerritorialView items={shown} />
+            <MapaTerritorialView
+              items={shown}
+              subView={mapSubView}
+              onSubViewChange={setMapSubView}
+              isFullscreen={mapFullscreen}
+              onToggleFullscreen={() => setMapFullscreen((v) => !v)}
+            />
           )}
 
           {/* Presentación 5: Estructura Jerárquica WBS / Árbol (Imagen de referencia 1) */}

@@ -167,14 +167,28 @@ const JUNIN_POLYGONS: RegionPolygonDef[] = [
 
 export interface MapaTerritorialViewProps {
   items: any[];
+  subView?: TerritorialSubView;
+  onSubViewChange?: (view: TerritorialSubView) => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
-export default function MapaTerritorialView({ items }: MapaTerritorialViewProps) {
+export default function MapaTerritorialView({
+  items,
+  subView: controlledSubView,
+  onSubViewChange,
+  isFullscreen: controlledIsFullscreen,
+  onToggleFullscreen,
+}: MapaTerritorialViewProps) {
   const [selectedRegion, setSelectedRegion] = useState<string>('JUNÍN');
   const [statusFilter, setStatusFilter] = useState<Status | 'Todos'>('Todos');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [subView, setSubView] = useState<TerritorialSubView>('geo-real');
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [internalSubView, setInternalSubView] = useState<TerritorialSubView>('geo-real');
+  const [internalIsFullscreen, setInternalIsFullscreen] = useState<boolean>(false);
+
+  const subView = controlledSubView ?? internalSubView;
+  const setSubView = onSubViewChange ?? setInternalSubView;
+  const isFullscreen = controlledIsFullscreen ?? internalIsFullscreen;
   const [selectedUgelId, setSelectedUgelId] = useState<string | null>('unit-124');
   const [hoveredUgel, setHoveredUgel] = useState<{
     id: string;
@@ -398,23 +412,27 @@ export default function MapaTerritorialView({ items }: MapaTerritorialViewProps)
   };
 
   const toggleFullscreen = () => {
+    if (onToggleFullscreen) {
+      onToggleFullscreen();
+      return;
+    }
     if (!mapContainerRef.current) return;
     if (!isFullscreen) {
       if (mapContainerRef.current.requestFullscreen) {
         mapContainerRef.current.requestFullscreen();
       }
-      setIsFullscreen(true);
+      setInternalIsFullscreen(true);
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen();
       }
-      setIsFullscreen(false);
+      setInternalIsFullscreen(false);
     }
   };
 
   useEffect(() => {
     const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      setInternalIsFullscreen(!!document.fullscreenElement);
       if (leafletRef.current) {
         setTimeout(() => leafletRef.current.invalidateSize(), 300);
       }
