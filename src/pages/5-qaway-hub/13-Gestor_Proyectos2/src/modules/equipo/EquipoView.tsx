@@ -36,6 +36,10 @@ import {
   CheckCircle2,
   SlidersHorizontal,
   ChartNoAxesColumnIncreasing,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  Check,
 } from 'lucide-react';
 
 const ALL_COLUMNS = [
@@ -86,12 +90,20 @@ export default function EquipoView({
   const [sedeFilter, setSedeFilter] = useState('todas');
   const [estadoOpFilter, setEstadoOpFilter] = useState('todos');
   const [estadoCuentaFilter, setEstadoCuentaFilter] = useState('todos');
+  const [showSummaryCards, setShowSummaryCards] = useState(true);
+  const [activeMenu, setActiveMenu] = useState<'sede' | 'estado' | null>(null);
   const [toastMessage, setToastMessage] = useState('');
 
   const notify = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 2800);
   };
+
+  useEffect(() => {
+    const handleDocClick = () => setActiveMenu(null);
+    document.addEventListener('click', handleDocClick);
+    return () => document.removeEventListener('click', handleDocClick);
+  }, []);
 
   useEffect(() => {
     onActions?.({ notify });
@@ -258,13 +270,47 @@ export default function EquipoView({
           actions={
             <>
               <button
+                type="button"
                 className="btn secondary"
-                onClick={() => setIsColumnasModalOpen(true)}
+                onClick={() => setShowSummaryCards((visible) => !visible)}
+                title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+                aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
               >
-                <SlidersHorizontal size={15} />
-                <span>Configurar Columnas</span>
+                {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
               </button>
               <button
+                type="button"
+                className="btn secondary"
+                onClick={() => {
+                  const headers = ['Código', 'Nombre Completo', 'Correo', 'Teléfono', 'Documento', 'Cargo', 'Sede', 'Estado Operativo', 'Estado Cuenta'];
+                  const rows = integrantes.map((i) => [
+                    i.codigo,
+                    i.nombreCompleto,
+                    i.email,
+                    i.telefono,
+                    i.documentoIdentidad,
+                    i.cargo,
+                    i.sedeNombre,
+                    i.estadoOperativo,
+                    i.estadoCuenta,
+                  ]);
+                  const csvContent = '\uFEFF' + [headers, ...rows].map((e) => e.map((x) => `"${String(x).replaceAll('"', '""')}"`).join(';')).join('\r\n');
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `directorio_equipo_${Date.now()}.csv`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                  notify('Directorio exportado a CSV');
+                }}
+                title="Exportar padrón del equipo"
+              >
+                <Download size={15} />
+                <span>Exportar</span>
+              </button>
+              <button
+                type="button"
                 className="btn primary"
                 onClick={() => setIsNuevoModalOpen(true)}
               >
@@ -276,66 +322,68 @@ export default function EquipoView({
         />
 
         {/* Tarjetas Métricas Directivas */}
-        <section className="metrics">
-          <article className="metric blue">
-            <span className="metric-icon">
-              <Users size={22} />
-            </span>
-            <div className="metric-copy">
-              <b>{metrics.total}</b>
-              <strong>Total Integrantes</strong>
-              <small>padrón del proyecto</small>
-            </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
-          </article>
+        {showSummaryCards && (
+          <section className="metrics">
+            <article className="metric blue">
+              <span className="metric-icon">
+                <Users size={22} />
+              </span>
+              <div className="metric-copy">
+                <b>{metrics.total}</b>
+                <strong>Total Integrantes</strong>
+                <small>padrón del proyecto</small>
+              </div>
+              <ChartNoAxesColumnIncreasing className="bars" />
+            </article>
 
-          <article className="metric green">
-            <span className="metric-icon">
-              <UserCheck size={22} />
-            </span>
-            <div className="metric-copy">
-              <b>{metrics.activos}</b>
-              <strong>En Funciones</strong>
-              <small>{Math.round((metrics.activos / Math.max(1, metrics.total)) * 100)}% operativos</small>
-            </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
-          </article>
+            <article className="metric green">
+              <span className="metric-icon">
+                <UserCheck size={22} />
+              </span>
+              <div className="metric-copy">
+                <b>{metrics.activos}</b>
+                <strong>En Funciones</strong>
+                <small>{Math.round((metrics.activos / Math.max(1, metrics.total)) * 100)}% operativos</small>
+              </div>
+              <ChartNoAxesColumnIncreasing className="bars" />
+            </article>
 
-          <article className="metric amber">
-            <span className="metric-icon">
-              <Clock3 size={22} />
-            </span>
-            <div className="metric-copy">
-              <b>{metrics.pendientesCuenta}</b>
-              <strong>Cuentas por Activar</strong>
-              <small>invitación pendiente</small>
-            </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
-          </article>
+            <article className="metric amber">
+              <span className="metric-icon">
+                <Clock3 size={22} />
+              </span>
+              <div className="metric-copy">
+                <b>{metrics.pendientesCuenta}</b>
+                <strong>Cuentas por Activar</strong>
+                <small>invitación pendiente</small>
+              </div>
+              <ChartNoAxesColumnIncreasing className="bars" />
+            </article>
 
-          <article className="metric red">
-            <span className="metric-icon">
-              <AlertTriangle size={22} />
-            </span>
-            <div className="metric-copy">
-              <b>{metrics.alertasAtrasadas}</b>
-              <strong>Con Alerta</strong>
-              <small>atención requerida</small>
-            </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
-          </article>
+            <article className="metric red">
+              <span className="metric-icon">
+                <AlertTriangle size={22} />
+              </span>
+              <div className="metric-copy">
+                <b>{metrics.alertasAtrasadas}</b>
+                <strong>Con Alerta</strong>
+                <small>atención requerida</small>
+              </div>
+              <ChartNoAxesColumnIncreasing className="bars" />
+            </article>
 
-          <article className="metric overall">
-            <div className="ring" style={{ '--p': `${metrics.ocupacionPromedio}%` } as React.CSSProperties}>
-              <b>{metrics.ocupacionPromedio}%</b>
-            </div>
-            <div>
-              <strong>Carga Promedio</strong>
-              <small>capacidad del equipo</small>
-            </div>
-            <ChartNoAxesColumnIncreasing className="bars" />
-          </article>
-        </section>
+            <article className="metric overall">
+              <div className="ring" style={{ '--p': `${metrics.ocupacionPromedio}%` } as React.CSSProperties}>
+                <b>{metrics.ocupacionPromedio}%</b>
+              </div>
+              <div>
+                <strong>Carga Promedio</strong>
+                <small>capacidad del equipo</small>
+              </div>
+              <ChartNoAxesColumnIncreasing className="bars" />
+            </article>
+          </section>
+        )}
 
         {/* =========================================================================
             LA CÁPSULA UNIFICADA: Workspace Central encapsulado con bordes y sombra
@@ -345,16 +393,168 @@ export default function EquipoView({
           <ProjectShellTabs
             tabsList={
               <>
-                {tabPills.map((t) => (
+                <button
+                  type="button"
+                  className={selectedPill === 'Todos' && sedeFilter === 'todas' && estadoOpFilter === 'todos' ? 'active' : ''}
+                  onClick={() => {
+                    setSelectedPill('Todos');
+                    setSedeFilter('todas');
+                    setEstadoOpFilter('todos');
+                    setEstadoCuentaFilter('todos');
+                    setActiveMenu(null);
+                  }}
+                >
+                  Todos <span>({integrantes.length})</span>
+                </button>
+
+                {/* Filtro Universal 1: Sede / Frente Territorial */}
+                <div className="filter-dropdown-wrap tabs-filter-wrap">
                   <button
-                    key={t.n}
                     type="button"
-                    className={selectedPill === t.n ? 'active' : ''}
-                    onClick={() => handlePillClick(t.n)}
+                    className={`filter-card-btn ${activeMenu === 'sede' ? 'active' : ''} ${sedeFilter !== 'todas' ? 'filtered' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveMenu(activeMenu === 'sede' ? null : 'sede');
+                    }}
+                    title="Filtrar por sede o frente territorial"
                   >
-                    {t.n} <span>({t.c})</span>
+                    <div className="filter-card-copy">
+                      <small>Sede / Frente</small>
+                      <span>{sedes.find((s) => s.id === sedeFilter)?.nombre || 'Todas las sedes'}</span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
                   </button>
-                ))}
+                  {activeMenu === 'sede' && (
+                    <div
+                      className="filter-card-popover"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ minWidth: 240 }}
+                    >
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Frentes Territoriales</span>
+                        {sedeFilter !== 'todas' && (
+                          <button
+                            type="button"
+                            className="filter-reset-link"
+                            onClick={() => setSedeFilter('todas')}
+                          >
+                            Restablecer
+                          </button>
+                        )}
+                      </div>
+                      <div className="filter-popover-list">
+                        <button
+                          type="button"
+                          className={`filter-item-btn filter-item-check ${sedeFilter === 'todas' ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSedeFilter('todas');
+                            setActiveMenu(null);
+                          }}
+                        >
+                          <span className="filter-item-main">
+                            <span className={`filter-radio ${sedeFilter === 'todas' ? 'checked' : ''}`}>
+                              {sedeFilter === 'todas' && <span className="filter-radio-dot" />}
+                            </span>
+                            <span className="filter-item-text"><strong>Todas las sedes</strong></span>
+                          </span>
+                          <span className="wbs-level-badge">{integrantes.length}</span>
+                        </button>
+                        {sedes.map((s) => {
+                          const count = integrantes.filter((i) => i.sedeId === s.id).length;
+                          const isSelected = sedeFilter === s.id;
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                              onClick={() => {
+                                setSedeFilter(s.id);
+                                setActiveMenu(null);
+                              }}
+                            >
+                              <span className="filter-item-main">
+                                <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                  {isSelected && <span className="filter-radio-dot" />}
+                                </span>
+                                <span className="filter-item-text"><strong>{s.nombre}</strong></span>
+                              </span>
+                              <span className="wbs-level-badge">{count}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Filtro Universal 2: Estado Laboral */}
+                <div className="filter-dropdown-wrap estado-filter-wrap tabs-filter-wrap">
+                  <button
+                    type="button"
+                    className={`filter-card-btn estado-card-btn ${activeMenu === 'estado' ? 'active' : ''} ${estadoOpFilter !== 'todos' ? 'filtered' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveMenu(activeMenu === 'estado' ? null : 'estado');
+                    }}
+                    title="Filtrar por estado operativo"
+                  >
+                    <div className="filter-card-copy">
+                      <small>Estado</small>
+                      <span>{estadoOpFilter === 'todos' ? 'Todos los estados' : estadoOpFilter}</span>
+                    </div>
+                    <ChevronDown size={14} className="filter-chevron" />
+                  </button>
+                  {activeMenu === 'estado' && (
+                    <div
+                      className="filter-card-popover"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ minWidth: 230 }}
+                    >
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Estado Laboral</span>
+                        {estadoOpFilter !== 'todos' && (
+                          <button
+                            type="button"
+                            className="filter-reset-link"
+                            onClick={() => setEstadoOpFilter('todos')}
+                          >
+                            Restablecer
+                          </button>
+                        )}
+                      </div>
+                      <div className="filter-popover-list">
+                        {[
+                          { id: 'todos', label: 'Todos los estados', count: integrantes.length, dotColor: '#64748b', badgeClass: '' },
+                          { id: 'En funciones', label: 'En funciones', count: metrics.activos, dotColor: '#16a34a', badgeClass: 'badge-cumple' },
+                          { id: 'Licencia / Permiso', label: 'Licencia / Permiso', count: metrics.licencias, dotColor: '#f59e0b', badgeClass: 'badge-enproceso' },
+                          { id: 'Desvinculado', label: 'Desvinculado', count: integrantes.filter(i => i.estadoOperativo === 'Desvinculado').length, dotColor: '#dc2626', badgeClass: 'badge-retraso' },
+                        ].map((opt) => {
+                          const isSelected = estadoOpFilter === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                              onClick={() => {
+                                setEstadoOpFilter(opt.id);
+                                setActiveMenu(null);
+                              }}
+                            >
+                              <span className="filter-item-main">
+                                <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                  {isSelected && <span className="filter-radio-dot" />}
+                                </span>
+                                <span className="filter-status-dot" style={{ background: opt.dotColor }} />
+                                <span className="filter-item-text"><strong>{opt.label}</strong></span>
+                              </span>
+                              <span className={`wbs-level-badge ${opt.badgeClass}`}>{opt.count}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             }
             viewSwitcher={

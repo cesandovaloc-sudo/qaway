@@ -23,6 +23,10 @@ import {
   Square,
   Bookmark,
   Plus,
+  RotateCcw,
+  Undo2,
+  Redo2,
+  Columns3,
 } from 'lucide-react';
 
 interface EquipoDirectorioViewProps {
@@ -85,7 +89,7 @@ export default function EquipoDirectorioView({
   const [targetEstadoOp, setTargetEstadoOp] = useState<EstadoOperativo>('En funciones');
   const [sortField, setSortField] = useState<keyof Integrante>('nombreCompleto');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const [openDropdown, setOpenDropdown] = useState<'sede' | 'estadoOp' | 'estadoCuenta' | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<'sede' | 'estadoOp' | 'estadoCuenta' | 'presets' | null>(null);
 
   useEffect(() => {
     const handleDocClick = () => setOpenDropdown(null);
@@ -198,113 +202,8 @@ export default function EquipoDirectorioView({
     <div className="cronograma-lista-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       {/* Barra de Filtros Nativa compartida estilo Cronograma */}
       <ProjectShellFilters>
-        <label className="search">
-          <Search size={16} />
-          <input
-            placeholder="Buscar por integrante, correo, cargo, documento..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')}>
-              <X size={14} />
-            </button>
-          )}
-        </label>
-
-        {/* Filtro Sede */}
-        <div className="filter-dropdown-wrap">
-          <button
-            type="button"
-            className={`filter-card-btn ${openDropdown === 'sede' ? 'active' : ''} ${sedeFilter !== 'todas' ? 'filtered' : ''}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenDropdown(openDropdown === 'sede' ? null : 'sede');
-            }}
-            title="Filtrar por sede"
-          >
-            <div className="filter-card-copy">
-              <small>Ubicación</small>
-              <span>{sedes.find((s) => s.id === sedeFilter)?.nombre || 'Todas las sedes'}</span>
-            </div>
-            <ChevronDown size={14} className="filter-chevron" />
-          </button>
-          {openDropdown === 'sede' && (
-            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 220 }}>
-              <div className="filter-popover-title">Filtrar por Ubicación</div>
-              <div className="filter-popover-list">
-                <button
-                  type="button"
-                  className={`filter-item-btn ${sedeFilter === 'todas' ? 'selected' : ''}`}
-                  onClick={() => {
-                    setSedeFilter('todas');
-                    setOpenDropdown(null);
-                  }}
-                >
-                  <span>Todas las sedes</span>
-                  {sedeFilter === 'todas' && <Check size={14} className="item-check" />}
-                </button>
-                {sedes.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    className={`filter-item-btn ${sedeFilter === s.id ? 'selected' : ''}`}
-                    onClick={() => {
-                      setSedeFilter(s.id);
-                      setOpenDropdown(null);
-                    }}
-                  >
-                    <span>{s.nombre}</span>
-                    {sedeFilter === s.id && <Check size={14} className="item-check" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Filtro Estado Laboral */}
-        <div className="filter-dropdown-wrap">
-          <button
-            type="button"
-            className={`filter-card-btn ${openDropdown === 'estadoOp' ? 'active' : ''} ${estadoOpFilter !== 'todos' ? 'filtered' : ''}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenDropdown(openDropdown === 'estadoOp' ? null : 'estadoOp');
-            }}
-            title="Filtrar por estado laboral"
-          >
-            <div className="filter-card-copy">
-              <small>Estado</small>
-              <span>{estadoOpFilter === 'todos' ? 'Todos los estados' : estadoOpFilter}</span>
-            </div>
-            <ChevronDown size={14} className="filter-chevron" />
-          </button>
-          {openDropdown === 'estadoOp' && (
-            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
-              <div className="filter-popover-title">Filtrar por Estado Laboral</div>
-              <div className="filter-popover-list">
-                {['todos', 'En funciones', 'Licencia / Permiso', 'Desvinculado'].map((st) => (
-                  <button
-                    key={st}
-                    type="button"
-                    className={`filter-item-btn ${estadoOpFilter === st ? 'selected' : ''}`}
-                    onClick={() => {
-                      setEstadoOpFilter(st);
-                      setOpenDropdown(null);
-                    }}
-                  >
-                    <span>{st === 'todos' ? 'Todos los estados' : st}</span>
-                    {estadoOpFilter === st && <Check size={14} className="item-check" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Filtro Cuenta de Acceso */}
-        <div className="filter-dropdown-wrap">
+        {/* Filtro Contextual 1: Cuenta de Acceso */}
+        <div className="filter-dropdown-wrap contextual-filter-wrap">
           <button
             type="button"
             className={`filter-card-btn ${openDropdown === 'estadoCuenta' ? 'active' : ''} ${estadoCuentaFilter !== 'todos' ? 'filtered' : ''}`}
@@ -322,7 +221,7 @@ export default function EquipoDirectorioView({
           </button>
           {openDropdown === 'estadoCuenta' && (
             <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 210 }}>
-              <div className="filter-popover-title">Filtrar por Acceso</div>
+              <div className="filter-popover-title">Acceso de Cuenta</div>
               <div className="filter-popover-list">
                 {['todos', 'Habilitada', 'Invitación Pendiente', 'Suspendida'].map((acc) => (
                   <button
@@ -343,35 +242,115 @@ export default function EquipoDirectorioView({
           )}
         </div>
 
-        {(searchQuery || sedeFilter !== 'todas' || estadoOpFilter !== 'todos' || estadoCuentaFilter !== 'todos') && (
-          <button className="clear-btn" onClick={onClearFilters} title="Limpiar todos los filtros">
-            Limpiar
+        {/* Filtro Contextual 2: Vista / Presets */}
+        <div className="filter-dropdown-wrap contextual-filter-wrap">
+          <button
+            type="button"
+            className={`filter-card-btn ${openDropdown === 'presets' ? 'active' : ''} ${activePresetId !== 'preset-todos' ? 'filtered' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdown(openDropdown === 'presets' ? null : 'presets');
+            }}
+            title="Vistas y filtros guardados"
+          >
+            <div className="filter-card-copy">
+              <small>Vista</small>
+              <span>{presets.find((p) => p.id === activePresetId)?.nombre || 'Predeterminada'}</span>
+            </div>
+            <ChevronDown size={14} className="filter-chevron" />
           </button>
-        )}
+          {openDropdown === 'presets' && (
+            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 220 }}>
+              <div className="filter-popover-title">Vistas Guardadas</div>
+              <div className="filter-popover-list">
+                {presets.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={`filter-item-btn ${activePresetId === p.id ? 'selected' : ''}`}
+                    onClick={() => {
+                      onSelectPreset(p);
+                      setOpenDropdown(null);
+                    }}
+                  >
+                    <span>{p.nombre}</span>
+                    {activePresetId === p.id && <Check size={14} className="item-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Separador vertical: Filtros | Buscador */}
+        <div className="filter-group-divider" aria-hidden="true" />
+
+        {/* Buscador Universal estilo Proyecto */}
+        <label className="search">
+          <Search size={15} />
+          <input
+            placeholder="Buscar por integrante, correo, cargo, documento..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button type="button" onClick={() => setSearchQuery('')}>
+              <X size={13} />
+            </button>
+          )}
+        </label>
 
         <div style={{ flex: 1 }} />
 
-        {/* Configurar Columnas */}
+        {/* Historial Deshacer / Rehacer */}
         <button
           type="button"
-          className="btn secondary"
-          style={{ height: '34px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-          onClick={onOpenColumnasModal}
+          className="btn secondary qm-btn-icon disabled"
+          disabled
+          data-tooltip="Sin cambios para retroceder"
+          aria-label="Deshacer último cambio"
         >
-          <SlidersHorizontal size={13} color="#0066ff" />
-          <span>Columnas</span>
+          <Undo2 size={14} />
         </button>
 
-        {/* Exportar */}
         <button
           type="button"
-          className="btn secondary"
-          style={{ height: '34px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-          onClick={exportarSeleccionCsv}
+          className="btn secondary qm-btn-icon disabled"
+          disabled
+          data-tooltip="Sin cambios para adelantar"
+          aria-label="Rehacer último cambio"
         >
-          <Download size={13} />
-          <span>Exportar</span>
+          <Redo2 size={14} />
         </button>
+
+        {/* Separador vertical: Historial | Restablecer filtros */}
+        <div className="filter-group-divider" aria-hidden="true" />
+
+        {/* Botón circular de Restablecimiento Universal */}
+        <button
+          type="button"
+          className="btn secondary clear-btn qm-btn-icon"
+          onClick={onClearFilters}
+          data-tooltip="Restablecer todos los filtros"
+          aria-label="Restablecer todos los filtros y limpiar vista"
+        >
+          <RotateCcw size={15} />
+        </button>
+
+        {/* Botón de Columnas en Azul App Primario (Idéntico a Proyecto) */}
+        <div className="filter-dropdown-wrap cols-dropdown-wrap cols-right-aligned">
+          <button
+            type="button"
+            className="btn primary cols-trigger-main-btn btn-primary-blue"
+            onClick={onOpenColumnasModal}
+            title="Configurar columnas visibles"
+            data-tooltip="Configurar columnas visibles"
+            aria-label="Configurar columnas visibles de la tabla"
+          >
+            <Columns3 size={15} />
+            <span className="cols-btn-label">Columnas</span>
+          </button>
+        </div>
       </ProjectShellFilters>
 
       {/* Contenedor de Tabla con Scroll Interno Encapsulado */}
@@ -599,23 +578,25 @@ export default function EquipoDirectorioView({
         </table>
       </div>
 
-      {/* Footer de Paginación que cierra la cápsula */}
+      {/* Footer de Paginación que cierra la cápsula (Idéntico a Proyecto) */}
       <footer className="footer">
         <span>
-          Mostrando {filteredIntegrantes.length ? 1 : 0}-{filteredIntegrantes.length} de {integrantes.length} integrantes registrados
+          Mostrando {filteredIntegrantes.length ? 1 : 0}–{filteredIntegrantes.length} de {integrantes.length} registros
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {selectedIds.size > 0 && (
             <span style={{ fontWeight: 600, color: '#0066ff' }}>
               {selectedIds.size} seleccionados
             </span>
           )}
           <button
+            type="button"
             className="btn secondary"
-            style={{ minHeight: '30px', fontSize: '12px' }}
+            style={{ minHeight: '32px', fontSize: '12px' }}
             onClick={exportarSeleccionCsv}
           >
-            Descargar Listado
+            <Download size={13} />
+            <span>Exportar CSV</span>
           </button>
         </div>
       </footer>
