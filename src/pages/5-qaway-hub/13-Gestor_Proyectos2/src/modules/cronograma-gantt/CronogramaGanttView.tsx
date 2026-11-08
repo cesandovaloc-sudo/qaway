@@ -2219,7 +2219,6 @@ export default function CronogramaGanttView({
   type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | 'phase' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [mapSubView, setMapSubView] = useState<TerritorialSubView>('geo-real');
-  const [mapFullscreen, setMapFullscreen] = useState(false);
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
   const [colsMenuOpen, setColsMenuOpen] = useState(false);
   const [colFilterOpen, setColFilterOpen] = useState<ColKey | null>(null);
@@ -4225,16 +4224,15 @@ export default function CronogramaGanttView({
     notify('Elemento y sus dependientes eliminados con éxito del cronograma maestro');
   };
 
-  const renderProgressVisual = (progressVal: number, statusTone: string, colId: string) => {
-    const format = percentGraphFormats[colId] || 'bar';
+  const renderProgressInner = (val: number, statusTone: string, format: 'bar' | 'ring' | 'number') => {
     if (format === 'ring') {
       const radius = 7.5;
       const circ = 2 * Math.PI * radius;
-      const offset = circ * (1 - Math.min(100, Math.max(0, progressVal)) / 100);
+      const offset = circ * (1 - Math.min(100, Math.max(0, val)) / 100);
       const strokeColor =
-        progressVal === 100 ? '#10b981' : statusTone === 'red' ? '#ef4444' : statusTone === 'gray' ? '#94a3b8' : '#2563eb';
+        val === 100 ? '#10b981' : statusTone === 'red' ? '#ef4444' : statusTone === 'gray' ? '#94a3b8' : '#2563eb';
       return (
-        <div className="progress-ring-wrap" title={`${progressVal}%`}>
+        <div className="progress-ring-wrap" title={`${val}%`}>
           <svg width="20" height="20" viewBox="0 0 20 20" className="progress-ring-svg">
             <circle cx="10" cy="10" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="2.5" />
             <circle
@@ -4250,26 +4248,30 @@ export default function CronogramaGanttView({
               className="progress-ring-circle"
             />
           </svg>
-          <span className="progress-num-text">{progressVal}%</span>
+          <b style={{ fontWeight: 500 }}>{val}%</b>
         </div>
       );
     }
     if (format === 'number') {
-      return (
-        <div className="progress-num-only" title={`${progressVal}%`}>
-          <span>{progressVal}%</span>
-        </div>
-      );
+      return <b style={{ fontWeight: 500 }}>{val}%</b>;
     }
-    // 'bar' (default)
     const barColorClass =
-      progressVal === 100 ? 'green' : statusTone === 'red' ? 'red' : statusTone === 'gray' ? 'gray' : 'blue';
+      val === 100 ? 'green' : statusTone === 'red' ? 'red' : statusTone === 'gray' ? 'gray' : 'blue';
+    return (
+      <>
+        <span>
+          <i className={barColorClass} style={{ width: `${val}%` }} />
+        </span>
+        <b style={{ fontWeight: 500 }}>{val}%</b>
+      </>
+    );
+  };
+
+  const renderProgressVisual = (progressVal: number, statusTone: string, colId: string) => {
+    const format = percentGraphFormats[colId] || 'bar';
     return (
       <div className="progress editable" style={{ width: '100%' }}>
-        <span>
-          <i className={barColorClass} style={{ width: `${progressVal}%` }} />
-        </span>
-        <span className="progress-num-text">{progressVal}%</span>
+        {renderProgressInner(progressVal, statusTone, format)}
       </div>
     );
   };
@@ -4714,11 +4716,30 @@ export default function CronogramaGanttView({
       const statusTone = x.progress === 100 ? 'green' : x.status === 'Con retraso' ? 'red' : x.status === 'Pendiente' ? 'gray' : 'blue';
       const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === x.id));
       const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
+      const format = percentGraphFormats['progress'] || 'bar';
 
-      if (isContainer || linkedTaskSummary) {
+      if (isContainer) {
         return (
-          <div key="progress" className="progress" style={{ width: '100%', cursor: 'default' }}>
-            {renderProgressVisual(x.progress, statusTone, 'progress')}
+          <div
+            key="progress"
+            className="progress is-rollup"
+            title="Avance calculado por rollup de subelementos (PMI - Regla del 100%)"
+            style={{ cursor: 'default' }}
+          >
+            {renderProgressInner(x.progress, statusTone, format)}
+          </div>
+        );
+      }
+
+      if (linkedTaskSummary) {
+        return (
+          <div
+            key="progress"
+            className="progress is-linked-tasks"
+            title={`Avance gobernado por tareas operativas: ${linkedTaskSummary.completed}/${linkedTaskSummary.total} completadas (Regla del 100%)`}
+            style={{ cursor: 'default' }}
+          >
+            {renderProgressInner(x.progress, statusTone, format)}
           </div>
         );
       }
@@ -4734,7 +4755,7 @@ export default function CronogramaGanttView({
           }}
         >
           {isEditing(x, 'progress') ? (
-            <div className="cell-editor cell-pop progress-pop">
+            <div className="cell-editor cell-pop progress-pop" onClick={(e) => e.stopPropagation()}>
               <input
                 type="range"
                 min={0}
@@ -4743,10 +4764,10 @@ export default function CronogramaGanttView({
                 value={x.progress}
                 onChange={(e) => setProgress(x, +e.target.value)}
               />
-              <span className="progress-num-text">{x.progress}%</span>
+              <b style={{ fontWeight: 500 }}>{x.progress}%</b>
             </div>
           ) : (
-            renderProgressVisual(x.progress, statusTone, 'progress')
+            renderProgressInner(x.progress, statusTone, format)
           )}
         </div>
       );
@@ -4835,48 +4856,38 @@ export default function CronogramaGanttView({
     }
 
     if (colKey === 'status') {
-      const isEditingStatus = isEditing(x, 'status');
       return (
         <div
           key="status"
           className="status-cell editable"
+          title={`Estado: ${x.status} · Clic para cambiar`}
           onClick={(e) => {
             e.stopPropagation();
             toggleEdit(x, 'status');
           }}
         >
-          {isEditingStatus ? (
-            <div
-              className="cell-editor cell-pop status-popover"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="status-popover-title">Seleccionar estado</div>
-              <div className="status-popover-list">
-                {(['Completado', 'En curso', 'En proceso', 'Pendiente', 'Con retraso', 'Cumple'] as Status[]).map(
-                  (st) => (
-                    <button
-                      key={st}
-                      type="button"
-                      className={`status-popover-option ${x.status === st ? 'is-selected' : ''}`}
-                      onClick={() => {
-                        update(x.id, { status: st });
-                        closeEdit();
-                      }}
-                    >
-                      <span className={`status-popover-dot ${STATUS_CLASS[st]}`} />
-                      <span className="status-popover-label">{st}</span>
-                      {x.status === st && <Check size={13} className="status-popover-check" />}
-                    </button>
-                  )
-                )}
-              </div>
+          {isEditing(x, 'status') ? (
+            <div className="cell-editor cell-pop status-pop" onClick={(e) => e.stopPropagation()}>
+              {STATUS_OPTIONS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={s === x.status ? 'cur' : ''}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setStatusWithSync(x, s);
+                    closeEdit();
+                  }}
+                >
+                  <span className={`status-item ${STATUS_CLASS[s]}`}>
+                    <span className="status-dot" />
+                    <span className="status-label">{s}</span>
+                  </span>
+                </button>
+              ))}
             </div>
           ) : (
-            <span
-              className={`status-item ${STATUS_CLASS[x.status]}`}
-              style={{ fontWeight: 500, cursor: 'pointer' }}
-              title="Clic para cambiar estado"
-            >
+            <span className={`status-item ${STATUS_CLASS[x.status]}`}>
               <span className="status-dot" />
               <span className="status-label">{x.status}</span>
             </span>
@@ -5409,7 +5420,7 @@ export default function CronogramaGanttView({
             <div className="fullscreen-exit-bar">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
-                <span>Modo Pantalla Completa — Vista {viewMode === 'gantt' ? 'Gantt' : viewMode === 'lista' ? 'Lista' : viewMode === 'kanban' ? 'Kanban' : 'Calendario'}</span>
+                <span>Modo Pantalla Completa — Vista {viewMode === 'gantt' ? 'Gantt' : viewMode === 'lista' ? 'Lista' : viewMode === 'kanban' ? 'Kanban' : viewMode === 'mapa' ? 'Mapa' : 'Calendario'}</span>
               </div>
               <button
                 type="button"
@@ -6499,12 +6510,12 @@ export default function CronogramaGanttView({
             {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa') && (
               <button
                 type="button"
-                className={`btn secondary qm-btn-icon ${(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "active" : ""}`}
-                onClick={viewMode === 'mapa' ? () => setMapFullscreen((v) => !v) : toggleFullscreen}
-                data-tooltip={(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? "Salir de pantalla completa" : "Pantalla completa"}
+                className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
+                onClick={toggleFullscreen}
+                data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
                 aria-label="Alternar modo pantalla completa"
               >
-                {(viewMode === 'mapa' ? mapFullscreen : isFullscreen) ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
               </button>
             )}
 
@@ -7645,8 +7656,8 @@ export default function CronogramaGanttView({
               items={shown}
               subView={mapSubView}
               onSubViewChange={setMapSubView}
-              isFullscreen={mapFullscreen}
-              onToggleFullscreen={() => setMapFullscreen((v) => !v)}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={toggleFullscreen}
             />
           )}
 

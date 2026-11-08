@@ -5363,6 +5363,18 @@ body.gantt-resizing {
   max-height: calc(100vh - 120px) !important;
 }
 
+.gantt-v2 .workspace.fullscreen-mode .territorial-hub-wrapper {
+  flex: 1 1 auto !important;
+  height: calc(100vh - 110px) !important;
+  max-height: calc(100vh - 110px) !important;
+  padding: 0 16px 12px !important;
+}
+
+.gantt-v2 .workspace.fullscreen-mode .territorial-hub-wrapper .territorial-canvas-body {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
 /* Barra superior de salida en pantalla completa */
 .gantt-v2 .fullscreen-exit-bar {
   display: flex;
@@ -11548,18 +11560,19 @@ body.gantt-resizing {
 }
 
 .territorial-hub-wrapper.is-fullscreen-territorial {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 99999 !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: calc(100vh - 110px) !important;
+  z-index: 1 !important;
   background: #f8fafc !important;
-  padding: 16px !important;
-  overflow: auto !important;
+  padding: 0 16px 12px !important;
+  overflow: hidden !important;
 }
 
 .territorial-hub-wrapper.is-fullscreen-territorial .territorial-canvas-body {
-  height: calc(100vh - 120px) !important;
+  height: 100% !important;
+  min-height: 0 !important;
 }
 
 @media (max-width: 1024px) {

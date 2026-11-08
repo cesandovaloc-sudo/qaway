@@ -495,6 +495,14 @@ export default function MapaTerritorialView({
     return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
+  useEffect(() => {
+    if (leafletRef.current) {
+      setTimeout(() => leafletRef.current.invalidateSize(), 150);
+      setTimeout(() => leafletRef.current.invalidateSize(), 400);
+    }
+    window.dispatchEvent(new Event('resize'));
+  }, [isFullscreen]);
+
   return (
     <div
       ref={mapContainerRef}
