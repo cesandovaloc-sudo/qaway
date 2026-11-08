@@ -3805,7 +3805,7 @@ export default function CronogramaGanttView({
               title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
               aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
             >
-              {showSummaryCards ? <EyeOff size={15} /> : <Eye size={15} />}
+              {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
             </button>
             <button
               className="btn secondary"
@@ -4363,7 +4363,7 @@ export default function CronogramaGanttView({
                 onClick={() => handleViewModeChange('mapa')}
                 title="Vista Mapa Territorial"
               >
-                <MapPinned size={14} />
+                <MapPin size={14} />
                 <span>Mapa</span>
               </button>
               {/* Vista conservada para una fase posterior; se oculta temporalmente del selector. */}
