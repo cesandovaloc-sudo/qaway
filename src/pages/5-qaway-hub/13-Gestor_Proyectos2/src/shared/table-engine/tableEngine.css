@@ -779,3 +779,79 @@
   width: 16px;
   pointer-events: auto;
 }
+
+
+/* ───────────── Barra de Cálculos al pie Notion / Excel ───────────── */
+.te-table-calc-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #334155;
+  overflow-x: auto;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.te-calc-bar-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  font-size: 11.5px;
+}
+
+.te-calc-bar-icon {
+  color: #2563eb;
+}
+
+.te-calc-bar-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.te-calc-summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.te-calc-pill-name {
+  font-weight: 600;
+  color: #334155;
+}
+
+.te-calc-pill-type {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.te-calc-pill-sep {
+  color: #94a3b8;
+}
+
+.te-calc-pill-val {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Celda con ajuste de texto (Wrap content) */
+.te-cell-wrap {
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.35 !important;
+}

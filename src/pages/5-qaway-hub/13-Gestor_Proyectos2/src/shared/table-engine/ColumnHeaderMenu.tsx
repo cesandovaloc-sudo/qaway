@@ -400,6 +400,7 @@ interface ColumnHeaderMenuProps<R> {
   iconSize?: number;
   onHideColumn?: ((columnId: string) => void) | undefined;
   onFreezeColumn?: ((columnId: string) => void) | undefined;
+  isFrozen?: boolean | undefined;
   onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
   onChangeType?: ((columnId: string, newType: string) => void) | undefined;
   onToggleWrap?: ((columnId: string) => void) | undefined;
@@ -421,6 +422,7 @@ export function ColumnHeaderMenu<R>({
   iconSize = 11,
   onHideColumn,
   onFreezeColumn,
+  isFrozen,
   onRenameColumn,
   onChangeType,
   onToggleWrap,
@@ -536,6 +538,7 @@ export function ColumnHeaderMenu<R>({
               close={close}
               onHideColumn={onHideColumn}
               onFreezeColumn={onFreezeColumn}
+              isFrozen={isFrozen}
               onRenameColumn={onRenameColumn}
               onChangeType={onChangeType}
               onToggleWrap={onToggleWrap}
@@ -560,6 +563,7 @@ function MenuBody<R>({
   close,
   onHideColumn,
   onFreezeColumn,
+  isFrozen,
   onRenameColumn,
   onChangeType,
   onToggleWrap,
@@ -576,6 +580,7 @@ function MenuBody<R>({
   close: (returnFocus?: boolean) => void;
   onHideColumn?: ((columnId: string) => void) | undefined;
   onFreezeColumn?: ((columnId: string) => void) | undefined;
+  isFrozen?: boolean | undefined;
   onRenameColumn?: ((columnId: string, newLabel: string) => void) | undefined;
   onChangeType?: ((columnId: string, newType: string) => void) | undefined;
   onToggleWrap?: ((columnId: string) => void) | undefined;
@@ -729,12 +734,14 @@ function MenuBody<R>({
     setIsRenaming(false);
   };
 
+  const [currentType, setCurrentType] = useState(col.type);
+  useEffect(() => { setCurrentType(col.type); }, [col.type]);
+
   const handleSelectType = (newType: string) => {
     col.type = newType;
+    setCurrentType(newType);
     onChangeType?.(col.id, newType);
     setNestedFlyout(null);
-    setActiveFlyout(null);
-    close();
   };
 
   const handleSelectCalc = (calcId: string) => {
@@ -742,8 +749,6 @@ function MenuBody<R>({
     setSelectedCalc(next);
     onCalculate?.(col.id, next);
     setNestedFlyout(null);
-    setActiveFlyout(null);
-    close();
   };
 
   const handleToggleWrap = () => {
@@ -1019,7 +1024,7 @@ function MenuBody<R>({
           {/* Cabecera editable con tipo */}
           <div className="te-prop-header">
             <div className="te-prop-title-row">
-              <span className="te-prop-icon">{getPropertyIcon(col.type)}</span>
+              <span className="te-prop-icon">{getPropertyIcon(currentType)}</span>
               {isRenaming ? (
                 <input
                   type="text"
@@ -1043,7 +1048,7 @@ function MenuBody<R>({
                 </span>
               )}
             </div>
-            <span className="te-prop-type-tag">{getPropertyTypeName(col.type)}</span>
+            <span className="te-prop-type-tag">{getPropertyTypeName(currentType)}</span>
           </div>
 
           <div className="te-sep" />
@@ -1120,13 +1125,13 @@ function MenuBody<R>({
             className="te-flyout-item"
             onClick={() => {
               onFreezeColumn?.(col.id);
-              close();
             }}
           >
             <div className="te-submenu-left">
               <Pin size={12} />
-              <span>Inmovilizar columna</span>
+              <span>{isFrozen ? 'Desinmovilizar columna' : 'Inmovilizar columna'}</span>
             </div>
+            {isFrozen && <Check size={12} className="te-tick" />}
           </button>
 
           {/* Ocultar */}
@@ -1232,7 +1237,7 @@ function MenuBody<R>({
                 {t.icon}
                 <span>{t.label}</span>
               </div>
-              {col.type === t.id && <Check size={12} className="te-tick" />}
+              {currentType === t.id && <Check size={12} className="te-tick" />}
             </button>
           ))}
         </div>,

@@ -146,6 +146,7 @@ import {
   Zap,
   ZoomIn,
   ZoomOut,
+  Sigma,
   X
 } from 'lucide-react';
 
@@ -1877,8 +1878,21 @@ export default function CronogramaGanttView({
     const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl, '_blank');
   };
-  const [history, setHistory] = useState<Item[][]>([]);
-  const [redoHistory, setRedoHistory] = useState<Item[][]>([]);
+  interface ColConfigSnapshot {
+    visibleCols: ColKey[];
+    customCols: CustomColDef[];
+    colTypeOverrides: Record<string, string>;
+    colCustomLabels: Record<string, string>;
+    colCalculations: Record<string, string>;
+    wrappedCols: string[];
+    frozenCols: string[];
+  }
+  interface GanttHistoryEntry {
+    items: Item[];
+    colConfig: ColConfigSnapshot;
+  }
+  const [history, setHistory] = useState<GanttHistoryEntry[]>([]);
+  const [redoHistory, setRedoHistory] = useState<GanttHistoryEntry[]>([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
@@ -2231,6 +2245,48 @@ export default function CronogramaGanttView({
     }
   });
 
+  const [colTypeOverrides, setColTypeOverrides] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('qaway-col-types-v1') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const [colCustomLabels, setColCustomLabels] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('qaway-col-labels-v1') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const [colCalculations, setColCalculations] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('qaway-col-calcs-v1') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const [wrappedCols, setWrappedCols] = useState<Set<string>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-wrapped-cols-v1') || '[]');
+      return new Set(Array.isArray(saved) ? saved : []);
+    } catch {
+      return new Set();
+    }
+  });
+
+  const [frozenCols, setFrozenCols] = useState<Set<string>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-frozen-cols-v1') || '[]');
+      return new Set(Array.isArray(saved) ? saved : []);
+    } catch {
+      return new Set();
+    }
+  });
+
   const [newColModalOpen, setNewColModalOpen] = useState(false);
   const [newColLabel, setNewColLabel] = useState('');
   const [newColType, setNewColType] = useState<CustomColDef['type']>('text');
@@ -2383,17 +2439,31 @@ export default function CronogramaGanttView({
 
   const ganttColumns = useMemo<ColumnDef<Item>[]>(
     () => [
-      ...GANTT_COLUMNS,
-      { id: 'deviation', label: 'Desviación', type: 'number', accessor: (r) => (r ? getDeviationDays(r, currentTodayIso) : undefined) },
-      { id: 'actualEnd', label: 'Fecha real', type: 'date', accessor: (r) => r?.actualEnd },
+      ...GANTT_COLUMNS.map((col) => ({
+        ...col,
+        label: colCustomLabels[col.id] || col.label,
+        type: (colTypeOverrides[col.id] || col.type) as any,
+      })),
+      {
+        id: 'deviation',
+        label: colCustomLabels['deviation'] || 'Desviación',
+        type: (colTypeOverrides['deviation'] || 'number') as any,
+        accessor: (r) => (r ? getDeviationDays(r, currentTodayIso) : undefined),
+      },
+      {
+        id: 'actualEnd',
+        label: colCustomLabels['actualEnd'] || 'Fecha real',
+        type: (colTypeOverrides['actualEnd'] || 'date') as any,
+        accessor: (r) => r?.actualEnd,
+      },
       ...customCols.map((c) => ({
         id: c.key,
-        label: c.label,
-        type: (c.type === 'percent' ? 'percent' : c.type === 'number' ? 'number' : c.type === 'date' ? 'date' : c.type === 'person' ? 'person' : c.type === 'select' ? 'select' : 'text') as any,
+        label: colCustomLabels[c.key] || c.label,
+        type: (colTypeOverrides[c.key] || c.type || 'text') as any,
         accessor: (r: Item) => (r as any)?.[c.key],
       })),
     ],
-    [currentTodayIso, customCols]
+    [currentTodayIso, customCols, colCustomLabels, colTypeOverrides]
   );
 
   const engine = useTableEngine<Item>({
@@ -2597,12 +2667,251 @@ export default function CronogramaGanttView({
   }, [onActions]);
 
   /* ---------- Historial de Deshacer y Rehacer (Buildern standard) ---------- */
+  const getColSnapshot = useCallback((): ColConfigSnapshot => ({
+    visibleCols: [...visibleCols],
+    customCols: [...customCols],
+    colTypeOverrides: { ...colTypeOverrides },
+    colCustomLabels: { ...colCustomLabels },
+    colCalculations: { ...colCalculations },
+    wrappedCols: Array.from(wrappedCols),
+    frozenCols: Array.from(frozenCols),
+  }), [visibleCols, customCols, colTypeOverrides, colCustomLabels, colCalculations, wrappedCols, frozenCols]);
+
+  const applyColSnapshot = useCallback((snap: ColConfigSnapshot) => {
+    if (!snap) return;
+    setVisibleCols(snap.visibleCols || []);
+    setCustomCols(snap.customCols || []);
+    setColTypeOverrides(snap.colTypeOverrides || {});
+    setColCustomLabels(snap.colCustomLabels || {});
+    setColCalculations(snap.colCalculations || {});
+    setWrappedCols(new Set(snap.wrappedCols || []));
+    setFrozenCols(new Set(snap.frozenCols || []));
+    try {
+      localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(snap.customCols || []));
+      localStorage.setItem('qaway-col-types-v1', JSON.stringify(snap.colTypeOverrides || {}));
+      localStorage.setItem('qaway-col-labels-v1', JSON.stringify(snap.colCustomLabels || {}));
+      localStorage.setItem('qaway-col-calcs-v1', JSON.stringify(snap.colCalculations || {}));
+      localStorage.setItem('qaway-wrapped-cols-v1', JSON.stringify(snap.wrappedCols || []));
+      localStorage.setItem('qaway-frozen-cols-v1', JSON.stringify(snap.frozenCols || []));
+    } catch {}
+  }, []);
+
+  const recordColumnChange = useCallback(() => {
+    setHistory((h) => [{ items, colConfig: getColSnapshot() }, ...h].slice(0, 30));
+    setRedoHistory([]);
+  }, [items, getColSnapshot]);
+
+  const getColLabel = (key: ColKey | string, defaultLabel: string) => colCustomLabels[key] || defaultLabel;
+
+  const handleRenameColumn = useCallback((columnId: string, newLabel: string) => {
+    recordColumnChange();
+    setColCustomLabels((prev) => {
+      const next = { ...prev, [columnId]: newLabel };
+      try { localStorage.setItem('qaway-col-labels-v1', JSON.stringify(next)); } catch {}
+      return next;
+    });
+    notify(`Columna renombrada a "${newLabel}"`);
+  }, [recordColumnChange, notify]);
+
+  const handleChangeType = useCallback((columnId: string, newType: string) => {
+    recordColumnChange();
+    setColTypeOverrides((prev) => {
+      const next = { ...prev, [columnId]: newType };
+      try { localStorage.setItem('qaway-col-types-v1', JSON.stringify(next)); } catch {}
+      return next;
+    });
+    notify(`Tipo de columna cambiado a "${newType}"`);
+  }, [recordColumnChange, notify]);
+
+  const handleCalculate = useCallback((columnId: string, calculation: string) => {
+    recordColumnChange();
+    setColCalculations((prev) => {
+      const next = { ...prev };
+      if (!calculation) delete next[columnId];
+      else next[columnId] = calculation;
+      try { localStorage.setItem('qaway-col-calcs-v1', JSON.stringify(next)); } catch {}
+      return next;
+    });
+    notify(calculation ? `Cálculo activado: ${calculation}` : 'Cálculo desactivado');
+  }, [recordColumnChange, notify]);
+
+  const handleToggleWrap = useCallback((columnId: string) => {
+    recordColumnChange();
+    setWrappedCols((prev) => {
+      const next = new Set(prev);
+      if (next.has(columnId)) next.delete(columnId);
+      else next.add(columnId);
+      try { localStorage.setItem('qaway-wrapped-cols-v1', JSON.stringify(Array.from(next))); } catch {}
+      return next;
+    });
+  }, [recordColumnChange]);
+
+  const handleFreezeColumn = useCallback((columnId: string) => {
+    recordColumnChange();
+    setFrozenCols((prev) => {
+      const next = new Set(prev);
+      if (next.has(columnId)) {
+        next.delete(columnId);
+        notify('Columna desinmovilizada');
+      } else {
+        next.add(columnId);
+        notify('Columna inmovilizada');
+      }
+      try { localStorage.setItem('qaway-frozen-cols-v1', JSON.stringify(Array.from(next))); } catch {}
+      return next;
+    });
+  }, [recordColumnChange, notify]);
+
+  const handleInsertColumn = useCallback((columnId: string, insertRight: boolean) => {
+    recordColumnChange();
+    const newKey = 'c_' + Date.now().toString(36);
+    const newCol: CustomColDef = {
+      key: newKey,
+      label: 'Nueva propiedad',
+      type: 'text',
+      required: false,
+      showInList: true,
+      appliesTo: 'all',
+      encapsular: false,
+    };
+    const updatedCustom = [...customCols, newCol];
+    setCustomCols(updatedCustom);
+    try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updatedCustom)); } catch {}
+
+    setVisibleCols((prev) => {
+      const idx = prev.indexOf(columnId as ColKey);
+      const next = [...prev];
+      if (idx >= 0) {
+        next.splice(insertRight ? idx + 1 : idx, 0, newKey as ColKey);
+      } else {
+        next.push(newKey as ColKey);
+      }
+      return next;
+    });
+    notify(`Nueva columna insertada a la ${insertRight ? 'derecha' : 'izquierda'}`);
+  }, [recordColumnChange, customCols, notify]);
+
+  const handleDuplicateColumn = useCallback((columnId: string) => {
+    recordColumnChange();
+    const sourceDef = ganttColumns.find((c) => c.id === columnId);
+    const currentLabel = colCustomLabels[columnId] || sourceDef?.label || columnId;
+    const newKey = 'c_' + Date.now().toString(36);
+    const newType = (colTypeOverrides[columnId] || sourceDef?.type || 'text') as CustomColDef['type'];
+    const newCol: CustomColDef = {
+      key: newKey,
+      label: `${currentLabel} (copia)`,
+      type: newType,
+      required: false,
+      showInList: true,
+      appliesTo: 'all',
+      encapsular: false,
+    };
+    const updatedCustom = [...customCols, newCol];
+    setCustomCols(updatedCustom);
+    try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updatedCustom)); } catch {}
+
+    setItems((prev) =>
+      prev.map((item) => {
+        const val = (item as any)[columnId];
+        return val !== undefined ? { ...item, [newKey]: val } : item;
+      })
+    );
+
+    setVisibleCols((prev) => {
+      const idx = prev.indexOf(columnId as ColKey);
+      const next = [...prev];
+      if (idx >= 0) next.splice(idx + 1, 0, newKey as ColKey);
+      else next.push(newKey as ColKey);
+      return next;
+    });
+    notify(`Columna duplicada como "${currentLabel} (copia)"`);
+  }, [recordColumnChange, ganttColumns, colCustomLabels, colTypeOverrides, customCols, notify]);
+
+  const handleDeleteColumn = useCallback((columnId: string) => {
+    recordColumnChange();
+    const isCustom = customCols.some((c) => c.key === columnId);
+    if (isCustom) {
+      const nextCustom = customCols.filter((c) => c.key !== columnId);
+      setCustomCols(nextCustom);
+      try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(nextCustom)); } catch {}
+    }
+    setVisibleCols((prev) => prev.filter((k) => k !== columnId));
+    notify('Propiedad eliminada');
+  }, [recordColumnChange, customCols, notify]);
+
+  const renderColumnHeaderMenu = (columnId: string, btnClass = 'th-action-btn') => (
+    <ColumnHeaderMenu
+      engine={engine}
+      columnId={columnId}
+      buttonClassName={btnClass}
+      onHideColumn={(id) => toggleColVisibility(id as ColKey)}
+      onFreezeColumn={handleFreezeColumn}
+      isFrozen={frozenCols.has(columnId)}
+      onRenameColumn={handleRenameColumn}
+      onChangeType={handleChangeType}
+      onToggleWrap={handleToggleWrap}
+      isWrapped={wrappedCols.has(columnId)}
+      onCalculate={handleCalculate}
+      activeCalculation={colCalculations[columnId]}
+      onInsertLeft={(id) => handleInsertColumn(id, false)}
+      onInsertRight={(id) => handleInsertColumn(id, true)}
+      onDuplicate={handleDuplicateColumn}
+      onDelete={handleDeleteColumn}
+    />
+  );
+
+  const computeColumnCalculation = useCallback((colId: string, calcId: string, rows: Item[]): string => {
+    if (!rows.length) return '—';
+    if (calcId === 'count') return `${rows.length} registros`;
+
+    const values: number[] = [];
+    for (const r of rows) {
+      let val: number | undefined;
+      if (colId === 'duration') val = getDays(r.start, r.end);
+      else if (colId === 'progress') val = r.progress;
+      else if (colId === 'deviation') val = getDeviationDays(r, currentTodayIso);
+      else {
+        const raw = (r as any)[colId];
+        if (typeof raw === 'number') val = raw;
+        else if (typeof raw === 'string') {
+          const parsed = parseFloat(raw.replace(/[^\d.-]/g, ''));
+          if (!isNaN(parsed)) val = parsed;
+        }
+      }
+      if (val !== undefined && !isNaN(val)) values.push(val);
+    }
+
+    if (values.length === 0) return `${rows.length} registros`;
+    const isPercent = colTypeOverrides[colId] === 'percent' || colId === 'progress';
+
+    switch (calcId) {
+      case 'sum': {
+        const sum = values.reduce((a, b) => a + b, 0);
+        return isPercent ? `${Math.round(sum)}%` : colId === 'duration' && colTypeOverrides[colId] !== 'number' ? `${Math.round(sum)} días` : `${Math.round(sum * 100) / 100}`;
+      }
+      case 'avg': {
+        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+        return isPercent ? `${Math.round(avg)}%` : colId === 'duration' && colTypeOverrides[colId] !== 'number' ? `${Math.round(avg)} días` : `${Math.round(avg * 10) / 10}`;
+      }
+      case 'min': {
+        const min = Math.min(...values);
+        return isPercent ? `${min}%` : colId === 'duration' && colTypeOverrides[colId] !== 'number' ? `${min} días` : `${min}`;
+      }
+      case 'max': {
+        const max = Math.max(...values);
+        return isPercent ? `${max}%` : colId === 'duration' && colTypeOverrides[colId] !== 'number' ? `${max} días` : `${max}`;
+      }
+      default:
+        return `${rows.length} registros`;
+    }
+  }, [currentTodayIso, colTypeOverrides]);
+
   const commitChange = (nextOrUpdater: Item[] | ((prev: Item[]) => Item[])) => {
     setItems((prev) => {
       const rawNext = typeof nextOrUpdater === 'function' ? nextOrUpdater(prev) : nextOrUpdater;
       const next = computeWbsHierarchy(rawNext, rawTasks);
       if (JSON.stringify(prev) !== JSON.stringify(next)) {
-        setHistory((h) => [prev, ...h].slice(0, 30));
+        setHistory((h) => [{ items: prev, colConfig: getColSnapshot() }, ...h].slice(0, 30));
         setRedoHistory([]);
       }
       return next;
@@ -2619,8 +2928,9 @@ export default function CronogramaGanttView({
       notify('No hay cambios previos para deshacer');
       return;
     }
-    setRedoHistory((r) => [items, ...r].slice(0, 30));
-    setItems(previous);
+    setRedoHistory((r) => [{ items, colConfig: getColSnapshot() }, ...r].slice(0, 30));
+    setItems(previous.items);
+    applyColSnapshot(previous.colConfig);
     setHistory(rest);
     notify('Cambio deshecho con éxito');
   };
@@ -2635,8 +2945,9 @@ export default function CronogramaGanttView({
       notify('No hay cambios posteriores para rehacer');
       return;
     }
-    setHistory((h) => [items, ...h].slice(0, 30));
-    setItems(next);
+    setHistory((h) => [{ items, colConfig: getColSnapshot() }, ...h].slice(0, 30));
+    setItems(next.items);
+    applyColSnapshot(next.colConfig);
     setRedoHistory(rest);
     notify('Cambio rehecho con éxito');
   };
@@ -5667,7 +5978,7 @@ export default function CronogramaGanttView({
               <div className="name-head">
                 <span>{viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE'}</span>
                 <div className="head-col-actions">
-                  <ColumnHeaderMenu engine={engine} columnId="name" buttonClassName="cols-trigger-btn" />
+                  {renderColumnHeaderMenu("name", "cols-trigger-btn")}
                   <button
                     type="button"
                     className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
@@ -5713,7 +6024,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="kind" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("kind")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'kind' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'kind')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('kind'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5734,14 +6045,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="parent" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("parent")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'parent' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'parent')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('parent'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('start') && (
                 <div className="th-col-header">
-                  <span className="th-label">Inicio</span>
+                  <span className="th-label">{getColLabel("start", "Inicio")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5755,14 +6066,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="start" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("start")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'start' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'start')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('start'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('end') && (
                 <div className="th-col-header">
-                  <span className="th-label">Fin</span>
+                  <span className="th-label">{getColLabel("end", "Fin")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5776,14 +6087,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="end" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("end")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'end' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'end')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('end'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('duration') && (
                 <div className="th-col-header">
-                  <span className="th-label">Duración</span>
+                  <span className="th-label">{getColLabel("duration", "Duración")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5797,14 +6108,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="duration" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("duration")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'duration' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'duration')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('duration'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('progress') && (
                 <div className="th-col-header">
-                  <span className="th-label">Avance</span>
+                  <span className="th-label">{getColLabel("progress", "Avance")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5818,14 +6129,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="progress" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("progress")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'progress' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'progress')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('progress'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('deviation') && (
                 <div className="th-col-header">
-                  <span className="th-label">Desviación</span>
+                  <span className="th-label">{getColLabel("deviation", "Desviación")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5839,14 +6150,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="deviation" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("deviation")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'deviation' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'deviation')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('deviation'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('status') && (
                 <div className="th-col-header">
-                  <span className="th-label">Estado</span>
+                  <span className="th-label">{getColLabel("status", "Estado")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5860,7 +6171,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="status" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("status")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'status' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'status')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('status'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5881,14 +6192,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="dependencies" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("dependencies")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'dependencies' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'dependencies')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('dependencies'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('gestor') && (
                 <div className="th-col-header">
-                  <span className="th-label">Responsable</span>
+                  <span className="th-label">{getColLabel("gestor", "Responsable")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5902,14 +6213,14 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="gestor" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("gestor")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'gestor' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'gestor')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('gestor'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
               )}
               {visibleCols.includes('region') && (
                 <div className="th-col-header">
-                  <span className="th-label">Ámbito</span>
+                  <span className="th-label">{getColLabel("region", "Ámbito")}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5923,7 +6234,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="region" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("region")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'region' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'region')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('region'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5944,7 +6255,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId="actualEnd" buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu("actualEnd")}
                   </div>
                   <div className={`col-resizer ${resizingCol === 'actualEnd' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'actualEnd')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('actualEnd'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -5958,7 +6269,7 @@ export default function CronogramaGanttView({
               {/* Columnas personalizadas Notion en cabecera con micro-filtro y resizer sincronizado */}
               {customCols.map((cCol) => visibleCols.includes(cCol.key as ColKey) && (
                 <div key={cCol.key} className="th-col-header">
-                  <span className="th-label">{cCol.label}</span>
+                  <span className="th-label">{getColLabel(cCol.key, cCol.label)}</span>
                   <div className="th-actions">
                     <button
                       type="button"
@@ -5972,7 +6283,7 @@ export default function CronogramaGanttView({
                     >
                       <EyeOff size={11} />
                     </button>
-                    <ColumnHeaderMenu engine={engine} columnId={cCol.key} buttonClassName="th-action-btn" onHideColumn={(colId) => toggleColVisibility(colId as ColKey)} />
+                    {renderColumnHeaderMenu(cCol.key)}
                   </div>
                   <div className={`col-resizer ${resizingCol === cCol.key ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, cCol.key as ColKey)} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth(cCol.key as ColKey); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
                 </div>
@@ -6441,7 +6752,13 @@ export default function CronogramaGanttView({
                           }}
                         />
                       ) : (
-                        <span className="cell-text">{getDays(x.start, x.end)} días</span>
+                        <span className="cell-text">
+                        {colTypeOverrides['duration'] === 'percent'
+                          ? `${getDays(x.start, x.end)}%`
+                          : colTypeOverrides['duration'] === 'number'
+                          ? getDays(x.start, x.end)
+                          : `${getDays(x.start, x.end)} días`}
+                      </span>
                       )}
                     </div>
                   )}
@@ -7748,6 +8065,32 @@ export default function CronogramaGanttView({
                 <span>Deseleccionar</span>
               </button>
             </aside>
+          )}
+
+          {/* Barra de Cálculos al pie Notion / Excel */}
+          {Object.keys(colCalculations).length > 0 && (
+            <div className="te-table-calc-bar" role="status" aria-label="Cálculos de columna activos">
+              <div className="te-calc-bar-header">
+                <Sigma size={13} className="te-calc-bar-icon" />
+                <span className="te-calc-bar-title">Cálculo al pie:</span>
+              </div>
+              <div className="te-calc-bar-pills">
+                {Object.entries(colCalculations).map(([colId, calcType]) => {
+                  const colDef = ganttColumns.find((c) => c.id === colId);
+                  const colLabel = getColLabel(colId, colDef?.label || colId);
+                  const calcName = calcType === 'sum' ? 'Suma' : calcType === 'avg' ? 'Promedio' : calcType === 'min' ? 'Mínimo' : calcType === 'max' ? 'Máximo' : 'Conteo';
+                  const result = computeColumnCalculation(colId, calcType, shown);
+                  return (
+                    <div key={colId} className="te-calc-summary-pill" title={`${colLabel}: ${calcName} = ${result}`}>
+                      <span className="te-calc-pill-name">{colLabel}</span>
+                      <span className="te-calc-pill-type">({calcName})</span>
+                      <span className="te-calc-pill-sep">:</span>
+                      <strong className="te-calc-pill-val">{result}</strong>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           {/* Footer de Paginación */}
