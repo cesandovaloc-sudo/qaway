@@ -243,6 +243,14 @@ export default function Sidebar({
       </button>
 
       <button
+        className={active === 'usuarios' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('usuarios')}
+      >
+        <UserRound size={18} />
+        <span>Equipo</span>
+      </button>
+
+      <button
         className={active === 'tareas' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('tareas')}
       >
@@ -273,14 +281,6 @@ export default function Sidebar({
       >
         <BarChart3 size={18} />
         <span>Reportes</span>
-      </button>
-
-      <button
-        className={active === 'usuarios' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('usuarios')}
-      >
-        <UserRound size={18} />
-        <span>Equipo</span>
       </button>
 
       <button

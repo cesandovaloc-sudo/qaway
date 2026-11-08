@@ -2764,37 +2764,44 @@
   gap: 8px;
 }
 
+.gantt-v2 .progress > span,
 .gantt-v2 .progress.editable > span,
 .gantt-v2 .progress.is-rollup > span,
 .gantt-v2 .progress.is-linked-tasks > span {
-  height: 8px;
+  height: 7px;
   min-width: 35px;
   flex: 1;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #e2e8f0;
   overflow: hidden;
 }
 
+.gantt-v2 .progress i,
 .gantt-v2 .progress.editable i,
 .gantt-v2 .progress.is-rollup i,
 .gantt-v2 .progress.is-linked-tasks i {
   display: block;
   height: 100%;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
+.gantt-v2 .progress i.blue,
 .gantt-v2 .progress.editable i.blue,
 .gantt-v2 .progress.is-rollup i.blue,
 .gantt-v2 .progress.is-linked-tasks i.blue { background: #0066ff; }
+.gantt-v2 .progress i.green,
 .gantt-v2 .progress.editable i.green,
 .gantt-v2 .progress.is-rollup i.green,
 .gantt-v2 .progress.is-linked-tasks i.green { background: #00b96b; }
+.gantt-v2 .progress i.amber,
 .gantt-v2 .progress.editable i.amber,
 .gantt-v2 .progress.is-rollup i.amber,
 .gantt-v2 .progress.is-linked-tasks i.amber { background: #fa8c16; }
+.gantt-v2 .progress i.red,
 .gantt-v2 .progress.editable i.red,
 .gantt-v2 .progress.is-rollup i.red,
 .gantt-v2 .progress.is-linked-tasks i.red { background: #ef4444; }
+.gantt-v2 .progress i.gray,
 .gantt-v2 .progress.editable i.gray,
 .gantt-v2 .progress.is-rollup i.gray,
 .gantt-v2 .progress.is-linked-tasks i.gray { background: #94a3b8; }
@@ -2879,7 +2886,7 @@
 }
 .gantt-v2 .status-item.complete .status-label {
   color: #047857;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .gantt-v2 .status-item.progress .status-dot {
@@ -2887,7 +2894,7 @@
 }
 .gantt-v2 .status-item.progress .status-label {
   color: #b45309;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .gantt-v2 .status-item.pending .status-dot {
@@ -2903,7 +2910,7 @@
 }
 .gantt-v2 .status-item.late .status-label {
   color: #dc2626;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Barras del Timeline */
@@ -5602,12 +5609,15 @@ body.gantt-resizing {
 .gantt-v2 .view-lista-fullwidth .table-head {
   width: 100% !important;
   overflow-x: hidden !important;
-  overflow-y: hidden !important;
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent !important;
 }
 
 .gantt-v2 .view-lista-fullwidth .table-head::-webkit-scrollbar {
   width: 6px;
   height: 0;
+  background: transparent;
 }
 
 .gantt-v2 .view-lista-fullwidth .table-head::-webkit-scrollbar-thumb {
@@ -5964,7 +5974,7 @@ body.gantt-resizing {
   text-align: left;
   padding: 10px 12px;
   border-bottom: 1px solid #cbd5e1;
-  border-right: 1px solid #f1f5f9;
+  border-right: 1px solid #e2e8f0;
   z-index: 10;
   white-space: nowrap;
 }
@@ -5972,9 +5982,14 @@ body.gantt-resizing {
 .cronograma-lista-table tbody td {
   padding: 9px 12px;
   border-bottom: 1px solid #e2e8f0;
-  border-right: 1px solid #f8fafc;
+  border-right: 1px solid #edf2f7;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.cronograma-lista-table thead th:last-child,
+.cronograma-lista-table tbody td:last-child {
+  border-right: none;
 }
 
 .cronograma-lista-table tbody tr.lista-row {
@@ -7037,11 +7052,11 @@ body.gantt-resizing {
   padding: 0 !important;
 }
 .gantt-v2 .type-text-label.is-hito {
-  font-weight: 650;
-  color: #1e3a8a;
+  font-weight: 500;
+  color: #334155;
 }
 .gantt-v2 .type-text-label.is-sub {
-  color: #5b21b6;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -7057,11 +7072,11 @@ body.gantt-resizing {
   padding: 0 !important;
 }
 .gantt-v2 .type-badge-pill.is-hito {
-  color: #1e3a8a;
-  font-weight: 650;
+  color: #334155;
+  font-weight: 500;
 }
 .gantt-v2 .type-badge-pill.is-sub {
-  color: #5b21b6;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -10994,7 +11009,9 @@ body.gantt-resizing {
 .territorial-view-stage {
   flex: 1;
   position: relative;
-  min-height: 480px;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
   background: #f8fafc;
   display: flex;
   flex-direction: column;
@@ -11002,15 +11019,14 @@ body.gantt-resizing {
 }
 
 .stage-pane {
-  flex: 1;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  position: relative;
 }
 
 .territorial-leaflet-canvas {
   height: 100%;
-  min-height: 480px;
   width: 100%;
   background: #e8eef3;
 }
@@ -11019,19 +11035,19 @@ body.gantt-resizing {
 .analytics-leaflet-canvas {
   position: absolute;
   inset: 0;
-  min-height: 420px;
+  width: 100%;
+  height: 100%;
   z-index: 1;
 }
 
-.peru-choropleth-embedded { position: relative; width: 100%; height: 100%; min-height: 420px; }
-.peru-choropleth-map { width: 100%; height: 100%; min-height: 420px; }
-.thematic-map-real-pane { padding: 0 !important; display: block !important; overflow: hidden !important; }
-.thematic-map-real-pane .peru-choropleth-embedded { min-height: 480px; height: 100%; }
-.thematic-map-real-pane .peru-choropleth-map { min-height: 480px; height: 100%; }
-.thematic-map-real-pane > .peru-choropleth-embedded { height: 480px; flex: 0 0 480px; }
-.choropleth-selection { position: absolute; left: 14px; bottom: 14px; z-index: 5; padding: 8px 11px; border-radius: 6px; background: rgba(255,255,255,.94); color: #17324d; font-size: 12px; box-shadow: 0 4px 16px rgba(15,23,42,.16); }
-.pbi-native-view { display: grid; grid-template-columns: minmax(0, 1fr) 250px; width: 100%; min-height: 480px; height: 100%; background: #f8fafc; }
-.pbi-native-map { min-height: 480px; height: 100%; }
+.peru-choropleth-embedded { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
+.peru-choropleth-map { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; }
+.thematic-map-real-pane { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0 !important; display: block !important; overflow: hidden !important; }
+.thematic-map-real-pane .peru-choropleth-embedded { width: 100%; height: 100%; }
+.thematic-map-real-pane .peru-choropleth-map { width: 100%; height: 100%; }
+.choropleth-selection { position: absolute; right: 14px; bottom: 14px; z-index: 5; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,.96); border: 1px solid #cbd5e1; color: #17324d; font-size: 12px; box-shadow: 0 4px 16px rgba(15,23,42,.12); }
+.pbi-native-view { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 240px; width: 100%; height: 100%; min-height: 0; background: #f8fafc; }
+.pbi-native-map { width: 100%; height: 100%; }
 .pbi-native-side { display: flex; flex-direction: column; gap: 14px; padding: 18px; background: #fff; border-left: 1px solid #e2e8f0; color: #26384d; }
 .pbi-native-side > strong { font-size: 14px; }
 .pbi-native-side > div { display: flex; flex-direction: column; gap: 3px; padding: 12px; background: #f7f9fc; border: 1px solid #edf1f6; border-radius: 8px; }
@@ -11482,56 +11498,52 @@ body.gantt-resizing {
   to { opacity: 1; transform: translate(-50%, -100%); }
 }
 
-/* 4. BOTONERA DOCK FLOTANTE SOBRE EL MAPA (Estilo App Moderna) */
+/* 4. BOTONERA DOCK FLOTANTE SOBRE EL MAPA (Estilo Oficial de la App) */
 .territorial-floating-dock {
   position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 12px;
+  left: 12px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 5px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.16), 0 2px 6px -1px rgba(15, 23, 42, 0.08);
-  z-index: 25;
+  gap: 3px;
+  background: #ffffff;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.06);
+  z-index: 1000 !important;
 }
 
 .floating-dock-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   border: 0;
   background: transparent;
   color: #475569;
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
 .floating-dock-btn:hover {
   background: #f1f5f9;
   color: #0f172a;
-  transform: translateY(-1px);
 }
 
 .floating-dock-btn.is-active {
   background: #0066ff;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 102, 255, 0.3);
 }
 
 .floating-dock-divider {
   width: 1px;
-  height: 20px;
+  height: 18px;
   background: #e2e8f0;
-  margin: 0 3px;
+  margin: 0 2px;
   flex-shrink: 0;
 }
 

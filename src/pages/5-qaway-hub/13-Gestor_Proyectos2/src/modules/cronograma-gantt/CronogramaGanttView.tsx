@@ -4265,7 +4265,7 @@ export default function CronogramaGanttView({
     const barColorClass =
       progressVal === 100 ? 'green' : statusTone === 'red' ? 'red' : statusTone === 'gray' ? 'gray' : 'blue';
     return (
-      <div className="progress" style={{ width: '100%' }}>
+      <div className="progress editable" style={{ width: '100%' }}>
         <span>
           <i className={barColorClass} style={{ width: `${progressVal}%` }} />
         </span>
@@ -4873,11 +4873,12 @@ export default function CronogramaGanttView({
             </div>
           ) : (
             <span
-              className={`status ${STATUS_CLASS[x.status]}`}
-              style={{ fontWeight: 500 }}
+              className={`status-item ${STATUS_CLASS[x.status]}`}
+              style={{ fontWeight: 500, cursor: 'pointer' }}
               title="Clic para cambiar estado"
             >
-              {x.status}
+              <span className="status-dot" />
+              <span className="status-label">{x.status}</span>
             </span>
           )}
         </div>
