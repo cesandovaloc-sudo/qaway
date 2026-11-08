@@ -2764,7 +2764,6 @@
   gap: 8px;
 }
 
-.gantt-v2 .progress > span,
 .gantt-v2 .progress.editable > span,
 .gantt-v2 .progress.is-rollup > span,
 .gantt-v2 .progress.is-linked-tasks > span {
@@ -2776,7 +2775,6 @@
   overflow: hidden;
 }
 
-.gantt-v2 .progress i,
 .gantt-v2 .progress.editable i,
 .gantt-v2 .progress.is-rollup i,
 .gantt-v2 .progress.is-linked-tasks i {
@@ -2785,23 +2783,18 @@
   border-radius: 6px;
 }
 
-.gantt-v2 .progress i.blue,
 .gantt-v2 .progress.editable i.blue,
 .gantt-v2 .progress.is-rollup i.blue,
 .gantt-v2 .progress.is-linked-tasks i.blue { background: #0066ff; }
-.gantt-v2 .progress i.green,
 .gantt-v2 .progress.editable i.green,
 .gantt-v2 .progress.is-rollup i.green,
 .gantt-v2 .progress.is-linked-tasks i.green { background: #00b96b; }
-.gantt-v2 .progress i.amber,
 .gantt-v2 .progress.editable i.amber,
 .gantt-v2 .progress.is-rollup i.amber,
 .gantt-v2 .progress.is-linked-tasks i.amber { background: #fa8c16; }
-.gantt-v2 .progress i.red,
 .gantt-v2 .progress.editable i.red,
 .gantt-v2 .progress.is-rollup i.red,
 .gantt-v2 .progress.is-linked-tasks i.red { background: #ef4444; }
-.gantt-v2 .progress i.gray,
 .gantt-v2 .progress.editable i.gray,
 .gantt-v2 .progress.is-rollup i.gray,
 .gantt-v2 .progress.is-linked-tasks i.gray { background: #94a3b8; }
