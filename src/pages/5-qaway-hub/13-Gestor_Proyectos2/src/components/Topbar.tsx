@@ -42,6 +42,7 @@ const MODULE_LABELS: Record<ModuleKey, string> = {
   reportes: 'Reportes y estadísticas',
   usuarios: 'Equipo del proyecto',
   actas: 'Actas y acuerdos',
+  pruebas: 'PRUEBAS',
   configuracion: 'Configuración del sistema',
 };
 

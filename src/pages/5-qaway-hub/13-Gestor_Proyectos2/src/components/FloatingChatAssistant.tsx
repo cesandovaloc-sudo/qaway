@@ -128,6 +128,15 @@ const MODULE_CONTEXT_INFO: Record<ModuleKey, { title: string; hint: string; sugg
       '⏱️ Acuerdos con fecha límite próxima'
     ]
   },
+  pruebas: {
+    title: 'PRUEBAS',
+    hint: 'Espacio experimental para validar herramientas de visualización.',
+    suggestions: [
+      '🧪 Abrir herramientas experimentales',
+      '🗺️ Probar visualizaciones de mapas',
+      '📊 Revisar ejemplos de análisis'
+    ]
+  },
   configuracion: {
     title: 'Configuración del Proyecto',
     hint: 'Parámetros del sistema, zona horaria y fecha oficial.',

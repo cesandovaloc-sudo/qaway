@@ -11,8 +11,12 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@deck.gl/core": "^9.4.1",
+    "@deck.gl/react": "^9.4.1",
+    "@kepler.gl/components": "^3.3.0-alpha.20",
     "@tailwindcss/vite": "latest",
     "@vitejs/plugin-react": "^5.2.0",
+    "echarts": "^6.1.0",
     "lucide-react": "^0.468.0",
     "maplibre-gl": "^6.17.0",
     "react": "^19.0.0",

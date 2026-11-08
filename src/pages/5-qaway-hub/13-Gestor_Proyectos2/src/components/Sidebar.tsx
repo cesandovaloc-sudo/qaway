@@ -291,6 +291,14 @@ export default function Sidebar({
         <span>Actas y acuerdos</span>
       </button>
 
+      <button
+        className={active === 'pruebas' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('pruebas')}
+      >
+        <Flag size={18} />
+        <span>PRUEBAS</span>
+      </button>
+
       {/* Espacio flexible para empujar la configuración al fondo */}
       <div style={{ flex: 1, minHeight: '15px' }} />
 

@@ -21,6 +21,7 @@ import EquipoView from './modules/equipo/EquipoView';
 import HitosView from './modules/hitos/HitosView';
 import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
 import ConfiguracionView from './modules/configuracion/ConfiguracionView';
+import PruebasView from './modules/pruebas/PruebasView';
 import FloatingChatAssistant from './components/FloatingChatAssistant';
 import { deleteGestorProject, listGestorProjects, upsertGestorProject } from './services/gestorProjectService';
 
@@ -55,7 +56,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'pruebas', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
@@ -584,6 +585,9 @@ function GestorProyectosApp() {
           </div>
           <div className={active === 'actas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
+          </div>
+          <div className={active === 'pruebas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+            <PruebasView activeProject={activeProject} />
           </div>
           <div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
             <ConfiguracionView

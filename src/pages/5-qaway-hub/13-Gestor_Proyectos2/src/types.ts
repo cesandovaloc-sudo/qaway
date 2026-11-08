@@ -1,5 +1,5 @@
 // Tipos compartidos del shell maestro.
-export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'configuracion';
+export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
 
 // Ruta pública canónica del módulo dentro del Hub.
 // La aplicación se llama Gestor de Proyectos (plural) y sus vistas de proyecto
@@ -18,6 +18,7 @@ export const MODULE_SLUGS: Record<ModuleKey, string> = {
   reportes: `${BASE_PATH}/reportes`,
   usuarios: `${BASE_PATH}/equipo`,
   actas: `${BASE_PATH}/actas`,
+  pruebas: `${BASE_PATH}/pruebas`,
   configuracion: `${BASE_PATH}/configuracion`,
 };
 
@@ -35,6 +36,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   [`${BASE_PATH}/equipo`]: 'usuarios',
   [`${BASE_PATH}/usuarios`]: 'usuarios',
   [`${BASE_PATH}/actas`]: 'actas',
+  [`${BASE_PATH}/pruebas`]: 'pruebas',
   [`${BASE_PATH}/actas-acuerdos`]: 'actas',
   [`${BASE_PATH}/actas-y-acuerdos`]: 'actas',
   [`${BASE_PATH}/configuracion`]: 'configuracion',
@@ -51,6 +53,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/equipo': 'usuarios',
   '/usuarios': 'usuarios',
   '/actas': 'actas',
+  '/pruebas': 'pruebas',
   '/actas-acuerdos': 'actas',
   '/configuracion': 'configuracion',
 };
