@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { ProjectShellFilters } from '../../shared/project-shell';
 import type { Integrante, SedeFrente, AsignacionViva, PresetVista, EstadoOperativo, EstadoCuenta } from './types';
 import {
   Search,
@@ -195,8 +196,8 @@ export default function EquipoDirectorioView({
 
   return (
     <div className="cronograma-lista-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      {/* Barra de Filtros Nativa estilo Cronograma */}
-      <div className="filters">
+      {/* Barra de Filtros Nativa compartida estilo Cronograma */}
+      <ProjectShellFilters>
         <label className="search">
           <Search size={16} />
           <input
@@ -371,7 +372,7 @@ export default function EquipoDirectorioView({
           <Download size={13} />
           <span>Exportar</span>
         </button>
-      </div>
+      </ProjectShellFilters>
 
       {/* Contenedor de Tabla con Scroll Interno Encapsulado */}
       <div className="cronograma-lista-table-wrap" style={{ flex: 1, overflow: 'auto' }}>

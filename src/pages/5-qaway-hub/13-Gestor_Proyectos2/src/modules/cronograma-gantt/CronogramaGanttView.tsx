@@ -12,6 +12,7 @@ import {
   hasBaseline,
 } from './scheduleMetrics';
 import './gantt.css';
+import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
@@ -5242,25 +5243,11 @@ export default function CronogramaGanttView({
     <div className="gantt-v2">
       <div className="app">
         {/* Header Principal */}
-        <header className="header">
-          <div className="heading">
-            <span className="heading-icon">
-              {perspective === 'territorial' ? <Building2 size={26} /> : <CalendarDays size={26} />}
-            </span>
-            <div>
-              <h1>
-                {perspective === 'territorial'
-                  ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
-                  : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`}
-              </h1>
-              <p>
-                {perspective === 'territorial'
-                  ? 'Seguimiento de entregables territoriales, sedes operativas, UGEL y DRE en tiempo real.'
-                  : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'}
-              </p>
-            </div>
-          </div>
-          <div className="head-actions">
+        <ProjectShellHeader
+          perspective={perspective}
+          title={perspective === 'territorial' ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}` : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`}
+          description={perspective === 'territorial' ? 'Seguimiento de entregables territoriales, sedes operativas, UGEL y DRE en tiempo real.' : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'}
+          actions={<>
             <button
               className="btn secondary"
               onClick={() => setShowSummaryCards((visible) => !visible)}
@@ -5317,8 +5304,8 @@ export default function CronogramaGanttView({
                 </div>
               )}
             </div>
-          </div>
-        </header>
+          </>}
+        />
 
         {/* Tarjetas Métricas Directivas */}
          {showSummaryCards && <section className="metrics">
@@ -5414,7 +5401,12 @@ export default function CronogramaGanttView({
          </section>}
 
         {/* Workspace Central */}
-        <main ref={workspaceRef} id="edt-workspace-toolbar" className={`workspace ${isFullscreen ? 'fullscreen-mode' : ''} ${isDocked ? 'is-docked' : ''}`}>
+        <ProjectShellWorkspace
+          ref={workspaceRef}
+          id="edt-workspace-toolbar"
+          isFullscreen={isFullscreen}
+          isDocked={isDocked}
+        >
           {/* Barra superior de salida en pantalla completa */}
           {isFullscreen && (
             <div className="fullscreen-exit-bar">
@@ -5833,7 +5825,7 @@ export default function CronogramaGanttView({
           </nav>
 
           {/* Filtros Contextuales y Macro */}
-          <div className="filters">
+          <ProjectShellFilters>
             {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
             <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
               <button
@@ -6728,7 +6720,7 @@ export default function CronogramaGanttView({
                 </div>
               )}
             </div>
-          </div>
+          </ProjectShellFilters>
 
           {/* Fila extra expandible de Filtros Personalizados */}
           {advancedFiltersOpen && (
@@ -7901,7 +7893,7 @@ export default function CronogramaGanttView({
               </button>
             </div>
           </footer>
-        </main>
+        </ProjectShellWorkspace>
 
         {/* Panel Lateral Editor Aislado y Memoizado (Cero re-renders en el Gantt al escribir) */}
         <GanttEditorDrawer

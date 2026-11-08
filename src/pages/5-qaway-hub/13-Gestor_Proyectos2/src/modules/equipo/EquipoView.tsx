@@ -21,6 +21,7 @@ import EquipoDrawer from './EquipoDrawer';
 import EquipoExpedienteModal from './EquipoExpedienteModal';
 import EquipoNuevoModal from './EquipoNuevoModal';
 import EquipoColumnasModal from './EquipoColumnasModal';
+import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellTabs } from '../../shared/project-shell';
 import {
   Users,
   UserCheck,
@@ -249,36 +250,30 @@ export default function EquipoView({
   return (
     <div className="gantt-v2">
       <div className="app">
-        {/* Header Principal idéntico a Cronograma */}
-        <header className="header">
-          <div className="heading">
-            <span className="heading-icon">
-              <Users size={26} />
-            </span>
-            <div>
-              <h1>Equipo del Proyecto · {projectName}</h1>
-              <p>
-                Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo.
-              </p>
-            </div>
-          </div>
-          <div className="head-actions">
-            <button
-              className="btn secondary"
-              onClick={() => setIsColumnasModalOpen(true)}
-            >
-              <SlidersHorizontal size={15} />
-              <span>Configurar Columnas</span>
-            </button>
-            <button
-              className="btn primary"
-              onClick={() => setIsNuevoModalOpen(true)}
-            >
-              <Plus size={16} />
-              <span>Nuevo Integrante</span>
-            </button>
-          </div>
-        </header>
+        {/* Header Principal universal compartido */}
+        <ProjectShellHeader
+          perspective="equipo"
+          title={`Equipo del Proyecto · ${projectName}`}
+          description="Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo."
+          actions={
+            <>
+              <button
+                className="btn secondary"
+                onClick={() => setIsColumnasModalOpen(true)}
+              >
+                <SlidersHorizontal size={15} />
+                <span>Configurar Columnas</span>
+              </button>
+              <button
+                className="btn primary"
+                onClick={() => setIsNuevoModalOpen(true)}
+              >
+                <Plus size={16} />
+                <span>Nuevo Integrante</span>
+              </button>
+            </>
+          }
+        />
 
         {/* Tarjetas Métricas Directivas */}
         <section className="metrics">
@@ -345,65 +340,67 @@ export default function EquipoView({
         {/* =========================================================================
             LA CÁPSULA UNIFICADA: Workspace Central encapsulado con bordes y sombra
            ========================================================================= */}
-        <main className="workspace">
+        <ProjectShellWorkspace>
           {/* Tabs Superiores con Switcher de Modos a la Derecha */}
-          <nav className="tabs">
-            <div className="tabs-list">
-              {tabPills.map((t) => (
+          <ProjectShellTabs
+            tabsList={
+              <>
+                {tabPills.map((t) => (
+                  <button
+                    key={t.n}
+                    type="button"
+                    className={selectedPill === t.n ? 'active' : ''}
+                    onClick={() => handlePillClick(t.n)}
+                  >
+                    {t.n} <span>({t.c})</span>
+                  </button>
+                ))}
+              </>
+            }
+            viewSwitcher={
+              <>
                 <button
-                  key={t.n}
                   type="button"
-                  className={selectedPill === t.n ? 'active' : ''}
-                  onClick={() => handlePillClick(t.n)}
+                  className={`view-mode-btn ${activeView === 'directorio' ? 'active' : ''}`}
+                  onClick={() => setActiveView('directorio')}
+                  title="Directorio Maestro"
                 >
-                  {t.n} <span>({t.c})</span>
+                  <List size={14} />
+                  <span>Directorio</span>
                 </button>
-              ))}
-            </div>
 
-            {/* Switcher de Modos con cápsula azul activa (Exacto a Cronograma) */}
-            <div className="view-mode-switcher" role="tablist">
-              <button
-                type="button"
-                className={`view-mode-btn ${activeView === 'directorio' ? 'active' : ''}`}
-                onClick={() => setActiveView('directorio')}
-                title="Directorio Maestro"
-              >
-                <List size={14} />
-                <span>Directorio</span>
-              </button>
+                <button
+                  type="button"
+                  className={`view-mode-btn ${activeView === 'organigrama' ? 'active' : ''}`}
+                  onClick={() => setActiveView('organigrama')}
+                  title="Organigrama Jerárquico"
+                >
+                  <GitBranch size={14} />
+                  <span>Organigrama</span>
+                </button>
 
-              <button
-                type="button"
-                className={`view-mode-btn ${activeView === 'organigrama' ? 'active' : ''}`}
-                onClick={() => setActiveView('organigrama')}
-                title="Organigrama Jerárquico"
-              >
-                <GitBranch size={14} />
-                <span>Organigrama</span>
-              </button>
+                <button
+                  type="button"
+                  className={`view-mode-btn ${activeView === 'sedes' ? 'active' : ''}`}
+                  onClick={() => setActiveView('sedes')}
+                  title="Frentes Territoriales"
+                >
+                  <Building2 size={14} />
+                  <span>Frentes Territoriales</span>
+                </button>
 
-              <button
-                type="button"
-                className={`view-mode-btn ${activeView === 'sedes' ? 'active' : ''}`}
-                onClick={() => setActiveView('sedes')}
-                title="Frentes Territoriales"
-              >
-                <Building2 size={14} />
-                <span>Frentes Territoriales</span>
-              </button>
-
-              <button
-                type="button"
-                className={`view-mode-btn ${activeView === 'carga' ? 'active' : ''}`}
-                onClick={() => setActiveView('carga')}
-                title="Carga de Trabajo"
-              >
-                <Activity size={14} />
-                <span>Carga de Trabajo</span>
-              </button>
-            </div>
-          </nav>
+                <button
+                  type="button"
+                  className={`view-mode-btn ${activeView === 'carga' ? 'active' : ''}`}
+                  onClick={() => setActiveView('carga')}
+                  title="Carga de Trabajo"
+                >
+                  <Activity size={14} />
+                  <span>Carga de Trabajo</span>
+                </button>
+              </>
+            }
+          />
 
           {/* VISTAS DENTRO DE LA CÁPSULA */}
           {activeView === 'directorio' && (
@@ -477,7 +474,7 @@ export default function EquipoView({
               }}
             />
           )}
-        </main>
+        </ProjectShellWorkspace>
       </div>
 
       {/* DRAWER LATERAL DE CONSULTA Y EDICIÓN RÁPIDA (NIVEL 1) */}
