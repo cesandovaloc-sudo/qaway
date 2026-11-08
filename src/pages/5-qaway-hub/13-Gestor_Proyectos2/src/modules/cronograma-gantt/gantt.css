@@ -653,9 +653,9 @@
 /* Delimitación fija y estable de los filtros desplegables para evitar saltos en la barra */
 .gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap,
 .gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap .filter-card-btn {
-  width: 175px;
+  width: 192px;
   min-width: 150px;
-  max-width: 205px;
+  max-width: 215px;
   flex-shrink: 0;
   box-sizing: border-box;
 }

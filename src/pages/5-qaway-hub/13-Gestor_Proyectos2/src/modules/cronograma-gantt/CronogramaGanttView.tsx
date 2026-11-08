@@ -405,23 +405,23 @@ const baseEdtIds = new Set([
 
 const extraSedesItems: Item[] = ALL_SEDES_EDT_ITEMS.filter((s) => !baseEdtIds.has(s.id)).map((s) => ({
   id: s.id,
-  code: s.code,
+  code: s.code || '',
   name: s.name,
   kind: 'subproceso' as const,
   edtType: 'PAQUETE_TRABAJO' as const,
   faseId: 'FASE-PLANIFICACION',
-  parentId: 'pt-1.6',
+  parentId: s.parentId || 'pt-1.6',
   start: s.start,
   end: s.end,
   dependencies: [],
   progress: s.progress,
   status: s.status,
   expanded: true,
-  description: `Seguimiento territorial de CDL y distribución en ${s.name}`,
-  deliverable: `CDL Validado y Registrado en SIGA - ${s.name}`,
+  description: s.entregableVerificable || `Seguimiento territorial en ${s.name}`,
+  deliverable: s.entregableVerificable || `Entregable verificado - ${s.name}`,
   deliverables: [{
     id: `deliv-${s.id}`,
-    name: `CDL Validado y Registrado en SIGA - ${s.name}`,
+    name: s.entregableVerificable || `Entregable verificado - ${s.name}`,
     type: 'spreadsheet' as const,
   }],
   region: s.region,
@@ -1356,7 +1356,7 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (hasLegacyMocks || parsed.length < 200 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo') || !parsed.some((it) => it.id === 'pt-1.6-dre-pasco')) {
+            if (hasLegacyMocks || parsed.length < 800 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-1.6-huancayo') || !parsed.some((it) => it.id === 'pt-1.6-dre-pasco')) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes (DRE + 13 UGEL)
               try {
                 localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
@@ -1445,10 +1445,14 @@ export default function CronogramaGanttView({
               (!it.parentId || cloudItems.some((p) => p.id === it.parentId))
           ) as Item[]
         );
-        if (projectId === 'p1' && !cleanCloudItems.some((it) => it.id === 'pt-7.2')) {
+        if (projectId === 'p1' && (cleanCloudItems.length < 800 || !cleanCloudItems.some((it) => it.id === 'pt-7.2'))) {
           setItems(INITIAL_ITEMS);
           syncAllCronogramaItemsToSupabase('p1', INITIAL_ITEMS as GanttItemData[]);
-        } else if (cleanCloudItems.length >= 50) {
+          try {
+            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(INITIAL_ITEMS));
+            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+          } catch {}
+        } else if (cleanCloudItems.length >= 800) {
           const recomputed = computeWbsHierarchy(cleanCloudItems, rawTasks);
           setItems(recomputed);
           try {
@@ -2226,6 +2230,7 @@ export default function CronogramaGanttView({
   );
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [selectedSedes, setSelectedSedes] = useState<string[]>([]);
+  const [selectedEdtCodes, setSelectedEdtCodes] = useState<string[]>([]);
 
   // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
   // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
@@ -2397,6 +2402,31 @@ export default function CronogramaGanttView({
     return `${selectedSedes.length} sedes`;
   }, [selectedSedes, gestorFilter]);
 
+  const edtComponentsWithProducts = useMemo(() => {
+    const components = items.filter((x) => !x.parentId && (x.kind === 'hito' || x.edtType === 'COMPONENTE'));
+    return components.map((comp) => {
+      const products = items.filter(
+        (p) => p.parentId === comp.id && (p.edtType === 'SUBCOMPONENTE' || p.edtType === 'PAQUETE_TRABAJO' || (p.code && p.code.includes('.')))
+      );
+      return { comp, products };
+    });
+  }, [items]);
+
+  const edtButtonText = useMemo(() => {
+    if (selectedEdtCodes.length === 0) return 'Todos los componentes';
+    if (selectedEdtCodes.length === 1) {
+      const target = selectedEdtCodes[0];
+      const it = items.find((x) => x.id === target || x.code === target);
+      if (it) {
+        const prefix = it.code ? `${it.code} ` : '';
+        const namePart = it.name.length > 20 ? `${it.name.slice(0, 20)}...` : it.name;
+        return `${prefix}${namePart}`;
+      }
+      return target;
+    }
+    return `${selectedEdtCodes.length} componentes/prod.`;
+  }, [selectedEdtCodes, items]);
+
   // Filtro de cargo territorial: Coordinador Macro-regional (supervisa 2 regiones)
   const [macroFilter, setMacroFilter] = useState<string>('Todos');
   const regionItemCounts = useMemo(() => {
@@ -2472,7 +2502,7 @@ export default function CronogramaGanttView({
   const [toast, setToast] = useState('');
   const [edit, setEdit] = useState<{ id: string; field: EditField } | null>(null);
   
-  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | 'phase' | 'equipoSede' | 'equipoEstado' | 'equipoCuenta' | 'equipoArea' | null;
+  type FilterMenuKey = 'region' | 'gestor' | 'state' | 'type' | 'dates' | 'wbsLevel' | 'vencimientos' | 'macro' | 'sede' | 'phase' | 'edtComponent' | 'equipoSede' | 'equipoEstado' | 'equipoCuenta' | 'equipoArea' | null;
   const [activeMenu, setActiveMenu] = useState<FilterMenuKey>(null);
   const [mapSubView, setMapSubView] = useState<TerritorialSubView>('geo-real');
   const [calOpen, setCalOpen] = useState<'from' | 'to' | null>(null);
@@ -3864,6 +3894,10 @@ export default function CronogramaGanttView({
     if (matchingSedeIds && matchingSedeIds.has(id)) {
       return true;
     }
+    // Si hay un filtro de componente/producto EDT activo y este nodo forma parte del árbol seleccionado, mantenerlo expandido
+    if (matchingEdtIds && matchingEdtIds.has(id)) {
+      return true;
+    }
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
     const modeMap = collapsedByMode[mode];
     if (modeMap && id in modeMap) {
@@ -3936,6 +3970,49 @@ export default function CronogramaGanttView({
     });
     return ids;
   }, [items, selectedSedes]);
+
+  const matchingEdtIds = useMemo(() => {
+    if (selectedEdtCodes.length === 0) return null;
+    const ids = new Set<string>();
+    const parentMap = new Map<string, string>();
+    const childrenMap = new Map<string, string[]>();
+
+    items.forEach((it) => {
+      if (it.parentId) {
+        parentMap.set(it.id, it.parentId);
+        if (!childrenMap.has(it.parentId)) childrenMap.set(it.parentId, []);
+        childrenMap.get(it.parentId)!.push(it.id);
+      }
+    });
+
+    const addDescendants = (id: string) => {
+      const children = childrenMap.get(id);
+      if (children) {
+        children.forEach((cId) => {
+          ids.add(cId);
+          addDescendants(cId);
+        });
+      }
+    };
+
+    items.forEach((it) => {
+      const isSelected = selectedEdtCodes.some(
+        (target) => it.id === target || it.code === target || (it.code && it.code.trim() === target.trim())
+      );
+
+      if (isSelected) {
+        ids.add(it.id);
+        let curr: string | undefined = it.id;
+        while (curr) {
+          ids.add(curr);
+          curr = parentMap.get(curr);
+        }
+        addDescendants(it.id);
+      }
+    });
+
+    return ids;
+  }, [items, selectedEdtCodes]);
 
   const shownBase = useMemo(() => {
     return items.filter((x) => {
@@ -4016,6 +4093,7 @@ export default function CronogramaGanttView({
         parent?.faseId === targetPhaseName;
 
       const matchSede = !matchingSedeIds || matchingSedeIds.has(x.id);
+      const matchEdt = !matchingEdtIds || matchingEdtIds.has(x.id);
 
       // Solapamiento de fechas con el período oficial consultado
       let matchRange = true;
@@ -4035,7 +4113,7 @@ export default function CronogramaGanttView({
 
       // Ocultar si cualquiera de sus ancestros en la jerarquía (padre, abuelo, etc.) está colapsado (independiente por vista)
       let notCollapsed = true;
-      if (isExplicitSedeMatch) {
+      if (isExplicitSedeMatch || (matchingEdtIds && matchingEdtIds.has(x.id))) {
         notCollapsed = true;
       } else {
         let currParentId = x.parentId;
@@ -4152,6 +4230,7 @@ export default function CronogramaGanttView({
         matchGestor &&
         matchMacro &&
         matchSede &&
+        matchEdt &&
         matchPhase &&
         matchRange &&
         notCollapsed &&
@@ -4244,6 +4323,8 @@ export default function CronogramaGanttView({
     macroFilter,
     selectedSedes,
     matchingSedeIds,
+    selectedEdtCodes,
+    matchingEdtIds,
     itemDepthMap
   ]);
 
@@ -4705,7 +4786,7 @@ export default function CronogramaGanttView({
           ) : (
             <FileText size={13} className="code-icon-flag is-sub" />
           )}
-          <span className="code-num">{x.code}</span>
+          <span className="code-num">{x.code || (x.sede ? (x.name.startsWith('DRE') || x.name.startsWith('GRE') ? 'DRE' : 'UGEL') : '')}</span>
         </div>
       );
     }
@@ -4738,7 +4819,7 @@ export default function CronogramaGanttView({
               <FileText size={15} className="file" />
             </button>
           )}
-          {viewMode === 'gantt' && (
+          {viewMode === 'gantt' && Boolean(x.code) && (
             <span className="code" style={{ fontWeight: 500 }}>
               {x.kind === 'hito' && (
                 <span className="hito-micro-diamond">◆</span>
@@ -5564,93 +5645,75 @@ export default function CronogramaGanttView({
               : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'
           }
           actions={
-            perspective === 'equipo' ? (
-              <>
-                <button
-                  className="btn secondary"
-                  onClick={() => setShowSummaryCards((visible) => !visible)}
-                  title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
-                  aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
-                >
-                  {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
-                </button>
-                <button
-                  className="btn secondary"
-                  onClick={() => notify('Directorio del equipo exportado en formato Excel')}
-                  title="Exportar padrón del equipo en formato Excel"
-                >
-                  <Download size={15} />
-                  <span>Exportar Directorio</span>
-                </button>
-                <button
-                  className="btn primary"
-                  onClick={() => setIsEquipoNuevoOpen(true)}
-                  title="Registrar nuevo integrante en el equipo"
-                >
+            <>
+              <button
+                className="btn secondary"
+                onClick={() => setShowSummaryCards((visible) => !visible)}
+                title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+                aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
+              >
+                {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
+              </button>
+              <button
+                className="btn secondary"
+                onClick={exportExcelTemplate}
+                title="Descargar plantilla de cronograma para completar en Excel"
+              >
+                <FileSpreadsheet size={15} />
+                <span>Plantilla Excel</span>
+              </button>
+              <button
+                className="btn secondary"
+                onClick={() => {
+                  setImportOpen(true);
+                  setPickedFile('');
+                }}
+              >
+                <Upload size={15} />
+                <span>Importar Cronograma</span>
+                <ChevronDown size={14} />
+              </button>
+              <div className="menu-wrap">
+                <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
                   <Plus size={16} />
-                  <span>Nuevo Integrante</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className="btn secondary"
-                  onClick={() => setShowSummaryCards((visible) => !visible)}
-                  title={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
-                  aria-label={showSummaryCards ? 'Ocultar tarjetas superiores' : 'Mostrar tarjetas superiores'}
-                >
-                  {showSummaryCards ? <Eye size={15} /> : <EyeOff size={15} />}
-                </button>
-                <button
-                  className="btn secondary"
-                  onClick={exportExcelTemplate}
-                  title="Descargar plantilla de cronograma para completar en Excel"
-                >
-                  <FileSpreadsheet size={15} />
-                  <span>Plantilla Excel</span>
-                </button>
-                <button
-                  className="btn secondary"
-                  onClick={() => {
-                    setImportOpen(true);
-                    setPickedFile('');
-                  }}
-                >
-                  <Upload size={15} />
-                  <span>Importar Cronograma</span>
+                  <span>Agregar Componente</span>
                   <ChevronDown size={14} />
                 </button>
-                <div className="menu-wrap">
-                  <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
-                    <Plus size={16} />
-                    <span>Agregar Componente</span>
-                    <ChevronDown size={14} />
-                  </button>
-                  {newMenu && (
-                    <div className="menu" onClick={(e) => e.stopPropagation()}>
+                {newMenu && (
+                  <div className="menu" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => {
+                        setNewMenu(false);
+                        add('hito');
+                      }}
+                    >
+                      <Folder size={15} />
+                      <span>Nuevo componente principal</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setNewMenu(false);
+                        add('subproceso');
+                      }}
+                    >
+                      <FileText size={15} />
+                      <span>Nuevo subcomponente / subproceso</span>
+                    </button>
+                    {perspective === 'equipo' && (
                       <button
                         onClick={() => {
                           setNewMenu(false);
-                          add('hito');
+                          setIsEquipoNuevoOpen(true);
                         }}
                       >
-                        <Folder size={15} />
-                        <span>Nuevo componente principal</span>
+                        <Users size={15} />
+                        <span>Nuevo integrante del equipo</span>
                       </button>
-                      <button
-                        onClick={() => {
-                          setNewMenu(false);
-                          add('subproceso');
-                        }}
-                      >
-                        <FileText size={15} />
-                        <span>Nuevo subcomponente / subproceso</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
           }
         />
 
@@ -5862,138 +5925,7 @@ export default function CronogramaGanttView({
 
           {/* Tabs Superiores con Switcher de Modos a la Derecha */}
           <nav className="tabs">
-            {perspective === 'equipo' ? (
-              <div className="tabs-list">
-                <button
-                  type="button"
-                  className={equipoPill === 'Todos' && equipoSedeFilter === 'todas' && equipoEstadoOpFilter === 'todos' ? 'active' : ''}
-                  onClick={() => {
-                    setEquipoPill('Todos');
-                    setEquipoSedeFilter('todas');
-                    setEquipoEstadoOpFilter('todos');
-                    setEquipoEstadoCuentaFilter('todos');
-                    setSearch('');
-                    closeMenus();
-                  }}
-                >
-                  Todos <span>({equipoIntegrantes.length})</span>
-                </button>
-
-                {/* Filtro Sede / Frente */}
-                <div className="filter-dropdown-wrap tabs-filter-wrap">
-                  <button
-                    type="button"
-                    className={`filter-card-btn ${activeMenu === 'equipoSede' ? 'active' : ''} ${equipoSedeFilter !== 'todas' ? 'filtered' : ''}`}
-                    onClick={() => toggleMenu('equipoSede' as any)}
-                    title="Filtrar por Sede o Frente territorial"
-                  >
-                    <div className="filter-card-copy">
-                      <small>Sede / Frente</small>
-                      <span>{equipoSedeFilter === 'todas' ? `Todas las sedes (${equipoSedes.length})` : (equipoSedes.find((s) => s.id === equipoSedeFilter)?.nombre || equipoSedeFilter)}</span>
-                    </div>
-                    <ChevronDown size={14} className="filter-chevron" />
-                  </button>
-                  {activeMenu === 'equipoSede' && (
-                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 260 }}>
-                      <div className="filter-popover-title filter-popover-title-row">
-                        <span>Sedes del Proyecto</span>
-                        {equipoSedeFilter !== 'todas' && (
-                          <button type="button" className="filter-reset-link" onClick={() => setEquipoSedeFilter('todas')}>
-                            Restablecer
-                          </button>
-                        )}
-                      </div>
-                      <div className="filter-popover-list" style={{ maxHeight: 280 }}>
-                        <button
-                          type="button"
-                          className={`filter-item-btn ${equipoSedeFilter === 'todas' ? 'selected' : ''}`}
-                          onClick={() => { setEquipoSedeFilter('todas'); closeMenus(); }}
-                        >
-                          <span className="filter-item-text">
-                            <strong>Todas las sedes</strong>
-                            <small>{equipoSedes.length} sedes registradas</small>
-                          </span>
-                          <span className="wbs-level-badge">{equipoIntegrantes.length}</span>
-                        </button>
-                        {equipoSedes.map((s) => {
-                          const count = equipoIntegrantes.filter((i) => i.sedeId === s.id).length;
-                          return (
-                            <button
-                              key={s.id}
-                              type="button"
-                              className={`filter-item-btn filter-item-check ${equipoSedeFilter === s.id || equipoSedeFilter === s.nombre ? 'selected' : ''}`}
-                              onClick={() => { setEquipoSedeFilter(s.id); closeMenus(); }}
-                            >
-                              <span className="filter-item-main">
-                                <span className="filter-item-text">
-                                  <strong>{s.nombre}</strong>
-                                  <small>{s.tipo} · {s.departamento}</small>
-                                </span>
-                              </span>
-                              {count > 0 && <span className="wbs-level-badge">{count}</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Filtro Estado Laboral */}
-                <div className="filter-dropdown-wrap tabs-filter-wrap">
-                  <button
-                    type="button"
-                    className={`filter-card-btn ${activeMenu === 'equipoEstado' ? 'active' : ''} ${equipoEstadoOpFilter !== 'todos' ? 'filtered' : ''}`}
-                    onClick={() => toggleMenu('equipoEstado' as any)}
-                    title="Filtrar por Estado Operativo / Laboral"
-                  >
-                    <div className="filter-card-copy">
-                      <small>Estado</small>
-                      <span>{equipoEstadoOpFilter === 'todos' ? 'Todos los estados' : equipoEstadoOpFilter}</span>
-                    </div>
-                    <ChevronDown size={14} className="filter-chevron" />
-                  </button>
-                  {activeMenu === 'equipoEstado' && (
-                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 240 }}>
-                      <div className="filter-popover-title filter-popover-title-row">
-                        <span>Estado Laboral</span>
-                        {equipoEstadoOpFilter !== 'todos' && (
-                          <button type="button" className="filter-reset-link" onClick={() => setEquipoEstadoOpFilter('todos')}>
-                            Restablecer
-                          </button>
-                        )}
-                      </div>
-                      <div className="filter-popover-list">
-                        {[
-                          { id: 'todos', label: 'Todos los estados' },
-                          { id: 'En funciones', label: 'En funciones' },
-                          { id: 'Licencia / Permiso', label: 'Licencia / Permiso' },
-                          { id: 'Cesado / Inactivo', label: 'Cesado / Inactivo' },
-                        ].map((opt) => {
-                          const count = opt.id === 'todos'
-                            ? equipoIntegrantes.length
-                            : equipoIntegrantes.filter((i) => i.estadoOperativo === opt.id).length;
-                          return (
-                            <button
-                              key={opt.id}
-                              type="button"
-                              className={`filter-item-btn filter-item-check ${equipoEstadoOpFilter === opt.id ? 'selected' : ''}`}
-                              onClick={() => { setEquipoEstadoOpFilter(opt.id); closeMenus(); }}
-                            >
-                              <span className="filter-item-main">
-                                <span className="filter-item-text"><strong>{opt.label}</strong></span>
-                              </span>
-                              {count > 0 && <span className="wbs-level-badge">{count}</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="tabs-list">
+            <div className="tabs-list">
               <button
                 type="button"
                 className={tab === 'Todos' && wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos' && wbsLevelFilter === 'todos' && vencimientosFilter === 'todos' && selectedStates.length === 0 ? 'active' : ''}
@@ -6337,8 +6269,155 @@ export default function CronogramaGanttView({
                   </div>
                 )}
               </div>
+
+              {/* Filtro Contextual 3 (Caja Roja): Componente / Producto EDT */}
+              <div className="filter-dropdown-wrap contextual-filter-wrap edt-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'edtComponent' ? 'active' : ''} ${
+                    selectedEdtCodes.length > 0 ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('edtComponent')}
+                  title="Filtrar por Componente o Producto EDT"
+                >
+                  <div className="filter-card-copy">
+                    <small>Componente / Producto</small>
+                    <span>{edtButtonText}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'edtComponent' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 320 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Componentes y Productos EDT</span>
+                      {selectedEdtCodes.length > 0 && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => setSelectedEdtCodes([])}
+                        >
+                          Restablecer
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list" style={{ maxHeight: 380 }}>
+                      {/* Opción Todos */}
+                      {(() => {
+                        const isAll = selectedEdtCodes.length === 0;
+                        return (
+                          <button
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isAll ? 'selected' : ''}`}
+                            onClick={() => setSelectedEdtCodes([])}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isAll ? 'checked' : ''}`}>
+                                {isAll && <span className="filter-radio-dot" />}
+                              </span>
+                              <span className="filter-item-text">
+                                <strong>Todos los componentes</strong>
+                              </span>
+                            </span>
+                            <span className="wbs-level-badge">{items.length}</span>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Grupos de Componentes y sus Productos */}
+                      {edtComponentsWithProducts.map(({ comp, products }) => {
+                        const isCompChecked = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
+                        const compTotalItems = items.filter((x) => x.id === comp.id || x.parentId === comp.id || items.some(p => p.id === x.parentId && p.parentId === comp.id)).length;
+                        return (
+                          <React.Fragment key={comp.id}>
+                            <div
+                              className="filter-popover-group-label"
+                              style={{
+                                marginTop: 8,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                background: 'rgba(37, 99, 235, 0.05)',
+                                padding: '5px 8px',
+                                borderRadius: 4,
+                              }}
+                            >
+                              <button
+                                type="button"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: 0,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 6,
+                                  textAlign: 'left',
+                                  font: 'inherit',
+                                  color: 'inherit',
+                                  flex: 1,
+                                }}
+                                onClick={() => {
+                                  setSelectedEdtCodes((prev) =>
+                                    prev.includes(comp.id) ? prev.filter((c) => c !== comp.id) : [...prev, comp.id]
+                                  );
+                                }}
+                              >
+                                <span className={`filter-checkbox ${isCompChecked ? 'checked' : ''}`}>
+                                  {isCompChecked && <Check size={10} strokeWidth={3} />}
+                                </span>
+                                <strong style={{ fontSize: 11, color: '#0f172a' }}>
+                                  {comp.code} {comp.name}
+                                </strong>
+                              </button>
+                              <span className="wbs-level-badge">{compTotalItems}</span>
+                            </div>
+
+                            {products.map((prod) => {
+                              const isProdChecked = selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
+                              const prodSedesCount = items.filter((x) => x.parentId === prod.id).length;
+                              return (
+                                <button
+                                  key={prod.id}
+                                  type="button"
+                                  className={`filter-item-btn filter-item-check ${isProdChecked ? 'selected' : ''}`}
+                                  style={{ paddingLeft: 18 }}
+                                  onClick={() => {
+                                    setSelectedEdtCodes((prev) =>
+                                      prev.includes(prod.id) ? prev.filter((c) => c !== prod.id) : [...prev, prod.id]
+                                    );
+                                  }}
+                                >
+                                  <span className="filter-item-main">
+                                    <span className={`filter-checkbox ${isProdChecked ? 'checked' : ''}`}>
+                                      {isProdChecked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span className="filter-item-text">
+                                      <strong>{prod.code ? `${prod.code} ` : ''}{prod.name}</strong>
+                                    </span>
+                                  </span>
+                                  {prodSedesCount > 0 && <span className="wbs-level-badge">{prodSedesCount}</span>}
+                                </button>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-            )}
 
             <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
               {perspective === 'equipo' ? (
@@ -6434,105 +6513,6 @@ export default function CronogramaGanttView({
 
           {/* Filtros Contextuales y Macro */}
           <ProjectShellFilters>
-            {perspective === 'equipo' ? (
-              <>
-                {/* Filtro Contextual 1 (Equipo): Cuenta de acceso */}
-                <div className="filter-dropdown-wrap contextual-filter-wrap">
-                  <button
-                    type="button"
-                    className={`filter-card-btn ${activeMenu === 'equipoCuenta' ? 'active' : ''} ${equipoEstadoCuentaFilter !== 'todos' ? 'filtered' : ''}`}
-                    onClick={() => toggleMenu('equipoCuenta' as any)}
-                    title="Filtrar por acceso a cuenta"
-                  >
-                    <div className="filter-card-copy">
-                      <small>Cuenta</small>
-                      <span>{equipoEstadoCuentaFilter === 'todos' ? 'Todos los accesos' : equipoEstadoCuentaFilter}</span>
-                    </div>
-                    <ChevronDown size={14} className="filter-chevron" />
-                  </button>
-                  {activeMenu === 'equipoCuenta' && (
-                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 240 }}>
-                      <div className="filter-popover-title filter-popover-title-row">
-                        <span>Cuenta de Acceso</span>
-                        {equipoEstadoCuentaFilter !== 'todos' && (
-                          <button type="button" className="filter-reset-link" onClick={() => setEquipoEstadoCuentaFilter('todos')}>
-                            Restablecer
-                          </button>
-                        )}
-                      </div>
-                      <div className="filter-popover-list">
-                        {[
-                          { id: 'todos', label: 'Todos los accesos' },
-                          { id: 'Habilitada', label: 'Habilitada' },
-                          { id: 'Invitación Pendiente', label: 'Invitación Pendiente' },
-                          { id: 'Suspendida', label: 'Suspendida' },
-                        ].map((opt) => (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            className={`filter-item-btn ${equipoEstadoCuentaFilter === opt.id ? 'selected' : ''}`}
-                            onClick={() => {
-                              setEquipoEstadoCuentaFilter(opt.id);
-                              closeMenus();
-                            }}
-                          >
-                            <span className="filter-item-text"><strong>{opt.label}</strong></span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Filtro Contextual 2 (Equipo): Área / Dependencia */}
-                <div className="filter-dropdown-wrap contextual-filter-wrap">
-                  <button
-                    type="button"
-                    className={`filter-card-btn ${activeMenu === 'equipoArea' ? 'active' : ''} ${equipoAreaFilter !== 'todas' ? 'filtered' : ''}`}
-                    onClick={() => toggleMenu('equipoArea' as any)}
-                    title="Filtrar por área funcional o dirección"
-                  >
-                    <div className="filter-card-copy">
-                      <small>Área</small>
-                      <span>{equipoAreaFilter === 'todas' ? 'Todas las áreas' : equipoAreaFilter}</span>
-                    </div>
-                    <ChevronDown size={14} className="filter-chevron" />
-                  </button>
-                  {activeMenu === 'equipoArea' && (
-                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 260 }}>
-                      <div className="filter-popover-title filter-popover-title-row">
-                        <span>Áreas Funcionales</span>
-                        {equipoAreaFilter !== 'todas' && (
-                          <button type="button" className="filter-reset-link" onClick={() => setEquipoAreaFilter('todas')}>
-                            Restablecer
-                          </button>
-                        )}
-                      </div>
-                      <div className="filter-popover-list">
-                        <button
-                          type="button"
-                          className={`filter-item-btn ${equipoAreaFilter === 'todas' ? 'selected' : ''}`}
-                          onClick={() => { setEquipoAreaFilter('todas'); closeMenus(); }}
-                        >
-                          <span className="filter-item-text"><strong>Todas las áreas</strong></span>
-                        </button>
-                        {equipoAreas.map((a) => (
-                          <button
-                            key={a.id}
-                            type="button"
-                            className={`filter-item-btn ${equipoAreaFilter === a.nombre ? 'selected' : ''}`}
-                            onClick={() => { setEquipoAreaFilter(a.nombre); closeMenus(); }}
-                          >
-                            <span className="filter-item-text"><strong>{a.nombre}</strong></span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
             {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
             <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
               <button
@@ -6930,8 +6910,6 @@ export default function CronogramaGanttView({
                 )}
               </div>
             )}
-            </>
-          )}
 
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
             <button
@@ -6950,41 +6928,8 @@ export default function CronogramaGanttView({
             {/* Separador vertical: Bloque 2 (Datos del proyecto) | Bloque 3 (Navegación temporal / corte) */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Bloque 3: Navegación temporal o búsqueda para perspectiva equipo */}
-            {perspective === 'equipo' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Search size={14} style={{ position: 'absolute', left: 10, color: '#94a3b8', pointerEvents: 'none' }} />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar por integrante, cargo o sede..."
-                    className="search-input"
-                    style={{
-                      height: '32px',
-                      paddingLeft: '32px',
-                      paddingRight: '12px',
-                      fontSize: '13px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border, #e2e8f0)',
-                      background: 'var(--card-bg, #ffffff)',
-                      width: '280px',
-                      color: 'inherit',
-                    }}
-                  />
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch('')}
-                      style={{ position: 'absolute', right: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
-                    >
-                      <X size={13} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : viewMode === 'mapa' ? (
+            {/* Bloque 3: Navegación temporal y selector de escala para todas las vistas */}
+            {viewMode === 'mapa' ? (
               /* En Modo Mapa: Conmutador Oficial de Sub-Vistas Territoriales (Geográfico, Temático Poligonal, Analítica Power BI) */
               <div className="zoom map-subview-switcher" title="Modo de representación del mapa territorial">
                 <button
@@ -7047,7 +6992,7 @@ export default function CronogramaGanttView({
                   ))}
                 </div>
               </>
-            ) : viewMode === 'organigrama' ? (
+            ) : viewMode === 'organigrama' && perspective !== 'equipo' ? (
               /* En Modo Organigrama EDT: Controles Oficiales de Zoom y Ajuste */
               <>
                 <button
@@ -7158,12 +7103,12 @@ export default function CronogramaGanttView({
             )}
 
             {/* Separador vertical: Bloque 2 (Tiempo) | Bloque 3 (Capas y Visualización de Cronograma) */}
-            {(viewMode === 'gantt' || viewMode === 'calendario') && (
+            {(viewMode === 'gantt' || viewMode === 'calendario' || perspective === 'equipo') && (
               <div className="filter-group-divider" aria-hidden="true" />
             )}
 
             {/* Bloque 3: Acordeón Maestro de Capas y Visualización de Barras (Línea Base + %, dependencias y responsables) */}
-            {(viewMode === 'gantt' || viewMode === 'calendario') && (
+            {(viewMode === 'gantt' || viewMode === 'calendario' || perspective === 'equipo') && (
               <div
                 className={'bar-tools-accordion ' + (
                   (viewMode === 'calendario' ? (calShowBaseline || calShowBarLabels) : (showBaseline || showBarLabels || showCriticalPath || showBarAvatars)) ? 'has-active' : ''
@@ -8699,45 +8644,38 @@ export default function CronogramaGanttView({
                 : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${items.length} registros`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {perspective === 'equipo' ? (
-                <button
-                  className="btn secondary"
-                  style={{ minHeight: '32px', fontSize: '12px' }}
-                  onClick={() => notify('Directorio del equipo descargado en CSV')}
-                >
-                  <Download size={14} />
-                  <span>Descargar Lista</span>
-                </button>
-              ) : (
-                <>
-                  <button
-                    className="btn secondary"
-                    style={{ minHeight: '32px', fontSize: '12px' }}
-                    onClick={() => {
-                      if (panelOpen) {
-                        requestCloseDrawer();
-                      } else {
-                        const target = selected || hitos[0] || items[0];
-                        if (target) {
-                          openEditorForItem(target);
-                        }
-                      }
-                    }}
-                    title="Abrir o cerrar panel de detalles del elemento seleccionado"
-                  >
-                    <PanelRightOpen size={14} />
-                    <span>{panelOpen ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
-                  </button>
-                  <button
-                    className="btn secondary"
-                    style={{ minHeight: '32px', fontSize: '12px' }}
-                    onClick={() => notify('Cronograma maestro sincronizado con el equipo')}
-                  >
-                    <CheckCircle2 size={14} color="#16a34a" />
-                    <span>Publicar Cronograma</span>
-                  </button>
-                </>
-              )}
+              <button
+                className="btn secondary"
+                style={{ minHeight: '32px', fontSize: '12px' }}
+                onClick={() => {
+                  if (perspective === 'equipo') {
+                    if (equipoSelectedId) {
+                      setEquipoSelectedId(null);
+                    } else if (equipoIntegrantes[0]) {
+                      setEquipoSelectedId(equipoIntegrantes[0].id);
+                    }
+                  } else if (panelOpen) {
+                    requestCloseDrawer();
+                  } else {
+                    const target = selected || hitos[0] || items[0];
+                    if (target) {
+                      openEditorForItem(target);
+                    }
+                  }
+                }}
+                title="Abrir o cerrar panel de detalles del elemento seleccionado"
+              >
+                <PanelRightOpen size={14} />
+                <span>{(perspective === 'equipo' ? Boolean(equipoSelectedId) : panelOpen) ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
+              </button>
+              <button
+                className="btn secondary"
+                style={{ minHeight: '32px', fontSize: '12px' }}
+                onClick={() => notify('Cronograma maestro sincronizado con el equipo')}
+              >
+                <CheckCircle2 size={14} color="#16a34a" />
+                <span>Publicar Cronograma</span>
+              </button>
             </div>
           </footer>
         </ProjectShellWorkspace>

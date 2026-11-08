@@ -124,19 +124,26 @@ const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualE
  * (esos datos siguen en el respaldo local hasta ejecutar el SQL).
  */
 async function upsertRows(rows: Record<string, any>[]): Promise<{ message: string } | null> {
-  const first = await supabase!.from('gestor_cronograma_items').upsert(rows);
-  if (!first.error) return null;
-  if (SCHEDULE_COLUMNS.some((col) => first.error!.message.includes(col))) {
-    console.warn('[Supabase Cronograma] Falta ejecutar supabase/02_gestor_cronograma_linea_base.sql; se sincroniza sin línea base ni fechas reales.');
-    const stripped = rows.map((r) => {
-      const copy = { ...r };
-      SCHEDULE_COLUMNS.forEach((col) => delete copy[col]);
-      return copy;
-    });
-    const retry = await supabase!.from('gestor_cronograma_items').upsert(stripped);
-    return retry.error ? { message: retry.error.message } : null;
+  const CHUNK_SIZE = 100;
+  for (let i = 0; i < rows.length; i += CHUNK_SIZE) {
+    const chunk = rows.slice(i, i + CHUNK_SIZE);
+    const first = await supabase!.from('gestor_cronograma_items').upsert(chunk);
+    if (first.error) {
+      if (SCHEDULE_COLUMNS.some((col) => first.error!.message.includes(col))) {
+        console.warn('[Supabase Cronograma] Falta ejecutar supabase/02_gestor_cronograma_linea_base.sql; se sincroniza sin línea base ni fechas reales.');
+        const stripped = chunk.map((r) => {
+          const copy = { ...r };
+          SCHEDULE_COLUMNS.forEach((col) => delete copy[col]);
+          return copy;
+        });
+        const retry = await supabase!.from('gestor_cronograma_items').upsert(stripped);
+        if (retry.error) return { message: retry.error.message };
+      } else {
+        return { message: first.error.message };
+      }
+    }
   }
-  return { message: first.error.message };
+  return null;
 }
 
 /**
@@ -149,7 +156,8 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
     const { data, error } = await supabase
       .from('gestor_cronograma_items')
       .select('*')
-      .eq('project_id', projectId);
+      .eq('project_id', projectId)
+      .limit(3000);
 
     if (error) {
       console.warn('[Supabase Cronograma] Aviso al leer (se usará respaldo local):', error.message);
