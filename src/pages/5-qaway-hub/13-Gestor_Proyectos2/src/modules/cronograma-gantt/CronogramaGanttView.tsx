@@ -1370,7 +1370,10 @@ export default function CronogramaGanttView({
         if (Array.isArray(parsed) && parsed.length > 0) {
           if (isMaestro) {
             parsed = parsed.filter((it: Item) => !isTerritorialSedeOnlyItem(it));
-            if (parsed.length === 0 || !parsed.some((it: Item) => it.id === 'comp-1')) {
+            const hasAllComponents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].every((n) =>
+              parsed.some((it: Item) => it.id === `comp-${n}`)
+            );
+            if (!hasAllComponents || parsed.length < 50) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
               } catch {}
@@ -1497,7 +1500,23 @@ export default function CronogramaGanttView({
 
         if (isMaestro) {
           cleanCloudItems = cleanCloudItems.filter((it) => !isTerritorialSedeOnlyItem(it));
-          const recomputed = computeWbsHierarchy(cleanCloudItems.length > 0 ? cleanCloudItems : MASTER_INITIAL_ITEMS, rawTasks);
+          // Reconciliar sobre MASTER_INITIAL_ITEMS garantizando los 11 componentes completos siempre
+          const cloudMap = new Map(cleanCloudItems.map((c) => [c.id, c]));
+          const merged: Item[] = MASTER_INITIAL_ITEMS.map((masterItem) => {
+            const cloud = cloudMap.get(masterItem.id);
+            if (!cloud) return masterItem;
+            const updated: Item = { ...masterItem };
+            if (typeof cloud.progress === 'number') updated.progress = cloud.progress;
+            if (cloud.status) updated.status = cloud.status;
+            if (cloud.start) updated.start = cloud.start;
+            if (cloud.end) updated.end = cloud.end;
+            if (cloud.actualStart) updated.actualStart = cloud.actualStart;
+            if (cloud.actualEnd) updated.actualEnd = cloud.actualEnd;
+            if (cloud.baselineStart) updated.baselineStart = cloud.baselineStart;
+            if (cloud.baselineEnd) updated.baselineEnd = cloud.baselineEnd;
+            return updated;
+          });
+          const recomputed = computeWbsHierarchy(merged, rawTasks);
           setItems(recomputed);
           try {
             localStorage.setItem(storageKey, JSON.stringify(recomputed));
@@ -1568,8 +1587,12 @@ export default function CronogramaGanttView({
       } catch {
         /* fallback */
       }
-      if (items.length > 0) {
-        syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
+      // Sincronización a Supabase con debounce de 2.5s para no saturar la red ni congelar la UI
+      if (isMaestro && items.length > 0) {
+        const timer = setTimeout(() => {
+          syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
+        }, 2500);
+        return () => clearTimeout(timer);
       }
     }
   }, [items, projectId, isActive, perspective]);
