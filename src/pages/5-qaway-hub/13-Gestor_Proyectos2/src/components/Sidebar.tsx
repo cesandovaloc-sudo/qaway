@@ -258,11 +258,12 @@ export default function Sidebar({
         <em>{tasksCount}</em>
       </button>
       <button
-        className={active === 'hitos' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('hitos')}
+        className={active === 'tareas2' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('tareas2')}
       >
-        <Flag size={18} />
-        <span>Componentes</span>
+        <CheckSquare size={18} />
+        <span>Tareas 2</span>
+        <em>{tasksCount}</em>
       </button>
 
       <button
@@ -279,14 +280,6 @@ export default function Sidebar({
       >
         <BarChart3 size={18} />
         <span>Reportes</span>
-      </button>
-
-      <button
-        className={active === 'actas' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('actas')}
-      >
-        <FileText size={18} />
-        <span>Actas y acuerdos</span>
       </button>
 
       {/* PRUEBAS queda oculto temporalmente para no cargar sus librerías experimentales. */}

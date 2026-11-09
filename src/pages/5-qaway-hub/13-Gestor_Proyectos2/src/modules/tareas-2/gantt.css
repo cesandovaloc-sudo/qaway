@@ -2084,10 +2084,23 @@
 }
 
 .gantt-v2 .name-head {
-  gap: 8px;
-  padding-left: 18px !important;
+  gap: 6px;
+  padding-left: 14px !important;
+  padding-right: 6px !important;
   position: relative;
-  overflow: visible !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.gantt-v2 .name-head .name-head-label {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
 }
 
 /* Acciones en la cabecera de columnas (Configuración y Reajuste) */
@@ -5408,15 +5421,27 @@ body.gantt-resizing {
    Ajustes Críticos: Reubicación Colapsador y Aprovechamiento Total de Ancho
    ========================================================================== */
 
-/* Cabecera name-head: Colapsador de panel al borde derecho */
+/* Cabecera name-head: Colapsador de panel al borde derecho con contención responsive */
 .gantt-v2 .name-head {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  padding-left: 18px !important;
-  padding-right: 4px !important;
+  gap: 6px !important;
+  padding-left: 14px !important;
+  padding-right: 6px !important;
   position: relative !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.gantt-v2 .name-head .name-head-label {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
 }
 
 .gantt-v2 .name-head .head-col-actions {
@@ -5426,6 +5451,14 @@ body.gantt-resizing {
   margin-left: auto !important;
   margin-right: 4px !important;
   flex-shrink: 0 !important;
+}
+
+.gantt-v2 .name-head .head-col-actions .cols-trigger-btn,
+.gantt-v2 .name-head .head-col-actions .collapse-toggle-btn,
+.gantt-v2 .name-head .head-col-actions .panel-collapse-btn {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
 }
 
 .gantt-v2 .name-head .panel-collapse-btn {

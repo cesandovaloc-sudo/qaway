@@ -131,19 +131,19 @@ function generateTerritorialHierarchy(): SedeEdtItem[] {
 
   // 1. Agrupar unidades por región identificando su sede matriz (DRE o GRE) y sus UGELs
   interface RegionData {
-    dre: (typeof MINEDU_UNIDADES)[0] | null;
-    ugels: typeof MINEDU_UNIDADES;
+    dre: (typeof MINEDU_UNIDADES)[number] | null;
+    ugels: Array<(typeof MINEDU_UNIDADES)[number]>;
   }
   const regionMap: Record<string, RegionData> = {};
 
   MINEDU_UNIDADES.forEach((u) => {
     const reg = u.region || 'OTRA';
-    if (!regionMap[reg]) regionMap[reg] = { dre: null, ugels: [] };
+    const current = regionMap[reg] || (regionMap[reg] = { dre: null, ugels: [] });
     const isMatrix = u.unitType === 'dre' || u.name.startsWith('DRE') || u.name.startsWith('GRE');
-    if (isMatrix && !regionMap[reg].dre) {
-      regionMap[reg].dre = u;
+    if (isMatrix && !current.dre) {
+      current.dre = u;
     } else {
-      regionMap[reg].ugels.push(u);
+      current.ugels.push(u);
     }
   });
 

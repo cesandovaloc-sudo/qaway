@@ -27,17 +27,9 @@ import EquipoDrawer from '../equipo/EquipoDrawer';
 import EquipoExpedienteModal from '../equipo/EquipoExpedienteModal';
 import EquipoNuevoModal from '../equipo/EquipoNuevoModal';
 import {
-  getStoredIntegrantes,
-  saveStoredIntegrantes,
-  getStoredSedes,
-  saveStoredSedes,
-  getStoredAreas,
-  getStoredAsignaciones,
-  saveStoredAsignaciones,
-} from '../equipo/mockData';
-import {
   fetchEquipoIntegrantesFromSupabase,
   fetchEquipoSedesFromSupabase,
+  updateCachedIntegrante,
 } from '../../services/gestorEquipoService';
 import {
   fetchCronogramaFromSupabase,
@@ -412,15 +404,15 @@ const extraSedesItems: Item[] = ALL_SEDES_EDT_ITEMS.filter((s) => !baseEdtIds.ha
   code: s.code || '',
   name: s.name,
   kind: 'subproceso' as const,
-  edtType: 'PAQUETE_TRABAJO' as const,
-  faseId: 'FASE-PLANIFICACION',
-  parentId: s.parentId || 'pt-1.6',
+  edtType: (s.edtType as Item['edtType']) || 'PAQUETE_TRABAJO',
+  faseId: s.faseId || 'FASE-PLANIFICACION',
+  parentId: s.parentId || 'comp-1',
   start: s.start,
   end: s.end,
   dependencies: [],
   progress: s.progress,
   status: s.status,
-  expanded: true,
+  expanded: false,
   description: s.entregableVerificable || `Seguimiento territorial en ${s.name}`,
   deliverable: s.entregableVerificable || `Entregable verificado - ${s.name}`,
   deliverables: [{
@@ -439,9 +431,9 @@ const extraSedesItems: Item[] = ALL_SEDES_EDT_ITEMS.filter((s) => !baseEdtIds.ha
   baselineEnd: s.end,
 }));
 
+// Cronograma Maestro de Proyecto: contiene exclusivamente los Componentes y Paquetes de Trabajo de entregables (cero sedes territoriales)
 export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
-  ...DRE_JUNIN_DOTACION_2027_EDT,
-  ...REGIONAL_NODE_SEEDS.map((s) => s.row),
+  ...DRE_JUNIN_DOTACION_2027_EDT.filter((r) => !r.id.startsWith('pt-1.6-') && r.parentId !== 'pt-1.6'),
 ].map((r) => {
   // Paquetes regionales (DRE fuera de Junín): responsable = Coordinador Regional de su región
   const regionalSeed = getRegionalSeed(r.id);
@@ -453,7 +445,7 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
     code: r.code,
     name: r.name,
     kind: r.kind,
-    edtType: r.edtType,
+    edtType: r.id === 'pt-1.6' ? 'PAQUETE_TRABAJO' : r.edtType,
     faseId: r.faseId,
     parentId: r.parentId,
     start: r.start,
@@ -503,18 +495,25 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
   };
 }) as Item[])));
 
-export const TERRITORIAL_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
-  ...MASTER_INITIAL_ITEMS,
-  ...extraSedesItems,
-])));
+const baseTerritorialComponents: Item[] = MASTER_INITIAL_ITEMS.filter((it) => !it.parentId).map((c) => ({
+  ...c,
+  expanded: false,
+}));
+
+export const TERRITORIAL_INITIAL_ITEMS: Item[] = computeWbsHierarchy(
+  sortWbsHierarchy([...baseTerritorialComponents, ...extraSedesItems])
+);
 
 export const INITIAL_ITEMS: Item[] = TERRITORIAL_INITIAL_ITEMS;
 
 const extraSedesIdSet = new Set(extraSedesItems.map((s) => s.id));
-export function isTerritorialSedeOnlyItem(item: { id: string; name?: string | undefined; edtType?: string | undefined; sede?: string | undefined }): boolean {
+export function isTerritorialSedeOnlyItem(item: { id: string; name?: string | undefined; edtType?: string | undefined; sede?: string | undefined; parentId?: string | undefined }): boolean {
   if (extraSedesIdSet.has(item.id)) return true;
   if (item.id.includes('-unit-')) return true;
-  if (item.edtType === 'PAQUETE_TRABAJO' && (item.name?.startsWith('UGEL') || item.name?.startsWith('DRE ')) && !baseEdtIds.has(item.id)) {
+  if (item.id.includes('-dre-')) return true;
+  if (item.id.startsWith('pt-1.6-') || item.parentId === 'pt-1.6') return true;
+  if (REGIONAL_NODE_SEEDS.some((s) => s.row.id === item.id)) return true;
+  if (item.edtType === 'PAQUETE_TRABAJO' && (item.name?.startsWith('UGEL') || item.name?.startsWith('DRE '))) {
     return true;
   }
   return false;
@@ -774,7 +773,7 @@ const DEFAULT_COLS: Record<ColKey, number> = {
 
 const MIN_COLS: Record<ColKey, number> = {
   code: 60,
-  name: 200,
+  name: 260,
   kind: 80,
   parent: 90,
   start: 90,
@@ -1395,7 +1394,7 @@ export default function Tareas2View({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (!isMaestro && (hasLegacyMocks || parsed.length < 5000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'pt-2.1-unit-001') || !parsed.some((it: Item) => it.id === 'pt-6.1-unit-002'))) {
+            if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
@@ -1482,7 +1481,7 @@ export default function Tareas2View({
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || perspective === 'territorial') return;
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
@@ -2134,35 +2133,12 @@ export default function Tareas2View({
     'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
   >(() => (perspective === 'equipo' ? 'directorio' : 'gantt'));
 
-  // Estado dedicado para perspectiva equipo
-  const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>(() => {
-    try {
-      return getStoredIntegrantes();
-    } catch {
-      return [];
-    }
-  });
-  const [equipoSedes, setEquipoSedes] = useState<any[]>(() => {
-    try {
-      return getStoredSedes();
-    } catch {
-      return [];
-    }
-  });
-  const [equipoAreas] = useState<any[]>(() => {
-    try {
-      return getStoredAreas();
-    } catch {
-      return [];
-    }
-  });
-  const [equipoAsignaciones, setEquipoAsignaciones] = useState<any[]>(() => {
-    try {
-      return getStoredAsignaciones();
-    } catch {
-      return [];
-    }
-  });
+  // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
+  const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
+  const [equipoSedes, setEquipoSedes] = useState<any[]>([]);
+  const [equipoAreas] = useState<any[]>([]);
+  const [equipoAsignaciones, setEquipoAsignaciones] = useState<any[]>([]);
+  const [isEquipoLoading, setIsEquipoLoading] = useState<boolean>(true);
   const [equipoSelectedId, setEquipoSelectedId] = useState<string | null>(null);
   const [equipoExpediente, setEquipoExpediente] = useState<any | null>(null);
   const [isEquipoNuevoOpen, setIsEquipoNuevoOpen] = useState(false);
@@ -2172,25 +2148,27 @@ export default function Tareas2View({
   const [equipoAreaFilter, setEquipoAreaFilter] = useState('todas');
   const [equipoPill, setEquipoPill] = useState('Todos');
 
-  // Carga reactiva de integrantes y sedes desde Supabase (cero hardcodeo local)
+  // Carga reactiva de integrantes y sedes directamente desde Supabase (cero fallbacks locales)
   useEffect(() => {
     if (perspective === 'equipo' && isActive) {
       let isMounted = true;
-      fetchEquipoIntegrantesFromSupabase().then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setEquipoIntegrantes(data);
-        }
-      }).catch((e) => {
-        console.warn('[Tareas2View] Error cargando integrantes Supabase:', e);
-      });
+      setIsEquipoLoading(true);
 
-      fetchEquipoSedesFromSupabase().then((sedes) => {
-        if (isMounted && Array.isArray(sedes) && sedes.length > 0) {
-          setEquipoSedes(sedes);
-        }
-      }).catch((e) => {
-        console.warn('[Tareas2View] Error cargando sedes Supabase:', e);
-      });
+      Promise.all([
+        fetchEquipoIntegrantesFromSupabase(),
+        fetchEquipoSedesFromSupabase(),
+      ])
+        .then(([integrantes, sedes]) => {
+          if (isMounted) {
+            setEquipoIntegrantes(Array.isArray(integrantes) ? integrantes : []);
+            setEquipoSedes(Array.isArray(sedes) ? sedes : []);
+            setIsEquipoLoading(false);
+          }
+        })
+        .catch((e) => {
+          console.warn('[Tareas2View] Error cargando equipo Supabase:', e);
+          if (isMounted) setIsEquipoLoading(false);
+        });
 
       return () => {
         isMounted = false;
@@ -2219,14 +2197,13 @@ export default function Tareas2View({
   const handleUpdateIntegrante = (updated: any) => {
     const next = equipoIntegrantes.map((i) => (i.id === updated.id ? updated : i));
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
+    updateCachedIntegrante(updated);
     notify(`Integrante "${updated.nombreCompleto}" actualizado`);
   };
 
   const handleCreateIntegrante = (nuevo: any) => {
     const next = [nuevo, ...equipoIntegrantes];
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
     notify(`Integrante "${nuevo.nombreCompleto}" registrado exitosamente`);
   };
 
@@ -2236,14 +2213,12 @@ export default function Tareas2View({
       ids.includes(i.id) ? { ...i, sedeId: targetSedeId, sedeNombre: sedeObj?.nombre || i.sedeNombre } : i
     );
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
     notify(`${ids.length} integrantes reasignados a ${sedeObj?.nombre || 'nueva sede'}`);
   };
 
   const handleBulkUpdateEstadoOperativo = (ids: string[], targetEstado: any) => {
     const next = equipoIntegrantes.map((i) => (ids.includes(i.id) ? { ...i, estadoOperativo: targetEstado } : i));
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
     notify(`${ids.length} integrantes actualizados a estado "${targetEstado}"`);
   };
 
@@ -2254,7 +2229,6 @@ export default function Tareas2View({
   const handleUpdateSede = (updatedSede: any) => {
     const next = equipoSedes.map((s) => (s.id === updatedSede.id ? updatedSede : s));
     setEquipoSedes(next);
-    saveStoredSedes(next);
     notify(`Sede "${updatedSede.nombre}" actualizada`);
   };
 
@@ -2262,7 +2236,6 @@ export default function Tareas2View({
     const nuevoIntegrante = equipoIntegrantes.find((i) => i.id === nuevoIntegranteId);
     const next = equipoAsignaciones.map((a) => (a.id === asignacionId ? { ...a, integranteId: nuevoIntegranteId } : a));
     setEquipoAsignaciones(next);
-    saveStoredAsignaciones(next);
     notify(`Tarea reasignada a ${nuevoIntegrante?.nombreCompleto || 'nuevo integrante'}`);
   };
   // Las tarjetas superiores se ocultan de entrada en pantallas pequeñas (<1024px),
@@ -2587,9 +2560,9 @@ export default function Tareas2View({
   const [inlineDraftCreatedId, setInlineDraftCreatedId] = useState<string | null>(null);
   const depHoverTimeoutRef = useRef<any>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
-  const [showBaseline, setShowBaseline] = useState(true);
+  const [showBaseline, setShowBaseline] = useState(false);
   const [calShowBarLabels, setCalShowBarLabels] = useState(true);
-  const [calShowBaseline, setCalShowBaseline] = useState(true);
+  const [calShowBaseline, setCalShowBaseline] = useState(false);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [showBarAvatars, setShowBarAvatars] = useState(false);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
@@ -4011,6 +3984,10 @@ export default function Tareas2View({
     if (matchingSedeIds && matchingSedeIds.has(id)) {
       return true;
     }
+    // Si hay un filtro de regiones activo y este nodo forma parte del árbol de la región seleccionada, mantenerlo expandido
+    if (matchingRegionIds && matchingRegionIds.has(id)) {
+      return true;
+    }
     // Si hay un filtro de componente/producto EDT activo y este nodo forma parte del árbol seleccionado, mantenerlo expandido
     if (matchingEdtIds && matchingEdtIds.has(id)) {
       return true;
@@ -4034,8 +4011,8 @@ export default function Tareas2View({
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
     setCollapsedByMode((prev) => {
       const modeMap = prev[mode] || {};
-      const currentlyCollapsed = typeof modeMap[id] === 'boolean' ? modeMap[id] : !defaultExpanded;
-      const nextCollapsed = !currentlyCollapsed;
+      const currentlyExpanded = isItemExpanded(id, defaultExpanded);
+      const nextCollapsed = currentlyExpanded;
       const next = {
         ...prev,
         [mode]: {
@@ -4872,9 +4849,12 @@ export default function Tareas2View({
       );
     }
     if (colKey === 'name') {
+      const colLabelText = getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE');
       return (
         <div key="name" className="name-head">
-          <span>{getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE')}</span>
+          <span className="name-head-label" title={colLabelText}>
+            {colLabelText}
+          </span>
           <div className="head-col-actions">
             {renderColumnHeaderMenu("name", "cols-trigger-btn")}
             <button
@@ -5814,7 +5794,7 @@ export default function Tareas2View({
           perspective={perspective}
           title={
             perspective === 'equipo'
-              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2027'}`
+              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2026'}`
               : perspective === 'territorial'
               ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
               : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`
@@ -6121,7 +6101,7 @@ export default function Tareas2View({
                   closeMenus();
                 }}
               >
-                Todos <span>({items.length})</span>
+                Todos <span>({perspective === 'territorial' ? 251 : items.length})</span>
               </button>
 
               {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
@@ -6157,7 +6137,7 @@ export default function Tareas2View({
                         const rStr = roleLabels[wbsRoleFilter];
 
                         if (wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos') {
-                          return `Todos los niveles (${items.length})`;
+                          return `Todos los niveles (${perspective === 'territorial' ? 251 : items.length})`;
                         }
                         if (wbsDepthFilter !== 'todos' && wbsRoleFilter === 'todos') {
                           return dStr;
@@ -6224,7 +6204,7 @@ export default function Tareas2View({
                             <strong>Todos los niveles</strong>
                           </span>
                         </span>
-                        <span className="wbs-level-badge">{items.length}</span>
+                        <span className="wbs-level-badge">{perspective === 'territorial' ? 251 : items.length}</span>
                       </button>
 
                       {/* Niveles dinámicos 1..n existentes en el proyecto (no se renderizan si el conteo es 0) */}
@@ -7477,11 +7457,12 @@ export default function Tareas2View({
                 setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
                 setCustomRules([]);
+                setSelectedEdtCodes([]);
                 setAdvancedFiltersOpen(false);
                 setColFilterOpen(null);
-                setShowBaseline(true);
+                setShowBaseline(false);
                 setCalShowBarLabels(true);
-                setCalShowBaseline(true);
+                setCalShowBaseline(false);
                 setShowCriticalPath(false);
                 engine.clearAllFilters();
                 engine.clearSort();
@@ -7843,6 +7824,7 @@ export default function Tareas2View({
             <>
               {(viewMode === 'directorio' || viewMode === 'lista') && (
                 <EquipoDirectorioView
+                  isLoading={isEquipoLoading}
                   integrantes={equipoIntegrantes}
                   selectedId={equipoSelectedId}
                   onSelectIntegrante={(id) => setEquipoSelectedId(id)}
@@ -8824,7 +8806,7 @@ export default function Tareas2View({
             <span>
               {perspective === 'equipo'
                 ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
-                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${items.length} registros`}
+                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? 251 : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <button

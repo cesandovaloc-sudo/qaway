@@ -11,6 +11,7 @@ import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
+const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
 import SedesView from './modules/sedes/SedesView';
 const CronogramaView = lazy(() => import('./modules/cronograma/CronogramaView'));
 const CronogramaGanttView = lazy(() => import('./modules/cronograma-gantt/CronogramaGanttView'));
@@ -33,6 +34,8 @@ export interface ProjectItem {
   name: string;
   region: string;
   subtext?: string | undefined;
+  descProyecto?: string | undefined;
+  descSedes?: string | undefined;
   budget?: string | undefined;
   sponsor?: string | undefined;
   riskLevel?: string | undefined;
@@ -46,6 +49,8 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     name: 'MINEDU · Dotación 2026',
     region: 'Nacional',
     subtext: 'Seguimiento de operaciones',
+    descProyecto: 'Línea de tiempo oficial y calibración de entregables.',
+    descSedes: 'Seguimiento territorial de DRE y UGEL en tiempo real.',
     budget: 'S/ 850,000',
     sponsor: 'Comité Directivo',
     riskLevel: 'Medio',
@@ -56,11 +61,11 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'tareas2', 'reuniones', 'reportes', 'usuarios', 'configuracion'];
     if (validModules.includes(saved)) return saved;
-    return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
+    return 'cronograma';
   } catch {
-    return 'tareas';
+    return 'cronograma';
   }
 };
 
@@ -68,8 +73,8 @@ const resolveModuleFromPath = (path: string): ModuleKey => {
   try {
     const clean = path.replace(/\/+$/, '') || '/';
     if (SLUG_TO_MODULE[clean]) {
-      // PRUEBAS queda oculto temporalmente y no debe activarse por una ruta guardada.
-      if (SLUG_TO_MODULE[clean] === 'pruebas') return 'tareas';
+      // PRUEBAS, HITOS (Componentes) y ACTAS quedan desactivados del shell principal
+      if (SLUG_TO_MODULE[clean] === 'pruebas' || SLUG_TO_MODULE[clean] === 'hitos' || SLUG_TO_MODULE[clean] === 'actas') return 'cronograma';
       return SLUG_TO_MODULE[clean];
     }
   } catch {
@@ -546,6 +551,9 @@ function GestorProyectosApp() {
            {visitedModules.has('tareas') && <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <TareasView activeProject={activeProject} onTasksCount={setTasksCount} onActions={(h) => { binds.current['tareas'] = h; }} />
            </div>}
+           {visitedModules.has('tareas2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Tareas 2…" />}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+             <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />
+           </div></Suspense>}
            {visitedModules.has('cronograma') && (
              <Suspense fallback={<ModuleLoadingFallback text="Cargando cronograma maestro…" />}>
                <div
