@@ -439,7 +439,7 @@ const extraSedesItems: Item[] = ALL_SEDES_EDT_ITEMS.filter((s) => !baseEdtIds.ha
   baselineEnd: s.end,
 }));
 
-export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
+export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
   ...DRE_JUNIN_DOTACION_2027_EDT,
   ...REGIONAL_NODE_SEEDS.map((s) => s.row),
 ].map((r) => {
@@ -501,7 +501,24 @@ export const INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
     gestores: [defaultGestor],
     entidadResponsable: r.entidadResponsable,
   };
-}) as Item[]).concat(extraSedesItems)));
+}) as Item[])));
+
+export const TERRITORIAL_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
+  ...MASTER_INITIAL_ITEMS,
+  ...extraSedesItems,
+])));
+
+export const INITIAL_ITEMS: Item[] = TERRITORIAL_INITIAL_ITEMS;
+
+const extraSedesIdSet = new Set(extraSedesItems.map((s) => s.id));
+export function isTerritorialSedeOnlyItem(item: { id: string; name?: string | undefined; edtType?: string | undefined; sede?: string | undefined }): boolean {
+  if (extraSedesIdSet.has(item.id)) return true;
+  if (item.id.includes('-unit-')) return true;
+  if (item.edtType === 'PAQUETE_TRABAJO' && (item.name?.startsWith('UGEL') || item.name?.startsWith('DRE ')) && !baseEdtIds.has(item.id)) {
+    return true;
+  }
+  return false;
+}
 
 const MONTHS = [
   { label: 'Sep', start: '2026-09-01' },
@@ -1342,37 +1359,56 @@ export default function CronogramaGanttView({
   });
 
   const loadProjectItems = (pid: string, tasksOverride?: any[]): Item[] => {
+    const isMaestro = perspective === 'maestro';
+    const targetInitialItems = isMaestro ? MASTER_INITIAL_ITEMS : TERRITORIAL_INITIAL_ITEMS;
+    const storageKey = isMaestro ? `qaway-gantt-items-${pid}-maestro` : `qaway-gantt-items-${pid}`;
+
     try {
-      const saved = localStorage.getItem(`qaway-gantt-items-${pid}`);
+      const saved = localStorage.getItem(storageKey) || (!isMaestro ? localStorage.getItem(`qaway-gantt-items-${pid}`) : null);
       if (saved) {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          if (isMaestro) {
+            parsed = parsed.filter((it: Item) => !isTerritorialSedeOnlyItem(it));
+            if (parsed.length === 0 || !parsed.some((it: Item) => it.id === 'comp-1')) {
+              try {
+                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+              } catch {}
+              return MASTER_INITIAL_ITEMS;
+            }
+          }
           if (pid !== 'p1') {
-            const isPolluted = parsed.some((it) => it.id === 's11' || it.code === '1.1');
+            const isPolluted = parsed.some((it: Item) => it.id === 's11' || it.code === '1.1');
             if (isPolluted) {
-              localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify([]));
+              localStorage.setItem(storageKey, JSON.stringify([]));
               return [];
             }
           } else {
             // Detectar si el proyecto activo p1 contiene datos obsoletos de prueba (h1..h5, s11..s52, 'Nuevo hito', 'Nuevo subproceso', huérfanos)
             const hasLegacyMocks = parsed.some(
-              (it) =>
+              (it: Item) =>
                 isLegacyCronogramaItem(it) ||
-                (Boolean(it.parentId) && !parsed.some((p) => p.id === it.parentId)) ||
+                (Boolean(it.parentId) && !parsed.some((p: Item) => p.id === it.parentId)) ||
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (hasLegacyMocks || parsed.length < 5000 || !parsed.some((it) => it.id === 'comp-11') || !parsed.some((it) => it.id === 'pt-2.1-unit-001') || !parsed.some((it) => it.id === 'pt-6.1-unit-002')) {
+            if (!isMaestro && (hasLegacyMocks || parsed.length < 5000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'pt-2.1-unit-001') || !parsed.some((it: Item) => it.id === 'pt-6.1-unit-002'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
-                localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
                 localStorage.removeItem('qaway-collapsed-by-mode-v1');
               } catch {}
-              return INITIAL_ITEMS;
+              return TERRITORIAL_INITIAL_ITEMS;
+            }
+            if (isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
+              try {
+                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+              } catch {}
+              return MASTER_INITIAL_ITEMS;
             }
           }
           // Sincronizar dependencias maestras para ítems persistidos sin campo dependencies
-          const initialMap = new Map(INITIAL_ITEMS.map((x) => [x.id, x]));
+          const initialMap = new Map(targetInitialItems.map((x) => [x.id, x]));
           const upgraded = parsed.map((it: Item) => {
             const init = initialMap.get(it.id);
             const isEntity = it.gestor === 'DRE / UGEL' || it.gestor === 'DRE' || it.gestor === 'UGEL' || it.gestor === 'DRE/UGEL' || !it.gestor;
@@ -1395,36 +1431,39 @@ export default function CronogramaGanttView({
       }
       if (pid === 'p1') {
         try {
-          localStorage.setItem('qaway-gantt-items-p1', JSON.stringify(INITIAL_ITEMS));
+          localStorage.setItem(storageKey, JSON.stringify(targetInitialItems));
           localStorage.removeItem('qaway-collapsed-by-mode-v1');
         } catch {
           /* fallback */
         }
-        return INITIAL_ITEMS;
+        return targetInitialItems;
       }
       return []; // Nuevo proyecto siempre inicia completamente vacío / calato
     } catch {
-      return pid === 'p1' ? INITIAL_ITEMS : [];
+      return pid === 'p1' ? targetInitialItems : [];
     }
   };
 
   const [items, setItems] = useState<Item[]>(() => loadProjectItems(projectId, rawTasks));
 
-  // Sincronización reactiva con Keep-Alive al conmutar de proyecto
+  // Sincronización reactiva con Keep-Alive al conmutar de proyecto o perspectiva
+  const currentPerspectiveRef = useRef(perspective);
   useEffect(() => {
-    if (currentPidRef.current !== projectId) {
+    if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective) {
       currentPidRef.current = projectId;
+      currentPerspectiveRef.current = perspective;
       const loaded = loadProjectItems(projectId, rawTasks);
       setItems(loaded);
       setSelectedId(null);
     }
-  }, [projectId]);
+  }, [projectId, perspective]);
 
   // Autocuración y persistencia inmediata de dependencias si provienen de caché anterior sin dependencias
   useEffect(() => {
     const hasAnyDep = items.some((it) => it.dependencies && it.dependencies.length > 0);
     if (!hasAnyDep && items.length > 0) {
-      const initialMap = new Map(INITIAL_ITEMS.map((x) => [x.id, x]));
+      const targetInitial = perspective === 'maestro' ? MASTER_INITIAL_ITEMS : TERRITORIAL_INITIAL_ITEMS;
+      const initialMap = new Map(targetInitial.map((x) => [x.id, x]));
       setItems((prev) =>
         prev.map((it) => {
           const init = initialMap.get(it.id);
@@ -1436,7 +1475,7 @@ export default function CronogramaGanttView({
         })
       );
     }
-  }, [items]);
+  }, [items, perspective]);
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
@@ -1444,25 +1483,40 @@ export default function CronogramaGanttView({
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
+        const isMaestro = perspective === 'maestro';
+        const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
+
         // Filtrar datos contaminados obsoletos si provienen de sesiones anteriores en BD y ordenar canónicamente
-        const cleanCloudItems = sortWbsHierarchy(
+        let cleanCloudItems = sortWbsHierarchy(
           cloudItems.filter(
             (it) =>
               !isLegacyCronogramaItem(it) &&
               (!it.parentId || cloudItems.some((p) => p.id === it.parentId))
           ) as Item[]
         );
-        if (projectId === 'p1' && (cleanCloudItems.length < 5000 || !cleanCloudItems.some((it) => it.id === 'pt-2.1-unit-001'))) {
-          setItems(INITIAL_ITEMS);
+
+        if (isMaestro) {
+          cleanCloudItems = cleanCloudItems.filter((it) => !isTerritorialSedeOnlyItem(it));
+          const recomputed = computeWbsHierarchy(cleanCloudItems.length > 0 ? cleanCloudItems : MASTER_INITIAL_ITEMS, rawTasks);
+          setItems(recomputed);
           try {
-            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(INITIAL_ITEMS));
+            localStorage.setItem(storageKey, JSON.stringify(recomputed));
+            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+          } catch {}
+          return;
+        }
+
+        if (projectId === 'p1' && (cleanCloudItems.length < 5000 || !cleanCloudItems.some((it) => it.id === 'pt-2.1-unit-001'))) {
+          setItems(TERRITORIAL_INITIAL_ITEMS);
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
             window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
           } catch {}
         } else if (cleanCloudItems.length >= 5000) {
           const recomputed = computeWbsHierarchy(cleanCloudItems, rawTasks);
           setItems(recomputed);
           try {
-            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
+            localStorage.setItem(storageKey, JSON.stringify(recomputed));
             window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
           } catch {}
         }
@@ -1471,7 +1525,7 @@ export default function CronogramaGanttView({
     return () => {
       isCancelled = true;
     };
-  }, [projectId, isActive]);
+  }, [projectId, isActive, perspective]);
 
   // Sincronización reactiva bidireccional con el módulo de tareas operativas (/tareas)
   useEffect(() => {
@@ -1506,8 +1560,10 @@ export default function CronogramaGanttView({
   useEffect(() => {
     if (!isActive) return;
     if (currentPidRef.current === projectId) {
+      const isMaestro = perspective === 'maestro';
+      const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
       try {
-        localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(items));
+        localStorage.setItem(storageKey, JSON.stringify(items));
         window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
       } catch {
         /* fallback */
@@ -1516,7 +1572,7 @@ export default function CronogramaGanttView({
         syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
       }
     }
-  }, [items, projectId, isActive]);
+  }, [items, projectId, isActive, perspective]);
 
   const [resizingCol, setResizingCol] = useState<ColKey | null>(null);
   const prevVisibleColsRef = useRef<ColKey[]>([...DEFAULT_VISIBLE_COLS]);
@@ -4106,7 +4162,11 @@ export default function CronogramaGanttView({
   }, [items, gestorFilter]);
 
   const shownBase = useMemo(() => {
+    const isMaestro = perspective === 'maestro';
     return items.filter((x) => {
+      if (isMaestro && isTerritorialSedeOnlyItem(x)) {
+        return false;
+      }
       const parent = items.find((p) => p.id === x.parentId);
       const matchSearch = `${x.code} ${x.name}`.toLowerCase().includes(search.toLowerCase());
       const matchEngine = !engineMatchIds || engineMatchIds.has(x.id);
