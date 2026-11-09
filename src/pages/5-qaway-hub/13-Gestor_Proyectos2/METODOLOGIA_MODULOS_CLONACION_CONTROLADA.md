@@ -143,20 +143,39 @@ Se extraen únicamente las partes demostrablemente iguales en ambos módulos:
 
 No se deben crear componentes genéricos basados únicamente en una suposición de lo que quizá se reutilice.
 
-## Fase E — Desvinculación controlada
+## Fase E — Desvinculación controlada (Desacople Estricto de Contenido)
 
-Después de extraer lo común, cada módulo conserva únicamente:
+La Fase E **SOLO desvincula el contenido y la fuente de datos**, jamás la interfaz visual ni el cascarón. Debe aplicarse estrictamente así:
 
-- Datos propios.
-- Servicio propio.
-- Columnas propias.
-- Reglas del dominio.
-- Permisos propios.
-- Acciones propias.
+1. **Partir de un módulo nuevo ya validado:**
+   - La copia literal debe haber pasado la comparación visual y funcional.
+   - El módulo original de referencia permanece 100% intacto.
 
-Los elementos visuales y comportamientos comunes pasan a `src/shared/` o a la capa común correspondiente.
+2. **Desacoplar únicamente el módulo nuevo:**
+   - Sustituir gradualmente sus imports, servicios, tipos y datos compartidos.
+   - Crear versiones propias dentro de la carpeta del nuevo módulo cuando sea necesario.
+   - Mantener rigurosamente la misma interfaz visual, densidad, botones, filtros y comportamiento funcional.
 
-La desvinculación no significa separar visualmente los módulos. Significa que cada módulo deja de depender de datos o lógica de otro módulo.
+3. **No modificar módulos protegidos:**
+   - Prohibido reemplazar vistas existentes (ej. el módulo `Sedes` debe conservar sus datos en las celdas y su vista territorial sin generar cargas del módulo Proyecto).
+   - Prohibido cambiar componentes originales o inyectar vistas planas no autorizadas.
+   - Prohibido alterar rutas, navegación del Sidebar, estilos globales o servicios compartidos sin autorización explícita.
+   - Prohibido usar la desvinculación como excusa para rediseñar.
+
+4. **Cambios permitidos:**
+   - Datos del dominio nuevo.
+   - Servicios propios de base de datos.
+   - Columnas y etiquetas específicas.
+   - Permisos y roles.
+   - Acciones específicas.
+   - Tipos y estados internos del módulo nuevo.
+
+5. **Validación obligatoria:**
+   - Comparar módulo original y módulo nuevo lado a lado.
+   - Ejecutar `npm run typecheck` (`npx tsc --noEmit`).
+   - Ejecutar `npm run build` (`npx vite build`).
+   - Verificar estados de carga, vacío, error, responsive e interacciones.
+   - Revisar `git diff` para confirmar que los cambios están limitados al módulo nuevo y a la integración autorizada.
 
 ---
 
