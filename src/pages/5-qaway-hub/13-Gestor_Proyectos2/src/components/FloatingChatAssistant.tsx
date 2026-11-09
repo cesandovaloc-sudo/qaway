@@ -83,6 +83,11 @@ const MODULE_CONTEXT_INFO: Record<ModuleKey, { title: string; hint: string; sugg
       '📅 Tareas que vencen esta semana'
     ]
   },
+  tareas2: {
+    title: 'Tareas 2',
+    hint: 'Perspectiva de tareas basada en el módulo Proyecto.',
+    suggestions: ['Revisar avance del proyecto', 'Analizar tareas críticas', 'Consultar próximos vencimientos']
+  },
   reportes: {
     title: 'Reporteador del Proyecto',
     hint: 'Métricas de avance físico, financiero y ejecución operativa.',

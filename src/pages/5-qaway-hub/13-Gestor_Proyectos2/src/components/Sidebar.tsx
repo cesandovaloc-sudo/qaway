@@ -249,7 +249,6 @@ export default function Sidebar({
         <UserRound size={18} />
         <span>Equipo</span>
       </button>
-
       <button
         className={active === 'tareas' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('tareas')}
@@ -258,7 +257,14 @@ export default function Sidebar({
         <span>Tareas</span>
         <em>{tasksCount}</em>
       </button>
-
+      <button
+        className={active === 'tareas2' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('tareas2')}
+      >
+        <CheckSquare size={18} />
+        <span>Tareas 2</span>
+        <em>{tasksCount}</em>
+      </button>
       <button
         className={active === 'hitos' ? 'side-link active' : 'side-link'}
         onClick={() => onModule('hitos')}

@@ -27,30 +27,8 @@ La orden correcta es:
 
 # Flujo por fases para cada nuevo módulo
 
-## Fase A — Congelar y auditar el módulo de referencia
 
-Antes de copiar:
-
-- Elegir un módulo de referencia validado.
-- Identificar todos sus archivos, imports, estilos, servicios y componentes secundarios.
-- Registrar qué partes son propias del dominio y cuáles parecen reutilizables.
-- Crear una lista de archivos protegidos.
-- Confirmar que el módulo de referencia compila y funciona antes de iniciar.
-
-### Archivos protegidos por defecto
-
-Mientras se construye otro panel, no deben modificarse sin autorización explícita:
-
-- `src/App.tsx`
-- `src/modules/cronograma-gantt/**`
-- `src/services/gestorCronogramaService.ts`
-- CSS global del Gestor
-- Tipos y servicios del módulo Proyecto
-- Componentes compartidos ya validados
-
-Si el nuevo módulo necesita tocar un archivo protegido, el agente debe detenerse, explicar la razón y pedir autorización. No debe resolverlo por iniciativa propia.
-
-## Fase B — Clonación literal controlada
+## Fase A — Clonación literal controlada
 
 Crear el nuevo módulo copiando la estructura de referencia, sin reinterpretarla.
 
@@ -94,7 +72,7 @@ Solamente:
 
 Si falta una capacidad, se reporta antes de editar. No se improvisa.
 
-## Fase C — Verificación de identidad
+## Fase B — Verificación de identidad
 
 Antes de hacer mejoras de dominio se debe comprobar que el nuevo módulo es equivalente al patrón.
 
@@ -124,7 +102,7 @@ Comparar referencia y clon en los mismos estados:
 
 No se acepta “se ve parecido”. La aceptación significa que conserva la misma composición, medidas, densidad, estados e interacción.
 
-## Fase D — Adaptación específica del proyecto
+## Fase C — Adaptación específica del proyecto
 
 Una vez aprobado el cascarón, se incorporan las necesidades reales del nuevo módulo:
 
@@ -139,7 +117,7 @@ Una vez aprobado el cascarón, se incorporan las necesidades reales del nuevo m�
 
 La adaptación no debe alterar el cascarón compartido. Si una necesidad exige cambiar una medida o comportamiento general, se registra como propuesta separada.
 
-## Fase E — Extracción posterior de componentes comunes
+## Fase D — Extracción posterior de componentes comunes
 
 Esta fase ocurre solo después de que el clon funciona y se ha comparado con la referencia.
 
@@ -165,7 +143,7 @@ Se extraen únicamente las partes demostrablemente iguales en ambos módulos:
 
 No se deben crear componentes genéricos basados únicamente en una suposición de lo que quizá se reutilice.
 
-## Fase F — Desvinculación controlada
+## Fase E — Desvinculación controlada
 
 Después de extraer lo común, cada módulo conserva únicamente:
 

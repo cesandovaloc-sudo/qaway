@@ -11,7 +11,8 @@ import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
-const SedesView = lazy(() => import('./modules/sedes/SedesView'));
+const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
+import SedesView from './modules/sedes/SedesView';
 const CronogramaView = lazy(() => import('./modules/cronograma/CronogramaView'));
 const CronogramaGanttView = lazy(() => import('./modules/cronograma-gantt/CronogramaGanttView'));
 const GanttElementDetailView = lazy(() => import('./modules/cronograma-gantt/GanttElementDetailView'));
@@ -42,12 +43,12 @@ export interface ProjectItem {
 const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 'p1',
-    code: 'PRJ-OPS-2027-01',
-    name: 'Distribución de Materiales DOT 2027',
-    region: 'Junín',
+    code: 'PRJ-MIN-2027-01',
+    name: 'MINEDU · Dotación 2027',
+    region: 'Nacional',
     subtext: 'Seguimiento de operaciones',
     budget: 'S/ 850,000',
-    sponsor: 'Comité Directivo',
+    sponsor: 'MINEDU - DIGERE',
     riskLevel: 'Medio',
     metodologia: 'Híbrido: Hitos Clave + Tareas de Campo',
   },
@@ -56,7 +57,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'tareas2', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
@@ -540,6 +541,9 @@ function GestorProyectosApp() {
            {visitedModules.has('tareas') && <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <TareasView activeProject={activeProject} onTasksCount={setTasksCount} onActions={(h) => { binds.current['tareas'] = h; }} />
            </div>}
+           {visitedModules.has('tareas2') && <Suspense fallback={<div className="qm-module-loading">Cargando Tareas 2…</div>}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+             <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />
+           </div></Suspense>}
            {visitedModules.has('cronograma') && <Suspense fallback={<div className="qm-module-loading">Cargando cronograma…</div>}><div
             className={
               active === 'cronograma' && cronogramaPerspective === 'maestro'
@@ -554,14 +558,14 @@ function GestorProyectosApp() {
               onActions={(h) => { binds.current['cronograma'] = h; }}
             />
            </div></Suspense>}
-           {visitedModules.has('sedes') && <Suspense fallback={<div className="qm-module-loading">Cargando sedes…</div>}><div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('sedes') && <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <SedesView
               activeProjectId={activeProjectId}
               activeProject={activeProject}
               isActive={active === 'sedes'}
               onActions={(h) => { binds.current['sedes'] = h; }}
             />
-           </div></Suspense>}
+           </div>}
            {visitedModules.has('cronograma') && <Suspense fallback={<div className="qm-module-loading">Cargando vista territorial…</div>}><div
             className={
               active === 'cronograma' && cronogramaPerspective === 'territorial'

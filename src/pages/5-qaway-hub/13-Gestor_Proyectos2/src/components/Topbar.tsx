@@ -37,6 +37,7 @@ const MODULE_LABELS: Record<ModuleKey, string> = {
   cronograma: 'Proyecto',
   sedes: 'Sedes',
   tareas: 'Tareas',
+  tareas2: 'Tareas 2',
   hitos: 'Componentes del proyecto',
   reuniones: 'Reuniones',
   reportes: 'Reportes y estadísticas',
