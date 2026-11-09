@@ -39,6 +39,7 @@ import {
   type AgentProfileId,
   type AgentToneId
 } from '../../services/geminiRAGService';
+import { CONFIGURABLE_MODULES } from '../../types';
 
 export type ConfigBinds = { notify: (m: string) => void };
 
@@ -48,6 +49,9 @@ export interface ProjectItem {
   name: string;
   region: string;
   subtext?: string | undefined;
+  descProyecto?: string | undefined;
+  descSedes?: string | undefined;
+  moduleDescriptions?: Record<string, string> | undefined;
   budget?: string | undefined;
   sponsor?: string | undefined;
   riskLevel?: string | undefined;
@@ -111,8 +115,14 @@ export default function ConfiguracionView({
   const [editCode, setEditCode] = useState(currentProj.code);
   const [editRegion, setEditRegion] = useState(currentProj.region || '');
   const [editSubtext, setEditSubtext] = useState(currentProj.subtext || '');
-  const [editDescProyecto, setEditDescProyecto] = useState(currentProj.descProyecto || '');
-  const [editDescSedes, setEditDescSedes] = useState(currentProj.descSedes || '');
+  const [selectedModuleKey, setSelectedModuleKey] = useState<string>(CONFIGURABLE_MODULES[0]?.key || 'cronograma');
+  const [moduleDescriptions, setModuleDescriptions] = useState<Record<string, string>>(() => {
+    return {
+      cronograma: currentProj.moduleDescriptions?.['cronograma'] || currentProj.descProyecto || '',
+      sedes: currentProj.moduleDescriptions?.['sedes'] || currentProj.descSedes || '',
+      ...(currentProj.moduleDescriptions || {}),
+    };
+  });
   
   // Flujo estricto de eliminación en dos pasos (Doble candado de confirmación)
   const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
@@ -139,8 +149,11 @@ export default function ConfiguracionView({
     setEditCode(currentProj.code);
     setEditRegion(currentProj.region || '');
     setEditSubtext(currentProj.subtext || '');
-    setEditDescProyecto(currentProj.descProyecto || '');
-    setEditDescSedes(currentProj.descSedes || '');
+    setModuleDescriptions({
+      cronograma: currentProj.moduleDescriptions?.['cronograma'] || currentProj.descProyecto || '',
+      sedes: currentProj.moduleDescriptions?.['sedes'] || currentProj.descSedes || '',
+      ...(currentProj.moduleDescriptions || {}),
+    });
   }, [currentProj]);
 
   const handleSaveCurrentProject = (e: React.FormEvent) => {
@@ -149,14 +162,21 @@ export default function ConfiguracionView({
       notify('El nombre del proyecto no puede estar vacío');
       return;
     }
+    const cronoDesc = (moduleDescriptions['cronograma'] || '').trim();
+    const sedesDesc = (moduleDescriptions['sedes'] || '').trim();
     onUpdateProject?.({
       ...currentProj,
       name: editName.trim(),
       code: editCode.trim() || currentProj.code,
       region: editRegion.trim(),
       subtext: editSubtext.trim(),
-      descProyecto: editDescProyecto.trim(),
-      descSedes: editDescSedes.trim(),
+      descProyecto: cronoDesc,
+      descSedes: sedesDesc,
+      moduleDescriptions: {
+        ...moduleDescriptions,
+        cronograma: cronoDesc,
+        sedes: sedesDesc,
+      },
     });
     notify(`Proyecto "${editName}" actualizado correctamente.`);
   };
@@ -560,18 +580,17 @@ export default function ConfiguracionView({
                   </div>
                 </div>
 
+                {/* Configuración dinámica de cabeceras por módulo */}
                 <div className="form-row">
                   <div className="field-info">
-                    <label htmlFor="cfg-proj-desc-proyecto">Subtítulo Cabecera · Módulo Proyecto</label>
-                    <p>Texto de una sola línea mostrado bajo el título en el cronograma maestro.</p>
+                    <label htmlFor="cfg-proj-module-select">Módulo a configurar</label>
+                    <p>Elige el módulo para personalizar el texto que aparece bajo su título principal.</p>
                   </div>
                   <div className="field-control">
-                    <input
-                      id="cfg-proj-desc-proyecto"
-                      type="text"
-                      value={editDescProyecto}
-                      onChange={(e) => setEditDescProyecto(e.target.value)}
-                      placeholder="Línea de tiempo oficial y calibración de entregables."
+                    <select
+                      id="cfg-proj-module-select"
+                      value={selectedModuleKey}
+                      onChange={(e) => setSelectedModuleKey(e.target.value)}
                       style={{
                         width: '100%',
                         padding: '9px 12px',
@@ -579,23 +598,40 @@ export default function ConfiguracionView({
                         border: '1px solid #cbd5e1',
                         fontSize: '13px',
                         color: '#0f172a',
+                        background: '#ffffff',
+                        fontWeight: 600,
+                        cursor: 'pointer',
                       }}
-                    />
+                    >
+                      {CONFIGURABLE_MODULES.map((mod) => (
+                        <option key={mod.key} value={mod.key}>
+                          {mod.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="field-info">
-                    <label htmlFor="cfg-proj-desc-sedes">Subtítulo Cabecera · Módulo Sedes</label>
-                    <p>Texto de una sola línea mostrado bajo el título en la perspectiva territorial.</p>
+                    <label htmlFor="cfg-proj-module-desc">
+                      Subtítulo de Cabecera · {CONFIGURABLE_MODULES.find((m) => m.key === selectedModuleKey)?.name || 'Módulo'}
+                    </label>
+                    <p>Texto corto de una sola línea mostrado a los usuarios en la cabecera de este módulo.</p>
                   </div>
                   <div className="field-control">
                     <input
-                      id="cfg-proj-desc-sedes"
+                      id="cfg-proj-module-desc"
                       type="text"
-                      value={editDescSedes}
-                      onChange={(e) => setEditDescSedes(e.target.value)}
-                      placeholder="Seguimiento territorial de DRE y UGEL en tiempo real."
+                      value={moduleDescriptions[selectedModuleKey] ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setModuleDescriptions((prev) => ({
+                          ...prev,
+                          [selectedModuleKey]: val,
+                        }));
+                      }}
+                      placeholder={CONFIGURABLE_MODULES.find((m) => m.key === selectedModuleKey)?.defaultSubtitle || 'Subtítulo del módulo...'}
                       style={{
                         width: '100%',
                         padding: '9px 12px',
@@ -605,6 +641,12 @@ export default function ConfiguracionView({
                         color: '#0f172a',
                       }}
                     />
+                    <div style={{ marginTop: '6px', fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>Vista previa:</span>
+                      <strong style={{ color: '#0284c7', fontWeight: 600 }}>
+                        {moduleDescriptions[selectedModuleKey]?.trim() || CONFIGURABLE_MODULES.find((m) => m.key === selectedModuleKey)?.defaultSubtitle}
+                      </strong>
+                    </div>
                   </div>
                 </div>
 

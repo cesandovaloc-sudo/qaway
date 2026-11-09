@@ -146,61 +146,95 @@ async function upsertRows(rows: Record<string, any>[]): Promise<{ message: strin
   return null;
 }
 
+/* P2 (gstack 08): columnas explícitas de la lectura (superset exacto de los campos que mapea fromSupabaseRow). */
+const CRONOGRAMA_SELECT =
+  'id,code,name,kind,parent_id,start_date,end_date,progress,status,expanded,description,deliverable,deliverables,attachments,report_type,region,gestor,gestores,tasks,done,baseline_start,baseline_end,actual_start,actual_end';
+
+/**
+ * P1 (gstack 08): dedup de promesas en vuelo por proyecto — evita la doble lectura del gantt
+ * causada por el doble montaje (StrictMode) y por consumidores múltiples en carga fría.
+ */
+const inFlightCronograma = new Map<string, Promise<GanttItemData[] | null>>();
+
 /**
  * Carga los ítems del cronograma desde Supabase para el proyecto dado.
  * Si la tabla o conexión no está disponible, retorna null para activar el fallback local.
  */
 export async function fetchCronogramaFromSupabase(projectId: string): Promise<GanttItemData[] | null> {
   if (!supabase) return null;
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 12000);
-  try {
-    const { data, error } = await supabase
-      .from('gestor_cronograma_items')
-      .select('*')
-      .eq('project_id', projectId)
-      .limit(15000)
-      .abortSignal(controller.signal);
+  const db = supabase;
+  const key = `project:${projectId}`;
+  const existing = inFlightCronograma.get(key);
+  if (existing) return existing;
+  const run = (async (): Promise<GanttItemData[] | null> => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 12000);
+    try {
+      let respuesta = await db
+        .from('gestor_cronograma_items')
+        .select(CRONOGRAMA_SELECT)
+        .eq('project_id', projectId)
+        .limit(15000)
+        .abortSignal(controller.signal);
 
-    if (error) {
-      console.warn('[Supabase Cronograma] Aviso al leer (se usará respaldo local):', error.message);
-      return null;
-    }
+      // Tolerante al esquema (mismo criterio de upsertRows): si una columna de la lista explícita
+      // aún no existe en la BD, relee con select=* para no romper la carga del cronograma.
+      if (respuesta.error) {
+        respuesta = await db
+          .from('gestor_cronograma_items')
+          .select('*')
+          .eq('project_id', projectId)
+          .limit(15000)
+          .abortSignal(controller.signal);
+      }
 
-    if (Array.isArray(data) && data.length > 0) {
-      const mapped = sortWbsHierarchy(data.map(fromSupabaseRow));
-      // Si la BD aún no guarda línea base/fechas reales, se conservan las del respaldo local.
-      try {
-        const local = JSON.parse(localStorage.getItem(`qaway-gantt-items-${projectId}`) || '[]');
-        if (Array.isArray(local)) {
-          const byId = new Map(local.map((l: any) => [l.id, l]));
-          mapped.forEach((m: any) => {
-            const l: any = byId.get(m.id);
-            if (!l) return;
-            SCHEDULE_FIELDS.forEach((f) => {
-              if (!m[f] && l[f]) m[f] = l[f];
+      if (respuesta.error) {
+        console.warn('[Supabase Cronograma] Aviso al leer (se usará respaldo local):', respuesta.error.message);
+        return null;
+      }
+
+      const data = respuesta.data;
+      if (Array.isArray(data) && data.length > 0) {
+        const mapped = sortWbsHierarchy(data.map(fromSupabaseRow));
+        // Si la BD aún no guarda línea base/fechas reales, se conservan las del respaldo local.
+        try {
+          const local = JSON.parse(localStorage.getItem(`qaway-gantt-items-${projectId}`) || '[]');
+          if (Array.isArray(local)) {
+            const byId = new Map(local.map((l: any) => [l.id, l]));
+            mapped.forEach((m: any) => {
+              const l: any = byId.get(m.id);
+              if (!l) return;
+              SCHEDULE_FIELDS.forEach((f) => {
+                if (!m[f] && l[f]) m[f] = l[f];
+              });
             });
-          });
+          }
+        } catch {
+          /* respaldo local no disponible */
         }
-      } catch {
-        /* respaldo local no disponible */
+        try {
+          localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(mapped));
+        } catch {
+          /* fallback */
+        }
+        return mapped;
       }
-      try {
-        localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(mapped));
-      } catch {
-        /* fallback */
-      }
-      return mapped;
-    }
 
-    return [];
-  } catch (err) {
-    if ((err as { name?: string })?.name !== 'AbortError') {
-      console.warn('[Supabase Cronograma] Excepción de conexión:', err);
+      return [];
+    } catch (err) {
+      if ((err as { name?: string })?.name !== 'AbortError') {
+        console.warn('[Supabase Cronograma] Excepción de conexión:', err);
+      }
+      return null;
+    } finally {
+      window.clearTimeout(timeoutId);
     }
-    return null;
+  })();
+  inFlightCronograma.set(key, run);
+  try {
+    return await run;
   } finally {
-    window.clearTimeout(timeoutId);
+    inFlightCronograma.delete(key);
   }
 }
 

@@ -11,22 +11,31 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
  * Carga el directorio completo de integrantes desde Supabase (tabla gestor_unidades).
  * Cero hardcodeo local: la fuente única de verdad es Supabase.
  */
+/**
+ * P1 (gstack 08): promesa en vuelo compartida — en carga fría, todas las llamadas concurrentes
+ * (Equipo + Sedes + doble montaje en StrictMode) comparten UNA sola ida a la red.
+ * La caché TTL existente sigue cubriendo las recargas posteriores.
+ */
+let inFlightIntegrantes: Promise<Integrante[]> | null = null;
+
 export async function fetchEquipoIntegrantesFromSupabase(forceRefresh = false): Promise<Integrante[]> {
   const now = Date.now();
   if (!forceRefresh && cachedIntegrantes && (now - lastFetchTime < CACHE_TTL_MS)) {
     return cachedIntegrantes;
   }
+  if (inFlightIntegrantes) return inFlightIntegrantes;
 
-  if (!supabase) {
-    console.warn('[gestorEquipoService] Supabase no disponible');
-    return cachedIntegrantes || [];
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from('gestor_unidades')
-      .select('id, name, region, unit_type, metadata')
-      .order('id');
+  const run = (async (): Promise<Integrante[]> => {
+    if (!supabase) {
+      console.warn('[gestorEquipoService] Supabase no disponible');
+      return cachedIntegrantes || [];
+    }
+    const db = supabase;
+    try {
+      const { data, error } = await db
+        .from('gestor_unidades')
+        .select('id, name, region, unit_type, metadata')
+        .order('id');
 
     if (error || !data || data.length === 0) {
       console.warn('[gestorEquipoService] No se pudieron obtener unidades de Supabase:', error);
@@ -92,6 +101,14 @@ export async function fetchEquipoIntegrantesFromSupabase(forceRefresh = false): 
   } catch (err) {
     console.error('[gestorEquipoService] Error inesperado consultando Supabase:', err);
     return cachedIntegrantes || [];
+    }
+  })();
+
+  inFlightIntegrantes = run;
+  try {
+    return await run;
+  } finally {
+    inFlightIntegrantes = null;
   }
 }
 

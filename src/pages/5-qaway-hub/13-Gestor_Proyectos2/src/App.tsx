@@ -38,6 +38,7 @@ export interface ProjectItem {
   subtext?: string | undefined;
   descProyecto?: string | undefined;
   descSedes?: string | undefined;
+  moduleDescriptions?: Record<string, string> | undefined;
   budget?: string | undefined;
   sponsor?: string | undefined;
   riskLevel?: string | undefined;
@@ -63,7 +64,8 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'tareas2', 'reuniones', 'reuniones2', 'reportes', 'reportes2', 'usuarios', 'configuracion'];
+    if (saved === 'tareas') return 'tareas2';
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas2', 'reuniones', 'reuniones2', 'reportes', 'reportes2', 'usuarios', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'cronograma';
   } catch {
@@ -549,9 +551,6 @@ function GestorProyectosApp() {
         <main ref={canvasRef} className="qm-canvas">
            {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <ResumenProyectoView userRole={userRole} onOpenCreateProject={() => setIsCreateProjectOpen(true)} onActions={(h) => { binds.current['resumen'] = h; }} />
-           </div>}
-           {visitedModules.has('tareas') && <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-             <TareasView activeProject={activeProject} onTasksCount={setTasksCount} onActions={(h) => { binds.current['tareas'] = h; }} />
            </div>}
            {visitedModules.has('tareas2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Tareas 2…" />}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />

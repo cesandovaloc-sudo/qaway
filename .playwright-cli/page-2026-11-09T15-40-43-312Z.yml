@@ -1,0 +1,101 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas 7" [ref=e43] [cursor=pointer]:
+      - generic [ref=e47]: Tareas
+      - emphasis [ref=e48]: "7"
+    - button "Tareas 2 7" [ref=e49] [cursor=pointer]:
+      - generic [ref=e53]: Tareas 2
+      - emphasis [ref=e54]: "7"
+    - button "Reuniones" [ref=e55] [cursor=pointer]
+    - button "Reuniones 2" [ref=e62] [cursor=pointer]
+    - button "Reportes" [ref=e69] [cursor=pointer]
+    - button "Reportes 2" [ref=e73] [cursor=pointer]
+    - button "Configuración" [ref=e79] [cursor=pointer]
+  - generic [ref=e84]:
+    - banner [ref=e85]:
+      - generic [ref=e86]:
+        - button "Colapsar panel lateral" [ref=e87] [cursor=pointer]
+        - generic [ref=e91]: Seguimiento de operaciones
+        - generic [ref=e94]: MINEDU · Dotación 2026
+        - generic [ref=e97]: Configuración del sistema
+      - generic [ref=e98]:
+        - button "Ayuda del sistema" [ref=e99] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e104] [cursor=pointer]:
+          - generic [ref=e108]: "3"
+        - generic "Opciones de perfil institucional" [ref=e109] [cursor=pointer]:
+          - generic [ref=e110]: CS
+          - generic [ref=e111]:
+            - generic [ref=e112]: Carlos Sandoval
+            - generic [ref=e113]: Coordinador General
+    - main [ref=e116]:
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - generic [ref=e122]: Gobernanza Territorial · Qaway Lab
+            - heading "Configuración y Parámetros del Sistema" [level=1] [ref=e125]
+            - paragraph [ref=e126]: Ajuste de zona horaria oficial, calibración de fecha operativa para seguimiento territorial y parámetros de tolerancia.
+          - button "Guardar Parámetros" [ref=e128] [cursor=pointer]
+        - navigation [ref=e134]:
+          - button "Zona Horaria y Fecha Operativa" [ref=e135] [cursor=pointer]
+          - button "Gestión del Proyecto Activo" [ref=e140] [cursor=pointer]
+          - button "Tolerancias y Reglas de Cronograma" [ref=e144] [cursor=pointer]
+          - button "Seguridad y Auditoría Institucional" [ref=e150] [cursor=pointer]
+          - button "Asistente IA (Qaway Copilot)" [ref=e155] [cursor=pointer]
+        - generic [ref=e161]:
+          - generic [ref=e169]:
+            - heading "Zona Horaria del Proyecto" [level=2] [ref=e170]
+            - paragraph [ref=e171]: Define el huso horario oficial para el cómputo de plazos, alertas de cierre de hitos y sincronización territorial.
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - generic [ref=e174]: Huso Horario Oficial
+              - paragraph [ref=e175]: Aplica a todas las fechas de corte, reportes de gestores y actas del proyecto.
+            - combobox "Huso Horario Oficial" [ref=e177]:
+              - option "America/Lima (UTC-05:00) · Hora Oficial de Perú" [selected]
+              - option "America/Bogota (UTC-05:00) · Colombia / Región Andina"
+              - option "America/La_Paz (UTC-04:00) · Bolivia"
+              - option "America/Santiago (UTC-04:00) · Chile"
+              - option "UTC (UTC+00:00) · Tiempo Universal Coordinado"
+          - generic [ref=e178]:
+            - generic [ref=e179]:
+              - generic [ref=e180]: Modo de Fecha del Sistema
+              - paragraph [ref=e181]: Determina si el cronograma toma la fecha real del computador o una fecha operativa de simulación/seguimiento.
+            - generic [ref=e183]:
+              - generic [ref=e184] [cursor=pointer]:
+                - 'radio "Fecha Operativa del Proyecto (Control de seguimiento) Fija la fecha de control territorial para evaluar con precisión el estado de hitos pasados, presentes y futuros. 2026-10-28 Fecha actual de seguimiento territorial: 2026-10-28" [checked] [ref=e185]'
+                - generic [ref=e186]:
+                  - strong [ref=e187]: Fecha Operativa del Proyecto (Control de seguimiento)
+                  - text: Fija la fecha de control territorial para evaluar con precisión el estado de hitos pasados, presentes y futuros.
+                  - generic [ref=e188]:
+                    - textbox [ref=e189]: 2026-10-28
+                    - generic [ref=e190]:
+                      - text: "Fecha actual de seguimiento territorial:"
+                      - strong [ref=e191]: 2026-10-28
+              - generic [ref=e192] [cursor=pointer]:
+                - radio "Fecha en Tiempo Real del Dispositivo Toma la fecha y hora del reloj del equipo según la zona horaria seleccionada." [ref=e193]
+                - generic [ref=e194]:
+                  - strong [ref=e195]: Fecha en Tiempo Real del Dispositivo
+                  - text: Toma la fecha y hora del reloj del equipo según la zona horaria seleccionada.
+          - generic [ref=e196]:
+            - generic [ref=e200]:
+              - text: "Fecha de referencia activa en el cronograma:"
+              - strong [ref=e201]: 2026-10-28
+              - text: (America/Lima)
+            - generic [ref=e202]: Sincronizado
+  - button "Asistente Qaway Copilot" [ref=e203] [cursor=pointer]:
+    - generic [ref=e215]: IA

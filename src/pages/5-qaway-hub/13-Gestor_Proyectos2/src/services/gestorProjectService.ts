@@ -42,17 +42,48 @@ const toRow = (project: ProjectItem, tenantId?: string | null) => ({
 });
 
 /**
+ * P1 (gstack 08): dedup de peticiones en vuelo — si una lectura idéntica ya está
+ * en curso, se comparte su promesa (evita duplicados por StrictMode/doble montaje
+ * y por consumidores múltiples del mismo recurso en carga fría).
+ */
+const inFlightProjects = new Map<string, Promise<ProjectItem[]>>();
+
+/**
  * Project persistence before Hub login integration.
  * tenantId is intentionally explicit and optional; it must not be inferred
  * from a session until the authentication phase is approved.
  */
 export async function listGestorProjects(tenantId?: string | null): Promise<ProjectItem[]> {
   if (!supabase) return [];
-  let query = supabase.from('gestor_proyectos').select('*').order('created_at', { ascending: true });
-  if (tenantId) query = query.eq('tenant_id', tenantId);
-  const { data, error } = await query;
-  if (error) throw error;
-  return (data ?? []).map((row) => fromRow(row as ProjectRow));
+  const db = supabase;
+  const key = `tenant:${tenantId ?? 'all'}`;
+  const existing = inFlightProjects.get(key);
+  if (existing) return existing;
+  const run = (async (): Promise<ProjectItem[]> => {
+    // P2 (gstack 08): columnas explícitas (superset de todo campo que mapea fromRow) en lugar de select=*
+    // Tolerante al esquema: si alguna columna aún no existe en la BD, relee con select=* (siempre válido).
+    let respuesta = await db
+      .from('gestor_proyectos')
+      .select('id,code,name,region,subtext,budget,sponsor,risk_level,metodologia,created_at,updated_at')
+      .order('created_at', { ascending: true });
+    if (respuesta.error) {
+      respuesta = await db
+        .from('gestor_proyectos')
+        .select('*')
+        .order('created_at', { ascending: true });
+    }
+    if (tenantId) {
+      respuesta.data = (respuesta.data ?? []).filter((row: any) => !tenantId || row.tenant_id === tenantId);
+    }
+    if (respuesta.error) throw respuesta.error;
+    return (respuesta.data ?? []).map((row) => fromRow(row as ProjectRow));
+  })();
+  inFlightProjects.set(key, run);
+  try {
+    return await run;
+  } finally {
+    inFlightProjects.delete(key);
+  }
 }
 
 export async function upsertGestorProject(project: ProjectItem, tenantId?: string | null): Promise<boolean> {

@@ -1,6 +1,25 @@
 // Tipos compartidos del shell maestro.
 export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'tareas2' | 'hitos' | 'reuniones' | 'reuniones2' | 'reportes' | 'reportes2' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
 
+export interface ConfigurableModuleInfo {
+  key: string;
+  name: string;
+  defaultSubtitle: string;
+}
+
+// Lista oficial y canónica de módulos sincronizada 1:1 con el panel lateral izquierdo
+export const CONFIGURABLE_MODULES: ConfigurableModuleInfo[] = [
+  { key: 'resumen', name: 'Resumen del proyecto', defaultSubtitle: 'Métricas clave y estado general del proyecto.' },
+  { key: 'cronograma', name: 'Proyecto', defaultSubtitle: 'Línea de tiempo oficial y calibración de entregables.' },
+  { key: 'sedes', name: 'Sedes', defaultSubtitle: 'Seguimiento territorial de DRE y UGEL en tiempo real.' },
+  { key: 'usuarios', name: 'Equipo', defaultSubtitle: 'Padrón operativo y frentes territoriales.' },
+  { key: 'tareas2', name: 'Tareas', defaultSubtitle: 'Tablero operativo de tareas.' },
+  { key: 'reuniones', name: 'Reuniones', defaultSubtitle: 'Coordinación de sesiones de trabajo y agenda.' },
+  { key: 'reuniones2', name: 'Reuniones 2', defaultSubtitle: 'Segunda perspectiva de coordinación y actas.' },
+  { key: 'reportes', name: 'Reportes', defaultSubtitle: 'Consolidado de informes territoriales.' },
+  { key: 'reportes2', name: 'Reportes 2', defaultSubtitle: 'Analítica territorial complementaria.' },
+];
+
 // Ruta pública canónica del Gestor de Proyectos dentro del sistema (sin prefijo /hub)
 export const BASE_PATH = '/gestor_proyectos';
 

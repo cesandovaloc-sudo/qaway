@@ -1342,6 +1342,7 @@ export default function CronogramaGanttView({
     subtext?: string | undefined;
     descProyecto?: string | undefined;
     descSedes?: string | undefined;
+    moduleDescriptions?: Record<string, string> | undefined;
   } | undefined;
   perspective?: 'maestro' | 'territorial' | 'equipo';
   isActive?: boolean;
@@ -5803,10 +5804,10 @@ export default function CronogramaGanttView({
           }
           description={
             perspective === 'equipo'
-              ? 'Padrón operativo y frentes territoriales.'
+              ? (activeProject?.moduleDescriptions?.['usuarios'] || 'Padrón operativo y frentes territoriales.')
               : perspective === 'territorial'
-              ? (activeProject?.descSedes || 'Seguimiento territorial de DRE y UGEL en tiempo real.')
-              : (activeProject?.descProyecto || 'Línea de tiempo oficial y calibración de entregables.')
+              ? (activeProject?.moduleDescriptions?.['sedes'] || activeProject?.descSedes || 'Seguimiento territorial de DRE y UGEL en tiempo real.')
+              : (activeProject?.moduleDescriptions?.['cronograma'] || activeProject?.descProyecto || 'Línea de tiempo oficial y calibración de entregables.')
           }
           actions={
             <>
