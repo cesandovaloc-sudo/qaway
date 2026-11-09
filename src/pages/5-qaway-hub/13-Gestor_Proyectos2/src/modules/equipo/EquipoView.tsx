@@ -4,10 +4,12 @@ import CronogramaGanttView from '../cronograma-gantt/CronogramaGanttView';
 export default function EquipoView({
   activeProject,
   onActions,
+  isActive = true,
   ...rest
 }: {
   activeProject?: any;
   onActions?: (h: { notify: (m: string) => void }) => void;
+  isActive?: boolean;
   [key: string]: any;
 }) {
   return (
@@ -15,6 +17,7 @@ export default function EquipoView({
       perspective="equipo"
       activeProject={activeProject}
       onActions={onActions}
+      isActive={isActive}
       {...rest}
     />
   );

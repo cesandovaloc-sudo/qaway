@@ -1314,6 +1314,7 @@ export default function CronogramaGanttView({
   onSwitchPerspective,
   activeProject,
   perspective = 'maestro',
+  isActive = true,
 }: {
   onActions?: ((h: any) => void) | undefined;
   onSwitchPerspective?: ((p: any) => void) | undefined;
@@ -1325,6 +1326,7 @@ export default function CronogramaGanttView({
     subtext?: string | undefined;
   } | undefined;
   perspective?: 'maestro' | 'territorial' | 'equipo';
+  isActive?: boolean;
 }) {
   const projectId = activeProject?.id || 'p1';
   const currentPidRef = useRef(projectId);
@@ -1438,6 +1440,7 @@ export default function CronogramaGanttView({
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
+    if (!isActive) return;
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
@@ -1468,10 +1471,11 @@ export default function CronogramaGanttView({
     return () => {
       isCancelled = true;
     };
-  }, [projectId]);
+  }, [projectId, isActive]);
 
   // Sincronización reactiva bidireccional con el módulo de tareas operativas (/tareas)
   useEffect(() => {
+    if (!isActive) return;
     const handleTasksUpdated = () => {
       try {
         const saved = localStorage.getItem('qaway-tasks-v1');
@@ -1496,10 +1500,11 @@ export default function CronogramaGanttView({
       window.removeEventListener('qaway-tasks-updated', handleTasksUpdated);
       window.removeEventListener('storage', handleTasksUpdated);
     };
-  }, [projectId]);
+  }, [projectId, isActive]);
 
   // Persistencia segura por proyecto activo (Doble capa: LocalStorage inmediato + Sincronización Supabase)
   useEffect(() => {
+    if (!isActive) return;
     if (currentPidRef.current === projectId) {
       try {
         localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(items));
@@ -1511,7 +1516,7 @@ export default function CronogramaGanttView({
         syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
       }
     }
-  }, [items, projectId]);
+  }, [items, projectId, isActive]);
 
   const [resizingCol, setResizingCol] = useState<ColKey | null>(null);
   const prevVisibleColsRef = useRef<ColKey[]>([...DEFAULT_VISIBLE_COLS]);
@@ -2090,7 +2095,7 @@ export default function CronogramaGanttView({
 
   // Carga reactiva de integrantes y sedes desde Supabase (cero hardcodeo local)
   useEffect(() => {
-    if (perspective === 'equipo') {
+    if (perspective === 'equipo' && isActive) {
       let isMounted = true;
       fetchEquipoIntegrantesFromSupabase().then((data) => {
         if (isMounted && Array.isArray(data) && data.length > 0) {
@@ -2112,7 +2117,7 @@ export default function CronogramaGanttView({
         isMounted = false;
       };
     }
-  }, [perspective]);
+  }, [perspective, isActive]);
 
   const equipoMetrics = useMemo(() => {
     const total = equipoIntegrantes.length;
@@ -2503,7 +2508,7 @@ export default function CronogramaGanttView({
   const [inlineDraftCreatedId, setInlineDraftCreatedId] = useState<string | null>(null);
   const depHoverTimeoutRef = useRef<any>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
-  const [showBaseline, setShowBaseline] = useState(false);
+  const [showBaseline, setShowBaseline] = useState(true);
   const [calShowBarLabels, setCalShowBarLabels] = useState(true);
   const [calShowBaseline, setCalShowBaseline] = useState(true);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
@@ -3931,6 +3936,10 @@ export default function CronogramaGanttView({
     const modeMap = collapsedByMode[mode];
     if (modeMap && id in modeMap) {
       return !modeMap[id];
+    }
+    // En perspectiva territorial (Módulo Sedes), las regiones y sedes inician colapsadas para evitar carga masiva de inicio
+    if (perspective === 'territorial') {
+      return false;
     }
     return defaultExpanded;
   };
@@ -7363,7 +7372,7 @@ export default function CronogramaGanttView({
                 setCustomRules([]);
                 setAdvancedFiltersOpen(false);
                 setColFilterOpen(null);
-                setShowBaseline(false);
+                setShowBaseline(true);
                 setCalShowBarLabels(true);
                 setCalShowBaseline(true);
                 setShowCriticalPath(false);

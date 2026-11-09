@@ -11,16 +11,16 @@ import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
-import SedesView from './modules/sedes/SedesView';
-import CronogramaView from './modules/cronograma/CronogramaView';
-import CronogramaGanttView from './modules/cronograma-gantt/CronogramaGanttView';
-import GanttElementDetailView from './modules/cronograma-gantt/GanttElementDetailView';
-import ReunionesView from './modules/reuniones/ReunionesView';
-import ReporteadorView from './modules/reporteador/ReporteadorView';
-import EquipoView from './modules/equipo/EquipoView';
-import HitosView from './modules/hitos/HitosView';
-import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
-import ConfiguracionView from './modules/configuracion/ConfiguracionView';
+const SedesView = lazy(() => import('./modules/sedes/SedesView'));
+const CronogramaView = lazy(() => import('./modules/cronograma/CronogramaView'));
+const CronogramaGanttView = lazy(() => import('./modules/cronograma-gantt/CronogramaGanttView'));
+const GanttElementDetailView = lazy(() => import('./modules/cronograma-gantt/GanttElementDetailView'));
+const ReunionesView = lazy(() => import('./modules/reuniones/ReunionesView'));
+const ReporteadorView = lazy(() => import('./modules/reporteador/ReporteadorView'));
+const EquipoView = lazy(() => import('./modules/equipo/EquipoView'));
+const HitosView = lazy(() => import('./modules/hitos/HitosView'));
+const ActasAcuerdosView = lazy(() => import('./modules/actas/ActasAcuerdosView'));
+const ConfiguracionView = lazy(() => import('./modules/configuracion/ConfiguracionView'));
 const PruebasView = lazy(() => import('./modules/pruebas/PruebasView'));
 import FloatingChatAssistant from './components/FloatingChatAssistant';
 import { deleteGestorProject, listGestorProjects, upsertGestorProject } from './services/gestorProjectService';
@@ -540,7 +540,7 @@ function GestorProyectosApp() {
            {visitedModules.has('tareas') && <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <TareasView activeProject={activeProject} onTasksCount={setTasksCount} onActions={(h) => { binds.current['tareas'] = h; }} />
            </div>}
-           {visitedModules.has('cronograma') && <div
+           {visitedModules.has('cronograma') && <Suspense fallback={<div className="qm-module-loading">Cargando cronograma…</div>}><div
             className={
               active === 'cronograma' && cronogramaPerspective === 'maestro'
                 ? 'gantt-v2 qm-pane-active'
@@ -549,18 +549,20 @@ function GestorProyectosApp() {
           >
             <CronogramaGanttView
               activeProject={activeProject}
+              isActive={active === 'cronograma' && cronogramaPerspective === 'maestro'}
               onSwitchPerspective={setCronogramaPerspective}
               onActions={(h) => { binds.current['cronograma'] = h; }}
             />
-           </div>}
-           {visitedModules.has('sedes') && <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div></Suspense>}
+           {visitedModules.has('sedes') && <Suspense fallback={<div className="qm-module-loading">Cargando sedes…</div>}><div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <SedesView
               activeProjectId={activeProjectId}
               activeProject={activeProject}
+              isActive={active === 'sedes'}
               onActions={(h) => { binds.current['sedes'] = h; }}
             />
-           </div>}
-           {visitedModules.has('cronograma') && <div
+           </div></Suspense>}
+           {visitedModules.has('cronograma') && <Suspense fallback={<div className="qm-module-loading">Cargando vista territorial…</div>}><div
             className={
               active === 'cronograma' && cronogramaPerspective === 'territorial'
                 ? 'qc-v1 qm-pane-active'
@@ -571,25 +573,26 @@ function GestorProyectosApp() {
               onSwitchPerspective={setCronogramaPerspective}
               onActions={(h) => { binds.current['cronograma'] = h; }}
             />
-           </div>}
-           {visitedModules.has('hitos') && <div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div></Suspense>}
+           {visitedModules.has('hitos') && <Suspense fallback={<div className="qm-module-loading">Cargando hitos…</div>}><div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
-           </div>}
-           {visitedModules.has('reuniones') && <div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div></Suspense>}
+           {visitedModules.has('reuniones') && <Suspense fallback={<div className="qm-module-loading">Cargando reuniones…</div>}><div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
-           </div>}
-           {visitedModules.has('reportes') && <div className={active === 'reportes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div></Suspense>}
+           {visitedModules.has('reportes') && <Suspense fallback={<div className="qm-module-loading">Cargando reportes…</div>}><div className={active === 'reportes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
-           </div>}
-           {visitedModules.has('usuarios') && <div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div></Suspense>}
+           {visitedModules.has('usuarios') && <Suspense fallback={<div className="qm-module-loading">Cargando equipo…</div>}><div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <EquipoView
               activeProject={activeProject}
+              isActive={active === 'usuarios'}
               onActions={(h) => { binds.current['usuarios'] = h; }}
             />
-           </div>}
-           {visitedModules.has('actas') && <div className={active === 'actas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div></Suspense>}
+           {visitedModules.has('actas') && <Suspense fallback={<div className="qm-module-loading">Cargando actas…</div>}><div className={active === 'actas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
-           </div>}
+           </div></Suspense>}
           <div className={active === 'pruebas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             {active === 'pruebas' && (
               <Suspense fallback={<div className="pruebas-loading">Cargando laboratorio PRUEBAS…</div>}>
@@ -597,7 +600,7 @@ function GestorProyectosApp() {
               </Suspense>
             )}
           </div>
-           {visitedModules.has('configuracion') && <div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
+           {visitedModules.has('configuracion') && <Suspense fallback={<div className="qm-module-loading">Cargando configuración…</div>}><div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
             <ConfiguracionView
               projects={projects}
               activeProjectId={activeProjectId}
@@ -606,7 +609,7 @@ function GestorProyectosApp() {
               onDeleteProject={handleDeleteProject}
               onActions={(h) => { binds.current['configuracion'] = h; }}
             />
-           </div>}
+           </div></Suspense>}
         </main>
       </div>
 
@@ -632,7 +635,7 @@ function App() {
   const location = useLocation();
 
   if (/\/hub\/gestor_proyectos\/proyecto\/gantt\/elemento\/[^/]+/.test(location.pathname)) {
-    return <GanttElementDetailView />;
+    return <Suspense fallback={<div className="qm-module-loading">Cargando detalle…</div>}><GanttElementDetailView /></Suspense>;
   }
 
   return <GestorProyectosApp />;
