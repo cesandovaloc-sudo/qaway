@@ -2965,6 +2965,8 @@ export default function CronogramaGanttView({
     setCalDay(27);
   };
   const scrollRef = useRef<HTMLDivElement>(null);
+  const prefetchSentinelRef = useRef<HTMLDivElement>(null);
+  const [renderedRowCount, setRenderedRowCount] = useState(120);
   const headScrollRef = useRef<HTMLDivElement>(null);
   const tableHeadRef = useRef<HTMLDivElement>(null);
   const colRef = useRef(colWidths);
@@ -2984,6 +2986,8 @@ export default function CronogramaGanttView({
 
   };
 
+  // Scroll progresivo: el siguiente bloque se prepara antes de que el usuario
+  // llegue al final, evitando pintar miles de filas en el primer render.
 
   const notify = (s: string) => {
     setToast(s);
@@ -4405,6 +4409,26 @@ export default function CronogramaGanttView({
 
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
   const shown = useMemo(() => engine.sortRows(shownBase), [engine.sortRows, shownBase]);
+
+  useEffect(() => {
+    setRenderedRowCount(120);
+  }, [projectId, perspective, engine.hasFilters]);
+
+  useEffect(() => {
+    const sentinel = prefetchSentinelRef.current;
+    const container = scrollRef.current;
+    if (!sentinel || !container) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setRenderedRowCount((count) => Math.min(count + 120, shown.length));
+        }
+      },
+      { root: container, rootMargin: '900px 0px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [shown.length, viewMode]);
 
   /* Control de Colapso / Despliegue 100% INDEPENDIENTE por vista (Gantt vs Lista) */
   const parentItems = useMemo(() => {
@@ -7900,7 +7924,7 @@ export default function CronogramaGanttView({
               }
             >
               {/* Filas */}
-              {shown.map((x, i) => (
+              {shown.slice(0, renderedRowCount).map((x, i) => (
                 <div
                   key={x.id}
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
@@ -7929,7 +7953,8 @@ export default function CronogramaGanttView({
                     <div className="month-grid" style={{ gridTemplateColumns: segCols }}>
                       {segments.map((s) => (
                         <span key={s.key} />
-                      ))}
+              ))}
+              <div ref={prefetchSentinelRef} aria-hidden="true" style={{ height: 1, width: '100%' }} />
                     </div>
                     {/* Sombra de Línea Base Desacoplada (Punto 2.A: coordenadas absolutas independientes) */}
                     {showBaseline && (() => {
