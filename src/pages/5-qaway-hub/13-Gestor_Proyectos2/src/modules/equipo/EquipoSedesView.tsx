@@ -30,6 +30,15 @@ export default function EquipoSedesView({
   const [modalTransferir, setModalTransferir] = useState<Integrante | null>(null);
   const [targetSedeId, setTargetSedeId] = useState<string>('');
 
+  // Sincronización reactiva con sedes de Supabase (evita IDs huérfanos o stale)
+  React.useEffect(() => {
+    if (!selectedSedeId && sedes.length > 0) {
+      setSelectedSedeId(sedes[0].id);
+    } else if (selectedSedeId && !sedes.some((s) => s.id === selectedSedeId) && sedes.length > 0) {
+      setSelectedSedeId(sedes[0].id);
+    }
+  }, [sedes, selectedSedeId]);
+
   const activeSede = sedes.find((s) => s.id === selectedSedeId) || sedes[0];
 
   const getIntegrantesDeSede = (sedeId: string) => {

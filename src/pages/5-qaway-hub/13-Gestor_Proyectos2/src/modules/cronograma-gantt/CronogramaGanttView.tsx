@@ -27,17 +27,9 @@ import EquipoDrawer from '../equipo/EquipoDrawer';
 import EquipoExpedienteModal from '../equipo/EquipoExpedienteModal';
 import EquipoNuevoModal from '../equipo/EquipoNuevoModal';
 import {
-  getStoredIntegrantes,
-  saveStoredIntegrantes,
-  getStoredSedes,
-  saveStoredSedes,
-  getStoredAreas,
-  getStoredAsignaciones,
-  saveStoredAsignaciones,
-} from '../equipo/mockData';
-import {
   fetchEquipoIntegrantesFromSupabase,
   fetchEquipoSedesFromSupabase,
+  updateCachedIntegrante,
 } from '../../services/gestorEquipoService';
 import {
   fetchCronogramaFromSupabase,
@@ -2160,35 +2152,12 @@ export default function CronogramaGanttView({
     'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
   >(() => (perspective === 'equipo' ? 'directorio' : 'gantt'));
 
-  // Estado dedicado para perspectiva equipo
-  const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>(() => {
-    try {
-      return getStoredIntegrantes();
-    } catch {
-      return [];
-    }
-  });
-  const [equipoSedes, setEquipoSedes] = useState<any[]>(() => {
-    try {
-      return getStoredSedes();
-    } catch {
-      return [];
-    }
-  });
-  const [equipoAreas] = useState<any[]>(() => {
-    try {
-      return getStoredAreas();
-    } catch {
-      return [];
-    }
-  });
-  const [equipoAsignaciones, setEquipoAsignaciones] = useState<any[]>(() => {
-    try {
-      return getStoredAsignaciones();
-    } catch {
-      return [];
-    }
-  });
+  // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
+  const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
+  const [equipoSedes, setEquipoSedes] = useState<any[]>([]);
+  const [equipoAreas] = useState<any[]>([]);
+  const [equipoAsignaciones, setEquipoAsignaciones] = useState<any[]>([]);
+  const [isEquipoLoading, setIsEquipoLoading] = useState<boolean>(true);
   const [equipoSelectedId, setEquipoSelectedId] = useState<string | null>(null);
   const [equipoExpediente, setEquipoExpediente] = useState<any | null>(null);
   const [isEquipoNuevoOpen, setIsEquipoNuevoOpen] = useState(false);
@@ -2198,25 +2167,27 @@ export default function CronogramaGanttView({
   const [equipoAreaFilter, setEquipoAreaFilter] = useState('todas');
   const [equipoPill, setEquipoPill] = useState('Todos');
 
-  // Carga reactiva de integrantes y sedes desde Supabase (cero hardcodeo local)
+  // Carga reactiva de integrantes y sedes directamente desde Supabase (cero fallbacks locales)
   useEffect(() => {
     if (perspective === 'equipo' && isActive) {
       let isMounted = true;
-      fetchEquipoIntegrantesFromSupabase().then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setEquipoIntegrantes(data);
-        }
-      }).catch((e) => {
-        console.warn('[CronogramaGanttView] Error cargando integrantes Supabase:', e);
-      });
+      setIsEquipoLoading(true);
 
-      fetchEquipoSedesFromSupabase().then((sedes) => {
-        if (isMounted && Array.isArray(sedes) && sedes.length > 0) {
-          setEquipoSedes(sedes);
-        }
-      }).catch((e) => {
-        console.warn('[CronogramaGanttView] Error cargando sedes Supabase:', e);
-      });
+      Promise.all([
+        fetchEquipoIntegrantesFromSupabase(),
+        fetchEquipoSedesFromSupabase(),
+      ])
+        .then(([integrantes, sedes]) => {
+          if (isMounted) {
+            setEquipoIntegrantes(Array.isArray(integrantes) ? integrantes : []);
+            setEquipoSedes(Array.isArray(sedes) ? sedes : []);
+            setIsEquipoLoading(false);
+          }
+        })
+        .catch((e) => {
+          console.warn('[CronogramaGanttView] Error cargando equipo Supabase:', e);
+          if (isMounted) setIsEquipoLoading(false);
+        });
 
       return () => {
         isMounted = false;
@@ -2245,14 +2216,13 @@ export default function CronogramaGanttView({
   const handleUpdateIntegrante = (updated: any) => {
     const next = equipoIntegrantes.map((i) => (i.id === updated.id ? updated : i));
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
+    updateCachedIntegrante(updated);
     notify(`Integrante "${updated.nombreCompleto}" actualizado`);
   };
 
   const handleCreateIntegrante = (nuevo: any) => {
     const next = [nuevo, ...equipoIntegrantes];
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
     notify(`Integrante "${nuevo.nombreCompleto}" registrado exitosamente`);
   };
 
@@ -2262,14 +2232,12 @@ export default function CronogramaGanttView({
       ids.includes(i.id) ? { ...i, sedeId: targetSedeId, sedeNombre: sedeObj?.nombre || i.sedeNombre } : i
     );
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
     notify(`${ids.length} integrantes reasignados a ${sedeObj?.nombre || 'nueva sede'}`);
   };
 
   const handleBulkUpdateEstadoOperativo = (ids: string[], targetEstado: any) => {
     const next = equipoIntegrantes.map((i) => (ids.includes(i.id) ? { ...i, estadoOperativo: targetEstado } : i));
     setEquipoIntegrantes(next);
-    saveStoredIntegrantes(next);
     notify(`${ids.length} integrantes actualizados a estado "${targetEstado}"`);
   };
 
@@ -2280,7 +2248,6 @@ export default function CronogramaGanttView({
   const handleUpdateSede = (updatedSede: any) => {
     const next = equipoSedes.map((s) => (s.id === updatedSede.id ? updatedSede : s));
     setEquipoSedes(next);
-    saveStoredSedes(next);
     notify(`Sede "${updatedSede.nombre}" actualizada`);
   };
 
@@ -2288,7 +2255,6 @@ export default function CronogramaGanttView({
     const nuevoIntegrante = equipoIntegrantes.find((i) => i.id === nuevoIntegranteId);
     const next = equipoAsignaciones.map((a) => (a.id === asignacionId ? { ...a, integranteId: nuevoIntegranteId } : a));
     setEquipoAsignaciones(next);
-    saveStoredAsignaciones(next);
     notify(`Tarea reasignada a ${nuevoIntegrante?.nombreCompleto || 'nuevo integrante'}`);
   };
   // Las tarjetas superiores se ocultan de entrada en pantallas pequeñas (<1024px),
@@ -7873,6 +7839,7 @@ export default function CronogramaGanttView({
             <>
               {(viewMode === 'directorio' || viewMode === 'lista') && (
                 <EquipoDirectorioView
+                  isLoading={isEquipoLoading}
                   integrantes={equipoIntegrantes}
                   selectedId={equipoSelectedId}
                   onSelectIntegrante={(id) => setEquipoSelectedId(id)}

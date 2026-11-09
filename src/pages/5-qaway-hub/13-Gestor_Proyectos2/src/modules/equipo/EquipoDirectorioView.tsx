@@ -31,6 +31,7 @@ import {
 
 interface EquipoDirectorioViewProps {
   hideToolbar?: boolean;
+  isLoading?: boolean;
   integrantes: Integrante[];
   selectedId: string | null;
   onSelectIntegrante: (id: string) => void;
@@ -429,7 +430,13 @@ export default function EquipoDirectorioView({
           </thead>
 
           <tbody>
-            {filteredIntegrantes.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={10} className="empty-row" style={{ padding: '36px 0', color: '#64748b' }}>
+                  Consultando padrón del equipo en Supabase...
+                </td>
+              </tr>
+            ) : filteredIntegrantes.length === 0 ? (
               <tr>
                 <td colSpan={10} className="empty-row">
                   No se encontraron integrantes registrados con los filtros seleccionados

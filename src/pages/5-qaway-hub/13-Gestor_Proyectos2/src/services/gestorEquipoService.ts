@@ -1,6 +1,5 @@
 import { supabase } from './supabaseClient';
 import type { Integrante, SedeFrente } from '../modules/equipo/types';
-import { INITIAL_INTEGRANTES, INITIAL_SEDES } from '../modules/equipo/mockData';
 
 // Cache en memoria para navegación instantánea sin descargas duplicadas
 let cachedIntegrantes: Integrante[] | null = null;
@@ -10,7 +9,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
 /**
  * Carga el directorio completo de integrantes desde Supabase (tabla gestor_unidades).
- * Cero hardcodeo local: los ~1,750 integrantes residen en Supabase.
+ * Cero hardcodeo local: la fuente única de verdad es Supabase.
  */
 export async function fetchEquipoIntegrantesFromSupabase(forceRefresh = false): Promise<Integrante[]> {
   const now = Date.now();
@@ -19,8 +18,8 @@ export async function fetchEquipoIntegrantesFromSupabase(forceRefresh = false): 
   }
 
   if (!supabase) {
-    console.warn('[gestorEquipoService] Supabase no disponible, usando fallback inicial');
-    return INITIAL_INTEGRANTES;
+    console.warn('[gestorEquipoService] Supabase no disponible');
+    return cachedIntegrantes || [];
   }
 
   try {
@@ -31,7 +30,7 @@ export async function fetchEquipoIntegrantesFromSupabase(forceRefresh = false): 
 
     if (error || !data || data.length === 0) {
       console.warn('[gestorEquipoService] No se pudieron obtener unidades de Supabase:', error);
-      return cachedIntegrantes || INITIAL_INTEGRANTES;
+      return cachedIntegrantes || [];
     }
 
     const allMembers: Integrante[] = [];
@@ -89,10 +88,10 @@ export async function fetchEquipoIntegrantesFromSupabase(forceRefresh = false): 
       return allMembers;
     }
 
-    return INITIAL_INTEGRANTES;
+    return [];
   } catch (err) {
     console.error('[gestorEquipoService] Error inesperado consultando Supabase:', err);
-    return cachedIntegrantes || INITIAL_INTEGRANTES;
+    return cachedIntegrantes || [];
   }
 }
 
@@ -102,7 +101,16 @@ export async function fetchEquipoIntegrantesFromSupabase(forceRefresh = false): 
 export async function fetchEquipoSedesFromSupabase(): Promise<SedeFrente[]> {
   if (cachedSedes && cachedSedes.length > 0) return cachedSedes;
   await fetchEquipoIntegrantesFromSupabase();
-  return cachedSedes || INITIAL_SEDES;
+  return cachedSedes || [];
+}
+
+/**
+ * Actualiza un integrante en la caché en memoria viva
+ */
+export function updateCachedIntegrante(updated: Integrante): void {
+  if (cachedIntegrantes) {
+    cachedIntegrantes = cachedIntegrantes.map((i) => (i.id === updated.id ? updated : i));
+  }
 }
 
 /**
