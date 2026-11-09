@@ -11,7 +11,6 @@ import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
-const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
 import SedesView from './modules/sedes/SedesView';
 const CronogramaView = lazy(() => import('./modules/cronograma/CronogramaView'));
 const CronogramaGanttView = lazy(() => import('./modules/cronograma-gantt/CronogramaGanttView'));
@@ -48,16 +47,16 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
     region: 'Nacional',
     subtext: 'Seguimiento de operaciones',
     budget: 'S/ 850,000',
-    sponsor: 'MINEDU - DIGERE',
+    sponsor: 'Comité Directivo',
     riskLevel: 'Medio',
-    metodologia: 'Híbrido: Hitos Clave + Tareas de Campo',
+    metodologia: '',
   },
 ];
 
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'tareas2', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
@@ -541,9 +540,6 @@ function GestorProyectosApp() {
            {visitedModules.has('tareas') && <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <TareasView activeProject={activeProject} onTasksCount={setTasksCount} onActions={(h) => { binds.current['tareas'] = h; }} />
            </div>}
-           {visitedModules.has('tareas2') && <Suspense fallback={<div className="qm-module-loading">Cargando Tareas 2…</div>}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-             <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />
-           </div></Suspense>}
            {visitedModules.has('cronograma') && <Suspense fallback={<div className="qm-module-loading">Cargando cronograma…</div>}><div
             className={
               active === 'cronograma' && cronogramaPerspective === 'maestro'

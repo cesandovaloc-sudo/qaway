@@ -774,7 +774,7 @@ const DEFAULT_COLS: Record<ColKey, number> = {
 
 const MIN_COLS: Record<ColKey, number> = {
   code: 60,
-  name: 200,
+  name: 260,
   kind: 80,
   parent: 90,
   start: 90,
@@ -2587,9 +2587,9 @@ export default function CronogramaGanttView({
   const [inlineDraftCreatedId, setInlineDraftCreatedId] = useState<string | null>(null);
   const depHoverTimeoutRef = useRef<any>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
-  const [showBaseline, setShowBaseline] = useState(true);
+  const [showBaseline, setShowBaseline] = useState(false);
   const [calShowBarLabels, setCalShowBarLabels] = useState(true);
-  const [calShowBaseline, setCalShowBaseline] = useState(true);
+  const [calShowBaseline, setCalShowBaseline] = useState(false);
   const [showCriticalPath, setShowCriticalPath] = useState(false);
   const [showBarAvatars, setShowBarAvatars] = useState(false);
   const [resizingTaskId, setResizingTaskId] = useState<string | null>(null);
@@ -4872,9 +4872,12 @@ export default function CronogramaGanttView({
       );
     }
     if (colKey === 'name') {
+      const colLabelText = getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE');
       return (
         <div key="name" className="name-head">
-          <span>{getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE')}</span>
+          <span className="name-head-label" title={colLabelText}>
+            {colLabelText}
+          </span>
           <div className="head-col-actions">
             {renderColumnHeaderMenu("name", "cols-trigger-btn")}
             <button
@@ -7477,11 +7480,12 @@ export default function CronogramaGanttView({
                 setRangeTo(DEFAULT_RANGE.to);
                 setTab('Todos');
                 setCustomRules([]);
+                setSelectedEdtCodes([]);
                 setAdvancedFiltersOpen(false);
                 setColFilterOpen(null);
-                setShowBaseline(true);
+                setShowBaseline(false);
                 setCalShowBarLabels(true);
-                setCalShowBaseline(true);
+                setCalShowBaseline(false);
                 setShowCriticalPath(false);
                 engine.clearAllFilters();
                 engine.clearSort();
