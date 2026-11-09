@@ -1340,6 +1340,8 @@ export default function CronogramaGanttView({
     name: string;
     region: string;
     subtext?: string | undefined;
+    descProyecto?: string | undefined;
+    descSedes?: string | undefined;
   } | undefined;
   perspective?: 'maestro' | 'territorial' | 'equipo';
   isActive?: boolean;
@@ -5801,10 +5803,10 @@ export default function CronogramaGanttView({
           }
           description={
             perspective === 'equipo'
-              ? 'Padrón operativo, organigrama, distribución de frentes territoriales y balance de capacidad de trabajo.'
+              ? 'Padrón operativo y frentes territoriales.'
               : perspective === 'territorial'
-              ? 'Seguimiento de entregables territoriales, sedes operativas, UGEL y DRE en tiempo real.'
-              : 'Línea de tiempo oficial, calibración de hitos clave, entregables y sincronización de plazos para los frentes operativos.'
+              ? (activeProject?.descSedes || 'Seguimiento territorial de DRE y UGEL en tiempo real.')
+              : (activeProject?.descProyecto || 'Línea de tiempo oficial y calibración de entregables.')
           }
           actions={
             <>

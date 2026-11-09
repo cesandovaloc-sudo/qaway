@@ -273,6 +273,13 @@ export default function Sidebar({
         <Users size={18} />
         <span>Reuniones</span>
       </button>
+      <button
+        className={active === 'reuniones2' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('reuniones2')}
+      >
+        <Users size={18} />
+        <span>Reuniones 2</span>
+      </button>
 
       <button
         className={active === 'reportes' ? 'side-link active' : 'side-link'}
@@ -280,6 +287,13 @@ export default function Sidebar({
       >
         <BarChart3 size={18} />
         <span>Reportes</span>
+      </button>
+      <button
+        className={active === 'reportes2' ? 'side-link active' : 'side-link'}
+        onClick={() => onModule('reportes2')}
+      >
+        <BarChart3 size={18} />
+        <span>Reportes 2</span>
       </button>
 
       {/* PRUEBAS queda oculto temporalmente para no cargar sus librerías experimentales. */}

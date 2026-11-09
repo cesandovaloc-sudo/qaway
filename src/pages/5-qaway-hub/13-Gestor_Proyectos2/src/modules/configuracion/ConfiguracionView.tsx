@@ -111,6 +111,8 @@ export default function ConfiguracionView({
   const [editCode, setEditCode] = useState(currentProj.code);
   const [editRegion, setEditRegion] = useState(currentProj.region || '');
   const [editSubtext, setEditSubtext] = useState(currentProj.subtext || '');
+  const [editDescProyecto, setEditDescProyecto] = useState(currentProj.descProyecto || '');
+  const [editDescSedes, setEditDescSedes] = useState(currentProj.descSedes || '');
   
   // Flujo estricto de eliminación en dos pasos (Doble candado de confirmación)
   const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
@@ -137,6 +139,8 @@ export default function ConfiguracionView({
     setEditCode(currentProj.code);
     setEditRegion(currentProj.region || '');
     setEditSubtext(currentProj.subtext || '');
+    setEditDescProyecto(currentProj.descProyecto || '');
+    setEditDescSedes(currentProj.descSedes || '');
   }, [currentProj]);
 
   const handleSaveCurrentProject = (e: React.FormEvent) => {
@@ -151,6 +155,8 @@ export default function ConfiguracionView({
       code: editCode.trim() || currentProj.code,
       region: editRegion.trim(),
       subtext: editSubtext.trim(),
+      descProyecto: editDescProyecto.trim(),
+      descSedes: editDescSedes.trim(),
     });
     notify(`Proyecto "${editName}" actualizado correctamente.`);
   };
@@ -542,6 +548,54 @@ export default function ConfiguracionView({
                       value={editRegion}
                       onChange={(e) => setEditRegion(e.target.value)}
                       placeholder="Ej. Zona Centro, Lima Norte, Frentes Regionales..."
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        color: '#0f172a',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-desc-proyecto">Subtítulo Cabecera · Módulo Proyecto</label>
+                    <p>Texto de una sola línea mostrado bajo el título en el cronograma maestro.</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-desc-proyecto"
+                      type="text"
+                      value={editDescProyecto}
+                      onChange={(e) => setEditDescProyecto(e.target.value)}
+                      placeholder="Línea de tiempo oficial y calibración de entregables."
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        color: '#0f172a',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="field-info">
+                    <label htmlFor="cfg-proj-desc-sedes">Subtítulo Cabecera · Módulo Sedes</label>
+                    <p>Texto de una sola línea mostrado bajo el título en la perspectiva territorial.</p>
+                  </div>
+                  <div className="field-control">
+                    <input
+                      id="cfg-proj-desc-sedes"
+                      type="text"
+                      value={editDescSedes}
+                      onChange={(e) => setEditDescSedes(e.target.value)}
+                      placeholder="Seguimiento territorial de DRE y UGEL en tiempo real."
                       style={{
                         width: '100%',
                         padding: '9px 12px',

@@ -1,5 +1,5 @@
 // Tipos compartidos del shell maestro.
-export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'tareas2' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
+export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'tareas2' | 'hitos' | 'reuniones' | 'reuniones2' | 'reportes' | 'reportes2' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
 
 // Ruta pública canónica del Gestor de Proyectos dentro del sistema (sin prefijo /hub)
 export const BASE_PATH = '/gestor_proyectos';
@@ -13,7 +13,9 @@ export const MODULE_SLUGS: Record<ModuleKey, string> = {
   tareas2: `${BASE_PATH}/tareas-2`,
   hitos: `${BASE_PATH}/componentes`,
   reuniones: `${BASE_PATH}/reuniones`,
+  reuniones2: `${BASE_PATH}/reuniones-2`,
   reportes: `${BASE_PATH}/reportes`,
+  reportes2: `${BASE_PATH}/reportes-2`,
   usuarios: `${BASE_PATH}/equipo`,
   actas: `${BASE_PATH}/actas`,
   pruebas: `${BASE_PATH}/pruebas`,
@@ -32,7 +34,9 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   [`${BASE_PATH}/componentes`]: 'hitos',
   [`${BASE_PATH}/hitos`]: 'hitos',
   [`${BASE_PATH}/reuniones`]: 'reuniones',
+  [`${BASE_PATH}/reuniones-2`]: 'reuniones2',
   [`${BASE_PATH}/reportes`]: 'reportes',
+  [`${BASE_PATH}/reportes-2`]: 'reportes2',
   [`${BASE_PATH}/equipo`]: 'usuarios',
   [`${BASE_PATH}/usuarios`]: 'usuarios',
   [`${BASE_PATH}/actas`]: 'actas',
@@ -51,7 +55,9 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/componentes': 'hitos',
   '/hitos': 'hitos',
   '/reuniones': 'reuniones',
+  '/reuniones-2': 'reuniones2',
   '/reportes': 'reportes',
+  '/reportes-2': 'reportes2',
   '/equipo': 'usuarios',
   '/usuarios': 'usuarios',
   '/actas': 'actas',
@@ -69,7 +75,9 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/hub/gestor_proyectos/componentes': 'hitos',
   '/hub/gestor_proyectos/hitos': 'hitos',
   '/hub/gestor_proyectos/reuniones': 'reuniones',
+  '/hub/gestor_proyectos/reuniones-2': 'reuniones2',
   '/hub/gestor_proyectos/reportes': 'reportes',
+  '/hub/gestor_proyectos/reportes-2': 'reportes2',
   '/hub/gestor_proyectos/equipo': 'usuarios',
   '/hub/gestor_proyectos/usuarios': 'usuarios',
   '/hub/gestor_proyectos/actas': 'actas',
@@ -81,7 +89,9 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/hub/gestor_proyectos/proyecto/tareas-2': 'tareas2',
   '/hub/gestor_proyectos/proyecto/componentes': 'hitos',
   '/hub/gestor_proyectos/proyecto/reuniones': 'reuniones',
+  '/hub/gestor_proyectos/proyecto/reuniones-2': 'reuniones2',
   '/hub/gestor_proyectos/proyecto/reportes': 'reportes',
+  '/hub/gestor_proyectos/proyecto/reportes-2': 'reportes2',
   '/hub/gestor_proyectos/proyecto/equipo': 'usuarios',
   '/hub/gestor_proyectos/proyecto/actas': 'actas',
 };

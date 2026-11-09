@@ -1,0 +1,48 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas 7" [ref=e43] [cursor=pointer]:
+      - generic [ref=e47]: Tareas
+      - emphasis [ref=e48]: "7"
+    - button "Tareas 2 7" [active] [ref=e49] [cursor=pointer]:
+      - generic [ref=e53]: Tareas 2
+      - emphasis [ref=e54]: "7"
+    - button "Reuniones" [ref=e55] [cursor=pointer]
+    - button "Reportes" [ref=e62] [cursor=pointer]
+    - button "Configuración" [ref=e68] [cursor=pointer]
+  - generic [ref=e73]:
+    - banner [ref=e74]:
+      - generic [ref=e75]:
+        - button "Colapsar panel lateral" [ref=e76] [cursor=pointer]
+        - generic [ref=e80]: Seguimiento de operaciones
+        - generic [ref=e83]: MINEDU · Dotación 2026
+        - generic [ref=e86]: Tareas 2
+      - generic [ref=e87]:
+        - button "Ayuda del sistema" [ref=e88] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e93] [cursor=pointer]:
+          - generic [ref=e97]: "3"
+        - generic "Opciones de perfil institucional" [ref=e98] [cursor=pointer]:
+          - generic [ref=e99]: CS
+          - generic [ref=e100]:
+            - generic [ref=e101]: Carlos Sandoval
+            - generic [ref=e102]: Coordinador General
+    - main [ref=e105]:
+      - status [ref=e1335]:
+        - paragraph [ref=e1340]: Cargando Tareas 2…
+  - button "Asistente Qaway Copilot" [ref=e1322] [cursor=pointer]:
+    - generic [ref=e1334]: IA

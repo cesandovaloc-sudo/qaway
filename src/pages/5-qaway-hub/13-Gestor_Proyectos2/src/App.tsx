@@ -12,6 +12,8 @@ import CreateProjectModal from './components/CreateProjectModal';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
+const Reuniones2View = lazy(() => import('./modules/reuniones-2/Reuniones2View'));
+const Reportes2View = lazy(() => import('./modules/reportes-2/Reportes2View'));
 import SedesView from './modules/sedes/SedesView';
 const CronogramaView = lazy(() => import('./modules/cronograma/CronogramaView'));
 const CronogramaGanttView = lazy(() => import('./modules/cronograma-gantt/CronogramaGanttView'));
@@ -61,7 +63,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'tareas2', 'reuniones', 'reportes', 'usuarios', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'tareas2', 'reuniones', 'reuniones2', 'reportes', 'reportes2', 'usuarios', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'cronograma';
   } catch {
@@ -553,6 +555,12 @@ function GestorProyectosApp() {
            </div>}
            {visitedModules.has('tareas2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Tareas 2…" />}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />
+           </div></Suspense>}
+           {visitedModules.has('reuniones2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Reuniones 2…" />}><div className={active === 'reuniones2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+             <Reuniones2View activeProject={activeProject} isActive={active === 'reuniones2'} />
+           </div></Suspense>}
+           {visitedModules.has('reportes2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Reportes 2…" />}><div className={active === 'reportes2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+             <Reportes2View activeProject={activeProject} isActive={active === 'reportes2'} />
            </div></Suspense>}
            {visitedModules.has('cronograma') && (
              <Suspense fallback={<ModuleLoadingFallback text="Cargando cronograma maestro…" />}>

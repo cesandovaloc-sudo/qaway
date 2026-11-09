@@ -1,0 +1,50 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas 7" [ref=e43] [cursor=pointer]:
+      - generic [ref=e47]: Tareas
+      - emphasis [ref=e48]: "7"
+    - button "Tareas 2 7" [ref=e49] [cursor=pointer]:
+      - generic [ref=e53]: Tareas 2
+      - emphasis [ref=e54]: "7"
+    - button "Reuniones" [ref=e55] [cursor=pointer]
+    - button "Reuniones 2" [ref=e62] [cursor=pointer]
+    - button "Reportes" [ref=e69] [cursor=pointer]
+    - button "Reportes 2" [active] [ref=e73] [cursor=pointer]
+    - button "Configuración" [ref=e79] [cursor=pointer]
+  - generic [ref=e84]:
+    - banner [ref=e85]:
+      - generic [ref=e86]:
+        - button "Colapsar panel lateral" [ref=e87] [cursor=pointer]
+        - generic [ref=e91]: Seguimiento de operaciones
+        - generic [ref=e94]: MINEDU · Dotación 2026
+        - generic [ref=e97]: Reportes 2
+      - generic [ref=e98]:
+        - button "Ayuda del sistema" [ref=e99] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e104] [cursor=pointer]:
+          - generic [ref=e108]: "3"
+        - generic "Opciones de perfil institucional" [ref=e109] [cursor=pointer]:
+          - generic [ref=e110]: CS
+          - generic [ref=e111]:
+            - generic [ref=e112]: Carlos Sandoval
+            - generic [ref=e113]: Coordinador General
+    - main [ref=e116]:
+      - status [ref=e2568]:
+        - paragraph [ref=e2573]: Cargando Reportes 2…
+  - button "Asistente Qaway Copilot" [ref=e1333] [cursor=pointer]:
+    - generic [ref=e1345]: IA
