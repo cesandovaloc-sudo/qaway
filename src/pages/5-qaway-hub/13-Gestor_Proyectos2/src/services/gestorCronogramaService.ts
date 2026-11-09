@@ -152,12 +152,15 @@ async function upsertRows(rows: Record<string, any>[]): Promise<{ message: strin
  */
 export async function fetchCronogramaFromSupabase(projectId: string): Promise<GanttItemData[] | null> {
   if (!supabase) return null;
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 12000);
   try {
     const { data, error } = await supabase
       .from('gestor_cronograma_items')
       .select('*')
       .eq('project_id', projectId)
-      .limit(15000);
+      .limit(15000)
+      .abortSignal(controller.signal);
 
     if (error) {
       console.warn('[Supabase Cronograma] Aviso al leer (se usará respaldo local):', error.message);
@@ -192,8 +195,12 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
 
     return [];
   } catch (err) {
-    console.warn('[Supabase Cronograma] Excepción de conexión:', err);
+    if ((err as { name?: string })?.name !== 'AbortError') {
+      console.warn('[Supabase Cronograma] Excepción de conexión:', err);
+    }
     return null;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 }
 
