@@ -1,19 +1,15 @@
 // Tipos compartidos del shell maestro.
-export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'tareas2' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
+export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
 
-// Ruta pública canónica del módulo dentro del Hub.
-// La aplicación se llama Gestor de Proyectos (plural) y sus vistas de proyecto
-// viven bajo /proyecto. Las rutas antiguas en singular se conservan únicamente
-// como compatibilidad en el router principal.
-export const BASE_PATH = '/hub/gestor_proyectos/proyecto';
+// Ruta pública canónica del Gestor de Proyectos dentro del sistema (sin prefijo /hub)
+export const BASE_PATH = '/gestor_proyectos';
 
-// Slugs canónicos para cada módulo en la URL
+// Slugs canónicos oficiales para cada módulo en la URL
 export const MODULE_SLUGS: Record<ModuleKey, string> = {
   resumen: `${BASE_PATH}/resumen`,
-  cronograma: `${BASE_PATH}/cronograma`,
+  cronograma: `${BASE_PATH}/proyecto`,
   sedes: `${BASE_PATH}/sedes`,
   tareas: `${BASE_PATH}/tareas`,
-  tareas2: `${BASE_PATH}/tareas-2`,
   hitos: `${BASE_PATH}/componentes`,
   reuniones: `${BASE_PATH}/reuniones`,
   reportes: `${BASE_PATH}/reportes`,
@@ -25,12 +21,12 @@ export const MODULE_SLUGS: Record<ModuleKey, string> = {
 
 // Mapeo inverso de slugs (y alias compatibles) hacia la clave de módulo interna
 export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
-  // Rutas canónicas con prefijo /hub/gestor_proyectos/proyecto
-  [`${BASE_PATH}/resumen`]: 'resumen',
+  // Rutas canónicas oficiales bajo /gestor_proyectos
+  [`${BASE_PATH}/proyecto`]: 'cronograma',
   [`${BASE_PATH}/cronograma`]: 'cronograma',
   [`${BASE_PATH}/sedes`]: 'sedes',
+  [`${BASE_PATH}/resumen`]: 'resumen',
   [`${BASE_PATH}/tareas`]: 'tareas',
-  [`${BASE_PATH}/tareas-2`]: 'tareas2',
   [`${BASE_PATH}/componentes`]: 'hitos',
   [`${BASE_PATH}/hitos`]: 'hitos',
   [`${BASE_PATH}/reuniones`]: 'reuniones',
@@ -38,17 +34,17 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   [`${BASE_PATH}/equipo`]: 'usuarios',
   [`${BASE_PATH}/usuarios`]: 'usuarios',
   [`${BASE_PATH}/actas`]: 'actas',
-  [`${BASE_PATH}/pruebas`]: 'pruebas',
   [`${BASE_PATH}/actas-acuerdos`]: 'actas',
   [`${BASE_PATH}/actas-y-acuerdos`]: 'actas',
   [`${BASE_PATH}/configuracion`]: 'configuracion',
+  [`${BASE_PATH}/pruebas`]: 'pruebas',
 
-  // Rutas cortas sin prefijo (compatibilidad interna).
-  '/resumen': 'resumen',
+  // Rutas directas sin prefijo (compatibilidad interna)
+  '/proyecto': 'cronograma',
   '/cronograma': 'cronograma',
   '/sedes': 'sedes',
+  '/resumen': 'resumen',
   '/tareas': 'tareas',
-  '/tareas-2': 'tareas2',
   '/componentes': 'hitos',
   '/hitos': 'hitos',
   '/reuniones': 'reuniones',
@@ -56,9 +52,33 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/equipo': 'usuarios',
   '/usuarios': 'usuarios',
   '/actas': 'actas',
-  '/pruebas': 'pruebas',
   '/actas-acuerdos': 'actas',
   '/configuracion': 'configuracion',
+  '/pruebas': 'pruebas',
+
+  // Compatibilidad hacia atrás con rutas legacy que contenían /hub
+  '/hub/gestor_proyectos/proyecto': 'cronograma',
+  '/hub/gestor_proyectos/cronograma': 'cronograma',
+  '/hub/gestor_proyectos/sedes': 'sedes',
+  '/hub/gestor_proyectos/resumen': 'resumen',
+  '/hub/gestor_proyectos/tareas': 'tareas',
+  '/hub/gestor_proyectos/componentes': 'hitos',
+  '/hub/gestor_proyectos/hitos': 'hitos',
+  '/hub/gestor_proyectos/reuniones': 'reuniones',
+  '/hub/gestor_proyectos/reportes': 'reportes',
+  '/hub/gestor_proyectos/equipo': 'usuarios',
+  '/hub/gestor_proyectos/usuarios': 'usuarios',
+  '/hub/gestor_proyectos/actas': 'actas',
+  '/hub/gestor_proyectos/configuracion': 'configuracion',
+  '/hub/gestor_proyectos/proyecto/cronograma': 'cronograma',
+  '/hub/gestor_proyectos/proyecto/sedes': 'sedes',
+  '/hub/gestor_proyectos/proyecto/resumen': 'resumen',
+  '/hub/gestor_proyectos/proyecto/tareas': 'tareas',
+  '/hub/gestor_proyectos/proyecto/componentes': 'hitos',
+  '/hub/gestor_proyectos/proyecto/reuniones': 'reuniones',
+  '/hub/gestor_proyectos/proyecto/reportes': 'reportes',
+  '/hub/gestor_proyectos/proyecto/equipo': 'usuarios',
+  '/hub/gestor_proyectos/proyecto/actas': 'actas',
 };
 
 // Conteo semilla del módulo Tareas (paridad con `initial` del módulo: 7 tareas).

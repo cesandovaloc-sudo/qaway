@@ -439,9 +439,9 @@ const extraSedesItems: Item[] = ALL_SEDES_EDT_ITEMS.filter((s) => !baseEdtIds.ha
   baselineEnd: s.end,
 }));
 
+// Cronograma Maestro de Proyecto: contiene exclusivamente los Componentes y Paquetes de Trabajo de entregables (cero sedes territoriales)
 export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
-  ...DRE_JUNIN_DOTACION_2027_EDT,
-  ...REGIONAL_NODE_SEEDS.map((s) => s.row),
+  ...DRE_JUNIN_DOTACION_2027_EDT.filter((r) => !r.id.startsWith('pt-1.6-') && r.parentId !== 'pt-1.6'),
 ].map((r) => {
   // Paquetes regionales (DRE fuera de Junín): responsable = Coordinador Regional de su región
   const regionalSeed = getRegionalSeed(r.id);
@@ -453,7 +453,7 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
     code: r.code,
     name: r.name,
     kind: r.kind,
-    edtType: r.edtType,
+    edtType: r.id === 'pt-1.6' ? 'PAQUETE_TRABAJO' : r.edtType,
     faseId: r.faseId,
     parentId: r.parentId,
     start: r.start,
@@ -504,17 +504,43 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
 }) as Item[])));
 
 export const TERRITORIAL_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
-  ...MASTER_INITIAL_ITEMS,
+  ...MASTER_INITIAL_ITEMS.map((it) => it.id === 'pt-1.6' ? { ...it, edtType: 'SUBCOMPONENTE' as const } : it),
+  ...DRE_JUNIN_DOTACION_2027_EDT.filter((r) => r.id.startsWith('pt-1.6-') || r.parentId === 'pt-1.6').map((r) => ({
+    id: r.id,
+    code: r.code,
+    name: r.name,
+    kind: r.kind,
+    edtType: r.edtType,
+    faseId: r.faseId,
+    parentId: r.parentId,
+    start: r.start,
+    end: r.end,
+    dependencies: OFFICIAL_WBS_DEPENDENCIES[r.id] || [],
+    progress: r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion' ? 100 : r.id === 'pt-1.6-dre-junin' || r.id === 'pt-1.6-huancayo' ? 75 : 50,
+    status: r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion' ? 'Cumple' : 'En proceso',
+    expanded: true,
+    description: r.entregableVerificable ? `Entregable oficial: ${r.entregableVerificable}` : '',
+    deliverable: r.entregableVerificable || '',
+    deliverables: [],
+    region: resolveItemRegion(r.id),
+    sede: r.name,
+    gestor: resolveDefaultGestor(r.code, r.name),
+    gestores: [resolveDefaultGestor(r.code, r.name)],
+    entidadResponsable: r.entidadResponsable,
+  } as Item)),
+  ...REGIONAL_NODE_SEEDS.map((s) => s.row as Item),
   ...extraSedesItems,
 ])));
 
 export const INITIAL_ITEMS: Item[] = TERRITORIAL_INITIAL_ITEMS;
 
 const extraSedesIdSet = new Set(extraSedesItems.map((s) => s.id));
-export function isTerritorialSedeOnlyItem(item: { id: string; name?: string | undefined; edtType?: string | undefined; sede?: string | undefined }): boolean {
+export function isTerritorialSedeOnlyItem(item: { id: string; name?: string | undefined; edtType?: string | undefined; sede?: string | undefined; parentId?: string | undefined }): boolean {
   if (extraSedesIdSet.has(item.id)) return true;
   if (item.id.includes('-unit-')) return true;
-  if (item.edtType === 'PAQUETE_TRABAJO' && (item.name?.startsWith('UGEL') || item.name?.startsWith('DRE ')) && !baseEdtIds.has(item.id)) {
+  if (item.id.startsWith('pt-1.6-') || item.parentId === 'pt-1.6') return true;
+  if (REGIONAL_NODE_SEEDS.some((s) => s.row.id === item.id)) return true;
+  if (item.edtType === 'PAQUETE_TRABAJO' && (item.name?.startsWith('UGEL') || item.name?.startsWith('DRE '))) {
     return true;
   }
   return false;
@@ -5817,7 +5843,7 @@ export default function CronogramaGanttView({
           perspective={perspective}
           title={
             perspective === 'equipo'
-              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2027'}`
+              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2026'}`
               : perspective === 'territorial'
               ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
               : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`

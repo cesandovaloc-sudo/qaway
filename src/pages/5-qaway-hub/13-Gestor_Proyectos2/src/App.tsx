@@ -43,7 +43,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 'p1',
     code: 'PRJ-MIN-2027-01',
-    name: 'MINEDU · Dotación 2027',
+    name: 'MINEDU · Dotación 2026',
     region: 'Nacional',
     subtext: 'Seguimiento de operaciones',
     budget: 'S/ 850,000',
@@ -119,14 +119,7 @@ function GestorProyectosApp() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const defaultProject = DEFAULT_PROJECTS[0];
-          const userProject = parsed.find((p: ProjectItem) => p.id !== 'p1');
-          if (userProject) {
-            const twoOnly = [userProject, defaultProject];
-            localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(twoOnly));
-            return twoOnly;
-          }
-          return [defaultProject];
+          return parsed;
         }
       }
     } catch {
