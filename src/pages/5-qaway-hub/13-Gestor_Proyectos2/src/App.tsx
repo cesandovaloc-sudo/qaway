@@ -14,7 +14,7 @@ import TareasView from './modules/tareas/TareasView';
 const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
 const Reuniones2View = lazy(() => import('./modules/reuniones-2/Reuniones2View'));
 const Reportes2View = lazy(() => import('./modules/reportes-2/Reportes2View'));
-import SedesView from './modules/sedes/SedesView';
+const SedesView = lazy(() => import('./modules/sedes/SedesView'));
 const CronogramaView = lazy(() => import('./modules/cronograma/CronogramaView'));
 const CronogramaGanttView = lazy(() => import('./modules/cronograma-gantt/CronogramaGanttView'));
 const GanttElementDetailView = lazy(() => import('./modules/cronograma-gantt/GanttElementDetailView'));
@@ -579,14 +579,14 @@ function GestorProyectosApp() {
                </div>
              </Suspense>
            )}
-           {visitedModules.has('sedes') && <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('sedes') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Sedes…" />}><div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <SedesView
               activeProjectId={activeProjectId}
               activeProject={activeProject}
               isActive={active === 'sedes'}
               onActions={(h) => { binds.current['sedes'] = h; }}
             />
-           </div>}
+           </div></Suspense>}
            {visitedModules.has('cronograma') && cronogramaPerspective === 'territorial' && (
              <Suspense fallback={<ModuleLoadingFallback text="Cargando vista territorial…" />}>
                <div

@@ -1484,7 +1484,7 @@ export default function CronogramaGanttView({
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
-    if (!isActive || perspective === 'territorial') return;
+    if (!isActive || perspective !== 'maestro') return;
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {

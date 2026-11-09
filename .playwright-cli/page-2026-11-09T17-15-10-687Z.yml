@@ -1,0 +1,278 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [active] [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas" [ref=e43] [cursor=pointer]
+    - button "Reuniones" [ref=e48] [cursor=pointer]
+    - button "Reuniones 2" [ref=e55] [cursor=pointer]
+    - button "Reportes" [ref=e62] [cursor=pointer]
+    - button "Reportes 2" [ref=e66] [cursor=pointer]
+    - button "Configuración" [ref=e72] [cursor=pointer]
+  - generic [ref=e77]:
+    - banner [ref=e78]:
+      - generic [ref=e79]:
+        - button "Colapsar panel lateral" [ref=e80] [cursor=pointer]
+        - generic [ref=e84]: Seguimiento de operaciones
+        - generic [ref=e87]: MINEDU · Dotación 2026
+        - generic [ref=e90]: Sedes
+      - generic [ref=e91]:
+        - button "Ayuda del sistema" [ref=e92] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e97] [cursor=pointer]:
+          - generic [ref=e101]: "3"
+        - generic "Opciones de perfil institucional" [ref=e102] [cursor=pointer]:
+          - generic [ref=e103]: CS
+          - generic [ref=e104]:
+            - generic [ref=e105]: Carlos Sandoval
+            - generic [ref=e106]: Coordinador General
+    - main [ref=e109]:
+      - generic [ref=e127]:
+        - generic [ref=e128]:
+          - generic [ref=e135]:
+            - heading "Sedes · MINEDU · Dotación 2026" [level=1] [ref=e136]
+            - paragraph [ref=e137]: Seguimiento territorial de DRE y UGEL en tiempo real.
+          - generic [ref=e138]:
+            - button "Mostrar tarjetas superiores" [ref=e139] [cursor=pointer]
+            - button "Plantilla Excel" [ref=e145] [cursor=pointer]
+            - button "Importar Cronograma" [ref=e150] [cursor=pointer]
+            - button "Agregar Componente" [ref=e158] [cursor=pointer]
+        - main [ref=e163]:
+          - navigation [ref=e164]:
+            - generic [ref=e165]:
+              - button "Todos (251)" [ref=e166] [cursor=pointer]:
+                - text: Todos
+                - generic [ref=e167]: (251)
+              - button "Todos los niveles (251)" [ref=e169] [cursor=pointer]
+              - button "Todos los estados" [ref=e175] [cursor=pointer]
+              - button "Todos los componentes" [ref=e181] [cursor=pointer]
+            - tablist "Modo de presentación" [ref=e186]:
+              - button "Gantt" [ref=e187] [cursor=pointer]
+              - button "Lista" [ref=e191] [cursor=pointer]
+              - button "Kanban" [ref=e194] [cursor=pointer]
+              - button "Calendario" [ref=e201] [cursor=pointer]
+              - button "Mapa" [ref=e205] [cursor=pointer]
+          - generic [ref=e210]:
+            - button "Todas las regiones" [ref=e212] [cursor=pointer]
+            - button "Todas las sedes" [ref=e218] [cursor=pointer]
+            - button "Condiciones de filtrado avanzado" [ref=e223] [cursor=pointer]
+            - button "Hoy" [ref=e226] [cursor=pointer]
+            - generic [ref=e227]:
+              - button "Desplazar hacia el pasado" [ref=e228] [cursor=pointer]
+              - button "Día" [ref=e231] [cursor=pointer]
+              - button "Semana" [ref=e232] [cursor=pointer]
+              - button "Mes" [ref=e233] [cursor=pointer]
+              - button "Trimestre" [ref=e234] [cursor=pointer]
+              - button "Desplazar hacia el futuro" [ref=e235] [cursor=pointer]
+            - generic [ref=e239]:
+              - button "Conmutar visualización de la línea base oficial" [ref=e240] [cursor=pointer]
+              - generic:
+                - button "Fijar línea base del cronograma (PMBOK)"
+                - button "Mostrar u ocultar porcentaje de avance en barras"
+                - button "Conmutar líneas de dependencia y prelación entre tareas"
+                - button "Conmutar avatares de responsables en barras de Gantt"
+            - button "Alternar modo pantalla completa" [ref=e246] [cursor=pointer]
+            - button "Ajustar anchos de columnas al contenido" [ref=e252] [cursor=pointer]
+            - button "Retroceder o deshacer último cambio" [disabled]
+            - button "Adelantar o rehacer último cambio" [disabled]
+            - button "Restablecer todos los filtros y limpiar vista" [ref=e258] [cursor=pointer]
+            - button "Configurar columnas visibles de la tabla" [ref=e263] [cursor=pointer]
+          - generic [ref=e266]:
+            - generic [ref=e267]:
+              - generic [ref=e269]:
+                - generic "COMPONENTE / SUBCOMPONENTE" [ref=e270]
+                - generic [ref=e271]:
+                  - button "Opciones de la columna COMPONENTE / SUBCOMPONENTE" [ref=e272] [cursor=pointer]
+                  - button "Expandir todos los componentes y subcomponentes" [ref=e275] [cursor=pointer]
+                  - button "Mostrar todas las columnas del cronograma" [ref=e279] [cursor=pointer]
+                - generic "Arrastra para redimensionar · Doble clic para auto-ajustar" [ref=e283]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "2026"
+                    - generic: "2027"
+                  - generic:
+                    - generic: Sep
+                    - generic: Oct
+                    - generic: Nov
+                    - generic: Dic
+                    - generic: Ene
+                    - generic: Feb
+                    - generic: Mar
+                    - generic: Abr
+            - generic [ref=e285]:
+              - generic [ref=e286] [cursor=pointer]:
+                - generic [ref=e288]:
+                  - button [ref=e289]
+                  - generic [ref=e292]:
+                    - generic [ref=e293]: ◆
+                    - text: "1."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e294]: PLANIFICACIÓN DE LA DISTRIBUCIÓN
+                  - generic [ref=e295]:
+                    - button "Crear nueva tarea rápida subordinada a \"PLANIFICACIÓN DE LA DISTRIBUCIÓN\"" [ref=e296]
+                    - button "Agregar subcomponente hijo para este componente (1.)" [ref=e298]
+                    - button "Expandir subcomponentes" [ref=e302]
+                - generic [ref=e306]:
+                  - generic "Componente Principal" [ref=e307]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e309]
+              - generic [ref=e310] [cursor=pointer]:
+                - generic [ref=e312]:
+                  - button [ref=e313]
+                  - generic [ref=e316]:
+                    - generic [ref=e317]: ◆
+                    - text: "2."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e318]: GESTIÓN DE ALMACENES
+                  - generic [ref=e319]:
+                    - button "Crear nueva tarea rápida subordinada a \"GESTIÓN DE ALMACENES\"" [ref=e320]
+                    - button "Agregar subcomponente hijo para este componente (2.)" [ref=e322]
+                    - button "Expandir subcomponentes" [ref=e326]
+                - generic [ref=e330]:
+                  - generic "Componente Principal" [ref=e331]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e333]
+              - generic [ref=e334] [cursor=pointer]:
+                - generic [ref=e336]:
+                  - button [ref=e337]
+                  - generic [ref=e340]:
+                    - generic [ref=e341]: ◆
+                    - text: "3."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e342]: RECEPCIÓN DE MATERIAL EDUCATIVO EN DRE / UGEL
+                  - generic [ref=e343]:
+                    - button "Crear nueva tarea rápida subordinada a \"RECEPCIÓN DE MATERIAL EDUCATIVO EN DRE / UGEL\"" [ref=e344]
+                    - button "Agregar subcomponente hijo para este componente (3.)" [ref=e346]
+                    - button "Expandir subcomponentes" [ref=e350]
+                - generic [ref=e354]:
+                  - generic "Componente Principal" [ref=e355]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e357]
+              - generic [ref=e358] [cursor=pointer]:
+                - generic [ref=e360]:
+                  - button [ref=e361]
+                  - generic [ref=e364]:
+                    - generic [ref=e365]: ◆
+                    - text: "4."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e366]: GESTIÓN DE CONTRATOS PARA EL SERVICIO DE DISTRIBUCIÓN DE UGEL A II.EE.
+                  - generic [ref=e367]:
+                    - button "Crear nueva tarea rápida subordinada a \"GESTIÓN DE CONTRATOS PARA EL SERVICIO DE DISTRIBUCIÓN DE UGEL A II.EE.\"" [ref=e368]
+                    - button "Agregar subcomponente hijo para este componente (4.)" [ref=e370]
+                    - button "Expandir subcomponentes" [ref=e374]
+                - generic [ref=e378]:
+                  - generic "Componente Principal" [ref=e379]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e381]
+              - generic [ref=e382] [cursor=pointer]:
+                - generic [ref=e384]:
+                  - button [ref=e385]
+                  - generic [ref=e388]:
+                    - generic [ref=e389]: ◆
+                    - text: "5."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e390]: REGISTRO DE PERSONAL DE APOYO PARA LA RECEPCIÓN EN II.EE. (PERÍODO VACACIONAL)
+                  - generic [ref=e391]:
+                    - button "Crear nueva tarea rápida subordinada a \"REGISTRO DE PERSONAL DE APOYO PARA LA RECEPCIÓN EN II.EE. (PERÍODO VACACIONAL)\"" [ref=e392]
+                    - button "Agregar subcomponente hijo para este componente (5.)" [ref=e394]
+                    - button "Expandir subcomponentes" [ref=e398]
+                - generic [ref=e402]:
+                  - generic "Componente Principal" [ref=e403]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e405]
+              - generic [ref=e406] [cursor=pointer]:
+                - generic [ref=e408]:
+                  - button [ref=e409]
+                  - generic [ref=e412]:
+                    - generic [ref=e413]: ◆
+                    - text: "6."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e414]: DESPACHO DE ME DE UGEL A LAS II.EE.
+                  - generic [ref=e415]:
+                    - button "Crear nueva tarea rápida subordinada a \"DESPACHO DE ME DE UGEL A LAS II.EE.\"" [ref=e416]
+                    - button "Agregar subcomponente hijo para este componente (6.)" [ref=e418]
+                    - button "Expandir subcomponentes" [ref=e422]
+                - generic [ref=e426]:
+                  - generic "Componente Principal" [ref=e427]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e429]
+              - generic [ref=e430] [cursor=pointer]:
+                - generic [ref=e432]:
+                  - button [ref=e433]
+                  - generic [ref=e436]:
+                    - generic [ref=e437]: ◆
+                    - text: "7."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e438]: RECEPCIÓN DE ME EN LA IE
+                  - generic [ref=e439]:
+                    - button "Crear nueva tarea rápida subordinada a \"RECEPCIÓN DE ME EN LA IE\"" [ref=e440]
+                    - button "Agregar subcomponente hijo para este componente (7.)" [ref=e442]
+                    - button "Expandir subcomponentes" [ref=e446]
+                - generic [ref=e450]:
+                  - generic "Componente Principal" [ref=e451]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e453]
+              - generic [ref=e454] [cursor=pointer]:
+                - generic [ref=e456]:
+                  - button [ref=e457]
+                  - generic [ref=e460]:
+                    - generic [ref=e461]: ◆
+                    - text: "8."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e462]: CONFORMIDAD DE ENTREGA DE ME A LAS II.EE. A CARGO DE LA UGEL
+                  - generic [ref=e463]:
+                    - button "Crear nueva tarea rápida subordinada a \"CONFORMIDAD DE ENTREGA DE ME A LAS II.EE. A CARGO DE LA UGEL\"" [ref=e464]
+                    - button "Agregar subcomponente hijo para este componente (8.)" [ref=e466]
+                    - button "Expandir subcomponentes" [ref=e470]
+                - generic [ref=e474]:
+                  - generic "Componente Principal" [ref=e475]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e477]
+              - generic [ref=e478] [cursor=pointer]:
+                - generic [ref=e480]:
+                  - button [ref=e481]
+                  - generic [ref=e484]:
+                    - generic [ref=e485]: ◆
+                    - text: "9."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e486]: ENTREGA DE ME A BENEFICIARIOS Y REGISTRO EN EL MÓDULO MATERIALES SIAGIE
+                  - generic [ref=e487]:
+                    - button "Crear nueva tarea rápida subordinada a \"ENTREGA DE ME A BENEFICIARIOS Y REGISTRO EN EL MÓDULO MATERIALES SIAGIE\"" [ref=e488]
+                    - button "Agregar subcomponente hijo para este componente (9.)" [ref=e490]
+                    - button "Expandir subcomponentes" [ref=e494]
+                - generic [ref=e498]:
+                  - generic "Componente Principal" [ref=e499]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e501]
+              - generic [ref=e502] [cursor=pointer]:
+                - generic [ref=e504]:
+                  - button [ref=e505]
+                  - generic [ref=e508]:
+                    - generic [ref=e509]: ◆
+                    - text: "10."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e510]: REDISTRIBUCIÓN Y DISTRIBUCIÓN LOCAL DE ME PARA ALCANZAR SUFICIENCIA
+                  - generic [ref=e511]:
+                    - button "Crear nueva tarea rápida subordinada a \"REDISTRIBUCIÓN Y DISTRIBUCIÓN LOCAL DE ME PARA ALCANZAR SUFICIENCIA\"" [ref=e512]
+                    - button "Agregar subcomponente hijo para este componente (10.)" [ref=e514]
+                    - button "Expandir subcomponentes" [ref=e518]
+                - generic [ref=e522]:
+                  - generic "Componente Principal" [ref=e523]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e525]
+              - generic [ref=e526] [cursor=pointer]:
+                - generic [ref=e528]:
+                  - button [ref=e529]
+                  - generic [ref=e532]:
+                    - generic [ref=e533]: ◆
+                    - text: "11."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e534]: BALANCE Y CIERRE DEL PROCESO DE DISTRIBUCIÓN Y REDISTRIBUCIÓN
+                  - generic [ref=e535]:
+                    - button "Crear nueva tarea rápida subordinada a \"BALANCE Y CIERRE DEL PROCESO DE DISTRIBUCIÓN Y REDISTRIBUCIÓN\"" [ref=e536]
+                    - button "Agregar subcomponente hijo para este componente (11.)" [ref=e538]
+                    - button "Expandir subcomponentes" [ref=e542]
+                - generic [ref=e546]:
+                  - generic "Componente Principal" [ref=e547]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e549]
+              - generic "Haz clic para agregar un nuevo componente principal al cronograma" [ref=e550] [cursor=pointer]: + Agregar nuevo componente principal
+              - generic: Hoy
+          - generic [ref=e556]:
+            - generic [ref=e557]: Mostrando 1–11 de 251 sedes territoriales
+            - generic [ref=e558]:
+              - button "Ver Detalle" [ref=e559] [cursor=pointer]
+              - button "Publicar Cronograma" [ref=e564] [cursor=pointer]
+  - button "Asistente Qaway Copilot" [ref=e116] [cursor=pointer]:
+    - generic [ref=e124]: IA

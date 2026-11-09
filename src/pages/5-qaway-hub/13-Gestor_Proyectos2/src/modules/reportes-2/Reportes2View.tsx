@@ -1342,6 +1342,7 @@ export default function Reportes2View({
     subtext?: string | undefined;
     descProyecto?: string | undefined;
     descSedes?: string | undefined;
+    moduleDescriptions?: Record<string, string> | undefined;
   } | undefined;
   perspective?: 'maestro' | 'territorial' | 'equipo';
   isActive?: boolean;
@@ -1483,7 +1484,7 @@ export default function Reportes2View({
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
-    if (!isActive || perspective === 'territorial') return;
+    if (!isActive || perspective !== 'maestro') return;
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
@@ -5803,10 +5804,10 @@ export default function Reportes2View({
           }
           description={
             perspective === 'equipo'
-              ? 'Padrón operativo y frentes territoriales.'
+              ? (activeProject?.moduleDescriptions?.['usuarios'] || 'Padrón operativo y frentes territoriales.')
               : perspective === 'territorial'
-              ? (activeProject?.descSedes || 'Seguimiento territorial de DRE y UGEL en tiempo real.')
-              : (activeProject?.descProyecto || 'Línea de tiempo oficial y calibración de entregables.')
+              ? (activeProject?.moduleDescriptions?.['sedes'] || activeProject?.descSedes || 'Seguimiento territorial de DRE y UGEL en tiempo real.')
+              : (activeProject?.moduleDescriptions?.['cronograma'] || activeProject?.descProyecto || 'Línea de tiempo oficial y calibración de entregables.')
           }
           actions={
             <>

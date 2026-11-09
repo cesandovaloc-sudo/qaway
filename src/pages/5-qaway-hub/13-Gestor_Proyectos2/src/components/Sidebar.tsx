@@ -2,6 +2,8 @@
 // Optimizado para altura 100vh sin scroll y con Configuración en la base.
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ModuleKey, UserRole } from '../types';
+import { listGestorUnits } from '../services/gestorOrganizacionService';
+import { fetchCronogramaFromSupabase } from '../services/gestorCronogramaService';
 import {
   BarChart3,
   Building2,
@@ -58,6 +60,28 @@ export default function Sidebar({
 }: SidebarProps) {
   const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
   const projectDropdownRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * P5 (auditoría 08): el viaje de red arranca en la INTENCIÓN del clic y no al montar el pane.
+   * Los servicios compartidos (dedup en vuelo) hacen que el montaje reutilice exactamente la
+   * misma promesa ya en vuelo: cero duplicación de red, cero bytes extra.
+   */
+  const unidadesPrefetch: ModuleKey[] = ['cronograma', 'sedes', 'usuarios', 'tareas2', 'reuniones2', 'reportes2'];
+  const cronogramaPrefetch: ModuleKey[] = ['cronograma', 'tareas2', 'reuniones2', 'reportes2'];
+
+  const handleModule = (k: ModuleKey) => {
+    try {
+      if (unidadesPrefetch.includes(k)) {
+        listGestorUnits().catch(() => { /* sin red: cada vista usa su respaldo local */ });
+      }
+      if (cronogramaPrefetch.includes(k)) {
+        fetchCronogramaFromSupabase(activeProjectId).catch(() => { /* respaldo local */ });
+      }
+    } catch {
+      /* prefetch best-effort, nunca bloquea la navegación */
+    }
+    onModule(k);
+  };
 
   const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
 
@@ -220,7 +244,7 @@ export default function Sidebar({
       <div className="side-label">PROYECTO</div>
       <button
         className={active === 'resumen' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('resumen')}
+        onClick={() => handleModule('resumen')}
       >
         <LayoutDashboard size={18} />
         <span>Resumen del proyecto</span>
@@ -228,7 +252,7 @@ export default function Sidebar({
 
       <button
         className={active === 'cronograma' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('cronograma')}
+        onClick={() => handleModule('cronograma')}
       >
         <CalendarDays size={18} />
         <span>Proyecto</span>
@@ -236,7 +260,7 @@ export default function Sidebar({
 
       <button
         className={active === 'sedes' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('sedes')}
+        onClick={() => handleModule('sedes')}
       >
         <Building2 size={18} />
         <span>Sedes</span>
@@ -244,14 +268,14 @@ export default function Sidebar({
 
       <button
         className={active === 'usuarios' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('usuarios')}
+        onClick={() => handleModule('usuarios')}
       >
         <UserRound size={18} />
         <span>Equipo</span>
       </button>
       <button
         className={active === 'tareas2' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('tareas2')}
+        onClick={() => handleModule('tareas2')}
       >
         <CheckSquare size={18} />
         <span>Tareas</span>
@@ -260,14 +284,14 @@ export default function Sidebar({
 
       <button
         className={active === 'reuniones' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('reuniones')}
+        onClick={() => handleModule('reuniones')}
       >
         <Users size={18} />
         <span>Reuniones</span>
       </button>
       <button
         className={active === 'reuniones2' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('reuniones2')}
+        onClick={() => handleModule('reuniones2')}
       >
         <Users size={18} />
         <span>Reuniones 2</span>
@@ -275,14 +299,14 @@ export default function Sidebar({
 
       <button
         className={active === 'reportes' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('reportes')}
+        onClick={() => handleModule('reportes')}
       >
         <BarChart3 size={18} />
         <span>Reportes</span>
       </button>
       <button
         className={active === 'reportes2' ? 'side-link active' : 'side-link'}
-        onClick={() => onModule('reportes2')}
+        onClick={() => handleModule('reportes2')}
       >
         <BarChart3 size={18} />
         <span>Reportes 2</span>
@@ -298,7 +322,7 @@ export default function Sidebar({
         <button
           className={active === 'configuracion' ? 'side-link active' : 'side-link'}
           style={{ width: '100%', marginBottom: 0 }}
-          onClick={() => onModule('configuracion')}
+          onClick={() => handleModule('configuracion')}
         >
           <Settings size={18} />
           <span>Configuración</span>

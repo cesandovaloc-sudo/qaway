@@ -212,11 +212,19 @@ export async function fetchCronogramaFromSupabase(projectId: string): Promise<Ga
         } catch {
           /* respaldo local no disponible */
         }
-        try {
-          localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(mapped));
-        } catch {
-          /* fallback */
-        }
+        // F3 (auditoría 08): persistencia de respaldo NO bloqueante — el stringify de ~6,000 filas
+        // se pospone al idle del hilo (antes detenía el render final con un paso síncrono).
+        const programarEscritura =
+          typeof (globalThis as { requestIdleCallback?: unknown }).requestIdleCallback === 'function'
+            ? (cb: () => void) => (globalThis as unknown as { requestIdleCallback: (cb: () => void, o?: { timeout: number }) => void }).requestIdleCallback(cb, { timeout: 2000 })
+            : (cb: () => void) => window.setTimeout(cb, 1500);
+        programarEscritura(() => {
+          try {
+            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(mapped));
+          } catch {
+            /* fallback */
+          }
+        });
         return mapped;
       }
 

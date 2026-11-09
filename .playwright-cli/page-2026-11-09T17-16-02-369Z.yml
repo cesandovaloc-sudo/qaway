@@ -1,0 +1,113 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas" [ref=e43] [cursor=pointer]
+    - button "Reuniones" [ref=e48] [cursor=pointer]
+    - button "Reuniones 2" [ref=e55] [cursor=pointer]
+    - button "Reportes" [ref=e62] [cursor=pointer]
+    - button "Reportes 2" [ref=e66] [cursor=pointer]
+    - button "Configuración" [ref=e72] [cursor=pointer]
+  - generic [ref=e77]:
+    - banner [ref=e78]:
+      - generic [ref=e79]:
+        - button "Colapsar panel lateral" [ref=e80] [cursor=pointer]
+        - generic [ref=e84]: Seguimiento de operaciones
+        - generic [ref=e87]: MINEDU · Dotación 2026
+        - generic [ref=e90]: Equipo del proyecto
+      - generic [ref=e91]:
+        - button "Ayuda del sistema" [ref=e92] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e97] [cursor=pointer]:
+          - generic [ref=e101]: "3"
+        - generic "Opciones de perfil institucional" [ref=e102] [cursor=pointer]:
+          - generic [ref=e103]: CS
+          - generic [ref=e104]:
+            - generic [ref=e105]: Carlos Sandoval
+            - generic [ref=e106]: Coordinador General
+    - main [ref=e109]:
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e121]:
+            - heading "Equipo del Proyecto · MINEDU · Dotación 2026" [level=1] [ref=e122]
+            - paragraph [ref=e123]: Padrón operativo y frentes territoriales.
+          - generic [ref=e124]:
+            - button "Mostrar tarjetas superiores" [ref=e125] [cursor=pointer]
+            - button "Plantilla Excel" [ref=e131] [cursor=pointer]
+            - button "Importar Cronograma" [ref=e136] [cursor=pointer]
+            - button "Agregar Componente" [ref=e144] [cursor=pointer]
+        - main [ref=e149]:
+          - navigation [ref=e150]:
+            - generic [ref=e151]:
+              - button "Todos (2772)" [ref=e152] [cursor=pointer]:
+                - text: Todos
+                - generic [ref=e153]: (2772)
+              - button "Todos los niveles (2772)" [ref=e155] [cursor=pointer]
+              - button "Todos los estados" [ref=e161] [cursor=pointer]
+              - button "Todos los componentes" [ref=e167] [cursor=pointer]
+            - tablist "Modo de presentación" [ref=e172]:
+              - button "Directorio" [ref=e173] [cursor=pointer]
+              - button "Organigrama" [ref=e180] [cursor=pointer]
+              - button "Frentes Territoriales" [ref=e186] [cursor=pointer]
+              - button "Carga de Trabajo" [ref=e192] [cursor=pointer]
+          - generic [ref=e196]:
+            - button "Todas las regiones" [ref=e198] [cursor=pointer]
+            - button "Todas las fases" [ref=e204] [cursor=pointer]:
+              - generic "Todas las fases" [ref=e206]
+            - button "Condiciones de filtrado avanzado" [ref=e209] [cursor=pointer]
+            - button "Hoy" [ref=e212] [cursor=pointer]
+            - generic [ref=e213]:
+              - button "Desplazar hacia el pasado" [ref=e214] [cursor=pointer]
+              - button "Día" [ref=e217] [cursor=pointer]
+              - button "Semana" [ref=e218] [cursor=pointer]
+              - button "Mes" [ref=e219] [cursor=pointer]
+              - button "Trimestre" [ref=e220] [cursor=pointer]
+              - button "Desplazar hacia el futuro" [ref=e221] [cursor=pointer]
+            - generic [ref=e225]:
+              - button "Conmutar visualización de la línea base oficial" [ref=e226] [cursor=pointer]
+              - generic:
+                - button "Fijar línea base del cronograma (PMBOK)"
+                - button "Mostrar u ocultar porcentaje de avance en barras"
+                - button "Conmutar líneas de dependencia y prelación entre tareas"
+                - button "Conmutar avatares de responsables en barras de Gantt"
+            - button "Alternar modo pantalla completa" [ref=e232] [cursor=pointer]
+            - button "Ajustar anchos de columnas al contenido" [ref=e238] [cursor=pointer]
+            - button "Retroceder o deshacer último cambio" [disabled]
+            - button "Adelantar o rehacer último cambio" [disabled]
+            - button "Restablecer todos los filtros y limpiar vista" [ref=e244] [cursor=pointer]
+            - button "Configurar columnas visibles de la tabla" [ref=e249] [cursor=pointer]
+          - table [ref=e254]:
+            - rowgroup [ref=e255]:
+              - row [ref=e256]:
+                - columnheader [ref=e257]:
+                  - checkbox "Seleccionar todos" [ref=e258] [cursor=pointer]
+                - columnheader "Integrante / Especialista" [ref=e259] [cursor=pointer]
+                - columnheader "Cargo Funcional" [ref=e264] [cursor=pointer]
+                - columnheader "Sede / Frente" [ref=e269] [cursor=pointer]
+                - columnheader "Estado Laboral" [ref=e274] [cursor=pointer]
+                - columnheader "Acceso de Cuenta" [ref=e279] [cursor=pointer]
+                - columnheader "Carga Operativa" [ref=e284]
+                - columnheader [ref=e285]
+            - rowgroup [ref=e286]:
+              - row [ref=e287]:
+                - cell "Consultando padrón del equipo en Supabase..." [ref=e288]
+          - generic [ref=e289]:
+            - generic [ref=e290]: Mostrando 0–0 de 0 integrantes registrados
+            - generic [ref=e291]:
+              - button "Ver Detalle" [ref=e292] [cursor=pointer]
+              - button "Publicar Cronograma" [ref=e297] [cursor=pointer]
+  - button "Asistente Qaway Copilot" [ref=e302] [cursor=pointer]:
+    - generic [ref=e314]: IA

@@ -1,0 +1,45 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas" [ref=e43] [cursor=pointer]
+    - button "Reuniones" [ref=e48] [cursor=pointer]
+    - button "Reuniones 2" [ref=e55] [cursor=pointer]
+    - button "Reportes" [ref=e62] [cursor=pointer]
+    - button "Reportes 2" [ref=e66] [cursor=pointer]
+    - button "Configuración" [ref=e72] [cursor=pointer]
+  - generic [ref=e77]:
+    - banner [ref=e78]:
+      - generic [ref=e79]:
+        - button "Colapsar panel lateral" [ref=e80] [cursor=pointer]
+        - generic [ref=e84]: Seguimiento de operaciones
+        - generic [ref=e87]: MINEDU · Dotación 2026
+        - generic [ref=e90]: Proyecto
+      - generic [ref=e91]:
+        - button "Ayuda del sistema" [ref=e92] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e97] [cursor=pointer]:
+          - generic [ref=e101]: "3"
+        - generic "Opciones de perfil institucional" [ref=e102] [cursor=pointer]:
+          - generic [ref=e103]: CS
+          - generic [ref=e104]:
+            - generic [ref=e105]: Carlos Sandoval
+            - generic [ref=e106]: Coordinador General
+    - main [ref=e109]:
+      - status [ref=e110]:
+        - paragraph [ref=e115]: Cargando cronograma maestro…
+  - button "Asistente Qaway Copilot" [ref=e116] [cursor=pointer]:
+    - generic [ref=e124]: IA

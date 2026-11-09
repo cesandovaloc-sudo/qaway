@@ -2,6 +2,7 @@ import { supabase } from './supabaseClient';
 
 export type GestorUnitType =
   | 'central'
+  | 'dre'
   | 'ugel'
   | 'obra'
   | 'jefatura'

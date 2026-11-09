@@ -13,6 +13,7 @@ import {
 } from './scheduleMetrics';
 import './gantt.css';
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
+import AsignarTareaDrawer from './AsignarTareaDrawer';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
@@ -163,6 +164,7 @@ import {
   ZoomIn,
   ZoomOut,
   Sigma,
+  Calendar,
   X
 } from 'lucide-react';
 
@@ -2561,6 +2563,12 @@ export default function Tareas2View({
   } | null>(null);
   const [inlineDraftCreatedId, setInlineDraftCreatedId] = useState<string | null>(null);
   const depHoverTimeoutRef = useRef<any>(null);
+
+  // Estados dedicados para Asignación de Tareas desde Baseline / Barra Gantt (Imagen 2 Oficial)
+  const [asignarTareaItem, setAsignarTareaItem] = useState<Item | null>(null);
+  const [isAsignarTareaOpen, setIsAsignarTareaOpen] = useState(false);
+  const [selectedBarActionItem, setSelectedBarActionItem] = useState<Item | null>(null);
+  const [selectedBarActionPos, setSelectedBarActionPos] = useState<{ x: number; y: number } | null>(null);
   const [showBarLabels, setShowBarLabels] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
   const [calShowBarLabels, setCalShowBarLabels] = useState(true);
@@ -8058,11 +8066,23 @@ export default function Tareas2View({
                         <div
                           className={`bar ${STATUS_CLASS[x.status]} ${x.kind === 'hito' ? 'major' : ''} ${
                             isRangeActive && x.end > rangeTo ? 'exceeds-range' : ''
-                          } ${resizingTaskId === x.id ? 'is-resizing' : ''}`}
+                          } ${resizingTaskId === x.id ? 'is-resizing' : ''} ${
+                            selectedBarActionItem?.id === x.id ? 'bar-active-selection' : ''
+                          }`}
                           style={{
                             left: `${getDatePixelOffset(x.start)}px`,
                             width: `${barWidthPx}px`,
                             animationDelay: `${Math.min(i * 35, 320)}ms`,
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedId(x.id);
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setSelectedBarActionItem(x);
+                            setSelectedBarActionPos({
+                              x: rect.left + rect.width / 2,
+                              y: rect.bottom + 6,
+                            });
                           }}
                           onDoubleClick={(e) => {
                             e.stopPropagation();
@@ -8504,6 +8524,114 @@ export default function Tareas2View({
             </div>
           )}
 
+          {/* Floating Action Popover al hacer clic en una Barra/Baseline (Imagen 2 Oficial) */}
+          {selectedBarActionItem && selectedBarActionPos && (
+            <div
+              className="gantt-bar-floating-actions"
+              style={{
+                position: 'fixed',
+                left: `${selectedBarActionPos.x}px`,
+                top: `${selectedBarActionPos.y}px`,
+                transform: 'translateX(-50%)',
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
+                borderRadius: '8px',
+                padding: '4px 6px',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: '#eff6ff',
+                  color: '#1d4ed8',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s ease',
+                }}
+                onClick={() => {
+                  setAsignarTareaItem(selectedBarActionItem);
+                  setIsAsignarTareaOpen(true);
+                  setSelectedBarActionItem(null);
+                }}
+              >
+                <UserPlus size={14} />
+                <span>Asignar tarea</span>
+              </button>
+              <button
+                type="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#475569',
+                  fontSize: '12.5px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  openEditorForItem(selectedBarActionItem);
+                  setSelectedBarActionItem(null);
+                }}
+              >
+                <Calendar size={13} />
+                <span>Crear tarea</span>
+              </button>
+              <button
+                type="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#475569',
+                  fontSize: '12.5px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  openEditorForItem(selectedBarActionItem);
+                  setSelectedBarActionItem(null);
+                }}
+              >
+                <Link2 size={13} />
+                <span>Vincular</span>
+              </button>
+              <button
+                type="button"
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                onClick={() => setSelectedBarActionItem(null)}
+              >
+                <MoreHorizontal size={14} />
+              </button>
+            </div>
+          )}
+
             </div>
           )}
 
@@ -8923,6 +9051,22 @@ export default function Tareas2View({
               window.dispatchEvent(new PopStateEvent('popstate'));
             }}
          />
+
+        {/* Panel Lateral Derecho: Asignar Tarea desde Baseline / Cronograma (Imagen 2 Oficial) */}
+        <AsignarTareaDrawer
+          isOpen={isAsignarTareaOpen}
+          onClose={() => setIsAsignarTareaOpen(false)}
+          item={asignarTareaItem}
+          allSubprocesos={items.filter((it) => it.kind === 'subproceso')}
+          onAssign={(newTask) => {
+            const updatedTasks = [newTask, ...rawTasks];
+            setRawTasks(updatedTasks);
+            try {
+              localStorage.setItem('qaway-tasks-v1', JSON.stringify(updatedTasks));
+            } catch {}
+            notify(`Tarea "${newTask.title}" asignada con éxito a ${newTask.owner}`);
+          }}
+        />
 
                 {/* Modal Institucional: Confirmar Eliminación de Hito / Subproceso */}
         {deleteConfirmModalOpen && activeItem && (

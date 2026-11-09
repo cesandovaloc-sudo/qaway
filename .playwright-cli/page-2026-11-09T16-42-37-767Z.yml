@@ -1,0 +1,643 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas" [ref=e43] [cursor=pointer]
+    - button "Reuniones" [ref=e48] [cursor=pointer]
+    - button "Reuniones 2" [ref=e55] [cursor=pointer]
+    - button "Reportes" [ref=e62] [cursor=pointer]
+    - button "Reportes 2" [ref=e66] [cursor=pointer]
+    - button "Configuración" [ref=e72] [cursor=pointer]
+  - generic [ref=e77]:
+    - banner [ref=e78]:
+      - generic [ref=e79]:
+        - button "Colapsar panel lateral" [ref=e80] [cursor=pointer]
+        - generic [ref=e84]: Seguimiento de operaciones
+        - generic [ref=e87]: MINEDU · Dotación 2026
+        - generic [ref=e90]: Proyecto
+      - generic [ref=e91]:
+        - button "Ayuda del sistema" [ref=e92] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e97] [cursor=pointer]:
+          - generic [ref=e101]: "3"
+        - generic "Opciones de perfil institucional" [ref=e102] [cursor=pointer]:
+          - generic [ref=e103]: CS
+          - generic [ref=e104]:
+            - generic [ref=e105]: Carlos Sandoval
+            - generic [ref=e106]: Coordinador General
+    - main [ref=e109]:
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e118]:
+            - heading "Cronograma Maestro · MINEDU · Dotación 2026" [level=1] [ref=e119]
+            - paragraph [ref=e120]: Línea de tiempo oficial y calibración de entregables.
+          - generic [ref=e121]:
+            - button "Mostrar tarjetas superiores" [ref=e122] [cursor=pointer]
+            - button "Plantilla Excel" [ref=e128] [cursor=pointer]
+            - button "Importar Cronograma" [ref=e133] [cursor=pointer]
+            - button "Agregar Componente" [ref=e141] [cursor=pointer]
+        - main [ref=e146]:
+          - navigation [ref=e147]:
+            - generic [ref=e148]:
+              - button "Todos (63)" [ref=e149] [cursor=pointer]:
+                - text: Todos
+                - generic [ref=e150]: (63)
+              - button "Todos los niveles (63)" [ref=e152] [cursor=pointer]
+              - button "Todos los estados" [ref=e158] [cursor=pointer]
+              - button "Todos los componentes" [ref=e164] [cursor=pointer]
+            - tablist "Modo de presentación" [ref=e169]:
+              - button "Gantt" [ref=e170] [cursor=pointer]
+              - button "Lista" [ref=e174] [cursor=pointer]
+              - button "Kanban" [ref=e177] [cursor=pointer]
+              - button "Calendario" [ref=e184] [cursor=pointer]
+              - button "Mapa" [ref=e188] [cursor=pointer]
+          - generic [ref=e193]:
+            - button "Todas las regiones" [ref=e195] [cursor=pointer]
+            - button "Todas las fases" [ref=e201] [cursor=pointer]:
+              - generic "Todas las fases" [ref=e203]
+            - button "Condiciones de filtrado avanzado" [ref=e206] [cursor=pointer]
+            - button "Hoy" [ref=e209] [cursor=pointer]
+            - generic [ref=e210]:
+              - button "Desplazar hacia el pasado" [ref=e211] [cursor=pointer]
+              - button "Día" [ref=e214] [cursor=pointer]
+              - button "Semana" [ref=e215] [cursor=pointer]
+              - button "Mes" [ref=e216] [cursor=pointer]
+              - button "Trimestre" [ref=e217] [cursor=pointer]
+              - button "Desplazar hacia el futuro" [ref=e218] [cursor=pointer]
+            - generic [ref=e222]:
+              - button "Conmutar visualización de la línea base oficial" [ref=e223] [cursor=pointer]
+              - generic:
+                - button "Fijar línea base del cronograma (PMBOK)"
+                - button "Mostrar u ocultar porcentaje de avance en barras"
+                - button "Conmutar líneas de dependencia y prelación entre tareas"
+                - button "Conmutar avatares de responsables en barras de Gantt"
+            - button "Alternar modo pantalla completa" [ref=e229] [cursor=pointer]
+            - button "Ajustar anchos de columnas al contenido" [ref=e235] [cursor=pointer]
+            - button "Retroceder o deshacer último cambio" [disabled]
+            - button "Adelantar o rehacer último cambio" [disabled]
+            - button "Restablecer todos los filtros y limpiar vista" [ref=e241] [cursor=pointer]
+            - button "Configurar columnas visibles de la tabla" [ref=e246] [cursor=pointer]
+          - generic [ref=e249]:
+            - generic [ref=e250]:
+              - generic [ref=e252]:
+                - generic "COMPONENTE / SUBCOMPONENTE" [ref=e253]
+                - generic [ref=e254]:
+                  - button "Opciones de la columna COMPONENTE / SUBCOMPONENTE" [ref=e255] [cursor=pointer]
+                  - button "Colapsar todos los componentes y subcomponentes" [ref=e258] [cursor=pointer]
+                  - button "Mostrar todas las columnas del cronograma" [ref=e262] [cursor=pointer]
+                - generic "Arrastra para redimensionar · Doble clic para auto-ajustar" [ref=e266]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "2026"
+                    - generic: "2027"
+                  - generic:
+                    - generic: Sep
+                    - generic: Oct
+                    - generic: Nov
+                    - generic: Dic
+                    - generic: Ene
+                    - generic: Feb
+                    - generic: Mar
+                    - generic: Abr
+            - generic [ref=e268]:
+              - generic [ref=e269] [cursor=pointer]:
+                - generic [ref=e271]:
+                  - button [ref=e272]
+                  - generic [ref=e275]:
+                    - generic [ref=e276]: ◆
+                    - text: "1."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e277]: PLANIFICACIÓN DE LA DISTRIBUCIÓN
+                  - generic [ref=e278]:
+                    - button "Crear nueva tarea rápida subordinada a \"PLANIFICACIÓN DE LA DISTRIBUCIÓN\"" [ref=e279]
+                    - button "Agregar subcomponente hijo para este componente (1.)" [ref=e281]
+                    - button "Colapsar subcomponentes" [ref=e285]
+                - generic [ref=e289]:
+                  - generic "Componente Principal" [ref=e290]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e292]
+              - generic [ref=e293] [cursor=pointer]:
+                - generic [ref=e295]:
+                  - button [ref=e296]
+                  - generic [ref=e300]: "1.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e301]: Conformación del Comité Regional para el Seguimiento y Monitoreo a la distribución del ME Distribución de Materiales DOT 2027
+                  - button "Crear nueva tarea rápida subordinada a \"Conformación del Comité Regional para el Seguimiento y Monitoreo a la distribución del ME Distribución de Materiales DOT 2027\"" [ref=e303]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e307]
+              - generic [ref=e308] [cursor=pointer]:
+                - generic [ref=e310]:
+                  - button [ref=e311]
+                  - generic [ref=e315]: "1.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e316]: Conformación del Comité de Distribución de ME en las UGEL
+                  - button "Crear nueva tarea rápida subordinada a \"Conformación del Comité de Distribución de ME en las UGEL\"" [ref=e318]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e322]
+              - generic [ref=e323] [cursor=pointer]:
+                - generic [ref=e325]:
+                  - button [ref=e326]
+                  - generic [ref=e330]: "1.3"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e331]: Elaboración y aprobación del Plan de Monitoreo Regional de la Distribución
+                  - button "Crear nueva tarea rápida subordinada a \"Elaboración y aprobación del Plan de Monitoreo Regional de la Distribución\"" [ref=e333]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e337]
+              - generic [ref=e338] [cursor=pointer]:
+                - generic [ref=e340]:
+                  - button [ref=e341]
+                  - generic [ref=e345]: "1.4"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e346]: Elaboración y aprobación del Plan de Distribución Local en las UGEL
+                  - button "Crear nueva tarea rápida subordinada a \"Elaboración y aprobación del Plan de Distribución Local en las UGEL\"" [ref=e348]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e352]
+              - generic [ref=e353] [cursor=pointer]:
+                - generic [ref=e355]:
+                  - button [ref=e356]
+                  - generic [ref=e360]: "1.5"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e361]: Solicitud de habilitación de códigos modulares en el MC SIGA a DIGERE (DEP / DISER)
+                  - button "Crear nueva tarea rápida subordinada a \"Solicitud de habilitación de códigos modulares en el MC SIGA a DIGERE (DEP / DISER)\"" [ref=e363]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e367]
+              - generic [ref=e368] [cursor=pointer]:
+                - generic [ref=e370]:
+                  - button [ref=e371]
+                  - generic [ref=e375]: "1.6"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e376]: Elaboración, revisión, validación y actualización del Cuadro de Distribución Local (CDL) en el MC SIGA
+                  - button "Crear nueva tarea rápida subordinada a \"Elaboración, revisión, validación y actualización del Cuadro de Distribución Local (CDL) en el MC SIGA\"" [ref=e378]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e382]
+              - generic [ref=e383] [cursor=pointer]:
+                - generic [ref=e385]:
+                  - button [ref=e386]
+                  - generic [ref=e389]: "1.7"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e390]: Comunicaciones y capacitación a II.EE. (Directores y COGECO)
+                  - button "Crear nueva tarea rápida subordinada a \"Comunicaciones y capacitación a II.EE. (Directores y COGECO)\"" [ref=e392]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e396]
+              - generic [ref=e397] [cursor=pointer]:
+                - generic [ref=e399]:
+                  - button [ref=e400]
+                  - generic [ref=e404]: 1.7a
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e405]: Comunicación a las II.EE. (Directores y COGECO) sobre pautas y distribución del ME Distribución de Materiales DOT 2027
+                  - button "Crear nueva tarea rápida subordinada a \"Comunicación a las II.EE. (Directores y COGECO) sobre pautas y distribución del ME Distribución de Materiales DOT 2027\"" [ref=e407]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e411]
+              - generic [ref=e412] [cursor=pointer]:
+                - generic [ref=e414]:
+                  - button [ref=e415]
+                  - generic [ref=e419]: 1.7b
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e420]: Capacitación a directores e integrantes de COGECO sobre pautas de recepción, verificación y resguardo
+                  - button "Crear nueva tarea rápida subordinada a \"Capacitación a directores e integrantes de COGECO sobre pautas de recepción, verificación y resguardo\"" [ref=e422]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e426]
+              - generic [ref=e427] [cursor=pointer]:
+                - generic [ref=e429]:
+                  - button [ref=e430]
+                  - generic [ref=e433]:
+                    - generic [ref=e434]: ◆
+                    - text: "2."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e435]: GESTIÓN DE ALMACENES
+                  - generic [ref=e436]:
+                    - button "Crear nueva tarea rápida subordinada a \"GESTIÓN DE ALMACENES\"" [ref=e437]
+                    - button "Agregar subcomponente hijo para este componente (2.)" [ref=e439]
+                    - button "Colapsar subcomponentes" [ref=e443]
+                - generic [ref=e447]:
+                  - generic "Componente Principal" [ref=e448]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e450]
+              - generic [ref=e451] [cursor=pointer]:
+                - generic [ref=e453]:
+                  - button [ref=e454]
+                  - generic [ref=e458]: "2.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e459]: Habilitación y acondicionamiento de almacenes o centros de recepción (espacios y seguridad)
+                  - button "Crear nueva tarea rápida subordinada a \"Habilitación y acondicionamiento de almacenes o centros de recepción (espacios y seguridad)\"" [ref=e461]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e465]
+              - generic [ref=e466] [cursor=pointer]:
+                - generic [ref=e468]:
+                  - button [ref=e469]
+                  - generic [ref=e473]: "2.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e474]: Comunicación oficial del directorio de almacenes y personal autorizado a MINEDU-DIGERE
+                  - button "Crear nueva tarea rápida subordinada a \"Comunicación oficial del directorio de almacenes y personal autorizado a MINEDU-DIGERE\"" [ref=e476]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e480]
+              - generic [ref=e481] [cursor=pointer]:
+                - generic [ref=e483]:
+                  - button [ref=e484]
+                  - generic [ref=e487]:
+                    - generic [ref=e488]: ◆
+                    - text: "3."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e489]: RECEPCIÓN DE MATERIAL EDUCATIVO EN DRE / UGEL
+                  - generic [ref=e490]:
+                    - button "Crear nueva tarea rápida subordinada a \"RECEPCIÓN DE MATERIAL EDUCATIVO EN DRE / UGEL\"" [ref=e491]
+                    - button "Agregar subcomponente hijo para este componente (3.)" [ref=e493]
+                    - button "Colapsar subcomponentes" [ref=e497]
+                - generic [ref=e501]:
+                  - generic "Componente Principal" [ref=e502]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e504]
+              - generic [ref=e505] [cursor=pointer]:
+                - generic [ref=e507]:
+                  - button [ref=e508]
+                  - generic [ref=e512]: "3.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e513]: Carga de archivos RAR en el MC SIGA para la generación técnica de NEA
+                  - button "Crear nueva tarea rápida subordinada a \"Carga de archivos RAR en el MC SIGA para la generación técnica de NEA\"" [ref=e515]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e519]
+              - generic [ref=e520] [cursor=pointer]:
+                - generic [ref=e522]:
+                  - button [ref=e523]
+                  - generic [ref=e527]: "3.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e528]: Verificación física de llegada del ME a almacén UGEL y suscripción de PECOSA / Guías / Actas
+                  - button "Crear nueva tarea rápida subordinada a \"Verificación física de llegada del ME a almacén UGEL y suscripción de PECOSA / Guías / Actas\"" [ref=e530]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e534]
+              - generic [ref=e535] [cursor=pointer]:
+                - generic [ref=e537]:
+                  - button [ref=e538]
+                  - generic [ref=e542]: "3.3"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e543]: Registro inmediato de las Notas de Entrada de Almacén (NEA) en el MC SIGA
+                  - button "Crear nueva tarea rápida subordinada a \"Registro inmediato de las Notas de Entrada de Almacén (NEA) en el MC SIGA\"" [ref=e545]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e549]
+              - generic [ref=e550] [cursor=pointer]:
+                - generic [ref=e552]:
+                  - button [ref=e553]
+                  - generic [ref=e556]:
+                    - generic [ref=e557]: ◆
+                    - text: "4."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e558]: GESTIÓN DE CONTRATOS PARA EL SERVICIO DE DISTRIBUCIÓN DE UGEL A II.EE.
+                  - generic [ref=e559]:
+                    - button "Crear nueva tarea rápida subordinada a \"GESTIÓN DE CONTRATOS PARA EL SERVICIO DE DISTRIBUCIÓN DE UGEL A II.EE.\"" [ref=e560]
+                    - button "Agregar subcomponente hijo para este componente (4.)" [ref=e562]
+                    - button "Colapsar subcomponentes" [ref=e566]
+                - generic [ref=e570]:
+                  - generic "Componente Principal" [ref=e571]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e573]
+              - generic [ref=e574] [cursor=pointer]:
+                - generic [ref=e576]:
+                  - button [ref=e577]
+                  - generic [ref=e580]: "4.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e581]: Actuaciones preparatorias según tipo de procedimiento de contratación
+                  - button "Crear nueva tarea rápida subordinada a \"Actuaciones preparatorias según tipo de procedimiento de contratación\"" [ref=e583]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e587]
+              - generic [ref=e588] [cursor=pointer]:
+                - generic [ref=e590]:
+                  - button [ref=e591]
+                  - generic [ref=e595]: 4.1a
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e596]: "Actuaciones preparatorias (TDR, indagación, disponibilidad, bases): UE con Procesos de Selección"
+                  - 'button "Crear nueva tarea rápida subordinada a \"Actuaciones preparatorias (TDR, indagación, disponibilidad, bases): UE con Procesos de Selección\"" [ref=e598]'
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e602]
+              - generic [ref=e603] [cursor=pointer]:
+                - generic [ref=e605]:
+                  - button [ref=e606]
+                  - generic [ref=e610]: 4.1b
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e611]: "Actuaciones preparatorias (TDR, cotizaciones, certificación): UE con Procesos Menores a 8 UIT"
+                  - 'button "Crear nueva tarea rápida subordinada a \"Actuaciones preparatorias (TDR, cotizaciones, certificación): UE con Procesos Menores a 8 UIT\"" [ref=e613]'
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e617]
+              - generic [ref=e618] [cursor=pointer]:
+                - generic [ref=e620]:
+                  - button [ref=e621]
+                  - generic [ref=e625]: "4.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e626]: Procedimiento de selección / contratación del servicio de transporte y distribución
+                  - button "Crear nueva tarea rápida subordinada a \"Procedimiento de selección / contratación del servicio de transporte y distribución\"" [ref=e628]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e632]
+              - generic [ref=e633] [cursor=pointer]:
+                - generic [ref=e635]:
+                  - button [ref=e636]
+                  - generic [ref=e640]: "4.3"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e641]: Registro oportuno de contratos del servicio de distribución en el MC SIGA
+                  - button "Crear nueva tarea rápida subordinada a \"Registro oportuno de contratos del servicio de distribución en el MC SIGA\"" [ref=e643]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e647]
+              - generic [ref=e648] [cursor=pointer]:
+                - generic [ref=e650]:
+                  - button [ref=e651]
+                  - generic [ref=e655]: "4.4"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e656]: Ejecución contractual, supervisión de rutas y cumplimiento de prestaciones
+                  - button "Crear nueva tarea rápida subordinada a \"Ejecución contractual, supervisión de rutas y cumplimiento de prestaciones\"" [ref=e658]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e662]
+              - generic [ref=e663] [cursor=pointer]:
+                - generic [ref=e665]:
+                  - button [ref=e666]
+                  - generic [ref=e669]:
+                    - generic [ref=e670]: ◆
+                    - text: "5."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e671]: REGISTRO DE PERSONAL DE APOYO PARA LA RECEPCIÓN EN II.EE. (PERÍODO VACACIONAL)
+                  - generic [ref=e672]:
+                    - button "Crear nueva tarea rápida subordinada a \"REGISTRO DE PERSONAL DE APOYO PARA LA RECEPCIÓN EN II.EE. (PERÍODO VACACIONAL)\"" [ref=e673]
+                    - button "Agregar subcomponente hijo para este componente (5.)" [ref=e675]
+                    - button "Colapsar subcomponentes" [ref=e679]
+                - generic [ref=e683]:
+                  - generic "Componente Principal" [ref=e684]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e686]
+              - generic [ref=e687] [cursor=pointer]:
+                - generic [ref=e689]:
+                  - button [ref=e690]
+                  - generic [ref=e693]: "5.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e694]: Solicitud y remisión del padrón de personal de apoyo en II.EE.
+                  - button "Crear nueva tarea rápida subordinada a \"Solicitud y remisión del padrón de personal de apoyo en II.EE.\"" [ref=e696]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e700]
+              - generic [ref=e701] [cursor=pointer]:
+                - generic [ref=e703]:
+                  - button [ref=e704]
+                  - generic [ref=e708]: 5.1a
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e709]: Envío de oficio de UGEL solicitando el listado de personal de apoyo a COGECO en II.EE.
+                  - button "Crear nueva tarea rápida subordinada a \"Envío de oficio de UGEL solicitando el listado de personal de apoyo a COGECO en II.EE.\"" [ref=e711]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e715]
+              - generic [ref=e716] [cursor=pointer]:
+                - generic [ref=e718]:
+                  - button [ref=e719]
+                  - generic [ref=e723]: 5.1b
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e724]: Remisión de respuesta con el listado de personal de apoyo por parte de las II.EE. a la UGEL
+                  - button "Crear nueva tarea rápida subordinada a \"Remisión de respuesta con el listado de personal de apoyo por parte de las II.EE. a la UGEL\"" [ref=e726]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e730]
+              - generic [ref=e731] [cursor=pointer]:
+                - generic [ref=e733]:
+                  - button [ref=e734]
+                  - generic [ref=e738]: "5.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e739]: Emisión de Resolución Directoral de reconocimiento al personal de apoyo para el periodo vacacional
+                  - button "Crear nueva tarea rápida subordinada a \"Emisión de Resolución Directoral de reconocimiento al personal de apoyo para el periodo vacacional\"" [ref=e741]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e745]
+              - generic [ref=e746] [cursor=pointer]:
+                - generic [ref=e748]:
+                  - button [ref=e749]
+                  - generic [ref=e753]: "5.3"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e754]: Capacitación en la IE al personal de apoyo sobre pautas de verificación y recepción (1.7)
+                  - button "Crear nueva tarea rápida subordinada a \"Capacitación en la IE al personal de apoyo sobre pautas de verificación y recepción (1.7)\"" [ref=e756]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e760]
+              - generic [ref=e761] [cursor=pointer]:
+                - generic [ref=e763]:
+                  - button [ref=e764]
+                  - generic [ref=e768]: "5.4"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e769]: Registro en el MC SIGA del personal de apoyo para la recepción del ME periodo vacacional 2027
+                  - button "Crear nueva tarea rápida subordinada a \"Registro en el MC SIGA del personal de apoyo para la recepción del ME periodo vacacional 2027\"" [ref=e771]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e775]
+              - generic [ref=e776] [cursor=pointer]:
+                - generic [ref=e778]:
+                  - button [ref=e779]
+                  - generic [ref=e782]:
+                    - generic [ref=e783]: ◆
+                    - text: "6."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e784]: DESPACHO DE ME DE UGEL A LAS II.EE.
+                  - generic [ref=e785]:
+                    - button "Crear nueva tarea rápida subordinada a \"DESPACHO DE ME DE UGEL A LAS II.EE.\"" [ref=e786]
+                    - button "Agregar subcomponente hijo para este componente (6.)" [ref=e788]
+                    - button "Colapsar subcomponentes" [ref=e792]
+                - generic [ref=e796]:
+                  - generic "Componente Principal" [ref=e797]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e799]
+              - generic [ref=e800] [cursor=pointer]:
+                - generic [ref=e802]:
+                  - button [ref=e803]
+                  - generic [ref=e807]: "6.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e808]: Atención a nuevos servicios educativos (CM creados no previstos en CDL inicial)
+                  - button "Crear nueva tarea rápida subordinada a \"Atención a nuevos servicios educativos (CM creados no previstos en CDL inicial)\"" [ref=e810]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e814]
+              - generic [ref=e815] [cursor=pointer]:
+                - generic [ref=e817]:
+                  - button [ref=e818]
+                  - generic [ref=e822]: "6.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e823]: Generación y emisión de PECOSA mediante el MC SIGA
+                  - button "Crear nueva tarea rápida subordinada a \"Generación y emisión de PECOSA mediante el MC SIGA\"" [ref=e825]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e829]
+              - generic [ref=e830] [cursor=pointer]:
+                - generic [ref=e832]:
+                  - button [ref=e833]
+                  - generic [ref=e837]: "6.3"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e838]: Modulado, embalaje y rotulado del ME según criterios y PECOSA
+                  - button "Crear nueva tarea rápida subordinada a \"Modulado, embalaje y rotulado del ME según criterios y PECOSA\"" [ref=e840]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e844]
+              - generic [ref=e845] [cursor=pointer]:
+                - generic [ref=e847]:
+                  - button [ref=e848]
+                  - generic [ref=e852]: "6.4"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e853]: Orientaciones e inducción al proveedor del servicio de transporte sobre protocolos de entrega (1.7)
+                  - button "Crear nueva tarea rápida subordinada a \"Orientaciones e inducción al proveedor del servicio de transporte sobre protocolos de entrega (1.7)\"" [ref=e855]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e859]
+              - generic [ref=e860] [cursor=pointer]:
+                - generic [ref=e862]:
+                  - button [ref=e863]
+                  - generic [ref=e867]: "6.5"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e868]: Comunicación y difusión a las II.EE. y comunidad educativa sobre el cronograma de despacho
+                  - button "Crear nueva tarea rápida subordinada a \"Comunicación y difusión a las II.EE. y comunidad educativa sobre el cronograma de despacho\"" [ref=e870]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e874]
+              - generic [ref=e875] [cursor=pointer]:
+                - generic [ref=e877]:
+                  - button [ref=e878]
+                  - generic [ref=e881]:
+                    - generic [ref=e882]: ◆
+                    - text: "7."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e883]: RECEPCIÓN DE ME EN LA IE
+                  - generic [ref=e884]:
+                    - button "Crear nueva tarea rápida subordinada a \"RECEPCIÓN DE ME EN LA IE\"" [ref=e885]
+                    - button "Agregar subcomponente hijo para este componente (7.)" [ref=e887]
+                    - button "Colapsar subcomponentes" [ref=e891]
+                - generic [ref=e895]:
+                  - generic "Componente Principal" [ref=e896]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e898]
+              - generic [ref=e899] [cursor=pointer]:
+                - generic [ref=e901]:
+                  - button [ref=e902]
+                  - generic [ref=e906]: "7.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e907]: Recepción física, verificación y suscripción de PECOSA en la IE
+                  - button "Crear nueva tarea rápida subordinada a \"Recepción física, verificación y suscripción de PECOSA en la IE\"" [ref=e909]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e913]
+              - generic [ref=e914] [cursor=pointer]:
+                - generic [ref=e916]:
+                  - button [ref=e917]
+                  - generic [ref=e921]: "7.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e922]: Tratamiento, formulación y reporte de Actas de Incidencia de recepción
+                  - button "Crear nueva tarea rápida subordinada a \"Tratamiento, formulación y reporte de Actas de Incidencia de recepción\"" [ref=e924]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e928]
+              - generic [ref=e929] [cursor=pointer]:
+                - generic [ref=e931]:
+                  - button [ref=e932]
+                  - generic [ref=e935]:
+                    - generic [ref=e936]: ◆
+                    - text: "8."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e937]: CONFORMIDAD DE ENTREGA DE ME A LAS II.EE. A CARGO DE LA UGEL
+                  - generic [ref=e938]:
+                    - button "Crear nueva tarea rápida subordinada a \"CONFORMIDAD DE ENTREGA DE ME A LAS II.EE. A CARGO DE LA UGEL\"" [ref=e939]
+                    - button "Agregar subcomponente hijo para este componente (8.)" [ref=e941]
+                    - button "Colapsar subcomponentes" [ref=e945]
+                - generic [ref=e949]:
+                  - generic "Componente Principal" [ref=e950]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e952]
+              - generic [ref=e953] [cursor=pointer]:
+                - generic [ref=e955]:
+                  - button [ref=e956]
+                  - generic [ref=e960]: "8.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e961]: Verificación y control de firmas de PECOSAs de retorno para otorgar conformidad del servicio
+                  - button "Crear nueva tarea rápida subordinada a \"Verificación y control de firmas de PECOSAs de retorno para otorgar conformidad del servicio\"" [ref=e963]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e967]
+              - generic [ref=e968] [cursor=pointer]:
+                - generic [ref=e970]:
+                  - button [ref=e971]
+                  - generic [ref=e975]: "8.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e976]: Registro sistemático y progresivo de la conformidad de PECOSA en el MC SIGA
+                  - button "Crear nueva tarea rápida subordinada a \"Registro sistemático y progresivo de la conformidad de PECOSA en el MC SIGA\"" [ref=e978]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e982]
+              - generic [ref=e983] [cursor=pointer]:
+                - generic [ref=e985]:
+                  - button [ref=e986]
+                  - generic [ref=e989]:
+                    - generic [ref=e990]: ◆
+                    - text: "9."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e991]: ENTREGA DE ME A BENEFICIARIOS Y REGISTRO EN EL MÓDULO MATERIALES SIAGIE
+                  - generic [ref=e992]:
+                    - button "Crear nueva tarea rápida subordinada a \"ENTREGA DE ME A BENEFICIARIOS Y REGISTRO EN EL MÓDULO MATERIALES SIAGIE\"" [ref=e993]
+                    - button "Agregar subcomponente hijo para este componente (9.)" [ref=e995]
+                    - button "Colapsar subcomponentes" [ref=e999]
+                - generic [ref=e1003]:
+                  - generic "Componente Principal" [ref=e1004]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1006]
+              - generic [ref=e1007] [cursor=pointer]:
+                - generic [ref=e1009]:
+                  - button [ref=e1010]
+                  - generic [ref=e1013]: "9.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1014]: Planificación e implementación de capacitación sobre Módulo Materiales SIAGIE
+                  - button "Crear nueva tarea rápida subordinada a \"Planificación e implementación de capacitación sobre Módulo Materiales SIAGIE\"" [ref=e1016]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1020]
+              - generic [ref=e1021] [cursor=pointer]:
+                - generic [ref=e1023]:
+                  - button [ref=e1024]
+                  - generic [ref=e1028]: 9.1a
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1029]: Elaboración del Plan de Capacitación para registro en Módulo Materiales SIAGIE
+                  - button "Crear nueva tarea rápida subordinada a \"Elaboración del Plan de Capacitación para registro en Módulo Materiales SIAGIE\"" [ref=e1031]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1035]
+              - generic [ref=e1036] [cursor=pointer]:
+                - generic [ref=e1038]:
+                  - button [ref=e1039]
+                  - generic [ref=e1043]: 9.1b
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1044]: Implementación del Plan de Capacitación para registro en Módulo Materiales SIAGIE
+                  - button "Crear nueva tarea rápida subordinada a \"Implementación del Plan de Capacitación para registro en Módulo Materiales SIAGIE\"" [ref=e1046]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1050]
+              - generic [ref=e1051] [cursor=pointer]:
+                - generic [ref=e1053]:
+                  - button [ref=e1054]
+                  - generic [ref=e1057]: "9.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1058]: Registro de recepción de ME en SIAGIE (BIAE y Post BIAE)
+                  - button "Crear nueva tarea rápida subordinada a \"Registro de recepción de ME en SIAGIE (BIAE y Post BIAE)\"" [ref=e1060]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1064]
+              - generic [ref=e1065] [cursor=pointer]:
+                - generic [ref=e1067]:
+                  - button [ref=e1068]
+                  - generic [ref=e1072]: 9.2a
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1073]: "Registro de recepción de ME en SIAGIE: Materiales distribuidos antes de inicio de clases (ME BIAE)"
+                  - 'button "Crear nueva tarea rápida subordinada a \"Registro de recepción de ME en SIAGIE: Materiales distribuidos antes de inicio de clases (ME BIAE)\"" [ref=e1075]'
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1079]
+              - generic [ref=e1080] [cursor=pointer]:
+                - generic [ref=e1082]:
+                  - button [ref=e1083]
+                  - generic [ref=e1087]: 9.2b
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1088]: "Registro de recepción de ME en SIAGIE: Materiales distribuidos tras inicio de clases (ME Post BIAE)"
+                  - 'button "Crear nueva tarea rápida subordinada a \"Registro de recepción de ME en SIAGIE: Materiales distribuidos tras inicio de clases (ME Post BIAE)\"" [ref=e1090]'
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1094]
+              - generic [ref=e1095] [cursor=pointer]:
+                - generic [ref=e1097]:
+                  - button [ref=e1098]
+                  - generic [ref=e1102]: "9.3"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1103]: Entrega efectiva de cuadernos y textos a beneficiarios finales (estudiantes y docentes de aula)
+                  - button "Crear nueva tarea rápida subordinada a \"Entrega efectiva de cuadernos y textos a beneficiarios finales (estudiantes y docentes de aula)\"" [ref=e1105]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1109]
+              - generic [ref=e1110] [cursor=pointer]:
+                - generic [ref=e1112]:
+                  - button [ref=e1113]
+                  - generic [ref=e1116]: "9.4"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1117]: Registro de asignación nominal a estudiantes en SIAGIE (BIAE y Post BIAE)
+                  - button "Crear nueva tarea rápida subordinada a \"Registro de asignación nominal a estudiantes en SIAGIE (BIAE y Post BIAE)\"" [ref=e1119]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1123]
+              - generic [ref=e1124] [cursor=pointer]:
+                - generic [ref=e1126]:
+                  - button [ref=e1127]
+                  - generic [ref=e1131]: 9.4a
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1132]: "Registro de asignación nominal a estudiantes en SIAGIE: ME BIAE"
+                  - 'button "Crear nueva tarea rápida subordinada a \"Registro de asignación nominal a estudiantes en SIAGIE: ME BIAE\"" [ref=e1134]'
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1138]
+              - generic [ref=e1139] [cursor=pointer]:
+                - generic [ref=e1141]:
+                  - button [ref=e1142]
+                  - generic [ref=e1146]: 9.4b
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1147]: "Registro de asignación nominal a estudiantes en SIAGIE: ME Post BIAE"
+                  - 'button "Crear nueva tarea rápida subordinada a \"Registro de asignación nominal a estudiantes en SIAGIE: ME Post BIAE\"" [ref=e1149]'
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1153]
+              - generic [ref=e1154] [cursor=pointer]:
+                - generic [ref=e1156]:
+                  - button [ref=e1157]
+                  - generic [ref=e1160]:
+                    - generic [ref=e1161]: ◆
+                    - text: "10."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1162]: REDISTRIBUCIÓN Y DISTRIBUCIÓN LOCAL DE ME PARA ALCANZAR SUFICIENCIA
+                  - generic [ref=e1163]:
+                    - button "Crear nueva tarea rápida subordinada a \"REDISTRIBUCIÓN Y DISTRIBUCIÓN LOCAL DE ME PARA ALCANZAR SUFICIENCIA\"" [ref=e1164]
+                    - button "Agregar subcomponente hijo para este componente (10.)" [ref=e1166]
+                    - button "Colapsar subcomponentes" [ref=e1170]
+                - generic [ref=e1174]:
+                  - generic "Componente Principal" [ref=e1175]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1177]
+              - generic [ref=e1178] [cursor=pointer]:
+                - generic [ref=e1180]:
+                  - button [ref=e1181]
+                  - generic [ref=e1185]: "10.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1186]: Cálculo y validación del cuadro de déficit y excedentes de ME por IE frente a matrícula real
+                  - button "Crear nueva tarea rápida subordinada a \"Cálculo y validación del cuadro de déficit y excedentes de ME por IE frente a matrícula real\"" [ref=e1188]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1192]
+              - generic [ref=e1193] [cursor=pointer]:
+                - generic [ref=e1195]:
+                  - button [ref=e1196]
+                  - generic [ref=e1200]: "10.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1201]: Envío del cuadro consolidado de ME excedente y déficit por título de las UGEL a la DRELP
+                  - button "Crear nueva tarea rápida subordinada a \"Envío del cuadro consolidado de ME excedente y déficit por título de las UGEL a la DRELP\"" [ref=e1203]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1207]
+              - generic [ref=e1208] [cursor=pointer]:
+                - generic [ref=e1210]:
+                  - button [ref=e1211]
+                  - generic [ref=e1215]: "10.3"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1216]: Consolidación regional de déficit/excedencias y formulación de propuesta de redistribución
+                  - button "Crear nueva tarea rápida subordinada a \"Consolidación regional de déficit/excedencias y formulación de propuesta de redistribución\"" [ref=e1218]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1222]
+              - generic [ref=e1223] [cursor=pointer]:
+                - generic [ref=e1225]:
+                  - button [ref=e1226]
+                  - generic [ref=e1230]: "10.4"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1231]: Redistribución Regional inter-UGEL mediante generación de PECOSA en MC SIGA (de requerirse)
+                  - button "Crear nueva tarea rápida subordinada a \"Redistribución Regional inter-UGEL mediante generación de PECOSA en MC SIGA (de requerirse)\"" [ref=e1233]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1237]
+              - generic [ref=e1238] [cursor=pointer]:
+                - generic [ref=e1240]:
+                  - button [ref=e1241]
+                  - generic [ref=e1245]: "10.5"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1246]: Ejecución de distribución y redistribución de ME a II.EE. para alcanzar el 100% de suficiencia
+                  - button "Crear nueva tarea rápida subordinada a \"Ejecución de distribución y redistribución de ME a II.EE. para alcanzar el 100% de suficiencia\"" [ref=e1248]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1252]
+              - generic [ref=e1253] [cursor=pointer]:
+                - generic [ref=e1255]:
+                  - button [ref=e1256]
+                  - generic [ref=e1259]:
+                    - generic [ref=e1260]: ◆
+                    - text: "11."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1261]: BALANCE Y CIERRE DEL PROCESO DE DISTRIBUCIÓN Y REDISTRIBUCIÓN
+                  - generic [ref=e1262]:
+                    - button "Crear nueva tarea rápida subordinada a \"BALANCE Y CIERRE DEL PROCESO DE DISTRIBUCIÓN Y REDISTRIBUCIÓN\"" [ref=e1263]
+                    - button "Agregar subcomponente hijo para este componente (11.)" [ref=e1265]
+                    - button "Colapsar subcomponentes" [ref=e1269]
+                - generic [ref=e1273]:
+                  - generic "Componente Principal" [ref=e1274]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1276]
+              - generic [ref=e1277] [cursor=pointer]:
+                - generic [ref=e1279]:
+                  - button [ref=e1280]
+                  - generic [ref=e1284]: "11.1"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1285]: Balance general y evaluación de lecciones aprendidas de los subprocesos de la Distribución de Materiales DOT 2027
+                  - button "Crear nueva tarea rápida subordinada a \"Balance general y evaluación de lecciones aprendidas de los subprocesos de la Distribución de Materiales DOT 2027\"" [ref=e1287]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1291]
+              - generic [ref=e1292] [cursor=pointer]:
+                - generic [ref=e1294]:
+                  - button [ref=e1295]
+                  - generic [ref=e1299]: "11.2"
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e1300]: Elaboración y remisión del Informe Final de Cierre del proceso a MINEDU-DIGERE
+                  - button "Crear nueva tarea rápida subordinada a \"Elaboración y remisión del Informe Final de Cierre del proceso a MINEDU-DIGERE\"" [ref=e1302]
+                - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e1306]
+              - generic "Haz clic para agregar un nuevo componente principal al cronograma" [ref=e1307] [cursor=pointer]: + Agregar nuevo componente principal
+              - generic: Hoy
+          - generic [ref=e1313]:
+            - generic [ref=e1314]: Mostrando 1–63 de 63 registros
+            - generic [ref=e1315]:
+              - button "Ver Detalle" [ref=e1316] [cursor=pointer]
+              - button "Publicar Cronograma" [ref=e1321] [cursor=pointer]
+  - button "Asistente Qaway Copilot" [ref=e1326] [cursor=pointer]:
+    - generic [ref=e1338]: IA
