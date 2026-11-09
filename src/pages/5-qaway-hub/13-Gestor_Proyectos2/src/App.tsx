@@ -1,8 +1,8 @@
 // Shell maestro consolidado: Sidebar único persistente + Canvas conmutable.
 // Los tres módulos viven nativamente en src/modules (sin alias ni subproyectos).
-// Keep-alive: los canvas permanecen montados (display:none en el inactivo) para
-// preservar estado de UI/filtros/drawer y eliminar el parpadeo al alternar.
-import { useEffect, useRef, useState } from 'react';
+// Keep-alive perezoso: cada canvas se monta solo al visitarlo por primera vez y
+// luego conserva su estado mientras permanece oculto.
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { ModuleKey, UserRole } from './types';
 import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, TAREAS_SEED_COUNT, USER_ROLE_STORAGE_KEY } from './types';
@@ -21,7 +21,7 @@ import EquipoView from './modules/equipo/EquipoView';
 import HitosView from './modules/hitos/HitosView';
 import ActasAcuerdosView from './modules/actas/ActasAcuerdosView';
 import ConfiguracionView from './modules/configuracion/ConfiguracionView';
-import PruebasView from './modules/pruebas/PruebasView';
+const PruebasView = lazy(() => import('./modules/pruebas/PruebasView'));
 import FloatingChatAssistant from './components/FloatingChatAssistant';
 import { deleteGestorProject, listGestorProjects, upsertGestorProject } from './services/gestorProjectService';
 
@@ -56,7 +56,7 @@ const DEFAULT_PROJECTS: ProjectItem[] = [
 const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'pruebas', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas', 'hitos', 'reuniones', 'reportes', 'usuarios', 'actas', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'tareas'; // estado de reposo que refleja el diseño del sidebar (Tareas activo)
   } catch {
@@ -68,6 +68,8 @@ const resolveModuleFromPath = (path: string): ModuleKey => {
   try {
     const clean = path.replace(/\/+$/, '') || '/';
     if (SLUG_TO_MODULE[clean]) {
+      // PRUEBAS queda oculto temporalmente y no debe activarse por una ruta guardada.
+      if (SLUG_TO_MODULE[clean] === 'pruebas') return 'tareas';
       return SLUG_TO_MODULE[clean];
     }
   } catch {
@@ -95,11 +97,21 @@ function GestorProyectosApp() {
 
   // Módulo activo unificado: la URL canónica es la fuente única de verdad (cero rebotes)
   const active: ModuleKey = resolveModuleFromPath(location.pathname);
+  const [visitedModules, setVisitedModules] = useState<Set<ModuleKey>>(() => new Set([active]));
   const [tasksCount, setTasksCount] = useState<number>(seedTasksCount);
   const [userRole, setUserRole] = useState<UserRole>(readStoredRole);
   const [cronogramaPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial'>(() =>
     readStoredRole() === 'coordinador' ? 'maestro' : 'territorial'
   );
+
+  useEffect(() => {
+    setVisitedModules((previous) => {
+      if (previous.has(active)) return previous;
+      const next = new Set(previous);
+      next.add(active);
+      return next;
+    });
+  }, [active]);
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
     try {
@@ -522,21 +534,13 @@ function GestorProyectosApp() {
           activeProject={activeProject}
         />
         <main ref={canvasRef} className="qm-canvas">
-          <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-            <ResumenProyectoView
-              userRole={userRole}
-              onOpenCreateProject={() => setIsCreateProjectOpen(true)}
-              onActions={(h) => { binds.current['resumen'] = h; }}
-            />
-          </div>
-          <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-            <TareasView
-              activeProject={activeProject}
-              onTasksCount={setTasksCount}
-              onActions={(h) => { binds.current['tareas'] = h; }}
-            />
-          </div>
-          <div
+           {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+             <ResumenProyectoView userRole={userRole} onOpenCreateProject={() => setIsCreateProjectOpen(true)} onActions={(h) => { binds.current['resumen'] = h; }} />
+           </div>}
+           {visitedModules.has('tareas') && <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+             <TareasView activeProject={activeProject} onTasksCount={setTasksCount} onActions={(h) => { binds.current['tareas'] = h; }} />
+           </div>}
+           {visitedModules.has('cronograma') && <div
             className={
               active === 'cronograma' && cronogramaPerspective === 'maestro'
                 ? 'gantt-v2 qm-pane-active'
@@ -548,15 +552,15 @@ function GestorProyectosApp() {
               onSwitchPerspective={setCronogramaPerspective}
               onActions={(h) => { binds.current['cronograma'] = h; }}
             />
-          </div>
-          <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div>}
+           {visitedModules.has('sedes') && <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <SedesView
               activeProjectId={activeProjectId}
               activeProject={activeProject}
               onActions={(h) => { binds.current['sedes'] = h; }}
             />
-          </div>
-          <div
+           </div>}
+           {visitedModules.has('cronograma') && <div
             className={
               active === 'cronograma' && cronogramaPerspective === 'territorial'
                 ? 'qc-v1 qm-pane-active'
@@ -567,29 +571,33 @@ function GestorProyectosApp() {
               onSwitchPerspective={setCronogramaPerspective}
               onActions={(h) => { binds.current['cronograma'] = h; }}
             />
-          </div>
-          <div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div>}
+           {visitedModules.has('hitos') && <div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
-          </div>
-          <div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div>}
+           {visitedModules.has('reuniones') && <div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
-          </div>
-          <div className={active === 'reportes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div>}
+           {visitedModules.has('reportes') && <div className={active === 'reportes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
-          </div>
-          <div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div>}
+           {visitedModules.has('usuarios') && <div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <EquipoView
               activeProject={activeProject}
               onActions={(h) => { binds.current['usuarios'] = h; }}
             />
-          </div>
-          <div className={active === 'actas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           </div>}
+           {visitedModules.has('actas') && <div className={active === 'actas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
-          </div>
+           </div>}
           <div className={active === 'pruebas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-            <PruebasView activeProject={activeProject} />
+            {active === 'pruebas' && (
+              <Suspense fallback={<div className="pruebas-loading">Cargando laboratorio PRUEBAS…</div>}>
+                <PruebasView activeProject={activeProject} />
+              </Suspense>
+            )}
           </div>
-          <div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
+           {visitedModules.has('configuracion') && <div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
             <ConfiguracionView
               projects={projects}
               activeProjectId={activeProjectId}
@@ -598,7 +606,7 @@ function GestorProyectosApp() {
               onDeleteProject={handleDeleteProject}
               onActions={(h) => { binds.current['configuracion'] = h; }}
             />
-          </div>
+           </div>}
         </main>
       </div>
 

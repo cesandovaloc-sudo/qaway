@@ -25,13 +25,17 @@ export default function PruebasView({ activeProject }: { activeProject?: { name?
 
   useEffect(() => {
     let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) setDataState('empty');
+    }, 8000);
     fetchCronogramaFromSupabase(activeProject?.id || 'p1').then((rows) => {
       if (!cancelled) {
+        window.clearTimeout(timeout);
         setItems(rows || []);
         setDataState(rows && rows.length > 0 ? 'ready' : 'empty');
       }
     });
-    return () => { cancelled = true; };
+    return () => { cancelled = true; window.clearTimeout(timeout); };
   }, [activeProject?.id]);
 
   const points = items.map((item, index) => ({
