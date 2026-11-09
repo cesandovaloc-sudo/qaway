@@ -32,9 +32,9 @@ export default function EquipoSedesView({
 
   // Sincronización reactiva con sedes de Supabase (evita IDs huérfanos o stale)
   React.useEffect(() => {
-    if (!selectedSedeId && sedes.length > 0) {
+    if (!selectedSedeId && sedes.length > 0 && sedes[0]) {
       setSelectedSedeId(sedes[0].id);
-    } else if (selectedSedeId && !sedes.some((s) => s.id === selectedSedeId) && sedes.length > 0) {
+    } else if (selectedSedeId && !sedes.some((s) => s.id === selectedSedeId) && sedes.length > 0 && sedes[0]) {
       setSelectedSedeId(sedes[0].id);
     }
   }, [sedes, selectedSedeId]);

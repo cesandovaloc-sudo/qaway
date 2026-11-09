@@ -1,5 +1,5 @@
 // Tipos compartidos del shell maestro.
-export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
+export type ModuleKey = 'resumen' | 'cronograma' | 'sedes' | 'tareas' | 'tareas2' | 'hitos' | 'reuniones' | 'reportes' | 'usuarios' | 'actas' | 'pruebas' | 'configuracion';
 
 // Ruta pública canónica del Gestor de Proyectos dentro del sistema (sin prefijo /hub)
 export const BASE_PATH = '/gestor_proyectos';
@@ -10,6 +10,7 @@ export const MODULE_SLUGS: Record<ModuleKey, string> = {
   cronograma: `${BASE_PATH}/proyecto`,
   sedes: `${BASE_PATH}/sedes`,
   tareas: `${BASE_PATH}/tareas`,
+  tareas2: `${BASE_PATH}/tareas-2`,
   hitos: `${BASE_PATH}/componentes`,
   reuniones: `${BASE_PATH}/reuniones`,
   reportes: `${BASE_PATH}/reportes`,

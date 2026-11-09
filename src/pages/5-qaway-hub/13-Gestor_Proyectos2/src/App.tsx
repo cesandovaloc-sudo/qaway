@@ -91,6 +91,19 @@ const readStoredRole = (): UserRole => {
   return 'coordinador';
 };
 
+function ModuleLoadingFallback({ text = 'Cargando módulo…' }: { text?: string }) {
+  return (
+    <div className="qm-module-loading" role="status" aria-live="polite">
+      <div className="qm-loading-chart" aria-hidden="true">
+        <span className="qm-loading-bar qm-bar-1" />
+        <span className="qm-loading-bar qm-bar-2" />
+        <span className="qm-loading-bar qm-bar-3" />
+      </div>
+      <p className="qm-loading-caption">{text}</p>
+    </div>
+  );
+}
+
 function GestorProyectosApp() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -533,20 +546,24 @@ function GestorProyectosApp() {
            {visitedModules.has('tareas') && <div className={active === 'tareas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <TareasView activeProject={activeProject} onTasksCount={setTasksCount} onActions={(h) => { binds.current['tareas'] = h; }} />
            </div>}
-           {visitedModules.has('cronograma') && <Suspense fallback={<div className="qm-module-loading">Cargando cronograma…</div>}><div
-            className={
-              active === 'cronograma' && cronogramaPerspective === 'maestro'
-                ? 'gantt-v2 qm-pane-active'
-                : 'gantt-v2 qm-pane'
-            }
-          >
-            <CronogramaGanttView
-              activeProject={activeProject}
-              isActive={active === 'cronograma' && cronogramaPerspective === 'maestro'}
-              onSwitchPerspective={setCronogramaPerspective}
-              onActions={(h) => { binds.current['cronograma'] = h; }}
-            />
-           </div></Suspense>}
+           {visitedModules.has('cronograma') && (
+             <Suspense fallback={<ModuleLoadingFallback text="Cargando cronograma maestro…" />}>
+               <div
+                 className={
+                   active === 'cronograma' && cronogramaPerspective === 'maestro'
+                     ? 'gantt-v2 qm-pane-active'
+                     : 'gantt-v2 qm-pane'
+                 }
+               >
+                 <CronogramaGanttView
+                   activeProject={activeProject}
+                   isActive={active === 'cronograma' && cronogramaPerspective === 'maestro'}
+                   onSwitchPerspective={setCronogramaPerspective}
+                   onActions={(h) => { binds.current['cronograma'] = h; }}
+                 />
+               </div>
+             </Suspense>
+           )}
            {visitedModules.has('sedes') && <div className={active === 'sedes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <SedesView
               activeProjectId={activeProjectId}
@@ -555,45 +572,49 @@ function GestorProyectosApp() {
               onActions={(h) => { binds.current['sedes'] = h; }}
             />
            </div>}
-           {visitedModules.has('cronograma') && <Suspense fallback={<div className="qm-module-loading">Cargando vista territorial…</div>}><div
-            className={
-              active === 'cronograma' && cronogramaPerspective === 'territorial'
-                ? 'qc-v1 qm-pane-active'
-                : 'qc-v1 qm-pane'
-            }
-          >
-            <CronogramaView
-              onSwitchPerspective={setCronogramaPerspective}
-              onActions={(h) => { binds.current['cronograma'] = h; }}
-            />
-           </div></Suspense>}
-           {visitedModules.has('hitos') && <Suspense fallback={<div className="qm-module-loading">Cargando hitos…</div>}><div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('cronograma') && cronogramaPerspective === 'territorial' && (
+             <Suspense fallback={<ModuleLoadingFallback text="Cargando vista territorial…" />}>
+               <div
+                 className={
+                   active === 'cronograma' && cronogramaPerspective === 'territorial'
+                     ? 'qc-v1 qm-pane-active'
+                     : 'qc-v1 qm-pane'
+                 }
+               >
+                 <CronogramaView
+                   onSwitchPerspective={setCronogramaPerspective}
+                   onActions={(h) => { binds.current['cronograma'] = h; }}
+                 />
+               </div>
+             </Suspense>
+           )}
+           {visitedModules.has('hitos') && <Suspense fallback={<ModuleLoadingFallback text="Cargando componentes rectores…" />}><div className={active === 'hitos' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <HitosView onActions={(h) => { binds.current['hitos'] = h; }} />
            </div></Suspense>}
-           {visitedModules.has('reuniones') && <Suspense fallback={<div className="qm-module-loading">Cargando reuniones…</div>}><div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('reuniones') && <Suspense fallback={<ModuleLoadingFallback text="Cargando agenda de reuniones…" />}><div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
            </div></Suspense>}
-           {visitedModules.has('reportes') && <Suspense fallback={<div className="qm-module-loading">Cargando reportes…</div>}><div className={active === 'reportes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('reportes') && <Suspense fallback={<ModuleLoadingFallback text="Cargando reporteador…" />}><div className={active === 'reportes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
            </div></Suspense>}
-           {visitedModules.has('usuarios') && <Suspense fallback={<div className="qm-module-loading">Cargando equipo…</div>}><div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('usuarios') && <Suspense fallback={<ModuleLoadingFallback text="Cargando directorio de equipo…" />}><div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <EquipoView
               activeProject={activeProject}
               isActive={active === 'usuarios'}
               onActions={(h) => { binds.current['usuarios'] = h; }}
             />
            </div></Suspense>}
-           {visitedModules.has('actas') && <Suspense fallback={<div className="qm-module-loading">Cargando actas…</div>}><div className={active === 'actas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('actas') && <Suspense fallback={<ModuleLoadingFallback text="Cargando actas y acuerdos…" />}><div className={active === 'actas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ActasAcuerdosView onActions={(h) => { binds.current['actas'] = h; }} />
            </div></Suspense>}
           <div className={active === 'pruebas' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             {active === 'pruebas' && (
-              <Suspense fallback={<div className="pruebas-loading">Cargando laboratorio PRUEBAS…</div>}>
+              <Suspense fallback={<ModuleLoadingFallback text="Cargando laboratorio de pruebas…" />}>
                 <PruebasView activeProject={activeProject} />
               </Suspense>
             )}
           </div>
-           {visitedModules.has('configuracion') && <Suspense fallback={<div className="qm-module-loading">Cargando configuración…</div>}><div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
+           {visitedModules.has('configuracion') && <Suspense fallback={<ModuleLoadingFallback text="Cargando configuración…" />}><div className={active === 'configuracion' ? 'cfg-v1 qm-pane-active' : 'cfg-v1 qm-pane'}>
             <ConfiguracionView
               projects={projects}
               activeProjectId={activeProjectId}

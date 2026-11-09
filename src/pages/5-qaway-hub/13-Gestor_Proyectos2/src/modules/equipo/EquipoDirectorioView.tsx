@@ -60,6 +60,7 @@ interface EquipoDirectorioViewProps {
 
 export default function EquipoDirectorioView({
   hideToolbar = false,
+  isLoading = false,
   integrantes,
   selectedId,
   onSelectIntegrante,

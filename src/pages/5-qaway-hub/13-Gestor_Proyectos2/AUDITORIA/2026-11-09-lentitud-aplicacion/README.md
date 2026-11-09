@@ -24,10 +24,22 @@ Determinar con mediciones reales por qué determinados paneles de la aplicación
 
 No se corregirá ningún archivo hasta identificar y registrar la causa con evidencia reproducible. Cada fase se ejecutará en orden y se documentará al terminar.
 
+## Alcance ejecutado hasta esta entrega
+
+La auditoría se ejecutó con la aplicación real, desde Proyecto y avanzando en orden hasta Equipo:
+
+```text
+Proyecto → Cronograma → Sedes → Equipo
+```
+
+No se repitieron las mediciones ya registradas de Sedes. Se conservaron las evidencias de las Fases 1–3 y se amplió la medición real a Proyecto, Cronograma y Equipo.
+
 ## Estado general
 
 ```text
-PENDIENTE DE AUTORIZACIÓN DEL USUARIO
+FASES 1–3 COMPLETADAS PARA EL ALCANCE PROYECTO → EQUIPO
+
+Fase 4 pendiente de consolidación y aprobación del plan.
 ```
 
 ## Herramientas y skills previstas

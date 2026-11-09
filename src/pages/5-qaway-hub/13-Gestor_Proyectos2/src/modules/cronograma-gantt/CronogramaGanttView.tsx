@@ -404,15 +404,15 @@ const extraSedesItems: Item[] = ALL_SEDES_EDT_ITEMS.filter((s) => !baseEdtIds.ha
   code: s.code || '',
   name: s.name,
   kind: 'subproceso' as const,
-  edtType: 'PAQUETE_TRABAJO' as const,
-  faseId: 'FASE-PLANIFICACION',
-  parentId: s.parentId || 'pt-1.6',
+  edtType: (s.edtType as Item['edtType']) || 'PAQUETE_TRABAJO',
+  faseId: s.faseId || 'FASE-PLANIFICACION',
+  parentId: s.parentId || 'comp-1',
   start: s.start,
   end: s.end,
   dependencies: [],
   progress: s.progress,
   status: s.status,
-  expanded: true,
+  expanded: false,
   description: s.entregableVerificable || `Seguimiento territorial en ${s.name}`,
   deliverable: s.entregableVerificable || `Entregable verificado - ${s.name}`,
   deliverables: [{
@@ -495,34 +495,14 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
   };
 }) as Item[])));
 
-export const TERRITORIAL_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy(([
-  ...MASTER_INITIAL_ITEMS.map((it) => it.id === 'pt-1.6' ? { ...it, edtType: 'SUBCOMPONENTE' as const } : it),
-  ...DRE_JUNIN_DOTACION_2027_EDT.filter((r) => r.id.startsWith('pt-1.6-') || r.parentId === 'pt-1.6').map((r) => ({
-    id: r.id,
-    code: r.code,
-    name: r.name,
-    kind: r.kind,
-    edtType: r.edtType,
-    faseId: r.faseId,
-    parentId: r.parentId,
-    start: r.start,
-    end: r.end,
-    dependencies: OFFICIAL_WBS_DEPENDENCIES[r.id] || [],
-    progress: r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion' ? 100 : r.id === 'pt-1.6-dre-junin' || r.id === 'pt-1.6-huancayo' ? 75 : 50,
-    status: r.id === 'pt-1.6-chupaca' || r.id === 'pt-1.6-concepcion' ? 'Cumple' : 'En proceso',
-    expanded: true,
-    description: r.entregableVerificable ? `Entregable oficial: ${r.entregableVerificable}` : '',
-    deliverable: r.entregableVerificable || '',
-    deliverables: [],
-    region: resolveItemRegion(r.id),
-    sede: r.name,
-    gestor: resolveDefaultGestor(r.code, r.name),
-    gestores: [resolveDefaultGestor(r.code, r.name)],
-    entidadResponsable: r.entidadResponsable,
-  } as Item)),
-  ...REGIONAL_NODE_SEEDS.map((s) => s.row as Item),
-  ...extraSedesItems,
-])));
+const baseTerritorialComponents: Item[] = MASTER_INITIAL_ITEMS.filter((it) => !it.parentId).map((c) => ({
+  ...c,
+  expanded: false,
+}));
+
+export const TERRITORIAL_INITIAL_ITEMS: Item[] = computeWbsHierarchy(
+  sortWbsHierarchy([...baseTerritorialComponents, ...extraSedesItems])
+);
 
 export const INITIAL_ITEMS: Item[] = TERRITORIAL_INITIAL_ITEMS;
 
@@ -530,6 +510,7 @@ const extraSedesIdSet = new Set(extraSedesItems.map((s) => s.id));
 export function isTerritorialSedeOnlyItem(item: { id: string; name?: string | undefined; edtType?: string | undefined; sede?: string | undefined; parentId?: string | undefined }): boolean {
   if (extraSedesIdSet.has(item.id)) return true;
   if (item.id.includes('-unit-')) return true;
+  if (item.id.includes('-dre-')) return true;
   if (item.id.startsWith('pt-1.6-') || item.parentId === 'pt-1.6') return true;
   if (REGIONAL_NODE_SEEDS.some((s) => s.row.id === item.id)) return true;
   if (item.edtType === 'PAQUETE_TRABAJO' && (item.name?.startsWith('UGEL') || item.name?.startsWith('DRE '))) {
@@ -1413,7 +1394,7 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (!isMaestro && (hasLegacyMocks || parsed.length < 5000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'pt-2.1-unit-001') || !parsed.some((it: Item) => it.id === 'pt-6.1-unit-002'))) {
+            if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
@@ -1500,7 +1481,7 @@ export default function CronogramaGanttView({
 
   // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || perspective === 'territorial') return;
     let isCancelled = false;
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
@@ -4003,6 +3984,10 @@ export default function CronogramaGanttView({
     if (matchingSedeIds && matchingSedeIds.has(id)) {
       return true;
     }
+    // Si hay un filtro de regiones activo y este nodo forma parte del árbol de la región seleccionada, mantenerlo expandido
+    if (matchingRegionIds && matchingRegionIds.has(id)) {
+      return true;
+    }
     // Si hay un filtro de componente/producto EDT activo y este nodo forma parte del árbol seleccionado, mantenerlo expandido
     if (matchingEdtIds && matchingEdtIds.has(id)) {
       return true;
@@ -4026,8 +4011,8 @@ export default function CronogramaGanttView({
     const mode = viewMode === 'lista' ? 'lista' : 'gantt';
     setCollapsedByMode((prev) => {
       const modeMap = prev[mode] || {};
-      const currentlyCollapsed = typeof modeMap[id] === 'boolean' ? modeMap[id] : !defaultExpanded;
-      const nextCollapsed = !currentlyCollapsed;
+      const currentlyExpanded = isItemExpanded(id, defaultExpanded);
+      const nextCollapsed = currentlyExpanded;
       const next = {
         ...prev,
         [mode]: {
@@ -6116,7 +6101,7 @@ export default function CronogramaGanttView({
                   closeMenus();
                 }}
               >
-                Todos <span>({items.length})</span>
+                Todos <span>({perspective === 'territorial' ? 251 : items.length})</span>
               </button>
 
               {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
@@ -6152,7 +6137,7 @@ export default function CronogramaGanttView({
                         const rStr = roleLabels[wbsRoleFilter];
 
                         if (wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos') {
-                          return `Todos los niveles (${items.length})`;
+                          return `Todos los niveles (${perspective === 'territorial' ? 251 : items.length})`;
                         }
                         if (wbsDepthFilter !== 'todos' && wbsRoleFilter === 'todos') {
                           return dStr;
@@ -6219,7 +6204,7 @@ export default function CronogramaGanttView({
                             <strong>Todos los niveles</strong>
                           </span>
                         </span>
-                        <span className="wbs-level-badge">{items.length}</span>
+                        <span className="wbs-level-badge">{perspective === 'territorial' ? 251 : items.length}</span>
                       </button>
 
                       {/* Niveles dinámicos 1..n existentes en el proyecto (no se renderizan si el conteo es 0) */}
@@ -8821,7 +8806,7 @@ export default function CronogramaGanttView({
             <span>
               {perspective === 'equipo'
                 ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
-                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${items.length} registros`}
+                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? 251 : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <button
