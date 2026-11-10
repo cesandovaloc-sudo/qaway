@@ -169,9 +169,6 @@ import {
   ZoomOut,
   Sigma,
   Calendar,
-  Video,
-  Headphones,
-  ClipboardCheck,
   X
 } from 'lucide-react';
 
@@ -252,23 +249,6 @@ export interface Item {
    *  Solo se popula en perspective="territorial"; ignorado en vista central. */
   blockerInfo?: import('../../types').SedeBlockerRequest;
 }
-
-const resolveTaskLucideIcon = (item: Item) => {
-  const text = `${item.name} ${item.deliverable || ''} ${item.description || ''}`.toLowerCase();
-  if (text.includes('video') || text.includes('reunión') || text.includes('reunion') || text.includes('sesión') || text.includes('conferencia')) {
-    return <Video size={14} style={{ color: '#7c3aed', flexShrink: 0 }} />;
-  }
-  if (text.includes('asistencia') || text.includes('capacitación') || text.includes('capacitacion') || text.includes('taller') || text.includes('inducción') || text.includes('soporte')) {
-    return <Headphones size={14} style={{ color: '#059669', flexShrink: 0 }} />;
-  }
-  if (text.includes('monitoreo') || text.includes('supervisión') || text.includes('supervision') || text.includes('inspección') || text.includes('validación') || text.includes('validacion')) {
-    return <ClipboardCheck size={14} style={{ color: '#d97706', flexShrink: 0 }} />;
-  }
-  if (text.includes('informe') || text.includes('plan') || text.includes('padrón') || text.includes('padron') || text.includes('acta') || text.includes('documento') || text.includes('cdl')) {
-    return <FileText size={14} style={{ color: '#0284c7', flexShrink: 0 }} />;
-  }
-  return <CheckSquare size={14} style={{ color: '#475569', flexShrink: 0 }} />;
-};
 
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
@@ -803,22 +783,22 @@ const RANGE_MAX = '2027-04-30';
 const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
-  parent: 220,
-  gestor: 170,
-  kind: 160,
-  name: 300,
-  end: 115,
-  status: 125,
-  actions: 115,
   code: 80,
+  name: 440,
+  kind: 110,
+  parent: 160,
   start: 125,
+  end: 125,
   duration: 105,
   progress: 130,
+  status: 125,
   dependencies: 130,
+  gestor: 165,
   region: 140,
   deviation: 120,
   actualEnd: 130,
   reportType: 185,
+  actions: 125,
   distrito: 130,
   sede: 130,
 };
@@ -845,31 +825,31 @@ const MIN_COLS: Record<ColKey, number> = {
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
-  { key: 'parent', label: 'Componente', fixed: true },
-  { key: 'gestor', label: 'Responsable' },
-  { key: 'kind', label: 'Tipo' },
-  { key: 'name', label: 'Tarea / Qué se ha pedido' },
-  { key: 'end', label: 'Fin' },
-  { key: 'status', label: 'Estado' },
-  { key: 'actions', label: 'Acción' },
+  { key: 'name', label: 'COMPONENTE / PRODUCTO', fixed: true },
   { key: 'code', label: 'Código' },
+  { key: 'kind', label: 'Tipo' },
+  { key: 'parent', label: 'Componente padre' },
   { key: 'start', label: 'Inicio' },
+  { key: 'end', label: 'Fin' },
   { key: 'duration', label: 'Duración' },
   { key: 'progress', label: 'Avance' },
   { key: 'deviation', label: 'Desviación' },
+  { key: 'status', label: 'Estado' },
   { key: 'dependencies', label: 'Predecesores' },
+  { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Ámbito' },
   { key: 'actualEnd', label: 'Fecha real' },
   { key: 'reportType', label: 'Formato de Reporte' },
+  { key: 'actions', label: 'Acción' },
 ];
 
-// Presets oficiales ordenados para Tareas 2
-const TAREAS_OFFICIAL_COLS: ColKey[] = ['parent', 'gestor', 'kind', 'name', 'end', 'status', 'actions'];
-const GANTT_PRESET_COLS: ColKey[] = TAREAS_OFFICIAL_COLS;
-const LISTA_PRESET_COLS: ColKey[] = TAREAS_OFFICIAL_COLS;
-const PORTADA_PRESET_COLS: ColKey[] = TAREAS_OFFICIAL_COLS;
-const DEFAULT_VISIBLE_COLS: ColKey[] = TAREAS_OFFICIAL_COLS;
-const LISTA_VISIBLE_COLS: ColKey[] = TAREAS_OFFICIAL_COLS;
+// Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
+const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
+// Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
+const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
+const PORTADA_PRESET_COLS: ColKey[] = ['name', 'gestor', 'parent', 'end', 'status', 'progress', 'reportType', 'actions'];
+const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
+const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
   if (!a || !b) return 1;
   const da = new Date(a).getTime();
@@ -887,11 +867,11 @@ const GANTT_HIERARCHY: Hierarchy<Item> = {
 };
 
 const GANTT_COLUMNS: ColumnDef<Item>[] = [
-  { id: 'parent', label: 'Componente', type: 'text', accessor: (r) => r?.parentId ?? '' },
-  { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
-  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Tarea') },
-  { id: 'name', label: 'Tarea / Qué se ha pedido', type: 'text', accessor: (r) => `${r?.name ?? ''} ${r?.deliverable ?? ''}`.trim() },
+  { id: 'name', label: 'COMPONENTE / PRODUCTO', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
+  { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r?.start },
   { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r?.end },
+  { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r?.start, r?.end) },
+  { id: 'progress', label: 'Avance', type: 'percent', accessor: (r) => r?.progress ?? 0 },
   {
     id: 'status',
     label: 'Estado',
@@ -899,19 +879,19 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
     accessor: (r) => r?.status,
     options: STATUS_FLOW.map((s) => ({ value: s, label: s })),
   },
-  { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r?.start },
-  { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r?.start, r?.end) },
-  { id: 'progress', label: 'Avance', type: 'percent', accessor: (r) => r?.progress ?? 0 },
   {
     id: 'dependencies',
     label: 'Predecesores',
     type: 'text',
     accessor: (r) => (r?.dependencies || []).join(', '),
   },
+  { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
   { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
   { id: 'distrito', label: 'Distrito', type: 'select', accessor: (r) => r?.distrito },
   { id: 'sede', label: 'Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
+  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Subcomponente') },
+  { id: 'parent', label: 'Componente padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
 
 export const formatDate = (s: string) =>
@@ -2822,15 +2802,17 @@ export default function Tareas2View({
       return [...PORTADA_PRESET_COLS];
     }
     try {
-      const storageKey = 'qaway-visible-cols-tareas-v4';
+      const storageKey = 'qaway-visible-cols-lista-v3';
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
-      if (Array.isArray(saved) && saved.length > 0 && saved.includes('parent')) {
-        return saved as ColKey[];
+      if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
+        const canonicalPart = CANONICAL_COLS.filter((k) => saved.includes(k));
+        const customPart = saved.filter((k) => typeof k === 'string' && k.startsWith('c_'));
+        return [...canonicalPart, ...customPart] as ColKey[];
       }
     } catch {
       /* almacenamiento no disponible */
     }
-    return [...TAREAS_OFFICIAL_COLS];
+    return [...LISTA_PRESET_COLS];
   };
 
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => loadSavedCols(viewMode));
@@ -4958,14 +4940,39 @@ export default function Tareas2View({
       );
     }
     if (colKey === 'name') {
-      const colLabelText = getColLabel('name', 'Tarea / Qué se ha pedido');
+      const colLabelText = getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / PRODUCTO');
       return (
         <div key="name" className="name-head">
           <span className="name-head-label" title={colLabelText}>
             {colLabelText}
           </span>
           <div className="head-col-actions">
+            <button
+              type="button"
+              className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleAllHitosExpand();
+              }}
+              title={allHitosExpanded ? "Colapsar todos los componentes y subcomponentes" : "Expandir todos los componentes y subcomponentes"}
+            >
+              <ChevronsUpDown size={14} />
+            </button>
             {renderColumnHeaderMenu("name", "cols-trigger-btn")}
+            {viewMode === 'gantt' && (
+              <button
+                type="button"
+                className={`cols-trigger-btn panel-collapse-btn ${visibleCols.length === 1 ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCompactColumns();
+                }}
+                title={visibleCols.length === 1 ? "Mostrar todas las columnas del cronograma" : "Colapsar columnas y dejar solo la columna principal"}
+              >
+                {visibleCols.length === 1 ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
+              </button>
+            )}
           </div>
           <div className={`col-resizer ${resizingCol === 'name' ? 'is-resizing' : ''}`} onMouseDown={(e) => startResize(e, 'name')} onDoubleClick={(e) => { e.stopPropagation(); resetSingleColWidth('name'); }} title="Arrastra para redimensionar · Doble clic para auto-ajustar" />
         </div>
@@ -5033,69 +5040,167 @@ export default function Tareas2View({
     }
 
     if (colKey === 'name') {
-      const taskIcon = resolveTaskLucideIcon(x);
-      const requirementSubtext = x.deliverable || x.description || (x.wbsNodeType === 'COMPONENTE' ? 'Hito rector del proyecto' : 'Definir y validar actividades con el equipo.');
+      const hasChildren = items.some((c) => c.parentId === x.id);
+      const nodeType: 'COMPONENTE' | 'PRODUCTO' | 'PAQUETE_TRABAJO' | 'HITO' =
+        x.wbsNodeType === 'SUBCOMPONENTE'
+          ? 'PRODUCTO'
+          : (x.wbsNodeType as any) ||
+            (!x.parentId ? (hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO') : hasChildren ? 'PRODUCTO' : (x.kind === 'hito' || x.start === x.end ? 'HITO' : 'PAQUETE_TRABAJO'));
+
       return (
-        <div key="name" className="name-cell" style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, paddingLeft: '4px' }}>
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 24,
-            height: 24,
-            borderRadius: '6px',
-            background: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            flexShrink: 0
-          }}>
-            {taskIcon}
-          </span>
+        <div key="name" className="name-cell">
+          {getItemDepth(x) > 0 && (
+            <span style={{ width: `${getItemDepth(x) * 10}px`, flexShrink: 0 }} />
+          )}
+          {hasChildren ? (
+            <button
+              className="expand"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleItemExpand(x.id, x.expanded !== false);
+              }}
+              title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar nodo" : "Expandir nodo"}
+            >
+              {isItemExpanded(x.id, x.expanded !== false) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+          ) : (
+            <span className="expand-spacer" style={{ width: 16, height: 20, display: 'inline-block', flexShrink: 0 }} />
+          )}
+          {nodeType === 'COMPONENTE' && (
+            <span className="gantt-row-icon componente" title="Componente rector">
+              <Layers size={14} />
+            </span>
+          )}
+          {nodeType === 'PRODUCTO' && (
+            <span className="gantt-row-icon producto" title="Producto entregable">
+              <Package size={13} />
+            </span>
+          )}
+          {nodeType === 'HITO' && (
+            <span className="gantt-row-icon hito" title="Hito clave">
+              <Flag size={13} />
+            </span>
+          )}
+          {nodeType === 'PAQUETE_TRABAJO' && (
+            <span className="gantt-row-icon paquete" title="Paquete de trabajo / Entregable">
+              <ListChecks size={13} />
+            </span>
+          )}
+          {Boolean(x.code) && (
+            <span className="code" style={{ fontWeight: 500, color: '#64748b', fontSize: '12.5px', flexShrink: 0 }}>
+              {x.code}
+            </span>
+          )}
           {isEditing(x, 'name') ? (
             <input
               className="cell-editor cell-input name-edit"
               autoFocus
               onFocus={(e) => e.currentTarget.select()}
               defaultValue={x.name}
-              title="Enter para guardar · Esc para cancelar"
+              title="Enter para guardar · Shift+Enter para agregar otro · Esc para cancelar"
               onBlur={(e) => {
                 const val = e.target.value.trim();
+                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                  commitChange((old) => old.filter((it) => it.id !== x.id));
+                  setInlineDraftCreatedId(null);
+                  closeEdit();
+                  notify('Borrador sin nombre descartado.');
+                  return;
+                }
                 update(x.id, { name: val || x.name });
+                setInlineDraftCreatedId(null);
                 closeEdit();
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   const val = e.currentTarget.value.trim();
+                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                    commitChange((old) => old.filter((it) => it.id !== x.id));
+                    setInlineDraftCreatedId(null);
+                    closeEdit();
+                    notify('Borrador sin nombre descartado.');
+                    return;
+                  }
                   update(x.id, { name: val || x.name });
+                  setInlineDraftCreatedId(null);
                   closeEdit();
+                  if (e.shiftKey) {
+                    setTimeout(() => {
+                      add(x.kind, x.parentId, true);
+                    }, 50);
+                  }
                 }
                 if (e.key === 'Escape') {
                   e.preventDefault();
+                  if (inlineDraftCreatedId === x.id) {
+                    commitChange((old) => old.filter((it) => it.id !== x.id));
+                    setInlineDraftCreatedId(null);
+                    closeEdit();
+                    notify('Creación cancelada.');
+                    return;
+                  }
                   closeEdit();
                 }
               }}
             />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-              <span
-                className="name"
-                style={{ fontWeight: 650, color: '#0f172a', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer' }}
-                title="Clic para editar nombre · Doble clic para detalle"
+            <span
+              className="name"
+              title="Clic para editar nombre · Doble clic para detalle"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedId(x.id);
+                toggleEdit(x, 'name');
+              }}
+            >
+              {x.name}
+            </span>
+          )}
+
+          {/* Micro-acciones rápidas inline */}
+          {edit?.id !== x.id && (
+            <div className="quick-inline-actions" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="quick-inline-icon-btn"
+                title={`Crear nueva tarea rápida subordinada a "${x.name}"`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedId(x.id);
-                  toggleEdit(x, 'name');
+                  add('subproceso', x.id, true);
                 }}
               >
-                {x.name}
-              </span>
-              {requirementSubtext && (
-                <span
-                  style={{ fontSize: '11px', color: '#64748b', fontWeight: 450, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}
-                  title={requirementSubtext}
-                >
-                  {requirementSubtext}
-                </span>
+                <Plus size={13} style={{ color: '#0066ff' }} />
+              </button>
+              {x.wbsNodeType === 'COMPONENTE' && (
+                <>
+                  <button
+                    type="button"
+                    className="quick-inline-icon-btn"
+                    title={`Agregar subcomponente hijo para este componente (${x.code})`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      add('subproceso', x.id, true);
+                    }}
+                  >
+                    <CornerDownRight size={13} style={{ color: '#0284c7' }} />
+                  </button>
+                  <button
+                    type="button"
+                    className="quick-inline-icon-btn"
+                    title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar subcomponentes" : "Expandir subcomponentes"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleItemExpand(x.id, x.expanded !== false);
+                    }}
+                  >
+                    {isItemExpanded(x.id, x.expanded !== false) ? (
+                      <ChevronDown size={13} style={{ color: '#0284c7' }} />
+                    ) : (
+                      <ChevronRight size={13} style={{ color: '#64748b' }} />
+                    )}
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -5104,56 +5209,21 @@ export default function Tareas2View({
     }
 
     if (colKey === 'kind') {
-      const isEdtLinked = Boolean(x.parentId || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || x.wbsNodeType === 'PAQUETE_TRABAJO' || x.wbsNodeType === 'HITO' || x.kind === 'hito' || (x.code && !x.code.startsWith('OP')));
       return (
-        <div key="kind" className="kind-cell-col" style={{ display: 'flex', alignItems: 'center' }}>
-          {isEdtLinked ? (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '3px 8px',
-              borderRadius: '6px',
-              fontSize: '11px',
-              fontWeight: 650,
-              background: '#eff6ff',
-              color: '#1d4ed8',
-              border: '1px solid #bfdbfe',
-              whiteSpace: 'nowrap'
-            }}>
-              <CheckCircle2 size={12} style={{ color: '#2563eb' }} />
-              Vinculada al EDT
-            </span>
-          ) : (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '3px 8px',
-              borderRadius: '6px',
-              fontSize: '11px',
-              fontWeight: 650,
-              background: '#f8fafc',
-              color: '#475569',
-              border: '1px solid #e2e8f0',
-              whiteSpace: 'nowrap'
-            }}>
-              <Activity size={12} style={{ color: '#64748b' }} />
-              Monitoreo / Operativa
-            </span>
-          )}
+        <div key="kind" className="kind-cell-col">
+          <span className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
+            {getEdtNodeDisplayLabel(x, items)}
+          </span>
         </div>
       );
     }
 
     if (colKey === 'parent') {
       const parentItem = x.parentId ? items.find((p) => p.id === x.parentId) : null;
-      const compLabel = parentItem ? `${parentItem.code} ${parentItem.name}` : (x.wbsNodeType === 'COMPONENTE' || !x.parentId ? `${x.code} ${x.name}` : '— Operativa —');
       return (
         <div
           key="parent"
           className="parent-cell-col editable"
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, paddingLeft: '4px' }}
           onClick={(e) => {
             e.stopPropagation();
             toggleEdit(x, 'parent');
@@ -5181,29 +5251,9 @@ export default function Tareas2View({
                 ))}
             </select>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, overflow: 'hidden' }}>
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 24,
-                height: 24,
-                borderRadius: '6px',
-                background: '#eff6ff',
-                color: '#0284c7',
-                border: '1px solid #bfdbfe',
-                flexShrink: 0
-              }}>
-                <Layers size={13} />
-              </span>
-              <span
-                className="cell-text"
-                style={{ fontWeight: 650, color: '#0f172a', fontSize: '12.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                title={compLabel}
-              >
-                {compLabel}
-              </span>
-            </div>
+            <span className="cell-text">
+              {parentItem ? `${parentItem.code} ${parentItem.name}` : '—'}
+            </span>
           )}
         </div>
       );
@@ -5240,7 +5290,6 @@ export default function Tareas2View({
     }
 
     if (colKey === 'end') {
-      const isOverdue = x.status === 'Con retraso';
       return (
         <div
           key="end"
@@ -5264,10 +5313,7 @@ export default function Tareas2View({
               onBlur={closeEdit}
             />
           ) : (
-            <span className="cell-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 550, color: isOverdue ? '#dc2626' : '#334155' }}>
-              <Calendar size={13} style={{ color: isOverdue ? '#dc2626' : '#64748b', flexShrink: 0 }} />
-              {x.end ? formatDatePE(x.end) : '—'}
-            </span>
+            <span className="cell-text">{formatDatePE(x.end)}</span>
           )}
         </div>
       );
