@@ -1,91 +1,108 @@
-# Arquitectura de Gestor: organización, unidades y proyectos
+# Arquitectura de Gestor de Proyectos: organización, unidades y proyectos
 
 ## 1. Alcance
 
-Gestor es la capa de planificación, seguimiento y control operativo de una organización. Usa la identidad y el acceso general del Qaway Hub, pero mantiene sus relaciones operativas propias.
+Gestor de Proyectos, es una aplicación de planificación, seguimiento y control operativo de una organización basado en metodologías, entre ellas usa EDT. Usa la identidad y el acceso general del Qaway Hub, pero mantiene sus relaciones operativas propias.
 
-En esta fase se implementa el modelo de datos y su contexto explícito. **No se conecta todavía con login, `auth.uid()`, invitaciones ni asignaciones automáticas del Hub.** Esa conexión queda reservada para la fase de seguridad.
 
-## 2. Estructura funcional
 
-```text
-Tenant / organización principal
-├── Unidades operativas
-│   ├── Central
-│   ├── UGEL
-│   ├── Obra
-│   ├── Jefatura
-│   ├── Tienda
-│   ├── Oficina
-│   └── Departamento
-├── Proyectos
-│   ├── Unidad central
-│   └── Unidades participantes
-├── Miembros y trabajadores
-└── Responsabilidades operativas
-```
+Arquitectura Funcional: Estructura Organizacional y Jerarquía de Monitoreo
 
-“Unidad operativa” es el término universal. Puede representar una sede física, una obra, una UGEL, una jefatura o cualquier área de trabajo; no se presupone que sea una ubicación física.
 
-## 3. Entidades persistentes de Gestor
+1. El Contenedor Raíz (Tenant)
 
-### `gestor_unidades`
+El Tenant representa la organización principal o el cliente global dentro del sistema (por ejemplo, un Ministerio, una corporación transnacional o una cadena de retail). Es el límite administrativo supremo; nada de lo que ocurre dentro de un Tenant es visible para otros Tenants.
 
-Catálogo de unidades pertenecientes a un tenant. Soporta jerarquía con `parent_unit_id`, región, macroregión y tipos operativos.
+2. El Modelo de Sedes (Jerarquía Recursiva Fractal)
 
-### `gestor_unidad_miembros`
+El núcleo del sistema no utiliza estructuras rígidas, sino un modelo de Sedes Jerárquicas Autorreferenciadas. Esto significa que cualquier oficina, dirección o local es un Nodo, y cada nodo tiene la capacidad de replicar el comportamiento de la Sede Central en una escala menor.
+text
+[Tenant: Organización Principal]
+       │
+       └── [Sede Central (Nodo Raíz)]
+                │
+                ├── [Sede Externa Nivel 1 (Nodo Hijo)]
+                │         │
+                │         └── [Sede Externa Nivel 2 (Nodo Nieto)]
+                │                  │
+                │                  └── [Sede Externa Nivel 3 (Sub-escala)]
+                │
+                └── [Sede Externa Nivel 1.2]
+Usa el código con precaución.
 
-Relación futura entre usuarios del Hub y unidades. Usa `public.users.id`, pero durante la fase actual `user_id` puede permanecer vacío para permitir preparar la estructura antes de conectar login.
+Características de cada Sede (Nodo):
 
-### `gestor_proyectos`
+• Autonomía Organizacional: Cada sede, sin importar su tamaño, cuenta con su propio organigrama, trabajadores internos y flujo de trabajo.
+• Capacidad de Monitoreo: Cada sede de nivel superior tiene la responsabilidad y las herramientas (Gantt, tableros, indicadores de gestión, control documental) para supervisar, auditar y consolidar la información de las sedes que están bajo su subordinación directa.
+• Ubicación Agnóstica: Las sedes dependientes pueden ser físicas (oficinas externas, tiendas en otros distritos) o puramente administrativas/funcionales (direcciones internas dentro del mismo edificio).
 
-Cada proyecto puede pertenecer a un tenant y tener una unidad central. Los registros históricos mantienen temporalmente esos campos vacíos hasta ejecutar la clasificación de datos.
+3. Ejemplos de Aplicación por Sectores
 
-### `gestor_proyecto_unidades`
+Para demostrar la flexibilidad del modelo, la estructura se adapta perfectamente a diferentes realidades mediante la relación Padre-Hijo:
 
-Relaciona proyectos con una o varias unidades participantes.
+A. Sector Público / Educación (Caso MINEDU)
 
-## 4. Acceso general y responsabilidades
+1. Sede Central (Nodo Raíz): Ministerio de Educación (Alta dirección, asesores, monitores globales).
+2. Escala Menor (Hijo): DRE (Dirección Regional de Educación) -> Cuenta con su propio Director y especialistas.
+3. Escala Siguiente (Nieto): UGEL (Unidad de Gestión Educativa Local) -> Monitoreada por la DRE, pero monitorea a los colegios.
+4. Última Escala (Sub-escala): IIEE (Instituciones Educativas / Colegios) -> Directores y docentes del plantel.
 
-Los roles generales del Hub siguen siendo:
+B. Sector Público / Finanzas (Caso MEF)
 
-```text
-admin · editor · viewer · guest
-```
+1. Sede Central: Ministerio de Economía y Finanzas.
+2. Escala Menor: Direcciones Presupuestales Generales.
+3. Escala Siguiente: Direcciones sectoriales o unidades ejecutoras subalternas.
 
-Gestor no crea otro sistema de roles. Las responsabilidades operativas son datos de contexto, por ejemplo:
+C. Sector Privado / Retail o Negocios
 
-```text
-project_manager
-unit_responsible
-reviewer
-progress_editor
-field_collaborator
-```
+1. Sede Central: Corporativo / Gerencia General (Gerente, directores, analistas de operaciones).
+2. Escala Menor: Tiendas o Sucursales por Distrito (Cada una con su propio Administrador y jefes de área).
+3. Escala Siguiente: Almacenes satélites, módulos de venta o sub-áreas dentro de la tienda.
 
-No se usan cargos como `RECTOR`, `SUPERVISOR` o `EJECUTOR` como permisos globales.
 
-## 5. Inventario y Gestor
+4. Gestión del Personal y Roles (El Organigrama y Control Centralizado)
 
-El módulo de Inventario tiene una interfaz de Sedes y la tabla `inventory_locations` para almacenes y ubicaciones internas. Esa tabla no es el catálogo universal de Gestor. No se enlazan automáticamente ambos dominios ni se reutilizan sus datos demo.
+El personal dentro del Tenant se divide bajo una lógica estricta de pertenencia a la Sede Central para funciones de control, o pertenencia a Sedes Externas para funciones operativas.
+text
+[Sede Central (Nodo Raíz)]
+   ├── Personal Directivo/Interno (Gerente, Director General)
+   └── EQUIPO DE MONITOREO CENTRALIZADO ────────┐ (Control Vertical Exclusivo)
+                                                │
+   ┌────────────────────────────────────────────┴──────────────────────────┐
+   ▼                                                                       ▼
+[Sede Externa A (Nodo Hijo)]                               [Sede Externa B (Nodo Hijo)]
+   └── Personal Operativo/Directivo Interno                   └── Personal Operativo/Directivo Interno
+       (Ejecutan, reportan KPIs y Gantt locales)                 (Ejecutan, reportan KPIs y Gantt locales)
+Usa el código con precaución.
 
-Si en el futuro se requiere una integración, se hará mediante una relación explícita y aprobada, sin cambiar el significado de ninguna entidad.
+Clasificación de Perfiles y Ubicación
 
-## 6. Contexto de transición
+1. Equipo de Monitoreo y Supervisión (Centralizado en la Sede Central):
+	• Ubicación: Pertenecen única y exclusivamente a la Sede Central. No forman parte de la planilla ni de la estructura de las sedes externas.
+	• Función: Es el equipo de control encargado de auditar de forma vertical y transversal a toda la organización. Tienen credenciales globales para revisar los diagramas de Gantt, hitos, KPIs, indicadores y seguimiento documental de todas las sedes dependientes (hijos, nietos, etc.).
+2. Personal Operativo / Directivo Interno (Distribuido por Sede):
+	• Ubicación: Pertenecen obligatoriamente a la sede específica donde laboran (sea la Sede Central o una Sede Externa).
+	• Función: Gestión y ejecución local. Son los responsables de alimentar el sistema con los avances de sus proyectos, cumplir las tareas asignadas a su nodo y responder por los indicadores de su propia sede. No monitorean a otras sedes.
 
-Mientras login no esté conectado, las pantallas y servicios pueden recibir un `tenantId` explícito. No se debe interpretar ese contexto como seguridad: las políticas actuales del cronograma siguen pendientes de endurecimiento.
+Ejemplos Prácticos de Control Centralizado
 
-La secuencia para activar seguridad será:
 
-1. Clasificar proyectos históricos y asignarles tenant.
-2. Completar unidades y miembros.
-3. Conectar `public.users` y `auth.uid()`.
-4. Sustituir el contexto manual por el tenant del usuario autenticado.
-5. Activar RLS tenant-aware en todas las tablas Gestor.
+A. Caso Sector Público: Ministerio de Educación (MINEDU)
 
-## 7. Reglas de compatibilidad
+• En la Sede Central (MINEDU): Se encuentra el Equipo de Control y Seguimiento de Proyectos Pedagógicos. Este equipo humano trabaja físicamente en el ministerio y pertenece a la Sede Central. Su único rol en el sistema es monitorear, evaluar y auditar mediante Gantt e indicadores cómo avanzan las metas de las regiones.
+• En las Sedes Externas (DRE / UGEL / Colegios): El Director de la DRE Cusco, el jefe de la UGEL Canchis o el Director del colegio son Personal Operativo/Directivo Interno de sus respectivas sedes. Ellos reportan la información en el sistema, pero no tienen un equipo de monitoreo propio para fiscalizar a otros; son fiscalizados verticalmente por el equipo central del MINEDU.
 
-- El cronograma conserva sus IDs y comportamiento actual.
-- Los campos nuevos son aditivos y no sustituyen `region`, `gestor` ni `gestores` hasta completar la migración funcional.
-- Las relaciones nuevas no deben borrar ni reinterpretar datos históricos.
-- No se ejecutan migraciones automáticamente desde el frontend.
+B. Caso Sector Privado: Franquicia de Restaurantes (Ej. Bembos / Rustica)
+
+• En la Sede Central (Oficina Corporativa / Gerencia General): Se encuentra el Equipo de Auditores de Operaciones y Calidad. Este equipo pertenece a la Sede Central. Utiliza la herramienta para monitorear los indicadores de ventas, mermas, tiempos de entrega (Gantt de campañas) y control documental de todas las sucursales del país.
+• En las Sedes Externas (Tiendas por Distrito - Ej. Sucursal Miraflores, Sucursal Trujillo): En cada restaurante hay un Administrador de Tienda, Jefes de Cocina y Cajeros. Ellos son Personal Operativo Interno de esa sucursal. Su trabajo en el sistema es registrar sus rendimientos diarios y proyectos locales. Ningún empleado de la tienda de Miraflores audita a otra tienda; todo el control viene del equipo de monitoreo alojado en la Sede Central corporativa.
+
+
+
+
+Tabla Comparativa de Variables de Tareas (Modelo Completo)
+
+
+
+
+

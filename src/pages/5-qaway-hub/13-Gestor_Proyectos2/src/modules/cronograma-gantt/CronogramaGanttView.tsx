@@ -2163,6 +2163,12 @@ export default function CronogramaGanttView({
     'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
   >(() => (perspective === 'equipo' ? 'lista' : (perspective === 'territorial' ? 'portada' : 'gantt')));
 
+  useEffect(() => {
+    if (perspective !== 'territorial' && viewMode === 'portada') {
+      setViewMode('gantt');
+    }
+  }, [perspective, viewMode]);
+
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
   const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
   const [equipoSedes, setEquipoSedes] = useState<any[]>([]);
@@ -5929,7 +5935,7 @@ export default function CronogramaGanttView({
   };
 
   return (
-    <div className="gantt-v2">
+    <div className={`gantt-v2 perspective-${perspective}`}>
       <div className="app">
         {/* Header Principal */}
         <ProjectShellHeader
@@ -6776,15 +6782,17 @@ export default function CronogramaGanttView({
                 </>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'portada' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('portada')}
-                    title="Vista Carátula Territorial y Cobertura"
-                  >
-                    <CheckSquare size={14} />
-                    <span>Carátula</span>
-                  </button>
+                  {perspective === 'territorial' && (
+                    <button
+                      type="button"
+                      className={`view-mode-btn view-mode-btn-portada ${viewMode === 'portada' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('portada')}
+                      title="Vista Carátula Territorial y Cobertura"
+                    >
+                      <CheckSquare size={14} />
+                      <span>Carátula</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
@@ -8010,7 +8018,7 @@ export default function CronogramaGanttView({
           )}
 
           {/* Presentación Carátula Territorial Oficial (Sedes) */}
-          {perspective !== 'equipo' && viewMode === 'portada' && (
+          {perspective === 'territorial' && viewMode === 'portada' && (
             <SedesCaratulaView
               items={items}
               unidades={unidades}

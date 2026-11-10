@@ -19,3 +19,4 @@ fotografia-linkedin-desktop.png
 src/**/dist/
 docs/**/dist/
 ~$*
+.playwright-cli/

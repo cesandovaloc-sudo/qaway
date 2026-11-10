@@ -902,7 +902,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
 const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
-const PORTADA_PRESET_COLS: ColKey[] = ['name', 'kind', 'deliverable', 'gestor', 'end', 'status', 'progress', 'actions'];
+const PORTADA_PRESET_COLS: ColKey[] = ['name', 'gestor', 'kind', 'deliverable', 'end', 'status', 'progress', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -8244,11 +8244,13 @@ export default function Tareas2View({
 
           {/* Presentación Maestro: Gantt, Lista y Carátula comparten 100% el mismo tablero unificado oficial */}
           {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'portada' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
+            <div style={{ display: 'flex', flexDirection: viewMode === 'portada' ? 'row' : 'column', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
+              {/* En Carátula: izquierda = gráficos + tablero · derecha = columna de tarjetas a alto completo (desde filtros hasta footer) */}
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
               {/* Tarjetas Principales Analíticas de Reportes 1 en Vista Carátula */}
               {viewMode === 'portada' && (
                 <div style={{ width: '100%', minHeight: 'auto', maxHeight: 'none', marginBottom: '14px', flexShrink: 0 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px', margin: 0, padding: '0 2px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(min(100%, 280px), 1fr))', gap: '16px', margin: 0, padding: '0 2px' }}>
                     {/* 1. Avance regional por hito */}
                     <section style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
                       <div style={{ marginBottom: '10px' }}>
@@ -8348,40 +8350,6 @@ export default function Tareas2View({
                             <b style={{ marginLeft: 'auto', color: '#0f172a' }}>2 (33%)</b>
                           </div>
                         </div>
-                      </div>
-                    </section>
-
-                    {/* 3. Evolución del avance regional (LineChart) */}
-                    <section style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
-                      <div style={{ marginBottom: '10px' }}>
-                        <h2 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Evolución del avance regional</h2>
-                        <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Curva de cumplimiento acumulado.</p>
-                      </div>
-                      <div style={{ height: '180px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={generalTrend} margin={{ top: 14, right: 8, bottom: 0, left: -18 }}>
-                            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 4" vertical={false} />
-                            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                            <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                            <Tooltip
-                              formatter={(v) => [`${v}%`, 'Avance']}
-                              cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '3 3' }}
-                              contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
-                            />
-                            <Line
-                              dataKey="v"
-                              name="Avance"
-                              stroke="#2563eb"
-                              strokeWidth={2.5}
-                              dot={{ r: 4, fill: '#2563eb' }}
-                              isAnimationActive={true}
-                              animationBegin={250}
-                              animationDuration={1300}
-                              animationEasing="ease-out"
-                              activeDot={{ r: 6.5, stroke: '#2563eb', strokeWidth: 2.5, fill: '#ffffff' }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
                       </div>
                     </section>
                   </div>
@@ -9143,6 +9111,8 @@ export default function Tareas2View({
 
                 </div>
               </div>
+            </div>
+            </div>
               {viewMode === 'portada' && (
                 <TareasSideCards
                   items={items}
@@ -9155,7 +9125,6 @@ export default function Tareas2View({
                   onViewAll={() => handleViewModeChange('lista')}
                 />
               )}
-            </div>
             </div>
           )}
 

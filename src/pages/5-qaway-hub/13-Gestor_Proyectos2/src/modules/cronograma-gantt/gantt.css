@@ -5714,6 +5714,11 @@ body.gantt-resizing {
   display: none !important;
 }
 
+/* Blindaje de perspectiva: La carátula territorial solo opera en perspectiva territorial (Sedes) */
+.gantt-v2.perspective-maestro .view-mode-btn-portada {
+  display: none !important;
+}
+
 /* Árbol y Multi-selección de Ubicación Territorial */
 .gantt-v2 .location-tree-group {
   display: flex;
