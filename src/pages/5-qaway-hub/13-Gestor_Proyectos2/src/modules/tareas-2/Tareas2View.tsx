@@ -24,7 +24,6 @@ import CronogramaCalendarioView from './CronogramaCalendarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
-import EquipoDirectorioView from '../equipo/EquipoDirectorioView';
 import EquipoOrganigramaView from '../equipo/EquipoOrganigramaView';
 import EquipoSedesView from '../equipo/EquipoSedesView';
 import EquipoCargaView from '../equipo/EquipoCargaView';
@@ -8096,61 +8095,36 @@ export default function Tareas2View({
           )}
 
 
-          {/* Vistas según perspectiva */}
-          {perspective === 'equipo' ? (
-            <>
-              {(viewMode === 'directorio' || viewMode === 'lista') && (
-                <EquipoDirectorioView
-                  isLoading={isEquipoLoading}
-                  integrantes={equipoIntegrantes}
-                  selectedId={equipoSelectedId}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                  onOpenExpediente={(i) => setEquipoExpediente(i)}
-                  onUpdateIntegrante={handleUpdateIntegrante}
-                  onBulkUpdateSede={handleBulkUpdateSede}
-                  onBulkUpdateEstadoOperativo={handleBulkUpdateEstadoOperativo}
-                  onBulkReenviarInvitaciones={handleBulkReenviarInvitaciones}
-                  sedes={equipoSedes}
-                  asignaciones={equipoAsignaciones}
-                  visibleColumns={['integrante', 'cargo', 'sede', 'estadoOperativo', 'estadoCuenta', 'carga']}
-                  searchQuery={search}
-                  sedeFilter={equipoSedeFilter}
-                  estadoOpFilter={equipoEstadoOpFilter}
-                  estadoCuentaFilter={equipoEstadoCuentaFilter}
-                  hideToolbar={true}
-                />
-              )}
-              {viewMode === 'organigrama' && (
-                <EquipoOrganigramaView
-                  integrantes={equipoIntegrantes}
-                  areas={equipoAreas}
-                  sedes={equipoSedes}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                />
-              )}
-              {viewMode === 'sedes' && (
-                <EquipoSedesView
-                  integrantes={equipoIntegrantes}
-                  sedes={equipoSedes}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                  onUpdateIntegrante={handleUpdateIntegrante}
-                  onUpdateSede={handleUpdateSede}
-                />
-              )}
-              {viewMode === 'carga' && (
-                <EquipoCargaView
-                  integrantes={equipoIntegrantes}
-                  asignaciones={equipoAsignaciones}
-                  sedes={equipoSedes}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                  onReasignarTarea={handleReasignarTarea}
-                />
-              )}
-            </>
-          ) : (
-            <>
+          {/* Vistas específicas de perspectiva Equipo */}
+          {perspective === 'equipo' && viewMode === 'organigrama' && (
+            <EquipoOrganigramaView
+              integrantes={equipoIntegrantes}
+              areas={equipoAreas}
+              sedes={equipoSedes}
+              onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+            />
+          )}
+          {perspective === 'equipo' && viewMode === 'sedes' && (
+            <EquipoSedesView
+              integrantes={equipoIntegrantes}
+              sedes={equipoSedes}
+              onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+              onUpdateIntegrante={handleUpdateIntegrante}
+              onUpdateSede={handleUpdateSede}
+            />
+          )}
+          {perspective === 'equipo' && viewMode === 'carga' && (
+            <EquipoCargaView
+              integrantes={equipoIntegrantes}
+              asignaciones={equipoAsignaciones}
+              sedes={equipoSedes}
+              onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+              onReasignarTarea={handleReasignarTarea}
+            />
+          )}
+
           {/* Presentación Maestro: Gantt, Lista y Carátula comparten 100% el mismo tablero unificado oficial */}
-          {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'portada') && (
+          {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'portada' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
             <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
               {/* Tarjetas Principales Analíticas de Reportes 1 en Vista Carátula */}
               {viewMode === 'portada' && (
@@ -9332,8 +9306,6 @@ export default function Tareas2View({
                 <span>Deseleccionar</span>
               </button>
             </aside>
-          )}
-            </>
           )}
 
           {/* Barra de Cálculos al pie Notion / Excel */}

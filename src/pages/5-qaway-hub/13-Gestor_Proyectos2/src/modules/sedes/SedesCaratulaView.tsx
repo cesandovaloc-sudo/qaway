@@ -92,6 +92,7 @@ export default function SedesCaratulaView({
   useEffect(() => {
     if (!mapContainerRef.current) return;
     let isCancelled = false;
+    let ro: ResizeObserver | null = null;
 
     import('leaflet').then((LModule) => {
       if (isCancelled || !mapContainerRef.current) return;
@@ -121,29 +122,34 @@ export default function SedesCaratulaView({
       const centroRegiones = new Set(['ANCASH', 'JUNIN', 'LIMA', 'HUANUCO', 'PASCO', 'HUANCAVELICA', 'AYACUCHO', 'ICA', 'UCAYALI']);
       const surRegiones = new Set(['AREQUIPA', 'CUSCO', 'PUNO', 'TACNA', 'MOQUEGUA', 'APURIMAC', 'MADRE DE DIOS']);
 
-      L.geoJSON(PERU_GEOJSON as any, {
-        style: (feature: any) => {
-          const rawName = (feature?.properties?.NOMBDEP || feature?.properties?.name || '').toUpperCase();
-          const normName = rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      let geoJsonLayer: any = null;
+      try {
+        geoJsonLayer = L.geoJSON(PERU_GEOJSON as any, {
+          style: (feature: any) => {
+            const rawName = (feature?.properties?.NOMBDEP || feature?.properties?.name || '').toUpperCase();
+            const normName = rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-          let fillColor = '#cbd5e1';
-          if (norteRegiones.has(normName)) {
-            fillColor = '#1e40af'; // Azul intenso (Norte)
-          } else if (centroRegiones.has(normName)) {
-            fillColor = '#3b82f6'; // Azul medio (Centro)
-          } else if (surRegiones.has(normName)) {
-            fillColor = '#93c5fd'; // Azul claro (Sur)
-          }
+            let fillColor = '#cbd5e1';
+            if (norteRegiones.has(normName)) {
+              fillColor = '#1e40af'; // Azul intenso (Norte)
+            } else if (centroRegiones.has(normName)) {
+              fillColor = '#3b82f6'; // Azul medio (Centro)
+            } else if (surRegiones.has(normName)) {
+              fillColor = '#93c5fd'; // Azul claro (Sur)
+            }
 
-          return {
-            fillColor: fillColor,
-            weight: 1.2,
-            opacity: 1,
-            color: '#ffffff',
-            fillOpacity: 0.85,
-          };
-        },
-      }).addTo(map);
+            return {
+              fillColor: fillColor,
+              weight: 1.2,
+              opacity: 1,
+              color: '#ffffff',
+              fillOpacity: 0.85,
+            };
+          },
+        }).addTo(map);
+      } catch (err) {
+        console.warn('Error cargando GeoJSON territorial:', err);
+      }
 
       // Pines territoriales representativos
       const cityPins = [
@@ -175,27 +181,40 @@ export default function SedesCaratulaView({
           .addTo(map);
       });
 
-      // Calibrar encuadre exacto sobre Perú
-      map.fitBounds(PERU_BOUNDS, { padding: [12, 12] });
+      // Calibrar encuadre exacto sobre Perú usando los límites del polígono GeoJSON
+      const peruBounds = geoJsonLayer && geoJsonLayer.getBounds && geoJsonLayer.getBounds().isValid()
+        ? geoJsonLayer.getBounds()
+        : L.latLngBounds(PERU_BOUNDS);
 
-      requestAnimationFrame(() => {
-        if (map) {
+      const fitPeru = () => {
+        if (!map || isCancelled) return;
+        map.invalidateSize();
+        map.fitBounds(peruBounds, { padding: [16, 16], maxZoom: 6 });
+      };
+
+      fitPeru();
+      requestAnimationFrame(fitPeru);
+      setTimeout(fitPeru, 120);
+      setTimeout(fitPeru, 350);
+
+      // ResizeObserver para mantener el mapa siempre adaptado sin desbordamientos ni saltos
+      if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
+        ro = new ResizeObserver(() => {
+          if (!map || isCancelled) return;
           map.invalidateSize();
-          map.fitBounds(PERU_BOUNDS, { padding: [12, 12] });
-        }
-      });
-      setTimeout(() => {
-        if (map) {
-          map.invalidateSize();
-          map.fitBounds(PERU_BOUNDS, { padding: [12, 12] });
-        }
-      }, 200);
+        });
+        ro.observe(mapContainerRef.current);
+      }
 
       leafletMapRef.current = map;
     });
 
     return () => {
       isCancelled = true;
+      if (ro) {
+        ro.disconnect();
+        ro = null;
+      }
       if (leafletMapRef.current) {
         leafletMapRef.current.remove();
         leafletMapRef.current = null;
@@ -228,9 +247,9 @@ export default function SedesCaratulaView({
   return (
     <div className="sd-caratula-wrapper" style={{
       display: 'grid',
-      gridTemplateColumns: '1.24fr 0.76fr',
+      gridTemplateColumns: '1.28fr 0.72fr',
       gap: '14px',
-      padding: '12px 14px',
+      padding: '10px 14px',
       flex: '1 1 0%',
       height: '100%',
       minHeight: 0,
@@ -241,7 +260,8 @@ export default function SedesCaratulaView({
     }}>
       {/* =========================================================================
           COMPONENTE 1 (Izquierda): Cobertura territorial del proyecto con Mapa
-          Cubre el 100% del área con cabecera mínima y botones horizontales compactos
+          Los botones de macrorregión y la leyenda se mantienen a la derecha del mapa
+          pero con espaciado compacto optimizado, eliminando el hueco blanco vacío.
           ========================================================================= */}
       <section style={{
         background: '#ffffff',
@@ -256,165 +276,166 @@ export default function SedesCaratulaView({
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}>
-        {/* Cabecera Mínima: Título + Chips Horizontales de Macrorregión */}
+        {/* Cabecera Mínima: Título en una sola línea compacta sin párrafos redundantes */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          gap: '8px',
           marginBottom: '8px',
           flexShrink: 0,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-            <MapPin size={15} color="#0284c7" />
-            <h2 style={{ fontSize: '13.5px', fontWeight: 750, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
-              Cobertura territorial
-            </h2>
-          </div>
-
-          {/* Chips compactos de Macrorregión (Aprovechamiento máximo del espacio) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveMacro('todas');
-                if (leafletMapRef.current) {
-                  leafletMapRef.current.flyToBounds(MACRO_BOUNDS.todas, { duration: 0.65, easeLinearity: 0.2, padding: [12, 12] });
-                }
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                background: activeMacro === 'todas' ? '#0f172a' : '#f1f5f9',
-                color: activeMacro === 'todas' ? '#ffffff' : '#475569',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <span>Todas (28)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => handleMacroClick('norte', e)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                background: activeMacro === 'norte' ? '#1e40af' : '#eff6ff',
-                color: activeMacro === 'norte' ? '#ffffff' : '#1e40af',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <span style={{ width: 8, height: 8, borderRadius: '2px', background: activeMacro === 'norte' ? '#ffffff' : '#1e40af' }} />
-              <span>Norte (11)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => handleMacroClick('centro', e)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                background: activeMacro === 'centro' ? '#2563eb' : '#eff6ff',
-                color: activeMacro === 'centro' ? '#ffffff' : '#2563eb',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <span style={{ width: 8, height: 8, borderRadius: '2px', background: activeMacro === 'centro' ? '#ffffff' : '#3b82f6' }} />
-              <span>Centro (9)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => handleMacroClick('sur', e)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                background: activeMacro === 'sur' ? '#0284c7' : '#eff6ff',
-                color: activeMacro === 'sur' ? '#ffffff' : '#0284c7',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <span style={{ width: 8, height: 8, borderRadius: '2px', background: activeMacro === 'sur' ? '#ffffff' : '#93c5fd' }} />
-              <span>Sur (8)</span>
-            </button>
-          </div>
+          <MapPin size={15} color="#0284c7" />
+          <h2 style={{ fontSize: '13.5px', fontWeight: 750, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
+            Cobertura territorial del proyecto
+          </h2>
         </div>
 
-        {/* Lienzo del Mapa Leaflet a Pantalla Completa (100% Ancho x 100% Alto) */}
+        {/* Lienzo del Mapa + Panel Lateral de Macrorregiones y Leyenda */}
         <div style={{
-          position: 'relative',
-          borderRadius: '10px',
-          overflow: 'hidden',
-          border: '1px solid #e2e8f0',
-          background: '#f8fafc',
+          display: 'grid',
+          gridTemplateColumns: '1fr 180px',
+          gap: '10px',
           flex: '1 1 0%',
           height: '100%',
           minHeight: 0,
-          width: '100%',
         }}>
-          <div ref={mapContainerRef} style={{ width: '100%', height: '100%', minHeight: '100%' }} />
-
-          {/* Leyenda discreta flotante sobre el mapa (inferior derecha) */}
+          {/* Contenedor del Mapa Leaflet Oficial (Se expande ocupando todo el ancho y alto disponible) */}
           <div style={{
-            position: 'absolute',
-            bottom: '10px',
-            right: '10px',
-            background: 'rgba(255, 255, 255, 0.94)',
-            backdropFilter: 'blur(4px)',
+            position: 'relative',
+            borderRadius: '10px',
+            overflow: 'hidden',
             border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            padding: '5px 9px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            fontSize: '11px',
-            color: '#475569',
-            boxShadow: '0 2px 8px rgba(15,23,42,0.08)',
-            zIndex: 1000,
+            background: '#f8fafc',
+            height: '100%',
+            minHeight: 0,
+            width: '100%',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#0f172a', display: 'grid', placeItems: 'center', color: '#fff' }}>
-                <MapPin size={7} />
-              </span>
-              <span>DRE</span>
+            <div ref={mapContainerRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+          </div>
+
+          {/* Panel Lateral: Botones de Macrorregión + Leyenda en su ubicación original pero sin huecos vacíos */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            background: '#ffffff',
+            padding: '2px 0',
+            overflowY: 'auto',
+          }}>
+            {/* 1. Cobertura por macrorregión */}
+            <div>
+              <h3 style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+                Cobertura por macrorregión
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <button
+                  type="button"
+                  onClick={(e) => handleMacroClick('norte', e)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '8px',
+                    background: activeMacro === 'norte' ? '#eff6ff' : '#f8fafc',
+                    border: '1px solid',
+                    borderColor: activeMacro === 'norte' ? '#bfdbfe' : '#eef2f6',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                    width: '100%',
+                  }}
+                >
+                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#1e40af', flexShrink: 0 }} />
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '12px', color: '#0f172a', lineHeight: 1.2 }}>Norte</strong>
+                    <small style={{ fontSize: '10.5px', color: '#64748b' }}>5 regiones · 11 entidades</small>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleMacroClick('centro', e)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '8px',
+                    background: activeMacro === 'centro' ? '#eff6ff' : '#f8fafc',
+                    border: '1px solid',
+                    borderColor: activeMacro === 'centro' ? '#bfdbfe' : '#eef2f6',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                    width: '100%',
+                  }}
+                >
+                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#3b82f6', flexShrink: 0 }} />
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '12px', color: '#0f172a', lineHeight: 1.2 }}>Centro</strong>
+                    <small style={{ fontSize: '10.5px', color: '#64748b' }}>4 regiones · 9 entidades</small>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleMacroClick('sur', e)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '8px',
+                    background: activeMacro === 'sur' ? '#eff6ff' : '#f8fafc',
+                    border: '1px solid',
+                    borderColor: activeMacro === 'sur' ? '#bfdbfe' : '#eef2f6',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                    width: '100%',
+                  }}
+                >
+                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#93c5fd', flexShrink: 0 }} />
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '12px', color: '#0f172a', lineHeight: 1.2 }}>Sur</strong>
+                    <small style={{ fontSize: '10.5px', color: '#64748b' }}>4 regiones · 8 entidades</small>
+                  </div>
+                </button>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#0284c7', display: 'grid', placeItems: 'center', color: '#fff' }}>
-                <MapPin size={7} />
-              </span>
-              <span>UGEL</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 12, height: 8, borderRadius: '2px', background: '#3b82f6' }} />
-              <span>Asignada</span>
+
+            {/* 2. Leyenda del mapa */}
+            <div>
+              <h3 style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+                Leyenda del mapa
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11px', color: '#475569' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0f172a', display: 'grid', placeItems: 'center', color: '#fff' }}>
+                    <MapPin size={8} />
+                  </span>
+                  <span>DRE (Sede regional)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0284c7', display: 'grid', placeItems: 'center', color: '#fff' }}>
+                    <MapPin size={8} />
+                  </span>
+                  <span>UGEL</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid #38bdf8', background: 'transparent' }} />
+                  <span>Unidad intervención</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#bfdbfe' }} />
+                  <span>Región asignada</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#e2e8f0' }} />
+                  <span>Sin asignación</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
