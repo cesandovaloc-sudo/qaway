@@ -1359,6 +1359,10 @@ export default function CronogramaGanttView({
   const projectId = activeProject?.id || 'p1';
   const currentPidRef = useRef(projectId);
 
+  /* FASE 1 — Aislamiento de UI: claves de configuración de columnas/anchos por módulo+perspectiva
+     (qaway-cronograma-{maestro|territorial|equipo}-*) para que la config de un módulo no pise la de otro. */
+  const uiKey = (k: string) => `qaway-cronograma-${perspective}-${k}`;
+
   // Estado reactivo de tareas operativas sincronizadas desde /tareas
   const [rawTasks, setRawTasks] = useState<any[]>(() => {
     try {
@@ -1410,7 +1414,7 @@ export default function CronogramaGanttView({
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
-                localStorage.removeItem('qaway-collapsed-by-mode-v1');
+                localStorage.removeItem(uiKey('collapsed-by-mode-v1'));
               } catch {}
               return TERRITORIAL_INITIAL_ITEMS;
             }
@@ -1446,7 +1450,7 @@ export default function CronogramaGanttView({
       if (pid === 'p1') {
         try {
           localStorage.setItem(storageKey, JSON.stringify(targetInitialItems));
-          localStorage.removeItem('qaway-collapsed-by-mode-v1');
+          localStorage.removeItem(uiKey('collapsed-by-mode-v1'));
         } catch {
           /* fallback */
         }
@@ -1643,7 +1647,7 @@ export default function CronogramaGanttView({
 
   const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v4') || 'null');
+      const saved = JSON.parse(localStorage.getItem(uiKey('gantt-cols-v4')) || 'null');
       if (saved && typeof saved === 'object') {
         const merged: Record<ColKey, number> = { ...DEFAULT_COLS };
         (Object.keys(DEFAULT_COLS) as ColKey[]).forEach((k) => {
@@ -2684,7 +2688,7 @@ export default function CronogramaGanttView({
 
   const [customCols, setCustomCols] = useState<CustomColDef[]>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-custom-cols-v1') || '[]');
+      const saved = JSON.parse(localStorage.getItem(uiKey('custom-cols-v1')) || '[]');
       return Array.isArray(saved) ? saved : [];
     } catch {
       return [];
@@ -2693,7 +2697,7 @@ export default function CronogramaGanttView({
 
   const [colTypeOverrides, setColTypeOverrides] = useState<Record<string, string>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-col-types-v1') || '{}');
+      return JSON.parse(localStorage.getItem(uiKey('col-types-v1')) || '{}');
     } catch {
       return {};
     }
@@ -2701,7 +2705,7 @@ export default function CronogramaGanttView({
 
   const [colCustomLabels, setColCustomLabels] = useState<Record<string, string>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-col-labels-v1') || '{}');
+      return JSON.parse(localStorage.getItem(uiKey('col-labels-v1')) || '{}');
     } catch {
       return {};
     }
@@ -2709,7 +2713,7 @@ export default function CronogramaGanttView({
 
   const [colCalculations, setColCalculations] = useState<Record<string, string>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-col-calcs-v1') || '{}');
+      return JSON.parse(localStorage.getItem(uiKey('col-calcs-v1')) || '{}');
     } catch {
       return {};
     }
@@ -2717,7 +2721,7 @@ export default function CronogramaGanttView({
 
   const [wrappedCols, setWrappedCols] = useState<Set<string>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-wrapped-cols-v1') || '[]');
+      const saved = JSON.parse(localStorage.getItem(uiKey('wrapped-cols-v1')) || '[]');
       return new Set(Array.isArray(saved) ? saved : []);
     } catch {
       return new Set();
@@ -2726,7 +2730,7 @@ export default function CronogramaGanttView({
 
   const [percentGraphFormats, setPercentGraphFormats] = useState<Record<string, 'bar' | 'ring' | 'number'>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-percent-formats-v1') || '{}');
+      return JSON.parse(localStorage.getItem(uiKey('percent-formats-v1')) || '{}');
     } catch {
       return {};
     }
@@ -2734,7 +2738,7 @@ export default function CronogramaGanttView({
 
   const [frozenCols, setFrozenCols] = useState<Set<string>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-frozen-cols-v1') || '[]');
+      const saved = JSON.parse(localStorage.getItem(uiKey('frozen-cols-v1')) || '[]');
       return new Set(Array.isArray(saved) ? saved : []);
     } catch {
       return new Set();
@@ -2764,11 +2768,11 @@ export default function CronogramaGanttView({
     const updated = [...customCols, newCol];
     setCustomCols(updated);
     try {
-      localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updated));
+      localStorage.setItem(uiKey('custom-cols-v1'), JSON.stringify(updated));
     } catch {}
 
     const isLista = viewMode === 'lista';
-    const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+    const storageKey = isLista ? uiKey('visible-cols-lista-v3') : uiKey('visible-cols-gantt-v3');
 
     setVisibleCols((prev) => {
       const next = [...prev, key as ColKey];
@@ -2782,7 +2786,7 @@ export default function CronogramaGanttView({
       const next = { ...prev, [key]: 140 };
       colRef.current = next;
       try {
-        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(next));
+        localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -2806,7 +2810,7 @@ export default function CronogramaGanttView({
       const next = { ...prev, [key]: defaultW };
       colRef.current = next;
       try {
-        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(next));
+        localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -2817,7 +2821,7 @@ export default function CronogramaGanttView({
   const loadSavedCols = (mode: string): ColKey[] => {
     if (mode === 'gantt') {
       try {
-        const saved = JSON.parse(localStorage.getItem('qaway-visible-cols-gantt-v3') || 'null');
+        const saved = JSON.parse(localStorage.getItem(uiKey('visible-cols-gantt-v3')) || 'null');
         if (Array.isArray(saved) && saved.length > 0 && saved.includes('name') && !saved.includes('code') && saved.length <= 6) {
           return saved;
         }
@@ -2826,7 +2830,7 @@ export default function CronogramaGanttView({
       return ['name'];
     }
     try {
-      const storageKey = 'qaway-visible-cols-lista-v3';
+      const storageKey = uiKey('visible-cols-lista-v3');
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
       if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
         const canonicalPart = CANONICAL_COLS.filter((k) => saved.includes(k));
@@ -2847,9 +2851,9 @@ export default function CronogramaGanttView({
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v3'), JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
-        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
     } catch {}
 
@@ -2867,9 +2871,9 @@ export default function CronogramaGanttView({
     if (viewMode === prevViewModeRef.current) return;
     try {
       if (prevViewModeRef.current === 'lista') {
-        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v3'), JSON.stringify(visibleCols));
       } else if (prevViewModeRef.current === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
-        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
     } catch {}
 
@@ -2882,9 +2886,9 @@ export default function CronogramaGanttView({
   useEffect(() => {
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v3'), JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
-        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
     } catch {
       /* almacenamiento no disponible */
@@ -2981,9 +2985,9 @@ export default function CronogramaGanttView({
     if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
 
     try {
-      const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      const storageKey = isLista ? uiKey('visible-cols-lista-v3') : uiKey('visible-cols-gantt-v3');
       localStorage.setItem(storageKey, JSON.stringify(pristineCols));
-      localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(calibratedWidths));
+      localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(calibratedWidths));
     } catch {
       /* almacenamiento no disponible */
     }
@@ -3147,13 +3151,13 @@ export default function CronogramaGanttView({
     setWrappedCols(new Set(snap.wrappedCols || []));
     setFrozenCols(new Set(snap.frozenCols || []));
     try {
-      localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(snap.customCols || []));
-      localStorage.setItem('qaway-col-types-v1', JSON.stringify(snap.colTypeOverrides || {}));
-      localStorage.setItem('qaway-col-labels-v1', JSON.stringify(snap.colCustomLabels || {}));
-      localStorage.setItem('qaway-col-calcs-v1', JSON.stringify(snap.colCalculations || {}));
-      localStorage.setItem('qaway-percent-formats-v1', JSON.stringify(snap.percentGraphFormats || {}));
-      localStorage.setItem('qaway-wrapped-cols-v1', JSON.stringify(snap.wrappedCols || []));
-      localStorage.setItem('qaway-frozen-cols-v1', JSON.stringify(snap.frozenCols || []));
+      localStorage.setItem(uiKey('custom-cols-v1'), JSON.stringify(snap.customCols || []));
+      localStorage.setItem(uiKey('col-types-v1'), JSON.stringify(snap.colTypeOverrides || {}));
+      localStorage.setItem(uiKey('col-labels-v1'), JSON.stringify(snap.colCustomLabels || {}));
+      localStorage.setItem(uiKey('col-calcs-v1'), JSON.stringify(snap.colCalculations || {}));
+      localStorage.setItem(uiKey('percent-formats-v1'), JSON.stringify(snap.percentGraphFormats || {}));
+      localStorage.setItem(uiKey('wrapped-cols-v1'), JSON.stringify(snap.wrappedCols || []));
+      localStorage.setItem(uiKey('frozen-cols-v1'), JSON.stringify(snap.frozenCols || []));
     } catch {}
   }, []);
 
@@ -3168,7 +3172,7 @@ export default function CronogramaGanttView({
     recordColumnChange();
     setColCustomLabels((prev) => {
       const next = { ...prev, [columnId]: newLabel };
-      try { localStorage.setItem('qaway-col-labels-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(uiKey('col-labels-v1'), JSON.stringify(next)); } catch {}
       return next;
     });
     notify(`Columna renombrada a "${newLabel}"`);
@@ -3178,7 +3182,7 @@ export default function CronogramaGanttView({
     recordColumnChange();
     setPercentGraphFormats((prev) => {
       const next = { ...prev, [columnId]: format };
-      try { localStorage.setItem('qaway-percent-formats-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(uiKey('percent-formats-v1'), JSON.stringify(next)); } catch {}
       return next;
     });
     notify(`Formato visual cambiado a "${format === 'ring' ? 'Circular / Anillo' : format === 'number' ? 'Solo número' : 'Barra horizontal'}"`);
@@ -3188,7 +3192,7 @@ export default function CronogramaGanttView({
     recordColumnChange();
     setColTypeOverrides((prev) => {
       const next = { ...prev, [columnId]: newType };
-      try { localStorage.setItem('qaway-col-types-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(uiKey('col-types-v1'), JSON.stringify(next)); } catch {}
       return next;
     });
     notify(`Tipo de columna cambiado a "${newType}"`);
@@ -3200,7 +3204,7 @@ export default function CronogramaGanttView({
       const next = { ...prev };
       if (!calculation) delete next[columnId];
       else next[columnId] = calculation;
-      try { localStorage.setItem('qaway-col-calcs-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(uiKey('col-calcs-v1'), JSON.stringify(next)); } catch {}
       return next;
     });
     notify(calculation ? `Cálculo activado: ${calculation}` : 'Cálculo desactivado');
@@ -3212,7 +3216,7 @@ export default function CronogramaGanttView({
       const next = new Set(prev);
       if (next.has(columnId)) next.delete(columnId);
       else next.add(columnId);
-      try { localStorage.setItem('qaway-wrapped-cols-v1', JSON.stringify(Array.from(next))); } catch {}
+      try { localStorage.setItem(uiKey('wrapped-cols-v1'), JSON.stringify(Array.from(next))); } catch {}
       return next;
     });
   }, [recordColumnChange]);
@@ -3228,7 +3232,7 @@ export default function CronogramaGanttView({
         next.add(columnId);
         notify('Columna inmovilizada');
       }
-      try { localStorage.setItem('qaway-frozen-cols-v1', JSON.stringify(Array.from(next))); } catch {}
+      try { localStorage.setItem(uiKey('frozen-cols-v1'), JSON.stringify(Array.from(next))); } catch {}
       return next;
     });
   }, [recordColumnChange, notify]);
@@ -3247,7 +3251,7 @@ export default function CronogramaGanttView({
     };
     const updatedCustom = [...customCols, newCol];
     setCustomCols(updatedCustom);
-    try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updatedCustom)); } catch {}
+    try { localStorage.setItem(uiKey('custom-cols-v1'), JSON.stringify(updatedCustom)); } catch {}
 
     setVisibleCols((prev) => {
       const idx = prev.indexOf(columnId as ColKey);
@@ -3279,7 +3283,7 @@ export default function CronogramaGanttView({
     };
     const updatedCustom = [...customCols, newCol];
     setCustomCols(updatedCustom);
-    try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updatedCustom)); } catch {}
+    try { localStorage.setItem(uiKey('custom-cols-v1'), JSON.stringify(updatedCustom)); } catch {}
 
     setItems((prev) =>
       prev.map((item) => {
@@ -3304,7 +3308,7 @@ export default function CronogramaGanttView({
     if (isCustom) {
       const nextCustom = customCols.filter((c) => c.key !== columnId);
       setCustomCols(nextCustom);
-      try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(nextCustom)); } catch {}
+      try { localStorage.setItem(uiKey('custom-cols-v1'), JSON.stringify(nextCustom)); } catch {}
     }
     setVisibleCols((prev) => prev.filter((k) => k !== columnId));
     notify('Propiedad eliminada');
@@ -3535,7 +3539,7 @@ export default function CronogramaGanttView({
       setResizingCol(null);
       document.body.classList.remove('gantt-resizing');
       try {
-        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(colRef.current));
+        localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(colRef.current));
       } catch {
         /* almacenamiento no disponible */
       }
@@ -4064,7 +4068,7 @@ export default function CronogramaGanttView({
     lista: Record<string, boolean>;
   }>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-collapsed-by-mode-v1') || 'null');
+      const saved = JSON.parse(localStorage.getItem(uiKey('collapsed-by-mode-v1')) || 'null');
       if (saved && typeof saved === 'object') return saved;
     } catch {}
     return { gantt: {}, lista: {} };
@@ -4112,7 +4116,7 @@ export default function CronogramaGanttView({
         },
       };
       try {
-        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+        localStorage.setItem(uiKey('collapsed-by-mode-v1'), JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -4609,7 +4613,7 @@ export default function CronogramaGanttView({
       });
       const next = { ...prev, [mode]: nextModeMap };
       try {
-        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+        localStorage.setItem(uiKey('collapsed-by-mode-v1'), JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -4748,7 +4752,7 @@ export default function CronogramaGanttView({
             },
           };
           try {
-            localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+            localStorage.setItem(uiKey('collapsed-by-mode-v1'), JSON.stringify(next));
           } catch {}
           return next;
         });
@@ -7324,7 +7328,7 @@ export default function CronogramaGanttView({
                   ))}
                 </div>
               </>
-            ) : viewMode === 'organigrama' && perspective !== 'equipo' ? (
+            ) : viewMode === 'organigrama' && (perspective === 'maestro' || perspective === 'territorial') ? (
               /* En Modo Organigrama EDT: Controles Oficiales de Zoom y Ajuste */
               <>
                 <button
@@ -7751,7 +7755,7 @@ export default function CronogramaGanttView({
                         const isLista = viewMode === 'lista';
                         const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
                         setVisibleCols(defaultCols);
-                        const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+                        const storageKey = isLista ? uiKey('visible-cols-lista-v3') : uiKey('visible-cols-gantt-v3');
                         try {
                           localStorage.setItem(storageKey, JSON.stringify(defaultCols));
                         } catch {}
@@ -8931,7 +8935,7 @@ export default function CronogramaGanttView({
           )}
 
           {/* Barra de Cálculos al pie Notion / Excel */}
-          {perspective !== 'equipo' && Object.keys(colCalculations).length > 0 && (
+          {(perspective === 'maestro' || perspective === 'territorial') && Object.keys(colCalculations).length > 0 && (
             <div className="te-table-calc-bar" role="status" aria-label="Cálculos de columna activos">
               <div className="te-calc-bar-header">
                 <Sigma size={13} className="te-calc-bar-icon" />

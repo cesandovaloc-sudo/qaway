@@ -790,6 +790,21 @@ const MIN_COLS: Record<ColKey, number> = {
   sede: 90,
 };
 
+/* FASE 1 — Aislamiento de UI: la configuración de columnas/anchos vive por módulo.
+   Antes: claves globales compartidas (qaway-gantt-cols-v4, etc.) pisaban la config entre módulos. */
+const LS_UI_PREFIX = 'qaway-reportes2';
+const LS_COLLAPSED_BY_MODE = `${LS_UI_PREFIX}-collapsed-by-mode-v1`;
+const LS_GANTT_COLS = `${LS_UI_PREFIX}-gantt-cols-v4`;
+const LS_CUSTOM_COLS = `${LS_UI_PREFIX}-custom-cols-v1`;
+const LS_COL_TYPES = `${LS_UI_PREFIX}-col-types-v1`;
+const LS_COL_LABELS = `${LS_UI_PREFIX}-col-labels-v1`;
+const LS_COL_CALCS = `${LS_UI_PREFIX}-col-calcs-v1`;
+const LS_WRAPPED_COLS = `${LS_UI_PREFIX}-wrapped-cols-v1`;
+const LS_PERCENT_FORMATS = `${LS_UI_PREFIX}-percent-formats-v1`;
+const LS_FROZEN_COLS = `${LS_UI_PREFIX}-frozen-cols-v1`;
+const LS_VISIBLE_COLS_GANTT = `${LS_UI_PREFIX}-visible-cols-gantt-v3`;
+const LS_VISIBLE_COLS_LISTA = `${LS_UI_PREFIX}-visible-cols-lista-v3`;
+
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'name', label: 'COMPONENTE / SUBCOMPONENTE', fixed: true },
   { key: 'code', label: 'Código' },
@@ -1400,7 +1415,7 @@ export default function Reportes2View({
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
-                localStorage.removeItem('qaway-collapsed-by-mode-v1');
+                localStorage.removeItem(LS_COLLAPSED_BY_MODE);
               } catch {}
               return TERRITORIAL_INITIAL_ITEMS;
             }
@@ -1436,7 +1451,7 @@ export default function Reportes2View({
       if (pid === 'p1') {
         try {
           localStorage.setItem(storageKey, JSON.stringify(targetInitialItems));
-          localStorage.removeItem('qaway-collapsed-by-mode-v1');
+          localStorage.removeItem(LS_COLLAPSED_BY_MODE);
         } catch {
           /* fallback */
         }
@@ -1615,7 +1630,7 @@ export default function Reportes2View({
 
   const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-gantt-cols-v4') || 'null');
+      const saved = JSON.parse(localStorage.getItem(LS_GANTT_COLS) || 'null');
       if (saved && typeof saved === 'object') {
         const merged: Record<ColKey, number> = { ...DEFAULT_COLS };
         (Object.keys(DEFAULT_COLS) as ColKey[]).forEach((k) => {
@@ -2612,7 +2627,7 @@ export default function Reportes2View({
 
   const [customCols, setCustomCols] = useState<CustomColDef[]>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-custom-cols-v1') || '[]');
+      const saved = JSON.parse(localStorage.getItem(LS_CUSTOM_COLS) || '[]');
       return Array.isArray(saved) ? saved : [];
     } catch {
       return [];
@@ -2621,7 +2636,7 @@ export default function Reportes2View({
 
   const [colTypeOverrides, setColTypeOverrides] = useState<Record<string, string>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-col-types-v1') || '{}');
+      return JSON.parse(localStorage.getItem(LS_COL_TYPES) || '{}');
     } catch {
       return {};
     }
@@ -2629,7 +2644,7 @@ export default function Reportes2View({
 
   const [colCustomLabels, setColCustomLabels] = useState<Record<string, string>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-col-labels-v1') || '{}');
+      return JSON.parse(localStorage.getItem(LS_COL_LABELS) || '{}');
     } catch {
       return {};
     }
@@ -2637,7 +2652,7 @@ export default function Reportes2View({
 
   const [colCalculations, setColCalculations] = useState<Record<string, string>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-col-calcs-v1') || '{}');
+      return JSON.parse(localStorage.getItem(LS_COL_CALCS) || '{}');
     } catch {
       return {};
     }
@@ -2645,7 +2660,7 @@ export default function Reportes2View({
 
   const [wrappedCols, setWrappedCols] = useState<Set<string>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-wrapped-cols-v1') || '[]');
+      const saved = JSON.parse(localStorage.getItem(LS_WRAPPED_COLS) || '[]');
       return new Set(Array.isArray(saved) ? saved : []);
     } catch {
       return new Set();
@@ -2654,7 +2669,7 @@ export default function Reportes2View({
 
   const [percentGraphFormats, setPercentGraphFormats] = useState<Record<string, 'bar' | 'ring' | 'number'>>(() => {
     try {
-      return JSON.parse(localStorage.getItem('qaway-percent-formats-v1') || '{}');
+      return JSON.parse(localStorage.getItem(LS_PERCENT_FORMATS) || '{}');
     } catch {
       return {};
     }
@@ -2662,7 +2677,7 @@ export default function Reportes2View({
 
   const [frozenCols, setFrozenCols] = useState<Set<string>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-frozen-cols-v1') || '[]');
+      const saved = JSON.parse(localStorage.getItem(LS_FROZEN_COLS) || '[]');
       return new Set(Array.isArray(saved) ? saved : []);
     } catch {
       return new Set();
@@ -2692,11 +2707,11 @@ export default function Reportes2View({
     const updated = [...customCols, newCol];
     setCustomCols(updated);
     try {
-      localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updated));
+      localStorage.setItem(LS_CUSTOM_COLS, JSON.stringify(updated));
     } catch {}
 
     const isLista = viewMode === 'lista';
-    const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+    const storageKey = isLista ? LS_VISIBLE_COLS_LISTA : LS_VISIBLE_COLS_GANTT;
 
     setVisibleCols((prev) => {
       const next = [...prev, key as ColKey];
@@ -2710,7 +2725,7 @@ export default function Reportes2View({
       const next = { ...prev, [key]: 140 };
       colRef.current = next;
       try {
-        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(next));
+        localStorage.setItem(LS_GANTT_COLS, JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -2734,7 +2749,7 @@ export default function Reportes2View({
       const next = { ...prev, [key]: defaultW };
       colRef.current = next;
       try {
-        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(next));
+        localStorage.setItem(LS_GANTT_COLS, JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -2745,7 +2760,7 @@ export default function Reportes2View({
   const loadSavedCols = (mode: string): ColKey[] => {
     if (mode === 'gantt') {
       try {
-        const saved = JSON.parse(localStorage.getItem('qaway-visible-cols-gantt-v3') || 'null');
+        const saved = JSON.parse(localStorage.getItem(LS_VISIBLE_COLS_GANTT) || 'null');
         if (Array.isArray(saved) && saved.length > 0 && saved.includes('name') && !saved.includes('code') && saved.length <= 6) {
           return saved;
         }
@@ -2754,7 +2769,7 @@ export default function Reportes2View({
       return ['name'];
     }
     try {
-      const storageKey = 'qaway-visible-cols-lista-v3';
+      const storageKey = LS_VISIBLE_COLS_LISTA;
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
       if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
         const canonicalPart = CANONICAL_COLS.filter((k) => saved.includes(k));
@@ -2775,9 +2790,9 @@ export default function Reportes2View({
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(LS_VISIBLE_COLS_LISTA, JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
-        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(LS_VISIBLE_COLS_GANTT, JSON.stringify(visibleCols));
       }
     } catch {}
 
@@ -2795,9 +2810,9 @@ export default function Reportes2View({
     if (viewMode === prevViewModeRef.current) return;
     try {
       if (prevViewModeRef.current === 'lista') {
-        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(LS_VISIBLE_COLS_LISTA, JSON.stringify(visibleCols));
       } else if (prevViewModeRef.current === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
-        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(LS_VISIBLE_COLS_GANTT, JSON.stringify(visibleCols));
       }
     } catch {}
 
@@ -2810,9 +2825,9 @@ export default function Reportes2View({
   useEffect(() => {
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem('qaway-visible-cols-lista-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(LS_VISIBLE_COLS_LISTA, JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
-        localStorage.setItem('qaway-visible-cols-gantt-v3', JSON.stringify(visibleCols));
+        localStorage.setItem(LS_VISIBLE_COLS_GANTT, JSON.stringify(visibleCols));
       }
     } catch {
       /* almacenamiento no disponible */
@@ -2909,9 +2924,9 @@ export default function Reportes2View({
     if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
 
     try {
-      const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+      const storageKey = isLista ? LS_VISIBLE_COLS_LISTA : LS_VISIBLE_COLS_GANTT;
       localStorage.setItem(storageKey, JSON.stringify(pristineCols));
-      localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(calibratedWidths));
+      localStorage.setItem(LS_GANTT_COLS, JSON.stringify(calibratedWidths));
     } catch {
       /* almacenamiento no disponible */
     }
@@ -3075,13 +3090,13 @@ export default function Reportes2View({
     setWrappedCols(new Set(snap.wrappedCols || []));
     setFrozenCols(new Set(snap.frozenCols || []));
     try {
-      localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(snap.customCols || []));
-      localStorage.setItem('qaway-col-types-v1', JSON.stringify(snap.colTypeOverrides || {}));
-      localStorage.setItem('qaway-col-labels-v1', JSON.stringify(snap.colCustomLabels || {}));
-      localStorage.setItem('qaway-col-calcs-v1', JSON.stringify(snap.colCalculations || {}));
-      localStorage.setItem('qaway-percent-formats-v1', JSON.stringify(snap.percentGraphFormats || {}));
-      localStorage.setItem('qaway-wrapped-cols-v1', JSON.stringify(snap.wrappedCols || []));
-      localStorage.setItem('qaway-frozen-cols-v1', JSON.stringify(snap.frozenCols || []));
+      localStorage.setItem(LS_CUSTOM_COLS, JSON.stringify(snap.customCols || []));
+      localStorage.setItem(LS_COL_TYPES, JSON.stringify(snap.colTypeOverrides || {}));
+      localStorage.setItem(LS_COL_LABELS, JSON.stringify(snap.colCustomLabels || {}));
+      localStorage.setItem(LS_COL_CALCS, JSON.stringify(snap.colCalculations || {}));
+      localStorage.setItem(LS_PERCENT_FORMATS, JSON.stringify(snap.percentGraphFormats || {}));
+      localStorage.setItem(LS_WRAPPED_COLS, JSON.stringify(snap.wrappedCols || []));
+      localStorage.setItem(LS_FROZEN_COLS, JSON.stringify(snap.frozenCols || []));
     } catch {}
   }, []);
 
@@ -3096,7 +3111,7 @@ export default function Reportes2View({
     recordColumnChange();
     setColCustomLabels((prev) => {
       const next = { ...prev, [columnId]: newLabel };
-      try { localStorage.setItem('qaway-col-labels-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(LS_COL_LABELS, JSON.stringify(next)); } catch {}
       return next;
     });
     notify(`Columna renombrada a "${newLabel}"`);
@@ -3106,7 +3121,7 @@ export default function Reportes2View({
     recordColumnChange();
     setPercentGraphFormats((prev) => {
       const next = { ...prev, [columnId]: format };
-      try { localStorage.setItem('qaway-percent-formats-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(LS_PERCENT_FORMATS, JSON.stringify(next)); } catch {}
       return next;
     });
     notify(`Formato visual cambiado a "${format === 'ring' ? 'Circular / Anillo' : format === 'number' ? 'Solo número' : 'Barra horizontal'}"`);
@@ -3116,7 +3131,7 @@ export default function Reportes2View({
     recordColumnChange();
     setColTypeOverrides((prev) => {
       const next = { ...prev, [columnId]: newType };
-      try { localStorage.setItem('qaway-col-types-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(LS_COL_TYPES, JSON.stringify(next)); } catch {}
       return next;
     });
     notify(`Tipo de columna cambiado a "${newType}"`);
@@ -3128,7 +3143,7 @@ export default function Reportes2View({
       const next = { ...prev };
       if (!calculation) delete next[columnId];
       else next[columnId] = calculation;
-      try { localStorage.setItem('qaway-col-calcs-v1', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(LS_COL_CALCS, JSON.stringify(next)); } catch {}
       return next;
     });
     notify(calculation ? `Cálculo activado: ${calculation}` : 'Cálculo desactivado');
@@ -3140,7 +3155,7 @@ export default function Reportes2View({
       const next = new Set(prev);
       if (next.has(columnId)) next.delete(columnId);
       else next.add(columnId);
-      try { localStorage.setItem('qaway-wrapped-cols-v1', JSON.stringify(Array.from(next))); } catch {}
+      try { localStorage.setItem(LS_WRAPPED_COLS, JSON.stringify(Array.from(next))); } catch {}
       return next;
     });
   }, [recordColumnChange]);
@@ -3156,7 +3171,7 @@ export default function Reportes2View({
         next.add(columnId);
         notify('Columna inmovilizada');
       }
-      try { localStorage.setItem('qaway-frozen-cols-v1', JSON.stringify(Array.from(next))); } catch {}
+      try { localStorage.setItem(LS_FROZEN_COLS, JSON.stringify(Array.from(next))); } catch {}
       return next;
     });
   }, [recordColumnChange, notify]);
@@ -3175,7 +3190,7 @@ export default function Reportes2View({
     };
     const updatedCustom = [...customCols, newCol];
     setCustomCols(updatedCustom);
-    try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updatedCustom)); } catch {}
+    try { localStorage.setItem(LS_CUSTOM_COLS, JSON.stringify(updatedCustom)); } catch {}
 
     setVisibleCols((prev) => {
       const idx = prev.indexOf(columnId as ColKey);
@@ -3207,7 +3222,7 @@ export default function Reportes2View({
     };
     const updatedCustom = [...customCols, newCol];
     setCustomCols(updatedCustom);
-    try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(updatedCustom)); } catch {}
+    try { localStorage.setItem(LS_CUSTOM_COLS, JSON.stringify(updatedCustom)); } catch {}
 
     setItems((prev) =>
       prev.map((item) => {
@@ -3232,7 +3247,7 @@ export default function Reportes2View({
     if (isCustom) {
       const nextCustom = customCols.filter((c) => c.key !== columnId);
       setCustomCols(nextCustom);
-      try { localStorage.setItem('qaway-custom-cols-v1', JSON.stringify(nextCustom)); } catch {}
+      try { localStorage.setItem(LS_CUSTOM_COLS, JSON.stringify(nextCustom)); } catch {}
     }
     setVisibleCols((prev) => prev.filter((k) => k !== columnId));
     notify('Propiedad eliminada');
@@ -3463,7 +3478,7 @@ export default function Reportes2View({
       setResizingCol(null);
       document.body.classList.remove('gantt-resizing');
       try {
-        localStorage.setItem('qaway-gantt-cols-v4', JSON.stringify(colRef.current));
+        localStorage.setItem(LS_GANTT_COLS, JSON.stringify(colRef.current));
       } catch {
         /* almacenamiento no disponible */
       }
@@ -3975,7 +3990,7 @@ export default function Reportes2View({
     lista: Record<string, boolean>;
   }>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('qaway-collapsed-by-mode-v1') || 'null');
+      const saved = JSON.parse(localStorage.getItem(LS_COLLAPSED_BY_MODE) || 'null');
       if (saved && typeof saved === 'object') return saved;
     } catch {}
     return { gantt: {}, lista: {} };
@@ -4023,7 +4038,7 @@ export default function Reportes2View({
         },
       };
       try {
-        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+        localStorage.setItem(LS_COLLAPSED_BY_MODE, JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -4518,7 +4533,7 @@ export default function Reportes2View({
       });
       const next = { ...prev, [mode]: nextModeMap };
       try {
-        localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+        localStorage.setItem(LS_COLLAPSED_BY_MODE, JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -4657,7 +4672,7 @@ export default function Reportes2View({
             },
           };
           try {
-            localStorage.setItem('qaway-collapsed-by-mode-v1', JSON.stringify(next));
+            localStorage.setItem(LS_COLLAPSED_BY_MODE, JSON.stringify(next));
           } catch {}
           return next;
         });
@@ -7156,7 +7171,7 @@ export default function Reportes2View({
                   ))}
                 </div>
               </>
-            ) : viewMode === 'organigrama' && perspective !== 'equipo' ? (
+            ) : viewMode === 'organigrama' && (perspective === 'maestro' || perspective === 'territorial') ? (
               /* En Modo Organigrama EDT: Controles Oficiales de Zoom y Ajuste */
               <>
                 <button
@@ -7583,7 +7598,7 @@ export default function Reportes2View({
                         const isLista = viewMode === 'lista';
                         const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
                         setVisibleCols(defaultCols);
-                        const storageKey = isLista ? 'qaway-visible-cols-lista-v3' : 'qaway-visible-cols-gantt-v3';
+                        const storageKey = isLista ? LS_VISIBLE_COLS_LISTA : LS_VISIBLE_COLS_GANTT;
                         try {
                           localStorage.setItem(storageKey, JSON.stringify(defaultCols));
                         } catch {}
@@ -8751,7 +8766,7 @@ export default function Reportes2View({
           )}
 
           {/* Barra de Cálculos al pie Notion / Excel */}
-          {perspective !== 'equipo' && Object.keys(colCalculations).length > 0 && (
+          {(perspective === 'maestro' || perspective === 'territorial') && Object.keys(colCalculations).length > 0 && (
             <div className="te-table-calc-bar" role="status" aria-label="Cálculos de columna activos">
               <div className="te-calc-bar-header">
                 <Sigma size={13} className="te-calc-bar-icon" />
