@@ -129,6 +129,7 @@ import {
   Layers3,
   LayoutDashboard,
   List,
+  ListChecks,
   FolderKanban,
   GitCompareArrows,
   GitFork,
@@ -175,7 +176,7 @@ import {
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
 export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
+type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
 type EditField = ColKey;
 
 const generalTrend = [
@@ -763,7 +764,7 @@ const getItemGestores = (item: Item): string[] => {
 const TYPE_OPTIONS = [
   { value: 'Todos', label: 'Todos' },
   { value: 'Hitos', label: 'Solo Componentes' },
-  { value: 'Subprocesos', label: 'Solo Subcomponentes' },
+  { value: 'Subprocesos', label: 'Solo Productos' },
 ];
 
 const PROJECT_MONTHS = [
@@ -780,7 +781,7 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
@@ -797,7 +798,8 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   region: 140,
   deviation: 120,
   actualEnd: 130,
-  actions: 80,
+  reportType: 185,
+  actions: 125,
   distrito: 130,
   sede: 130,
 };
@@ -817,13 +819,14 @@ const MIN_COLS: Record<ColKey, number> = {
   region: 95,
   deviation: 90,
   actualEnd: 100,
-  actions: 60,
+  reportType: 140,
+  actions: 100,
   distrito: 90,
   sede: 90,
 };
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
-  { key: 'name', label: 'COMPONENTE / SUBCOMPONENTE', fixed: true },
+  { key: 'name', label: 'COMPONENTE / PRODUCTO', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
   { key: 'parent', label: 'Componente padre' },
@@ -837,14 +840,15 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Ámbito' },
   { key: 'actualEnd', label: 'Fecha real' },
-  { key: 'actions', label: 'Acciones' },
+  { key: 'reportType', label: 'Formato de Reporte' },
+  { key: 'actions', label: 'Acción' },
 ];
 
 // Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
 const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
-const PORTADA_PRESET_COLS: ColKey[] = ['name', 'gestor', 'parent', 'end', 'status', 'progress', 'actions'];
+const PORTADA_PRESET_COLS: ColKey[] = ['name', 'gestor', 'parent', 'end', 'status', 'progress', 'reportType', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -864,7 +868,7 @@ const GANTT_HIERARCHY: Hierarchy<Item> = {
 };
 
 const GANTT_COLUMNS: ColumnDef<Item>[] = [
-  { id: 'name', label: 'COMPONENTE / SUBCOMPONENTE', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
+  { id: 'name', label: 'COMPONENTE / PRODUCTO', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
   { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r?.start },
   { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r?.end },
   { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r?.start, r?.end) },
@@ -4937,7 +4941,7 @@ export default function Tareas2View({
       );
     }
     if (colKey === 'name') {
-      const colLabelText = getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / SUBCOMPONENTE');
+      const colLabelText = getColLabel('name', viewMode === 'lista' ? 'Nombre' : 'COMPONENTE / PRODUCTO');
       return (
         <div key="name" className="name-head">
           <span className="name-head-label" title={colLabelText}>
@@ -5050,38 +5054,54 @@ export default function Tareas2View({
     }
 
     if (colKey === 'name') {
+      const hasChildren = items.some((c) => c.parentId === x.id);
+      const nodeType: 'COMPONENTE' | 'PRODUCTO' | 'PAQUETE_TRABAJO' | 'HITO' =
+        x.wbsNodeType === 'SUBCOMPONENTE'
+          ? 'PRODUCTO'
+          : (x.wbsNodeType as any) ||
+            (!x.parentId ? (hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO') : hasChildren ? 'PRODUCTO' : (x.kind === 'hito' || x.start === x.end ? 'HITO' : 'PAQUETE_TRABAJO'));
+
       return (
         <div key="name" className="name-cell">
           {getItemDepth(x) > 0 && (
-            <span style={{ width: `${getItemDepth(x) * 20}px`, flexShrink: 0 }} />
+            <span style={{ width: `${getItemDepth(x) * 18}px`, flexShrink: 0 }} />
           )}
-          {items.some((c) => c.parentId === x.id) ? (
+          {hasChildren ? (
             <button
               className="expand"
               onClick={(e) => {
                 e.stopPropagation();
                 toggleItemExpand(x.id, x.expanded !== false);
               }}
+              title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar nodo" : "Expandir nodo"}
             >
               {isItemExpanded(x.id, x.expanded !== false) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
           ) : (
-            <button
-              type="button"
-              className="row-icon-action"
-              onClick={(e) => {
-                e.stopPropagation();
-                openEditorForItem(x);
-              }}
-            >
-              <FileText size={15} className="file" />
-            </button>
+            <span className="expand-spacer" style={{ width: 20, height: 24, display: 'inline-block', flexShrink: 0 }} />
           )}
-          {viewMode === 'gantt' && Boolean(x.code) && (
-            <span className="code" style={{ fontWeight: 500 }}>
-              {x.kind === 'hito' && (
-                <span className="hito-micro-diamond">◆</span>
-              )}
+          {nodeType === 'COMPONENTE' && (
+            <span className="gantt-row-icon componente" title="Componente rector">
+              <Layers size={14} />
+            </span>
+          )}
+          {nodeType === 'PRODUCTO' && (
+            <span className="gantt-row-icon producto" title="Producto entregable">
+              <Package size={13} />
+            </span>
+          )}
+          {nodeType === 'HITO' && (
+            <span className="gantt-row-icon hito" title="Hito clave">
+              <Flag size={13} />
+            </span>
+          )}
+          {nodeType === 'PAQUETE_TRABAJO' && (
+            <span className="gantt-row-icon paquete" title="Paquete de trabajo / Entregable">
+              <ListChecks size={13} />
+            </span>
+          )}
+          {Boolean(x.code) && (
+            <span className="code" style={{ fontWeight: 500, color: '#64748b', fontSize: '12.5px', flexShrink: 0 }}>
               {x.code}
             </span>
           )}
@@ -5882,6 +5902,34 @@ export default function Tareas2View({
       );
     }
 
+    if (colKey === 'reportType') {
+      const isHeaderLevel = !x.parentId || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || x.kind === 'hito';
+      return (
+        <div
+          key="reportType"
+          className="report-type-cell"
+          title={isHeaderLevel ? `Formato: ${x.reportType || 'Matriz de entregables'}` : 'Subproceso operativo territorial'}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isHeaderLevel) {
+              openEditorForItem(x);
+            }
+          }}
+        >
+          {isHeaderLevel ? (
+            <span className="presentation-badge">
+              <BarChart3 size={13} />
+              <span>{x.reportType || 'Matriz de entregables'}</span>
+            </span>
+          ) : (
+            <small className="subproceso-text">
+              Subproceso operativo territorial
+            </small>
+          )}
+        </div>
+      );
+    }
+
     if (colKey === 'actions') {
       return (
         <div
@@ -5891,14 +5939,15 @@ export default function Tareas2View({
         >
           <button
             type="button"
-            className="row-action-btn"
-            title="Ver detalle del registro"
+            className="btn-open-report"
+            title="Abrir reporte o ficha del entregable"
             onClick={(e) => {
               e.stopPropagation();
               openEditorForItem(x);
             }}
           >
-            <MoreHorizontal size={14} />
+            <span>Abrir reporte</span>
+            <ChevronRight size={12} />
           </button>
         </div>
       );

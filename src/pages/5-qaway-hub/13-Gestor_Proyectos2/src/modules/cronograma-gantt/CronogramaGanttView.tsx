@@ -326,10 +326,13 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
   });
 
   // Cálculo de profundidad para procesamiento bottom-up estricto
+  const itemsById = new Map<string, Item>();
+  items.forEach((it) => itemsById.set(it.id, it));
+
   const depthMap = new Map<string, number>();
   const getDepth = (id: string): number => {
     if (depthMap.has(id)) return depthMap.get(id)!;
-    const item = items.find((x) => x.id === id);
+    const item = itemsById.get(id);
     if (!item || !item.parentId) {
       depthMap.set(id, 0);
       return 0;
@@ -347,7 +350,7 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
 
   // Rollup de avance, fechas y estado en contenedores
   containers.forEach((parent) => {
-    const children = items.filter((x) => x.parentId === parent.id);
+    const children = parentToChildren.get(parent.id) ?? [];
     if (children.length > 0) {
       const totalProgress = children.reduce((sum, c) => sum + (typeof c.progress === 'number' ? c.progress : 0), 0);
       parent.progress = Math.min(100, Math.max(0, Math.round(totalProgress / children.length)));
@@ -1462,6 +1465,24 @@ export default function CronogramaGanttView({
       setSelectedId(null);
     }
   }, [projectId, perspective]);
+
+  /* Índices O(1) del EDT: evitan recorridos O(n²) al filtrar miles de ítems territoriales */
+  const itemsById = useMemo(() => {
+    const map = new Map<string, Item>();
+    for (const it of items) map.set(it.id, it);
+    return map;
+  }, [items]);
+
+  const childrenByParent = useMemo(() => {
+    const map = new Map<string, Item[]>();
+    for (const it of items) {
+      if (!it.parentId) continue;
+      const bucket = map.get(it.parentId);
+      if (bucket) bucket.push(it);
+      else map.set(it.parentId, [it]);
+    }
+    return map;
+  }, [items]);
 
   // Autocuración y persistencia inmediata de dependencias si provienen de caché anterior sin dependencias
   useEffect(() => {
@@ -3882,7 +3903,7 @@ export default function CronogramaGanttView({
     const dMap = new Map<string, number>();
     const getDepth = (id: string): number => {
       if (dMap.has(id)) return dMap.get(id)!;
-      const it = items.find((x) => x.id === id);
+      const it = itemsById.get(id);
       if (!it || !it.parentId) {
         dMap.set(id, 0);
         return 0;
@@ -3893,7 +3914,7 @@ export default function CronogramaGanttView({
     };
     items.forEach((it) => getDepth(it.id));
     return dMap;
-  }, [items]);
+  }, [items, itemsById]);
 
   // Profundidad máxima real presente en los datos
   const maxProjectDepth = useMemo(() => {
@@ -3924,19 +3945,19 @@ export default function CronogramaGanttView({
   // Paquetes de trabajo: hasChildren === false (nodos terminales con fechas y entregable)
   const rolesCounts = useMemo(() => {
     const componentes = items.filter((x) => !x.parentId).length;
-    const productos = items.filter((x) => Boolean(x.parentId) && items.some((c) => c.parentId === x.id)).length;
-    const paquetes = items.filter((x) => !items.some((c) => c.parentId === x.id)).length;
+    const productos = items.filter((x) => Boolean(x.parentId) && childrenByParent.has(x.id)).length;
+    const paquetes = items.filter((x) => !childrenByParent.has(x.id)).length;
     return { componentes, productos, paquetes };
-  }, [items]);
+  }, [items, childrenByParent]);
 
   // Desglose oficial de niveles WBS según taxonomía PM4R (BID)
   const intermediosCount = useMemo(() => {
-    return items.filter((x) => Boolean(x.parentId) && items.some((c) => c.parentId === x.id)).length;
-  }, [items]);
+    return items.filter((x) => Boolean(x.parentId) && childrenByParent.has(x.id)).length;
+  }, [items, childrenByParent]);
 
   const paquetesCount = useMemo(() => {
-    return items.filter((x) => !items.some((c) => c.parentId === x.id)).length;
-  }, [items]);
+    return items.filter((x) => !childrenByParent.has(x.id)).length;
+  }, [items, childrenByParent]);
 
   // Conteo de elementos por período de vencimiento
   const criticalItemsCount = useMemo(() => {
@@ -4183,11 +4204,18 @@ export default function CronogramaGanttView({
 
   const shownBase = useMemo(() => {
     const isMaestro = perspective === 'maestro';
+    const macroDef = macroFilter !== 'Todos' ? getMacroById(macroFilter) : undefined;
+    const targetPhaseDef =
+      phaseFilter !== 'Todas'
+        ? PROJECT_PHASES_CATALOG.find((p) => p.id === phaseFilter || p.name === phaseFilter)
+        : undefined;
+    const targetPhaseId = targetPhaseDef?.id || phaseFilter;
+    const targetPhaseName = targetPhaseDef?.name || phaseFilter;
     return items.filter((x) => {
       if (isMaestro && isTerritorialSedeOnlyItem(x)) {
         return false;
       }
-      const parent = items.find((p) => p.id === x.parentId);
+      const parent = x.parentId ? itemsById.get(x.parentId) : undefined;
       const matchSearch = `${x.code} ${x.name}`.toLowerCase().includes(search.toLowerCase());
       const matchEngine = !engineMatchIds || engineMatchIds.has(x.id);
       const matchState =
@@ -4229,15 +4257,8 @@ export default function CronogramaGanttView({
         isExplicitSedeMatch ||
         (matchingGestorIds ? matchingGestorIds.has(x.id) : false);
 
-      const macroDef = macroFilter !== 'Todos' ? getMacroById(macroFilter) : undefined;
       const matchMacro =
         !macroDef || !x.region || x.region === MULTI_REGION_VALUE || macroDef.regiones.includes(x.region);
-      const targetPhaseDef =
-        phaseFilter !== 'Todas'
-          ? PROJECT_PHASES_CATALOG.find((p) => p.id === phaseFilter || p.name === phaseFilter)
-          : undefined;
-      const targetPhaseId = targetPhaseDef?.id || phaseFilter;
-      const targetPhaseName = targetPhaseDef?.name || phaseFilter;
       const matchPhase =
         phaseFilter === 'Todas' ||
         x.phase === targetPhaseId ||
@@ -4258,8 +4279,8 @@ export default function CronogramaGanttView({
         if (x.kind === 'hito') {
           // El hito coincide si su propio rango se solapa O si cualquiera de sus subprocesos se solapa
           const selfOverlaps = x.start <= rangeTo && x.end >= rangeFrom;
-          const anyChildOverlaps = items.some(
-            (c) => c.parentId === x.id && c.start <= rangeTo && c.end >= rangeFrom
+          const anyChildOverlaps = (childrenByParent.get(x.id) ?? []).some(
+            (c) => c.start <= rangeTo && c.end >= rangeFrom
           );
           matchRange = selfOverlaps || anyChildOverlaps;
         } else {
@@ -4275,7 +4296,7 @@ export default function CronogramaGanttView({
       } else {
         let currParentId = x.parentId;
         while (currParentId) {
-          const pNode = items.find((p) => p.id === currParentId);
+          const pNode = itemsById.get(currParentId);
           if (!pNode) {
             // Si el padre no existe en el conjunto de items, es un elemento huérfano. Ocultar.
             notCollapsed = false;
@@ -4327,7 +4348,7 @@ export default function CronogramaGanttView({
       const depth = itemDepthMap.get(x.id) ?? 0;
       const matchDepth = wbsDepthFilter === 'todos' || depth === wbsDepthFilter;
 
-      const hasChildren = items.some((c) => c.parentId === x.id);
+      const hasChildren = childrenByParent.has(x.id);
       let matchRole = true;
       if (wbsRoleFilter === 'componentes') {
         matchRole = !x.parentId;
@@ -4410,7 +4431,7 @@ export default function CronogramaGanttView({
             const selfMatch = isOverlapping(item.start, item.end, fStart, fEnd);
             if (selfMatch) return true;
             if (item.kind === 'hito') {
-              return items.some((c) => c.parentId === item.id && isOverlapping(c.start, c.end, fStart, fEnd));
+              return (childrenByParent.get(item.id) ?? []).some((c) => isOverlapping(c.start, c.end, fStart, fEnd));
             }
             return false;
           };
@@ -4484,7 +4505,9 @@ export default function CronogramaGanttView({
     matchingGestorIds,
     selectedEdtCodes,
     matchingEdtIds,
-    itemDepthMap
+    itemDepthMap,
+    itemsById,
+    childrenByParent
   ]);
 
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
@@ -4512,8 +4535,8 @@ export default function CronogramaGanttView({
 
   /* Control de Colapso / Despliegue 100% INDEPENDIENTE por vista (Gantt vs Lista) */
   const parentItems = useMemo(() => {
-    return items.filter((it) => items.some((child) => child.parentId === it.id));
-  }, [items]);
+    return items.filter((it) => childrenByParent.has(it.id));
+  }, [items, childrenByParent]);
 
   // Si al menos un nodo contenedor está expandido, el botón de colapso contraerá todo a Nivel 1.
   const hasAnyExpanded = useMemo(() => {
@@ -4979,7 +5002,7 @@ export default function CronogramaGanttView({
           {getItemDepth(x) > 0 && (
             <span style={{ width: `${getItemDepth(x) * 20}px`, flexShrink: 0 }} />
           )}
-          {items.some((c) => c.parentId === x.id) ? (
+          {childrenByParent.has(x.id) ? (
             <button
               className="expand"
               onClick={(e) => {
@@ -5137,7 +5160,7 @@ export default function CronogramaGanttView({
     }
 
     if (colKey === 'parent') {
-      const parentItem = x.parentId ? items.find((p) => p.id === x.parentId) : null;
+      const parentItem = x.parentId ? itemsById.get(x.parentId) ?? null : null;
       return (
         <div
           key="parent"
@@ -5282,7 +5305,7 @@ export default function CronogramaGanttView({
 
     if (colKey === 'progress') {
       const statusTone = x.progress === 100 ? 'green' : x.status === 'Con retraso' ? 'red' : x.status === 'Pendiente' ? 'gray' : 'blue';
-      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === x.id));
+      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || childrenByParent.has(x.id));
       const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
       const format = percentGraphFormats['progress'] || 'bar';
 
@@ -8353,7 +8376,7 @@ export default function CronogramaGanttView({
                     }
 
                     // 2. Si el contenedor tiene hijos ocultos/colapsados (no mostrados en pantalla), recolectar dependencias externas
-                    const hasVisibleChildren = items.some((c) => c.parentId === item.id && shownSet.has(c.id));
+                    const hasVisibleChildren = (childrenByParent.get(item.id) ?? []).some((c) => shownSet.has(c.id));
                     if (!hasVisibleChildren) {
                       items.forEach((subIt) => {
                         if (subIt.parentId === item.id && subIt.dependencies && subIt.dependencies.length > 0) {
