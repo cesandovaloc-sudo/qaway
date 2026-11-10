@@ -124,7 +124,6 @@ import {
   Layers3,
   LayoutDashboard,
   List,
-  ListChecks,
   FolderKanban,
   GitCompareArrows,
   GitFork,
@@ -170,7 +169,7 @@ import {
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
 export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
+type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
 type EditField = ColKey;
 
 export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
@@ -750,7 +749,7 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
@@ -767,8 +766,7 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   region: 140,
   deviation: 120,
   actualEnd: 130,
-  reportType: 185,
-  actions: 125,
+  actions: 80,
   distrito: 130,
   sede: 130,
 };
@@ -788,8 +786,7 @@ const MIN_COLS: Record<ColKey, number> = {
   region: 95,
   deviation: 90,
   actualEnd: 100,
-  reportType: 140,
-  actions: 100,
+  actions: 60,
   distrito: 90,
   sede: 90,
 };
@@ -809,7 +806,6 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Ámbito' },
   { key: 'actualEnd', label: 'Fecha real' },
-  { key: 'reportType', label: 'Formato de Reporte' },
   { key: 'actions', label: 'Acciones' },
 ];
 
@@ -4978,52 +4974,38 @@ export default function CronogramaGanttView({
     }
 
     if (colKey === 'name') {
-      const hasChildren = items.some((c) => c.parentId === x.id);
-      const nodeType: 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO' =
-        x.wbsNodeType ||
-        (!x.parentId ? (hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO') : hasChildren ? 'SUBCOMPONENTE' : (x.kind === 'hito' || x.start === x.end ? 'HITO' : 'PAQUETE_TRABAJO'));
-
       return (
         <div key="name" className="name-cell">
           {getItemDepth(x) > 0 && (
-            <span style={{ width: `${getItemDepth(x) * 18}px`, flexShrink: 0 }} />
+            <span style={{ width: `${getItemDepth(x) * 20}px`, flexShrink: 0 }} />
           )}
-          {hasChildren ? (
+          {items.some((c) => c.parentId === x.id) ? (
             <button
               className="expand"
               onClick={(e) => {
                 e.stopPropagation();
                 toggleItemExpand(x.id, x.expanded !== false);
               }}
-              title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar nodo" : "Expandir nodo"}
             >
               {isItemExpanded(x.id, x.expanded !== false) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
           ) : (
-            <span className="expand-spacer" style={{ width: 20, height: 24, display: 'inline-block', flexShrink: 0 }} />
+            <button
+              type="button"
+              className="row-icon-action"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEditorForItem(x);
+              }}
+            >
+              <FileText size={15} className="file" />
+            </button>
           )}
-          {nodeType === 'COMPONENTE' && (
-            <span className="gantt-row-icon componente" title="Componente rector">
-              <Layers size={14} />
-            </span>
-          )}
-          {nodeType === 'SUBCOMPONENTE' && (
-            <span className="gantt-row-icon subcomponente" title="Subcomponente / Producto">
-              <Package size={13} />
-            </span>
-          )}
-          {nodeType === 'HITO' && (
-            <span className="gantt-row-icon hito" title="Hito clave">
-              <Flag size={13} />
-            </span>
-          )}
-          {nodeType === 'PAQUETE_TRABAJO' && (
-            <span className="gantt-row-icon paquete" title="Paquete de trabajo / Entregable">
-              <ListChecks size={13} />
-            </span>
-          )}
-          {Boolean(x.code) && (
-            <span className="code" style={{ fontWeight: 500, color: '#64748b', fontSize: '12.5px', flexShrink: 0 }}>
+          {viewMode === 'gantt' && Boolean(x.code) && (
+            <span className="code" style={{ fontWeight: 500 }}>
+              {x.kind === 'hito' && (
+                <span className="hito-micro-diamond">◆</span>
+              )}
               {x.code}
             </span>
           )}
@@ -5688,34 +5670,6 @@ export default function CronogramaGanttView({
       );
     }
 
-    if (colKey === 'reportType') {
-      const isHeaderLevel = !x.parentId || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || x.kind === 'hito';
-      return (
-        <div
-          key="reportType"
-          className="report-type-cell"
-          title={isHeaderLevel ? `Formato: ${x.reportType || 'Matriz de entregables'}` : 'Subproceso operativo territorial'}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isHeaderLevel) {
-              openEditorForItem(x);
-            }
-          }}
-        >
-          {isHeaderLevel ? (
-            <span className="presentation-badge">
-              <BarChart3 size={13} />
-              <span>{x.reportType || 'Matriz de entregables'}</span>
-            </span>
-          ) : (
-            <small className="subproceso-text">
-              Subproceso operativo territorial
-            </small>
-          )}
-        </div>
-      );
-    }
-
     if (colKey === 'actions') {
       return (
         <div
@@ -5725,15 +5679,14 @@ export default function CronogramaGanttView({
         >
           <button
             type="button"
-            className="btn-open-report"
-            title="Abrir reporte o ficha del entregable"
+            className="row-action-btn"
+            title="Ver detalle del registro"
             onClick={(e) => {
               e.stopPropagation();
               openEditorForItem(x);
             }}
           >
-            <span>Abrir reporte</span>
-            <ChevronRight size={12} />
+            <MoreHorizontal size={14} />
           </button>
         </div>
       );

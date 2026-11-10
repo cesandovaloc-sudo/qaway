@@ -1942,7 +1942,7 @@
   display: flex;
   align-items: center;
   padding: 0 8px;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid rgba(226, 232, 240, 0.35);
   position: relative;
   min-width: 0;
   overflow: visible;
@@ -2353,7 +2353,7 @@
   position: relative;
   min-height: 48px;
   background: #ffffff;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.45);
+  border-bottom: 1px solid rgba(241, 245, 249, 0.4);
   cursor: pointer;
   color: #1e293b;
   font-size: 13.5px;
@@ -2361,7 +2361,7 @@
 }
 
 .gantt-v2 .row.stripe {
-  background: #f8fafc;
+  background: #fafbfc;
 }
 
 .gantt-v2 .row:hover {
@@ -2401,7 +2401,7 @@
 }
 
 .gantt-v2 .row.hito.stripe {
-  background: #f8fafc;
+  background: #fafbfc;
 }
 
 .gantt-v2 .row .fixed-cols {
@@ -2409,7 +2409,7 @@
 }
 
 .gantt-v2 .row.stripe .fixed-cols {
-  background: #f8fafc;
+  background: #fafbfc;
 }
 
 .gantt-v2 .row.selected .fixed-cols {
@@ -2440,7 +2440,7 @@
   align-items: center;
   padding: 0 10px;
   min-width: 0;
-  border-right: 1px solid #e9edf3;
+  border-right: 1px solid rgba(226, 232, 240, 0.25);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
