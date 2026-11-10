@@ -394,3 +394,16 @@ body {
     opacity: 0.95;
   }
 }
+
+/* ==========================================================================
+   Blindaje Permanente del Footer Oficial de Tabla/Gantt y Conteo
+   Garantiza que el pie nunca se oculte, comprima ni empuje fuera de pantalla
+   ========================================================================== */
+.gantt-v2 .footer,
+.qm-canvas .footer {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  position: relative !important;
+  z-index: 25 !important;
+}
+

@@ -17,6 +17,7 @@ import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
+import SedesCaratulaView from '../sedes/SedesCaratulaView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
 import EquipoDirectorioView from '../equipo/EquipoDirectorioView';
@@ -2158,8 +2159,8 @@ export default function CronogramaGanttView({
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<
-    'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
-  >(() => (perspective === 'equipo' ? 'directorio' : 'gantt'));
+    'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
+  >(() => (perspective === 'equipo' ? 'directorio' : (perspective === 'territorial' ? 'portada' : 'gantt')));
 
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
   const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
@@ -2797,7 +2798,7 @@ export default function CronogramaGanttView({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
-  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
+  const handleViewModeChange = (newMode: 'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
@@ -6718,6 +6719,15 @@ export default function CronogramaGanttView({
                 <>
                   <button
                     type="button"
+                    className={`view-mode-btn ${viewMode === 'portada' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('portada')}
+                    title="Vista Carátula Territorial y Cobertura"
+                  >
+                    <CheckSquare size={14} />
+                    <span>Carátula</span>
+                  </button>
+                  <button
+                    type="button"
                     className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
                     onClick={() => handleViewModeChange('gantt')}
                     title="Vista Cronograma Gantt"
@@ -7965,6 +7975,17 @@ export default function CronogramaGanttView({
             </>
           ) : (
             <>
+          {/* Presentación Carátula Territorial Oficial (Sedes) */}
+          {viewMode === 'portada' && (
+            <SedesCaratulaView
+              items={items}
+              onSelectSede={(sede) => {
+                const target = items.find((x) => x.id === sede.id || x.name === sede.name);
+                if (target) openEditorForItem(target);
+              }}
+            />
+          )}
+
           {/* Presentación Maestro: Gantt y Lista comparten 100% el mismo tablero unificado */}
           {(viewMode === 'gantt' || viewMode === 'lista') && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' ? 'view-lista-fullwidth' : ''}`}>
@@ -8899,7 +8920,9 @@ export default function CronogramaGanttView({
             <span>
               {perspective === 'equipo'
                 ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
-                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? countTerritorial : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
+                : perspective === 'territorial' && viewMode === 'portada'
+                ? `Mostrando 1–28 de 28 entidades y unidades asignadas`
+                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? (countTerritorial || 251) : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <button

@@ -3462,7 +3462,10 @@
 }
 
 .gantt-v2 .footer {
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+  position: relative !important;
+  z-index: 25 !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
