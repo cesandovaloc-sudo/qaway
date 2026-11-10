@@ -213,6 +213,7 @@ body {
 .qm-pane-active {
   display: block;
   min-width: 0;
+  height: 100%;
 }
 
 /* Topbar Unificado y Persistente del Shell Maestro */
