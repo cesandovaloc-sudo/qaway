@@ -209,6 +209,13 @@ function GestorProyectosApp() {
     const scrollCanvas = canvasRef.current;
     if (!scrollCanvas) return;
 
+    // Bandera de pausa: cambiar a true para reactivar el scroll automático de cabecera
+    const ENABLE_CANVAS_SCROLL = false;
+    if (!ENABLE_CANVAS_SCROLL) {
+      scrollCanvas.style.setProperty('--canvas-scroll', '0px');
+      return;
+    }
+
     let currentCollapse = 0;
     let targetScroll = 0;
     let rafId: number | null = null;

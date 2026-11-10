@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, CalendarDays, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Target, CalendarDays, ChevronRight } from 'lucide-react';
 import type { Item } from './Tareas2View';
 
 // Catálogo fotográfico oficial de colaboradores
@@ -83,7 +83,7 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
         boxSizing: 'border-box',
       }}
     >
-      {/* Tarjeta 1: Asignar Tareas - Equipo y Tareas Asignadas */}
+      {/* Tarjeta 1 (Arriba): Próximos Vencimientos — Altura 260px alineada exactamente con el corte de los gráficos superiores (Línea roja) */}
       <div
         className="qm-card"
         style={{
@@ -91,135 +91,14 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
           borderRadius: '12px',
           border: '1px solid #e2e8f0',
           boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          padding: '16px 18px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '7px',
-                background: '#eff6ff',
-                color: '#0066ff',
-                display: 'grid',
-                placeItems: 'center',
-              }}
-            >
-              <Target size={16} />
-            </div>
-            <h3
-              style={{
-                margin: 0,
-                fontSize: '14.5px',
-                fontWeight: 700,
-                color: '#0f172a',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Carga del Equipo Directo
-            </h3>
-          </div>
-        </div>
-
-        {/* Lista de Colaboradores con sus tareas asignadas */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {colaboradoresConTareas.map((colab) => (
-            <div
-              key={colab.name}
-              onClick={() => onOpenAsignar({ gestorName: colab.name })}
-              title={`Asignar o revisar tareas de ${colab.name}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 10px',
-                borderRadius: '8px',
-                border: '1px solid #f1f5f9',
-                background: '#ffffff',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#c7d2fe';
-                e.currentTarget.style.background = '#f8fbff';
-                e.currentTarget.style.transform = 'translateX(2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#f1f5f9';
-                e.currentTarget.style.background = '#ffffff';
-                e.currentTarget.style.transform = 'translateX(0)';
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                <img
-                  src={colab.avatar}
-                  alt={colab.name}
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '1.5px solid #ffffff',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    flexShrink: 0,
-                  }}
-                />
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: '12.5px',
-                      fontWeight: 600,
-                      color: '#1e293b',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {colab.name}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>
-                    {colab.role}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                <span
-                  style={{
-                    fontSize: '10.5px',
-                    fontWeight: 700,
-                    padding: '2px 7px',
-                    borderRadius: '999px',
-                    background: '#eff6ff',
-                    color: '#0066ff',
-                    border: '1px solid #dbeafe',
-                  }}
-                >
-                  {colab.tasksCount} tareas
-                </span>
-                <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Tarjeta 2: Próximos Vencimientos (Interactiva con icono Lucide y semáforo de días) — ORDEN -1: arranca arriba en la columna */}
-      <div
-        className="qm-card"
-        style={{
-          order: -1,
-          background: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          padding: '18px',
-          flex: 1,
+          padding: '14px 16px',
+          height: '260px',
+          minHeight: '260px',
+          maxHeight: '260px',
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '440px',
+          boxSizing: 'border-box',
+          flexShrink: 0,
         }}
       >
         <div
@@ -227,9 +106,10 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '14px',
+            marginBottom: '10px',
             paddingBottom: '8px',
             borderBottom: '1px solid #f1f5f9',
+            flexShrink: 0,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -249,7 +129,7 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
             <h3
               style={{
                 margin: 0,
-                fontSize: '14.5px',
+                fontSize: '14px',
                 fontWeight: 700,
                 color: '#0f172a',
                 letterSpacing: '-0.01em',
@@ -353,12 +233,13 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
                   display: 'flex',
                   alignItems: 'center',
                   gap: '11px',
-                  padding: '8px 10px',
+                  padding: '7px 9px',
                   borderRadius: '8px',
                   border: '1px solid #f1f5f9',
                   background: '#ffffff',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
+                  flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#bfdbfe';
@@ -374,8 +255,8 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
                 {/* Cuadrito de Fecha */}
                 <div
                   style={{
-                    minWidth: '40px',
-                    padding: '5px 0',
+                    minWidth: '38px',
+                    padding: '4px 0',
                     textAlign: 'center',
                     background: '#f8fafc',
                     border: '1px solid #e2e8f0',
@@ -384,8 +265,8 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
                     flexShrink: 0,
                   }}
                 >
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>{day}</div>
-                  <div style={{ fontSize: '9.5px', fontWeight: 600, color: '#64748b' }}>{monthStr}</div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>{day}</div>
+                  <div style={{ fontSize: '9px', fontWeight: 600, color: '#64748b' }}>{monthStr}</div>
                 </div>
 
                 {/* Contenido de la tarea con avatar */}
@@ -454,6 +335,168 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Tarjeta 2 (Abajo): Carga del Equipo Directo — Altura homogénea de 260px, separada por el respiro exacto de 16px (Zigzag verde) */}
+      <div
+        className="qm-card"
+        style={{
+          background: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          padding: '14px 16px',
+          height: '260px',
+          minHeight: '260px',
+          maxHeight: '260px',
+          display: 'flex',
+          flexDirection: 'column',
+          boxSizing: 'border-box',
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '10px',
+            paddingBottom: '8px',
+            borderBottom: '1px solid #f1f5f9',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '7px',
+                background: '#eff6ff',
+                color: '#0066ff',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              <Target size={16} />
+            </div>
+            <h3
+              style={{
+                margin: 0,
+                fontSize: '14px',
+                fontWeight: 700,
+                color: '#0f172a',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              Carga del Equipo Directo
+            </h3>
+          </div>
+          <span
+            style={{
+              fontSize: '10.5px',
+              fontWeight: 700,
+              color: '#64748b',
+              background: '#f1f5f9',
+              padding: '1px 6px',
+              borderRadius: '999px',
+            }}
+          >
+            {colaboradoresConTareas.length} integrantes
+          </span>
+        </div>
+
+        {/* Lista de Colaboradores con sus tareas asignadas */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+            overflowY: 'auto',
+            flex: 1,
+            paddingRight: '4px',
+          }}
+        >
+          {colaboradoresConTareas.map((colab) => (
+            <div
+              key={colab.name}
+              onClick={() => onOpenAsignar({ gestorName: colab.name })}
+              title={`Asignar o revisar tareas de ${colab.name}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 9px',
+                borderRadius: '8px',
+                border: '1px solid #f1f5f9',
+                background: '#ffffff',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#c7d2fe';
+                e.currentTarget.style.background = '#f8fbff';
+                e.currentTarget.style.transform = 'translateX(2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#f1f5f9';
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.transform = 'translateX(0)';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0 }}>
+                <img
+                  src={colab.avatar}
+                  alt={colab.name}
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '1.5px solid #ffffff',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: '#1e293b',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {colab.name}
+                  </div>
+                  <div style={{ fontSize: '10.5px', color: '#64748b' }}>
+                    {colab.role}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                <span
+                  style={{
+                    fontSize: '10.5px',
+                    fontWeight: 700,
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                    background: '#eff6ff',
+                    color: '#0066ff',
+                    border: '1px solid #dbeafe',
+                  }}
+                >
+                  {colab.tasksCount} tareas
+                </span>
+                <ChevronRight size={13} style={{ color: '#94a3b8' }} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </aside>
