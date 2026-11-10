@@ -5024,7 +5024,6 @@ export default function Tareas2View({
 
   const renderRowCell = (x: Item, colKey: ColKey) => {
     if (colKey === 'code') {
-      const depth = getItemDepth(x);
       return (
         <div key="code" className="code-cell-col" onClick={(e) => e.stopPropagation()}>
           <input
@@ -5036,7 +5035,6 @@ export default function Tareas2View({
               toggleSelectRow(x.id);
             }}
           />
-          {depth > 0 && <span style={{ width: `${depth * 12}px`, flexShrink: 0 }} />}
           <span className="code-num">{x.code || (x.sede ? (x.name.startsWith('DRE') || x.name.startsWith('GRE') ? 'DRE' : 'UGEL') : '')}</span>
         </div>
       );
