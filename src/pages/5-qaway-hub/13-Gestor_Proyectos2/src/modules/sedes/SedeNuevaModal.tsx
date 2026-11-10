@@ -36,7 +36,7 @@ export default function SedeNuevaModal({
 }: SedeNuevaModalProps) {
   const [nombre, setNombre] = useState('');
   const [codigo, setCodigo] = useState('');
-  const [unitType, setUnitType] = useState<GestorUnitType>('dre');
+  const [unitType, setUnitType] = useState<GestorUnitType>('central');
   const [parentUnitId, setParentUnitId] = useState<string>('');
   const [region, setRegion] = useState('JUNÍN');
   const [responsable, setResponsable] = useState('');
@@ -62,7 +62,7 @@ export default function SedeNuevaModal({
       name: nombre.trim(),
       code: generatedCode,
       unitType: unitType,
-      parentUnitId: parentUnitId ? parentUnitId : null,
+      parentUnitId: unitType === 'central' ? null : (parentUnitId ? parentUnitId : null),
       region: region,
       macroregion: macro,
       address: direccion.trim() || null,
@@ -73,7 +73,7 @@ export default function SedeNuevaModal({
       metadata: {
         responsable: responsable.trim() || null,
         created_via: 'SedeNuevaModal',
-        tipo_oficial: unitType === 'central' ? 'Sede Central Matriz' : unitType === 'dre' ? 'Sede Regional / DRE' : 'Unidad Operativa / UGEL',
+        tipo_oficial: unitType === 'central' ? 'Sede Central Matriz' : unitType === 'dre' ? 'Sede Regional Matriz' : 'Sede Operativa / Frente Local',
       },
     };
 
@@ -88,7 +88,7 @@ export default function SedeNuevaModal({
         onSave({
           id: `unit-local-${Date.now()}`,
           tenantId: null,
-          parentUnitId: parentUnitId || null,
+          parentUnitId: unitType === 'central' ? null : (parentUnitId || null),
           name: nombre.trim(),
           code: generatedCode,
           unitType: unitType,
@@ -165,10 +165,10 @@ export default function SedeNuevaModal({
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 750, color: '#0f172a' }}>
-                Registrar Nueva Sede / Unidad Territorial
+                Registrar Nueva Sede / Centro Operativo
               </h3>
               <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b' }}>
-                Configuración de entidad, matriz regional o frente de intervención territorial.
+                Jerarquía organizacional: Sede Central (Jefatura), Sede Regional o Frente Operativo.
               </p>
             </div>
           </div>
@@ -190,12 +190,40 @@ export default function SedeNuevaModal({
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '72vh', overflowY: 'auto' }}>
-          {/* Nivel / Tipo de Sede */}
+          {/* Nivel / Tipo de Sede: ORDEN JERÁRQUICO ESTRICTO 1° Central -> 2° Regional -> 3° Operativa */}
           <div>
             <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-              Tipo de Sede / Nivel Jerárquico *
+              Nivel Jerárquico de la Sede *
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+              {/* 1. Sede Central (Jefatura / Gerencia / Máxima autoridad de monitoreo) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setUnitType('central');
+                  setParentUnitId('');
+                }}
+                style={{
+                  padding: '9px 10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid',
+                  borderColor: unitType === 'central' ? '#0f172a' : '#e2e8f0',
+                  background: unitType === 'central' ? '#f1f5f9' : '#ffffff',
+                  color: unitType === 'central' ? '#0f172a' : '#475569',
+                  fontWeight: 650,
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  boxShadow: unitType === 'central' ? '0 1px 3px rgba(15,23,42,0.1)' : 'none',
+                }}
+              >
+                <Layers size={15} color={unitType === 'central' ? '#0f172a' : '#64748b'} />
+                <span>1. Sede Central</span>
+              </button>
+
+              {/* 2. Sede Regional (Sede Principal de Monitoreo / Dirección Regional) */}
               <button
                 type="button"
                 onClick={() => setUnitType('dre')}
@@ -212,12 +240,14 @@ export default function SedeNuevaModal({
                   alignItems: 'center',
                   gap: '6px',
                   cursor: 'pointer',
+                  boxShadow: unitType === 'dre' ? '0 1px 3px rgba(30,64,175,0.1)' : 'none',
                 }}
               >
                 <Building2 size={15} color={unitType === 'dre' ? '#1e40af' : '#64748b'} />
-                <span>Sede Regional (DRE)</span>
+                <span>2. Sede Regional</span>
               </button>
 
+              {/* 3. Sede Operativa / Mini-sede (Oficina Local / Frente de Obra) */}
               <button
                 type="button"
                 onClick={() => setUnitType('ugel')}
@@ -234,34 +264,20 @@ export default function SedeNuevaModal({
                   alignItems: 'center',
                   gap: '6px',
                   cursor: 'pointer',
+                  boxShadow: unitType === 'ugel' ? '0 1px 3px rgba(2,132,199,0.1)' : 'none',
                 }}
               >
                 <Building size={15} color={unitType === 'ugel' ? '#0284c7' : '#64748b'} />
-                <span>Mini-sede (UGEL / Local)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setUnitType('central')}
-                style={{
-                  padding: '9px 10px',
-                  borderRadius: '8px',
-                  border: '1.5px solid',
-                  borderColor: unitType === 'central' ? '#0f172a' : '#e2e8f0',
-                  background: unitType === 'central' ? '#f1f5f9' : '#ffffff',
-                  color: unitType === 'central' ? '#0f172a' : '#475569',
-                  fontWeight: 650,
-                  fontSize: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                }}
-              >
-                <Layers size={15} color={unitType === 'central' ? '#0f172a' : '#64748b'} />
-                <span>Sede Central Matriz</span>
+                <span>3. Sede Operativa</span>
               </button>
             </div>
+            <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#64748b' }}>
+              {unitType === 'central'
+                ? '★ Sede Principal / Jefatura General: Desde donde se centraliza la coordinación y monitoreo maestro.'
+                : unitType === 'dre'
+                ? '◆ Sede Regional Matriz: Sede principal departamental o de monitoreo intermedio.'
+                : '● Sede Operativa / Mini-sede: Oficina territorial local, frente de obra o punto de intervención.'}
+            </p>
           </div>
 
           {/* Nombre de la Sede */}
@@ -272,7 +288,13 @@ export default function SedeNuevaModal({
             <input
               required
               type="text"
-              placeholder={unitType === 'dre' ? 'Ej. DRE Junín (Sede Regional Matriz)' : unitType === 'central' ? 'Ej. Sede Central MINEDU' : 'Ej. UGEL Satipo'}
+              placeholder={
+                unitType === 'central'
+                  ? 'Ej. Sede Central (Jefatura / Gerencia General)'
+                  : unitType === 'dre'
+                  ? 'Ej. Sede Regional Junín (Dirección de Monitoreo)'
+                  : 'Ej. Sede Operativa Huancayo (Oficina Local / Frente de Obra)'
+              }
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               style={{
@@ -292,7 +314,7 @@ export default function SedeNuevaModal({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                Región / Ámbito *
+                Región / Ámbito Territorial *
               </label>
               <select
                 value={region}
@@ -318,10 +340,11 @@ export default function SedeNuevaModal({
 
             <div>
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                Sede Superior / Depende de
+                Sede Superior / Dependencia
               </label>
               <select
                 value={parentUnitId}
+                disabled={unitType === 'central'}
                 onChange={(e) => setParentUnitId(e.target.value)}
                 style={{
                   width: '100%',
@@ -331,15 +354,23 @@ export default function SedeNuevaModal({
                   padding: '0 10px',
                   fontSize: '12.5px',
                   boxSizing: 'border-box',
-                  background: '#ffffff',
+                  background: unitType === 'central' ? '#f1f5f9' : '#ffffff',
+                  color: unitType === 'central' ? '#64748b' : '#0f172a',
+                  cursor: unitType === 'central' ? 'not-allowed' : 'default',
                 }}
               >
-                <option value="">(Ninguna / Es Sede Matriz)</option>
-                {sedesSuperiores.map((s, idx) => (
-                  <option key={s.id || idx} value={s.id || s.name}>
-                    {s.name} ({s.region || 'Nacional'})
-                  </option>
-                ))}
+                {unitType === 'central' ? (
+                  <option value="">(Ninguna · Es la Sede Central / Jefatura Máxima)</option>
+                ) : (
+                  <>
+                    <option value="">(Seleccionar sede superior de monitoreo)</option>
+                    {sedesSuperiores.map((s, idx) => (
+                      <option key={s.id || idx} value={s.id || s.name}>
+                        {s.name} ({s.region || 'Nacional'})
+                      </option>
+                    ))}
+                  </>
+                )}
               </select>
             </div>
           </div>
@@ -348,11 +379,11 @@ export default function SedeNuevaModal({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                Responsable / Gestor Territorial
+                Responsable / Coordinador
               </label>
               <input
                 type="text"
-                placeholder="Ej. Javier Ruiz o Gestor Territorial"
+                placeholder={unitType === 'central' ? 'Ej. Gerente General / Coordinador' : 'Ej. Gestor Regional / Supervisor'}
                 value={responsable}
                 onChange={(e) => setResponsable(e.target.value)}
                 style={{
@@ -373,7 +404,7 @@ export default function SedeNuevaModal({
               </label>
               <input
                 type="text"
-                placeholder="Ej. DRE-JUN / UGEL-SAT"
+                placeholder="Ej. SC-01, SR-JUN, OP-HYO"
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
                 style={{
@@ -396,7 +427,7 @@ export default function SedeNuevaModal({
             </label>
             <input
               type="text"
-              placeholder="Ej. Av. Ferrocarril 1234, El Tambo, Huancayo"
+              placeholder="Ej. Av. Principal 123, Oficina Central / Frente de Obra"
               value={direccion}
               onChange={(e) => setDireccion(e.target.value)}
               style={{
