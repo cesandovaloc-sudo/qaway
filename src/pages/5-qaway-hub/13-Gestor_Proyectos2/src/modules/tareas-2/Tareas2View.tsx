@@ -30,6 +30,7 @@ import EquipoCargaView from '../equipo/EquipoCargaView';
 import EquipoDrawer from '../equipo/EquipoDrawer';
 import EquipoExpedienteModal from '../equipo/EquipoExpedienteModal';
 import EquipoNuevoModal from '../equipo/EquipoNuevoModal';
+import TareaNuevaModal, { type TaskNature, type DeliverableType } from './TareaNuevaModal';
 import {
   fetchEquipoIntegrantesFromSupabase,
   fetchEquipoSedesFromSupabase,
@@ -2249,6 +2250,7 @@ export default function Tareas2View({
   const [equipoSelectedId, setEquipoSelectedId] = useState<string | null>(null);
   const [equipoExpediente, setEquipoExpediente] = useState<any | null>(null);
   const [isEquipoNuevoOpen, setIsEquipoNuevoOpen] = useState(false);
+  const [isTareaNuevaModalOpen, setIsTareaNuevaModalOpen] = useState(false);
   const [equipoSedeFilter, setEquipoSedeFilter] = useState('todas');
   const [equipoEstadoOpFilter, setEquipoEstadoOpFilter] = useState('todos');
   const [equipoEstadoCuentaFilter, setEquipoEstadoCuentaFilter] = useState('todos');
@@ -2312,6 +2314,58 @@ export default function Tareas2View({
     const next = [nuevo, ...equipoIntegrantes];
     setEquipoIntegrantes(next);
     notify(`Integrante "${nuevo.nombreCompleto}" registrado exitosamente`);
+  };
+
+  const handleSaveNuevaTarea = (nueva: {
+    title: string;
+    taskNature: TaskNature;
+    parentId?: string;
+    deliverable: string;
+    deliverableType: DeliverableType;
+    owner: string;
+    end: string;
+    priority: 'Alta' | 'Media' | 'Baja';
+    description?: string;
+  }) => {
+    const isEdt = nueva.taskNature === 'Tarea EDT';
+    const id = isEdt ? `task-${Date.now()}` : `op-${Date.now()}`;
+    const parentComp = isEdt && nueva.parentId ? items.find((p) => p.id === nueva.parentId) : null;
+    const code = isEdt
+      ? (parentComp?.code ? `${parentComp.code.replace(/\.$/, '')}.T${Math.floor(10 + Math.random() * 90)}` : `T-${Math.floor(100 + Math.random() * 900)}`)
+      : `OP-${Math.floor(100 + Math.random() * 900)}`;
+
+    const iconName = nueva.deliverableType === 'Videoconferencia'
+      ? 'Video'
+      : nueva.deliverableType === 'Asistencia técnica'
+      ? 'Headphones'
+      : nueva.deliverableType === 'Acta/Registro'
+      ? 'ClipboardCheck'
+      : 'FileText';
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const newItem: Item = {
+      id,
+      code,
+      name: nueva.title,
+      kind: 'subproceso',
+      edtType: isEdt ? 'PAQUETE_TRABAJO' : undefined,
+      wbsNodeType: isEdt ? 'PAQUETE_TRABAJO' : undefined,
+      parentId: isEdt ? nueva.parentId : undefined,
+      start: todayStr,
+      end: nueva.end || todayStr,
+      progress: 0,
+      status: 'Pendiente',
+      deliverable: nueva.deliverable,
+      taskType: nueva.deliverableType,
+      icon: iconName,
+      gestor: nueva.owner || 'Sin asignar',
+      gestores: nueva.owner ? [nueva.owner] : [],
+      region: parentComp?.region || 'Todas',
+      description: nueva.description || '',
+    };
+
+    commitChange((old) => [newItem, ...old]);
+    notify(`Tarea "${nueva.title}" creada con éxito como ${nueva.taskNature}.`);
   };
 
   const handleBulkUpdateSede = (ids: string[], targetSedeId: string) => {
@@ -6197,44 +6251,15 @@ export default function Tareas2View({
                 <ChevronDown size={14} />
               </button>
               <div className="menu-wrap">
-                <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={() => setIsTareaNuevaModalOpen(true)}
+                  title="Crear y asignar una nueva tarea operativa o vinculada a la EDT"
+                >
                   <Plus size={16} />
-                  <span>Agregar Componente</span>
-                  <ChevronDown size={14} />
+                  <span>Nueva Tarea</span>
                 </button>
-                {newMenu && (
-                  <div className="menu" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => {
-                        setNewMenu(false);
-                        add('hito');
-                      }}
-                    >
-                      <Folder size={15} />
-                      <span>Nuevo componente principal</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setNewMenu(false);
-                        add('subproceso');
-                      }}
-                    >
-                      <FileText size={15} />
-                      <span>Nuevo subcomponente / subproceso</span>
-                    </button>
-                    {perspective === 'equipo' && (
-                      <button
-                        onClick={() => {
-                          setNewMenu(false);
-                          setIsEquipoNuevoOpen(true);
-                        }}
-                      >
-                        <Users size={15} />
-                        <span>Nuevo integrante del equipo</span>
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             </>
           }
@@ -9505,6 +9530,15 @@ export default function Tareas2View({
             />
           </>
         )}
+
+        {/* Modal Oficial: Crear Nueva Tarea (Asociada a EDT u Operativa) */}
+        <TareaNuevaModal
+          isOpen={isTareaNuevaModalOpen}
+          onClose={() => setIsTareaNuevaModalOpen(false)}
+          onSave={handleSaveNuevaTarea}
+          componentesEdt={items.filter((it) => it.kind === 'hito' || !it.parentId || it.wbsNodeType === 'COMPONENTE')}
+          gestoresDisponibles={availableGestores}
+        />
 
         {/* Panel Lateral Editor Aislado y Memoizado (Cero re-renders en el Gantt al escribir) */}
         <GanttEditorDrawer
