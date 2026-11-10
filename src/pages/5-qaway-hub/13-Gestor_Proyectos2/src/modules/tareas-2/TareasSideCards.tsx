@@ -118,30 +118,9 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
                 letterSpacing: '-0.01em',
               }}
             >
-              Asignar tareas
+              Carga del Equipo Directo
             </h3>
           </div>
-          <button
-            type="button"
-            onClick={() => onOpenAsignar({ role: 'nueva' })}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 9px',
-              borderRadius: '6px',
-              border: '1px solid #0066ff',
-              background: '#eff6ff',
-              color: '#0066ff',
-              fontSize: '11px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <Plus size={12} strokeWidth={2.5} />
-            <span>Nueva</span>
-          </button>
         </div>
 
         {/* Lista de Colaboradores con sus tareas asignadas */}
@@ -227,10 +206,11 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
         </div>
       </div>
 
-      {/* Tarjeta 2: Próximos Vencimientos (Interactiva con icono Lucide y semáforo de días) */}
+      {/* Tarjeta 2: Próximos Vencimientos (Interactiva con icono Lucide y semáforo de días) — ORDEN -1: arranca arriba en la columna */}
       <div
         className="qm-card"
         style={{
+          order: -1,
           background: '#ffffff',
           borderRadius: '12px',
           border: '1px solid #e2e8f0',
