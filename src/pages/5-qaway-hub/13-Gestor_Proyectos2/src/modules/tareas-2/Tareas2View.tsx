@@ -287,6 +287,20 @@ export const renderOfficialTaskIcon = (item: Item, nodeType: string) => {
   return <ListChecks size={13} />;
 };
 
+export const renderDeliverableIcon = (deliverableText: string, taskType?: string) => {
+  const text = `${taskType || ''} ${deliverableText}`.toLowerCase();
+  if (text.includes('videoconferencia') || text.includes('video') || text.includes('virtual') || text.includes('reunión') || text.includes('reunion') || text.includes('sesión') || text.includes('conferencia')) {
+    return <Video size={13} style={{ color: '#7c3aed', flexShrink: 0 }} />;
+  }
+  if (text.includes('asistencia') || text.includes('capacitación') || text.includes('capacitacion') || text.includes('taller') || text.includes('inducción') || text.includes('induccion') || text.includes('soporte')) {
+    return <Headphones size={13} style={{ color: '#059669', flexShrink: 0 }} />;
+  }
+  if (text.includes('acta') || text.includes('registro') || text.includes('padrón') || text.includes('padron') || text.includes('conformidad') || text.includes('validación') || text.includes('validacion') || text.includes('constancia') || text.includes('checklist')) {
+    return <ClipboardCheck size={13} style={{ color: '#d97706', flexShrink: 0 }} />;
+  }
+  return <FileText size={13} style={{ color: '#0284c7', flexShrink: 0 }} />;
+};
+
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
   'pt-1.6': ['pt-1.4'],   // CDL depende de Plan de Distribución Local aprobado
@@ -930,7 +944,19 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
   { id: 'distrito', label: 'Distrito', type: 'select', accessor: (r) => r?.distrito },
   { id: 'sede', label: 'Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
-  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Subcomponente') },
+  {
+    id: 'kind',
+    label: 'Tipo',
+    type: 'select',
+    accessor: (r) => {
+      const isEdt = Boolean(r && !r.id.startsWith('op-') && (r.parentId || r.wbsNodeType || r.edtType || (r.code && !r.code.startsWith('OP'))));
+      return isEdt ? 'Tarea EDT' : 'Tarea Operativa';
+    },
+    options: [
+      { value: 'Tarea EDT', label: 'Tarea EDT' },
+      { value: 'Tarea Operativa', label: 'Tarea Operativa' },
+    ],
+  },
   { id: 'deliverable', label: 'Entregable', type: 'text', accessor: (r) => r?.deliverable ?? '' },
   { id: 'parent', label: 'Componente padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
@@ -5234,15 +5260,31 @@ export default function Tareas2View({
 
     if (colKey === 'kind') {
       const isEdt = Boolean(!x.id.startsWith('op-') && (x.parentId || x.wbsNodeType || x.edtType || (x.code && !x.code.startsWith('OP'))));
-      const edtLabel = getEdtNodeDisplayLabel(x, items);
       return (
         <div key="kind" className="kind-cell-col" style={{ display: 'flex', alignItems: 'center' }}>
           <span
-            className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}
-            style={!isEdt ? { background: '#f8fafc', color: '#475569', borderColor: '#e2e8f0' } : undefined}
-            title={isEdt ? `Trabajo EDT · ${edtLabel}` : 'Monitoreo / Operativa territorial'}
+            className={`type-text-label ${isEdt ? 'is-sub' : 'is-hito'}`}
+            style={isEdt ? {
+              background: '#eff6ff',
+              color: '#1d4ed8',
+              border: '1px solid #bfdbfe',
+              fontSize: '11.5px',
+              fontWeight: 600,
+              padding: '2px 8px',
+              borderRadius: '6px',
+              whiteSpace: 'nowrap'
+            } : {
+              background: '#f8fafc',
+              color: '#475569',
+              border: '1px solid #e2e8f0',
+              fontSize: '11.5px',
+              fontWeight: 600,
+              padding: '2px 8px',
+              borderRadius: '6px',
+              whiteSpace: 'nowrap'
+            }}
           >
-            {isEdt ? edtLabel : 'Monitoreo'}
+            {isEdt ? 'Tarea EDT' : 'Tarea Operativa'}
           </span>
         </div>
       );
@@ -5251,15 +5293,18 @@ export default function Tareas2View({
     if (colKey === 'deliverable') {
       const delivText = x.deliverable || (x.deliverables && x.deliverables[0]?.name) || '';
       return (
-        <div key="deliverable" className="deliverable-cell-col" style={{ display: 'flex', alignItems: 'center', minWidth: 0, padding: '0 8px' }}>
+        <div key="deliverable" className="deliverable-cell-col" style={{ display: 'flex', alignItems: 'center', minWidth: 0, padding: '0 8px', gap: '6px' }}>
           {delivText ? (
-            <span
-              className="cell-text"
-              style={{ fontSize: '12.5px', color: '#334155', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-              title={delivText}
-            >
-              {delivText}
-            </span>
+            <>
+              {renderDeliverableIcon(delivText, x.taskType)}
+              <span
+                className="cell-text"
+                style={{ fontSize: '12.5px', color: '#334155', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                title={delivText}
+              >
+                {delivText}
+              </span>
+            </>
           ) : (
             <span style={{ color: '#94a3b8', fontSize: '12.5px' }}>—</span>
           )}
