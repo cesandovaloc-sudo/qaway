@@ -3828,7 +3828,6 @@ export default function Reportes2View({
     const onMouseUp = (upEvent: MouseEvent) => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
-      dragCleanupRef.current = null;
 
       const deltaX = upEvent.clientX - startMouseX;
       const addedDays = Math.round(deltaX / pxPerDay);
@@ -3847,35 +3846,19 @@ export default function Reportes2View({
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
-    // D3: registra el desarme automático por si el módulo se desmonta a mitad del redimensionado
-    dragCleanupRef.current = () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
   };
 
-  // D3: desarme de listeners de drag si el módulo se desmonta a mitad de un redimensionado
-  const dragCleanupRef = useRef<(() => void) | null>(null);
-  useEffect(() => () => dragCleanupRef.current?.(), []);
-
-  // D1: conteo territorial DINÁMICO desde la BD (antes: "251" fijo en 4 sitios del UI; la BD puede ganar/perder unidades)
-  const countTerritorial = unidades.length;
-
+  const hitos = items.filter((x) => x.kind === 'hito');
+  const subs = items.filter((x) => x.kind === 'subproceso');
+  const inprog = items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length;
   const isItemLate = (x: Item) => {
     if (x.status === 'Con retraso') return true;
     if (x.status === 'Completado' || x.status === 'Cumple' || (x.progress ?? 0) >= 100) return false;
     return !!(x.end && currentTodayIso > x.end);
   };
-
-  // D2: métricas globales memoizadas (antes: 5 recorridos completos del array de ítems en CADA render, con ~6,000 ítems)
-  const { hitos, subs, inprog, late, complete, overall } = useMemo(() => ({
-    hitos: items.filter((x) => x.kind === 'hito'),
-    subs: items.filter((x) => x.kind === 'subproceso'),
-    inprog: items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length,
-    late: items.filter(isItemLate).length,
-    complete: items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length,
-    overall: items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0,
-  }), [items, currentTodayIso]);
+  const late = items.filter(isItemLate).length;
+  const complete = items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length;
+  const overall = items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0;
 
   // Mapa de profundidad y niveles WBS (1 al 5) según PMI / PMBOK
   const itemDepthMap = useMemo(() => {
@@ -6121,7 +6104,7 @@ export default function Reportes2View({
                   closeMenus();
                 }}
               >
-                Todos <span>({perspective === 'territorial' ? countTerritorial : items.length})</span>
+                Todos <span>({perspective === 'territorial' ? 251 : items.length})</span>
               </button>
 
               {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
@@ -6157,7 +6140,7 @@ export default function Reportes2View({
                         const rStr = roleLabels[wbsRoleFilter];
 
                         if (wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos') {
-                          return `Todos los niveles (${perspective === 'territorial' ? countTerritorial : items.length})`;
+                          return `Todos los niveles (${perspective === 'territorial' ? 251 : items.length})`;
                         }
                         if (wbsDepthFilter !== 'todos' && wbsRoleFilter === 'todos') {
                           return dStr;
@@ -6224,7 +6207,7 @@ export default function Reportes2View({
                             <strong>Todos los niveles</strong>
                           </span>
                         </span>
-                        <span className="wbs-level-badge">{perspective === 'territorial' ? countTerritorial : items.length}</span>
+                        <span className="wbs-level-badge">{perspective === 'territorial' ? 251 : items.length}</span>
                       </button>
 
                       {/* Niveles dinámicos 1..n existentes en el proyecto (no se renderizan si el conteo es 0) */}
@@ -8826,7 +8809,7 @@ export default function Reportes2View({
             <span>
               {perspective === 'equipo'
                 ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
-                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? countTerritorial : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
+                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? 251 : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <button
