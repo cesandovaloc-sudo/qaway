@@ -20,7 +20,6 @@ import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerri
 import SedesCaratulaView from '../sedes/SedesCaratulaView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
-import EquipoDirectorioView from '../equipo/EquipoDirectorioView';
 import EquipoOrganigramaView from '../equipo/EquipoOrganigramaView';
 import EquipoSedesView from '../equipo/EquipoSedesView';
 import EquipoCargaView from '../equipo/EquipoCargaView';
@@ -1369,7 +1368,7 @@ export default function CronogramaGanttView({
   });
 
   const loadProjectItems = (pid: string, tasksOverride?: any[]): Item[] => {
-    const isMaestro = perspective === 'maestro';
+    const isMaestro = perspective === 'maestro' || perspective === 'equipo';
     const targetInitialItems = isMaestro ? MASTER_INITIAL_ITEMS : TERRITORIAL_INITIAL_ITEMS;
     const storageKey = isMaestro ? `qaway-gantt-items-${pid}-maestro` : `qaway-gantt-items-${pid}`;
 
@@ -2160,7 +2159,7 @@ export default function CronogramaGanttView({
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<
     'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
-  >(() => (perspective === 'equipo' ? 'directorio' : (perspective === 'territorial' ? 'portada' : 'gantt')));
+  >(() => (perspective === 'equipo' ? 'lista' : (perspective === 'territorial' ? 'portada' : 'gantt')));
 
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
   const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
@@ -6680,12 +6679,12 @@ export default function CronogramaGanttView({
                 <>
                   <button
                     type="button"
-                    className={`view-mode-btn ${viewMode === 'directorio' || viewMode === 'lista' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('directorio')}
-                    title="Directorio de Integrantes"
+                    className={`view-mode-btn ${viewMode === 'lista' || viewMode === 'directorio' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('lista')}
+                    title="Lista y Cronograma Oficial"
                   >
-                    <Users size={14} />
-                    <span>Directorio</span>
+                    <List size={14} />
+                    <span>Lista</span>
                   </button>
                   <button
                     type="button"
@@ -7922,61 +7921,36 @@ export default function CronogramaGanttView({
           )}
 
 
-          {/* Vistas según perspectiva */}
-          {perspective === 'equipo' ? (
-            <>
-              {(viewMode === 'directorio' || viewMode === 'lista') && (
-                <EquipoDirectorioView
-                  isLoading={isEquipoLoading}
-                  integrantes={equipoIntegrantes}
-                  selectedId={equipoSelectedId}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                  onOpenExpediente={(i) => setEquipoExpediente(i)}
-                  onUpdateIntegrante={handleUpdateIntegrante}
-                  onBulkUpdateSede={handleBulkUpdateSede}
-                  onBulkUpdateEstadoOperativo={handleBulkUpdateEstadoOperativo}
-                  onBulkReenviarInvitaciones={handleBulkReenviarInvitaciones}
-                  sedes={equipoSedes}
-                  asignaciones={equipoAsignaciones}
-                  visibleColumns={['integrante', 'cargo', 'sede', 'estadoOperativo', 'estadoCuenta', 'carga']}
-                  searchQuery={search}
-                  sedeFilter={equipoSedeFilter}
-                  estadoOpFilter={equipoEstadoOpFilter}
-                  estadoCuentaFilter={equipoEstadoCuentaFilter}
-                  hideToolbar={true}
-                />
-              )}
-              {viewMode === 'organigrama' && (
-                <EquipoOrganigramaView
-                  integrantes={equipoIntegrantes}
-                  areas={equipoAreas}
-                  sedes={equipoSedes}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                />
-              )}
-              {viewMode === 'sedes' && (
-                <EquipoSedesView
-                  integrantes={equipoIntegrantes}
-                  sedes={equipoSedes}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                  onUpdateIntegrante={handleUpdateIntegrante}
-                  onUpdateSede={handleUpdateSede}
-                />
-              )}
-              {viewMode === 'carga' && (
-                <EquipoCargaView
-                  integrantes={equipoIntegrantes}
-                  asignaciones={equipoAsignaciones}
-                  sedes={equipoSedes}
-                  onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-                  onReasignarTarea={handleReasignarTarea}
-                />
-              )}
-            </>
-          ) : (
-            <>
+          {/* Vistas específicas de perspectiva Equipo */}
+          {perspective === 'equipo' && viewMode === 'organigrama' && (
+            <EquipoOrganigramaView
+              integrantes={equipoIntegrantes}
+              areas={equipoAreas}
+              sedes={equipoSedes}
+              onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+            />
+          )}
+          {perspective === 'equipo' && viewMode === 'sedes' && (
+            <EquipoSedesView
+              integrantes={equipoIntegrantes}
+              sedes={equipoSedes}
+              onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+              onUpdateIntegrante={handleUpdateIntegrante}
+              onUpdateSede={handleUpdateSede}
+            />
+          )}
+          {perspective === 'equipo' && viewMode === 'carga' && (
+            <EquipoCargaView
+              integrantes={equipoIntegrantes}
+              asignaciones={equipoAsignaciones}
+              sedes={equipoSedes}
+              onSelectIntegrante={(id) => setEquipoSelectedId(id)}
+              onReasignarTarea={handleReasignarTarea}
+            />
+          )}
+
           {/* Presentación Carátula Territorial Oficial (Sedes) */}
-          {viewMode === 'portada' && (
+          {perspective !== 'equipo' && viewMode === 'portada' && (
             <SedesCaratulaView
               items={items}
               onSelectSede={(sede) => {
@@ -7986,9 +7960,9 @@ export default function CronogramaGanttView({
             />
           )}
 
-          {/* Presentación Maestro: Gantt y Lista comparten 100% el mismo tablero unificado */}
-          {(viewMode === 'gantt' || viewMode === 'lista') && (
-            <div className={`gantt-master-view-wrap ${viewMode === 'lista' ? 'view-lista-fullwidth' : ''}`}>
+          {/* Presentación Oficial Aprobada: Gantt y Lista comparten 100% el mismo tablero unificado */}
+          {(viewMode === 'gantt' || viewMode === 'lista' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
+            <div className={`gantt-master-view-wrap ${viewMode === 'lista' || perspective === 'equipo' ? 'view-lista-fullwidth' : ''}`}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>
             <div
@@ -8886,8 +8860,6 @@ export default function CronogramaGanttView({
               </button>
             </aside>
           )}
-            </>
-          )}
 
           {/* Barra de Cálculos al pie Notion / Excel */}
           {perspective !== 'equipo' && Object.keys(colCalculations).length > 0 && (
@@ -8918,10 +8890,10 @@ export default function CronogramaGanttView({
           {/* Footer de Paginación */}
           <footer className="footer">
             <span>
-              {perspective === 'equipo'
-                ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
-                : perspective === 'territorial' && viewMode === 'portada'
+              {perspective === 'territorial' && viewMode === 'portada'
                 ? `Mostrando 1–28 de 28 entidades y unidades asignadas`
+                : (perspective === 'equipo' && ['organigrama', 'sedes', 'carga'].includes(viewMode))
+                ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
                 : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? (countTerritorial || 251) : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -8929,7 +8901,7 @@ export default function CronogramaGanttView({
                 className="btn secondary"
                 style={{ minHeight: '32px', fontSize: '12px' }}
                 onClick={() => {
-                  if (perspective === 'equipo') {
+                  if (perspective === 'equipo' && ['organigrama', 'sedes', 'carga'].includes(viewMode)) {
                     if (equipoSelectedId) {
                       setEquipoSelectedId(null);
                     } else if (equipoIntegrantes[0]) {
@@ -8947,7 +8919,7 @@ export default function CronogramaGanttView({
                 title="Abrir o cerrar panel de detalles del elemento seleccionado"
               >
                 <PanelRightOpen size={14} />
-                <span>{(perspective === 'equipo' ? Boolean(equipoSelectedId) : panelOpen) ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
+                <span>{((perspective === 'equipo' && ['organigrama', 'sedes', 'carga'].includes(viewMode)) ? Boolean(equipoSelectedId) : panelOpen) ? 'Ocultar Detalle' : 'Ver Detalle'}</span>
               </button>
               <button
                 className="btn secondary"

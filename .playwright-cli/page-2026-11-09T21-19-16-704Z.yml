@@ -1,0 +1,438 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas" [ref=e43] [cursor=pointer]
+    - button "Reuniones" [ref=e48] [cursor=pointer]
+    - button "Reuniones 2" [ref=e55] [cursor=pointer]
+    - button "Reportes" [ref=e62] [cursor=pointer]
+    - button "Reportes 2" [ref=e66] [cursor=pointer]
+    - button "Configuración" [ref=e72] [cursor=pointer]
+  - generic [ref=e77]:
+    - banner [ref=e78]:
+      - generic [ref=e79]:
+        - button "Colapsar panel lateral" [ref=e80] [cursor=pointer]
+        - generic [ref=e84]: Seguimiento de operaciones
+        - generic [ref=e87]: MINEDU · Dotación 2026
+        - generic [ref=e90]: Sedes
+      - generic [ref=e91]:
+        - button "Ayuda del sistema" [ref=e92] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e97] [cursor=pointer]:
+          - generic [ref=e101]: "3"
+        - generic "Opciones de perfil institucional" [ref=e102] [cursor=pointer]:
+          - generic [ref=e103]: CS
+          - generic [ref=e104]:
+            - generic [ref=e105]: Carlos Sandoval
+            - generic [ref=e106]: Coordinador General
+    - main [ref=e109]:
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e120]:
+            - heading "Sedes · MINEDU · Dotación 2026" [level=1] [ref=e121]
+            - paragraph [ref=e122]: Seguimiento territorial de DRE y UGEL en tiempo real.
+          - generic [ref=e123]:
+            - button "Mostrar tarjetas superiores" [ref=e124] [cursor=pointer]
+            - button "Plantilla Excel" [ref=e130] [cursor=pointer]
+            - button "Importar Cronograma" [ref=e135] [cursor=pointer]
+            - button "Agregar Componente" [ref=e143] [cursor=pointer]
+        - main [ref=e148]:
+          - navigation [ref=e149]:
+            - generic [ref=e150]:
+              - button "Todos (251)" [ref=e151] [cursor=pointer]:
+                - text: Todos
+                - generic [ref=e152]: (251)
+              - button "Todos los niveles (251)" [ref=e154] [cursor=pointer]
+              - button "Todos los estados" [ref=e160] [cursor=pointer]
+              - button "Todos los componentes" [ref=e166] [cursor=pointer]
+            - tablist "Modo de presentación" [ref=e171]:
+              - button "Gantt" [ref=e172] [cursor=pointer]
+              - button "Lista" [ref=e176] [cursor=pointer]
+              - button "Kanban" [ref=e179] [cursor=pointer]
+              - button "Calendario" [ref=e186] [cursor=pointer]
+              - button "Mapa" [ref=e190] [cursor=pointer]
+          - generic [ref=e195]:
+            - generic [ref=e196]:
+              - button "Todas las regiones" [active] [ref=e197] [cursor=pointer]
+              - generic [ref=e567]:
+                - generic [ref=e568]: Regiones y sedes del catálogo
+                - generic [ref=e570]:
+                  - button "Todas las regiones 7 macro-regiones · 251 sedes 251" [ref=e571] [cursor=pointer]:
+                    - generic [ref=e572]:
+                      - strong [ref=e573]: Todas las regiones
+                      - generic [ref=e574]: 7 macro-regiones · 251 sedes
+                    - generic [ref=e575]: "251"
+                  - generic [ref=e576]:
+                    - generic [ref=e577]: MACRO NORTE
+                    - button "Todas (5)" [ref=e578] [cursor=pointer]
+                  - button "Áncash 21 sedes 231" [ref=e579] [cursor=pointer]:
+                    - generic [ref=e582]:
+                      - strong [ref=e583]: Áncash
+                      - generic [ref=e584]: 21 sedes
+                    - generic [ref=e585]: "231"
+                  - button "Lambayeque 4 sedes 44" [ref=e586] [cursor=pointer]:
+                    - generic [ref=e589]:
+                      - strong [ref=e590]: Lambayeque
+                      - generic [ref=e591]: 4 sedes
+                    - generic [ref=e592]: "44"
+                  - button "La Libertad 16 sedes 176" [ref=e593] [cursor=pointer]:
+                    - generic [ref=e596]:
+                      - strong [ref=e597]: La Libertad
+                      - generic [ref=e598]: 16 sedes
+                    - generic [ref=e599]: "176"
+                  - button "Piura 13 sedes 143" [ref=e600] [cursor=pointer]:
+                    - generic [ref=e603]:
+                      - strong [ref=e604]: Piura
+                      - generic [ref=e605]: 13 sedes
+                    - generic [ref=e606]: "143"
+                  - button "Tumbes 4 sedes 44" [ref=e607] [cursor=pointer]:
+                    - generic [ref=e610]:
+                      - strong [ref=e611]: Tumbes
+                      - generic [ref=e612]: 4 sedes
+                    - generic [ref=e613]: "44"
+                  - generic [ref=e614]:
+                    - generic [ref=e615]: MACRO NOR ORIENTE
+                    - button "Todas (3)" [ref=e616] [cursor=pointer]
+                  - button "Amazonas 11 sedes 121" [ref=e617] [cursor=pointer]:
+                    - generic [ref=e620]:
+                      - strong [ref=e621]: Amazonas
+                      - generic [ref=e622]: 11 sedes
+                    - generic [ref=e623]: "121"
+                  - button "Cajamarca 14 sedes 154" [ref=e624] [cursor=pointer]:
+                    - generic [ref=e627]:
+                      - strong [ref=e628]: Cajamarca
+                      - generic [ref=e629]: 14 sedes
+                    - generic [ref=e630]: "154"
+                  - button "San Martín 11 sedes 121" [ref=e631] [cursor=pointer]:
+                    - generic [ref=e634]:
+                      - strong [ref=e635]: San Martín
+                      - generic [ref=e636]: 11 sedes
+                    - generic [ref=e637]: "121"
+                  - generic [ref=e638]:
+                    - generic [ref=e639]: MACRO CENTRO
+                    - button "Todas (5)" [ref=e640] [cursor=pointer]
+                  - button "Callao 2 sedes 22" [ref=e641] [cursor=pointer]:
+                    - generic [ref=e644]:
+                      - strong [ref=e645]: Callao
+                      - generic [ref=e646]: 2 sedes
+                    - generic [ref=e647]: "22"
+                  - button "Lima Metropolitana 8 sedes 88" [ref=e648] [cursor=pointer]:
+                    - generic [ref=e651]:
+                      - strong [ref=e652]: Lima Metropolitana
+                      - generic [ref=e653]: 8 sedes
+                    - generic [ref=e654]: "88"
+                  - button "Lima Provincias 10 sedes 110" [ref=e655] [cursor=pointer]:
+                    - generic [ref=e658]:
+                      - strong [ref=e659]: Lima Provincias
+                      - generic [ref=e660]: 10 sedes
+                    - generic [ref=e661]: "110"
+                  - 'button "Junín 14 sedes · Coord. regional: María Salazar 154" [ref=e662] [cursor=pointer]':
+                    - generic [ref=e665]:
+                      - strong [ref=e666]: Junín
+                      - generic [ref=e667]: "14 sedes · Coord. regional: María Salazar"
+                    - generic [ref=e668]: "154"
+                  - 'button "Pasco 5 sedes · Coord. regional: Luis Ccori 55" [ref=e669] [cursor=pointer]':
+                    - generic [ref=e672]:
+                      - strong [ref=e673]: Pasco
+                      - generic [ref=e674]: "5 sedes · Coord. regional: Luis Ccori"
+                    - generic [ref=e675]: "55"
+                  - generic [ref=e676]:
+                    - generic [ref=e677]: MACRO ORIENTE
+                    - button "Todas (3)" [ref=e678] [cursor=pointer]
+                  - 'button "Huánuco 12 sedes · Coord. regional: Patricia Vela 132" [ref=e679] [cursor=pointer]':
+                    - generic [ref=e682]:
+                      - strong [ref=e683]: Huánuco
+                      - generic [ref=e684]: "12 sedes · Coord. regional: Patricia Vela"
+                    - generic [ref=e685]: "132"
+                  - 'button "Ucayali 5 sedes · Coord. regional: Renzo Tapia 55" [ref=e686] [cursor=pointer]':
+                    - generic [ref=e689]:
+                      - strong [ref=e690]: Ucayali
+                      - generic [ref=e691]: "5 sedes · Coord. regional: Renzo Tapia"
+                    - generic [ref=e692]: "55"
+                  - button "Loreto 9 sedes 99" [ref=e693] [cursor=pointer]:
+                    - generic [ref=e696]:
+                      - strong [ref=e697]: Loreto
+                      - generic [ref=e698]: 9 sedes
+                    - generic [ref=e699]: "99"
+                  - generic [ref=e700]:
+                    - generic [ref=e701]: MACRO CENTRO SUR
+                    - button "Todas (2)" [ref=e702] [cursor=pointer]
+                  - 'button "Huancavelica 9 sedes · Coord. regional: Elena Rojas 99" [ref=e703] [cursor=pointer]':
+                    - generic [ref=e706]:
+                      - strong [ref=e707]: Huancavelica
+                      - generic [ref=e708]: "9 sedes · Coord. regional: Elena Rojas"
+                    - generic [ref=e709]: "99"
+                  - 'button "Ayacucho 12 sedes · Coord. regional: Jorge Huamán 132" [ref=e710] [cursor=pointer]':
+                    - generic [ref=e713]:
+                      - strong [ref=e714]: Ayacucho
+                      - generic [ref=e715]: "12 sedes · Coord. regional: Jorge Huamán"
+                    - generic [ref=e716]: "132"
+                  - generic [ref=e717]:
+                    - generic [ref=e718]: MACRO SUR
+                    - button "Todas (4)" [ref=e719] [cursor=pointer]
+                  - button "Ica 6 sedes 66" [ref=e720] [cursor=pointer]:
+                    - generic [ref=e723]:
+                      - strong [ref=e724]: Ica
+                      - generic [ref=e725]: 6 sedes
+                    - generic [ref=e726]: "66"
+                  - button "Arequipa 11 sedes 121" [ref=e727] [cursor=pointer]:
+                    - generic [ref=e730]:
+                      - strong [ref=e731]: Arequipa
+                      - generic [ref=e732]: 11 sedes
+                    - generic [ref=e733]: "121"
+                  - button "Moquegua 5 sedes 55" [ref=e734] [cursor=pointer]:
+                    - generic [ref=e737]:
+                      - strong [ref=e738]: Moquegua
+                      - generic [ref=e739]: 5 sedes
+                    - generic [ref=e740]: "55"
+                  - button "Tacna 5 sedes 55" [ref=e741] [cursor=pointer]:
+                    - generic [ref=e744]:
+                      - strong [ref=e745]: Tacna
+                      - generic [ref=e746]: 5 sedes
+                    - generic [ref=e747]: "55"
+                  - generic [ref=e748]:
+                    - generic [ref=e749]: MACRO SUR ORIENTE
+                    - button "Todas (4)" [ref=e750] [cursor=pointer]
+                  - button "Apurímac 9 sedes 99" [ref=e751] [cursor=pointer]:
+                    - generic [ref=e754]:
+                      - strong [ref=e755]: Apurímac
+                      - generic [ref=e756]: 9 sedes
+                    - generic [ref=e757]: "99"
+                  - button "Cusco 15 sedes 165" [ref=e758] [cursor=pointer]:
+                    - generic [ref=e761]:
+                      - strong [ref=e762]: Cusco
+                      - generic [ref=e763]: 15 sedes
+                    - generic [ref=e764]: "165"
+                  - button "Puno 15 sedes 165" [ref=e765] [cursor=pointer]:
+                    - generic [ref=e768]:
+                      - strong [ref=e769]: Puno
+                      - generic [ref=e770]: 15 sedes
+                    - generic [ref=e771]: "165"
+                  - button "Madre de Dios 5 sedes 55" [ref=e772] [cursor=pointer]:
+                    - generic [ref=e775]:
+                      - strong [ref=e776]: Madre de Dios
+                      - generic [ref=e777]: 5 sedes
+                    - generic [ref=e778]: "55"
+            - button "Todas las sedes" [ref=e203] [cursor=pointer]
+            - button "Condiciones de filtrado avanzado" [ref=e208] [cursor=pointer]
+            - button "Hoy" [ref=e211] [cursor=pointer]
+            - generic [ref=e212]:
+              - button "Desplazar hacia el pasado" [ref=e213] [cursor=pointer]
+              - button "Día" [ref=e216] [cursor=pointer]
+              - button "Semana" [ref=e217] [cursor=pointer]
+              - button "Mes" [ref=e218] [cursor=pointer]
+              - button "Trimestre" [ref=e219] [cursor=pointer]
+              - button "Desplazar hacia el futuro" [ref=e220] [cursor=pointer]
+            - generic [ref=e224]:
+              - button "Conmutar visualización de la línea base oficial" [ref=e225] [cursor=pointer]
+              - generic:
+                - button "Fijar línea base del cronograma (PMBOK)"
+                - button "Mostrar u ocultar porcentaje de avance en barras"
+                - button "Conmutar líneas de dependencia y prelación entre tareas"
+                - button "Conmutar avatares de responsables en barras de Gantt"
+            - button "Alternar modo pantalla completa" [ref=e231] [cursor=pointer]
+            - button "Ajustar anchos de columnas al contenido" [ref=e237] [cursor=pointer]
+            - button "Retroceder o deshacer último cambio" [disabled]
+            - button "Adelantar o rehacer último cambio" [disabled]
+            - button "Restablecer todos los filtros y limpiar vista" [ref=e243] [cursor=pointer]
+            - button "Configurar columnas visibles de la tabla" [ref=e248] [cursor=pointer]
+          - generic [ref=e251]:
+            - generic [ref=e252]:
+              - generic [ref=e254]:
+                - generic "COMPONENTE / SUBCOMPONENTE" [ref=e255]
+                - generic [ref=e256]:
+                  - button "Opciones de la columna COMPONENTE / SUBCOMPONENTE" [ref=e257] [cursor=pointer]
+                  - button "Expandir todos los componentes y subcomponentes" [ref=e260] [cursor=pointer]
+                  - button "Mostrar todas las columnas del cronograma" [ref=e264] [cursor=pointer]
+                - generic "Arrastra para redimensionar · Doble clic para auto-ajustar" [ref=e268]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: "2026"
+                    - generic: "2027"
+                  - generic:
+                    - generic: Sep
+                    - generic: Oct
+                    - generic: Nov
+                    - generic: Dic
+                    - generic: Ene
+                    - generic: Feb
+                    - generic: Mar
+                    - generic: Abr
+            - generic [ref=e270]:
+              - generic [ref=e271] [cursor=pointer]:
+                - generic [ref=e273]:
+                  - button [ref=e274]
+                  - generic [ref=e277]:
+                    - generic [ref=e278]: ◆
+                    - text: "1."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e279]: PLANIFICACIÓN DE LA DISTRIBUCIÓN
+                  - generic [ref=e280]:
+                    - button "Crear nueva tarea rápida subordinada a \"PLANIFICACIÓN DE LA DISTRIBUCIÓN\"" [ref=e281]
+                    - button "Agregar subcomponente hijo para este componente (1.)" [ref=e283]
+                    - button "Expandir subcomponentes" [ref=e287]
+                - generic [ref=e291]:
+                  - generic "Componente Principal" [ref=e292]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e294]
+              - generic [ref=e295] [cursor=pointer]:
+                - generic [ref=e297]:
+                  - button [ref=e298]
+                  - generic [ref=e301]:
+                    - generic [ref=e302]: ◆
+                    - text: "2."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e303]: GESTIÓN DE ALMACENES
+                  - generic [ref=e304]:
+                    - button "Crear nueva tarea rápida subordinada a \"GESTIÓN DE ALMACENES\"" [ref=e305]
+                    - button "Agregar subcomponente hijo para este componente (2.)" [ref=e307]
+                    - button "Expandir subcomponentes" [ref=e311]
+                - generic [ref=e315]:
+                  - generic "Componente Principal" [ref=e316]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e318]
+              - generic [ref=e319] [cursor=pointer]:
+                - generic [ref=e321]:
+                  - button [ref=e322]
+                  - generic [ref=e325]:
+                    - generic [ref=e326]: ◆
+                    - text: "3."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e327]: RECEPCIÓN DE MATERIAL EDUCATIVO EN DRE / UGEL
+                  - generic [ref=e328]:
+                    - button "Crear nueva tarea rápida subordinada a \"RECEPCIÓN DE MATERIAL EDUCATIVO EN DRE / UGEL\"" [ref=e329]
+                    - button "Agregar subcomponente hijo para este componente (3.)" [ref=e331]
+                    - button "Expandir subcomponentes" [ref=e335]
+                - generic [ref=e339]:
+                  - generic "Componente Principal" [ref=e340]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e342]
+              - generic [ref=e343] [cursor=pointer]:
+                - generic [ref=e345]:
+                  - button [ref=e346]
+                  - generic [ref=e349]:
+                    - generic [ref=e350]: ◆
+                    - text: "4."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e351]: GESTIÓN DE CONTRATOS PARA EL SERVICIO DE DISTRIBUCIÓN DE UGEL A II.EE.
+                  - generic [ref=e352]:
+                    - button "Crear nueva tarea rápida subordinada a \"GESTIÓN DE CONTRATOS PARA EL SERVICIO DE DISTRIBUCIÓN DE UGEL A II.EE.\"" [ref=e353]
+                    - button "Agregar subcomponente hijo para este componente (4.)" [ref=e355]
+                    - button "Expandir subcomponentes" [ref=e359]
+                - generic [ref=e363]:
+                  - generic "Componente Principal" [ref=e364]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e366]
+              - generic [ref=e367] [cursor=pointer]:
+                - generic [ref=e369]:
+                  - button [ref=e370]
+                  - generic [ref=e373]:
+                    - generic [ref=e374]: ◆
+                    - text: "5."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e375]: REGISTRO DE PERSONAL DE APOYO PARA LA RECEPCIÓN EN II.EE. (PERÍODO VACACIONAL)
+                  - generic [ref=e376]:
+                    - button "Crear nueva tarea rápida subordinada a \"REGISTRO DE PERSONAL DE APOYO PARA LA RECEPCIÓN EN II.EE. (PERÍODO VACACIONAL)\"" [ref=e377]
+                    - button "Agregar subcomponente hijo para este componente (5.)" [ref=e379]
+                    - button "Expandir subcomponentes" [ref=e383]
+                - generic [ref=e387]:
+                  - generic "Componente Principal" [ref=e388]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e390]
+              - generic [ref=e391] [cursor=pointer]:
+                - generic [ref=e393]:
+                  - button [ref=e394]
+                  - generic [ref=e397]:
+                    - generic [ref=e398]: ◆
+                    - text: "6."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e399]: DESPACHO DE ME DE UGEL A LAS II.EE.
+                  - generic [ref=e400]:
+                    - button "Crear nueva tarea rápida subordinada a \"DESPACHO DE ME DE UGEL A LAS II.EE.\"" [ref=e401]
+                    - button "Agregar subcomponente hijo para este componente (6.)" [ref=e403]
+                    - button "Expandir subcomponentes" [ref=e407]
+                - generic [ref=e411]:
+                  - generic "Componente Principal" [ref=e412]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e414]
+              - generic [ref=e415] [cursor=pointer]:
+                - generic [ref=e417]:
+                  - button [ref=e418]
+                  - generic [ref=e421]:
+                    - generic [ref=e422]: ◆
+                    - text: "7."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e423]: RECEPCIÓN DE ME EN LA IE
+                  - generic [ref=e424]:
+                    - button "Crear nueva tarea rápida subordinada a \"RECEPCIÓN DE ME EN LA IE\"" [ref=e425]
+                    - button "Agregar subcomponente hijo para este componente (7.)" [ref=e427]
+                    - button "Expandir subcomponentes" [ref=e431]
+                - generic [ref=e435]:
+                  - generic "Componente Principal" [ref=e436]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e438]
+              - generic [ref=e439] [cursor=pointer]:
+                - generic [ref=e441]:
+                  - button [ref=e442]
+                  - generic [ref=e445]:
+                    - generic [ref=e446]: ◆
+                    - text: "8."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e447]: CONFORMIDAD DE ENTREGA DE ME A LAS II.EE. A CARGO DE LA UGEL
+                  - generic [ref=e448]:
+                    - button "Crear nueva tarea rápida subordinada a \"CONFORMIDAD DE ENTREGA DE ME A LAS II.EE. A CARGO DE LA UGEL\"" [ref=e449]
+                    - button "Agregar subcomponente hijo para este componente (8.)" [ref=e451]
+                    - button "Expandir subcomponentes" [ref=e455]
+                - generic [ref=e459]:
+                  - generic "Componente Principal" [ref=e460]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e462]
+              - generic [ref=e463] [cursor=pointer]:
+                - generic [ref=e465]:
+                  - button [ref=e466]
+                  - generic [ref=e469]:
+                    - generic [ref=e470]: ◆
+                    - text: "9."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e471]: ENTREGA DE ME A BENEFICIARIOS Y REGISTRO EN EL MÓDULO MATERIALES SIAGIE
+                  - generic [ref=e472]:
+                    - button "Crear nueva tarea rápida subordinada a \"ENTREGA DE ME A BENEFICIARIOS Y REGISTRO EN EL MÓDULO MATERIALES SIAGIE\"" [ref=e473]
+                    - button "Agregar subcomponente hijo para este componente (9.)" [ref=e475]
+                    - button "Expandir subcomponentes" [ref=e479]
+                - generic [ref=e483]:
+                  - generic "Componente Principal" [ref=e484]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e486]
+              - generic [ref=e487] [cursor=pointer]:
+                - generic [ref=e489]:
+                  - button [ref=e490]
+                  - generic [ref=e493]:
+                    - generic [ref=e494]: ◆
+                    - text: "10."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e495]: REDISTRIBUCIÓN Y DISTRIBUCIÓN LOCAL DE ME PARA ALCANZAR SUFICIENCIA
+                  - generic [ref=e496]:
+                    - button "Crear nueva tarea rápida subordinada a \"REDISTRIBUCIÓN Y DISTRIBUCIÓN LOCAL DE ME PARA ALCANZAR SUFICIENCIA\"" [ref=e497]
+                    - button "Agregar subcomponente hijo para este componente (10.)" [ref=e499]
+                    - button "Expandir subcomponentes" [ref=e503]
+                - generic [ref=e507]:
+                  - generic "Componente Principal" [ref=e508]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e510]
+              - generic [ref=e511] [cursor=pointer]:
+                - generic [ref=e513]:
+                  - button [ref=e514]
+                  - generic [ref=e517]:
+                    - generic [ref=e518]: ◆
+                    - text: "11."
+                  - generic "Clic para editar nombre · Doble clic para detalle" [ref=e519]: BALANCE Y CIERRE DEL PROCESO DE DISTRIBUCIÓN Y REDISTRIBUCIÓN
+                  - generic [ref=e520]:
+                    - button "Crear nueva tarea rápida subordinada a \"BALANCE Y CIERRE DEL PROCESO DE DISTRIBUCIÓN Y REDISTRIBUCIÓN\"" [ref=e521]
+                    - button "Agregar subcomponente hijo para este componente (11.)" [ref=e523]
+                    - button "Expandir subcomponentes" [ref=e527]
+                - generic [ref=e531]:
+                  - generic "Componente Principal" [ref=e532]
+                  - generic "Arrastra para modificar la fecha de fin (o doble clic para editar)" [ref=e534]
+              - generic "Haz clic para agregar un nuevo componente principal al cronograma" [ref=e535] [cursor=pointer]: + Agregar nuevo componente principal
+              - generic: Hoy
+          - generic [ref=e541]:
+            - generic [ref=e542]: Mostrando 1–11 de 251 sedes territoriales
+            - generic [ref=e543]:
+              - button "Ver Detalle" [ref=e544] [cursor=pointer]
+              - button "Publicar Cronograma" [ref=e549] [cursor=pointer]
+  - button "Asistente Qaway Copilot" [ref=e554] [cursor=pointer]:
+    - generic [ref=e566]: IA

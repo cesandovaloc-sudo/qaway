@@ -1,0 +1,2391 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: q
+      - generic [ref=e8]:
+        - generic [ref=e9]: qaway
+        - generic [ref=e10]: GESTOR DE PROYECTOS
+    - generic [ref=e11]:
+      - generic [ref=e12]: PROYECTO ACTIVO
+      - generic "Clic para seleccionar proyecto regional" [ref=e13] [cursor=pointer]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: MINEDU · Dotación 2026
+          - generic [ref=e17]: PRJ-MIN-2027-01
+    - generic [ref=e20]: PROYECTO
+    - button "Resumen del proyecto" [ref=e21] [cursor=pointer]
+    - button "Proyecto" [ref=e28] [cursor=pointer]
+    - button "Sedes" [ref=e32] [cursor=pointer]
+    - button "Equipo" [ref=e38] [cursor=pointer]
+    - button "Tareas" [ref=e43] [cursor=pointer]
+    - button "Reuniones" [ref=e48] [cursor=pointer]
+    - button "Reuniones 2" [ref=e55] [cursor=pointer]
+    - button "Reportes" [ref=e62] [cursor=pointer]
+    - button "Reportes 2" [ref=e66] [cursor=pointer]
+    - button "Configuración" [ref=e72] [cursor=pointer]
+  - generic [ref=e77]:
+    - banner [ref=e78]:
+      - generic [ref=e79]:
+        - button "Colapsar panel lateral" [ref=e80] [cursor=pointer]
+        - generic [ref=e84]: Seguimiento de operaciones
+        - generic [ref=e87]: MINEDU · Dotación 2026
+        - generic [ref=e90]: Sedes
+      - generic [ref=e91]:
+        - button "Ayuda del sistema" [ref=e92] [cursor=pointer]
+        - button "Notificaciones, 3 sin leer" [ref=e97] [cursor=pointer]:
+          - generic [ref=e101]: "3"
+        - generic "Opciones de perfil institucional" [ref=e102] [cursor=pointer]:
+          - generic [ref=e103]: CS
+          - generic [ref=e104]:
+            - generic [ref=e105]: Carlos Sandoval
+            - generic [ref=e106]: Coordinador General
+    - main [ref=e109]:
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e120]:
+            - heading "Sedes · MINEDU · Dotación 2026" [level=1] [ref=e121]
+            - paragraph [ref=e122]: Seguimiento territorial de DRE y UGEL en tiempo real.
+          - generic [ref=e123]:
+            - button "Mostrar tarjetas superiores" [ref=e124] [cursor=pointer]
+            - button "Plantilla Excel" [ref=e130] [cursor=pointer]
+            - button "Importar Cronograma" [ref=e135] [cursor=pointer]
+            - button "Agregar Componente" [ref=e143] [cursor=pointer]
+        - main [ref=e148]:
+          - navigation [ref=e149]:
+            - generic [ref=e150]:
+              - button "Todos (251)" [ref=e151] [cursor=pointer]:
+                - text: Todos
+                - generic [ref=e152]: (251)
+              - button "Todos los niveles (251)" [ref=e154] [cursor=pointer]
+              - button "Todos los estados" [ref=e160] [cursor=pointer]
+              - button "Todos los componentes" [ref=e166] [cursor=pointer]
+            - tablist "Modo de presentación" [ref=e171]:
+              - button "Gantt" [ref=e172] [cursor=pointer]
+              - button "Lista" [ref=e176] [cursor=pointer]
+              - button "Kanban" [ref=e179] [cursor=pointer]
+              - button "Calendario" [ref=e186] [cursor=pointer]
+              - button "Mapa" [active] [ref=e190] [cursor=pointer]
+          - generic [ref=e195]:
+            - button "Todas las regiones" [ref=e197] [cursor=pointer]
+            - button "Todas las sedes" [ref=e203] [cursor=pointer]
+            - button "Condiciones de filtrado avanzado" [ref=e208] [cursor=pointer]
+            - generic "Modo de representación del mapa territorial" [ref=e779]:
+              - button "Geográfico" [ref=e780] [cursor=pointer]
+              - button "Temático Poligonal" [ref=e784] [cursor=pointer]
+              - button "Analítica Power BI" [ref=e789] [cursor=pointer]
+            - button "Alternar modo pantalla completa" [ref=e231] [cursor=pointer]
+            - button "Ajustar anchos de columnas al contenido" [ref=e237] [cursor=pointer]
+            - button "Retroceder o deshacer último cambio" [disabled]
+            - button "Adelantar o rehacer último cambio" [disabled]
+            - button "Restablecer todos los filtros y limpiar vista" [ref=e243] [cursor=pointer]
+            - button "Configurar columnas visibles de la tabla" [ref=e248] [cursor=pointer]
+          - generic [ref=e793]:
+            - complementary [ref=e794]:
+              - generic [ref=e795]:
+                - heading "Estado por UGEL" [level=3] [ref=e796]
+                - generic [ref=e797]: 251 resultados
+              - table [ref=e799]:
+                - rowgroup [ref=e800]:
+                  - row [ref=e801]:
+                    - columnheader "N.°" [ref=e802]
+                    - columnheader "UGEL / Sede" [ref=e803]
+                    - columnheader "Estado" [ref=e804]
+                    - columnheader "Avance actual" [ref=e805]
+                    - columnheader [ref=e806]
+                - rowgroup [ref=e807]:
+                  - row [ref=e808] [cursor=pointer]:
+                    - cell "1" [ref=e809]
+                    - cell "DRE AMAZONAS AMAZONAS" [ref=e810]:
+                      - strong [ref=e811]: DRE AMAZONAS
+                      - generic [ref=e812]: AMAZONAS
+                    - cell "En proceso" [ref=e813]
+                    - cell "75%" [ref=e816]
+                    - cell [ref=e820]
+                  - row [ref=e823] [cursor=pointer]:
+                    - cell "2" [ref=e824]
+                    - cell "DRE ANCASH ANCASH" [ref=e825]:
+                      - strong [ref=e826]: DRE ANCASH
+                      - generic [ref=e827]: ANCASH
+                    - cell "En proceso" [ref=e828]
+                    - cell "50%" [ref=e831]
+                    - cell [ref=e835]
+                  - row [ref=e838] [cursor=pointer]:
+                    - cell "3" [ref=e839]
+                    - cell "DRE APURÍMAC APURÍMAC" [ref=e840]:
+                      - strong [ref=e841]: DRE APURÍMAC
+                      - generic [ref=e842]: APURÍMAC
+                    - cell "En proceso" [ref=e843]
+                    - cell "50%" [ref=e846]
+                    - cell [ref=e850]
+                  - row [ref=e853] [cursor=pointer]:
+                    - cell "4" [ref=e854]
+                    - cell "DRE AYACUCHO AYACUCHO" [ref=e855]:
+                      - strong [ref=e856]: DRE AYACUCHO
+                      - generic [ref=e857]: AYACUCHO
+                    - cell "En proceso" [ref=e858]
+                    - cell "33%" [ref=e861]
+                    - cell [ref=e865]
+                  - row [ref=e868] [cursor=pointer]:
+                    - cell "5" [ref=e869]
+                    - cell "DRE CAJAMARCA CAJAMARCA" [ref=e870]:
+                      - strong [ref=e871]: DRE CAJAMARCA
+                      - generic [ref=e872]: CAJAMARCA
+                    - cell "En proceso" [ref=e873]
+                    - cell "20%" [ref=e876]
+                    - cell [ref=e880]
+                  - row [ref=e883] [cursor=pointer]:
+                    - cell "6" [ref=e884]
+                    - cell "DRE CALLAO CALLAO" [ref=e885]:
+                      - strong [ref=e886]: DRE CALLAO
+                      - generic [ref=e887]: CALLAO
+                    - cell "En proceso" [ref=e888]
+                    - cell "75%" [ref=e891]
+                    - cell [ref=e895]
+                  - row [ref=e898] [cursor=pointer]:
+                    - cell "7" [ref=e899]
+                    - cell "DRE CUSCO CUSCO" [ref=e900]:
+                      - strong [ref=e901]: DRE CUSCO
+                      - generic [ref=e902]: CUSCO
+                    - cell "En proceso" [ref=e903]
+                    - cell "50%" [ref=e906]
+                    - cell [ref=e910]
+                  - row [ref=e913] [cursor=pointer]:
+                    - cell "8" [ref=e914]
+                    - cell "DRE HUANCAVELICA HUANCAVELICA" [ref=e915]:
+                      - strong [ref=e916]: DRE HUANCAVELICA
+                      - generic [ref=e917]: HUANCAVELICA
+                    - cell "En proceso" [ref=e918]
+                    - cell "50%" [ref=e921]
+                    - cell [ref=e925]
+                  - row [ref=e928] [cursor=pointer]:
+                    - cell "9" [ref=e929]
+                    - cell "DRE HUÁNUCO HUÁNUCO" [ref=e930]:
+                      - strong [ref=e931]: DRE HUÁNUCO
+                      - generic [ref=e932]: HUÁNUCO
+                    - cell "En proceso" [ref=e933]
+                    - cell "33%" [ref=e936]
+                    - cell [ref=e940]
+                  - row [ref=e943] [cursor=pointer]:
+                    - cell "10" [ref=e944]
+                    - cell "DRE ICA ICA" [ref=e945]:
+                      - strong [ref=e946]: DRE ICA
+                      - generic [ref=e947]: ICA
+                    - cell "En proceso" [ref=e948]
+                    - cell "20%" [ref=e951]
+                    - cell [ref=e955]
+                  - row [ref=e958] [cursor=pointer]:
+                    - cell "11" [ref=e959]
+                    - cell "DRE JUNÍN JUNÍN" [ref=e960]:
+                      - strong [ref=e961]: DRE JUNÍN
+                      - generic [ref=e962]: JUNÍN
+                    - cell "En proceso" [ref=e963]
+                    - cell "75%" [ref=e966]
+                    - cell [ref=e970]
+                  - row [ref=e973] [cursor=pointer]:
+                    - cell "12" [ref=e974]
+                    - cell "DRE LIMA METROPOLITANA LIMA METROPOLITANA" [ref=e975]:
+                      - strong [ref=e976]: DRE LIMA METROPOLITANA
+                      - generic [ref=e977]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e978]
+                    - cell "50%" [ref=e981]
+                    - cell [ref=e985]
+                  - row [ref=e988] [cursor=pointer]:
+                    - cell "13" [ref=e989]
+                    - cell "DRE LIMA PROVINCIAS LIMA PROVINCIAS" [ref=e990]:
+                      - strong [ref=e991]: DRE LIMA PROVINCIAS
+                      - generic [ref=e992]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e993]
+                    - cell "50%" [ref=e996]
+                    - cell [ref=e1000]
+                  - row [ref=e1003] [cursor=pointer]:
+                    - cell "14" [ref=e1004]
+                    - cell "DRE LORETO LORETO" [ref=e1005]:
+                      - strong [ref=e1006]: DRE LORETO
+                      - generic [ref=e1007]: LORETO
+                    - cell "En proceso" [ref=e1008]
+                    - cell "33%" [ref=e1011]
+                    - cell [ref=e1015]
+                  - row [ref=e1018] [cursor=pointer]:
+                    - cell "15" [ref=e1019]
+                    - cell "DRE MADRE DE DIOS MADRE DE DIOS" [ref=e1020]:
+                      - strong [ref=e1021]: DRE MADRE DE DIOS
+                      - generic [ref=e1022]: MADRE DE DIOS
+                    - cell "En proceso" [ref=e1023]
+                    - cell "20%" [ref=e1026]
+                    - cell [ref=e1030]
+                  - row [ref=e1033] [cursor=pointer]:
+                    - cell "16" [ref=e1034]
+                    - cell "DRE MOQUEGUA MOQUEGUA" [ref=e1035]:
+                      - strong [ref=e1036]: DRE MOQUEGUA
+                      - generic [ref=e1037]: MOQUEGUA
+                    - cell "En proceso" [ref=e1038]
+                    - cell "75%" [ref=e1041]
+                    - cell [ref=e1045]
+                  - row [ref=e1048] [cursor=pointer]:
+                    - cell "17" [ref=e1049]
+                    - cell "DRE PASCO PASCO" [ref=e1050]:
+                      - strong [ref=e1051]: DRE PASCO
+                      - generic [ref=e1052]: PASCO
+                    - cell "En proceso" [ref=e1053]
+                    - cell "50%" [ref=e1056]
+                    - cell [ref=e1060]
+                  - row [ref=e1063] [cursor=pointer]:
+                    - cell "18" [ref=e1064]
+                    - cell "DRE PIURA PIURA" [ref=e1065]:
+                      - strong [ref=e1066]: DRE PIURA
+                      - generic [ref=e1067]: PIURA
+                    - cell "En proceso" [ref=e1068]
+                    - cell "50%" [ref=e1071]
+                    - cell [ref=e1075]
+                  - row [ref=e1078] [cursor=pointer]:
+                    - cell "19" [ref=e1079]
+                    - cell "DRE PUNO PUNO" [ref=e1080]:
+                      - strong [ref=e1081]: DRE PUNO
+                      - generic [ref=e1082]: PUNO
+                    - cell "En proceso" [ref=e1083]
+                    - cell "33%" [ref=e1086]
+                    - cell [ref=e1090]
+                  - row [ref=e1093] [cursor=pointer]:
+                    - cell "20" [ref=e1094]
+                    - cell "DRE SAN MARTÍN SAN MARTÍN" [ref=e1095]:
+                      - strong [ref=e1096]: DRE SAN MARTÍN
+                      - generic [ref=e1097]: SAN MARTÍN
+                    - cell "En proceso" [ref=e1098]
+                    - cell "20%" [ref=e1101]
+                    - cell [ref=e1105]
+                  - row [ref=e1108] [cursor=pointer]:
+                    - cell "21" [ref=e1109]
+                    - cell "DRE TACNA TACNA" [ref=e1110]:
+                      - strong [ref=e1111]: DRE TACNA
+                      - generic [ref=e1112]: TACNA
+                    - cell "En proceso" [ref=e1113]
+                    - cell "75%" [ref=e1116]
+                    - cell [ref=e1120]
+                  - row [ref=e1123] [cursor=pointer]:
+                    - cell "22" [ref=e1124]
+                    - cell "DRE TUMBES TUMBES" [ref=e1125]:
+                      - strong [ref=e1126]: DRE TUMBES
+                      - generic [ref=e1127]: TUMBES
+                    - cell "En proceso" [ref=e1128]
+                    - cell "50%" [ref=e1131]
+                    - cell [ref=e1135]
+                  - row [ref=e1138] [cursor=pointer]:
+                    - cell "23" [ref=e1139]
+                    - cell "DRE UCAYALI UCAYALI" [ref=e1140]:
+                      - strong [ref=e1141]: DRE UCAYALI
+                      - generic [ref=e1142]: UCAYALI
+                    - cell "En proceso" [ref=e1143]
+                    - cell "50%" [ref=e1146]
+                    - cell [ref=e1150]
+                  - row [ref=e1153] [cursor=pointer]:
+                    - cell "24" [ref=e1154]
+                    - cell "GRE AREQUIPA AREQUIPA" [ref=e1155]:
+                      - strong [ref=e1156]: GRE AREQUIPA
+                      - generic [ref=e1157]: AREQUIPA
+                    - cell "En proceso" [ref=e1158]
+                    - cell "33%" [ref=e1161]
+                    - cell [ref=e1165]
+                  - row [ref=e1168] [cursor=pointer]:
+                    - cell "25" [ref=e1169]
+                    - cell "GRE LA LIBERTAD LA LIBERTAD" [ref=e1170]:
+                      - strong [ref=e1171]: GRE LA LIBERTAD
+                      - generic [ref=e1172]: LA LIBERTAD
+                    - cell "En proceso" [ref=e1173]
+                    - cell "20%" [ref=e1176]
+                    - cell [ref=e1180]
+                  - row [ref=e1183] [cursor=pointer]:
+                    - cell "26" [ref=e1184]
+                    - cell "GRE LAMBAYEQUE LAMBAYEQUE" [ref=e1185]:
+                      - strong [ref=e1186]: GRE LAMBAYEQUE
+                      - generic [ref=e1187]: LAMBAYEQUE
+                    - cell "En proceso" [ref=e1188]
+                    - cell "75%" [ref=e1191]
+                    - cell [ref=e1195]
+                  - row [ref=e1198] [cursor=pointer]:
+                    - cell "27" [ref=e1199]
+                    - cell "RED HUEPETUHE MADRE DE DIOS" [ref=e1200]:
+                      - strong [ref=e1201]: RED HUEPETUHE
+                      - generic [ref=e1202]: MADRE DE DIOS
+                    - cell "En proceso" [ref=e1203]
+                    - cell "50%" [ref=e1206]
+                    - cell [ref=e1210]
+                  - row [ref=e1213] [cursor=pointer]:
+                    - cell "28" [ref=e1214]
+                    - cell "UGEL 01 - EL PORVENIR LA LIBERTAD" [ref=e1215]:
+                      - strong [ref=e1216]: UGEL 01 - EL PORVENIR
+                      - generic [ref=e1217]: LA LIBERTAD
+                    - cell "En proceso" [ref=e1218]
+                    - cell "50%" [ref=e1221]
+                    - cell [ref=e1225]
+                  - row [ref=e1228] [cursor=pointer]:
+                    - cell "29" [ref=e1229]
+                    - cell "UGEL 01 - SAN JUAN DE MIRAFLORES LIMA METROPOLITANA" [ref=e1230]:
+                      - strong [ref=e1231]: UGEL 01 - SAN JUAN DE MIRAFLORES
+                      - generic [ref=e1232]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e1233]
+                    - cell "33%" [ref=e1236]
+                    - cell [ref=e1240]
+                  - row [ref=e1243] [cursor=pointer]:
+                    - cell "30" [ref=e1244]
+                    - cell "UGEL 02 - LA ESPERANZA LA LIBERTAD" [ref=e1245]:
+                      - strong [ref=e1246]: UGEL 02 - LA ESPERANZA
+                      - generic [ref=e1247]: LA LIBERTAD
+                    - cell "En proceso" [ref=e1248]
+                    - cell "20%" [ref=e1251]
+                    - cell [ref=e1255]
+                  - row [ref=e1258] [cursor=pointer]:
+                    - cell "31" [ref=e1259]
+                    - cell "UGEL 02 - RÍMAC LIMA METROPOLITANA" [ref=e1260]:
+                      - strong [ref=e1261]: UGEL 02 - RÍMAC
+                      - generic [ref=e1262]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e1263]
+                    - cell "75%" [ref=e1266]
+                    - cell [ref=e1270]
+                  - row [ref=e1273] [cursor=pointer]:
+                    - cell "32" [ref=e1274]
+                    - cell "UGEL 03 - BREÑA LIMA METROPOLITANA" [ref=e1275]:
+                      - strong [ref=e1276]: UGEL 03 - BREÑA
+                      - generic [ref=e1277]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e1278]
+                    - cell "50%" [ref=e1281]
+                    - cell [ref=e1285]
+                  - row [ref=e1288] [cursor=pointer]:
+                    - cell "33" [ref=e1289]
+                    - cell "UGEL 03 - TRUJILLO NOR OESTE LA LIBERTAD" [ref=e1290]:
+                      - strong [ref=e1291]: UGEL 03 - TRUJILLO NOR OESTE
+                      - generic [ref=e1292]: LA LIBERTAD
+                    - cell "En proceso" [ref=e1293]
+                    - cell "50%" [ref=e1296]
+                    - cell [ref=e1300]
+                  - row [ref=e1303] [cursor=pointer]:
+                    - cell "34" [ref=e1304]
+                    - cell "UGEL 04 - COMAS LIMA METROPOLITANA" [ref=e1305]:
+                      - strong [ref=e1306]: UGEL 04 - COMAS
+                      - generic [ref=e1307]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e1308]
+                    - cell "33%" [ref=e1311]
+                    - cell [ref=e1315]
+                  - row [ref=e1318] [cursor=pointer]:
+                    - cell "35" [ref=e1319]
+                    - cell "UGEL 04 - TRUJILLO SUR ESTE LA LIBERTAD" [ref=e1320]:
+                      - strong [ref=e1321]: UGEL 04 - TRUJILLO SUR ESTE
+                      - generic [ref=e1322]: LA LIBERTAD
+                    - cell "En proceso" [ref=e1323]
+                    - cell "20%" [ref=e1326]
+                    - cell [ref=e1330]
+                  - row [ref=e1333] [cursor=pointer]:
+                    - cell "36" [ref=e1334]
+                    - cell "UGEL 05 - SAN JUAN DE LURIGANCHO LIMA METROPOLITANA" [ref=e1335]:
+                      - strong [ref=e1336]: UGEL 05 - SAN JUAN DE LURIGANCHO
+                      - generic [ref=e1337]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e1338]
+                    - cell "75%" [ref=e1341]
+                    - cell [ref=e1345]
+                  - row [ref=e1348] [cursor=pointer]:
+                    - cell "37" [ref=e1349]
+                    - cell "UGEL 06 - ATE LIMA METROPOLITANA" [ref=e1350]:
+                      - strong [ref=e1351]: UGEL 06 - ATE
+                      - generic [ref=e1352]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e1353]
+                    - cell "50%" [ref=e1356]
+                    - cell [ref=e1360]
+                  - row [ref=e1363] [cursor=pointer]:
+                    - cell "38" [ref=e1364]
+                    - cell "UGEL 07 - SAN BORJA LIMA METROPOLITANA" [ref=e1365]:
+                      - strong [ref=e1366]: UGEL 07 - SAN BORJA
+                      - generic [ref=e1367]: LIMA METROPOLITANA
+                    - cell "En proceso" [ref=e1368]
+                    - cell "50%" [ref=e1371]
+                    - cell [ref=e1375]
+                  - row [ref=e1378] [cursor=pointer]:
+                    - cell "39" [ref=e1379]
+                    - cell "UGEL 08 - CAÑETE LIMA PROVINCIAS" [ref=e1380]:
+                      - strong [ref=e1381]: UGEL 08 - CAÑETE
+                      - generic [ref=e1382]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1383]
+                    - cell "33%" [ref=e1386]
+                    - cell [ref=e1390]
+                  - row [ref=e1393] [cursor=pointer]:
+                    - cell "40" [ref=e1394]
+                    - cell "UGEL 09 - HUAURA LIMA PROVINCIAS" [ref=e1395]:
+                      - strong [ref=e1396]: UGEL 09 - HUAURA
+                      - generic [ref=e1397]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1398]
+                    - cell "20%" [ref=e1401]
+                    - cell [ref=e1405]
+                  - row [ref=e1408] [cursor=pointer]:
+                    - cell "41" [ref=e1409]
+                    - cell "UGEL 10 - HUARAL LIMA PROVINCIAS" [ref=e1410]:
+                      - strong [ref=e1411]: UGEL 10 - HUARAL
+                      - generic [ref=e1412]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1413]
+                    - cell "75%" [ref=e1416]
+                    - cell [ref=e1420]
+                  - row [ref=e1423] [cursor=pointer]:
+                    - cell "42" [ref=e1424]
+                    - cell "UGEL 11 - CAJATAMBO LIMA PROVINCIAS" [ref=e1425]:
+                      - strong [ref=e1426]: UGEL 11 - CAJATAMBO
+                      - generic [ref=e1427]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1428]
+                    - cell "50%" [ref=e1431]
+                    - cell [ref=e1435]
+                  - row [ref=e1438] [cursor=pointer]:
+                    - cell "43" [ref=e1439]
+                    - cell "UGEL 12 - CANTA LIMA PROVINCIAS" [ref=e1440]:
+                      - strong [ref=e1441]: UGEL 12 - CANTA
+                      - generic [ref=e1442]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1443]
+                    - cell "50%" [ref=e1446]
+                    - cell [ref=e1450]
+                  - row [ref=e1453] [cursor=pointer]:
+                    - cell "44" [ref=e1454]
+                    - cell "UGEL 13 - YAUYOS LIMA PROVINCIAS" [ref=e1455]:
+                      - strong [ref=e1456]: UGEL 13 - YAUYOS
+                      - generic [ref=e1457]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1458]
+                    - cell "33%" [ref=e1461]
+                    - cell [ref=e1465]
+                  - row [ref=e1468] [cursor=pointer]:
+                    - cell "45" [ref=e1469]
+                    - cell "UGEL 14 - OYÓN LIMA PROVINCIAS" [ref=e1470]:
+                      - strong [ref=e1471]: UGEL 14 - OYÓN
+                      - generic [ref=e1472]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1473]
+                    - cell "20%" [ref=e1476]
+                    - cell [ref=e1480]
+                  - row [ref=e1483] [cursor=pointer]:
+                    - cell "46" [ref=e1484]
+                    - cell "UGEL 15 - HUAROCHIRÍ LIMA PROVINCIAS" [ref=e1485]:
+                      - strong [ref=e1486]: UGEL 15 - HUAROCHIRÍ
+                      - generic [ref=e1487]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1488]
+                    - cell "75%" [ref=e1491]
+                    - cell [ref=e1495]
+                  - row [ref=e1498] [cursor=pointer]:
+                    - cell "47" [ref=e1499]
+                    - cell "UGEL 16 - BARRANCA LIMA PROVINCIAS" [ref=e1500]:
+                      - strong [ref=e1501]: UGEL 16 - BARRANCA
+                      - generic [ref=e1502]: LIMA PROVINCIAS
+                    - cell "En proceso" [ref=e1503]
+                    - cell "50%" [ref=e1506]
+                    - cell [ref=e1510]
+                  - row [ref=e1513] [cursor=pointer]:
+                    - cell "48" [ref=e1514]
+                    - cell "UGEL ABANCAY APURÍMAC" [ref=e1515]:
+                      - strong [ref=e1516]: UGEL ABANCAY
+                      - generic [ref=e1517]: APURÍMAC
+                    - cell "En proceso" [ref=e1518]
+                    - cell "50%" [ref=e1521]
+                    - cell [ref=e1525]
+                  - row [ref=e1528] [cursor=pointer]:
+                    - cell "49" [ref=e1529]
+                    - cell "UGEL ACOBAMBA HUANCAVELICA" [ref=e1530]:
+                      - strong [ref=e1531]: UGEL ACOBAMBA
+                      - generic [ref=e1532]: HUANCAVELICA
+                    - cell "En proceso" [ref=e1533]
+                    - cell "33%" [ref=e1536]
+                    - cell [ref=e1540]
+                  - row [ref=e1543] [cursor=pointer]:
+                    - cell "50" [ref=e1544]
+                    - cell "UGEL ACOMAYO CUSCO" [ref=e1545]:
+                      - strong [ref=e1546]: UGEL ACOMAYO
+                      - generic [ref=e1547]: CUSCO
+                    - cell "En proceso" [ref=e1548]
+                    - cell "20%" [ref=e1551]
+                    - cell [ref=e1555]
+                  - row [ref=e1558] [cursor=pointer]:
+                    - cell "51" [ref=e1559]
+                    - cell "UGEL AIJA ANCASH" [ref=e1560]:
+                      - strong [ref=e1561]: UGEL AIJA
+                      - generic [ref=e1562]: ANCASH
+                    - cell "En proceso" [ref=e1563]
+                    - cell "75%" [ref=e1566]
+                    - cell [ref=e1570]
+                  - row [ref=e1573] [cursor=pointer]:
+                    - cell "52" [ref=e1574]
+                    - cell "UGEL ALTO AMAZONAS - SAN LORENZO LORETO" [ref=e1575]:
+                      - strong [ref=e1576]: UGEL ALTO AMAZONAS - SAN LORENZO
+                      - generic [ref=e1577]: LORETO
+                    - cell "En proceso" [ref=e1578]
+                    - cell "50%" [ref=e1581]
+                    - cell [ref=e1585]
+                  - row [ref=e1588] [cursor=pointer]:
+                    - cell "53" [ref=e1589]
+                    - cell "UGEL ALTO AMAZONAS - YURIMAGUAS LORETO" [ref=e1590]:
+                      - strong [ref=e1591]: UGEL ALTO AMAZONAS - YURIMAGUAS
+                      - generic [ref=e1592]: LORETO
+                    - cell "En proceso" [ref=e1593]
+                    - cell "50%" [ref=e1596]
+                    - cell [ref=e1600]
+                  - row [ref=e1603] [cursor=pointer]:
+                    - cell "54" [ref=e1604]
+                    - cell "UGEL AMBO HUÁNUCO" [ref=e1605]:
+                      - strong [ref=e1606]: UGEL AMBO
+                      - generic [ref=e1607]: HUÁNUCO
+                    - cell "En proceso" [ref=e1608]
+                    - cell "33%" [ref=e1611]
+                    - cell [ref=e1615]
+                  - row [ref=e1618] [cursor=pointer]:
+                    - cell "55" [ref=e1619]
+                    - cell "UGEL ANDAHUAYLAS APURÍMAC" [ref=e1620]:
+                      - strong [ref=e1621]: UGEL ANDAHUAYLAS
+                      - generic [ref=e1622]: APURÍMAC
+                    - cell "En proceso" [ref=e1623]
+                    - cell "20%" [ref=e1626]
+                    - cell [ref=e1630]
+                  - row [ref=e1633] [cursor=pointer]:
+                    - cell "56" [ref=e1634]
+                    - cell "UGEL ANGARAES HUANCAVELICA" [ref=e1635]:
+                      - strong [ref=e1636]: UGEL ANGARAES
+                      - generic [ref=e1637]: HUANCAVELICA
+                    - cell "En proceso" [ref=e1638]
+                    - cell "75%" [ref=e1641]
+                    - cell [ref=e1645]
+                  - row [ref=e1648] [cursor=pointer]:
+                    - cell "57" [ref=e1649]
+                    - cell "UGEL ANTA CUSCO" [ref=e1650]:
+                      - strong [ref=e1651]: UGEL ANTA
+                      - generic [ref=e1652]: CUSCO
+                    - cell "En proceso" [ref=e1653]
+                    - cell "50%" [ref=e1656]
+                    - cell [ref=e1660]
+                  - row [ref=e1663] [cursor=pointer]:
+                    - cell "58" [ref=e1664]
+                    - cell "UGEL ANTABAMBA APURÍMAC" [ref=e1665]:
+                      - strong [ref=e1666]: UGEL ANTABAMBA
+                      - generic [ref=e1667]: APURÍMAC
+                    - cell "En proceso" [ref=e1668]
+                    - cell "50%" [ref=e1671]
+                    - cell [ref=e1675]
+                  - row [ref=e1678] [cursor=pointer]:
+                    - cell "59" [ref=e1679]
+                    - cell "UGEL ANTONIO RAYMONDI ANCASH" [ref=e1680]:
+                      - strong [ref=e1681]: UGEL ANTONIO RAYMONDI
+                      - generic [ref=e1682]: ANCASH
+                    - cell "En proceso" [ref=e1683]
+                    - cell "33%" [ref=e1686]
+                    - cell [ref=e1690]
+                  - row [ref=e1693] [cursor=pointer]:
+                    - cell "60" [ref=e1694]
+                    - cell "UGEL AREQUIPA NORTE AREQUIPA" [ref=e1695]:
+                      - strong [ref=e1696]: UGEL AREQUIPA NORTE
+                      - generic [ref=e1697]: AREQUIPA
+                    - cell "En proceso" [ref=e1698]
+                    - cell "20%" [ref=e1701]
+                    - cell [ref=e1705]
+                  - row [ref=e1708] [cursor=pointer]:
+                    - cell "61" [ref=e1709]
+                    - cell "UGEL AREQUIPA SUR AREQUIPA" [ref=e1710]:
+                      - strong [ref=e1711]: UGEL AREQUIPA SUR
+                      - generic [ref=e1712]: AREQUIPA
+                    - cell "En proceso" [ref=e1713]
+                    - cell "75%" [ref=e1716]
+                    - cell [ref=e1720]
+                  - row [ref=e1723] [cursor=pointer]:
+                    - cell "62" [ref=e1724]
+                    - cell "UGEL ASCOPE LA LIBERTAD" [ref=e1725]:
+                      - strong [ref=e1726]: UGEL ASCOPE
+                      - generic [ref=e1727]: LA LIBERTAD
+                    - cell "En proceso" [ref=e1728]
+                    - cell "50%" [ref=e1731]
+                    - cell [ref=e1735]
+                  - row [ref=e1738] [cursor=pointer]:
+                    - cell "63" [ref=e1739]
+                    - cell "UGEL ASUNCIÓN ANCASH" [ref=e1740]:
+                      - strong [ref=e1741]: UGEL ASUNCIÓN
+                      - generic [ref=e1742]: ANCASH
+                    - cell "En proceso" [ref=e1743]
+                    - cell "50%" [ref=e1746]
+                    - cell [ref=e1750]
+                  - row [ref=e1753] [cursor=pointer]:
+                    - cell "64" [ref=e1754]
+                    - cell "UGEL ATALAYA UCAYALI" [ref=e1755]:
+                      - strong [ref=e1756]: UGEL ATALAYA
+                      - generic [ref=e1757]: UCAYALI
+                    - cell "En proceso" [ref=e1758]
+                    - cell "33%" [ref=e1761]
+                    - cell [ref=e1765]
+                  - row [ref=e1768] [cursor=pointer]:
+                    - cell "65" [ref=e1769]
+                    - cell "UGEL AYABACA PIURA" [ref=e1770]:
+                      - strong [ref=e1771]: UGEL AYABACA
+                      - generic [ref=e1772]: PIURA
+                    - cell "En proceso" [ref=e1773]
+                    - cell "20%" [ref=e1776]
+                    - cell [ref=e1780]
+                  - row [ref=e1783] [cursor=pointer]:
+                    - cell "66" [ref=e1784]
+                    - cell "UGEL AYMARAES APURÍMAC" [ref=e1785]:
+                      - strong [ref=e1786]: UGEL AYMARAES
+                      - generic [ref=e1787]: APURÍMAC
+                    - cell "En proceso" [ref=e1788]
+                    - cell "75%" [ref=e1791]
+                    - cell [ref=e1795]
+                  - row [ref=e1798] [cursor=pointer]:
+                    - cell "67" [ref=e1799]
+                    - cell "UGEL AZÁNGARO PUNO" [ref=e1800]:
+                      - strong [ref=e1801]: UGEL AZÁNGARO
+                      - generic [ref=e1802]: PUNO
+                    - cell "En proceso" [ref=e1803]
+                    - cell "50%" [ref=e1806]
+                    - cell [ref=e1810]
+                  - row [ref=e1813] [cursor=pointer]:
+                    - cell "68" [ref=e1814]
+                    - cell "UGEL BAGUA AMAZONAS" [ref=e1815]:
+                      - strong [ref=e1816]: UGEL BAGUA
+                      - generic [ref=e1817]: AMAZONAS
+                    - cell "En proceso" [ref=e1818]
+                    - cell "50%" [ref=e1821]
+                    - cell [ref=e1825]
+                  - row [ref=e1828] [cursor=pointer]:
+                    - cell "69" [ref=e1829]
+                    - cell "UGEL BELLAVISTA SAN MARTÍN" [ref=e1830]:
+                      - strong [ref=e1831]: UGEL BELLAVISTA
+                      - generic [ref=e1832]: SAN MARTÍN
+                    - cell "En proceso" [ref=e1833]
+                    - cell "33%" [ref=e1836]
+                    - cell [ref=e1840]
+                  - row [ref=e1843] [cursor=pointer]:
+                    - cell "70" [ref=e1844]
+                    - cell "UGEL BOLIVAR LA LIBERTAD" [ref=e1845]:
+                      - strong [ref=e1846]: UGEL BOLIVAR
+                      - generic [ref=e1847]: LA LIBERTAD
+                    - cell "En proceso" [ref=e1848]
+                    - cell "20%" [ref=e1851]
+                    - cell [ref=e1855]
+                  - row [ref=e1858] [cursor=pointer]:
+                    - cell "71" [ref=e1859]
+                    - cell "UGEL BOLOGNESI ANCASH" [ref=e1860]:
+                      - strong [ref=e1861]: UGEL BOLOGNESI
+                      - generic [ref=e1862]: ANCASH
+                    - cell "En proceso" [ref=e1863]
+                    - cell "75%" [ref=e1866]
+                    - cell [ref=e1870]
+                  - row [ref=e1873] [cursor=pointer]:
+                    - cell "72" [ref=e1874]
+                    - cell "UGEL BONGARÁ AMAZONAS" [ref=e1875]:
+                      - strong [ref=e1876]: UGEL BONGARÁ
+                      - generic [ref=e1877]: AMAZONAS
+                    - cell "En proceso" [ref=e1878]
+                    - cell "50%" [ref=e1881]
+                    - cell [ref=e1885]
+                  - row [ref=e1888] [cursor=pointer]:
+                    - cell "73" [ref=e1889]
+                    - cell "UGEL CAJABAMBA CAJAMARCA" [ref=e1890]:
+                      - strong [ref=e1891]: UGEL CAJABAMBA
+                      - generic [ref=e1892]: CAJAMARCA
+                    - cell "En proceso" [ref=e1893]
+                    - cell "50%" [ref=e1896]
+                    - cell [ref=e1900]
+                  - row [ref=e1903] [cursor=pointer]:
+                    - cell "74" [ref=e1904]
+                    - cell "UGEL CAJAMARCA CAJAMARCA" [ref=e1905]:
+                      - strong [ref=e1906]: UGEL CAJAMARCA
+                      - generic [ref=e1907]: CAJAMARCA
+                    - cell "En proceso" [ref=e1908]
+                    - cell "33%" [ref=e1911]
+                    - cell [ref=e1915]
+                  - row [ref=e1918] [cursor=pointer]:
+                    - cell "75" [ref=e1919]
+                    - cell "UGEL CALCA CUSCO" [ref=e1920]:
+                      - strong [ref=e1921]: UGEL CALCA
+                      - generic [ref=e1922]: CUSCO
+                    - cell "En proceso" [ref=e1923]
+                    - cell "20%" [ref=e1926]
+                    - cell [ref=e1930]
+                  - row [ref=e1933] [cursor=pointer]:
+                    - cell "76" [ref=e1934]
+                    - cell "UGEL CAMANÁ AREQUIPA" [ref=e1935]:
+                      - strong [ref=e1936]: UGEL CAMANÁ
+                      - generic [ref=e1937]: AREQUIPA
+                    - cell "En proceso" [ref=e1938]
+                    - cell "75%" [ref=e1941]
+                    - cell [ref=e1945]
+                  - row [ref=e1948] [cursor=pointer]:
+                    - cell "77" [ref=e1949]
+                    - cell "UGEL CANAS CUSCO" [ref=e1950]:
+                      - strong [ref=e1951]: UGEL CANAS
+                      - generic [ref=e1952]: CUSCO
+                    - cell "En proceso" [ref=e1953]
+                    - cell "50%" [ref=e1956]
+                    - cell [ref=e1960]
+                  - row [ref=e1963] [cursor=pointer]:
+                    - cell "78" [ref=e1964]
+                    - cell "UGEL CANCHIS CUSCO" [ref=e1965]:
+                      - strong [ref=e1966]: UGEL CANCHIS
+                      - generic [ref=e1967]: CUSCO
+                    - cell "En proceso" [ref=e1968]
+                    - cell "50%" [ref=e1971]
+                    - cell [ref=e1975]
+                  - row [ref=e1978] [cursor=pointer]:
+                    - cell "79" [ref=e1979]
+                    - cell "UGEL CANDARAVE TACNA" [ref=e1980]:
+                      - strong [ref=e1981]: UGEL CANDARAVE
+                      - generic [ref=e1982]: TACNA
+                    - cell "En proceso" [ref=e1983]
+                    - cell "33%" [ref=e1986]
+                    - cell [ref=e1990]
+                  - row [ref=e1993] [cursor=pointer]:
+                    - cell "80" [ref=e1994]
+                    - cell "UGEL CANGALLO AYACUCHO" [ref=e1995]:
+                      - strong [ref=e1996]: UGEL CANGALLO
+                      - generic [ref=e1997]: AYACUCHO
+                    - cell "En proceso" [ref=e1998]
+                    - cell "20%" [ref=e2001]
+                    - cell [ref=e2005]
+                  - row [ref=e2008] [cursor=pointer]:
+                    - cell "81" [ref=e2009]
+                    - cell "UGEL CARABAYA PUNO" [ref=e2010]:
+                      - strong [ref=e2011]: UGEL CARABAYA
+                      - generic [ref=e2012]: PUNO
+                    - cell "En proceso" [ref=e2013]
+                    - cell "75%" [ref=e2016]
+                    - cell [ref=e2020]
+                  - row [ref=e2023] [cursor=pointer]:
+                    - cell "82" [ref=e2024]
+                    - cell "UGEL CARAVELI AREQUIPA" [ref=e2025]:
+                      - strong [ref=e2026]: UGEL CARAVELI
+                      - generic [ref=e2027]: AREQUIPA
+                    - cell "En proceso" [ref=e2028]
+                    - cell "50%" [ref=e2031]
+                    - cell [ref=e2035]
+                  - row [ref=e2038] [cursor=pointer]:
+                    - cell "83" [ref=e2039]
+                    - cell "UGEL CARHUÁZ ANCASH" [ref=e2040]:
+                      - strong [ref=e2041]: UGEL CARHUÁZ
+                      - generic [ref=e2042]: ANCASH
+                    - cell "En proceso" [ref=e2043]
+                    - cell "50%" [ref=e2046]
+                    - cell [ref=e2050]
+                  - row [ref=e2053] [cursor=pointer]:
+                    - cell "84" [ref=e2054]
+                    - cell "UGEL CARLOS FERMIN FITZCARRALD ANCASH" [ref=e2055]:
+                      - strong [ref=e2056]: UGEL CARLOS FERMIN FITZCARRALD
+                      - generic [ref=e2057]: ANCASH
+                    - cell "En proceso" [ref=e2058]
+                    - cell "33%" [ref=e2061]
+                    - cell [ref=e2065]
+                  - row [ref=e2068] [cursor=pointer]:
+                    - cell "85" [ref=e2069]
+                    - cell "UGEL CASMA ANCASH" [ref=e2070]:
+                      - strong [ref=e2071]: UGEL CASMA
+                      - generic [ref=e2072]: ANCASH
+                    - cell "En proceso" [ref=e2073]
+                    - cell "20%" [ref=e2076]
+                    - cell [ref=e2080]
+                  - row [ref=e2083] [cursor=pointer]:
+                    - cell "86" [ref=e2084]
+                    - cell "UGEL CASTILLA AREQUIPA" [ref=e2085]:
+                      - strong [ref=e2086]: UGEL CASTILLA
+                      - generic [ref=e2087]: AREQUIPA
+                    - cell "En proceso" [ref=e2088]
+                    - cell "75%" [ref=e2091]
+                    - cell [ref=e2095]
+                  - row [ref=e2098] [cursor=pointer]:
+                    - cell "87" [ref=e2099]
+                    - cell "UGEL CASTROVIRREYNA HUANCAVELICA" [ref=e2100]:
+                      - strong [ref=e2101]: UGEL CASTROVIRREYNA
+                      - generic [ref=e2102]: HUANCAVELICA
+                    - cell "En proceso" [ref=e2103]
+                    - cell "50%" [ref=e2106]
+                    - cell [ref=e2110]
+                  - row [ref=e2113] [cursor=pointer]:
+                    - cell "88" [ref=e2114]
+                    - cell "UGEL CAYLLOMA AREQUIPA" [ref=e2115]:
+                      - strong [ref=e2116]: UGEL CAYLLOMA
+                      - generic [ref=e2117]: AREQUIPA
+                    - cell "En proceso" [ref=e2118]
+                    - cell "50%" [ref=e2121]
+                    - cell [ref=e2125]
+                  - row [ref=e2128] [cursor=pointer]:
+                    - cell "89" [ref=e2129]
+                    - cell "UGEL CELENDÍN CAJAMARCA" [ref=e2130]:
+                      - strong [ref=e2131]: UGEL CELENDÍN
+                      - generic [ref=e2132]: CAJAMARCA
+                    - cell "En proceso" [ref=e2133]
+                    - cell "33%" [ref=e2136]
+                    - cell [ref=e2140]
+                  - row [ref=e2143] [cursor=pointer]:
+                    - cell "90" [ref=e2144]
+                    - cell "UGEL CHACHAPOYAS AMAZONAS" [ref=e2145]:
+                      - strong [ref=e2146]: UGEL CHACHAPOYAS
+                      - generic [ref=e2147]: AMAZONAS
+                    - cell "En proceso" [ref=e2148]
+                    - cell "20%" [ref=e2151]
+                    - cell [ref=e2155]
+                  - row [ref=e2158] [cursor=pointer]:
+                    - cell "91" [ref=e2159]
+                    - cell "UGEL CHANCHAMAYO JUNÍN" [ref=e2160]:
+                      - strong [ref=e2161]: UGEL CHANCHAMAYO
+                      - generic [ref=e2162]: JUNÍN
+                    - cell "En proceso" [ref=e2163]
+                    - cell "75%" [ref=e2166]
+                    - cell [ref=e2170]
+                  - row [ref=e2173] [cursor=pointer]:
+                    - cell "92" [ref=e2174]
+                    - cell "UGEL CHEPÉN LA LIBERTAD" [ref=e2175]:
+                      - strong [ref=e2176]: UGEL CHEPÉN
+                      - generic [ref=e2177]: LA LIBERTAD
+                    - cell "En proceso" [ref=e2178]
+                    - cell "50%" [ref=e2181]
+                    - cell [ref=e2185]
+                  - row [ref=e2188] [cursor=pointer]:
+                    - cell "93" [ref=e2189]
+                    - cell "UGEL CHICLAYO LAMBAYEQUE" [ref=e2190]:
+                      - strong [ref=e2191]: UGEL CHICLAYO
+                      - generic [ref=e2192]: LAMBAYEQUE
+                    - cell "En proceso" [ref=e2193]
+                    - cell "50%" [ref=e2196]
+                    - cell [ref=e2200]
+                  - row [ref=e2203] [cursor=pointer]:
+                    - cell "94" [ref=e2204]
+                    - cell "UGEL CHINCHA ICA" [ref=e2205]:
+                      - strong [ref=e2206]: UGEL CHINCHA
+                      - generic [ref=e2207]: ICA
+                    - cell "En proceso" [ref=e2208]
+                    - cell "33%" [ref=e2211]
+                    - cell [ref=e2215]
+                  - row [ref=e2218] [cursor=pointer]:
+                    - cell "95" [ref=e2219]
+                    - cell "UGEL CHINCHEROS APURÍMAC" [ref=e2220]:
+                      - strong [ref=e2221]: UGEL CHINCHEROS
+                      - generic [ref=e2222]: APURÍMAC
+                    - cell "En proceso" [ref=e2223]
+                    - cell "20%" [ref=e2226]
+                    - cell [ref=e2230]
+                  - row [ref=e2233] [cursor=pointer]:
+                    - cell "96" [ref=e2234]
+                    - cell "UGEL CHOTA CAJAMARCA" [ref=e2235]:
+                      - strong [ref=e2236]: UGEL CHOTA
+                      - generic [ref=e2237]: CAJAMARCA
+                    - cell "En proceso" [ref=e2238]
+                    - cell "75%" [ref=e2241]
+                    - cell [ref=e2245]
+                  - row [ref=e2248] [cursor=pointer]:
+                    - cell "97" [ref=e2249]
+                    - cell "UGEL CHUCUITO PUNO" [ref=e2250]:
+                      - strong [ref=e2251]: UGEL CHUCUITO
+                      - generic [ref=e2252]: PUNO
+                    - cell "En proceso" [ref=e2253]
+                    - cell "50%" [ref=e2256]
+                    - cell [ref=e2260]
+                  - row [ref=e2263] [cursor=pointer]:
+                    - cell "98" [ref=e2264]
+                    - cell "UGEL CHULUCANAS PIURA" [ref=e2265]:
+                      - strong [ref=e2266]: UGEL CHULUCANAS
+                      - generic [ref=e2267]: PIURA
+                    - cell "En proceso" [ref=e2268]
+                    - cell "50%" [ref=e2271]
+                    - cell [ref=e2275]
+                  - row [ref=e2278] [cursor=pointer]:
+                    - cell "99" [ref=e2279]
+                    - cell "UGEL CHUMBIVILCAS CUSCO" [ref=e2280]:
+                      - strong [ref=e2281]: UGEL CHUMBIVILCAS
+                      - generic [ref=e2282]: CUSCO
+                    - cell "En proceso" [ref=e2283]
+                    - cell "33%" [ref=e2286]
+                    - cell [ref=e2290]
+                  - row [ref=e2293] [cursor=pointer]:
+                    - cell "100" [ref=e2294]
+                    - cell "UGEL CHUPACA JUNÍN" [ref=e2295]:
+                      - strong [ref=e2296]: UGEL CHUPACA
+                      - generic [ref=e2297]: JUNÍN
+                    - cell "En proceso" [ref=e2298]
+                    - cell "20%" [ref=e2301]
+                    - cell [ref=e2305]
+                  - row [ref=e2308] [cursor=pointer]:
+                    - cell "101" [ref=e2309]
+                    - cell "UGEL CHURCAMPA HUANCAVELICA" [ref=e2310]:
+                      - strong [ref=e2311]: UGEL CHURCAMPA
+                      - generic [ref=e2312]: HUANCAVELICA
+                    - cell "En proceso" [ref=e2313]
+                    - cell "75%" [ref=e2316]
+                    - cell [ref=e2320]
+                  - row [ref=e2323] [cursor=pointer]:
+                    - cell "102" [ref=e2324]
+                    - cell "UGEL CONCEPCIÓN JUNÍN" [ref=e2325]:
+                      - strong [ref=e2326]: UGEL CONCEPCIÓN
+                      - generic [ref=e2327]: JUNÍN
+                    - cell "En proceso" [ref=e2328]
+                    - cell "50%" [ref=e2331]
+                    - cell [ref=e2335]
+                  - row [ref=e2338] [cursor=pointer]:
+                    - cell "103" [ref=e2339]
+                    - cell "UGEL CONDESUYOS AREQUIPA" [ref=e2340]:
+                      - strong [ref=e2341]: UGEL CONDESUYOS
+                      - generic [ref=e2342]: AREQUIPA
+                    - cell "En proceso" [ref=e2343]
+                    - cell "50%" [ref=e2346]
+                    - cell [ref=e2350]
+                  - row [ref=e2353] [cursor=pointer]:
+                    - cell "104" [ref=e2354]
+                    - cell "UGEL CONDORCANQUI AMAZONAS" [ref=e2355]:
+                      - strong [ref=e2356]: UGEL CONDORCANQUI
+                      - generic [ref=e2357]: AMAZONAS
+                    - cell "En proceso" [ref=e2358]
+                    - cell "33%" [ref=e2361]
+                    - cell [ref=e2365]
+                  - row [ref=e2368] [cursor=pointer]:
+                    - cell "105" [ref=e2369]
+                    - cell "UGEL CONTRALMIRANTE VILLAR TUMBES" [ref=e2370]:
+                      - strong [ref=e2371]: UGEL CONTRALMIRANTE VILLAR
+                      - generic [ref=e2372]: TUMBES
+                    - cell "En proceso" [ref=e2373]
+                    - cell "20%" [ref=e2376]
+                    - cell [ref=e2380]
+                  - row [ref=e2383] [cursor=pointer]:
+                    - cell "106" [ref=e2384]
+                    - cell "UGEL CONTUMAZÁ CAJAMARCA" [ref=e2385]:
+                      - strong [ref=e2386]: UGEL CONTUMAZÁ
+                      - generic [ref=e2387]: CAJAMARCA
+                    - cell "En proceso" [ref=e2388]
+                    - cell "75%" [ref=e2391]
+                    - cell [ref=e2395]
+                  - row [ref=e2398] [cursor=pointer]:
+                    - cell "107" [ref=e2399]
+                    - cell "UGEL CORONEL PORTILLO UCAYALI" [ref=e2400]:
+                      - strong [ref=e2401]: UGEL CORONEL PORTILLO
+                      - generic [ref=e2402]: UCAYALI
+                    - cell "En proceso" [ref=e2403]
+                    - cell "50%" [ref=e2406]
+                    - cell [ref=e2410]
+                  - row [ref=e2413] [cursor=pointer]:
+                    - cell "108" [ref=e2414]
+                    - cell "UGEL CORONGO ANCASH" [ref=e2415]:
+                      - strong [ref=e2416]: UGEL CORONGO
+                      - generic [ref=e2417]: ANCASH
+                    - cell "En proceso" [ref=e2418]
+                    - cell "50%" [ref=e2421]
+                    - cell [ref=e2425]
+                  - row [ref=e2428] [cursor=pointer]:
+                    - cell "109" [ref=e2429]
+                    - cell "UGEL COTABAMBAS APURÍMAC" [ref=e2430]:
+                      - strong [ref=e2431]: UGEL COTABAMBAS
+                      - generic [ref=e2432]: APURÍMAC
+                    - cell "En proceso" [ref=e2433]
+                    - cell "33%" [ref=e2436]
+                    - cell [ref=e2440]
+                  - row [ref=e2443] [cursor=pointer]:
+                    - cell "110" [ref=e2444]
+                    - cell "UGEL CRUCERO PUNO" [ref=e2445]:
+                      - strong [ref=e2446]: UGEL CRUCERO
+                      - generic [ref=e2447]: PUNO
+                    - cell "En proceso" [ref=e2448]
+                    - cell "20%" [ref=e2451]
+                    - cell [ref=e2455]
+                  - row [ref=e2458] [cursor=pointer]:
+                    - cell "111" [ref=e2459]
+                    - cell "UGEL CUSCO CUSCO" [ref=e2460]:
+                      - strong [ref=e2461]: UGEL CUSCO
+                      - generic [ref=e2462]: CUSCO
+                    - cell "En proceso" [ref=e2463]
+                    - cell "75%" [ref=e2466]
+                    - cell [ref=e2470]
+                  - row [ref=e2473] [cursor=pointer]:
+                    - cell "112" [ref=e2474]
+                    - cell "UGEL CUTERVO CAJAMARCA" [ref=e2475]:
+                      - strong [ref=e2476]: UGEL CUTERVO
+                      - generic [ref=e2477]: CAJAMARCA
+                    - cell "En proceso" [ref=e2478]
+                    - cell "50%" [ref=e2481]
+                    - cell [ref=e2485]
+                  - row [ref=e2488] [cursor=pointer]:
+                    - cell "113" [ref=e2489]
+                    - cell "UGEL DANIEL ALCIDES CARRIÓN PASCO" [ref=e2490]:
+                      - strong [ref=e2491]: UGEL DANIEL ALCIDES CARRIÓN
+                      - generic [ref=e2492]: PASCO
+                    - cell "En proceso" [ref=e2493]
+                    - cell "50%" [ref=e2496]
+                    - cell [ref=e2500]
+                  - row [ref=e2503] [cursor=pointer]:
+                    - cell "114" [ref=e2504]
+                    - cell "UGEL DOS DE MAYO HUÁNUCO" [ref=e2505]:
+                      - strong [ref=e2506]: UGEL DOS DE MAYO
+                      - generic [ref=e2507]: HUÁNUCO
+                    - cell "En proceso" [ref=e2508]
+                    - cell "33%" [ref=e2511]
+                    - cell [ref=e2515]
+                  - row [ref=e2518] [cursor=pointer]:
+                    - cell "115" [ref=e2519]
+                    - cell "UGEL EL COLLAO PUNO" [ref=e2520]:
+                      - strong [ref=e2521]: UGEL EL COLLAO
+                      - generic [ref=e2522]: PUNO
+                    - cell "En proceso" [ref=e2523]
+                    - cell "20%" [ref=e2526]
+                    - cell [ref=e2530]
+                  - row [ref=e2533] [cursor=pointer]:
+                    - cell "116" [ref=e2534]
+                    - cell "UGEL EL DORADO SAN MARTÍN" [ref=e2535]:
+                      - strong [ref=e2536]: UGEL EL DORADO
+                      - generic [ref=e2537]: SAN MARTÍN
+                    - cell "En proceso" [ref=e2538]
+                    - cell "75%" [ref=e2541]
+                    - cell [ref=e2545]
+                  - row [ref=e2548] [cursor=pointer]:
+                    - cell "117" [ref=e2549]
+                    - cell "UGEL ESPINAR CUSCO" [ref=e2550]:
+                      - strong [ref=e2551]: UGEL ESPINAR
+                      - generic [ref=e2552]: CUSCO
+                    - cell "En proceso" [ref=e2553]
+                    - cell "50%" [ref=e2556]
+                    - cell [ref=e2560]
+                  - row [ref=e2563] [cursor=pointer]:
+                    - cell "118" [ref=e2564]
+                    - cell "UGEL FERREÑAFE LAMBAYEQUE" [ref=e2565]:
+                      - strong [ref=e2566]: UGEL FERREÑAFE
+                      - generic [ref=e2567]: LAMBAYEQUE
+                    - cell "En proceso" [ref=e2568]
+                    - cell "50%" [ref=e2571]
+                    - cell [ref=e2575]
+                  - row [ref=e2578] [cursor=pointer]:
+                    - cell "119" [ref=e2579]
+                    - cell "UGEL GENERAL SÁNCHEZ CERRO MOQUEGUA" [ref=e2580]:
+                      - strong [ref=e2581]: UGEL GENERAL SÁNCHEZ CERRO
+                      - generic [ref=e2582]: MOQUEGUA
+                    - cell "En proceso" [ref=e2583]
+                    - cell "33%" [ref=e2586]
+                    - cell [ref=e2590]
+                  - row [ref=e2593] [cursor=pointer]:
+                    - cell "120" [ref=e2594]
+                    - cell "UGEL GRAN CHIMÚ LA LIBERTAD" [ref=e2595]:
+                      - strong [ref=e2596]: UGEL GRAN CHIMÚ
+                      - generic [ref=e2597]: LA LIBERTAD
+                    - cell "En proceso" [ref=e2598]
+                    - cell "20%" [ref=e2601]
+                    - cell [ref=e2605]
+                  - row [ref=e2608] [cursor=pointer]:
+                    - cell "121" [ref=e2609]
+                    - cell "UGEL GRAU APURÍMAC" [ref=e2610]:
+                      - strong [ref=e2611]: UGEL GRAU
+                      - generic [ref=e2612]: APURÍMAC
+                    - cell "En proceso" [ref=e2613]
+                    - cell "75%" [ref=e2616]
+                    - cell [ref=e2620]
+                  - row [ref=e2623] [cursor=pointer]:
+                    - cell "122" [ref=e2624]
+                    - cell "UGEL HUACAYBAMBA HUÁNUCO" [ref=e2625]:
+                      - strong [ref=e2626]: UGEL HUACAYBAMBA
+                      - generic [ref=e2627]: HUÁNUCO
+                    - cell "En proceso" [ref=e2628]
+                    - cell "50%" [ref=e2631]
+                    - cell [ref=e2635]
+                  - row [ref=e2638] [cursor=pointer]:
+                    - cell "123" [ref=e2639]
+                    - cell "UGEL HUALGAYOC CAJAMARCA" [ref=e2640]:
+                      - strong [ref=e2641]: UGEL HUALGAYOC
+                      - generic [ref=e2642]: CAJAMARCA
+                    - cell "En proceso" [ref=e2643]
+                    - cell "50%" [ref=e2646]
+                    - cell [ref=e2650]
+                  - row [ref=e2653] [cursor=pointer]:
+                    - cell "124" [ref=e2654]
+                    - cell "UGEL HUALLAGA SAN MARTÍN" [ref=e2655]:
+                      - strong [ref=e2656]: UGEL HUALLAGA
+                      - generic [ref=e2657]: SAN MARTÍN
+                    - cell "En proceso" [ref=e2658]
+                    - cell "33%" [ref=e2661]
+                    - cell [ref=e2665]
+                  - row [ref=e2668] [cursor=pointer]:
+                    - cell "125" [ref=e2669]
+                    - cell "UGEL HUAMALÍES HUÁNUCO" [ref=e2670]:
+                      - strong [ref=e2671]: UGEL HUAMALÍES
+                      - generic [ref=e2672]: HUÁNUCO
+                    - cell "En proceso" [ref=e2673]
+                    - cell "20%" [ref=e2676]
+                    - cell [ref=e2680]
+                  - row [ref=e2683] [cursor=pointer]:
+                    - cell "126" [ref=e2684]
+                    - cell "UGEL HUAMANGA AYACUCHO" [ref=e2685]:
+                      - strong [ref=e2686]: UGEL HUAMANGA
+                      - generic [ref=e2687]: AYACUCHO
+                    - cell "En proceso" [ref=e2688]
+                    - cell "75%" [ref=e2691]
+                    - cell [ref=e2695]
+                  - row [ref=e2698] [cursor=pointer]:
+                    - cell "127" [ref=e2699]
+                    - cell "UGEL HUANCABAMBA PIURA" [ref=e2700]:
+                      - strong [ref=e2701]: UGEL HUANCABAMBA
+                      - generic [ref=e2702]: PIURA
+                    - cell "En proceso" [ref=e2703]
+                    - cell "50%" [ref=e2706]
+                    - cell [ref=e2710]
+                  - row [ref=e2713] [cursor=pointer]:
+                    - cell "128" [ref=e2714]
+                    - cell "UGEL HUANCANÉ PUNO" [ref=e2715]:
+                      - strong [ref=e2716]: UGEL HUANCANÉ
+                      - generic [ref=e2717]: PUNO
+                    - cell "En proceso" [ref=e2718]
+                    - cell "50%" [ref=e2721]
+                    - cell [ref=e2725]
+                  - row [ref=e2728] [cursor=pointer]:
+                    - cell "129" [ref=e2729]
+                    - cell "UGEL HUANCARAMA APURÍMAC" [ref=e2730]:
+                      - strong [ref=e2731]: UGEL HUANCARAMA
+                      - generic [ref=e2732]: APURÍMAC
+                    - cell "En proceso" [ref=e2733]
+                    - cell "33%" [ref=e2736]
+                    - cell [ref=e2740]
+                  - row [ref=e2743] [cursor=pointer]:
+                    - cell "130" [ref=e2744]
+                    - cell "UGEL HUANCASANCOS AYACUCHO" [ref=e2745]:
+                      - strong [ref=e2746]: UGEL HUANCASANCOS
+                      - generic [ref=e2747]: AYACUCHO
+                    - cell "En proceso" [ref=e2748]
+                    - cell "20%" [ref=e2751]
+                    - cell [ref=e2755]
+                  - row [ref=e2758] [cursor=pointer]:
+                    - cell "131" [ref=e2759]
+                    - cell "UGEL HUANCAVELICA HUANCAVELICA" [ref=e2760]:
+                      - strong [ref=e2761]: UGEL HUANCAVELICA
+                      - generic [ref=e2762]: HUANCAVELICA
+                    - cell "En proceso" [ref=e2763]
+                    - cell "75%" [ref=e2766]
+                    - cell [ref=e2770]
+                  - row [ref=e2773] [cursor=pointer]:
+                    - cell "132" [ref=e2774]
+                    - cell "UGEL HUANCAYO JUNÍN" [ref=e2775]:
+                      - strong [ref=e2776]: UGEL HUANCAYO
+                      - generic [ref=e2777]: JUNÍN
+                    - cell "En proceso" [ref=e2778]
+                    - cell "50%" [ref=e2781]
+                    - cell [ref=e2785]
+                  - row [ref=e2788] [cursor=pointer]:
+                    - cell "133" [ref=e2789]
+                    - cell "UGEL HUANTA AYACUCHO" [ref=e2790]:
+                      - strong [ref=e2791]: UGEL HUANTA
+                      - generic [ref=e2792]: AYACUCHO
+                    - cell "En proceso" [ref=e2793]
+                    - cell "50%" [ref=e2796]
+                    - cell [ref=e2800]
+                  - row [ref=e2803] [cursor=pointer]:
+                    - cell "134" [ref=e2804]
+                    - cell "UGEL HUÁNUCO HUÁNUCO" [ref=e2805]:
+                      - strong [ref=e2806]: UGEL HUÁNUCO
+                      - generic [ref=e2807]: HUÁNUCO
+                    - cell "En proceso" [ref=e2808]
+                    - cell "33%" [ref=e2811]
+                    - cell [ref=e2815]
+                  - row [ref=e2818] [cursor=pointer]:
+                    - cell "135" [ref=e2819]
+                    - cell "UGEL HUARAZ ANCASH" [ref=e2820]:
+                      - strong [ref=e2821]: UGEL HUARAZ
+                      - generic [ref=e2822]: ANCASH
+                    - cell "En proceso" [ref=e2823]
+                    - cell "20%" [ref=e2826]
+                    - cell [ref=e2830]
+                  - row [ref=e2833] [cursor=pointer]:
+                    - cell "136" [ref=e2834]
+                    - cell "UGEL HUARI ANCASH" [ref=e2835]:
+                      - strong [ref=e2836]: UGEL HUARI
+                      - generic [ref=e2837]: ANCASH
+                    - cell "En proceso" [ref=e2838]
+                    - cell "75%" [ref=e2841]
+                    - cell [ref=e2845]
+                  - row [ref=e2848] [cursor=pointer]:
+                    - cell "137" [ref=e2849]
+                    - cell "UGEL HUARMACA PIURA" [ref=e2850]:
+                      - strong [ref=e2851]: UGEL HUARMACA
+                      - generic [ref=e2852]: PIURA
+                    - cell "En proceso" [ref=e2853]
+                    - cell "50%" [ref=e2856]
+                    - cell [ref=e2860]
+                  - row [ref=e2863] [cursor=pointer]:
+                    - cell "138" [ref=e2864]
+                    - cell "UGEL HUARMEY ANCASH" [ref=e2865]:
+                      - strong [ref=e2866]: UGEL HUARMEY
+                      - generic [ref=e2867]: ANCASH
+                    - cell "En proceso" [ref=e2868]
+                    - cell "50%" [ref=e2871]
+                    - cell [ref=e2875]
+                  - row [ref=e2878] [cursor=pointer]:
+                    - cell "139" [ref=e2879]
+                    - cell "UGEL HUAYLAS ANCASH" [ref=e2880]:
+                      - strong [ref=e2881]: UGEL HUAYLAS
+                      - generic [ref=e2882]: ANCASH
+                    - cell "En proceso" [ref=e2883]
+                    - cell "33%" [ref=e2886]
+                    - cell [ref=e2890]
+                  - row [ref=e2893] [cursor=pointer]:
+                    - cell "140" [ref=e2894]
+                    - cell "UGEL HUAYTARÁ HUANCAVELICA" [ref=e2895]:
+                      - strong [ref=e2896]: UGEL HUAYTARÁ
+                      - generic [ref=e2897]: HUANCAVELICA
+                    - cell "En proceso" [ref=e2898]
+                    - cell "20%" [ref=e2901]
+                    - cell [ref=e2905]
+                  - row [ref=e2908] [cursor=pointer]:
+                    - cell "141" [ref=e2909]
+                    - cell "UGEL IBIR - IMAZA AMAZONAS" [ref=e2910]:
+                      - strong [ref=e2911]: UGEL IBIR - IMAZA
+                      - generic [ref=e2912]: AMAZONAS
+                    - cell "En proceso" [ref=e2913]
+                    - cell "75%" [ref=e2916]
+                    - cell [ref=e2920]
+                  - row [ref=e2923] [cursor=pointer]:
+                    - cell "142" [ref=e2924]
+                    - cell "UGEL ICA ICA" [ref=e2925]:
+                      - strong [ref=e2926]: UGEL ICA
+                      - generic [ref=e2927]: ICA
+                    - cell "En proceso" [ref=e2928]
+                    - cell "50%" [ref=e2931]
+                    - cell [ref=e2935]
+                  - row [ref=e2938] [cursor=pointer]:
+                    - cell "143" [ref=e2939]
+                    - cell "UGEL ILO MOQUEGUA" [ref=e2940]:
+                      - strong [ref=e2941]: UGEL ILO
+                      - generic [ref=e2942]: MOQUEGUA
+                    - cell "En proceso" [ref=e2943]
+                    - cell "50%" [ref=e2946]
+                    - cell [ref=e2950]
+                  - row [ref=e2953] [cursor=pointer]:
+                    - cell "144" [ref=e2954]
+                    - cell "UGEL INTERCULTURAL BILINGÜE CENEPA AMAZONAS" [ref=e2955]:
+                      - strong [ref=e2956]: UGEL INTERCULTURAL BILINGÜE CENEPA
+                      - generic [ref=e2957]: AMAZONAS
+                    - cell "En proceso" [ref=e2958]
+                    - cell "33%" [ref=e2961]
+                    - cell [ref=e2965]
+                  - row [ref=e2968] [cursor=pointer]:
+                    - cell "145" [ref=e2969]
+                    - cell "UGEL INTERCULTURAL BILINGÜE RIO SANTIAGO AMAZONAS" [ref=e2970]:
+                      - strong [ref=e2971]: UGEL INTERCULTURAL BILINGÜE RIO SANTIAGO
+                      - generic [ref=e2972]: AMAZONAS
+                    - cell "En proceso" [ref=e2973]
+                    - cell "20%" [ref=e2976]
+                    - cell [ref=e2980]
+                  - row [ref=e2983] [cursor=pointer]:
+                    - cell "146" [ref=e2984]
+                    - cell "UGEL ISLAY AREQUIPA" [ref=e2985]:
+                      - strong [ref=e2986]: UGEL ISLAY
+                      - generic [ref=e2987]: AREQUIPA
+                    - cell "En proceso" [ref=e2988]
+                    - cell "75%" [ref=e2991]
+                    - cell [ref=e2995]
+                  - row [ref=e2998] [cursor=pointer]:
+                    - cell "147" [ref=e2999]
+                    - cell "UGEL JAÉN CAJAMARCA" [ref=e3000]:
+                      - strong [ref=e3001]: UGEL JAÉN
+                      - generic [ref=e3002]: CAJAMARCA
+                    - cell "En proceso" [ref=e3003]
+                    - cell "50%" [ref=e3006]
+                    - cell [ref=e3010]
+                  - row [ref=e3013] [cursor=pointer]:
+                    - cell "148" [ref=e3014]
+                    - cell "UGEL JAUJA JUNÍN" [ref=e3015]:
+                      - strong [ref=e3016]: UGEL JAUJA
+                      - generic [ref=e3017]: JUNÍN
+                    - cell "En proceso" [ref=e3018]
+                    - cell "50%" [ref=e3021]
+                    - cell [ref=e3025]
+                  - row [ref=e3028] [cursor=pointer]:
+                    - cell "149" [ref=e3029]
+                    - cell "UGEL JORGE BASADRE TACNA" [ref=e3030]:
+                      - strong [ref=e3031]: UGEL JORGE BASADRE
+                      - generic [ref=e3032]: TACNA
+                    - cell "En proceso" [ref=e3033]
+                    - cell "33%" [ref=e3036]
+                    - cell [ref=e3040]
+                  - row [ref=e3043] [cursor=pointer]:
+                    - cell "150" [ref=e3044]
+                    - cell "UGEL JULCÁN LA LIBERTAD" [ref=e3045]:
+                      - strong [ref=e3046]: UGEL JULCÁN
+                      - generic [ref=e3047]: LA LIBERTAD
+                    - cell "En proceso" [ref=e3048]
+                    - cell "20%" [ref=e3051]
+                    - cell [ref=e3055]
+                  - row [ref=e3058] [cursor=pointer]:
+                    - cell "151" [ref=e3059]
+                    - cell "UGEL JUNÍN JUNÍN" [ref=e3060]:
+                      - strong [ref=e3061]: UGEL JUNÍN
+                      - generic [ref=e3062]: JUNÍN
+                    - cell "En proceso" [ref=e3063]
+                    - cell "75%" [ref=e3066]
+                    - cell [ref=e3070]
+                  - row [ref=e3073] [cursor=pointer]:
+                    - cell "152" [ref=e3074]
+                    - cell "UGEL LA CONVENCIÓN CUSCO" [ref=e3075]:
+                      - strong [ref=e3076]: UGEL LA CONVENCIÓN
+                      - generic [ref=e3077]: CUSCO
+                    - cell "En proceso" [ref=e3078]
+                    - cell "50%" [ref=e3081]
+                    - cell [ref=e3085]
+                  - row [ref=e3088] [cursor=pointer]:
+                    - cell "153" [ref=e3089]
+                    - cell "UGEL LA JOYA AREQUIPA" [ref=e3090]:
+                      - strong [ref=e3091]: UGEL LA JOYA
+                      - generic [ref=e3092]: AREQUIPA
+                    - cell "En proceso" [ref=e3093]
+                    - cell "50%" [ref=e3096]
+                    - cell [ref=e3100]
+                  - row [ref=e3103] [cursor=pointer]:
+                    - cell "154" [ref=e3104]
+                    - cell "UGEL LA MAR AYACUCHO" [ref=e3105]:
+                      - strong [ref=e3106]: UGEL LA MAR
+                      - generic [ref=e3107]: AYACUCHO
+                    - cell "En proceso" [ref=e3108]
+                    - cell "33%" [ref=e3111]
+                    - cell [ref=e3115]
+                  - row [ref=e3118] [cursor=pointer]:
+                    - cell "155" [ref=e3119]
+                    - cell "UGEL LA UNIÓN (A) AREQUIPA" [ref=e3120]:
+                      - strong [ref=e3121]: UGEL LA UNIÓN (A)
+                      - generic [ref=e3122]: AREQUIPA
+                    - cell "En proceso" [ref=e3123]
+                    - cell "20%" [ref=e3126]
+                    - cell [ref=e3130]
+                  - row [ref=e3133] [cursor=pointer]:
+                    - cell "156" [ref=e3134]
+                    - cell "UGEL LA UNIÓN (P) PIURA" [ref=e3135]:
+                      - strong [ref=e3136]: UGEL LA UNIÓN (P)
+                      - generic [ref=e3137]: PIURA
+                    - cell "En proceso" [ref=e3138]
+                    - cell "75%" [ref=e3141]
+                    - cell [ref=e3145]
+                  - row [ref=e3148] [cursor=pointer]:
+                    - cell "157" [ref=e3149]
+                    - cell "UGEL LAMAS SAN MARTÍN" [ref=e3150]:
+                      - strong [ref=e3151]: UGEL LAMAS
+                      - generic [ref=e3152]: SAN MARTÍN
+                    - cell "En proceso" [ref=e3153]
+                    - cell "50%" [ref=e3156]
+                    - cell [ref=e3160]
+                  - row [ref=e3163] [cursor=pointer]:
+                    - cell "158" [ref=e3164]
+                    - cell "UGEL LAMBAYEQUE LAMBAYEQUE" [ref=e3165]:
+                      - strong [ref=e3166]: UGEL LAMBAYEQUE
+                      - generic [ref=e3167]: LAMBAYEQUE
+                    - cell "En proceso" [ref=e3168]
+                    - cell "50%" [ref=e3171]
+                    - cell [ref=e3175]
+                  - row [ref=e3178] [cursor=pointer]:
+                    - cell "159" [ref=e3179]
+                    - cell "UGEL LAMPA PUNO" [ref=e3180]:
+                      - strong [ref=e3181]: UGEL LAMPA
+                      - generic [ref=e3182]: PUNO
+                    - cell "En proceso" [ref=e3183]
+                    - cell "33%" [ref=e3186]
+                    - cell [ref=e3190]
+                  - row [ref=e3193] [cursor=pointer]:
+                    - cell "160" [ref=e3194]
+                    - cell "UGEL LAURICOCHA HUÁNUCO" [ref=e3195]:
+                      - strong [ref=e3196]: UGEL LAURICOCHA
+                      - generic [ref=e3197]: HUÁNUCO
+                    - cell "En proceso" [ref=e3198]
+                    - cell "20%" [ref=e3201]
+                    - cell [ref=e3205]
+                  - row [ref=e3208] [cursor=pointer]:
+                    - cell "161" [ref=e3209]
+                    - cell "UGEL LEONCIO PRADO HUÁNUCO" [ref=e3210]:
+                      - strong [ref=e3211]: UGEL LEONCIO PRADO
+                      - generic [ref=e3212]: HUÁNUCO
+                    - cell "En proceso" [ref=e3213]
+                    - cell "75%" [ref=e3216]
+                    - cell [ref=e3220]
+                  - row [ref=e3223] [cursor=pointer]:
+                    - cell "162" [ref=e3224]
+                    - cell "UGEL LORETO - NAUTA LORETO" [ref=e3225]:
+                      - strong [ref=e3226]: UGEL LORETO - NAUTA
+                      - generic [ref=e3227]: LORETO
+                    - cell "En proceso" [ref=e3228]
+                    - cell "50%" [ref=e3231]
+                    - cell [ref=e3235]
+                  - row [ref=e3238] [cursor=pointer]:
+                    - cell "163" [ref=e3239]
+                    - cell "UGEL LUCANAS AYACUCHO" [ref=e3240]:
+                      - strong [ref=e3241]: UGEL LUCANAS
+                      - generic [ref=e3242]: AYACUCHO
+                    - cell "En proceso" [ref=e3243]
+                    - cell "50%" [ref=e3246]
+                    - cell [ref=e3250]
+                  - row [ref=e3253] [cursor=pointer]:
+                    - cell "164" [ref=e3254]
+                    - cell "UGEL LUYA AMAZONAS" [ref=e3255]:
+                      - strong [ref=e3256]: UGEL LUYA
+                      - generic [ref=e3257]: AMAZONAS
+                    - cell "En proceso" [ref=e3258]
+                    - cell "33%" [ref=e3261]
+                    - cell [ref=e3265]
+                  - row [ref=e3268] [cursor=pointer]:
+                    - cell "165" [ref=e3269]
+                    - cell "UGEL MANU MADRE DE DIOS" [ref=e3270]:
+                      - strong [ref=e3271]: UGEL MANU
+                      - generic [ref=e3272]: MADRE DE DIOS
+                    - cell "En proceso" [ref=e3273]
+                    - cell "20%" [ref=e3276]
+                    - cell [ref=e3280]
+                  - row [ref=e3283] [cursor=pointer]:
+                    - cell "166" [ref=e3284]
+                    - cell "UGEL MARAÑÓN HUÁNUCO" [ref=e3285]:
+                      - strong [ref=e3286]: UGEL MARAÑÓN
+                      - generic [ref=e3287]: HUÁNUCO
+                    - cell "En proceso" [ref=e3288]
+                    - cell "75%" [ref=e3291]
+                    - cell [ref=e3295]
+                  - row [ref=e3298] [cursor=pointer]:
+                    - cell "167" [ref=e3299]
+                    - cell "UGEL MARISCAL CÁCERES SAN MARTÍN" [ref=e3300]:
+                      - strong [ref=e3301]: UGEL MARISCAL CÁCERES
+                      - generic [ref=e3302]: SAN MARTÍN
+                    - cell "En proceso" [ref=e3303]
+                    - cell "50%" [ref=e3306]
+                    - cell [ref=e3310]
+                  - row [ref=e3313] [cursor=pointer]:
+                    - cell "168" [ref=e3314]
+                    - cell "UGEL MARISCAL LUZURIAGA ANCASH" [ref=e3315]:
+                      - strong [ref=e3316]: UGEL MARISCAL LUZURIAGA
+                      - generic [ref=e3317]: ANCASH
+                    - cell "En proceso" [ref=e3318]
+                    - cell "50%" [ref=e3321]
+                    - cell [ref=e3325]
+                  - row [ref=e3328] [cursor=pointer]:
+                    - cell "169" [ref=e3329]
+                    - cell "UGEL MARISCAL NIETO MOQUEGUA" [ref=e3330]:
+                      - strong [ref=e3331]: UGEL MARISCAL NIETO
+                      - generic [ref=e3332]: MOQUEGUA
+                    - cell "En proceso" [ref=e3333]
+                    - cell "33%" [ref=e3336]
+                    - cell [ref=e3340]
+                  - row [ref=e3343] [cursor=pointer]:
+                    - cell "170" [ref=e3344]
+                    - cell "UGEL MAYNAS LORETO" [ref=e3345]:
+                      - strong [ref=e3346]: UGEL MAYNAS
+                      - generic [ref=e3347]: LORETO
+                    - cell "En proceso" [ref=e3348]
+                    - cell "20%" [ref=e3351]
+                    - cell [ref=e3355]
+                  - row [ref=e3358] [cursor=pointer]:
+                    - cell "171" [ref=e3359]
+                    - cell "UGEL MELGAR PUNO" [ref=e3360]:
+                      - strong [ref=e3361]: UGEL MELGAR
+                      - generic [ref=e3362]: PUNO
+                    - cell "En proceso" [ref=e3363]
+                    - cell "75%" [ref=e3366]
+                    - cell [ref=e3370]
+                  - row [ref=e3373] [cursor=pointer]:
+                    - cell "172" [ref=e3374]
+                    - cell "UGEL MOHO PUNO" [ref=e3375]:
+                      - strong [ref=e3376]: UGEL MOHO
+                      - generic [ref=e3377]: PUNO
+                    - cell "En proceso" [ref=e3378]
+                    - cell "50%" [ref=e3381]
+                    - cell [ref=e3385]
+                  - row [ref=e3388] [cursor=pointer]:
+                    - cell "173" [ref=e3389]
+                    - cell "UGEL MORROPÓN PIURA" [ref=e3390]:
+                      - strong [ref=e3391]: UGEL MORROPÓN
+                      - generic [ref=e3392]: PIURA
+                    - cell "En proceso" [ref=e3393]
+                    - cell "50%" [ref=e3396]
+                    - cell [ref=e3400]
+                  - row [ref=e3403] [cursor=pointer]:
+                    - cell "174" [ref=e3404]
+                    - cell "UGEL MOYOBAMBA SAN MARTÍN" [ref=e3405]:
+                      - strong [ref=e3406]: UGEL MOYOBAMBA
+                      - generic [ref=e3407]: SAN MARTÍN
+                    - cell "En proceso" [ref=e3408]
+                    - cell "33%" [ref=e3411]
+                    - cell [ref=e3415]
+                  - row [ref=e3418] [cursor=pointer]:
+                    - cell "175" [ref=e3419]
+                    - cell "UGEL NASCA ICA" [ref=e3420]:
+                      - strong [ref=e3421]: UGEL NASCA
+                      - generic [ref=e3422]: ICA
+                    - cell "En proceso" [ref=e3423]
+                    - cell "20%" [ref=e3426]
+                    - cell [ref=e3430]
+                  - row [ref=e3433] [cursor=pointer]:
+                    - cell "176" [ref=e3434]
+                    - cell "UGEL OCROS ANCASH" [ref=e3435]:
+                      - strong [ref=e3436]: UGEL OCROS
+                      - generic [ref=e3437]: ANCASH
+                    - cell "En proceso" [ref=e3438]
+                    - cell "75%" [ref=e3441]
+                    - cell [ref=e3445]
+                  - row [ref=e3448] [cursor=pointer]:
+                    - cell "177" [ref=e3449]
+                    - cell "UGEL OTUZCO LA LIBERTAD" [ref=e3450]:
+                      - strong [ref=e3451]: UGEL OTUZCO
+                      - generic [ref=e3452]: LA LIBERTAD
+                    - cell "En proceso" [ref=e3453]
+                    - cell "50%" [ref=e3456]
+                    - cell [ref=e3460]
+                  - row [ref=e3463] [cursor=pointer]:
+                    - cell "178" [ref=e3464]
+                    - cell "UGEL OXAPAMPA PASCO" [ref=e3465]:
+                      - strong [ref=e3466]: UGEL OXAPAMPA
+                      - generic [ref=e3467]: PASCO
+                    - cell "En proceso" [ref=e3468]
+                    - cell "50%" [ref=e3471]
+                    - cell [ref=e3475]
+                  - row [ref=e3478] [cursor=pointer]:
+                    - cell "179" [ref=e3479]
+                    - cell "UGEL PACASMAYO LA LIBERTAD" [ref=e3480]:
+                      - strong [ref=e3481]: UGEL PACASMAYO
+                      - generic [ref=e3482]: LA LIBERTAD
+                    - cell "En proceso" [ref=e3483]
+                    - cell "33%" [ref=e3486]
+                    - cell [ref=e3490]
+                  - row [ref=e3493] [cursor=pointer]:
+                    - cell "180" [ref=e3494]
+                    - cell "UGEL PACHITEA HUÁNUCO" [ref=e3495]:
+                      - strong [ref=e3496]: UGEL PACHITEA
+                      - generic [ref=e3497]: HUÁNUCO
+                    - cell "En proceso" [ref=e3498]
+                    - cell "20%" [ref=e3501]
+                    - cell [ref=e3505]
+                  - row [ref=e3508] [cursor=pointer]:
+                    - cell "181" [ref=e3509]
+                    - cell "UGEL PADRE ABAD UCAYALI" [ref=e3510]:
+                      - strong [ref=e3511]: UGEL PADRE ABAD
+                      - generic [ref=e3512]: UCAYALI
+                    - cell "En proceso" [ref=e3513]
+                    - cell "75%" [ref=e3516]
+                    - cell [ref=e3520]
+                  - row [ref=e3523] [cursor=pointer]:
+                    - cell "182" [ref=e3524]
+                    - cell "UGEL PAITA PIURA" [ref=e3525]:
+                      - strong [ref=e3526]: UGEL PAITA
+                      - generic [ref=e3527]: PIURA
+                    - cell "En proceso" [ref=e3528]
+                    - cell "50%" [ref=e3531]
+                    - cell [ref=e3535]
+                  - row [ref=e3538] [cursor=pointer]:
+                    - cell "183" [ref=e3539]
+                    - cell "UGEL PALLASCA ANCASH" [ref=e3540]:
+                      - strong [ref=e3541]: UGEL PALLASCA
+                      - generic [ref=e3542]: ANCASH
+                    - cell "En proceso" [ref=e3543]
+                    - cell "50%" [ref=e3546]
+                    - cell [ref=e3550]
+                  - row [ref=e3553] [cursor=pointer]:
+                    - cell "184" [ref=e3554]
+                    - cell "UGEL PALPA ICA" [ref=e3555]:
+                      - strong [ref=e3556]: UGEL PALPA
+                      - generic [ref=e3557]: ICA
+                    - cell "En proceso" [ref=e3558]
+                    - cell "33%" [ref=e3561]
+                    - cell [ref=e3565]
+                  - row [ref=e3568] [cursor=pointer]:
+                    - cell "185" [ref=e3569]
+                    - cell "UGEL PANGOA JUNÍN" [ref=e3570]:
+                      - strong [ref=e3571]: UGEL PANGOA
+                      - generic [ref=e3572]: JUNÍN
+                    - cell "En proceso" [ref=e3573]
+                    - cell "20%" [ref=e3576]
+                    - cell [ref=e3580]
+                  - row [ref=e3583] [cursor=pointer]:
+                    - cell "186" [ref=e3584]
+                    - cell "UGEL PARINACOCHAS AYACUCHO" [ref=e3585]:
+                      - strong [ref=e3586]: UGEL PARINACOCHAS
+                      - generic [ref=e3587]: AYACUCHO
+                    - cell "En proceso" [ref=e3588]
+                    - cell "75%" [ref=e3591]
+                    - cell [ref=e3595]
+                  - row [ref=e3598] [cursor=pointer]:
+                    - cell "187" [ref=e3599]
+                    - cell "UGEL PARURO CUSCO" [ref=e3600]:
+                      - strong [ref=e3601]: UGEL PARURO
+                      - generic [ref=e3602]: CUSCO
+                    - cell "En proceso" [ref=e3603]
+                    - cell "50%" [ref=e3606]
+                    - cell [ref=e3610]
+                  - row [ref=e3613] [cursor=pointer]:
+                    - cell "188" [ref=e3614]
+                    - cell "UGEL PASCO PASCO" [ref=e3615]:
+                      - strong [ref=e3616]: UGEL PASCO
+                      - generic [ref=e3617]: PASCO
+                    - cell "En proceso" [ref=e3618]
+                    - cell "50%" [ref=e3621]
+                    - cell [ref=e3625]
+                  - row [ref=e3628] [cursor=pointer]:
+                    - cell "189" [ref=e3629]
+                    - cell "UGEL PATAZ LA LIBERTAD" [ref=e3630]:
+                      - strong [ref=e3631]: UGEL PATAZ
+                      - generic [ref=e3632]: LA LIBERTAD
+                    - cell "En proceso" [ref=e3633]
+                    - cell "33%" [ref=e3636]
+                    - cell [ref=e3640]
+                  - row [ref=e3643] [cursor=pointer]:
+                    - cell "190" [ref=e3644]
+                    - cell "UGEL PAUCAR DE SARASARA AYACUCHO" [ref=e3645]:
+                      - strong [ref=e3646]: UGEL PAUCAR DE SARASARA
+                      - generic [ref=e3647]: AYACUCHO
+                    - cell "En proceso" [ref=e3648]
+                    - cell "20%" [ref=e3651]
+                    - cell [ref=e3655]
+                  - row [ref=e3658] [cursor=pointer]:
+                    - cell "191" [ref=e3659]
+                    - cell "UGEL PAUCARTAMBO CUSCO" [ref=e3660]:
+                      - strong [ref=e3661]: UGEL PAUCARTAMBO
+                      - generic [ref=e3662]: CUSCO
+                    - cell "En proceso" [ref=e3663]
+                    - cell "75%" [ref=e3666]
+                    - cell [ref=e3670]
+                  - row [ref=e3673] [cursor=pointer]:
+                    - cell "192" [ref=e3674]
+                    - cell "UGEL PICHANAKI JUNÍN" [ref=e3675]:
+                      - strong [ref=e3676]: UGEL PICHANAKI
+                      - generic [ref=e3677]: JUNÍN
+                    - cell "En proceso" [ref=e3678]
+                    - cell "50%" [ref=e3681]
+                    - cell [ref=e3685]
+                  - row [ref=e3688] [cursor=pointer]:
+                    - cell "193" [ref=e3689]
+                    - cell "UGEL PICHARI KIMBIRI VILLA VIRGEN CUSCO" [ref=e3690]:
+                      - strong [ref=e3691]: UGEL PICHARI KIMBIRI VILLA VIRGEN
+                      - generic [ref=e3692]: CUSCO
+                    - cell "En proceso" [ref=e3693]
+                    - cell "50%" [ref=e3696]
+                    - cell [ref=e3700]
+                  - row [ref=e3703] [cursor=pointer]:
+                    - cell "194" [ref=e3704]
+                    - cell "UGEL PICOTA SAN MARTÍN" [ref=e3705]:
+                      - strong [ref=e3706]: UGEL PICOTA
+                      - generic [ref=e3707]: SAN MARTÍN
+                    - cell "En proceso" [ref=e3708]
+                    - cell "33%" [ref=e3711]
+                    - cell [ref=e3715]
+                  - row [ref=e3718] [cursor=pointer]:
+                    - cell "195" [ref=e3719]
+                    - cell "UGEL PISCO ICA" [ref=e3720]:
+                      - strong [ref=e3721]: UGEL PISCO
+                      - generic [ref=e3722]: ICA
+                    - cell "En proceso" [ref=e3723]
+                    - cell "20%" [ref=e3726]
+                    - cell [ref=e3730]
+                  - row [ref=e3733] [cursor=pointer]:
+                    - cell "196" [ref=e3734]
+                    - cell "UGEL PIURA PIURA" [ref=e3735]:
+                      - strong [ref=e3736]: UGEL PIURA
+                      - generic [ref=e3737]: PIURA
+                    - cell "En proceso" [ref=e3738]
+                    - cell "75%" [ref=e3741]
+                    - cell [ref=e3745]
+                  - row [ref=e3748] [cursor=pointer]:
+                    - cell "197" [ref=e3749]
+                    - cell "UGEL POMABAMBA ANCASH" [ref=e3750]:
+                      - strong [ref=e3751]: UGEL POMABAMBA
+                      - generic [ref=e3752]: ANCASH
+                    - cell "En proceso" [ref=e3753]
+                    - cell "50%" [ref=e3756]
+                    - cell [ref=e3760]
+                  - row [ref=e3763] [cursor=pointer]:
+                    - cell "198" [ref=e3764]
+                    - cell "UGEL PUERTO BERMUDEZ PASCO" [ref=e3765]:
+                      - strong [ref=e3766]: UGEL PUERTO BERMUDEZ
+                      - generic [ref=e3767]: PASCO
+                    - cell "En proceso" [ref=e3768]
+                    - cell "50%" [ref=e3771]
+                    - cell [ref=e3775]
+                  - row [ref=e3778] [cursor=pointer]:
+                    - cell "199" [ref=e3779]
+                    - cell "UGEL PUERTO INCA HUÁNUCO" [ref=e3780]:
+                      - strong [ref=e3781]: UGEL PUERTO INCA
+                      - generic [ref=e3782]: HUÁNUCO
+                    - cell "En proceso" [ref=e3783]
+                    - cell "33%" [ref=e3786]
+                    - cell [ref=e3790]
+                  - row [ref=e3793] [cursor=pointer]:
+                    - cell "200" [ref=e3794]
+                    - cell "UGEL PUNO PUNO" [ref=e3795]:
+                      - strong [ref=e3796]: UGEL PUNO
+                      - generic [ref=e3797]: PUNO
+                    - cell "En proceso" [ref=e3798]
+                    - cell "20%" [ref=e3801]
+                    - cell [ref=e3805]
+                  - row [ref=e3808] [cursor=pointer]:
+                    - cell "201" [ref=e3809]
+                    - cell "UGEL PURUS UCAYALI" [ref=e3810]:
+                      - strong [ref=e3811]: UGEL PURUS
+                      - generic [ref=e3812]: UCAYALI
+                    - cell "En proceso" [ref=e3813]
+                    - cell "75%" [ref=e3816]
+                    - cell [ref=e3820]
+                  - row [ref=e3823] [cursor=pointer]:
+                    - cell "202" [ref=e3824]
+                    - cell "UGEL PUTUMAYO LORETO" [ref=e3825]:
+                      - strong [ref=e3826]: UGEL PUTUMAYO
+                      - generic [ref=e3827]: LORETO
+                    - cell "En proceso" [ref=e3828]
+                    - cell "50%" [ref=e3831]
+                    - cell [ref=e3835]
+                  - row [ref=e3838] [cursor=pointer]:
+                    - cell "203" [ref=e3839]
+                    - cell "UGEL QUISPICANCHI CUSCO" [ref=e3840]:
+                      - strong [ref=e3841]: UGEL QUISPICANCHI
+                      - generic [ref=e3842]: CUSCO
+                    - cell "En proceso" [ref=e3843]
+                    - cell "50%" [ref=e3846]
+                    - cell [ref=e3850]
+                  - row [ref=e3853] [cursor=pointer]:
+                    - cell "204" [ref=e3854]
+                    - cell "UGEL RAMÓN CASTILLA - CABALLOCOCHA LORETO" [ref=e3855]:
+                      - strong [ref=e3856]: UGEL RAMÓN CASTILLA - CABALLOCOCHA
+                      - generic [ref=e3857]: LORETO
+                    - cell "En proceso" [ref=e3858]
+                    - cell "33%" [ref=e3861]
+                    - cell [ref=e3865]
+                  - row [ref=e3868] [cursor=pointer]:
+                    - cell "205" [ref=e3869]
+                    - cell "UGEL RECUAY ANCASH" [ref=e3870]:
+                      - strong [ref=e3871]: UGEL RECUAY
+                      - generic [ref=e3872]: ANCASH
+                    - cell "En proceso" [ref=e3873]
+                    - cell "20%" [ref=e3876]
+                    - cell [ref=e3880]
+                  - row [ref=e3883] [cursor=pointer]:
+                    - cell "206" [ref=e3884]
+                    - cell "UGEL REQUENA LORETO" [ref=e3885]:
+                      - strong [ref=e3886]: UGEL REQUENA
+                      - generic [ref=e3887]: LORETO
+                    - cell "En proceso" [ref=e3888]
+                    - cell "75%" [ref=e3891]
+                    - cell [ref=e3895]
+                  - row [ref=e3898] [cursor=pointer]:
+                    - cell "207" [ref=e3899]
+                    - cell "UGEL RIO ENE - MANTARO JUNÍN" [ref=e3900]:
+                      - strong [ref=e3901]: UGEL RIO ENE - MANTARO
+                      - generic [ref=e3902]: JUNÍN
+                    - cell "En proceso" [ref=e3903]
+                    - cell "50%" [ref=e3906]
+                    - cell [ref=e3910]
+                  - row [ref=e3913] [cursor=pointer]:
+                    - cell "208" [ref=e3914]
+                    - cell "UGEL RIO TAMBO JUNÍN" [ref=e3915]:
+                      - strong [ref=e3916]: UGEL RIO TAMBO
+                      - generic [ref=e3917]: JUNÍN
+                    - cell "En proceso" [ref=e3918]
+                    - cell "50%" [ref=e3921]
+                    - cell [ref=e3925]
+                  - row [ref=e3928] [cursor=pointer]:
+                    - cell "209" [ref=e3929]
+                    - cell "UGEL RIOJA SAN MARTÍN" [ref=e3930]:
+                      - strong [ref=e3931]: UGEL RIOJA
+                      - generic [ref=e3932]: SAN MARTÍN
+                    - cell "En proceso" [ref=e3933]
+                    - cell "33%" [ref=e3936]
+                    - cell [ref=e3940]
+                  - row [ref=e3943] [cursor=pointer]:
+                    - cell "210" [ref=e3944]
+                    - cell "UGEL RODRÍGUEZ DE MENDOZA AMAZONAS" [ref=e3945]:
+                      - strong [ref=e3946]: UGEL RODRÍGUEZ DE MENDOZA
+                      - generic [ref=e3947]: AMAZONAS
+                    - cell "En proceso" [ref=e3948]
+                    - cell "20%" [ref=e3951]
+                    - cell [ref=e3955]
+                  - row [ref=e3958] [cursor=pointer]:
+                    - cell "211" [ref=e3959]
+                    - cell "UGEL SAN ANTONIO DE PUTINA PUNO" [ref=e3960]:
+                      - strong [ref=e3961]: UGEL SAN ANTONIO DE PUTINA
+                      - generic [ref=e3962]: PUNO
+                    - cell "En proceso" [ref=e3963]
+                    - cell "75%" [ref=e3966]
+                    - cell [ref=e3970]
+                  - row [ref=e3973] [cursor=pointer]:
+                    - cell "212" [ref=e3974]
+                    - cell "UGEL SAN IGNACIO CAJAMARCA" [ref=e3975]:
+                      - strong [ref=e3976]: UGEL SAN IGNACIO
+                      - generic [ref=e3977]: CAJAMARCA
+                    - cell "En proceso" [ref=e3978]
+                    - cell "50%" [ref=e3981]
+                    - cell [ref=e3985]
+                  - row [ref=e3988] [cursor=pointer]:
+                    - cell "213" [ref=e3989]
+                    - cell "UGEL SAN IGNACIO DE LOYOLA - ICHUÑA MOQUEGUA" [ref=e3990]:
+                      - strong [ref=e3991]: UGEL SAN IGNACIO DE LOYOLA - ICHUÑA
+                      - generic [ref=e3992]: MOQUEGUA
+                    - cell "En proceso" [ref=e3993]
+                    - cell "50%" [ref=e3996]
+                    - cell [ref=e4000]
+                  - row [ref=e4003] [cursor=pointer]:
+                    - cell "214" [ref=e4004]
+                    - cell "UGEL SAN MARCOS CAJAMARCA" [ref=e4005]:
+                      - strong [ref=e4006]: UGEL SAN MARCOS
+                      - generic [ref=e4007]: CAJAMARCA
+                    - cell "En proceso" [ref=e4008]
+                    - cell "33%" [ref=e4011]
+                    - cell [ref=e4015]
+                  - row [ref=e4018] [cursor=pointer]:
+                    - cell "215" [ref=e4019]
+                    - cell "UGEL SAN MARTÍN SAN MARTÍN" [ref=e4020]:
+                      - strong [ref=e4021]: UGEL SAN MARTÍN
+                      - generic [ref=e4022]: SAN MARTÍN
+                    - cell "En proceso" [ref=e4023]
+                    - cell "20%" [ref=e4026]
+                    - cell [ref=e4030]
+                  - row [ref=e4033] [cursor=pointer]:
+                    - cell "216" [ref=e4034]
+                    - cell "UGEL SAN MIGUEL CAJAMARCA" [ref=e4035]:
+                      - strong [ref=e4036]: UGEL SAN MIGUEL
+                      - generic [ref=e4037]: CAJAMARCA
+                    - cell "En proceso" [ref=e4038]
+                    - cell "75%" [ref=e4041]
+                    - cell [ref=e4045]
+                  - row [ref=e4048] [cursor=pointer]:
+                    - cell "217" [ref=e4049]
+                    - cell "UGEL SAN PABLO CAJAMARCA" [ref=e4050]:
+                      - strong [ref=e4051]: UGEL SAN PABLO
+                      - generic [ref=e4052]: CAJAMARCA
+                    - cell "En proceso" [ref=e4053]
+                    - cell "50%" [ref=e4056]
+                    - cell [ref=e4060]
+                  - row [ref=e4063] [cursor=pointer]:
+                    - cell "218" [ref=e4064]
+                    - cell "UGEL SAN ROMÁN PUNO" [ref=e4065]:
+                      - strong [ref=e4066]: UGEL SAN ROMÁN
+                      - generic [ref=e4067]: PUNO
+                    - cell "En proceso" [ref=e4068]
+                    - cell "50%" [ref=e4071]
+                    - cell [ref=e4075]
+                  - row [ref=e4078] [cursor=pointer]:
+                    - cell "219" [ref=e4079]
+                    - cell "UGEL SÁNCHEZ CARRIÓN LA LIBERTAD" [ref=e4080]:
+                      - strong [ref=e4081]: UGEL SÁNCHEZ CARRIÓN
+                      - generic [ref=e4082]: LA LIBERTAD
+                    - cell "En proceso" [ref=e4083]
+                    - cell "33%" [ref=e4086]
+                    - cell [ref=e4090]
+                  - row [ref=e4093] [cursor=pointer]:
+                    - cell "220" [ref=e4094]
+                    - cell "UGEL SANDIA PUNO" [ref=e4095]:
+                      - strong [ref=e4096]: UGEL SANDIA
+                      - generic [ref=e4097]: PUNO
+                    - cell "En proceso" [ref=e4098]
+                    - cell "20%" [ref=e4101]
+                    - cell [ref=e4105]
+                  - row [ref=e4108] [cursor=pointer]:
+                    - cell "221" [ref=e4109]
+                    - cell "UGEL SANTA ANCASH" [ref=e4110]:
+                      - strong [ref=e4111]: UGEL SANTA
+                      - generic [ref=e4112]: ANCASH
+                    - cell "En proceso" [ref=e4113]
+                    - cell "75%" [ref=e4116]
+                    - cell [ref=e4120]
+                  - row [ref=e4123] [cursor=pointer]:
+                    - cell "222" [ref=e4124]
+                    - cell "UGEL SANTA CRUZ CAJAMARCA" [ref=e4125]:
+                      - strong [ref=e4126]: UGEL SANTA CRUZ
+                      - generic [ref=e4127]: CAJAMARCA
+                    - cell "En proceso" [ref=e4128]
+                    - cell "50%" [ref=e4131]
+                    - cell [ref=e4135]
+                  - row [ref=e4138] [cursor=pointer]:
+                    - cell "223" [ref=e4139]
+                    - cell "UGEL SANTIAGO DE CHUCO LA LIBERTAD" [ref=e4140]:
+                      - strong [ref=e4141]: UGEL SANTIAGO DE CHUCO
+                      - generic [ref=e4142]: LA LIBERTAD
+                    - cell "En proceso" [ref=e4143]
+                    - cell "50%" [ref=e4146]
+                    - cell [ref=e4150]
+                  - row [ref=e4153] [cursor=pointer]:
+                    - cell "224" [ref=e4154]
+                    - cell "UGEL SATIPO JUNÍN" [ref=e4155]:
+                      - strong [ref=e4156]: UGEL SATIPO
+                      - generic [ref=e4157]: JUNÍN
+                    - cell "En proceso" [ref=e4158]
+                    - cell "33%" [ref=e4161]
+                    - cell [ref=e4165]
+                  - row [ref=e4168] [cursor=pointer]:
+                    - cell "225" [ref=e4169]
+                    - cell "UGEL SECHURA PIURA" [ref=e4170]:
+                      - strong [ref=e4171]: UGEL SECHURA
+                      - generic [ref=e4172]: PIURA
+                    - cell "En proceso" [ref=e4173]
+                    - cell "20%" [ref=e4176]
+                    - cell [ref=e4180]
+                  - row [ref=e4183] [cursor=pointer]:
+                    - cell "226" [ref=e4184]
+                    - cell "UGEL SIHUAS ANCASH" [ref=e4185]:
+                      - strong [ref=e4186]: UGEL SIHUAS
+                      - generic [ref=e4187]: ANCASH
+                    - cell "En proceso" [ref=e4188]
+                    - cell "75%" [ref=e4191]
+                    - cell [ref=e4195]
+                  - row [ref=e4198] [cursor=pointer]:
+                    - cell "227" [ref=e4199]
+                    - cell "UGEL SUCRE AYACUCHO" [ref=e4200]:
+                      - strong [ref=e4201]: UGEL SUCRE
+                      - generic [ref=e4202]: AYACUCHO
+                    - cell "En proceso" [ref=e4203]
+                    - cell "50%" [ref=e4206]
+                    - cell [ref=e4210]
+                  - row [ref=e4213] [cursor=pointer]:
+                    - cell "228" [ref=e4214]
+                    - cell "UGEL SULLANA PIURA" [ref=e4215]:
+                      - strong [ref=e4216]: UGEL SULLANA
+                      - generic [ref=e4217]: PIURA
+                    - cell "En proceso" [ref=e4218]
+                    - cell "50%" [ref=e4221]
+                    - cell [ref=e4225]
+                  - row [ref=e4228] [cursor=pointer]:
+                    - cell "229" [ref=e4229]
+                    - cell "UGEL SURCUBAMBA HUANCAVELICA" [ref=e4230]:
+                      - strong [ref=e4231]: UGEL SURCUBAMBA
+                      - generic [ref=e4232]: HUANCAVELICA
+                    - cell "En proceso" [ref=e4233]
+                    - cell "33%" [ref=e4236]
+                    - cell [ref=e4240]
+                  - row [ref=e4243] [cursor=pointer]:
+                    - cell "230" [ref=e4244]
+                    - cell "UGEL TACNA TACNA" [ref=e4245]:
+                      - strong [ref=e4246]: UGEL TACNA
+                      - generic [ref=e4247]: TACNA
+                    - cell "En proceso" [ref=e4248]
+                    - cell "20%" [ref=e4251]
+                    - cell [ref=e4255]
+                  - row [ref=e4258] [cursor=pointer]:
+                    - cell "231" [ref=e4259]
+                    - cell "UGEL TAHUAMANU MADRE DE DIOS" [ref=e4260]:
+                      - strong [ref=e4261]: UGEL TAHUAMANU
+                      - generic [ref=e4262]: MADRE DE DIOS
+                    - cell "En proceso" [ref=e4263]
+                    - cell "75%" [ref=e4266]
+                    - cell [ref=e4270]
+                  - row [ref=e4273] [cursor=pointer]:
+                    - cell "232" [ref=e4274]
+                    - cell "UGEL TALARA PIURA" [ref=e4275]:
+                      - strong [ref=e4276]: UGEL TALARA
+                      - generic [ref=e4277]: PIURA
+                    - cell "En proceso" [ref=e4278]
+                    - cell "50%" [ref=e4281]
+                    - cell [ref=e4285]
+                  - row [ref=e4288] [cursor=pointer]:
+                    - cell "233" [ref=e4289]
+                    - cell "UGEL TAMBOGRANDE PIURA" [ref=e4290]:
+                      - strong [ref=e4291]: UGEL TAMBOGRANDE
+                      - generic [ref=e4292]: PIURA
+                    - cell "En proceso" [ref=e4293]
+                    - cell "50%" [ref=e4296]
+                    - cell [ref=e4300]
+                  - row [ref=e4303] [cursor=pointer]:
+                    - cell "234" [ref=e4304]
+                    - cell "UGEL TAMBOPATA MADRE DE DIOS" [ref=e4305]:
+                      - strong [ref=e4306]: UGEL TAMBOPATA
+                      - generic [ref=e4307]: MADRE DE DIOS
+                    - cell "En proceso" [ref=e4308]
+                    - cell "33%" [ref=e4311]
+                    - cell [ref=e4315]
+                  - row [ref=e4318] [cursor=pointer]:
+                    - cell "235" [ref=e4319]
+                    - cell "UGEL TARATA TACNA" [ref=e4320]:
+                      - strong [ref=e4321]: UGEL TARATA
+                      - generic [ref=e4322]: TACNA
+                    - cell "En proceso" [ref=e4323]
+                    - cell "20%" [ref=e4326]
+                    - cell [ref=e4330]
+                  - row [ref=e4333] [cursor=pointer]:
+                    - cell "236" [ref=e4334]
+                    - cell "UGEL TARMA JUNÍN" [ref=e4335]:
+                      - strong [ref=e4336]: UGEL TARMA
+                      - generic [ref=e4337]: JUNÍN
+                    - cell "En proceso" [ref=e4338]
+                    - cell "75%" [ref=e4341]
+                    - cell [ref=e4345]
+                  - row [ref=e4348] [cursor=pointer]:
+                    - cell "237" [ref=e4349]
+                    - cell "UGEL TAYACAJA HUANCAVELICA" [ref=e4350]:
+                      - strong [ref=e4351]: UGEL TAYACAJA
+                      - generic [ref=e4352]: HUANCAVELICA
+                    - cell "En proceso" [ref=e4353]
+                    - cell "50%" [ref=e4356]
+                    - cell [ref=e4360]
+                  - row [ref=e4363] [cursor=pointer]:
+                    - cell "238" [ref=e4364]
+                    - cell "UGEL TOCACHE SAN MARTÍN" [ref=e4365]:
+                      - strong [ref=e4366]: UGEL TOCACHE
+                      - generic [ref=e4367]: SAN MARTÍN
+                    - cell "En proceso" [ref=e4368]
+                    - cell "50%" [ref=e4371]
+                    - cell [ref=e4375]
+                  - row [ref=e4378] [cursor=pointer]:
+                    - cell "239" [ref=e4379]
+                    - cell "UGEL TUMBES TUMBES" [ref=e4380]:
+                      - strong [ref=e4381]: UGEL TUMBES
+                      - generic [ref=e4382]: TUMBES
+                    - cell "En proceso" [ref=e4383]
+                    - cell "33%" [ref=e4386]
+                    - cell [ref=e4390]
+                  - row [ref=e4393] [cursor=pointer]:
+                    - cell "240" [ref=e4394]
+                    - cell "UGEL UCAYALI - CONTAMANA LORETO" [ref=e4395]:
+                      - strong [ref=e4396]: UGEL UCAYALI - CONTAMANA
+                      - generic [ref=e4397]: LORETO
+                    - cell "En proceso" [ref=e4398]
+                    - cell "20%" [ref=e4401]
+                    - cell [ref=e4405]
+                  - row [ref=e4408] [cursor=pointer]:
+                    - cell "241" [ref=e4409]
+                    - cell "UGEL URUBAMBA CUSCO" [ref=e4410]:
+                      - strong [ref=e4411]: UGEL URUBAMBA
+                      - generic [ref=e4412]: CUSCO
+                    - cell "En proceso" [ref=e4413]
+                    - cell "75%" [ref=e4416]
+                    - cell [ref=e4420]
+                  - row [ref=e4423] [cursor=pointer]:
+                    - cell "242" [ref=e4424]
+                    - cell "UGEL UTCUBAMBA AMAZONAS" [ref=e4425]:
+                      - strong [ref=e4426]: UGEL UTCUBAMBA
+                      - generic [ref=e4427]: AMAZONAS
+                    - cell "En proceso" [ref=e4428]
+                    - cell "50%" [ref=e4431]
+                    - cell [ref=e4435]
+                  - row [ref=e4438] [cursor=pointer]:
+                    - cell "243" [ref=e4439]
+                    - cell "UGEL VENTANILLA CALLAO" [ref=e4440]:
+                      - strong [ref=e4441]: UGEL VENTANILLA
+                      - generic [ref=e4442]: CALLAO
+                    - cell "En proceso" [ref=e4443]
+                    - cell "50%" [ref=e4446]
+                    - cell [ref=e4450]
+                  - row [ref=e4453] [cursor=pointer]:
+                    - cell "244" [ref=e4454]
+                    - cell "UGEL VÍCTOR FAJARDO AYACUCHO" [ref=e4455]:
+                      - strong [ref=e4456]: UGEL VÍCTOR FAJARDO
+                      - generic [ref=e4457]: AYACUCHO
+                    - cell "En proceso" [ref=e4458]
+                    - cell "33%" [ref=e4461]
+                    - cell [ref=e4465]
+                  - row [ref=e4468] [cursor=pointer]:
+                    - cell "245" [ref=e4469]
+                    - cell "UGEL VILCASHUAMÁN AYACUCHO" [ref=e4470]:
+                      - strong [ref=e4471]: UGEL VILCASHUAMÁN
+                      - generic [ref=e4472]: AYACUCHO
+                    - cell "En proceso" [ref=e4473]
+                    - cell "20%" [ref=e4476]
+                    - cell [ref=e4480]
+                  - row [ref=e4483] [cursor=pointer]:
+                    - cell "246" [ref=e4484]
+                    - cell "UGEL VIRÚ LA LIBERTAD" [ref=e4485]:
+                      - strong [ref=e4486]: UGEL VIRÚ
+                      - generic [ref=e4487]: LA LIBERTAD
+                    - cell "En proceso" [ref=e4488]
+                    - cell "75%" [ref=e4491]
+                    - cell [ref=e4495]
+                  - row [ref=e4498] [cursor=pointer]:
+                    - cell "247" [ref=e4499]
+                    - cell "UGEL YAROWILCA HUÁNUCO" [ref=e4500]:
+                      - strong [ref=e4501]: UGEL YAROWILCA
+                      - generic [ref=e4502]: HUÁNUCO
+                    - cell "En proceso" [ref=e4503]
+                    - cell "50%" [ref=e4506]
+                    - cell [ref=e4510]
+                  - row [ref=e4513] [cursor=pointer]:
+                    - cell "248" [ref=e4514]
+                    - cell "UGEL YAULI JUNÍN" [ref=e4515]:
+                      - strong [ref=e4516]: UGEL YAULI
+                      - generic [ref=e4517]: JUNÍN
+                    - cell "En proceso" [ref=e4518]
+                    - cell "50%" [ref=e4521]
+                    - cell [ref=e4525]
+                  - row [ref=e4528] [cursor=pointer]:
+                    - cell "249" [ref=e4529]
+                    - cell "UGEL YUNGAY ANCASH" [ref=e4530]:
+                      - strong [ref=e4531]: UGEL YUNGAY
+                      - generic [ref=e4532]: ANCASH
+                    - cell "En proceso" [ref=e4533]
+                    - cell "33%" [ref=e4536]
+                    - cell [ref=e4540]
+                  - row [ref=e4543] [cursor=pointer]:
+                    - cell "250" [ref=e4544]
+                    - cell "UGEL YUNGUYO PUNO" [ref=e4545]:
+                      - strong [ref=e4546]: UGEL YUNGUYO
+                      - generic [ref=e4547]: PUNO
+                    - cell "En proceso" [ref=e4548]
+                    - cell "20%" [ref=e4551]
+                    - cell [ref=e4555]
+                  - row [ref=e4558] [cursor=pointer]:
+                    - cell "251" [ref=e4559]
+                    - cell "UGEL ZARUMILLA TUMBES" [ref=e4560]:
+                      - strong [ref=e4561]: UGEL ZARUMILLA
+                      - generic [ref=e4562]: TUMBES
+                    - cell "En proceso" [ref=e4563]
+                    - cell "75%" [ref=e4566]
+                    - cell [ref=e4570]
+            - main [ref=e4573]:
+              - generic [ref=e4574]:
+                - generic [ref=e4575]:
+                  - heading "Mapa Geográfico Satelital" [level=4] [ref=e4581]
+                  - generic [ref=e4582]:
+                    - generic [ref=e4583]: Cumple
+                    - generic [ref=e4585]: En proceso
+                    - generic [ref=e4587]: No cumple
+                - generic [ref=e4589]:
+                  - generic "Mapa interactivo territorial" [ref=e4591]:
+                    - generic:
+                      - generic:
+                        - button [ref=e4592] [cursor=pointer]
+                        - button [ref=e4594] [cursor=pointer]
+                        - button [ref=e4596] [cursor=pointer]
+                        - button [ref=e4598] [cursor=pointer]
+                        - button [ref=e4600] [cursor=pointer]
+                        - button [ref=e4602] [cursor=pointer]
+                        - button [ref=e4604] [cursor=pointer]
+                        - button [ref=e4606] [cursor=pointer]
+                        - button [ref=e4608] [cursor=pointer]
+                        - button [ref=e4610] [cursor=pointer]
+                        - button [ref=e4612] [cursor=pointer]
+                        - button [ref=e4614] [cursor=pointer]
+                        - button [ref=e4616] [cursor=pointer]
+                        - button [ref=e4618] [cursor=pointer]
+                        - button [ref=e4620] [cursor=pointer]
+                        - button [ref=e4622] [cursor=pointer]
+                        - button [ref=e4624] [cursor=pointer]
+                        - button [ref=e4626] [cursor=pointer]
+                        - button [ref=e4628] [cursor=pointer]
+                        - button [ref=e4630] [cursor=pointer]
+                        - button [ref=e4632] [cursor=pointer]
+                        - button [ref=e4634] [cursor=pointer]
+                        - button [ref=e4636] [cursor=pointer]
+                        - button [ref=e4638] [cursor=pointer]
+                        - button [ref=e4640] [cursor=pointer]
+                        - button [ref=e4642] [cursor=pointer]
+                        - button [ref=e4644] [cursor=pointer]
+                        - button [ref=e4646] [cursor=pointer]
+                        - button [ref=e4648] [cursor=pointer]
+                        - button [ref=e4650] [cursor=pointer]
+                        - button [ref=e4652] [cursor=pointer]
+                        - button [ref=e4654] [cursor=pointer]
+                        - button [ref=e4656] [cursor=pointer]
+                        - button [ref=e4658] [cursor=pointer]
+                        - button [ref=e4660] [cursor=pointer]
+                        - button [ref=e4662] [cursor=pointer]
+                        - button [ref=e4664] [cursor=pointer]
+                        - button [ref=e4666] [cursor=pointer]
+                        - button [ref=e4668] [cursor=pointer]
+                        - button [ref=e4670] [cursor=pointer]
+                        - button [ref=e4672] [cursor=pointer]
+                        - button [ref=e4674] [cursor=pointer]
+                        - button [ref=e4676] [cursor=pointer]
+                        - button [ref=e4678] [cursor=pointer]
+                        - button [ref=e4680] [cursor=pointer]
+                        - button [ref=e4682] [cursor=pointer]
+                        - button [ref=e4684] [cursor=pointer]
+                        - button [ref=e4686] [cursor=pointer]
+                        - button [ref=e4688] [cursor=pointer]
+                        - button [ref=e4690] [cursor=pointer]
+                        - button [ref=e4692] [cursor=pointer]
+                        - button [ref=e4694] [cursor=pointer]
+                        - button [ref=e4696] [cursor=pointer]
+                        - button [ref=e4698] [cursor=pointer]
+                        - button [ref=e4700] [cursor=pointer]
+                        - button [ref=e4702] [cursor=pointer]
+                        - button [ref=e4704] [cursor=pointer]
+                        - button [ref=e4706] [cursor=pointer]
+                        - button [ref=e4708] [cursor=pointer]
+                        - button [ref=e4710] [cursor=pointer]
+                        - button [ref=e4712] [cursor=pointer]
+                        - button [ref=e4714] [cursor=pointer]
+                        - button [ref=e4716] [cursor=pointer]
+                        - button [ref=e4718] [cursor=pointer]
+                        - button [ref=e4720] [cursor=pointer]
+                        - button [ref=e4722] [cursor=pointer]
+                        - button [ref=e4724] [cursor=pointer]
+                        - button [ref=e4726] [cursor=pointer]
+                        - button [ref=e4728] [cursor=pointer]
+                        - button [ref=e4730] [cursor=pointer]
+                        - button [ref=e4732] [cursor=pointer]
+                        - button [ref=e4734] [cursor=pointer]
+                        - button [ref=e4736] [cursor=pointer]
+                        - button [ref=e4738] [cursor=pointer]
+                        - button [ref=e4740] [cursor=pointer]
+                        - button [ref=e4742] [cursor=pointer]
+                        - button [ref=e4744] [cursor=pointer]
+                        - button [ref=e4746] [cursor=pointer]
+                        - button [ref=e4748] [cursor=pointer]
+                        - button [ref=e4750] [cursor=pointer]
+                        - button [ref=e4752] [cursor=pointer]
+                        - button [ref=e4754] [cursor=pointer]
+                        - button [ref=e4756] [cursor=pointer]
+                        - button [ref=e4758] [cursor=pointer]
+                        - button [ref=e4760] [cursor=pointer]
+                        - button [ref=e4762] [cursor=pointer]
+                        - button [ref=e4764] [cursor=pointer]
+                        - button [ref=e4766] [cursor=pointer]
+                        - button [ref=e4768] [cursor=pointer]
+                        - button [ref=e4770] [cursor=pointer]
+                        - button [ref=e4772] [cursor=pointer]
+                        - button [ref=e4774] [cursor=pointer]
+                        - button [ref=e4776] [cursor=pointer]
+                        - button [ref=e4778] [cursor=pointer]
+                        - button [ref=e4780] [cursor=pointer]
+                        - button [ref=e4782] [cursor=pointer]
+                        - button [ref=e4784] [cursor=pointer]
+                        - button [ref=e4786] [cursor=pointer]
+                        - button [ref=e4788] [cursor=pointer]
+                        - button [ref=e4790] [cursor=pointer]
+                        - button [ref=e4792] [cursor=pointer]
+                        - button [ref=e4794] [cursor=pointer]
+                        - button [ref=e4796] [cursor=pointer]
+                        - button [ref=e4798] [cursor=pointer]
+                        - button [ref=e4800] [cursor=pointer]
+                        - button [ref=e4802] [cursor=pointer]
+                        - button [ref=e4804] [cursor=pointer]
+                        - button [ref=e4806] [cursor=pointer]
+                        - button [ref=e4808] [cursor=pointer]
+                        - button [ref=e4810] [cursor=pointer]
+                        - button [ref=e4812] [cursor=pointer]
+                        - button [ref=e4814] [cursor=pointer]
+                        - button [ref=e4816] [cursor=pointer]
+                        - button [ref=e4818] [cursor=pointer]
+                        - button [ref=e4820] [cursor=pointer]
+                        - button [ref=e4822] [cursor=pointer]
+                        - button [ref=e4824] [cursor=pointer]
+                        - button [ref=e4826] [cursor=pointer]
+                        - button [ref=e4828] [cursor=pointer]
+                        - button [ref=e4830] [cursor=pointer]
+                        - button [ref=e4832] [cursor=pointer]
+                        - button [ref=e4834] [cursor=pointer]
+                        - button [ref=e4836] [cursor=pointer]
+                        - button [ref=e4838] [cursor=pointer]
+                        - button [ref=e4840] [cursor=pointer]
+                        - button [ref=e4843] [cursor=pointer]
+                        - button [ref=e4845] [cursor=pointer]
+                        - button [ref=e4847] [cursor=pointer]
+                        - button [ref=e4849] [cursor=pointer]
+                        - button [ref=e4851] [cursor=pointer]
+                        - button [ref=e4853] [cursor=pointer]
+                        - button [ref=e4855] [cursor=pointer]
+                        - button [ref=e4857] [cursor=pointer]
+                        - button [ref=e4859] [cursor=pointer]
+                        - button [ref=e4861] [cursor=pointer]
+                        - button [ref=e4863] [cursor=pointer]
+                        - button [ref=e4865] [cursor=pointer]
+                        - button [ref=e4867] [cursor=pointer]
+                        - button [ref=e4869] [cursor=pointer]
+                        - button [ref=e4871] [cursor=pointer]
+                        - button [ref=e4873] [cursor=pointer]
+                        - button [ref=e4875] [cursor=pointer]
+                        - button [ref=e4877] [cursor=pointer]
+                        - button [ref=e4879] [cursor=pointer]
+                        - button [ref=e4881] [cursor=pointer]
+                        - button [ref=e4883] [cursor=pointer]
+                        - button [ref=e4885] [cursor=pointer]
+                        - button [ref=e4887] [cursor=pointer]
+                        - button [ref=e4889] [cursor=pointer]
+                        - button [ref=e4891] [cursor=pointer]
+                        - button [ref=e4893] [cursor=pointer]
+                        - button [ref=e4895] [cursor=pointer]
+                        - button [ref=e4897] [cursor=pointer]
+                        - button [ref=e4899] [cursor=pointer]
+                        - button [ref=e4901] [cursor=pointer]
+                        - button [ref=e4903] [cursor=pointer]
+                        - button [ref=e4905] [cursor=pointer]
+                        - button [ref=e4907] [cursor=pointer]
+                        - button [ref=e4909] [cursor=pointer]
+                        - button [ref=e4911] [cursor=pointer]
+                        - button [ref=e4913] [cursor=pointer]
+                        - button [ref=e4915] [cursor=pointer]
+                        - button [ref=e4917] [cursor=pointer]
+                        - button [ref=e4919] [cursor=pointer]
+                        - button [ref=e4921] [cursor=pointer]
+                        - button [ref=e4923] [cursor=pointer]
+                        - button [ref=e4925] [cursor=pointer]
+                        - button [ref=e4927] [cursor=pointer]
+                        - button [ref=e4929] [cursor=pointer]
+                        - button [ref=e4931] [cursor=pointer]
+                        - button [ref=e4933] [cursor=pointer]
+                        - button [ref=e4935] [cursor=pointer]
+                        - button [ref=e4937] [cursor=pointer]
+                        - button [ref=e4939] [cursor=pointer]
+                        - button [ref=e4941] [cursor=pointer]
+                        - button [ref=e4943] [cursor=pointer]
+                        - button [ref=e4945] [cursor=pointer]
+                        - button [ref=e4947] [cursor=pointer]
+                        - button [ref=e4949] [cursor=pointer]
+                        - button [ref=e4951] [cursor=pointer]
+                        - button [ref=e4953] [cursor=pointer]
+                        - button [ref=e4955] [cursor=pointer]
+                        - button [ref=e4957] [cursor=pointer]
+                        - button [ref=e4959] [cursor=pointer]
+                        - button [ref=e4961] [cursor=pointer]
+                        - button [ref=e4963] [cursor=pointer]
+                        - button [ref=e4965] [cursor=pointer]
+                        - button [ref=e4967] [cursor=pointer]
+                        - button [ref=e4969] [cursor=pointer]
+                        - button [ref=e4971] [cursor=pointer]
+                        - button [ref=e4973] [cursor=pointer]
+                        - button [ref=e4975] [cursor=pointer]
+                        - button [ref=e4977] [cursor=pointer]
+                        - button [ref=e4979] [cursor=pointer]
+                        - button [ref=e4981] [cursor=pointer]
+                        - button [ref=e4983] [cursor=pointer]
+                        - button [ref=e4985] [cursor=pointer]
+                        - button [ref=e4987] [cursor=pointer]
+                        - button [ref=e4989] [cursor=pointer]
+                        - button [ref=e4991] [cursor=pointer]
+                        - button [ref=e4993] [cursor=pointer]
+                        - button [ref=e4995] [cursor=pointer]
+                        - button [ref=e4997] [cursor=pointer]
+                        - button [ref=e4999] [cursor=pointer]
+                        - button [ref=e5001] [cursor=pointer]
+                        - button [ref=e5003] [cursor=pointer]
+                        - button [ref=e5005] [cursor=pointer]
+                        - button [ref=e5007] [cursor=pointer]
+                        - button [ref=e5009] [cursor=pointer]
+                        - button [ref=e5011] [cursor=pointer]
+                        - button [ref=e5013] [cursor=pointer]
+                        - button [ref=e5015] [cursor=pointer]
+                        - button [ref=e5017] [cursor=pointer]
+                        - button [ref=e5019] [cursor=pointer]
+                        - button [ref=e5021] [cursor=pointer]
+                        - button [ref=e5023] [cursor=pointer]
+                        - button [ref=e5025] [cursor=pointer]
+                        - button [ref=e5027] [cursor=pointer]
+                        - button [ref=e5029] [cursor=pointer]
+                        - button [ref=e5031] [cursor=pointer]
+                        - button [ref=e5033] [cursor=pointer]
+                        - button [ref=e5035] [cursor=pointer]
+                        - button [ref=e5037] [cursor=pointer]
+                        - button [ref=e5039] [cursor=pointer]
+                        - button [ref=e5041] [cursor=pointer]
+                        - button [ref=e5043] [cursor=pointer]
+                        - button [ref=e5045] [cursor=pointer]
+                        - button [ref=e5047] [cursor=pointer]
+                        - button [ref=e5049] [cursor=pointer]
+                        - button [ref=e5051] [cursor=pointer]
+                        - button [ref=e5053] [cursor=pointer]
+                        - button [ref=e5055] [cursor=pointer]
+                        - button [ref=e5057] [cursor=pointer]
+                        - button [ref=e5059] [cursor=pointer]
+                        - button [ref=e5061] [cursor=pointer]
+                        - button [ref=e5063] [cursor=pointer]
+                        - button [ref=e5065] [cursor=pointer]
+                        - button [ref=e5067] [cursor=pointer]
+                        - button [ref=e5069] [cursor=pointer]
+                        - button [ref=e5071] [cursor=pointer]
+                        - button [ref=e5073] [cursor=pointer]
+                        - button [ref=e5075] [cursor=pointer]
+                        - button [ref=e5077] [cursor=pointer]
+                        - button [ref=e5079] [cursor=pointer]
+                        - button [ref=e5081] [cursor=pointer]
+                        - button [ref=e5083] [cursor=pointer]
+                        - button [ref=e5085] [cursor=pointer]
+                        - button [ref=e5087] [cursor=pointer]
+                        - button [ref=e5089] [cursor=pointer]
+                        - button [ref=e5091] [cursor=pointer]
+                        - button [ref=e5093] [cursor=pointer]
+                      - generic [ref=e5095]:
+                        - generic [ref=e5098]:
+                          - generic [ref=e5099]:
+                            - generic [ref=e5100]: ◆
+                            - generic [ref=e5101]: UGEL HUAMALÍES
+                          - generic [ref=e5102]:
+                            - generic [ref=e5103]: "Cumplimiento : 20%"
+                            - generic [ref=e5104]: ·
+                            - generic [ref=e5105]: "Estado: En proceso"
+                          - generic [ref=e5106]: "HUÁNUCO · FC: 01-12-2026"
+                        - button "Close popup" [ref=e5108] [cursor=pointer]: ×
+                    - generic [ref=e5109]:
+                      - button "Zoom in" [ref=e5110] [cursor=pointer]: +
+                      - button "Zoom out" [ref=e5111] [cursor=pointer]: −
+                  - tablist "Modos de Vista del Mapa" [ref=e5112]:
+                    - button "Mapa Geográfico" [ref=e5113] [cursor=pointer]
+                    - button "Mapa Temático Poligonal" [ref=e5119] [cursor=pointer]
+                    - button "Analítica Power BI" [ref=e5124] [cursor=pointer]
+                    - button "Pantalla Completa" [ref=e5128] [cursor=pointer]
+          - generic [ref=e541]:
+            - generic [ref=e542]: Mostrando 1–11 de 251 sedes territoriales
+            - generic [ref=e543]:
+              - button "Ver Detalle" [ref=e544] [cursor=pointer]
+              - button "Publicar Cronograma" [ref=e549] [cursor=pointer]
+  - button "Asistente Qaway Copilot" [ref=e554] [cursor=pointer]:
+    - generic [ref=e566]: IA
