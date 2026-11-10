@@ -5548,11 +5548,11 @@ body.gantt-resizing {
 /* --- Estilos para Línea Base y Ruta Crítica (Benchmark Imagen 2) --- */
 .gantt-v2 .baseline-shadow-bar {
   position: absolute;
-  top: calc(50% + 11px);
-  height: 5px;
-  border-radius: 3px;
+  top: calc(50% + 9px);
+  height: 8px;
+  border-radius: 4px;
   background: repeating-linear-gradient(45deg, #94a3b8, #94a3b8 4px, #cbd5e1 4px, #cbd5e1 8px);
-  opacity: 0.85;
+  opacity: 0.9;
   z-index: 4;
   pointer-events: auto;
   cursor: pointer;
@@ -9279,7 +9279,7 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .tabs-list > button {
-  height: 40px !important;
+  height: 46px !important;
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
@@ -9294,9 +9294,9 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .tabs-list .filter-card-btn {
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   border-radius: 6px !important;
   padding: 2px 11px !important;
   background: #ffffff;
@@ -9324,16 +9324,16 @@ body.gantt-resizing {
 .gantt-v2 .filters .search {
   max-width: 200px !important;
   min-width: 165px !important;
-  height: 38px !important;
+  height: 46px !important;
   flex-shrink: 0;
 }
 
 .gantt-v2 .filter-dropdown-wrap.contextual-filter-wrap,
 .gantt-v2 .filter-dropdown-wrap.contextual-filter-wrap .filter-card-btn {
-  width: 155px !important;
-  min-width: 140px !important;
-  max-width: 165px !important;
-  height: 42px !important;
+  width: 180px !important;
+  min-width: 180px !important;
+  max-width: 180px !important;
+  height: 46px !important;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -9345,24 +9345,24 @@ body.gantt-resizing {
 
 .gantt-v2 .contextual-filter-wrap .filter-card-copy small,
 .gantt-v2 .tabs-list .filter-card-copy small {
-  font-size: 9.5px !important;
+  font-size: 10.5px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.03em !important;
   color: #64748b !important;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .gantt-v2 .contextual-filter-wrap .filter-card-copy span,
 .gantt-v2 .tabs-list .filter-card-copy span {
-  font-size: 11.5px !important;
+  font-size: 12.5px !important;
   font-weight: 600 !important;
   color: #0f172a !important;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .gantt-v2 .custom-filter-trigger-btn {
-  height: 38px !important;
+  height: 46px !important;
 }
 
 
@@ -9423,9 +9423,9 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .tabs-list .filter-card-btn {
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   padding: 2px 11px !important;
   background: #ffffff;
   border: 1px solid #cbd5e1;
@@ -9449,7 +9449,7 @@ body.gantt-resizing {
   background: #f0f7ff !important;
 }
 
-/* Fila 2: Filtros Contextuales Fijos y Homogéneos (Región y Fase / Sede) a altura uniforme 40px */
+/* Fila 2: Filtros Contextuales Fijos y Homogéneos (Región y Fase / Sede) a altura uniforme 46px */
 .gantt-v2 .contextual-filter-wrap.region-filter-wrap,
 .gantt-v2 .contextual-filter-wrap.region-filter-wrap .filter-card-btn,
 .gantt-v2 .contextual-filter-wrap.phase-filter-wrap,
@@ -9458,36 +9458,36 @@ body.gantt-resizing {
 .gantt-v2 .contextual-filter-wrap.sede-filter-wrap .filter-card-btn,
 .gantt-v2 .contextual-filter-wrap.macro-filter-wrap,
 .gantt-v2 .contextual-filter-wrap.macro-filter-wrap .filter-card-btn {
-  width: 165px !important;
-  min-width: 165px !important;
-  max-width: 165px !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  width: 180px !important;
+  min-width: 180px !important;
+  max-width: 180px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
 }
 
-/* Fila 1: Filtros Superiores Inmutables (NIVEL, ESTADO, COMPONENTE / PRODUCTO) a ancho uniforme 175px */
+/* Fila 1: Filtros Superiores Inmutables (NIVEL, ESTADO, COMPONENTE / PRODUCTO) a ancho uniforme 192px y alto 46px */
 .gantt-v2 .tabs-list .filter-dropdown-wrap.wbs-filter-wrap,
 .gantt-v2 .tabs-list .filter-dropdown-wrap.wbs-filter-wrap .filter-card-btn,
 .gantt-v2 .tabs-list .filter-dropdown-wrap.estado-filter-wrap,
 .gantt-v2 .tabs-list .filter-dropdown-wrap.estado-filter-wrap .filter-card-btn,
 .gantt-v2 .tabs-list .filter-dropdown-wrap.edt-filter-wrap,
 .gantt-v2 .tabs-list .filter-dropdown-wrap.edt-filter-wrap .filter-card-btn {
-  width: 175px !important;
-  min-width: 175px !important;
-  max-width: 175px !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  width: 192px !important;
+  min-width: 192px !important;
+  max-width: 192px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
 }
 
 .gantt-v2 .tabs-list .filter-card-copy span {
   width: 100% !important;
-  max-width: 125px !important;
+  max-width: 142px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -9499,9 +9499,9 @@ body.gantt-resizing {
   width: 98px !important;
   min-width: 98px !important;
   max-width: 98px !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
@@ -9519,19 +9519,19 @@ body.gantt-resizing {
   font-variant-numeric: tabular-nums !important;
 }
 
-/* Uniformidad de altura a 40px para todos los controles en la barra de filtros */
+/* Uniformidad de altura a 46px para todos los controles en la barra de filtros */
 .gantt-v2 .filters .today-pill {
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   border-radius: 8px !important;
   box-sizing: border-box !important;
 }
 
 .gantt-v2 .filters .zoom {
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   border-radius: 8px !important;
   box-sizing: border-box !important;
 }
@@ -9543,12 +9543,12 @@ body.gantt-resizing {
 
 .gantt-v2 .filters .qm-btn-icon,
 .gantt-v2 .filters .custom-filter-trigger-btn {
-  width: 40px !important;
-  min-width: 40px !important;
-  max-width: 40px !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
   border-radius: 8px !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -9577,22 +9577,22 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .contextual-filter-wrap .filter-card-copy small {
-  font-size: 9.5px !important;
+  font-size: 10.5px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.03em !important;
   color: #64748b !important;
-  line-height: 1.1 !important;
+  line-height: 1.15 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
 
 .gantt-v2 .contextual-filter-wrap .filter-card-copy span {
-  font-size: 11.5px !important;
+  font-size: 12.5px !important;
   font-weight: 600 !important;
   color: #0f172a !important;
-  line-height: 1.2 !important;
+  line-height: 1.25 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;

@@ -12,6 +12,9 @@ import {
   hasBaseline,
 } from './scheduleMetrics';
 import './gantt.css';
+import {
+  Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
+} from 'recharts';
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
 import AsignarTareaDrawer from './AsignarTareaDrawer';
 import TareasSideCards, { PERSON_AVATARS } from './TareasSideCards';
@@ -174,6 +177,14 @@ type Kind = 'hito' | 'subproceso';
 export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
 type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'actions' | (string & {});
 type EditField = ColKey;
+
+const generalTrend = [
+  { date: '01 oct.', v: 18 },
+  { date: '08 oct.', v: 31 },
+  { date: '15 oct.', v: 49 },
+  { date: '22 oct.', v: 62 },
+  { date: '30 oct.', v: 68 },
+];
 
 export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
 
@@ -8104,9 +8115,154 @@ export default function Tareas2View({
             <>
           {/* Presentación Maestro: Gantt, Lista y Carátula comparten 100% el mismo tablero unificado oficial */}
           {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'portada') && (
-            <div style={{ display: 'flex', gap: '16px', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
-              <div style={{ flex: 1, minWidth: 0, height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <div className={`gantt-master-view-wrap ${viewMode !== 'gantt' ? 'view-lista-fullwidth' : ''}`} style={{ flex: 1, height: '100%', minHeight: 0, overflow: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0, overflowY: viewMode === 'portada' ? 'auto' : 'hidden', overflowX: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
+              {/* Tarjetas Principales Analíticas de Reportes 1 en Vista Carátula */}
+              {viewMode === 'portada' && (
+                <div className="rep-v1" style={{ width: '100%', marginBottom: '14px', flexShrink: 0 }}>
+                  <div className="charts" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px', margin: 0, padding: '0 2px' }}>
+                    {/* 1. Avance regional por hito */}
+                    <section className="panel" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px 20px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
+                      <div className="panel-head" style={{ marginBottom: '14px' }}>
+                        <h2 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Avance regional por hito</h2>
+                        <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Porcentaje promedio de cumplimiento en las 13 UGEL.</p>
+                      </div>
+                      <div className="bar-chart" style={{ height: '220px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={[
+                              { id: '1.4', name: 'Preparación', v: 100 },
+                              { id: '1.6', name: 'CDL SIGA', v: 67 },
+                              { id: '2.1', name: 'Recepción', v: 42 },
+                              { id: '3.1', name: 'Distribución', v: 18 },
+                              { id: '4.1', name: 'Cierre', v: 0 },
+                              { id: '5.1', name: 'Informe', v: 0 },
+                            ]}
+                            margin={{ top: 14, right: 8, bottom: 0, left: -18 }}
+                          >
+                            <CartesianGrid stroke="#e2e8f0" vertical={false} strokeDasharray="3 4" />
+                            <XAxis dataKey="id" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                            <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                            <Tooltip
+                              formatter={(v) => [`${v}%`, 'Cumplimiento']}
+                              cursor={{ fill: 'rgba(37, 99, 235, 0.08)', radius: 4 }}
+                              contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                            />
+                            <Bar
+                              dataKey="v"
+                              radius={[5, 5, 0, 0]}
+                              fill="#2563eb"
+                              isAnimationActive={true}
+                              animationBegin={150}
+                              animationDuration={1200}
+                              animationEasing="ease-out"
+                              activeBar={{ fill: '#1d4ed8', stroke: '#1e40af', strokeWidth: 1.5 }}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </section>
+
+                    {/* 2. Estado de los hitos (Donut) */}
+                    <section className="panel" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px 20px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
+                      <div className="panel-head" style={{ marginBottom: '14px' }}>
+                        <h2 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Estado de los hitos</h2>
+                        <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Distribución porcentual actual.</p>
+                      </div>
+                      <div className="donut-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', height: '220px' }}>
+                        <div className="donut" style={{ position: 'relative', width: '136px', height: '136px', background: 'transparent' }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Tooltip
+                                formatter={(v: any, name: any) => [`${v} hitos (${Math.round((Number(v) / 6) * 100)}%)`, name]}
+                                contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                              />
+                              <Pie
+                                data={[
+                                  { name: 'Cumplidos', value: 1, color: '#10b981' },
+                                  { name: 'En proceso', value: 3, color: '#f59e0b' },
+                                  { name: 'Pendientes', value: 2, color: '#ef4444' },
+                                ]}
+                                innerRadius={42}
+                                outerRadius={65}
+                                paddingAngle={3}
+                                dataKey="value"
+                                isAnimationActive={true}
+                                animationBegin={200}
+                                animationDuration={1300}
+                                animationEasing="ease-out"
+                              >
+                                <Cell fill="#10b981" />
+                                <Cell fill="#f59e0b" />
+                                <Cell fill="#ef4444" />
+                              </Pie>
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                            <b style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>06</b>
+                            <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>hitos</small>
+                          </div>
+                        </div>
+                        <div className="donut-legend" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div className="legend-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px' }}>
+                            <span className="legend-dot green" style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+                            <span style={{ color: '#475569' }}>Cumplidos</span>
+                            <b style={{ marginLeft: 'auto', color: '#0f172a' }}>1 (17%)</b>
+                          </div>
+                          <div className="legend-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px' }}>
+                            <span className="legend-dot amber" style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b' }} />
+                            <span style={{ color: '#475569' }}>En proceso</span>
+                            <b style={{ marginLeft: 'auto', color: '#0f172a' }}>3 (50%)</b>
+                          </div>
+                          <div className="legend-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px' }}>
+                            <span className="legend-dot red" style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444' }} />
+                            <span style={{ color: '#475569' }}>Pendientes</span>
+                            <b style={{ marginLeft: 'auto', color: '#0f172a' }}>2 (33%)</b>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* 3. Evolución del avance regional (LineChart) */}
+                    <section className="panel" style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px 20px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
+                      <div className="panel-head" style={{ marginBottom: '14px' }}>
+                        <h2 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Evolución del avance regional</h2>
+                        <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Curva de cumplimiento acumulado.</p>
+                      </div>
+                      <div className="line-chart" style={{ height: '220px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={generalTrend} margin={{ top: 14, right: 8, bottom: 0, left: -18 }}>
+                            <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 4" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                            <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                            <Tooltip
+                              formatter={(v) => [`${v}%`, 'Avance']}
+                              cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '3 3' }}
+                              contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
+                            />
+                            <Line
+                              dataKey="v"
+                              name="Avance"
+                              stroke="#2563eb"
+                              strokeWidth={2.5}
+                              dot={{ r: 4, fill: '#2563eb' }}
+                              isAnimationActive={true}
+                              animationBegin={250}
+                              animationDuration={1300}
+                              animationEasing="ease-out"
+                              activeDot={{ r: 6.5, stroke: '#2563eb', strokeWidth: 2.5, fill: '#ffffff' }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              )}
+
+              {/* Tablero (sin mover nada del tablero) */}
+              <div style={{ display: 'flex', gap: '16px', width: '100%', flex: viewMode === 'portada' ? '0 0 auto' : 1, minHeight: viewMode === 'portada' ? '500px' : 0, overflow: 'visible', alignItems: 'stretch' }}>
+                <div style={{ flex: 1, minWidth: 0, minHeight: viewMode === 'portada' ? '500px' : 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <div className={`gantt-master-view-wrap ${viewMode !== 'gantt' ? 'view-lista-fullwidth' : ''}`} style={{ flex: 1, minHeight: viewMode === 'portada' ? '500px' : 0, overflow: 'auto' }}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>
             <div
@@ -8870,6 +9026,7 @@ export default function Tareas2View({
                   onViewAll={() => handleViewModeChange('lista')}
                 />
               )}
+            </div>
             </div>
           )}
 
