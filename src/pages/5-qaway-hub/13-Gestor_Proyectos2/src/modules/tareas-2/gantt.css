@@ -1942,13 +1942,17 @@
   display: flex;
   align-items: center;
   padding: 0 8px;
-  border-right: 1px solid rgba(226, 232, 240, 0.35);
+  border-right: 1px solid rgba(226, 232, 240, 0.2);
   position: relative;
   min-width: 0;
   overflow: visible;
   text-overflow: ellipsis;
   white-space: nowrap;
   box-sizing: border-box !important;
+}
+
+.gantt-v2 .table-head .fixed-cols > div:first-child {
+  padding-left: 20px !important;
 }
 
 .gantt-v2 .table-head .fixed-cols > div:last-child {
@@ -2353,7 +2357,7 @@
   position: relative;
   min-height: 52px;
   background: #ffffff;
-  border-bottom: 1px solid rgba(241, 245, 249, 0.4);
+  border-bottom: 1px solid rgba(241, 245, 249, 0.25);
   cursor: pointer;
   color: #1e293b;
   font-size: 13.5px;
@@ -2361,7 +2365,7 @@
 }
 
 .gantt-v2 .row.stripe {
-  background: #fafbfc;
+  background: #fcfdfe;
 }
 
 .gantt-v2 .row:hover {
@@ -2401,7 +2405,7 @@
 }
 
 .gantt-v2 .row.hito.stripe {
-  background: #fafbfc;
+  background: #fcfdfe;
 }
 
 .gantt-v2 .row .fixed-cols {
@@ -2409,7 +2413,7 @@
 }
 
 .gantt-v2 .row.stripe .fixed-cols {
-  background: #fafbfc;
+  background: #fcfdfe;
 }
 
 .gantt-v2 .row.selected .fixed-cols {
@@ -2440,11 +2444,15 @@
   align-items: center;
   padding: 0 10px;
   min-width: 0;
-  border-right: 1px solid rgba(226, 232, 240, 0.25);
+  border-right: 1px solid rgba(226, 232, 240, 0.14);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   box-sizing: border-box !important;
+}
+
+.gantt-v2 .row .fixed-cols > div:first-child {
+  padding-left: 20px !important;
 }
 
 .gantt-v2 .row .fixed-cols > div:last-child {
@@ -7177,7 +7185,7 @@ body.gantt-resizing {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 10px;
+  padding: 0 10px 0 20px !important;
 }
 .gantt-v2 .th-col-code input[type="checkbox"],
 .gantt-v2 .code-cell-col input[type="checkbox"] {

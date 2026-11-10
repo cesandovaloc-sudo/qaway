@@ -4871,7 +4871,7 @@ export default function CronogramaGanttView({
   const renderHeaderCell = (colKey: ColKey) => {
     if (colKey === 'code') {
       return (
-        <div key="code" className="th-col-header th-col-code">
+        <div key="code" className="th-col-header th-col-code" style={{ paddingLeft: '20px' }}>
           <input
             type="checkbox"
             aria-label="Seleccionar todos los registros visibles"
@@ -4979,8 +4979,14 @@ export default function CronogramaGanttView({
 
   const renderRowCell = (x: Item, colKey: ColKey) => {
     if (colKey === 'code') {
+      const depth = getItemDepth(x);
       return (
-        <div key="code" className="code-cell-col" onClick={(e) => e.stopPropagation()}>
+        <div
+          key="code"
+          className="code-cell-col"
+          style={{ paddingLeft: `${20 + depth * 16}px` }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <input
             type="checkbox"
             checked={selectedRowIds.has(x.id)}
@@ -4990,11 +4996,6 @@ export default function CronogramaGanttView({
               toggleSelectRow(x.id);
             }}
           />
-          {x.kind === 'hito' ? (
-            <Flag size={13} className="code-icon-flag is-hito" />
-          ) : (
-            <FileText size={13} className="code-icon-flag is-sub" />
-          )}
           <span className="code-num">{x.code || (x.sede ? (x.name.startsWith('DRE') || x.name.startsWith('GRE') ? 'DRE' : 'UGEL') : '')}</span>
         </div>
       );
