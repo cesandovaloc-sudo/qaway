@@ -22,6 +22,7 @@ interface Props {
   item: Item | null;
   onAssign: (newTask: any) => void;
   allSubprocesos?: Item[];
+  initialRole?: string;
 }
 
 export default function AsignarTareaDrawer({
@@ -30,40 +31,57 @@ export default function AsignarTareaDrawer({
   item,
   onAssign,
   allSubprocesos = [],
+  initialRole,
 }: Props) {
-  if (!isOpen || !item) return null;
+  if (!isOpen) return null;
 
-  const itemTitle = `${item.code ? (item.code.endsWith('.') ? item.code : `${item.code} `) : ''}${item.name || ''}`.trim();
+  const fallbackItem: Item = {
+    id: 'sp-default',
+    code: 'SP-01',
+    name: 'Planificación de la distribución',
+    start: '2026-09-01',
+    end: '2026-11-30',
+    progress: 0,
+    status: 'Pendiente',
+    kind: 'subproceso',
+    gestor: 'Carlos Sandoval',
+    region: 'Nacional',
+  };
+
+  const currentItem = item || fallbackItem;
+  const itemTitle = `${currentItem.code ? (currentItem.code.endsWith('.') ? currentItem.code : `${currentItem.code} `) : ''}${currentItem.name || ''}`.trim();
 
   // Estados del formulario
   const [taskTitle, setTaskTitle] = useState('');
-  const [assigneeType, setAssigneeType] = useState<'macro' | 'gestor'>('macro');
+  const [assigneeType, setAssigneeType] = useState<'macro' | 'gestor'>(() => (initialRole === 'gestor' ? 'gestor' : 'macro'));
   const [selectedPerson, setSelectedPerson] = useState('');
-  const [dueDate, setDueDate] = useState(item.end || '2026-11-30');
+  const [dueDate, setDueDate] = useState(currentItem.end || '2026-11-30');
   const [priority, setPriority] = useState<'Alta' | 'Media' | 'Baja'>('Media');
   const [expectedResult, setExpectedResult] = useState('');
 
   // Más opciones
   const [moreOptionsOpen, setMoreOptionsOpen] = useState(true);
-  const [linkedSubprocesoId, setLinkedSubprocesoId] = useState(item.id);
+  const [linkedSubprocesoId, setLinkedSubprocesoId] = useState(currentItem.id);
   const [requireEvidence, setRequireEvidence] = useState(true);
   const [addChecklist, setAddChecklist] = useState(false);
   const [notifyAssignee, setNotifyAssignee] = useState(true);
 
   // Inicializar campos con datos del item
   useEffect(() => {
-    if (item) {
-      setTaskTitle(`Elaborar y validar ${item.name.toLowerCase()}`);
-      setDueDate(item.end || '2026-11-30');
-      setExpectedResult(`${item.name} validado y registrado con la evidencia correspondiente.`);
-      setLinkedSubprocesoId(item.id);
-      if (assigneeType === 'macro') {
-        setSelectedPerson(MACROREGIONES[0].coordinador);
+    if (currentItem) {
+      setTaskTitle(`Elaborar y validar ${currentItem.name.toLowerCase()}`);
+      setDueDate(currentItem.end || '2026-11-30');
+      setExpectedResult(`${currentItem.name} validado y registrado con la evidencia correspondiente.`);
+      setLinkedSubprocesoId(currentItem.id);
+      if (initialRole === 'gestor') {
+        setAssigneeType('gestor');
+        setSelectedPerson(REGIONES_PROYECTO[0]?.coordinadorRegional || 'María Salazar');
       } else {
-        setSelectedPerson(REGIONES_PROYECTO[0].coordinadorRegional);
+        setAssigneeType('macro');
+        setSelectedPerson(MACROREGIONES[0]?.coordinador || 'Carlos Sandoval');
       }
     }
-  }, [item?.id]);
+  }, [currentItem?.id, initialRole]);
 
   const handleTypeChange = (type: 'macro' | 'gestor') => {
     setAssigneeType(type);
@@ -272,7 +290,7 @@ export default function AsignarTareaDrawer({
                 }}
               >
                 <UserCheck size={15} />
-                <span>Coordinador macro</span>
+                <span>Por Nivel / Cargo</span>
               </button>
 
               <button
@@ -295,7 +313,7 @@ export default function AsignarTareaDrawer({
                 }}
               >
                 <User size={15} />
-                <span>Gestor</span>
+                <span>Individual</span>
               </button>
             </div>
           </div>

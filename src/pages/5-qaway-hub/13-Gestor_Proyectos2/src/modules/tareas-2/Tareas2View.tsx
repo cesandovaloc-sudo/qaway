@@ -14,6 +14,7 @@ import {
 import './gantt.css';
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
 import AsignarTareaDrawer from './AsignarTareaDrawer';
+import TareasSideCards, { PERSON_AVATARS } from './TareasSideCards';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
@@ -377,23 +378,39 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
 const resolveDefaultGestor = (code: string, name: string): string => {
   const c = code || '';
   const n = (name || '').toLowerCase();
-  if (n.includes('dre junín') || n.includes('dre junin') || n.includes('comité regional') || n.includes('plan de monitoreo regional')) return 'María Salazar';
+  if (c === '1.1') return 'María Rojas';
+  if (c === '1.2') return 'Carlos Mendoza';
+  if (c === '1.3') return 'Ana Beltrán';
+  if (c === '1.4') return 'María Rojas';
+  if (c === '1.5' || c === '1.6') return 'Lucía Flores';
+  if (c === '1.7') return 'Carlos Mendoza';
+  if (n.includes('dre junín') || n.includes('dre junin') || n.includes('comité regional') || n.includes('plan de monitoreo regional')) return 'María Rojas';
   if (n.includes('chanchamayo') || n.includes('pichanaki') || n.includes('perené') || n.includes('perene') || n.includes('satipo') || n.includes('río tambo') || n.includes('rio tambo') || n.includes('pangoa')) {
-    return 'Lucía Ramos';
+    return 'Lucía Flores';
   }
   if (n.includes('huancayo') || n.includes('jauja') || n.includes('tarma') || n.includes('yauli') || n.includes('chupaca') || n.includes('concepción') || n.includes('concepcion') || n.includes('plan de distribución local') || n.includes('comité de distribución')) {
     return 'Javier Ruiz';
   }
   if (n.includes('siga') || n.includes('código') || n.includes('cdl') || n.includes('matriz')) return 'Lucía Flores';
   if (c.startsWith('1.') || c === '1.') {
-    if (n.includes('comunicación') || n.includes('capacitación')) return 'María Jara';
+    if (n.includes('comunicación') || n.includes('capacitación')) return 'Carlos Mendoza';
     return 'Javier Ruiz';
   }
   if (c.startsWith('2.') || c === '2.' || n.includes('almacén') || n.includes('pecosa')) return 'Javier Ruiz';
   if (c.startsWith('3.') || c === '3.' || n.includes('transporte') || n.includes('distribución') || n.includes('ruta')) return 'Juan Pérez';
-  if (c.startsWith('4.') || c === '4.' || n.includes('cierre') || n.includes('auditoría')) return 'Ana Torres';
-  if (c.startsWith('5.') || c === '5.' || n.includes('informe') || n.includes('balance')) return 'María Jara';
+  if (c.startsWith('4.') || c === '4.' || n.includes('cierre') || n.includes('auditoría')) return 'Ana Beltrán';
+  if (c.startsWith('5.') || c === '5.' || n.includes('informe') || n.includes('balance')) return 'María Rojas';
   return 'Javier Ruiz';
+};
+
+const resolveDefaultGestores = (code: string, name: string): string[] => {
+  const c = code || '';
+  if (c === '1.1') return ['María Rojas', 'Carlos Mendoza', 'Javier Ruiz'];
+  if (c === '1.2') return ['Carlos Mendoza', 'Javier Ruiz'];
+  if (c === '1.3') return ['Ana Beltrán', 'María Rojas'];
+  if (c === '2.1') return ['Javier Ruiz', 'Carlos Mendoza'];
+  const single = resolveDefaultGestor(code, name);
+  return [single];
 };
 
 const baseEdtIds = new Set([
@@ -442,6 +459,7 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
   const defaultGestor = regionalSeed
     ? getRegionCoordinador(regionalSeed.region) || resolveDefaultGestor(r.code, r.name)
     : resolveDefaultGestor(r.code, r.name);
+  const defaultGestores = resolveDefaultGestores(r.code, r.name);
   return {
     id: r.id,
     code: r.code,
@@ -492,7 +510,7 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
     region: resolveItemRegion(r.id),
     sede: r.name.includes('UGEL') || r.name.includes('DRE') ? r.name : undefined,
     gestor: defaultGestor,
-    gestores: [defaultGestor],
+    gestores: defaultGestores,
     entidadResponsable: r.entidadResponsable,
   };
 }) as Item[])));
@@ -815,6 +833,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
 const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
+const PORTADA_PRESET_COLS: ColKey[] = ['name', 'gestor', 'parent', 'end', 'status', 'progress', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -1419,7 +1438,10 @@ export default function Tareas2View({
             const init = initialMap.get(it.id);
             const isEntity = it.gestor === 'DRE / UGEL' || it.gestor === 'DRE' || it.gestor === 'UGEL' || it.gestor === 'DRE/UGEL' || !it.gestor;
             const finalGestor = isEntity ? (init?.gestor || resolveDefaultGestor(it.code, it.name)) : (it.gestor ?? '');
-            const finalGestores = isEntity ? [finalGestor] : (it.gestores && it.gestores.length > 0 ? it.gestores : [finalGestor]);
+            const defaultGestores = resolveDefaultGestores(it.code, it.name);
+            const finalGestores = (it.gestores && it.gestores.length > 1)
+              ? it.gestores
+              : (defaultGestores.length > 1 ? defaultGestores : (it.gestores && it.gestores.length > 0 ? it.gestores : [finalGestor]));
             return {
               ...it,
               edtType: it.edtType || init?.edtType || resolveEdtNodeType(it, parsed),
@@ -2134,8 +2156,8 @@ export default function Tareas2View({
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<
-    'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
-  >(() => (perspective === 'equipo' ? 'directorio' : 'gantt'));
+    'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
+  >(() => (perspective === 'equipo' ? 'directorio' : 'portada'));
 
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
   const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
@@ -2566,6 +2588,7 @@ export default function Tareas2View({
 
   // Estados dedicados para Asignación de Tareas desde Baseline / Barra Gantt (Imagen 2 Oficial)
   const [asignarTareaItem, setAsignarTareaItem] = useState<Item | null>(null);
+  const [drawerInitialRole, setDrawerInitialRole] = useState<string | undefined>(undefined);
   const [isAsignarTareaOpen, setIsAsignarTareaOpen] = useState(false);
   const [selectedBarActionItem, setSelectedBarActionItem] = useState<Item | null>(null);
   const [selectedBarActionPos, setSelectedBarActionPos] = useState<{ x: number; y: number } | null>(null);
@@ -2761,6 +2784,9 @@ export default function Tareas2View({
       // En modo Gantt, el lienzo temporal es protagonista absoluto: inicia en vista compacta con solo 'name'
       return ['name'];
     }
+    if (mode === 'portada') {
+      return [...PORTADA_PRESET_COLS];
+    }
     try {
       const storageKey = 'qaway-visible-cols-lista-v3';
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
@@ -2779,7 +2805,7 @@ export default function Tareas2View({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
-  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
+  const handleViewModeChange = (newMode: 'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
@@ -3835,6 +3861,7 @@ export default function Tareas2View({
     const onMouseUp = (upEvent: MouseEvent) => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      dragCleanupRef.current = null;
 
       const deltaX = upEvent.clientX - startMouseX;
       const addedDays = Math.round(deltaX / pxPerDay);
@@ -3853,19 +3880,35 @@ export default function Tareas2View({
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+    // D3: registra el desarme automático por si el módulo se desmonta a mitad del redimensionado
+    dragCleanupRef.current = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
   };
 
-  const hitos = items.filter((x) => x.kind === 'hito');
-  const subs = items.filter((x) => x.kind === 'subproceso');
-  const inprog = items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length;
+  // D3: desarme de listeners de drag si el módulo se desmonta a mitad de un redimensionado
+  const dragCleanupRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => dragCleanupRef.current?.(), []);
+
+  // D1: conteo territorial DINÁMICO desde la BD (antes: "251" fijo en 4 sitios del UI; la BD puede ganar/perder unidades)
+  const countTerritorial = unidades.length;
+
   const isItemLate = (x: Item) => {
     if (x.status === 'Con retraso') return true;
     if (x.status === 'Completado' || x.status === 'Cumple' || (x.progress ?? 0) >= 100) return false;
     return !!(x.end && currentTodayIso > x.end);
   };
-  const late = items.filter(isItemLate).length;
-  const complete = items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length;
-  const overall = items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0;
+
+  // D2: métricas globales memoizadas (antes: 5 recorridos completos del array de ítems en CADA render, con ~6,000 ítems)
+  const { hitos, subs, inprog, late, complete, overall } = useMemo(() => ({
+    hitos: items.filter((x) => x.kind === 'hito'),
+    subs: items.filter((x) => x.kind === 'subproceso'),
+    inprog: items.filter((x) => x.status === 'En proceso' || x.status === 'En curso').length,
+    late: items.filter(isItemLate).length,
+    complete: items.filter((x) => x.status === 'Completado' || x.status === 'Cumple').length,
+    overall: items.length > 0 ? Math.round(items.reduce((a, x) => a + x.progress, 0) / items.length) : 0,
+  }), [items, currentTodayIso]);
 
   // Mapa de profundidad y niveles WBS (1 al 5) según PMI / PMBOK
   const itemDepthMap = useMemo(() => {
@@ -4779,6 +4822,30 @@ export default function Tareas2View({
     notify('Elemento y sus dependientes eliminados con éxito del cronograma maestro');
   };
 
+  const handleScrollToTask = (targetItem: Item) => {
+    // Asegurar que ancestros estén expandidos para que la fila exista en el DOM
+    let curr = targetItem.parentId;
+    const parentIdsToExpand: string[] = [];
+    while (curr) {
+      parentIdsToExpand.push(curr);
+      curr = items.find((x) => x.id === curr)?.parentId;
+    }
+    if (parentIdsToExpand.length > 0) {
+      setItems((prev) =>
+        prev.map((it) => (parentIdsToExpand.includes(it.id) ? { ...it, expanded: true } : it))
+      );
+    }
+    setSelectedId(targetItem.id);
+    setTimeout(() => {
+      const el = document.getElementById(`row-${targetItem.id}`) || document.querySelector(`[data-item-id="${targetItem.id}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('flash-highlight');
+        setTimeout(() => el.classList.remove('flash-highlight'), 1800);
+      }
+    }, 120);
+  };
+
   const renderProgressInner = (val: number, statusTone: string, format: 'bar' | 'ring' | 'number') => {
     if (format === 'ring') {
       const radius = 7.5;
@@ -4866,7 +4933,6 @@ export default function Tareas2View({
             {colLabelText}
           </span>
           <div className="head-col-actions">
-            {renderColumnHeaderMenu("name", "cols-trigger-btn")}
             <button
               type="button"
               className={`cols-trigger-btn collapse-toggle-btn ${!allHitosExpanded ? 'collapsed' : ''}`}
@@ -4879,6 +4945,7 @@ export default function Tareas2View({
             >
               <ChevronsUpDown size={14} />
             </button>
+            {renderColumnHeaderMenu("name", "cols-trigger-btn")}
             {viewMode === 'gantt' && (
               <button
                 type="button"
@@ -4942,8 +5009,16 @@ export default function Tareas2View({
 
   const renderRowCell = (x: Item, colKey: ColKey) => {
     if (colKey === 'code') {
+      const depth = getItemDepth(x);
+      const isFirstCol = visibleCols[0] === 'code';
+      const basePad = isFirstCol ? 20 : 10;
       return (
-        <div key="code" className="code-cell-col" onClick={(e) => e.stopPropagation()}>
+        <div
+          key="code"
+          className="code-cell-col"
+          style={{ paddingLeft: `${basePad + depth * 12}px` }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <input
             type="checkbox"
             checked={selectedRowIds.has(x.id)}
@@ -5518,6 +5593,13 @@ export default function Tareas2View({
     }
 
     if (colKey === 'gestor') {
+      const defaultGestores = resolveDefaultGestores(x.code, x.name);
+      const gestoresList: string[] = (x.gestores && x.gestores.length > 0)
+        ? x.gestores
+        : (defaultGestores.length > 0 ? defaultGestores : (x.gestor ? [x.gestor] : ['Carlos Sandoval']));
+      const isMultiple = gestoresList.length > 1;
+      const primaryGestor = x.gestor || gestoresList[0] || 'Carlos Sandoval';
+
       return (
         <div
           key="gestor"
@@ -5531,44 +5613,173 @@ export default function Tareas2View({
             <select
               className="cell-editor cell-select"
               autoFocus
-              defaultValue={x.gestor || 'Carlos Sandoval'}
+              defaultValue={primaryGestor}
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => {
-                update(x.id, { gestor: e.target.value });
+                const val = e.target.value;
+                update(x.id, { gestor: val, gestores: [val] });
                 closeEdit();
               }}
               onBlur={closeEdit}
             >
-              <option value="Carlos Sandoval">Carlos Sandoval</option>
-              <option value="Lucía Flores">Lucía Flores</option>
-              <option value="María Salazar">María Salazar</option>
-              <option value="Juan Pérez">Juan Pérez</option>
+              <option value="María Rojas">María Rojas (Gestora Territorial)</option>
+              <option value="Carlos Mendoza">Carlos Mendoza (Especialista Operativo)</option>
+              <option value="Ana Beltrán">Ana Beltrán (Supervisión y Control)</option>
+              <option value="Javier Ruiz">Javier Ruiz (Logística y Almacenes)</option>
+              <option value="Lucía Flores">Lucía Flores (Especialista SIGA)</option>
+              <option value="Juan Pérez">Juan Pérez (Transporte)</option>
+              <option value="Carlos Sandoval">Carlos Sandoval (Coordinador General)</option>
             </select>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              {isMultiple ? (
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    flexShrink: 0,
+                  }}
+                  title={`Asignación conjunta: ${gestoresList.join(', ')}`}
+                >
+                  {gestoresList.slice(0, 3).map((gName, idx) => {
+                    const avatarUrl = PERSON_AVATARS[gName];
+                    const initials = (gName || 'CS')
+                      .split(' ')
+                      .map((w: string) => w[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase();
+                    return avatarUrl ? (
+                      <img
+                        key={idx}
+                        src={avatarUrl}
+                        alt={gName}
+                        title={gName}
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          border: '2px solid #ffffff',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                          marginLeft: idx === 0 ? 0 : -8,
+                          position: 'relative',
+                          zIndex: 5 - idx,
+                        }}
+                      />
+                    ) : (
+                      <span
+                        key={idx}
+                        title={gName}
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '50%',
+                          background: '#0284c7',
+                          color: '#fff',
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '2px solid #ffffff',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                          marginLeft: idx === 0 ? 0 : -8,
+                          position: 'relative',
+                          zIndex: 5 - idx,
+                        }}
+                      >
+                        {initials}
+                      </span>
+                    );
+                  })}
+                  {gestoresList.length > 3 && (
+                    <span
+                      title={gestoresList.slice(3).join(', ')}
+                      style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        background: '#e2e8f0',
+                        color: '#475569',
+                        fontSize: '9.5px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1.5px solid #ffffff',
+                        marginLeft: -6,
+                        position: 'relative',
+                        zIndex: 1,
+                      }}
+                    >
+                      +{gestoresList.length - 3}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                (() => {
+                  const singleName = primaryGestor;
+                  const avatarUrl = PERSON_AVATARS[singleName];
+                  const initials = (singleName || 'CS')
+                    .split(' ')
+                    .map((w: string) => w[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase();
+                  return avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={singleName}
+                      title={singleName}
+                      style={{
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '1.5px solid #ffffff',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <span
+                      title={singleName}
+                      style={{
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '50%',
+                        background: singleName === 'Lucía Flores' ? '#9333ea' : '#0284c7',
+                        color: '#fff',
+                        fontSize: '10.5px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 600,
+                        flexShrink: 0,
+                        border: '1.5px solid #ffffff',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                      }}
+                    >
+                      {initials}
+                    </span>
+                  );
+                })()
+              )}
               <span
+                className="cell-text"
                 style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  background: x.gestor === 'Lucía Flores' ? '#9333ea' : '#0284c7',
-                  color: '#fff',
-                  fontSize: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 600,
-                  flexShrink: 0,
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: '#1e293b',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
+                title={gestoresList.join(', ')}
               >
-                {(x.gestor || 'CS')
-                  .split(' ')
-                  .map((w: string) => w[0])
-                  .join('')
-                  .slice(0, 2)
-                  .toUpperCase()}
+                {isMultiple ? `${gestoresList[0]} (+${gestoresList.length - 1})` : primaryGestor}
               </span>
-              <span className="cell-text">{x.gestor || 'Carlos Sandoval'}</span>
             </div>
           )}
         </div>
@@ -6111,7 +6322,7 @@ export default function Tareas2View({
                   closeMenus();
                 }}
               >
-                Todos <span>({perspective === 'territorial' ? 251 : items.length})</span>
+                Todos <span>({perspective === 'territorial' ? countTerritorial : items.length})</span>
               </button>
 
               {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
@@ -6147,7 +6358,7 @@ export default function Tareas2View({
                         const rStr = roleLabels[wbsRoleFilter];
 
                         if (wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos') {
-                          return `Todos los niveles (${perspective === 'territorial' ? 251 : items.length})`;
+                          return `Todos los niveles (${perspective === 'territorial' ? countTerritorial : items.length})`;
                         }
                         if (wbsDepthFilter !== 'todos' && wbsRoleFilter === 'todos') {
                           return dStr;
@@ -6214,7 +6425,7 @@ export default function Tareas2View({
                             <strong>Todos los niveles</strong>
                           </span>
                         </span>
-                        <span className="wbs-level-badge">{perspective === 'territorial' ? 251 : items.length}</span>
+                        <span className="wbs-level-badge">{perspective === 'territorial' ? countTerritorial : items.length}</span>
                       </button>
 
                       {/* Niveles dinámicos 1..n existentes en el proyecto (no se renderizan si el conteo es 0) */}
@@ -6633,6 +6844,15 @@ export default function Tareas2View({
                 </>
               ) : (
                 <>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'portada' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('portada')}
+                    title="Carátula y Asignación de Tareas"
+                  >
+                    <CheckSquare size={14} />
+                    <span>Carátula</span>
+                  </button>
                   <button
                     type="button"
                     className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
@@ -7882,9 +8102,11 @@ export default function Tareas2View({
             </>
           ) : (
             <>
-          {/* Presentación Maestro: Gantt y Lista comparten 100% el mismo tablero unificado */}
-          {(viewMode === 'gantt' || viewMode === 'lista') && (
-            <div className={`gantt-master-view-wrap ${viewMode === 'lista' ? 'view-lista-fullwidth' : ''}`}>
+          {/* Presentación Maestro: Gantt, Lista y Carátula comparten 100% el mismo tablero unificado oficial */}
+          {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'portada') && (
+            <div style={{ display: 'flex', gap: '16px', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
+              <div style={{ flex: 1, minWidth: 0, height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div className={`gantt-master-view-wrap ${viewMode !== 'gantt' ? 'view-lista-fullwidth' : ''}`} style={{ flex: 1, height: '100%', minHeight: 0, overflow: 'auto' }}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>
             <div
@@ -8002,6 +8224,8 @@ export default function Tareas2View({
               {shown.slice(0, renderedRowCount).map((x, i) => (
                 <div
                   key={x.id}
+                  id={`row-${x.id}`}
+                  data-item-id={x.id}
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
                     selectedId === x.id ? 'selected' : ''
                   } ${selectedRowIds.has(x.id) ? 'batch-selected-row' : ''} ${edit?.id === x.id ? 'is-editing-row' : ''}`}
@@ -8632,6 +8856,20 @@ export default function Tareas2View({
             </div>
           )}
 
+                </div>
+              </div>
+              {viewMode === 'portada' && (
+                <TareasSideCards
+                  items={items}
+                  onOpenAsignar={(opts) => {
+                    setDrawerInitialRole(opts?.role);
+                    setAsignarTareaItem(opts?.item || null);
+                    setIsAsignarTareaOpen(true);
+                  }}
+                  onSelectTask={(task) => handleScrollToTask(task)}
+                  onViewAll={() => handleViewModeChange('lista')}
+                />
+              )}
             </div>
           )}
 
@@ -8936,7 +9174,7 @@ export default function Tareas2View({
             <span>
               {perspective === 'equipo'
                 ? `Mostrando ${equipoIntegrantes.length ? 1 : 0}–${equipoIntegrantes.length} de ${equipoIntegrantes.length} integrantes registrados`
-                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? 251 : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
+                : `Mostrando ${shown.length ? 1 : 0}–${shown.length} de ${perspective === 'territorial' ? countTerritorial : items.length} ${perspective === 'territorial' ? 'sedes territoriales' : 'registros'}`}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <button
@@ -9057,6 +9295,7 @@ export default function Tareas2View({
           isOpen={isAsignarTareaOpen}
           onClose={() => setIsAsignarTareaOpen(false)}
           item={asignarTareaItem}
+          initialRole={drawerInitialRole}
           allSubprocesos={items.filter((it) => it.kind === 'subproceso')}
           onAssign={(newTask) => {
             const updatedTasks = [newTask, ...rawTasks];
