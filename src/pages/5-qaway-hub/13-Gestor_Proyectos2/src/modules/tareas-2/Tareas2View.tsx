@@ -5051,7 +5051,7 @@ export default function Tareas2View({
       return (
         <div key="name" className="name-cell">
           {getItemDepth(x) > 0 && (
-            <span style={{ width: `${getItemDepth(x) * 18}px`, flexShrink: 0 }} />
+            <span style={{ width: `${getItemDepth(x) * 10}px`, flexShrink: 0 }} />
           )}
           {hasChildren ? (
             <button
@@ -5065,7 +5065,7 @@ export default function Tareas2View({
               {isItemExpanded(x.id, x.expanded !== false) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
           ) : (
-            <span className="expand-spacer" style={{ width: 20, height: 24, display: 'inline-block', flexShrink: 0 }} />
+            <span className="expand-spacer" style={{ width: 16, height: 20, display: 'inline-block', flexShrink: 0 }} />
           )}
           {nodeType === 'COMPONENTE' && (
             <span className="gantt-row-icon componente" title="Componente rector">
