@@ -2452,9 +2452,9 @@
 }
 
 .gantt-v2 .name-cell {
-  gap: 8px;
+  gap: 6px;
   overflow: hidden;
-  padding-left: 14px !important;
+  padding-left: 4px !important;
   display: flex;
   align-items: center;
 }
@@ -2556,8 +2556,8 @@
 .gantt-v2 .expand {
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 24px;
+  width: 16px;
+  height: 20px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -5609,9 +5609,9 @@ body.gantt-resizing {
   position: relative !important;
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 6px !important;
   overflow: hidden !important;
-  padding-left: 18px !important;
+  padding-left: 4px !important;
   padding-right: 8px !important;
   width: 100% !important;
 }
