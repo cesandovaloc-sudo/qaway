@@ -8416,7 +8416,7 @@ export default function Tareas2View({
             <div
               className="gantt"
               style={
-                viewMode === 'lista'
+                viewMode === 'lista' || viewMode === 'portada'
                   ? ({ width: `${fixedWidth}px`, minWidth: `${fixedWidth}px` } as React.CSSProperties)
                   : ({
                       '--fixed': `${fixedWidth}px`,

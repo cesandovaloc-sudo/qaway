@@ -5806,6 +5806,7 @@ body.gantt-resizing {
 
 .gantt-v2 .view-lista-fullwidth .table-head .fixed-cols {
   border-right: none !important;
+  position: static !important;
 }
 
 .gantt-v2 .view-lista-fullwidth .timeline-head-viewport {
@@ -5819,6 +5820,7 @@ body.gantt-resizing {
 
 .gantt-v2 .view-lista-fullwidth .row .fixed-cols {
   border-right: none !important;
+  position: static !important;
 }
 
 .gantt-v2 .view-lista-fullwidth .row .timeline {

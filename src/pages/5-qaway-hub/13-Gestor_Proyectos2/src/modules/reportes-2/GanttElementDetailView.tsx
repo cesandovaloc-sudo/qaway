@@ -21,7 +21,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AttachmentItem, DeliverableItem, Item, Status } from './Reportes2View';
 import { OFFICIAL_WBS_DEPENDENCIES } from './Reportes2View';
 import { DRE_JUNIN_DOTACION_2027_EDT, PROJECT_PHASES_CATALOG } from './edtPmbokModel';
-import './gantt.css';
+import '../cronograma-gantt/gantt.css';
 
 /* Tipos que viven solo en Reportes2View: se replican aquí para no importar
    módulo pesado. El matching de tareas es compatible con getLinkedTasksSummary. */

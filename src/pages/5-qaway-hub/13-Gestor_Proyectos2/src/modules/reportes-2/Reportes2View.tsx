@@ -11,7 +11,7 @@ import {
   getDeviationTone,
   hasBaseline,
 } from './scheduleMetrics';
-import './gantt.css';
+import '../cronograma-gantt/gantt.css';
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
