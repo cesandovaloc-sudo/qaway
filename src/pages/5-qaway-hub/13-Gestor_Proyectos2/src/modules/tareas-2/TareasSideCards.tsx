@@ -52,7 +52,7 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
   const upcomingItems = items
     .filter((it) => it.kind === 'subproceso' && it.status !== 'Completado' && it.status !== 'Cumple')
     .sort((a, b) => (a.end || '').localeCompare(b.end || ''))
-    .slice(0, 8);
+    .slice(0, 20);
 
   const getDaysRemaining = (endIso?: string) => {
     if (!endIso) return null;
@@ -75,7 +75,7 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
-        padding: '0 4px 12px 0',
+        padding: '0 0 12px 0',
         alignSelf: 'stretch',
         height: '100%',
         maxHeight: '100%',
@@ -83,7 +83,7 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
         boxSizing: 'border-box',
       }}
     >
-      {/* Tarjeta 1 (Arriba): Próximos Vencimientos — Altura 260px alineada exactamente con el corte de los gráficos superiores (Línea roja) */}
+      {/* Tarjeta 1 (Arriba): Próximos Vencimientos — flex: 1 para aprovechar el espacio mayor al contener más datos dinámicos */}
       <div
         className="qm-card"
         style={{
@@ -92,13 +92,12 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
           border: '1px solid #e2e8f0',
           boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           padding: '14px 16px',
-          height: '260px',
-          minHeight: '260px',
-          maxHeight: '260px',
+          flex: 1,
+          minHeight: '220px',
           display: 'flex',
           flexDirection: 'column',
           boxSizing: 'border-box',
-          flexShrink: 0,
+          overflow: 'hidden',
         }}
       >
         <div
@@ -338,7 +337,7 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
         </div>
       </div>
 
-      {/* Tarjeta 2 (Abajo): Carga del Equipo Directo — Altura homogénea de 260px, separada por el respiro exacto de 16px (Zigzag verde) */}
+      {/* Tarjeta 2 (Abajo): Carga del Equipo Directo — Altura natural compacta para mostrar al equipo completo sin huecos */}
       <div
         className="qm-card"
         style={{
@@ -347,13 +346,10 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
           border: '1px solid #e2e8f0',
           boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           padding: '14px 16px',
-          height: '260px',
-          minHeight: '260px',
-          maxHeight: '260px',
+          flexShrink: 0,
           display: 'flex',
           flexDirection: 'column',
           boxSizing: 'border-box',
-          flexShrink: 0,
         }}
       >
         <div
@@ -413,9 +409,6 @@ export default function TareasSideCards({ onOpenAsignar, onViewAll, onSelectTask
             display: 'flex',
             flexDirection: 'column',
             gap: '6px',
-            overflowY: 'auto',
-            flex: 1,
-            paddingRight: '4px',
           }}
         >
           {colaboradoresConTareas.map((colab) => (

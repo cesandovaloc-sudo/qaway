@@ -8244,13 +8244,13 @@ export default function Tareas2View({
 
           {/* Presentación Maestro: Gantt, Lista y Carátula comparten 100% el mismo tablero unificado oficial */}
           {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'portada' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
-            <div style={{ display: 'flex', flexDirection: viewMode === 'portada' ? 'row' : 'column', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
+            <div style={{ display: 'flex', flexDirection: viewMode === 'portada' ? 'row' : 'column', gap: viewMode === 'portada' ? '16px' : '0px', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
               {/* En Carátula: izquierda = gráficos + tablero · derecha = columna de tarjetas a alto completo (desde filtros hasta footer) */}
               <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
               {/* Tarjetas Principales Analíticas de Reportes 1 en Vista Carátula */}
               {viewMode === 'portada' && (
                 <div style={{ width: '100%', minHeight: 'auto', maxHeight: 'none', marginBottom: '14px', flexShrink: 0 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(min(100%, 280px), 1fr))', gap: '16px', margin: 0, padding: '0 2px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(min(100%, 280px), 1fr))', gap: '16px', margin: 0, padding: 0 }}>
                     {/* 1. Avance regional por hito */}
                     <section style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
                       <div style={{ marginBottom: '10px' }}>
