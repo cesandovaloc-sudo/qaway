@@ -26,6 +26,7 @@ import EquipoCargaView from '../equipo/EquipoCargaView';
 import EquipoDrawer from '../equipo/EquipoDrawer';
 import EquipoExpedienteModal from '../equipo/EquipoExpedienteModal';
 import EquipoNuevoModal from '../equipo/EquipoNuevoModal';
+import SedeNuevaModal from '../sedes/SedeNuevaModal';
 import {
   fetchEquipoIntegrantesFromSupabase,
   fetchEquipoSedesFromSupabase,
@@ -87,6 +88,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   BarChart3,
+  Building,
   Building2,
   CalendarDays,
   CalendarRange,
@@ -2170,6 +2172,7 @@ export default function CronogramaGanttView({
   const [equipoSelectedId, setEquipoSelectedId] = useState<string | null>(null);
   const [equipoExpediente, setEquipoExpediente] = useState<any | null>(null);
   const [isEquipoNuevoOpen, setIsEquipoNuevoOpen] = useState(false);
+  const [isSedeNuevaOpen, setIsSedeNuevaOpen] = useState(false);
   const [equipoSedeFilter, setEquipoSedeFilter] = useState('todas');
   const [equipoEstadoOpFilter, setEquipoEstadoOpFilter] = useState('todos');
   const [equipoEstadoCuentaFilter, setEquipoEstadoCuentaFilter] = useState('todos');
@@ -2233,6 +2236,43 @@ export default function CronogramaGanttView({
     const next = [nuevo, ...equipoIntegrantes];
     setEquipoIntegrantes(next);
     notify(`Integrante "${nuevo.nombreCompleto}" registrado exitosamente`);
+  };
+
+  const handleCreateSede = (nueva: any) => {
+    const formatted = {
+      id: nueva.id,
+      name: nueva.name,
+      region: nueva.region || '',
+      unitType: nueva.unitType || 'ugel',
+      status: nueva.status || 'active',
+      gestor: nueva.gestor || 'Gestor Territorial',
+    };
+    UNIDADES_REMOTAS = null;
+    setUnidades((prev) => [formatted, ...prev]);
+
+    if (perspective === 'territorial') {
+      const isDre = nueva.unitType === 'dre' || nueva.unitType === 'central';
+      const newItem: any = {
+        id: nueva.id || `sede-${Date.now()}`,
+        code: nueva.code || '',
+        name: nueva.name,
+        edtType: isDre ? 'SUBCOMPONENTE' : 'PAQUETE_TRABAJO',
+        wbsNodeType: isDre ? 'SUBCOMPONENTE' : 'PAQUETE_TRABAJO',
+        kind: 'subproceso',
+        faseId: 'FASE-PLANIFICACION',
+        parentId: nueva.parentUnitId || 'comp-1',
+        entidadResponsable: isDre ? 'DRE' : 'UGEL',
+        unitType: nueva.unitType,
+        region: nueva.region || 'Junín',
+        gestor: nueva.gestor || 'Gestor Territorial',
+        start: new Date().toISOString().split('T')[0],
+        end: new Date(Date.now() + 60 * 86400000).toISOString().split('T')[0],
+        progress: 0,
+        status: 'En proceso',
+      };
+      commitChange((old) => [newItem, ...old]);
+    }
+    notify(`Sede "${nueva.name}" registrada exitosamente en Supabase`);
   };
 
   const handleBulkUpdateSede = (ids: string[], targetSedeId: string) => {
@@ -5022,25 +5062,40 @@ export default function CronogramaGanttView({
           ) : (
             <span className="expand-spacer" style={{ width: 16, height: 20, display: 'inline-block', flexShrink: 0 }} />
           )}
-          {nodeType === 'COMPONENTE' && (
+          {nodeType === 'COMPONENTE' ? (
             <span className="gantt-row-icon componente" title="Componente rector">
               <Layers size={14} />
             </span>
-          )}
-          {nodeType === 'PRODUCTO' && (
-            <span className="gantt-row-icon producto" title="Producto entregable">
-              <Package size={13} />
+          ) : (perspective === 'territorial' || (x as any).entidadResponsable || (x as any).unitType) && ((x as any).entidadResponsable === 'DRE' || (x as any).unitType === 'dre' || (x as any).unitType === 'regional' || (x.name && (x.name.includes('DRE ') || x.name.includes('GRE ') || x.name.includes('Regional Matriz')))) ? (
+            <span className="gantt-row-icon dre" title="Sede Regional Matriz (DRE)">
+              <Building2 size={13} style={{ color: '#1e40af' }} />
             </span>
-          )}
-          {nodeType === 'HITO' && (
-            <span className="gantt-row-icon hito" title="Hito clave">
-              <Flag size={13} />
+          ) : (perspective === 'territorial' || (x as any).entidadResponsable || (x as any).unitType) && ((x as any).entidadResponsable === 'UGEL' || (x as any).unitType === 'ugel' || (x as any).unitType === 'operativa' || (x as any).unitType === 'obra' || (x as any).unitType === 'oficina' || (x.name && x.name.startsWith('UGEL '))) ? (
+            <span className="gantt-row-icon ugel" title="Unidad Territorial Operativa (UGEL)">
+              <Building size={13} style={{ color: '#0284c7' }} />
             </span>
-          )}
-          {nodeType === 'PAQUETE_TRABAJO' && (
-            <span className="gantt-row-icon paquete" title="Paquete de trabajo / Entregable">
-              <ListChecks size={13} />
+          ) : (x as any).unitType === 'central' ? (
+            <span className="gantt-row-icon central" title="Sede Central Matriz">
+              <Building2 size={13} style={{ color: '#0f172a' }} />
             </span>
+          ) : (
+            <>
+              {nodeType === 'PRODUCTO' && (
+                <span className="gantt-row-icon producto" title="Producto entregable">
+                  <Package size={13} />
+                </span>
+              )}
+              {nodeType === 'HITO' && (
+                <span className="gantt-row-icon hito" title="Hito clave">
+                  <Flag size={13} />
+                </span>
+              )}
+              {nodeType === 'PAQUETE_TRABAJO' && (
+                <span className="gantt-row-icon paquete" title="Paquete de trabajo / Entregable">
+                  <ListChecks size={13} />
+                </span>
+              )}
+            </>
           )}
           {Boolean(x.code) && (
             <span className="code" style={{ fontWeight: 500, color: '#64748b', fontSize: '12.5px', flexShrink: 0 }}>
@@ -5922,46 +5977,57 @@ export default function CronogramaGanttView({
                 <span>Importar Cronograma</span>
                 <ChevronDown size={14} />
               </button>
-              <div className="menu-wrap">
-                <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
+              {perspective === 'territorial' ? (
+                <button
+                  className="btn primary"
+                  onClick={() => setIsSedeNuevaOpen(true)}
+                  title="Registrar nueva sede territorial u operativa"
+                >
                   <Plus size={16} />
-                  <span>Agregar Componente</span>
-                  <ChevronDown size={14} />
+                  <span>Nueva sede</span>
                 </button>
-                {newMenu && (
-                  <div className="menu" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => {
-                        setNewMenu(false);
-                        add('hito');
-                      }}
-                    >
-                      <Folder size={15} />
-                      <span>Nuevo componente principal</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setNewMenu(false);
-                        add('subproceso');
-                      }}
-                    >
-                      <FileText size={15} />
-                      <span>Nuevo subcomponente / subproceso</span>
-                    </button>
-                    {perspective === 'equipo' && (
+              ) : (
+                <div className="menu-wrap">
+                  <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
+                    <Plus size={16} />
+                    <span>Agregar Componente</span>
+                    <ChevronDown size={14} />
+                  </button>
+                  {newMenu && (
+                    <div className="menu" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => {
                           setNewMenu(false);
-                          setIsEquipoNuevoOpen(true);
+                          add('hito');
                         }}
                       >
-                        <Users size={15} />
-                        <span>Nuevo integrante del equipo</span>
+                        <Folder size={15} />
+                        <span>Nuevo componente principal</span>
                       </button>
-                    )}
-                  </div>
-                )}
-              </div>
+                      <button
+                        onClick={() => {
+                          setNewMenu(false);
+                          add('subproceso');
+                        }}
+                      >
+                        <FileText size={15} />
+                        <span>Nuevo subcomponente / subproceso</span>
+                      </button>
+                      {perspective === 'equipo' && (
+                        <button
+                          onClick={() => {
+                            setNewMenu(false);
+                            setIsEquipoNuevoOpen(true);
+                          }}
+                        >
+                          <Users size={15} />
+                          <span>Nuevo integrante del equipo</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           }
         />
@@ -7947,6 +8013,7 @@ export default function CronogramaGanttView({
           {perspective !== 'equipo' && viewMode === 'portada' && (
             <SedesCaratulaView
               items={items}
+              unidades={unidades}
               onSelectSede={(sede) => {
                 const target = items.find((x) => x.id === sede.id || x.name === sede.name);
                 if (target) openEditorForItem(target);
@@ -8960,6 +9027,14 @@ export default function CronogramaGanttView({
             />
           </>
         )}
+
+        {/* Modal Oficial de Registro de Sede Territorial / Unidad Operativa */}
+        <SedeNuevaModal
+          isOpen={isSedeNuevaOpen}
+          onClose={() => setIsSedeNuevaOpen(false)}
+          onSave={handleCreateSede}
+          unidadesExistentes={unidades}
+        />
 
         {/* Panel Lateral Editor Aislado y Memoizado (Cero re-renders en el Gantt al escribir) */}
         <GanttEditorDrawer

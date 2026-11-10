@@ -168,3 +168,46 @@ export async function listGestorProjectUnits(projectId: string): Promise<GestorP
     inFlightProjectUnits.delete(key);
   }
 }
+
+export async function createGestorUnit(unit: Partial<GestorUnit>): Promise<GestorUnit> {
+  const newId = unit.id || `unit-${Date.now().toString(36)}-${Math.floor(Math.random() * 1000)}`;
+  const cleanCode = (unit.code || unit.name?.replace(/\s+/g, '-').toUpperCase() || `UNIT-${Date.now()}`).trim();
+
+  const row = {
+    id: newId,
+    tenant_id: unit.tenantId ?? null,
+    parent_unit_id: unit.parentUnitId ?? null,
+    name: unit.name?.trim() || 'Nueva Sede',
+    code: cleanCode,
+    unit_type: unit.unitType || 'ugel',
+    region: unit.region ?? null,
+    macroregion: unit.macroregion ?? null,
+    address: unit.address ?? null,
+    status: unit.status || 'active',
+    metadata: {
+      ...(unit.metadata || {}),
+      ...(unit.gestor ? { gestor: unit.gestor } : {}),
+      ...(typeof unit.progress === 'number' ? { progress: unit.progress } : {}),
+      ...(unit.complianceStatus ? { compliance_status: unit.complianceStatus } : {}),
+    },
+    updated_at: new Date().toISOString(),
+  };
+
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('gestor_unidades')
+      .upsert(row, { onConflict: 'id' })
+      .select('id,tenant_id,parent_unit_id,name,code,unit_type,region,macroregion,address,status,metadata')
+      .single();
+
+    if (!error && data) {
+      inFlightUnits.clear();
+      return mapUnit(data);
+    }
+  }
+
+  // Fallback si supabase no responde o modo offline
+  inFlightUnits.clear();
+  return mapUnit(row);
+}
+

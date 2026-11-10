@@ -169,13 +169,16 @@ import {
   ZoomOut,
   Sigma,
   Calendar,
+  Video,
+  Headphones,
+  ClipboardCheck,
   X
 } from 'lucide-react';
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
 export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
+type ColKey = 'name' | 'code' | 'kind' | 'deliverable' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
 type EditField = ColKey;
 
 const generalTrend = [
@@ -248,7 +251,41 @@ export interface Item {
   /** Estado de Nudo Critico o Solicitud de Prorroga desde sede territorial.
    *  Solo se popula en perspective="territorial"; ignorado en vista central. */
   blockerInfo?: import('../../types').SedeBlockerRequest;
+  /** Tipo de tarea oficial (Reunión, Asistencia técnica, Informe, etc.) e icono Lucide */
+  taskType?: string;
+  icon?: string;
 }
+
+export const renderOfficialTaskIcon = (item: Item, nodeType: string) => {
+  // 1. Icono explícito configurado en Supabase / modelo
+  if (item.icon === 'Video') return <Video size={13} style={{ color: '#7c3aed', flexShrink: 0 }} />;
+  if (item.icon === 'Headphones') return <Headphones size={13} style={{ color: '#059669', flexShrink: 0 }} />;
+  if (item.icon === 'FileText') return <FileText size={13} style={{ color: '#0284c7', flexShrink: 0 }} />;
+  if (item.icon === 'ClipboardCheck') return <ClipboardCheck size={13} style={{ color: '#d97706', flexShrink: 0 }} />;
+  if (item.icon === 'Package') return <Package size={13} style={{ color: '#0284c7', flexShrink: 0 }} />;
+  if (item.icon === 'Flag') return <Flag size={13} style={{ color: '#dc2626', flexShrink: 0 }} />;
+
+  // 2. Tipo de tarea oficial asignado
+  const typeStr = (item.taskType || '').toLowerCase();
+  if (typeStr.includes('reunión') || typeStr.includes('reunion') || typeStr.includes('virtual')) {
+    return <Video size={13} style={{ color: '#7c3aed', flexShrink: 0 }} />;
+  }
+  if (typeStr.includes('asistencia') || typeStr.includes('capacitación') || typeStr.includes('taller')) {
+    return <Headphones size={13} style={{ color: '#059669', flexShrink: 0 }} />;
+  }
+  if (typeStr.includes('informe') || typeStr.includes('reporte') || typeStr.includes('documento')) {
+    return <FileText size={13} style={{ color: '#0284c7', flexShrink: 0 }} />;
+  }
+  if (typeStr.includes('monitoreo') || typeStr.includes('supervisión') || typeStr.includes('seguimiento')) {
+    return <ClipboardCheck size={13} style={{ color: '#d97706', flexShrink: 0 }} />;
+  }
+
+  // 3. Tipología oficial EDT / PMBOK estándar
+  if (nodeType === 'COMPONENTE') return <Layers size={14} />;
+  if (nodeType === 'PRODUCTO' || nodeType === 'ENTREGABLE') return <Package size={13} />;
+  if (nodeType === 'HITO') return <Flag size={13} />;
+  return <ListChecks size={13} />;
+};
 
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
@@ -780,12 +817,13 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'deliverable', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
   name: 440,
   kind: 110,
+  deliverable: 220,
   parent: 160,
   start: 125,
   end: 125,
@@ -807,6 +845,7 @@ const MIN_COLS: Record<ColKey, number> = {
   code: 60,
   name: 260,
   kind: 80,
+  deliverable: 140,
   parent: 90,
   start: 90,
   end: 90,
@@ -828,6 +867,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'name', label: 'COMPONENTE / PRODUCTO', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
+  { key: 'deliverable', label: 'Entregable' },
   { key: 'parent', label: 'Componente padre' },
   { key: 'start', label: 'Inicio' },
   { key: 'end', label: 'Fin' },
@@ -847,7 +887,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
 const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
-const PORTADA_PRESET_COLS: ColKey[] = ['name', 'gestor', 'parent', 'end', 'status', 'progress', 'reportType', 'actions'];
+const PORTADA_PRESET_COLS: ColKey[] = ['name', 'kind', 'deliverable', 'gestor', 'end', 'status', 'progress', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -891,6 +931,7 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
   { id: 'sede', label: 'Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
   { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Subcomponente') },
+  { id: 'deliverable', label: 'Entregable', type: 'text', accessor: (r) => r?.deliverable ?? '' },
   { id: 'parent', label: 'Componente padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
 
@@ -5066,26 +5107,9 @@ export default function Tareas2View({
           ) : (
             <span className="expand-spacer" style={{ width: 16, height: 20, display: 'inline-block', flexShrink: 0 }} />
           )}
-          {nodeType === 'COMPONENTE' && (
-            <span className="gantt-row-icon componente" title="Componente rector">
-              <Layers size={14} />
-            </span>
-          )}
-          {nodeType === 'PRODUCTO' && (
-            <span className="gantt-row-icon producto" title="Producto entregable">
-              <Package size={13} />
-            </span>
-          )}
-          {nodeType === 'HITO' && (
-            <span className="gantt-row-icon hito" title="Hito clave">
-              <Flag size={13} />
-            </span>
-          )}
-          {nodeType === 'PAQUETE_TRABAJO' && (
-            <span className="gantt-row-icon paquete" title="Paquete de trabajo / Entregable">
-              <ListChecks size={13} />
-            </span>
-          )}
+          <span className={`gantt-row-icon ${nodeType.toLowerCase()}`} title={x.taskType ? `Tipo: ${x.taskType}` : nodeType}>
+            {renderOfficialTaskIcon(x, nodeType)}
+          </span>
           {Boolean(x.code) && (
             <span className="code" style={{ fontWeight: 500, color: '#64748b', fontSize: '12.5px', flexShrink: 0 }}>
               {x.code}
@@ -5209,11 +5233,36 @@ export default function Tareas2View({
     }
 
     if (colKey === 'kind') {
+      const isEdt = Boolean(!x.id.startsWith('op-') && (x.parentId || x.wbsNodeType || x.edtType || (x.code && !x.code.startsWith('OP'))));
+      const edtLabel = getEdtNodeDisplayLabel(x, items);
       return (
-        <div key="kind" className="kind-cell-col">
-          <span className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
-            {getEdtNodeDisplayLabel(x, items)}
+        <div key="kind" className="kind-cell-col" style={{ display: 'flex', alignItems: 'center' }}>
+          <span
+            className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}
+            style={!isEdt ? { background: '#f8fafc', color: '#475569', borderColor: '#e2e8f0' } : undefined}
+            title={isEdt ? `Trabajo EDT · ${edtLabel}` : 'Monitoreo / Operativa territorial'}
+          >
+            {isEdt ? edtLabel : 'Monitoreo'}
           </span>
+        </div>
+      );
+    }
+
+    if (colKey === 'deliverable') {
+      const delivText = x.deliverable || (x.deliverables && x.deliverables[0]?.name) || '';
+      return (
+        <div key="deliverable" className="deliverable-cell-col" style={{ display: 'flex', alignItems: 'center', minWidth: 0, padding: '0 8px' }}>
+          {delivText ? (
+            <span
+              className="cell-text"
+              style={{ fontSize: '12.5px', color: '#334155', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              title={delivText}
+            >
+              {delivText}
+            </span>
+          ) : (
+            <span style={{ color: '#94a3b8', fontSize: '12.5px' }}>—</span>
+          )}
         </div>
       );
     }

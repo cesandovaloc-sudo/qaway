@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
 
 interface SedesCaratulaViewProps {
   items?: any[];
+  unidades?: any[];
   onSelectSede?: (sede: any) => void;
 }
 
@@ -27,6 +28,7 @@ const MACRO_BOUNDS: Record<string, [[number, number], [number, number]]> = {
 
 export default function SedesCaratulaView({
   items = [],
+  unidades = [],
   onSelectSede,
 }: SedesCaratulaViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -34,8 +36,37 @@ export default function SedesCaratulaView({
   const [activeMacro, setActiveMacro] = useState<string>('todas');
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
-  // 1. Datos representativos de las 28 entidades asignadas (DREs y principales UGELs piloto)
+  // 1. Datos de entidades asignadas vinculados a Supabase (gestor_unidades) con fallback
   const entidadesAsignadas = useMemo(() => {
+    if (unidades && unidades.length > 0) {
+      return unidades.slice(0, 30).map((u: any, idx: number) => {
+        const isDre = u.unitType === 'dre' || u.name?.includes('DRE') || u.name?.includes('GRE');
+        const reg = u.region || 'Junín';
+        const rNorm = reg.toUpperCase();
+        let macro = 'centro';
+        if (['TUMBES', 'PIURA', 'LAMBAYEQUE', 'LA LIBERTAD', 'CAJAMARCA', 'AMAZONAS', 'SAN MARTÍN', 'LORETO'].includes(rNorm)) {
+          macro = 'norte';
+        } else if (['AREQUIPA', 'MOQUEGUA', 'TACNA', 'PUNO', 'CUSCO', 'APURÍMAC', 'MADRE DE DIOS'].includes(rNorm)) {
+          macro = 'sur';
+        }
+        const resp = u.gestor || u.responsable || (isDre ? 'Coordinador Regional' : 'Gestor Territorial');
+        const initials = resp.split(' ').map((p: string) => p[0]).slice(0, 2).join('').toUpperCase();
+        const estado = u.status === 'active' || u.status === 'Activa' ? 'Activa' : u.status === 'inactive' ? 'Inactiva' : 'En proceso';
+
+        return {
+          id: u.id || `u-${idx + 1}`,
+          name: u.name,
+          code: u.code || (isDre ? 'DRE' : 'UGEL'),
+          type: isDre ? 'DRE' : 'UGEL',
+          region: reg,
+          macro: macro,
+          responsable: resp,
+          avatar: initials || 'GT',
+          estado: estado,
+        };
+      });
+    }
+
     return [
       { id: 'u-1', name: 'DRE Junín', code: 'DRE-JUN', type: 'DRE', region: 'Junín', macro: 'centro', responsable: 'Javier Ruiz', avatar: 'JR', estado: 'Activa' },
       { id: 'u-2', name: 'UGEL Huancayo', code: 'UGEL-HYO', type: 'UGEL', region: 'Junín', macro: 'centro', responsable: 'María Rojas', avatar: 'MR', estado: 'Activa' },
@@ -66,7 +97,7 @@ export default function SedesCaratulaView({
       { id: 'u-27', name: 'UGEL Tacna', code: 'UGEL-TAC', type: 'UGEL', region: 'Tacna', macro: 'sur', responsable: 'Gloria Choque', avatar: 'GC', estado: 'Activa' },
       { id: 'u-28', name: 'UGEL Jauja', code: 'UGEL-JAU', type: 'UGEL', region: 'Junín', macro: 'centro', responsable: 'Alberto Vega', avatar: 'AV', estado: 'Inactiva' },
     ];
-  }, []);
+  }, [unidades]);
 
   // 2. Cálculo dinámico de estados para el Gráfico Donut (Componente 2)
   const donutData = useMemo(() => {

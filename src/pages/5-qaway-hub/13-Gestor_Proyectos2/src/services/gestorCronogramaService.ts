@@ -54,6 +54,9 @@ export interface GanttItemData {
   baselineEnd?: string;
   actualStart?: string;
   actualEnd?: string;
+  /** Tipo oficial de tarea (Reunión, Asistencia técnica, Informe, etc.) e icono Lucide */
+  taskType?: string;
+  icon?: string;
 }
 
 // Convertidor de modelo de frontend hacia columnas de base de datos Supabase
@@ -83,6 +86,8 @@ const toSupabaseRow = (projectId: string, item: GanttItemData) => ({
   baseline_end: item.baselineEnd || null,
   actual_start: item.actualStart || null,
   actual_end: item.actualEnd || null,
+  task_type: item.taskType || null,
+  icon: item.icon || null,
   updated_at: new Date().toISOString(),
 });
 
@@ -112,11 +117,13 @@ const fromSupabaseRow = (row: any): GanttItemData => ({
   baselineEnd: row.baseline_end || undefined,
   actualStart: row.actual_start || undefined,
   actualEnd: row.actual_end || undefined,
+  taskType: row.task_type || undefined,
+  icon: row.icon || undefined,
 });
 
-/* Columnas de la Fase 1 (supabase/02_gestor_cronograma_linea_base.sql). */
-const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end'] as const;
-const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
+/* Columnas de la Fase 1 (supabase/02_gestor_cronograma_linea_base.sql) y Tipo/Icono. */
+const SCHEDULE_COLUMNS = ['baseline_start', 'baseline_end', 'actual_start', 'actual_end', 'task_type', 'icon'] as const;
+const SCHEDULE_FIELDS = ['baselineStart', 'baselineEnd', 'actualStart', 'actualEnd', 'taskType', 'icon', 'edtType', 'faseId', 'phase', 'dependencies'] as const;
 
 /**
  * Upsert tolerante al esquema: si la BD aún no tiene las columnas de línea base/fechas reales,
