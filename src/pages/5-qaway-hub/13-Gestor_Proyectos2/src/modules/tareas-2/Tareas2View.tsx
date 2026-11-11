@@ -179,11 +179,24 @@ import {
   X
 } from 'lucide-react';
 
-export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
-type Kind = 'hito' | 'subproceso';
-export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
-type ColKey = 'name' | 'code' | 'kind' | 'deliverable' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
-type EditField = ColKey;
+// Fase 2 — cronograma-core: tipos canónicos del cronograma (fuente única).
+import type {
+  AttachmentItem,
+  ColKey,
+  DeliverableItem,
+  EditField,
+  Item,
+  Kind,
+  Status,
+  WbsNodeType,
+} from '../cronograma-core/types';
+export type {
+  AttachmentItem,
+  DeliverableItem,
+  Item,
+  Status,
+  WbsNodeType,
+} from '../cronograma-core/types';
 
 const generalTrend = [
   { date: '01 oct.', v: 18 },
@@ -195,70 +208,7 @@ const generalTrend = [
 
 export type { DeliverableFormat, DeliverableType };
 
-export interface DeliverableItem {
-  id: string;
-  name: string;
-  type: DeliverableFormat;
-  url?: string | undefined;
-  fileName?: string;
-}
-
-export interface AttachmentItem {
-  id: string;
-  name: string;
-  date: string;
-  url?: string;
-  type?: string;
-}
-
-export interface Item {
-  id: string;
-  code: string;
-  name: string;
-  kind: Kind;
-  /** Clasificación metodológica formal PMI/PMBOK de la EDT/WBS */
-  edtType?: EdtNodeType;
-  wbsNodeType?: WbsNodeType;
-  /** Contenedor macro de ciclo de vida temporal (opcional / nullable) */
-  faseId?: string | null | undefined;
-  parentId?: string | undefined;
-  children?: Item[];
-  start: string;
-  end: string;
-  progress: number;
-  status: Status;
-  expanded?: boolean;
-  description?: string;
-  deliverable?: string;
-  deliverables?: DeliverableItem[];
-  attachments?: AttachmentItem[];
-  reportType?: string;
-  region?: string;
-  distrito?: string | undefined;
-  sede?: string | undefined;
-  gestor?: string;
-  gestores?: string[];
-  tasks?: number;
-  done?: number;
-  unit?: string;
-  phase?: string | null;
-  /** Línea base aprobada (fechas originales contra las que se mide la desviación). */
-  baselineStart?: string;
-  baselineEnd?: string | undefined;
-  /** Fechas reales de ejecución (se registran al iniciar/completar; editables). */
-  actualStart?: string | undefined;
-  actualEnd?: string | undefined;
-  /** Tareas o hitos predecesores en la cadena de prelación / ruta crítica. */
-  dependencies?: string[];
-  /** Entidad responsable oficial del componente (DRE / UGEL / región). */
-  entidadResponsable?: string | undefined;
-  /** Estado de Nudo Critico o Solicitud de Prorroga desde sede territorial.
-   *  Solo se popula en perspective="territorial"; ignorado en vista central. */
-  blockerInfo?: import('../../types').SedeBlockerRequest;
-  /** Tipo de tarea oficial (Reunión, Asistencia técnica, Informe, etc.) e icono Lucide */
-  taskType?: string;
-  icon?: string;
-}
+// (DeliverableItem, AttachmentItem e Item viven ahora en cronograma-core/types.ts)
 
 export const renderOfficialTaskIcon = (item: Item, nodeType: string) => {
   // 1. Icono explícito configurado en Supabase / modelo
@@ -308,8 +258,10 @@ export const renderDeliverableIcon = (deliverableText: string, taskType?: string
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
   'pt-1.6': ['pt-1.4'],   // CDL depende de Plan de Distribución Local aprobado
-  'pt-1.7a': ['pt-1.6'],  // Comunicación a II.EE. depende de CDL validado
-  'pt-1.7b': ['pt-1.7a'], // Capacitación a directores depende de Comunicación inicial
+  'pt-1.7.1': ['pt-1.6'], // Comunicación a II.EE. depende de CDL validado
+  'pt-1.7.2': ['pt-1.7.1'], // Capacitación a directores depende de Comunicación inicial
+  'pt-1.7a': ['pt-1.6'],  // retrocompatibilidad
+  'pt-1.7b': ['pt-1.7.1'], // retrocompatibilidad
 
   // Dependencias macro entre componentes rectores
   'comp-3': ['comp-2'],   // Recepción en DRE/UGEL depende de Habilitación de Almacenes

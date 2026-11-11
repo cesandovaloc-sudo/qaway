@@ -15,6 +15,7 @@ import './gantt.css';
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
+import { PERSON_AVATARS } from '../tareas-2/TareasSideCards';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import SedesCaratulaView from '../sedes/SedesCaratulaView';
@@ -172,7 +173,7 @@ import {
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
 export type WbsNodeType = 'COMPONENTE' | 'PRODUCTO' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
-type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
+type ColKey = 'name' | 'code' | 'kind' | 'deliverable' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'successors' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
 type EditField = ColKey;
 
 import type { DeliverableFormat } from '../../shared/deliverableTypes';
@@ -792,12 +793,13 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'deliverable', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'successors', 'gestor', 'region', 'actualEnd', 'reportType', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
   name: 420,
   kind: 145,
+  deliverable: 240,
   parent: 260,
   start: 135,
   end: 135,
@@ -805,12 +807,13 @@ const DEFAULT_COLS: Record<ColKey, number> = {
   progress: 130,
   status: 125,
   dependencies: 130,
+  successors: 130,
   gestor: 165,
   region: 140,
   deviation: 120,
   actualEnd: 130,
   reportType: 185,
-  actions: 125,
+  actions: 75,
   distrito: 130,
   sede: 130,
 };
@@ -819,6 +822,7 @@ const MIN_COLS: Record<ColKey, number> = {
   code: 60,
   name: 260,
   kind: 80,
+  deliverable: 140,
   parent: 90,
   start: 90,
   end: 90,
@@ -826,12 +830,13 @@ const MIN_COLS: Record<ColKey, number> = {
   progress: 100,
   status: 90,
   dependencies: 90,
+  successors: 90,
   gestor: 110,
   region: 95,
   deviation: 90,
   actualEnd: 100,
   reportType: 140,
-  actions: 100,
+  actions: 60,
   distrito: 90,
   sede: 90,
 };
@@ -840,6 +845,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'name', label: 'COMPONENTE / PRODUCTO', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
+  { key: 'deliverable', label: 'Entregable' },
   { key: 'parent', label: 'Componente padre' },
   { key: 'start', label: 'Inicio' },
   { key: 'end', label: 'Fin' },
@@ -848,6 +854,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'deviation', label: 'Desviación' },
   { key: 'status', label: 'Estado' },
   { key: 'dependencies', label: 'Predecesores' },
+  { key: 'successors', label: 'Sucesores' },
   { key: 'gestor', label: 'Responsable' },
   { key: 'region', label: 'Ámbito' },
   { key: 'actualEnd', label: 'Fecha real' },
@@ -858,7 +865,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 // Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
-const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
+const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'deliverable', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'region', 'actualEnd', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -896,12 +903,19 @@ const GANTT_COLUMNS: ColumnDef<Item>[] = [
     type: 'text',
     accessor: (r) => (r?.dependencies || []).join(', '),
   },
+  {
+    id: 'successors',
+    label: 'Sucesores',
+    type: 'text',
+    accessor: () => '',
+  },
   { id: 'gestor', label: 'Responsable', type: 'person', accessor: (r) => (r ? getItemGestores(r) : []), emptyLabel: 'Sin asignar' },
   { id: 'region', label: 'Región', type: 'select', accessor: (r) => r?.region },
   { id: 'distrito', label: 'Distrito', type: 'select', accessor: (r) => r?.distrito },
   { id: 'sede', label: 'Sede', type: 'select', accessor: (r) => r?.sede },
   { id: 'code', label: 'Código', type: 'text', accessor: (r) => r?.code ?? '' },
-  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Subcomponente') },
+  { id: 'kind', label: 'Tipo', type: 'select', accessor: (r) => (r ? getEdtNodeDisplayLabel(r) : 'Producto') },
+  { id: 'deliverable', label: 'Entregable', type: 'text', accessor: (r) => r?.deliverable || r?.deliverables?.[0]?.name || '' },
   { id: 'parent', label: 'Componente padre', type: 'text', accessor: (r) => r?.parentId ?? '' },
 ];
 
@@ -1685,7 +1699,7 @@ export default function CronogramaGanttView({
 
   const [colWidths, setColWidths] = useState<Record<ColKey, number>>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(uiKey('gantt-cols-v4')) || 'null');
+      const saved = JSON.parse(localStorage.getItem(uiKey('gantt-cols-v5')) || 'null');
       if (saved && typeof saved === 'object') {
         const merged: Record<ColKey, number> = { ...DEFAULT_COLS };
         (Object.keys(DEFAULT_COLS) as ColKey[]).forEach((k) => {
@@ -2810,7 +2824,7 @@ export default function CronogramaGanttView({
     } catch {}
 
     const isLista = viewMode === 'lista';
-    const storageKey = isLista ? uiKey('visible-cols-lista-v3') : uiKey('visible-cols-gantt-v3');
+    const storageKey = isLista ? uiKey('visible-cols-lista-v4') : uiKey('visible-cols-gantt-v3');
 
     setVisibleCols((prev) => {
       const next = [...prev, key as ColKey];
@@ -2824,7 +2838,7 @@ export default function CronogramaGanttView({
       const next = { ...prev, [key]: 140 };
       colRef.current = next;
       try {
-        localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(next));
+        localStorage.setItem(uiKey('gantt-cols-v5'), JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -2848,7 +2862,7 @@ export default function CronogramaGanttView({
       const next = { ...prev, [key]: defaultW };
       colRef.current = next;
       try {
-        localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(next));
+        localStorage.setItem(uiKey('gantt-cols-v5'), JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -2868,7 +2882,7 @@ export default function CronogramaGanttView({
       return ['name'];
     }
     try {
-      const storageKey = uiKey('visible-cols-lista-v3');
+      const storageKey = uiKey('visible-cols-lista-v4');
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
       if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
         const canonicalPart = CANONICAL_COLS.filter((k) => saved.includes(k));
@@ -2889,7 +2903,7 @@ export default function CronogramaGanttView({
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem(uiKey('visible-cols-lista-v3'), JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v4'), JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
         localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
@@ -2909,7 +2923,7 @@ export default function CronogramaGanttView({
     if (viewMode === prevViewModeRef.current) return;
     try {
       if (prevViewModeRef.current === 'lista') {
-        localStorage.setItem(uiKey('visible-cols-lista-v3'), JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v4'), JSON.stringify(visibleCols));
       } else if (prevViewModeRef.current === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
         localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
@@ -2924,7 +2938,7 @@ export default function CronogramaGanttView({
   useEffect(() => {
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem(uiKey('visible-cols-lista-v3'), JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v4'), JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
         localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
@@ -2988,6 +3002,7 @@ export default function CronogramaGanttView({
       code: 80,
       name: isLista ? 420 : 320,
       kind: 145,
+      deliverable: 240,
       parent: 260,
       start: 135,
       end: 135,
@@ -2995,11 +3010,12 @@ export default function CronogramaGanttView({
       progress: 130,
       status: 125,
       dependencies: 130,
+      successors: 130,
       gestor: 165,
       region: 140,
       deviation: 120,
       actualEnd: 130,
-      actions: 80,
+      actions: 75,
     };
 
     customCols.forEach((col) => {
@@ -3023,9 +3039,9 @@ export default function CronogramaGanttView({
     if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
 
     try {
-      const storageKey = isLista ? uiKey('visible-cols-lista-v3') : uiKey('visible-cols-gantt-v3');
+      const storageKey = isLista ? uiKey('visible-cols-lista-v4') : uiKey('visible-cols-gantt-v3');
       localStorage.setItem(storageKey, JSON.stringify(pristineCols));
-      localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(calibratedWidths));
+      localStorage.setItem(uiKey('gantt-cols-v5'), JSON.stringify(calibratedWidths));
     } catch {
       /* almacenamiento no disponible */
     }
@@ -3577,7 +3593,7 @@ export default function CronogramaGanttView({
       setResizingCol(null);
       document.body.classList.remove('gantt-resizing');
       try {
-        localStorage.setItem(uiKey('gantt-cols-v4'), JSON.stringify(colRef.current));
+        localStorage.setItem(uiKey('gantt-cols-v5'), JSON.stringify(colRef.current));
       } catch {
         /* almacenamiento no disponible */
       }
@@ -5277,6 +5293,79 @@ export default function CronogramaGanttView({
       );
     }
 
+    if (colKey === 'deliverable') {
+      const firstDeliv = x.deliverables && x.deliverables.length > 0 ? x.deliverables[0] : null;
+      const delivText = x.deliverable || firstDeliv?.name || '';
+      const delivFormat = firstDeliv?.type || 'document';
+      const DelivIcon =
+        delivFormat === 'spreadsheet'
+          ? FileSpreadsheet
+          : delivFormat === 'presentation'
+          ? Presentation
+          : delivFormat === 'link'
+          ? Link2
+          : delivFormat === 'physical'
+          ? Package
+          : FileText;
+      const delivColor =
+        delivFormat === 'spreadsheet'
+          ? '#16a34a'
+          : delivFormat === 'presentation'
+          ? '#ea580c'
+          : delivFormat === 'link'
+          ? '#7c3aed'
+          : delivFormat === 'physical'
+          ? '#d97706'
+          : '#2563eb';
+
+      return (
+        <div
+          key="deliverable"
+          className="deliverable-cell-col editable"
+          style={{ display: 'flex', alignItems: 'center', minWidth: 0, padding: '0 8px', gap: '6px' }}
+          title={delivText || 'Clic para definir entregable oficial del EDT'}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'deliverable');
+          }}
+        >
+          {isEditing(x, 'deliverable') ? (
+            <input
+              className="cell-editor cell-input"
+              type="text"
+              autoFocus
+              defaultValue={delivText}
+              onClick={(e) => e.stopPropagation()}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                update(x.id, {
+                  deliverable: val,
+                  deliverables: val ? [{ id: firstDeliv?.id || `deliv-${x.id}`, name: val, type: delivFormat }] : [],
+                });
+                closeEdit();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+                if (e.key === 'Escape') closeEdit();
+              }}
+            />
+          ) : delivText ? (
+            <>
+              <DelivIcon size={13} style={{ color: delivColor, flexShrink: 0 }} />
+              <span
+                className="cell-text"
+                style={{ fontSize: '12.5px', color: '#334155', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {delivText}
+              </span>
+            </>
+          ) : (
+            <span style={{ color: '#94a3b8', fontSize: '12.5px' }}>—</span>
+          )}
+        </div>
+      );
+    }
+
     if (colKey === 'parent') {
       const parentItem = x.parentId ? itemsById.get(x.parentId) ?? null : null;
       return (
@@ -5668,6 +5757,72 @@ export default function CronogramaGanttView({
       );
     }
 
+    if (colKey === 'successors') {
+      const succs = items.filter((it) => it.id !== x.id && (it.dependencies || []).includes(x.id));
+      return (
+        <div
+          key="successors"
+          className="dependencies editable"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleEdit(x, 'successors');
+          }}
+        >
+          {isEditing(x, 'successors') ? (
+            <div className="cell-editor cell-pop dep-picker-pop" onClick={(e) => e.stopPropagation()}>
+              <div className="dep-picker-header">
+                <span>Sucesores de {x.code}</span>
+                <button type="button" className="dep-picker-close" onClick={closeEdit}>
+                  <X size={12} />
+                </button>
+              </div>
+              <div className="dep-picker-list">
+                {items
+                  .filter((c) => c.id !== x.id)
+                  .map((c) => {
+                    const isChecked = (c.dependencies || []).includes(x.id);
+                    return (
+                      <label key={c.id} className="dep-picker-item">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            commitChange((old) =>
+                              old.map((it) => {
+                                if (it.id !== c.id) return it;
+                                const curr = new Set(it.dependencies || []);
+                                if (checked) curr.add(x.id);
+                                else curr.delete(x.id);
+                                return { ...it, dependencies: Array.from(curr) };
+                              })
+                            );
+                          }}
+                        />
+                        <span className="dep-code">{c.code}</span>
+                        <span className="dep-name">{c.name}</span>
+                      </label>
+                    );
+                  })}
+              </div>
+            </div>
+          ) : (
+            <div className="dep-tags">
+              {succs.length > 0 ? (
+                succs.map((succItem) => (
+                  <span key={succItem.id} className="dep-tag" title={`${succItem.code} - ${succItem.name}`}>
+                    {succItem.code || succItem.id}
+                  </span>
+                ))
+              ) : (
+                <span className="cell-text" style={{ color: '#94a3b8' }}>—</span>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     if (colKey === 'gestor') {
       return (
         <div
@@ -5696,31 +5851,57 @@ export default function CronogramaGanttView({
               <option value="Juan Pérez">Juan Pérez</option>
             </select>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  background: x.gestor === 'Lucía Flores' ? '#9333ea' : '#0284c7',
-                  color: '#fff',
-                  fontSize: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 600,
-                  flexShrink: 0,
-                }}
-              >
-                {(x.gestor || 'CS')
-                  .split(' ')
-                  .map((w: string) => w[0])
-                  .join('')
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </span>
-              <span className="cell-text">{x.gestor || 'Carlos Sandoval'}</span>
-            </div>
+            (() => {
+              const primaryName = x.gestor || 'Carlos Sandoval';
+              const avatarUrl = PERSON_AVATARS[primaryName];
+              const initials = primaryName
+                .split(' ')
+                .map((w: string) => w[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase();
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={primaryName}
+                      title={primaryName}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '1.5px solid #ffffff',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        background: primaryName === 'Lucía Flores' ? '#9333ea' : '#0284c7',
+                        color: '#fff',
+                        fontSize: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 600,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {initials}
+                    </span>
+                  )}
+                  <span className="cell-text" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {primaryName}
+                  </span>
+                </div>
+              );
+            })()
           )}
         </div>
       );
@@ -5867,15 +6048,27 @@ export default function CronogramaGanttView({
         >
           <button
             type="button"
-            className="btn-open-report"
-            title="Abrir reporte o ficha del entregable"
+            className="lista-action-btn"
+            title="Ver detalle / Editar ficha"
+            aria-label="Ver detalle"
             onClick={(e) => {
               e.stopPropagation();
               openEditorForItem(x);
             }}
+            style={{
+              width: 30,
+              height: 28,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid transparent',
+              background: 'transparent',
+              borderRadius: 6,
+              color: '#64748b',
+              cursor: 'pointer',
+            }}
           >
-            <span>Abrir reporte</span>
-            <ChevronRight size={12} />
+            <MoreHorizontal size={16} />
           </button>
         </div>
       );
@@ -7812,7 +8005,7 @@ export default function CronogramaGanttView({
                         const isLista = viewMode === 'lista';
                         const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
                         setVisibleCols(defaultCols);
-                        const storageKey = isLista ? uiKey('visible-cols-lista-v3') : uiKey('visible-cols-gantt-v3');
+                        const storageKey = isLista ? uiKey('visible-cols-lista-v4') : uiKey('visible-cols-gantt-v3');
                         try {
                           localStorage.setItem(storageKey, JSON.stringify(defaultCols));
                         } catch {}
@@ -9141,6 +9334,17 @@ export default function CronogramaGanttView({
           onSelectItem={(id) => setSelectedId(id)}
           notify={notify}
            activeProject={activeProject}
+           onToggleSuccessor={(sourceId, successorId, shouldAdd) => {
+             commitChange((old) =>
+               old.map((it) => {
+                 if (it.id !== successorId) return it;
+                 const deps = new Set(it.dependencies || []);
+                 if (shouldAdd) deps.add(sourceId);
+                 else deps.delete(sourceId);
+                 return { ...it, dependencies: Array.from(deps) };
+               })
+             );
+           }}
             onOpenFullDetail={(item) => {
               setPanelOpen(false);
               window.history.pushState({}, '', `/hub/gestor_proyectos/proyecto/gantt/elemento/${encodeURIComponent(item.id)}`);

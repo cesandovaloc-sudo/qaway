@@ -12,7 +12,7 @@ modelos puros, catálogos, tipos y utilidades sin dependencia de React.
 
 | Archivo | Estado |
 | --- | --- |
-| `edtPmbokModel.ts` | Canonical (copia idéntica de tareas-2). `cronograma-gantt` aún mantiene copia local por WIP en curso del agente EDT — migrar cuando se libere. |
+| `edtPmbokModel.ts` | Canonical único (regla BID/PMBOK: `PRODUCTO`, hoja → `PAQUETE_TRABAJO`, códigos decimales `1.7.1`/`1.7.2`) → shims activos en los 4 módulos. |
 | `regionalCoordinationModel.ts` | Canonical ×4 → shims activos en tareas-2 / reportes-2 / reuniones-2. |
 | `sedesCatalogSeeds.ts` | Canonical ×4 → shims activos en tareas-2 / reportes-2 / reuniones-2. |
 | `scheduleMetrics.ts` | Canonical ×4 → shims activos en tareas-2 / reportes-2 / reuniones-2. |

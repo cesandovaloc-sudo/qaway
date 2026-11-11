@@ -240,8 +240,10 @@ export interface Item {
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
   'pt-1.6': ['pt-1.4'],   // CDL depende de Plan de Distribución Local aprobado
-  'pt-1.7a': ['pt-1.6'],  // Comunicación a II.EE. depende de CDL validado
-  'pt-1.7b': ['pt-1.7a'], // Capacitación a directores depende de Comunicación inicial
+  'pt-1.7.1': ['pt-1.6'], // Comunicación a II.EE. depende de CDL validado
+  'pt-1.7.2': ['pt-1.7.1'], // Capacitación a directores depende de Comunicación inicial
+  'pt-1.7a': ['pt-1.6'],  // retrocompatibilidad
+  'pt-1.7b': ['pt-1.7.1'], // retrocompatibilidad
 
   // Dependencias macro entre componentes rectores
   'comp-3': ['comp-2'],   // Recepción en DRE/UGEL depende de Habilitación de Almacenes

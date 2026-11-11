@@ -269,6 +269,7 @@ interface GanttEditorDrawerProps {
   notify: (msg: string) => void;
   activeProject?: any;
   onOpenFullDetail?: (item: Item) => void;
+  onToggleSuccessor?: (sourceId: string, successorId: string, shouldAdd: boolean) => void;
 }
 
 export const GanttEditorDrawer = memo(function GanttEditorDrawer({
@@ -287,6 +288,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   notify,
   activeProject,
   onOpenFullDetail,
+  onToggleSuccessor,
 }: GanttEditorDrawerProps) {
   // ESTADO LOCAL DEL BORRADOR (Aislamiento total: escribir aqui NO re-renderiza el Gantt)
   const [drawerDraft, setDrawerDraft] = useState<Item | null>(null);
@@ -301,6 +303,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [editorHitoSelectOpen, setEditorHitoSelectOpen] = useState(false);
   const [editorParentSelectOpen, setEditorParentSelectOpen] = useState(false);
   const [editorDepSelectOpen, setEditorDepSelectOpen] = useState(false);
+  const [editorSuccSelectOpen, setEditorSuccSelectOpen] = useState(false);
   const [editorLevelSelectOpen, setEditorLevelSelectOpen] = useState(false);
   const [editorPhaseSelectOpen, setEditorPhaseSelectOpen] = useState(false);
 
@@ -470,6 +473,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
     setEditorHitoSelectOpen(false);
     setEditorParentSelectOpen(false);
     setEditorDepSelectOpen(false);
+            setEditorSuccSelectOpen(false);
 
     if (isEditorDirty()) {
       setPendingCloseAction(() => action || (() => {
@@ -2040,6 +2044,106 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     </div>
                   );
                 })()}
+
+                {/* Actividades Sucesoras */}
+                <div className="field relative" style={{ marginTop: 14 }}>
+                  <span>Vincular Actividades Sucesoras (Siguientes en cadena)</span>
+                  <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                    <button
+                      type="button"
+                      className={`filter-card-btn ${editorSuccSelectOpen ? 'active' : ''}`}
+                      style={{
+                        width: '100%',
+                        height: '36px',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        padding: '0 10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditorDepSelectOpen(false);
+                        setEditorSuccSelectOpen((v) => !v);
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: '#0f172a',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          textAlign: 'left',
+                        }}
+                      >
+                        {(() => {
+                          const succList = items.filter((it) => it.id !== activeItem.id && (it.dependencies || []).includes(activeItem.id));
+                          if (succList.length === 0) return 'Sin sucesores vinculados';
+                          return succList.map((s) => `${s.code} ${s.name}`).join(', ');
+                        })()}
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        className="filter-chevron"
+                        style={{
+                          transform: editorSuccSelectOpen ? 'rotate(180deg)' : 'none',
+                          transition: 'transform 0.15s ease',
+                          color: '#64748b',
+                          flexShrink: 0,
+                          marginLeft: 6,
+                        }}
+                      />
+                    </button>
+                    {editorSuccSelectOpen && (
+                      <div
+                        className="filter-card-popover"
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          zIndex: 9999,
+                          marginTop: '4px',
+                          maxHeight: '220px',
+                          overflowY: 'auto',
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="filter-popover-title">Actividades Sucesoras (Dependen de este nodo)</div>
+                        {items
+                          .filter((h) => h.id !== activeItem.id)
+                          .map((h) => {
+                            const isSelected = (h.dependencies || []).includes(activeItem.id);
+                            return (
+                              <button
+                                key={h.id}
+                                type="button"
+                                className={`filter-item-btn ${isSelected ? 'selected' : ''}`}
+                                onClick={() => {
+                                  onToggleSuccessor?.(activeItem.id, h.id, !isSelected);
+                                }}
+                                style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                              >
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }}>
+                                  <b style={{ color: '#0284c7', marginRight: 5 }}>{h.code}</b> {h.name}
+                                </span>
+                                {isSelected && <Check size={14} className="item-check" style={{ color: '#0284c7', flexShrink: 0 }} />}
+                              </button>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
