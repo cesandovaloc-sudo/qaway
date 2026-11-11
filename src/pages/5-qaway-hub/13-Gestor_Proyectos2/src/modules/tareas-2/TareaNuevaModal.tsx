@@ -13,9 +13,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 import type { Item } from './Tareas2View';
+import type { DeliverableType } from '../../shared/deliverableTypes';
 
 export type TaskNature = 'Tarea EDT' | 'Tarea Operativa';
-export type DeliverableType = 'Videoconferencia' | 'Documento' | 'Asistencia técnica' | 'Acta/Registro';
+export type { DeliverableType };
 
 interface TareaNuevaModalProps {
   isOpen: boolean;

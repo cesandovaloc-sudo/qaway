@@ -37,7 +37,7 @@ import type {
   Status,
   DeliverableItem,
   AttachmentItem,
-  DeliverableType,
+  DeliverableFormat,
 } from './Reportes2View';
 import { getDeviationDays } from './scheduleMetrics';
 import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, type EdtNodeType } from './edtPmbokModel';
@@ -306,7 +306,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
   const [newDelivName, setNewDelivName] = useState('');
-  const [newDelivType, setNewDelivType] = useState<DeliverableType>('document');
+  const [newDelivType, setNewDelivType] = useState<DeliverableFormat>('document');
   const [newDelivUrl, setNewDelivUrl] = useState('');
   const [attachment, setAttachment] = useState('');
 
@@ -1230,11 +1230,11 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                       </div>
                       <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
                         {[
-                          { type: 'document' as DeliverableType, label: 'Doc / PDF', icon: FileText, color: '#2563eb' },
-                          { type: 'spreadsheet' as DeliverableType, label: 'Excel / Sheets', icon: FileSpreadsheet, color: '#16a34a' },
-                          { type: 'presentation' as DeliverableType, label: 'Canva / PPT', icon: Presentation, color: '#ea580c' },
-                          { type: 'link' as DeliverableType, label: 'Enlace Web', icon: ExternalLink, color: '#7c3aed' },
-                          { type: 'physical' as DeliverableType, label: 'Físico', icon: Package, color: '#d97706' },
+                          { type: 'document' as DeliverableFormat, label: 'Doc / PDF', icon: FileText, color: '#2563eb' },
+                          { type: 'spreadsheet' as DeliverableFormat, label: 'Excel / Sheets', icon: FileSpreadsheet, color: '#16a34a' },
+                          { type: 'presentation' as DeliverableFormat, label: 'Canva / PPT', icon: Presentation, color: '#ea580c' },
+                          { type: 'link' as DeliverableFormat, label: 'Enlace Web', icon: ExternalLink, color: '#7c3aed' },
+                          { type: 'physical' as DeliverableFormat, label: 'Físico', icon: Package, color: '#d97706' },
                         ].map((btn) => {
                           const IconComponent = btn.icon;
                           const isSel = newDelivType === btn.type;

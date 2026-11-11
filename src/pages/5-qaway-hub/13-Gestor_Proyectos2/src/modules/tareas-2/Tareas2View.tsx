@@ -30,7 +30,8 @@ import EquipoCargaView from '../equipo/EquipoCargaView';
 import EquipoDrawer from '../equipo/EquipoDrawer';
 import EquipoExpedienteModal from '../equipo/EquipoExpedienteModal';
 import EquipoNuevoModal from '../equipo/EquipoNuevoModal';
-import TareaNuevaModal, { type TaskNature, type DeliverableType } from './TareaNuevaModal';
+import TareaNuevaModal, { type TaskNature } from './TareaNuevaModal';
+import type { DeliverableFormat, DeliverableType } from '../../shared/deliverableTypes';
 import {
   fetchEquipoIntegrantesFromSupabase,
   fetchEquipoSedesFromSupabase,
@@ -190,7 +191,7 @@ const generalTrend = [
   { date: '30 oct.', v: 68 },
 ];
 
-export type DeliverableFormat = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
+export type { DeliverableFormat, DeliverableType };
 
 export interface DeliverableItem {
   id: string;

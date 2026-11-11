@@ -175,12 +175,13 @@ export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | '
 type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
 type EditField = ColKey;
 
-export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
+import type { DeliverableFormat } from '../../shared/deliverableTypes';
+export type { DeliverableFormat };
 
 export interface DeliverableItem {
   id: string;
   name: string;
-  type: DeliverableType;
+  type: DeliverableFormat;
   url?: string | undefined;
   fileName?: string;
 }
@@ -1692,7 +1693,7 @@ export default function CronogramaGanttView({
 
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
   const [newDelivName, setNewDelivName] = useState('');
-  const [newDelivType, setNewDelivType] = useState<DeliverableType>('document');
+  const [newDelivType, setNewDelivType] = useState<DeliverableFormat>('document');
   const [newDelivUrl, setNewDelivUrl] = useState('');
   const [, setForceTasksNonce] = useState(0);
 
