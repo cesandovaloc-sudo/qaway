@@ -5,21 +5,9 @@
 import { supabase } from './supabaseClient';
 import { isLegacyCronogramaItem, sortWbsHierarchy } from '../modules/cronograma-gantt/edtPmbokModel';
 
-export type EdtNodeType =
-  | 'FASE'
-  | 'COMPONENTE'
-  | 'SUBCOMPONENTE'
-  | 'PAQUETE_TRABAJO'
-  | 'ENTREGABLE'
-  | 'HITO';
-
-export interface Fase {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  order: number;
-}
+/** Re-export del catálogo único de tipos de nodo EDT (no redefinir aquí). */
+export type { EdtNodeType, Fase } from '../modules/cronograma-core/edtPmbokModel';
+import type { EdtNodeType } from '../modules/cronograma-core/edtPmbokModel';
 
 export interface GanttItemData {
   id: string;

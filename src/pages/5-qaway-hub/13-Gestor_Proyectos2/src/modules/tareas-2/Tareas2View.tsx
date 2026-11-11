@@ -23,7 +23,6 @@ import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
-import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
 import EquipoOrganigramaView from '../equipo/EquipoOrganigramaView';
 import EquipoSedesView from '../equipo/EquipoSedesView';
 import EquipoCargaView from '../equipo/EquipoCargaView';
@@ -56,6 +55,7 @@ import {
   compareWbsCodes,
   isLegacyCronogramaItem,
 } from './edtPmbokModel';
+import { computeWbsHierarchy, getLinkedTasksSummary } from './wbsHierarchy';
 import {
   MACROREGIONES,
   REGIONES_PROYECTO,
@@ -169,8 +169,6 @@ import {
   Users,
   Network,
   Zap,
-  ZoomIn,
-  ZoomOut,
   Sigma,
   Calendar,
   Video,
@@ -272,126 +270,9 @@ export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   'comp-11': ['comp-5'],  // Alerta temprana depende de inicio de Distribución
 };
 
-/**
- * Obtiene el resumen de tareas operativas vinculadas a un elemento de la WBS
- * desde el almacén central 'qaway-tasks-v1' del módulo /tareas.
- */
-export function getLinkedTasksSummary(
-  item: Item,
-  rawTasks?: any[]
-): { total: number; completed: number; progress: number } | null {
-  if (!rawTasks || !Array.isArray(rawTasks) || rawTasks.length === 0) return null;
-  const itemLabel = `${item.code ? (item.code.endsWith('.') ? item.code : `${item.code} `) : ''}${item.name}`.trim().toLowerCase();
-  const itemName = (item.name || '').trim().toLowerCase();
-  const itemId = (item.id || '').trim().toLowerCase();
-  const itemCode = (item.code || '').trim().toLowerCase();
 
-  const linked = rawTasks.filter((t) => {
-    if (!t || !t.milestone || t.milestone === '—' || t.milestone === '-') return false;
-    const m = String(t.milestone).trim().toLowerCase();
-    if (m === itemLabel || m === itemName || m === itemId) return true;
-    if (itemCode && m.startsWith(itemCode)) return true;
-    if (m.includes(itemName) || itemName.includes(m)) return true;
-    if (t.wbsId && String(t.wbsId).toLowerCase() === itemId) return true;
-    if (t.componentId && String(t.componentId).toLowerCase() === itemId) return true;
-    return false;
-  });
-
-  if (linked.length === 0) return null;
-
-  const completed = linked.filter((t) =>
-    t.status === 'Cumple' || t.status === 'Completado' || t.status === 'Completada'
-  ).length;
-
-  const progress = Math.min(100, Math.max(0, Math.round((completed / linked.length) * 100)));
-  return { total: linked.length, completed, progress };
-}
-
-/**
- * Motor central de Gobernanza WBS / EDT conforme al estándar PMI/PMBOK:
- * - Clasifica wbsNodeType (COMPONENTE, SUBCOMPONENTE, PAQUETE_TRABAJO, HITO).
- * - En hojas: sincroniza avance con tareas operativas si están vinculadas.
- * - En contenedores: ejecuta Rollup dinámico del 100% (avance ponderado/promedio de hijos, min(start) y max(end)).
- */
-export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] {
-  if (!Array.isArray(rawItems) || rawItems.length === 0) return [];
-
-  const items = rawItems.map((it) => ({ ...it }));
-  const parentToChildren = new Map<string, Item[]>();
-  items.forEach((it) => {
-    if (it.parentId) {
-      if (!parentToChildren.has(it.parentId)) parentToChildren.set(it.parentId, []);
-      parentToChildren.get(it.parentId)!.push(it);
-    }
-  });
-
-  // Clasificación de tipología de nodo y avance en nodos hoja
-  // Si un nodo de Nivel 1 no tiene hijos, actúa como Entregable Directo (PAQUETE_TRABAJO) sin forzar rollup
-  items.forEach((it) => {
-    const hasChildren = parentToChildren.has(it.id) && parentToChildren.get(it.id)!.length > 0;
-    if (!it.parentId) {
-      it.wbsNodeType = hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO';
-    } else if (hasChildren) {
-      it.wbsNodeType = 'SUBCOMPONENTE';
-    } else {
-      const isMilestone = it.start === it.end && it.kind === 'hito';
-      it.wbsNodeType = isMilestone ? 'HITO' : 'PAQUETE_TRABAJO';
-    }
-
-    if (!hasChildren) {
-      const summary = getLinkedTasksSummary(it, rawTasks);
-      if (summary) {
-        it.progress = summary.progress;
-      }
-    }
-  });
-
-  // Cálculo de profundidad para procesamiento bottom-up estricto
-  const depthMap = new Map<string, number>();
-  const getDepth = (id: string): number => {
-    if (depthMap.has(id)) return depthMap.get(id)!;
-    const item = items.find((x) => x.id === id);
-    if (!item || !item.parentId) {
-      depthMap.set(id, 0);
-      return 0;
-    }
-    const d = 1 + getDepth(item.parentId);
-    depthMap.set(id, d);
-    return d;
-  };
-  items.forEach((it) => getDepth(it.id));
-
-  // Ordenar contenedores de mayor profundidad a menor (hojas intermedias primero, luego raíces)
-  const containers = items
-    .filter((it) => parentToChildren.has(it.id) && parentToChildren.get(it.id)!.length > 0)
-    .sort((a, b) => (depthMap.get(b.id) || 0) - (depthMap.get(a.id) || 0));
-
-  // Rollup de avance, fechas y estado en contenedores
-  containers.forEach((parent) => {
-    const children = items.filter((x) => x.parentId === parent.id);
-    if (children.length > 0) {
-      const totalProgress = children.reduce((sum, c) => sum + (typeof c.progress === 'number' ? c.progress : 0), 0);
-      parent.progress = Math.min(100, Math.max(0, Math.round(totalProgress / children.length)));
-
-      const validStarts = children.map((c) => c.start).filter((s): s is string => !!s && /^\d{4}-\d{2}-\d{2}/.test(s)).sort();
-      const validEnds = children.map((c) => c.end).filter((e): e is string => !!e && /^\d{4}-\d{2}-\d{2}/.test(e)).sort();
-      if (validStarts.length > 0) parent.start = validStarts[0] ?? parent.start;
-      if (validEnds.length > 0) parent.end = validEnds[validEnds.length - 1] ?? parent.end;
-
-      if (parent.progress === 100) {
-        parent.status = 'Completado';
-      } else if (children.some((c) => c.status === 'Con retraso')) {
-        parent.status = 'Con retraso';
-      } else if (parent.progress > 0) {
-        parent.status = 'En proceso';
-      } else {
-        parent.status = 'Pendiente';
-      }
-    }
-  });
-
-  return items;
-}
+/* Motor WBS centralizado en cronograma-core: sin copia local. */
+export { computeWbsHierarchy, getLinkedTasksSummary };
 
 const resolveDefaultGestor = (code: string, name: string): string => {
   const c = code || '';
@@ -2748,7 +2629,7 @@ export default function Tareas2View({
     const components = items.filter((x) => !x.parentId && (x.kind === 'hito' || x.edtType === 'COMPONENTE'));
     return components.map((comp) => {
       const products = items.filter(
-        (p) => p.parentId === comp.id && (p.edtType === 'SUBCOMPONENTE' || p.edtType === 'PAQUETE_TRABAJO' || (p.code && p.code.includes('.')))
+        (p) => p.parentId === comp.id && (p.edtType === 'PRODUCTO' || p.edtType === 'PAQUETE_TRABAJO' || (p.code && p.code.includes('.')))
       );
       return { comp, products };
     });
@@ -2799,8 +2680,6 @@ export default function Tareas2View({
   const [wbsRoleFilter, setWbsRoleFilter] = useState<'todos' | 'componentes' | 'productos' | 'paquetes'>('todos');
   const [wbsLevelFilter, setWbsLevelFilter] = useState<'todos' | 'componentes' | 'intermedios' | 'paquetes'>('todos');
   const [zoom, setZoom] = useState('Mes');
-  const [organigramaZoom, setOrganigramaZoom] = useState<number>(100);
-  const [organigramaFitTrigger, setOrganigramaFitTrigger] = useState<number>(0);
   const [currentTodayIso, setCurrentTodayIso] = useState<string>(getSystemTodayIso);
   const [hoveredTask, setHoveredTask] = useState<{
     item: Item;
@@ -4826,7 +4705,7 @@ export default function Tareas2View({
     const headers = [
       'Código',
       'Nombre de Componente o Subcomponente',
-      'Tipo (COMPONENTE/SUBCOMPONENTE)',
+      'Tipo (COMPONENTE/PRODUCTO)',
       'Componente Padre (Código)',
       'Fecha Inicio (YYYY-MM-DD)',
       'Fecha Fin (YYYY-MM-DD)',
@@ -5258,7 +5137,7 @@ export default function Tareas2View({
     if (colKey === 'name') {
       const hasChildren = items.some((c) => c.parentId === x.id);
       const nodeType: 'COMPONENTE' | 'PRODUCTO' | 'PAQUETE_TRABAJO' | 'HITO' =
-        x.wbsNodeType === 'SUBCOMPONENTE'
+        x.wbsNodeType === 'PRODUCTO'
           ? 'PRODUCTO'
           : (x.wbsNodeType as any) ||
             (!x.parentId ? (hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO') : hasChildren ? 'PRODUCTO' : (x.kind === 'hito' || x.start === x.end ? 'HITO' : 'PAQUETE_TRABAJO'));
@@ -5607,7 +5486,7 @@ export default function Tareas2View({
 
     if (colKey === 'progress') {
       const statusTone = x.progress === 100 ? 'green' : x.status === 'Con retraso' ? 'red' : x.status === 'Pendiente' ? 'gray' : 'blue';
-      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === x.id));
+      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'PRODUCTO' || items.some((c) => c.parentId === x.id));
       const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
       const format = percentGraphFormats['progress'] || 'bar';
 
@@ -6150,7 +6029,7 @@ export default function Tareas2View({
     }
 
     if (colKey === 'reportType') {
-      const isHeaderLevel = !x.parentId || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || x.kind === 'hito';
+      const isHeaderLevel = !x.parentId || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'PRODUCTO' || x.kind === 'hito';
       return (
         <div
           key="reportType"
@@ -7660,50 +7539,6 @@ export default function Tareas2View({
                       {x === 'Semana' ? 'Esta Semana' : x === 'Mes' ? 'Este Mes' : x}
                     </button>
                   ))}
-                </div>
-              </>
-            ) : viewMode === 'organigrama' && (perspective === 'maestro' || perspective === 'territorial') ? (
-              /* En Modo Organigrama EDT: Controles Oficiales de Zoom y Ajuste */
-              <>
-                <button
-                  type="button"
-                  className="today-pill"
-                  onClick={() => setOrganigramaFitTrigger((c) => c + 1)}
-                  title="Ajustar vista del organigrama EDT al ancho de pantalla"
-                >
-                  Ajustar
-                </button>
-
-                <div className="zoom" title="Escala de zoom del organigrama EDT">
-                  <button
-                    type="button"
-                    className="zoom-nav-arrow"
-                    onClick={() => setOrganigramaZoom((z) => Math.max(40, z - 10))}
-                    title="Reducir zoom EDT"
-                    aria-label="Reducir zoom"
-                  >
-                    <ZoomOut size={14} />
-                  </button>
-                  {([50, 75, 100, 125] as const).map((pct) => (
-                    <button
-                      type="button"
-                      key={pct}
-                      className={organigramaZoom === pct ? 'active' : ''}
-                      onClick={() => setOrganigramaZoom(pct)}
-                      title={`Zoom ${pct}%`}
-                    >
-                      {pct}%
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="zoom-nav-arrow"
-                    onClick={() => setOrganigramaZoom((z) => Math.min(150, z + 10))}
-                    title="Aumentar zoom EDT"
-                    aria-label="Aumentar zoom"
-                  >
-                    <ZoomIn size={14} />
-                  </button>
                 </div>
               </>
             ) : (
@@ -9338,124 +9173,6 @@ export default function Tareas2View({
               onSelectItem={openEditorForItem}
               onAddItem={(kind, pId) => add(kind, pId, true)}
               formatDatePE={formatDatePE}
-            />
-          )}
-
-          {/* Presentación 6: Vista Organigrama WBS por Niveles (EDT Estructurada) */}
-          {viewMode === 'organigrama' && (
-            <CronogramaOrganigramaView
-              items={shown}
-              allItems={items}
-              selectedId={selectedId}
-              projectName={activeProject?.name || 'Distribución de Materiales DOT 2027'}
-              zoomLevel={organigramaZoom}
-              onZoomChange={setOrganigramaZoom}
-              fitViewTrigger={organigramaFitTrigger}
-              onSelectItem={openEditorForItem}
-              onAddItem={(kind, pId) => add(kind, pId, true)}
-              formatDatePE={formatDatePE}
-              onMoveNode={(draggedId, targetId, mode) => {
-                commitChange((prev) => {
-                  const dragged = prev.find((x) => x.id === draggedId);
-                  const target = prev.find((x) => x.id === targetId);
-                  if (!dragged || !target || dragged.id === target.id) return prev;
-
-                  // Colectar subárbol completo del elemento arrastrado (en caso sea Componente o Agrupador)
-                  const subtreeIds = new Set<string>([dragged.id]);
-                  const collectDescendants = (pId: string) => {
-                    prev.forEach((it) => {
-                      if (it.parentId === pId && !subtreeIds.has(it.id)) {
-                        subtreeIds.add(it.id);
-                        collectDescendants(it.id);
-                      }
-                    });
-                  };
-                  collectDescendants(dragged.id);
-
-                  // Evitar ciclos: el destino jamás puede estar dentro del subárbol arrastrado
-                  if (subtreeIds.has(target.id)) return prev;
-
-                  const newParentId = mode === 'reparent' ? target.id : target.parentId;
-                  const updatedDragged: Item = {
-                    ...dragged,
-                    parentId: newParentId,
-                    kind: newParentId ? 'subproceso' : 'hito',
-                  };
-
-                  const draggedBlock = prev
-                    .filter((x) => subtreeIds.has(x.id))
-                    .map((x) => (x.id === dragged.id ? updatedDragged : x));
-
-                  const remaining = prev.filter((x) => !subtreeIds.has(x.id));
-
-                  if (mode === 'reparent') {
-                    // Insertar al final de los hijos actuales del contenedor destino
-                    const targetSubtreeIds = new Set<string>([target.id]);
-                    const collectTargetDesc = (pId: string) => {
-                      remaining.forEach((it) => {
-                        if (it.parentId === pId && !targetSubtreeIds.has(it.id)) {
-                          targetSubtreeIds.add(it.id);
-                          collectTargetDesc(it.id);
-                        }
-                      });
-                    };
-                    collectTargetDesc(target.id);
-
-                    let insertIdx = remaining.findIndex((x) => x.id === target.id);
-                    remaining.forEach((it, idx) => {
-                      if (targetSubtreeIds.has(it.id)) insertIdx = idx;
-                    });
-
-                    const nextList = [...remaining];
-                    nextList.splice(insertIdx + 1, 0, ...draggedBlock);
-                    return nextList;
-                  } else {
-                    // Reordenamiento en el mismo nivel junto al elemento objetivo
-                    const origDraggedIdx = prev.findIndex((x) => x.id === dragged.id);
-                    const origTargetIdx = prev.findIndex((x) => x.id === target.id);
-                    const targetIdxInRemaining = remaining.findIndex((x) => x.id === target.id);
-                    if (targetIdxInRemaining === -1) return [...remaining, ...draggedBlock];
-
-                    // Si venía de antes y se suelta sobre un hermano posterior, insertar después del subárbol del hermano
-                    if (origDraggedIdx < origTargetIdx) {
-                      const targetSubtreeIds = new Set<string>([target.id]);
-                      const collectTargetDesc = (pId: string) => {
-                        remaining.forEach((it) => {
-                          if (it.parentId === pId && !targetSubtreeIds.has(it.id)) {
-                            targetSubtreeIds.add(it.id);
-                            collectTargetDesc(it.id);
-                          }
-                        });
-                      };
-                      collectTargetDesc(target.id);
-                      let afterIdx = targetIdxInRemaining;
-                      remaining.forEach((it, idx) => {
-                        if (targetSubtreeIds.has(it.id)) afterIdx = idx;
-                      });
-                      const nextList = [...remaining];
-                      nextList.splice(afterIdx + 1, 0, ...draggedBlock);
-                      return nextList;
-                    } else {
-                      const nextList = [...remaining];
-                      nextList.splice(targetIdxInRemaining, 0, ...draggedBlock);
-                      return nextList;
-                    }
-                  }
-                });
-                const draggedItem = items.find((x) => x.id === draggedId);
-                const targetItem = items.find((x) => x.id === targetId);
-                if (draggedItem && targetItem) {
-                  notify(
-                    mode === 'reparent'
-                      ? `"${draggedItem.code} ${draggedItem.name}" movido dentro de "${targetItem.code} ${targetItem.name}"`
-                      : `"${draggedItem.code} ${draggedItem.name}" reordenado junto a "${targetItem.code} ${targetItem.name}"`
-                  );
-                }
-              }}
-              onAutoSort={() => {
-                commitChange((prev) => sortWbsHierarchy(prev));
-                notify('Diagrama EDT autoordenado según jerarquía y numeración WBS');
-              }}
             />
           )}
 

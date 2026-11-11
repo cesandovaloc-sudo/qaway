@@ -1,22 +1,33 @@
 /**
- * QAWAY LAB · Modelo Oficial de Jerarquía EDT / WBS según PMI – PMBOK
- * Define las entidades metodológicas:
- * - FASE (Agrupador macro opcional del ciclo de vida del proyecto)
- * - COMPONENTE (Nivel 1 de la EDT: grandes bloques de alcance, reemplaza al antiguo "Hito agrupador")
- * - SUBCOMPONENTE (Nivel 2..n recursivo: subdivisión intermedia de alcance)
- * - PAQUETE_TRABAJO (Unidad de menor nivel de la EDT con fechas Inicio/Fin y Entidad responsable)
- * - ENTREGABLE (Producto, resultado o evidencia documental sustentatoria verificable)
- * - HITO (Evento o punto de control de duración cero; nunca es contenedor jerárquico)
+ * QAWAY LAB · Modelo Oficial de Clasificación EDT / WBS (PMI – PMBOK, BID)
+ *
+ * FUENTE ÚNICA de la taxonomía de nodos del cronograma. Ningún módulo debe
+ * redefinir esta lista, sus etiquetas, sus iconos ni sus reglas: todo se importa de aquí.
+ *
+ * Tipos de nodo vigentes:
+ * - COMPONENTE       Nivel 1 del alcance (raíz con hijos).
+ * - PRODUCTO         Agrupador intermedio con hijos (regla BID/PMBOK).
+ * - ENTREGABLE       Agrupador de paquetes declarado explícitamente (no derivable del árbol).
+ * - PAQUETE_TRABAJO  Hoja terminal, a cualquier profundidad.
+ * - HITO             Evento de duración cero; nunca es contenedor.
+ *
+ * Tipos retirados (solo se aceptan como valor heredado en lectura, ver LEGACY_EDT_TYPES):
+ * - FASE          → es una dimensión de agrupación (PROJECT_PHASES_CATALOG), no un nodo de la EDT.
+ * - SUBCOMPONENTE → reemplazado por PRODUCTO.
  */
 
-export type EdtNodeType =
-  | 'FASE'
-  | 'COMPONENTE'
-  | 'PRODUCTO'
-  | 'SUBCOMPONENTE'
-  | 'PAQUETE_TRABAJO'
-  | 'ENTREGABLE'
-  | 'HITO';
+/** Tipos de nodo EDT vigentes (única enumeración válida en todo el producto). */
+export const EDT_NODE_TYPES = ['COMPONENTE', 'PRODUCTO', 'ENTREGABLE', 'PAQUETE_TRABAJO', 'HITO'] as const;
+
+export type EdtNodeType = (typeof EDT_NODE_TYPES)[number];
+
+/**
+ * Valores retirados que todavía pueden aparecer en registros heredados
+ * (localStorage, semillas antiguas o filas creadas con la taxonomía previa).
+ */
+export const LEGACY_EDT_TYPES = ['FASE', 'SUBCOMPONENTE', 'SUBPROCESO'] as const;
+
+export type LegacyEdtNodeType = (typeof LEGACY_EDT_TYPES)[number];
 
 export interface Fase {
   id: string;
@@ -69,26 +80,70 @@ export const PROJECT_PHASES_CATALOG: Fase[] = [
   },
 ];
 
-/** Diccionario oficial de etiquetas visibles para cada tipo de nodo de la EDT */
+/**
+ * Normaliza un valor heredado o desconocido al tipo vigente equivalente.
+ * Es la ÚNICA frontera de compatibilidad: el resto del código solo ve EdtNodeType.
+ */
+export function normalizeEdtType(value?: string | null): EdtNodeType | undefined {
+  if (!value) return undefined;
+  const raw = String(value).trim().toUpperCase();
+  if (raw === 'SUBCOMPONENTE' || raw === 'SUBPROCESO') return 'PRODUCTO';
+  if (raw === 'FASE') return 'COMPONENTE';
+  return (EDT_NODE_TYPES as readonly string[]).includes(raw) ? (raw as EdtNodeType) : undefined;
+}
+
+/** Diccionario oficial de etiquetas visibles para cada tipo de nodo de la EDT. */
 export const EDT_NODE_LABELS: Record<EdtNodeType, string> = {
-  FASE: 'Fase',
   COMPONENTE: 'Componente',
   PRODUCTO: 'Producto',
-  SUBCOMPONENTE: 'Producto',
-  PAQUETE_TRABAJO: 'Paquete de Trabajo',
   ENTREGABLE: 'Entregable',
+  PAQUETE_TRABAJO: 'Paquete de Trabajo',
   HITO: 'Hito',
 };
 
+/** Orden jerárquico oficial (1 = nivel más alto). */
+export const EDT_NODE_ORDER: Record<EdtNodeType, number> = {
+  COMPONENTE: 1,
+  PRODUCTO: 2,
+  ENTREGABLE: 3,
+  PAQUETE_TRABAJO: 4,
+  HITO: 4,
+};
+
+/** Iconos oficiales por tipo (nombre de icono Lucide; el core no depende de React). */
+export const EDT_NODE_ICONS: Record<EdtNodeType, string> = {
+  COMPONENTE: 'Layers',
+  PRODUCTO: 'Package',
+  ENTREGABLE: 'FileCheck',
+  PAQUETE_TRABAJO: 'ListChecks',
+  HITO: 'Flag',
+};
+
+/** Tipos que agrupan otros nodos (nunca son hojas). */
+export function isContainerEdtType(type: EdtNodeType): boolean {
+  return type === 'COMPONENTE' || type === 'PRODUCTO' || type === 'ENTREGABLE';
+}
+
+/** Único valor de tipo que el usuario puede declarar a mano (los demás se derivan). */
+export const DECLARABLE_EDT_TYPES: EdtNodeType[] = ['ENTREGABLE'];
+
 /**
- * Determina la clasificación metodológica PMI/PMBOK de un registro del cronograma
- * preservando compatibilidad total con los registros existentes (`kind: 'hito' | 'subproceso'`).
+ * Determina la clasificación metodológica PMI/PMBOK de un registro del cronograma.
+ *
+ * REGLA ÚNICA (no duplicar en ninguna vista): *   sin padre (con o sin hijos)                  → COMPONENTE
+ *   hoja + duración cero (o declarada HITO)      → HITO
+ *   con hijos (declarada ENTREGABLE)             → ENTREGABLE
+ *   con hijos                                    → PRODUCTO
+ *   hoja                                          → PAQUETE_TRABAJO
+ *
+ * El tipo se DERIVA del árbol: `edtType` almacenado solo se consulta para HITO y
+ * ENTREGABLE, y siempre pasa por `normalizeEdtType` para absorber valores heredados.
  */
 export function resolveEdtNodeType(
   item: {
     id: string;
     kind?: 'hito' | 'subproceso';
-    edtType?: EdtNodeType;
+    edtType?: EdtNodeType | LegacyEdtNodeType | string | undefined;
     parentId?: string | undefined;
     start?: string;
     end?: string;
@@ -96,27 +151,24 @@ export function resolveEdtNodeType(
   allItems: Array<{ id: string; parentId?: string | undefined }> = []
 ): EdtNodeType {
   const hasChildren = allItems.length > 0 && allItems.some((c) => c.parentId === item.id);
+  const declared = normalizeEdtType(item.edtType);
 
-  // Un Hito real tiene duración cero o tipo HITO explícito sin hijos
-  if (!hasChildren && (item.edtType === 'HITO' || (item.start && item.start === item.end))) {
-    return 'HITO';
-  }
-
-  // Nivel 1 (sin parentId): Todo agrupador raíz del alcance es un COMPONENTE
+  // Nivel 1 (sin parentId): toda raíz del alcance es un COMPONENTE, incluso sin hijos.
   if (!item.parentId) {
     return 'COMPONENTE';
   }
 
-  // Nivel intermedio que posee hijos anidados: PRODUCTO (regla BID/PMBOK)
+  // Un Hito nunca es contenedor: con hijos pasa a ser agrupador (PRODUCTO/ENTREGABLE).
+  if (!hasChildren && (declared === 'HITO' || (!!item.start && item.start === item.end))) {
+    return 'HITO';
+  }
+
+  // Nivel intermedio con hijos: ENTREGABLE si fue declarado, si no PRODUCTO (regla BID/PMBOK).
   if (hasChildren) {
-    return 'PRODUCTO';
+    return declared === 'ENTREGABLE' ? 'ENTREGABLE' : 'PRODUCTO';
   }
 
-  if (item.edtType === 'ENTREGABLE') {
-    return 'ENTREGABLE';
-  }
-
-  // Nodo hoja terminal sin hijos: PAQUETE DE TRABAJO (regla BID/PMBOK)
+  // Hoja terminal sin hijos: PAQUETE DE TRABAJO (regla BID/PMBOK).
   return 'PAQUETE_TRABAJO';
 }
 
@@ -129,7 +181,7 @@ export function getEdtNodeDisplayLabel(
   item: {
     id: string;
     kind?: 'hito' | 'subproceso';
-    edtType?: EdtNodeType;
+    edtType?: EdtNodeType | LegacyEdtNodeType | string | undefined;
     parentId?: string | undefined;
     start?: string;
     end?: string;
@@ -249,7 +301,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     id: 'pt-1.6',
     code: '1.6',
     name: 'Elaboración, revisión, validación y actualización del Cuadro de Distribución Local (CDL) en el MC SIGA',
-    edtType: 'SUBCOMPONENTE',
+    edtType: 'PRODUCTO',
     kind: 'subproceso',
     faseId: 'FASE-PLANIFICACION',
     parentId: 'comp-1',
@@ -604,7 +656,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     id: 'sub-4.1',
     code: '4.1',
     name: 'Actuaciones preparatorias según tipo de procedimiento de contratación',
-    edtType: 'SUBCOMPONENTE',
+    edtType: 'PRODUCTO',
     kind: 'subproceso',
     faseId: 'FASE-PLANIFICACION',
     parentId: 'comp-4',
@@ -702,7 +754,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     id: 'sub-5.1',
     code: '5.1',
     name: 'Solicitud y remisión del padrón de personal de apoyo en II.EE.',
-    edtType: 'SUBCOMPONENTE',
+    edtType: 'PRODUCTO',
     kind: 'subproceso',
     faseId: 'FASE-PLANIFICACION',
     parentId: 'comp-5',
@@ -971,7 +1023,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     id: 'sub-9.1',
     code: '9.1',
     name: 'Planificación e implementación de capacitación sobre Módulo Materiales SIAGIE',
-    edtType: 'SUBCOMPONENTE',
+    edtType: 'PRODUCTO',
     kind: 'subproceso',
     faseId: 'FASE-EJECUCION',
     parentId: 'comp-9',
@@ -1012,7 +1064,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     id: 'sub-9.2',
     code: '9.2',
     name: 'Registro de recepción de ME en SIAGIE (BIAE y Post BIAE)',
-    edtType: 'SUBCOMPONENTE',
+    edtType: 'PRODUCTO',
     kind: 'subproceso',
     faseId: 'FASE-EJECUCION',
     parentId: 'comp-9',
@@ -1067,7 +1119,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     id: 'sub-9.4',
     code: '9.4',
     name: 'Registro de asignación nominal a estudiantes en SIAGIE (BIAE y Post BIAE)',
-    edtType: 'SUBCOMPONENTE',
+    edtType: 'PRODUCTO',
     kind: 'subproceso',
     faseId: 'FASE-EJECUCION',
     parentId: 'comp-9',

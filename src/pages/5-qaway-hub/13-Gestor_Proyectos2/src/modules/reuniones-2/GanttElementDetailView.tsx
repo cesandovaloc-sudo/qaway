@@ -29,10 +29,11 @@ type StatusOption = Status;
 
 const STATUS_OPTIONS: StatusOption[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
-/** Términos de configuración adicional que sí existen en el modelo de datos */
+/** Etiquetas de tipo EDT para vista de detalle (taxonomía vigente). */
 const KIND_LABELS: Record<string, string> = {
   COMPONENTE: 'Componente',
-  SUBCOMPONENTE: 'Subcomponente',
+  PRODUCTO: 'Producto',
+  ENTREGABLE: 'Entregable',
   PAQUETE_TRABAJO: 'Paquete de trabajo',
   HITO: 'Hito',
 };
@@ -175,7 +176,7 @@ export default function GanttElementDetailView() {
     </main>;
   }
 
-  const wbsType = item.wbsNodeType || (childEntries.length > 0 ? (item.parentId ? 'SUBCOMPONENTE' : 'COMPONENTE') : 'PAQUETE_TRABAJO');
+  const wbsType = item.wbsNodeType || (childEntries.length > 0 ? (item.parentId ? 'PRODUCTO' : 'COMPONENTE') : 'PAQUETE_TRABAJO');
   const kindLabel = KIND_LABELS[wbsType] || 'Componente';
   const duration = durationDays(item.start, item.end);
 

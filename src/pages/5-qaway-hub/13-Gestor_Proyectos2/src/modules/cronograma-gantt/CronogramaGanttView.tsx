@@ -51,6 +51,7 @@ import {
   compareWbsCodes,
   isLegacyCronogramaItem,
 } from './edtPmbokModel';
+import { computeWbsHierarchy, getLinkedTasksSummary } from './wbsHierarchy';
 import {
   MACROREGIONES,
   REGIONES_PROYECTO,
@@ -170,76 +171,19 @@ import {
   X
 } from 'lucide-react';
 
-export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
-type Kind = 'hito' | 'subproceso';
-export type WbsNodeType = 'COMPONENTE' | 'PRODUCTO' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
-type ColKey = 'name' | 'code' | 'kind' | 'deliverable' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'successors' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
-type EditField = ColKey;
-
+// Tipos canonicos: cronograma-core/types (sin duplicados locales).
+import type {
+  AttachmentItem,
+  ColKey,
+  DeliverableItem,
+  EditField,
+  Item,
+  Kind,
+  Status,
+  WbsNodeType,
+} from '../cronograma-core/types';
 import type { DeliverableFormat } from '../../shared/deliverableTypes';
-export type { DeliverableFormat };
-
-export interface DeliverableItem {
-  id: string;
-  name: string;
-  type: DeliverableFormat;
-  url?: string | undefined;
-  fileName?: string;
-}
-
-export interface AttachmentItem {
-  id: string;
-  name: string;
-  date: string;
-  url?: string;
-  type?: string;
-}
-
-export interface Item {
-  id: string;
-  code: string;
-  name: string;
-  kind: Kind;
-  /** Clasificación metodológica formal PMI/PMBOK de la EDT/WBS */
-  edtType?: EdtNodeType;
-  wbsNodeType?: WbsNodeType;
-  /** Contenedor macro de ciclo de vida temporal (opcional / nullable) */
-  faseId?: string | null | undefined;
-  parentId?: string | undefined;
-  children?: Item[];
-  start: string;
-  end: string;
-  progress: number;
-  status: Status;
-  expanded?: boolean;
-  description?: string;
-  deliverable?: string;
-  deliverables?: DeliverableItem[];
-  attachments?: AttachmentItem[];
-  reportType?: string;
-  region?: string;
-  distrito?: string | undefined;
-  sede?: string | undefined;
-  gestor?: string;
-  gestores?: string[];
-  tasks?: number;
-  done?: number;
-  unit?: string;
-  phase?: string | null;
-  /** Línea base aprobada (fechas originales contra las que se mide la desviación). */
-  baselineStart?: string;
-  baselineEnd?: string | undefined;
-  /** Fechas reales de ejecución (se registran al iniciar/completar; editables). */
-  actualStart?: string | undefined;
-  actualEnd?: string | undefined;
-  /** Tareas o hitos predecesores en la cadena de prelación / ruta crítica. */
-  dependencies?: string[];
-  /** Entidad responsable oficial del componente (DRE / UGEL / región). */
-  entidadResponsable?: string | undefined;
-  /** Estado de Nudo Critico o Solicitud de Prorroga desde sede territorial.
-   *  Solo se popula en perspective="territorial"; ignorado en vista central. */
-  blockerInfo?: import('../../types').SedeBlockerRequest;
-}
+export type { AttachmentItem, DeliverableItem, DeliverableFormat, Item, Kind, Status, WbsNodeType };
 
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
@@ -258,129 +202,9 @@ export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   'comp-11': ['comp-5'],  // Alerta temprana depende de inicio de Distribución
 };
 
-/**
- * Obtiene el resumen de tareas operativas vinculadas a un elemento de la WBS
- * desde el almacén central 'qaway-tasks-v1' del módulo /tareas.
- */
-export function getLinkedTasksSummary(
-  item: Item,
-  rawTasks?: any[]
-): { total: number; completed: number; progress: number } | null {
-  if (!rawTasks || !Array.isArray(rawTasks) || rawTasks.length === 0) return null;
-  const itemLabel = `${item.code ? (item.code.endsWith('.') ? item.code : `${item.code} `) : ''}${item.name}`.trim().toLowerCase();
-  const itemName = (item.name || '').trim().toLowerCase();
-  const itemId = (item.id || '').trim().toLowerCase();
-  const itemCode = (item.code || '').trim().toLowerCase();
 
-  const linked = rawTasks.filter((t) => {
-    if (!t || !t.milestone || t.milestone === '—' || t.milestone === '-') return false;
-    const m = String(t.milestone).trim().toLowerCase();
-    if (m === itemLabel || m === itemName || m === itemId) return true;
-    if (itemCode && m.startsWith(itemCode)) return true;
-    if (m.includes(itemName) || itemName.includes(m)) return true;
-    if (t.wbsId && String(t.wbsId).toLowerCase() === itemId) return true;
-    if (t.componentId && String(t.componentId).toLowerCase() === itemId) return true;
-    return false;
-  });
-
-  if (linked.length === 0) return null;
-
-  const completed = linked.filter((t) =>
-    t.status === 'Cumple' || t.status === 'Completado' || t.status === 'Completada'
-  ).length;
-
-  const progress = Math.min(100, Math.max(0, Math.round((completed / linked.length) * 100)));
-  return { total: linked.length, completed, progress };
-}
-
-/**
- * Motor central de Gobernanza WBS / EDT conforme al estándar PMI/PMBOK:
- * - Clasifica wbsNodeType (COMPONENTE, SUBCOMPONENTE, PAQUETE_TRABAJO, HITO).
- * - En hojas: sincroniza avance con tareas operativas si están vinculadas.
- * - En contenedores: ejecuta Rollup dinámico del 100% (avance ponderado/promedio de hijos, min(start) y max(end)).
- */
-export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] {
-  if (!Array.isArray(rawItems) || rawItems.length === 0) return [];
-
-  const items = rawItems.map((it) => ({ ...it }));
-  const parentToChildren = new Map<string, Item[]>();
-  items.forEach((it) => {
-    if (it.parentId) {
-      if (!parentToChildren.has(it.parentId)) parentToChildren.set(it.parentId, []);
-      parentToChildren.get(it.parentId)!.push(it);
-    }
-  });
-
-  // Clasificación de tipología de nodo y avance en nodos hoja
-  // Si un nodo de Nivel 1 no tiene hijos, actúa como Entregable Directo (PAQUETE_TRABAJO) sin forzar rollup
-  items.forEach((it) => {
-    const hasChildren = parentToChildren.has(it.id) && parentToChildren.get(it.id)!.length > 0;
-    if (!it.parentId) {
-      it.wbsNodeType = hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO';
-    } else if (hasChildren) {
-      it.wbsNodeType = 'PRODUCTO';
-    } else {
-      const isMilestone = it.start === it.end && it.kind === 'hito';
-      it.wbsNodeType = isMilestone ? 'HITO' : 'PAQUETE_TRABAJO';
-    }
-
-    if (!hasChildren) {
-      const summary = getLinkedTasksSummary(it, rawTasks);
-      if (summary) {
-        it.progress = summary.progress;
-      }
-    }
-  });
-
-  // Cálculo de profundidad para procesamiento bottom-up estricto
-  const itemsById = new Map<string, Item>();
-  items.forEach((it) => itemsById.set(it.id, it));
-
-  const depthMap = new Map<string, number>();
-  const getDepth = (id: string): number => {
-    if (depthMap.has(id)) return depthMap.get(id)!;
-    const item = itemsById.get(id);
-    if (!item || !item.parentId) {
-      depthMap.set(id, 0);
-      return 0;
-    }
-    const d = 1 + getDepth(item.parentId);
-    depthMap.set(id, d);
-    return d;
-  };
-  items.forEach((it) => getDepth(it.id));
-
-  // Ordenar contenedores de mayor profundidad a menor (hojas intermedias primero, luego raíces)
-  const containers = items
-    .filter((it) => parentToChildren.has(it.id) && parentToChildren.get(it.id)!.length > 0)
-    .sort((a, b) => (depthMap.get(b.id) || 0) - (depthMap.get(a.id) || 0));
-
-  // Rollup de avance, fechas y estado en contenedores
-  containers.forEach((parent) => {
-    const children = parentToChildren.get(parent.id) ?? [];
-    if (children.length > 0) {
-      const totalProgress = children.reduce((sum, c) => sum + (typeof c.progress === 'number' ? c.progress : 0), 0);
-      parent.progress = Math.min(100, Math.max(0, Math.round(totalProgress / children.length)));
-
-      const validStarts = children.map((c) => c.start).filter((s): s is string => !!s && /^\d{4}-\d{2}-\d{2}/.test(s)).sort();
-      const validEnds = children.map((c) => c.end).filter((e): e is string => !!e && /^\d{4}-\d{2}-\d{2}/.test(e)).sort();
-      if (validStarts.length > 0) parent.start = validStarts[0] ?? parent.start;
-      if (validEnds.length > 0) parent.end = validEnds[validEnds.length - 1] ?? parent.end;
-
-      if (parent.progress === 100) {
-        parent.status = 'Completado';
-      } else if (children.some((c) => c.status === 'Con retraso')) {
-        parent.status = 'Con retraso';
-      } else if (parent.progress > 0) {
-        parent.status = 'En proceso';
-      } else {
-        parent.status = 'Pendiente';
-      }
-    }
-  });
-
-  return items;
-}
+/* Motor WBS centralizado en cronograma-core: sin copia local. */
+export { computeWbsHierarchy, getLinkedTasksSummary };
 
 const resolveDefaultGestor = (code: string, name: string): string => {
   const c = code || '';
@@ -885,7 +709,7 @@ const GANTT_HIERARCHY: Hierarchy<Item> = {
 };
 
 const GANTT_COLUMNS: ColumnDef<Item>[] = [
-  { id: 'name', label: 'COMPONENTE / SUBCOMPONENTE', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
+  { id: 'name', label: 'COMPONENTE / PRODUCTO', type: 'text', accessor: (r) => `${r?.code ?? ''} ${r?.name ?? ''}`.trim() },
   { id: 'start', label: 'Inicio', type: 'date', accessor: (r) => r?.start },
   { id: 'end', label: 'Fin', type: 'date', accessor: (r) => r?.end },
   { id: 'duration', label: 'Duración', type: 'number', accessor: (r) => getDays(r?.start, r?.end) },
@@ -2318,8 +2142,8 @@ export default function CronogramaGanttView({
         id: nueva.id || `sede-${Date.now()}`,
         code: nueva.code || '',
         name: nueva.name,
-        edtType: isDre ? 'SUBCOMPONENTE' : 'PAQUETE_TRABAJO',
-        wbsNodeType: isDre ? 'SUBCOMPONENTE' : 'PAQUETE_TRABAJO',
+        edtType: isDre ? 'PRODUCTO' : 'PAQUETE_TRABAJO',
+        wbsNodeType: isDre ? 'PRODUCTO' : 'PAQUETE_TRABAJO',
         kind: 'subproceso',
         faseId: 'FASE-PLANIFICACION',
         parentId: nueva.parentUnitId || 'comp-1',
@@ -2622,7 +2446,7 @@ export default function CronogramaGanttView({
     const components = items.filter((x) => !x.parentId && (x.kind === 'hito' || x.edtType === 'COMPONENTE'));
     return components.map((comp) => {
       const products = items.filter(
-        (p) => p.parentId === comp.id && (p.edtType === 'SUBCOMPONENTE' || p.edtType === 'PAQUETE_TRABAJO' || (p.code && p.code.includes('.')))
+        (p) => p.parentId === comp.id && (p.edtType === 'PRODUCTO' || p.edtType === 'PAQUETE_TRABAJO' || (p.code && p.code.includes('.')))
       );
       return { comp, products };
     });
@@ -4694,7 +4518,7 @@ export default function CronogramaGanttView({
     const headers = [
       'Código',
       'Nombre de Componente o Subcomponente',
-      'Tipo (COMPONENTE/SUBCOMPONENTE)',
+      'Tipo (COMPONENTE/PRODUCTO)',
       'Componente Padre (Código)',
       'Fecha Inicio (YYYY-MM-DD)',
       'Fecha Fin (YYYY-MM-DD)',
@@ -5102,7 +4926,7 @@ export default function CronogramaGanttView({
     if (colKey === 'name') {
       const hasChildren = childrenByParent.has(x.id);
       const nodeType: 'COMPONENTE' | 'PRODUCTO' | 'PAQUETE_TRABAJO' | 'HITO' =
-        x.wbsNodeType === 'SUBCOMPONENTE'
+        x.wbsNodeType === 'PRODUCTO'
           ? 'PRODUCTO'
           : (x.wbsNodeType as any) ||
             (!x.parentId ? (hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO') : hasChildren ? 'PRODUCTO' : (x.kind === 'hito' || x.start === x.end ? 'HITO' : 'PAQUETE_TRABAJO'));
@@ -5512,7 +5336,7 @@ export default function CronogramaGanttView({
 
     if (colKey === 'progress') {
       const statusTone = x.progress === 100 ? 'green' : x.status === 'Con retraso' ? 'red' : x.status === 'Pendiente' ? 'gray' : 'blue';
-      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || childrenByParent.has(x.id));
+      const isContainer = Boolean((x.children && x.children.length > 0) || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'PRODUCTO' || childrenByParent.has(x.id));
       const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(x, rawTasks) : null;
       const format = percentGraphFormats['progress'] || 'bar';
 
@@ -6012,7 +5836,7 @@ export default function CronogramaGanttView({
     }
 
     if (colKey === 'reportType') {
-      const isHeaderLevel = !x.parentId || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'SUBCOMPONENTE' || x.kind === 'hito';
+      const isHeaderLevel = !x.parentId || x.wbsNodeType === 'COMPONENTE' || x.wbsNodeType === 'PRODUCTO' || x.kind === 'hito';
       return (
         <div
           key="reportType"
@@ -9016,8 +8840,8 @@ export default function CronogramaGanttView({
             />
           )}
 
-          {/* Presentación 6: Vista Organigrama WBS por Niveles (EDT Estructurada) */}
-          {viewMode === 'organigrama' && (
+          {/* Presentación 6: Vista Organigrama WBS por Niveles (EDT Estructurada - solo fuera de Equipo) */}
+          {perspective !== 'equipo' && viewMode === 'organigrama' && (
             <CronogramaOrganigramaView
               items={shown}
               allItems={items}

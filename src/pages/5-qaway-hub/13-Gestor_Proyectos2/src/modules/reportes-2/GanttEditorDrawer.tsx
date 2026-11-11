@@ -40,7 +40,10 @@ import type {
   DeliverableFormat,
 } from './Reportes2View';
 import { getDeviationDays } from './scheduleMetrics';
-import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, type EdtNodeType } from './edtPmbokModel';
+import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, EDT_NODE_LABELS, isContainerEdtType, normalizeEdtType, type EdtNodeType } from './edtPmbokModel';
+import { getLinkedTasksSummary } from '../cronograma-core/wbsHierarchy';
+export { sortWbsHierarchy } from './wbsHierarchy';
+
 import {
   REGIONES_PROYECTO,
   MACROREGIONES,
@@ -75,41 +78,6 @@ const getPhaseLabel = (phaseId: string) => {
   return phase ? `${phase.code} · ${phase.name}` : 'Sin fase asignada';
 };
 
-function getLinkedTasksSummary(
-  item: Item,
-  rawTasks?: any[]
-): { total: number; completed: number; progress: number } | null {
-  if (!rawTasks || !Array.isArray(rawTasks) || rawTasks.length === 0) return null;
-  const itemLabel = `${item.code ? (item.code.endsWith('.') ? item.code : `${item.code} `) : ''}${item.name}`.trim().toLowerCase();
-  const itemName = (item.name || '').trim().toLowerCase();
-  const itemId = (item.id || '').trim().toLowerCase();
-  const itemCode = (item.code || '').trim().toLowerCase();
-
-  const linked = rawTasks.filter((t) => {
-    if (!t || !t.milestone || t.milestone === '—' || t.milestone === '-') return false;
-    const m = String(t.milestone).trim().toLowerCase();
-    if (m === itemLabel || m === itemName || m === itemId) return true;
-    if (itemCode && m.startsWith(itemCode)) return true;
-    if (m.includes(itemName) || itemName.includes(m)) return true;
-    if (t.wbsId && String(t.wbsId).toLowerCase() === itemId) return true;
-    if (t.componentId && String(t.componentId).toLowerCase() === itemId) return true;
-    return false;
-  });
-
-  if (linked.length === 0) return null;
-  const completed = linked.filter((t) => {
-    const s = String(t.status || '').toLowerCase();
-    return s === 'completado' || s === 'cumple' || s === 'completada' || Number(t.progress || 0) >= 100;
-  }).length;
-  const avgProgress = Math.round(
-    linked.reduce((acc, t) => acc + (Number(t.progress) || 0), 0) / linked.length
-  );
-  return {
-    total: linked.length,
-    completed,
-    progress: avgProgress,
-  };
-}
 
 function MiniCalendar({
   value,
@@ -301,7 +269,6 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [editorHitoSelectOpen, setEditorHitoSelectOpen] = useState(false);
   const [editorParentSelectOpen, setEditorParentSelectOpen] = useState(false);
   const [editorDepSelectOpen, setEditorDepSelectOpen] = useState(false);
-  const [editorLevelSelectOpen, setEditorLevelSelectOpen] = useState(false);
   const [editorPhaseSelectOpen, setEditorPhaseSelectOpen] = useState(false);
 
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
@@ -1165,13 +1132,16 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                  <label className="field" style={{ marginBottom: '10px' }}>
                    <span>Nivel del elemento</span>
                    <div className="drawer-choice-wrap">
-                     <button type="button" className={`drawer-choice ${editorLevelSelectOpen ? 'active' : ''}`} onClick={() => setEditorLevelSelectOpen((v) => !v)}>
-                       <span>{({ COMPONENTE: 'Componente', HITO: 'Hito', SUBCOMPONENTE: 'Subcomponente', PAQUETE_TRABAJO: 'Paquete de trabajo', ENTREGABLE: 'Entregable' } as Record<string, string>)[activeItem.edtType || resolveEdtNodeType(activeItem, items)] || 'Componente'}</span><ChevronDown size={14} />
-                     </button>
-                     {editorLevelSelectOpen && <div className="drawer-choice-menu">
-                       {(activeItem.kind === 'hito' ? [['COMPONENTE', 'Componente'], ['HITO', 'Hito']] : [['SUBCOMPONENTE', 'Subcomponente'], ['PAQUETE_TRABAJO', 'Paquete de trabajo'], ['ENTREGABLE', 'Entregable'], ['HITO', 'Hito']]).map(([value, label]) => <button type="button" key={value} className={(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value ? 'selected' : ''} onClick={() => { updateDraft({ edtType: value as EdtNodeType }); setEditorLevelSelectOpen(false); }}>{label}{(activeItem.edtType || resolveEdtNodeType(activeItem, items)) === value && <Check size={14} />}</button>)}
-                     </div>}
+                     <span className="drawer-choice" style={{ cursor: 'default' }}>
+                       <span>{EDT_NODE_LABELS[resolveEdtNodeType(activeItem, items)]}</span>
+                     </span>
                    </div>
+                   {isContainerEdtType(resolveEdtNodeType(activeItem, items)) && (
+                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 12 }}>
+                       <input type="checkbox" checked={normalizeEdtType(activeItem.edtType) === 'ENTREGABLE'} onChange={(e) => updateDraft({ edtType: (e.target.checked ? 'ENTREGABLE' : undefined) as EdtNodeType })} />
+                       Marcar este agrupador como entregable
+                     </label>
+                   )}
                  </label>
 
                 {/* 1. Nombre */}
@@ -1603,7 +1573,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
                 {/* 6. Avance */}
                 {(() => {
-                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || activeItem.wbsNodeType === 'COMPONENTE' || activeItem.wbsNodeType === 'SUBCOMPONENTE' || items.some((c) => c.parentId === activeItem.id));
+                  const isContainer = Boolean((activeItem.children && activeItem.children.length > 0) || isContainerEdtType(resolveEdtNodeType(activeItem, items)) || items.some((c) => c.parentId === activeItem.id));
                    const linkedTaskSummary = !isContainer ? getLinkedTasksSummary(activeItem, rawTasks) : null;
 
                   return (

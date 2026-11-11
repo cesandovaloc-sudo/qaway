@@ -19,8 +19,12 @@ export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'C
 /** Naturaleza del elemento del cronograma. */
 export type Kind = 'hito' | 'subproceso';
 
-/** Nivel oficial de la EDT/WBS. */
-export type WbsNodeType = 'COMPONENTE' | 'PRODUCTO' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
+/**
+ * Nivel oficial de la EDT/WBS.
+ * Alias histórico de `EdtNodeType`: existe un único catálogo de tipos de nodo
+ * (`edtPmbokModel`), no dos enumeraciones paralelas.
+ */
+export type WbsNodeType = EdtNodeType;
 
 /** Claves de columnas de la tabla del cronograma (abierto: columnas dinámicas permitidas). */
 export type ColKey =

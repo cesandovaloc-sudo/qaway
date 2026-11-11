@@ -167,7 +167,7 @@ function generateTerritorialHierarchy(): SedeEdtItem[] {
         id: dreNodeId,
         code: '', // Sin numeración artificial
         name: `${dre.name} (Sede Regional Matriz)`,
-        edtType: 'SUBCOMPONENTE',
+        edtType: 'PRODUCTO',
         kind: 'subproceso',
         faseId: comp.faseId,
         parentId: comp.id, // Hija del componente
