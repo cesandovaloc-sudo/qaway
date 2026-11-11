@@ -171,7 +171,7 @@ import {
 
 export type Status = 'Completado' | 'En curso' | 'En proceso' | 'Pendiente' | 'Con retraso' | 'Cumple';
 type Kind = 'hito' | 'subproceso';
-export type WbsNodeType = 'COMPONENTE' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
+export type WbsNodeType = 'COMPONENTE' | 'PRODUCTO' | 'SUBCOMPONENTE' | 'PAQUETE_TRABAJO' | 'HITO';
 type ColKey = 'name' | 'code' | 'kind' | 'parent' | 'start' | 'end' | 'duration' | 'progress' | 'status' | 'dependencies' | 'gestor' | 'region' | 'distrito' | 'sede' | 'deviation' | 'actualEnd' | 'reportType' | 'actions' | (string & {});
 type EditField = ColKey;
 
@@ -243,8 +243,10 @@ export interface Item {
 export const OFFICIAL_WBS_DEPENDENCIES: Record<string, string[]> = {
   // Componente 1: Planificación
   'pt-1.6': ['pt-1.4'],   // CDL depende de Plan de Distribución Local aprobado
-  'pt-1.7a': ['pt-1.6'],  // Comunicación a II.EE. depende de CDL validado
-  'pt-1.7b': ['pt-1.7a'], // Capacitación a directores depende de Comunicación inicial
+  'pt-1.7.1': ['pt-1.6'], // Comunicación a II.EE. depende de CDL validado
+  'pt-1.7.2': ['pt-1.7.1'], // Capacitación a directores depende de Comunicación inicial
+  'pt-1.7a': ['pt-1.6'],  // retrocompatibilidad
+  'pt-1.7b': ['pt-1.7.1'], // retrocompatibilidad
 
   // Dependencias macro entre componentes rectores
   'comp-3': ['comp-2'],   // Recepción en DRE/UGEL depende de Habilitación de Almacenes
@@ -315,7 +317,7 @@ export function computeWbsHierarchy(rawItems: Item[], rawTasks?: any[]): Item[] 
     if (!it.parentId) {
       it.wbsNodeType = hasChildren ? 'COMPONENTE' : 'PAQUETE_TRABAJO';
     } else if (hasChildren) {
-      it.wbsNodeType = 'SUBCOMPONENTE';
+      it.wbsNodeType = 'PRODUCTO';
     } else {
       const isMilestone = it.start === it.end && it.kind === 'hito';
       it.wbsNodeType = isMilestone ? 'HITO' : 'PAQUETE_TRABAJO';
@@ -525,6 +527,40 @@ export function isTerritorialSedeOnlyItem(item: { id: string; name?: string | un
   }
   return false;
 }
+
+export function isSedeItem(item: any): boolean {
+  if (!item) return false;
+  if (item.wbsNodeType === 'COMPONENTE' || item.edtType === 'COMPONENTE') return false;
+  if (item.code && /^\d+(\.\d+)+$/.test(String(item.code).trim())) return false;
+  if (item.unitType === 'dre' || item.unitType === 'regional' || item.unitType === 'ugel' || item.unitType === 'operativa' || item.unitType === 'central') return true;
+  if (item.isSede) return true;
+  if (isTerritorialSedeOnlyItem(item)) return true;
+  if (typeof item.name === 'string') {
+    const trimmed = item.name.trim();
+    if (trimmed.startsWith('DRE ') || trimmed.startsWith('GRE ') || trimmed.startsWith('UGEL ') || trimmed.includes('Regional Matriz')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function getSedeType(itemOrName: any): 'dre' | 'ugel' | 'central' | null {
+  if (!itemOrName) return null;
+  const name = typeof itemOrName === 'string' ? itemOrName : String(itemOrName.sede || itemOrName.name || '');
+  const unitType = typeof itemOrName === 'object' ? itemOrName.unitType : undefined;
+
+  if (unitType === 'dre' || unitType === 'regional' || name.startsWith('DRE ') || name.startsWith('GRE ') || name.includes('Regional Matriz')) {
+    return 'dre';
+  }
+  if (unitType === 'ugel' || unitType === 'operativa' || unitType === 'oficina' || unitType === 'obra' || name.startsWith('UGEL ')) {
+    return 'ugel';
+  }
+  if (unitType === 'central' || name.includes('Sede Central')) {
+    return 'central';
+  }
+  return null;
+}
+
 
 const MONTHS = [
   { label: 'Sep', start: '2026-09-01' },
@@ -760,12 +796,12 @@ const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'en
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
-  name: 440,
-  kind: 110,
-  parent: 160,
-  start: 125,
-  end: 125,
-  duration: 105,
+  name: 420,
+  kind: 145,
+  parent: 260,
+  start: 135,
+  end: 135,
+  duration: 115,
   progress: 130,
   status: 125,
   dependencies: 130,
@@ -1389,7 +1425,8 @@ export default function CronogramaGanttView({
             const hasAllComponents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].every((n) =>
               parsed.some((it: Item) => it.id === `comp-${n}`)
             );
-            if (!hasAllComponents || parsed.length < 50) {
+            const hasLegacy17 = parsed.some((it: Item) => it.id === 'pt-1.7a' || it.code === '1.7a');
+            if (!hasAllComponents || parsed.length < 50 || hasLegacy17) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
               } catch {}
@@ -2949,12 +2986,12 @@ export default function CronogramaGanttView({
     const isLista = viewMode === 'lista';
     const calibratedWidths: Record<string, number> = {
       code: 80,
-      name: isLista ? 440 : 300,
-      kind: 110,
-      parent: 160,
-      start: 125,
-      end: 125,
-      duration: 105,
+      name: isLista ? 420 : 320,
+      kind: 145,
+      parent: 260,
+      start: 135,
+      end: 135,
+      duration: 115,
       progress: 130,
       status: 125,
       dependencies: 130,
@@ -5077,15 +5114,15 @@ export default function CronogramaGanttView({
             <span className="gantt-row-icon componente" title="Componente rector">
               <Layers size={14} />
             </span>
-          ) : (perspective === 'territorial' || (x as any).entidadResponsable || (x as any).unitType) && ((x as any).entidadResponsable === 'DRE' || (x as any).unitType === 'dre' || (x as any).unitType === 'regional' || (x.name && (x.name.includes('DRE ') || x.name.includes('GRE ') || x.name.includes('Regional Matriz')))) ? (
-            <span className="gantt-row-icon dre" title="Sede Regional Matriz (DRE)">
+          ) : isSedeItem(x) && getSedeType(x) === 'dre' ? (
+            <span className="gantt-row-icon dre" title="Sede Regional Matriz (DRE / GRE)">
               <Building2 size={13} style={{ color: '#1e40af' }} />
             </span>
-          ) : (perspective === 'territorial' || (x as any).entidadResponsable || (x as any).unitType) && ((x as any).entidadResponsable === 'UGEL' || (x as any).unitType === 'ugel' || (x as any).unitType === 'operativa' || (x as any).unitType === 'obra' || (x as any).unitType === 'oficina' || (x.name && x.name.startsWith('UGEL '))) ? (
+          ) : isSedeItem(x) && getSedeType(x) === 'ugel' ? (
             <span className="gantt-row-icon ugel" title="Unidad Territorial Operativa (UGEL)">
               <Building size={13} style={{ color: '#0284c7' }} />
             </span>
-          ) : (x as any).unitType === 'central' ? (
+          ) : isSedeItem(x) && getSedeType(x) === 'central' ? (
             <span className="gantt-row-icon central" title="Sede Central Matriz">
               <Building2 size={13} style={{ color: '#0f172a' }} />
             </span>
@@ -5740,6 +5777,25 @@ export default function CronogramaGanttView({
           ) : (
             <span className="cell-text">{x.region || 'Todas las Regiones'}</span>
           )}
+        </div>
+      );
+    }
+
+    if (colKey === 'sede') {
+      const rawVal = x.sede || (isSedeItem(x) ? x.name : undefined);
+      const sType = getSedeType(rawVal || x);
+      return (
+        <div key="sede" className="sede-cell-col" style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          {sType === 'dre' ? (
+            <Building2 size={13} style={{ color: '#1e40af', flexShrink: 0 }} />
+          ) : sType === 'ugel' ? (
+            <Building size={13} style={{ color: '#0284c7', flexShrink: 0 }} />
+          ) : sType === 'central' ? (
+            <Building2 size={13} style={{ color: '#0f172a', flexShrink: 0 }} />
+          ) : null}
+          <span className="cell-text" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {rawVal || '—'}
+          </span>
         </div>
       );
     }

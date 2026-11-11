@@ -94,6 +94,7 @@ import {
   ArrowLeftRight,
   ArrowRight,
   BarChart3,
+  Building,
   Building2,
   CalendarDays,
   CalendarRange,
@@ -6144,6 +6145,24 @@ export default function Tareas2View({
           ) : (
             <span className="cell-text">{x.region || 'Todas las Regiones'}</span>
           )}
+        </div>
+      );
+    }
+
+    if (colKey === 'sede') {
+      const rawVal = x.sede || (x.name?.startsWith('UGEL') || x.name?.startsWith('DRE') || x.name?.startsWith('GRE') ? x.name : undefined);
+      const isDre = rawVal && (rawVal.startsWith('DRE') || rawVal.startsWith('GRE') || rawVal.includes('Regional Matriz'));
+      const isUgel = rawVal && rawVal.startsWith('UGEL');
+      return (
+        <div key="sede" className="sede-cell-col" style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          {isDre ? (
+            <Building2 size={13} style={{ color: '#1e40af', flexShrink: 0 }} />
+          ) : isUgel ? (
+            <Building size={13} style={{ color: '#0284c7', flexShrink: 0 }} />
+          ) : null}
+          <span className="cell-text" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {rawVal || '—'}
+          </span>
         </div>
       );
     }

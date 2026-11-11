@@ -12,6 +12,7 @@
 export type EdtNodeType =
   | 'FASE'
   | 'COMPONENTE'
+  | 'PRODUCTO'
   | 'SUBCOMPONENTE'
   | 'PAQUETE_TRABAJO'
   | 'ENTREGABLE'
@@ -72,7 +73,8 @@ export const PROJECT_PHASES_CATALOG: Fase[] = [
 export const EDT_NODE_LABELS: Record<EdtNodeType, string> = {
   FASE: 'Fase',
   COMPONENTE: 'Componente',
-  SUBCOMPONENTE: 'Subcomponente',
+  PRODUCTO: 'Producto',
+  SUBCOMPONENTE: 'Producto',
   PAQUETE_TRABAJO: 'Paquete de Trabajo',
   ENTREGABLE: 'Entregable',
   HITO: 'Hito',
@@ -95,8 +97,8 @@ export function resolveEdtNodeType(
 ): EdtNodeType {
   const hasChildren = allItems.length > 0 && allItems.some((c) => c.parentId === item.id);
 
-  // Un Hito real tiene duración cero y jamás actúa como contenedor jerárquico
-  if (!hasChildren && item.edtType === 'HITO') {
+  // Un Hito real tiene duración cero o tipo HITO explícito sin hijos
+  if (!hasChildren && (item.edtType === 'HITO' || (item.start && item.start === item.end))) {
     return 'HITO';
   }
 
@@ -105,20 +107,17 @@ export function resolveEdtNodeType(
     return 'COMPONENTE';
   }
 
-  // Nivel 2..n que posee hijos anidados o actúa como agrupador intermedio: SUBCOMPONENTE
-  if (hasChildren || item.kind === 'hito' || item.edtType === 'SUBCOMPONENTE') {
-    return 'SUBCOMPONENTE';
+  // Nivel intermedio que posee hijos anidados: PRODUCTO (regla BID/PMBOK)
+  if (hasChildren) {
+    return 'PRODUCTO';
   }
 
   if (item.edtType === 'ENTREGABLE') {
     return 'ENTREGABLE';
   }
 
-  if (item.edtType === 'PAQUETE_TRABAJO') {
-    return 'PAQUETE_TRABAJO';
-  }
-
-  return 'SUBCOMPONENTE';
+  // Nodo hoja terminal sin hijos: PAQUETE DE TRABAJO (regla BID/PMBOK)
+  return 'PAQUETE_TRABAJO';
 }
 
 /**
@@ -137,29 +136,8 @@ export function getEdtNodeDisplayLabel(
   },
   allItems: Array<{ id: string; parentId?: string | undefined }> = []
 ): string {
-  const hasChildren = allItems.length > 0 && allItems.some((c) => c.parentId === item.id);
-
-  if (!hasChildren && item.edtType === 'HITO') {
-    return 'Hito';
-  }
-
-  if (!item.parentId && item.kind === 'hito') {
-    return 'Componente';
-  }
-
-  if (item.parentId && (item.kind === 'hito' || hasChildren || item.edtType === 'SUBCOMPONENTE')) {
-    return 'Subcomponente';
-  }
-
-  if (item.edtType === 'PAQUETE_TRABAJO') {
-    return 'Paquete de Trabajo';
-  }
-
-  if (item.edtType === 'ENTREGABLE') {
-    return 'Entregable';
-  }
-
-  return item.kind === 'hito' ? 'Componente' : 'Subcomponente';
+  const resolved = resolveEdtNodeType(item, allItems);
+  return EDT_NODE_LABELS[resolved] || 'Paquete de Trabajo';
 }
 
 /**
@@ -467,7 +445,7 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     id: 'sub-1.7',
     code: '1.7',
     name: 'Comunicaciones y capacitación a II.EE. (Directores y COGECO)',
-    edtType: 'SUBCOMPONENTE',
+    edtType: 'PRODUCTO',
     kind: 'subproceso',
     faseId: 'FASE-PLANIFICACION',
     parentId: 'comp-1',
@@ -477,8 +455,8 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     entidadResponsable: 'UGEL',
   },
   {
-    id: 'pt-1.7a',
-    code: '1.7a',
+    id: 'pt-1.7.1',
+    code: '1.7.1',
     name: 'Comunicación a las II.EE. (Directores y COGECO) sobre pautas y distribución del ME Distribución de Materiales DOT 2027',
     edtType: 'PAQUETE_TRABAJO',
     kind: 'subproceso',
@@ -491,8 +469,8 @@ export const DRE_JUNIN_DOTACION_2027_EDT: OfficialEdtReferenceRow[] = [
     entregableVerificable: 'Oficio Múltiple emitido por la UGEL dirigido a las II.EE. Sustento de publicación.',
   },
   {
-    id: 'pt-1.7b',
-    code: '1.7b',
+    id: 'pt-1.7.2',
+    code: '1.7.2',
     name: 'Capacitación a directores e integrantes de COGECO sobre pautas de recepción, verificación y resguardo',
     edtType: 'PAQUETE_TRABAJO',
     kind: 'subproceso',
