@@ -31,6 +31,26 @@ export default function EquipoCargaView({
   const [busqueda, setBusqueda] = useState('');
   const [openDropdown, setOpenDropdown] = useState<'sede' | 'nivel' | null>(null);
 
+  // ── Punto 3 — Ventana de filas del padrón ─────────────────────────────────
+  // El padrón completo (miles de integrantes) no se renderiza de una vez:
+  // se pinta una ventana inicial y se agregan filas idénticas al acercarse
+  // al final del scroll. Cero cambio visual; solo menos DOM por frame.
+  const VENTANA_INICIAL = 120;
+  const VENTANA_INCREMENTO = 120;
+  const [visibleCount, setVisibleCount] = useState<number>(VENTANA_INICIAL);
+
+  useEffect(() => {
+    setVisibleCount(VENTANA_INICIAL);
+  }, [filtroSede, filtroNivelCarga, busqueda]);
+
+  const handleScrollVentana = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 320) {
+      setVisibleCount((c) => Math.min(c + VENTANA_INCREMENTO, filteredList.length));
+    }
+  };
+  // ── fin Punto 3 ────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const handleDocClick = () => setOpenDropdown(null);
     document.addEventListener('mousedown', handleDocClick);
@@ -236,7 +256,7 @@ export default function EquipoCargaView({
       </div>
 
       {/* Tabla de Capacidad dentro del Contenedor de Scroll */}
-      <div className="cronograma-lista-table-wrap" style={{ flex: 1, overflow: 'auto' }}>
+      <div className="cronograma-lista-table-wrap" style={{ flex: 1, overflow: 'auto' }} onScroll={handleScrollVentana}>
         <table className="cronograma-lista-table">
           <thead>
             <tr>
@@ -249,7 +269,7 @@ export default function EquipoCargaView({
             </tr>
           </thead>
           <tbody>
-            {filteredList.map((row) => {
+            {filteredList.slice(0, visibleCount).map((row) => {
               const { integrante, tareasActivas, esfuerzoTotal, capacidad, porcentaje } = row;
 
               return (

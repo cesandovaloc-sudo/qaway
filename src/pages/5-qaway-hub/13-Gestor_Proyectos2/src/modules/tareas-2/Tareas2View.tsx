@@ -1700,20 +1700,40 @@ export default function Tareas2View({
   }, [projectId, isActive]);
 
   // Persistencia segura por proyecto activo (Doble capa: LocalStorage inmediato + Sincronización Supabase)
+  // ── Punto 3 — dedupe de rewrites ────────────────────────────────────────────
+  // setItems con identidad nueva pero contenido idéntico (recómputos de jerarquía,
+  // sincronizaciones) disparaba stringify + localStorage.setItem + evento global
+  // en cada pasada. Ahora solo se escribe/notifica cuando el contenido cambia.
+  const lastPersistedRef = useRef<{ key: string; json: string }>({ key: '', json: '' });
+  const lastSyncedJsonRef = useRef<{ key: string; json: string }>({ key: '', json: '' });
   useEffect(() => {
     if (!isActive) return;
     if (currentPidRef.current === projectId) {
       const isMaestro = perspective === 'maestro';
       const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
+      let json = '';
       try {
-        localStorage.setItem(storageKey, JSON.stringify(items));
-        window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+        json = JSON.stringify(items);
       } catch {
-        /* fallback */
+        json = '';
       }
-      // Sincronización a Supabase con debounce de 2.5s para no saturar la red ni congelar la UI
+      const last = lastPersistedRef.current;
+      if (json && !(last.key === storageKey && last.json === json)) {
+        lastPersistedRef.current = { key: storageKey, json };
+        try {
+          localStorage.setItem(storageKey, json);
+          window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+        } catch {
+          /* fallback */
+        }
+      }
+      // Sincronización a Supabase con debounce de 2.5s para no saturar la red ni congelar la UI.
+      // Si el contenido ya está sincronizado, el timer corre pero no viaja a la red.
       if (isMaestro && items.length > 0) {
         const timer = setTimeout(() => {
+          const synced = lastSyncedJsonRef.current;
+          if (synced.key === storageKey && synced.json === json) return;
+          lastSyncedJsonRef.current = { key: storageKey, json };
           syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
         }, 2500);
         return () => clearTimeout(timer);
