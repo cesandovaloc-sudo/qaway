@@ -27,6 +27,7 @@ import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
 import EquipoOrganigramaView from '../equipo/EquipoOrganigramaView';
 import EquipoSedesView from '../equipo/EquipoSedesView';
 import EquipoCargaView from '../equipo/EquipoCargaView';
+import type { AsignacionViva, UnidadOrganizacional } from '../equipo/types';
 import EquipoDrawer from '../equipo/EquipoDrawer';
 import EquipoExpedienteModal from '../equipo/EquipoExpedienteModal';
 import EquipoNuevoModal from '../equipo/EquipoNuevoModal';
@@ -2260,9 +2261,66 @@ export default function Tareas2View({
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
   const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
   const [equipoSedes, setEquipoSedes] = useState<any[]>([]);
-  const [equipoAreas] = useState<any[]>([]);
-  const [equipoAsignaciones, setEquipoAsignaciones] = useState<any[]>([]);
   const [isEquipoLoading, setIsEquipoLoading] = useState<boolean>(true);
+
+  // ── Punto 2 — Datos de Equipo derivados de fuentes reales ──────────────────
+  // No existen tablas de "areas" ni "asignaciones" en Supabase: el modelo real
+  // del dominio es el cronograma (item.gestor / item.gestores), el mismo que ya
+  // usa la tarjeta "Carga del Equipo Directo" de la portada. Se derivan en vivo
+  // y la reasignación edita el item del cronograma (persistencia automática).
+  const equipoAsignaciones = useMemo<AsignacionViva[]>(() => {
+    const byName = new Map(equipoIntegrantes.map((i) => [String(i.nombreCompleto), i]));
+    const out: AsignacionViva[] = [];
+    for (const it of items) {
+      const names = it.gestores && it.gestores.length > 0 ? it.gestores : it.gestor ? [it.gestor] : [];
+      for (const name of names) {
+        const integ = byName.get(name);
+        if (!integ) continue;
+        out.push({
+          id: `asg-${it.id}::${encodeURIComponent(name)}`,
+          integranteId: String(integ.id),
+          proyectoId: projectId,
+          titulo: it.name,
+          tipo: it.kind === 'hito' ? 'Hito' : it.kind === 'subproceso' ? 'Tarea' : 'Proceso',
+          fechaInicio: it.start,
+          fechaFin: it.end,
+          // Estimación estándar de esfuerzo planificado: duración en días × 8h
+          // (el cronograma no registra horas; la duración es su proxy directo).
+          esfuerzoHoras: getDays(it.start, it.end) * 8,
+          progresoPorcentaje: it.progress ?? 0,
+          estado:
+            it.status === 'Con retraso'
+              ? 'Atrasado'
+              : it.status === 'En proceso' || it.status === 'En curso'
+              ? 'En curso'
+              : it.status === 'Completado' || it.status === 'Cumple'
+              ? 'Completado'
+              : 'Pendiente',
+        });
+      }
+    }
+    return out;
+  }, [items, equipoIntegrantes, projectId]);
+
+  const equipoAreas = useMemo<UnidadOrganizacional[]>(() => {
+    // Áreas reales del dominio: los cargos presentes en el directorio cargado
+    // desde Supabase, con su primer integrante como responsable.
+    const byCargo = new Map<string, any>();
+    for (const i of equipoIntegrantes) {
+      const cargo = String(i.cargo || '').trim();
+      if (cargo && !byCargo.has(cargo)) byCargo.set(cargo, i);
+    }
+    return Array.from(byCargo.entries()).map(([cargo, integ], idx) => ({
+      id: `area-${idx + 1}`,
+      codigo: cargo.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) || `AREA-${idx + 1}`,
+      nombre: cargo,
+      nivel: 2,
+      responsableId: String(integ.id),
+      responsableNombre: String(integ.nombreCompleto || ''),
+    }));
+  }, [equipoIntegrantes]);
+  // ── fin Punto 2 ────────────────────────────────────────────────────────────
+
   const [equipoSelectedId, setEquipoSelectedId] = useState<string | null>(null);
   const [equipoExpediente, setEquipoExpediente] = useState<any | null>(null);
   const [isEquipoNuevoOpen, setIsEquipoNuevoOpen] = useState(false);
@@ -2273,7 +2331,9 @@ export default function Tareas2View({
   const [equipoAreaFilter, setEquipoAreaFilter] = useState('todas');
   const [equipoPill, setEquipoPill] = useState('Todos');
 
-  // Carga reactiva de integrantes y sedes directamente desde Supabase (cero fallbacks locales)
+  // Carga reactiva de integrantes y sedes directamente desde Supabase (cero fallbacks locales).
+  // Las áreas y asignaciones del equipo NO se cargan de red: se derivan en vivo
+  // del cronograma (items × gestores) y del directorio (cargos) — ver useMemo arriba.
   useEffect(() => {
     if (perspective === 'equipo' && isActive) {
       let isMounted = true;
@@ -2410,8 +2470,26 @@ export default function Tareas2View({
 
   const handleReasignarTarea = (asignacionId: string, nuevoIntegranteId: string) => {
     const nuevoIntegrante = equipoIntegrantes.find((i) => i.id === nuevoIntegranteId);
-    const next = equipoAsignaciones.map((a) => (a.id === asignacionId ? { ...a, integranteId: nuevoIntegranteId } : a));
-    setEquipoAsignaciones(next);
+    if (!nuevoIntegrante) return;
+    // La asignación vive en el item del cronograma (gestor/gestores). El formato
+    // del id derivado es `asg-${itemId}::${encodeURIComponent(nombreAnterior)}`.
+    // Editar el item dispara la persistencia automática del cronograma.
+    const sep = asignacionId.indexOf('::');
+    const itemId = sep >= 0 ? asignacionId.slice(4, sep) : asignacionId.slice(4);
+    const oldName = sep >= 0 ? decodeURIComponent(asignacionId.slice(sep + 2)) : '';
+    setItems((prev) =>
+      prev.map((it) => {
+        if (it.id !== itemId) return it;
+        const names = it.gestores && it.gestores.length > 0 ? [...it.gestores] : it.gestor ? [it.gestor] : [];
+        if (oldName) {
+          const idx = names.indexOf(oldName);
+          if (idx >= 0) names[idx] = nuevoIntegrante.nombreCompleto;
+        } else {
+          names.push(nuevoIntegrante.nombreCompleto);
+        }
+        return { ...it, gestor: names[0] ?? '', gestores: names };
+      })
+    );
     notify(`Tarea reasignada a ${nuevoIntegrante?.nombreCompleto || 'nuevo integrante'}`);
   };
   // Las tarjetas superiores se ocultan de entrada en pantallas pequeñas (<1024px),
