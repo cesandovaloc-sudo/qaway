@@ -113,7 +113,7 @@ export default function TareaNuevaModal({
 
   if (!isOpen) return null;
 
-  const currentDelivConfig = DELIVERABLE_TYPES.find((d) => d.id === deliverableType) || DELIVERABLE_TYPES[1];
+  const currentDelivConfig = DELIVERABLE_TYPES.find((d) => d.id === deliverableType) || DELIVERABLE_TYPES[1]!;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,7 +122,7 @@ export default function TareaNuevaModal({
     onSave({
       title: title.trim(),
       taskNature,
-      parentId: taskNature === 'Tarea EDT' ? (parentId || undefined) : undefined,
+      ...(taskNature === 'Tarea EDT' && parentId ? { parentId } : {}),
       deliverable: deliverable.trim() || currentDelivConfig.label,
       deliverableType,
       owner: owner.trim() || 'Sin asignar',

@@ -67,7 +67,7 @@ export default function SedeNuevaModal({
       macroregion: macro,
       address: direccion.trim() || null,
       status: 'active',
-      gestor: responsable.trim() || undefined,
+      ...(responsable.trim() ? { gestor: responsable.trim() } : {}),
       progress: 0,
       complianceStatus: 'En proceso',
       metadata: {
@@ -96,7 +96,7 @@ export default function SedeNuevaModal({
           macroregion: macro,
           address: direccion.trim() || null,
           status: 'active',
-          gestor: responsable.trim() || undefined,
+          ...(responsable.trim() ? { gestor: responsable.trim() } : {}),
           progress: 0,
           complianceStatus: 'En proceso',
           metadata: {},

@@ -190,12 +190,12 @@ const generalTrend = [
   { date: '30 oct.', v: 68 },
 ];
 
-export type DeliverableType = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
+export type DeliverableFormat = 'document' | 'spreadsheet' | 'presentation' | 'link' | 'physical';
 
 export interface DeliverableItem {
   id: string;
   name: string;
-  type: DeliverableType;
+  type: DeliverableFormat;
   url?: string | undefined;
   fileName?: string;
 }
@@ -576,7 +576,7 @@ export const MASTER_INITIAL_ITEMS: Item[] = computeWbsHierarchy(sortWbsHierarchy
     gestores: defaultGestores,
     entidadResponsable: r.entidadResponsable,
   };
-}) as Item[])));
+}) as unknown as Item[])));
 
 const baseTerritorialComponents: Item[] = MASTER_INITIAL_ITEMS.filter((it) => !it.parentId).map((c) => ({
   ...c,
@@ -1781,7 +1781,7 @@ export default function Tareas2View({
 
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
   const [newDelivName, setNewDelivName] = useState('');
-  const [newDelivType, setNewDelivType] = useState<DeliverableType>('document');
+  const [newDelivType, setNewDelivType] = useState<DeliverableFormat>('document');
   const [newDelivUrl, setNewDelivUrl] = useState('');
   const [, setForceTasksNonce] = useState(0);
 
@@ -2363,8 +2363,7 @@ export default function Tareas2View({
       code,
       name: nueva.title,
       kind: 'subproceso',
-      edtType: isEdt ? 'PAQUETE_TRABAJO' : undefined,
-      wbsNodeType: isEdt ? 'PAQUETE_TRABAJO' : undefined,
+      ...(isEdt ? { edtType: 'PAQUETE_TRABAJO' as const, wbsNodeType: 'PAQUETE_TRABAJO' as const } : {}),
       parentId: isEdt ? nueva.parentId : undefined,
       start: todayStr,
       end: nueva.end || todayStr,

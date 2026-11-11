@@ -22,7 +22,7 @@ interface Props {
   item: Item | null;
   onAssign: (newTask: any) => void;
   allSubprocesos?: Item[];
-  initialRole?: string;
+  initialRole?: string | undefined;
 }
 
 export default function AsignarTareaDrawer({
@@ -86,9 +86,9 @@ export default function AsignarTareaDrawer({
   const handleTypeChange = (type: 'macro' | 'gestor') => {
     setAssigneeType(type);
     if (type === 'macro') {
-      setSelectedPerson(MACROREGIONES[0].coordinador);
+      setSelectedPerson(MACROREGIONES[0]?.coordinador || 'Carlos Sandoval');
     } else {
-      setSelectedPerson(REGIONES_PROYECTO[0].coordinadorRegional);
+      setSelectedPerson(REGIONES_PROYECTO[0]?.coordinadorRegional || 'Carlos Sandoval');
     }
   };
 
@@ -100,7 +100,7 @@ export default function AsignarTareaDrawer({
       id: Date.now(),
       title: taskTitle.trim(),
       milestone: itemTitle,
-      wbsId: item.id,
+      wbsId: item?.id,
       owner: selectedPerson,
       assignedBy: 'Carlos Sandoval (Coordinador General)',
       due: dueDate,
@@ -527,9 +527,9 @@ export default function AsignarTareaDrawer({
                       backgroundColor: '#ffffff',
                     }}
                   >
-                    <option value={item.id}>{itemTitle}</option>
+                    <option value={item?.id ?? ''}>{itemTitle}</option>
                     {allSubprocesos
-                      .filter((s) => s.id !== item.id)
+                      .filter((s) => s.id !== item?.id)
                       .slice(0, 10)
                       .map((s) => (
                         <option key={s.id} value={s.id}>
