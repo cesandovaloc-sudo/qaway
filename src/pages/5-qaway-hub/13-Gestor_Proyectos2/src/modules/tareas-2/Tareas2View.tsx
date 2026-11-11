@@ -2269,12 +2269,41 @@ export default function Tareas2View({
   // usa la tarjeta "Carga del Equipo Directo" de la portada. Se derivan en vivo
   // y la reasignación edita el item del cronograma (persistencia automática).
   const equipoAsignaciones = useMemo<AsignacionViva[]>(() => {
-    const byName = new Map(equipoIntegrantes.map((i) => [String(i.nombreCompleto), i]));
+    const norm = (s: string) =>
+      String(s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    // El gestor se escribe a mano (texto libre) y el padrón usa nombre completo
+    // con doble apellido: se matchea primero por nombre exacto y, si no, por
+    // prefijo único ("Javier Ruiz" → "Javier Ruiz Espinoza") solo si la
+    // coincidencia es inequívoca — cero asignaciones inventadas.
+    const byExact = new Map<string, any>();
+    const pool: Array<{ key: string; integ: any }> = [];
+    for (const i of equipoIntegrantes) {
+      const key = norm(i.nombreCompleto);
+      if (key) {
+        if (!byExact.has(key)) byExact.set(key, i);
+        pool.push({ key, integ: i });
+      }
+    }
+    const resolve = (name: string): any | null => {
+      const k = norm(name);
+      if (!k) return null;
+      const exact = byExact.get(k);
+      if (exact) return exact;
+      const pref = k + ' ';
+      const cands = pool.filter((p) => p.key.startsWith(pref));
+      const first = cands.length === 1 ? cands[0] : undefined;
+      return first ? first.integ : null;
+    };
     const out: AsignacionViva[] = [];
     for (const it of items) {
       const names = it.gestores && it.gestores.length > 0 ? it.gestores : it.gestor ? [it.gestor] : [];
       for (const name of names) {
-        const integ = byName.get(name);
+        const integ = resolve(name);
         if (!integ) continue;
         out.push({
           id: `asg-${it.id}::${encodeURIComponent(name)}`,
