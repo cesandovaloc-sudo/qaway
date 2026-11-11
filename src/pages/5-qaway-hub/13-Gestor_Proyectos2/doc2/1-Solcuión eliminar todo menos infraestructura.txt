@@ -1,0 +1,138 @@
+No fue un error del análisis: el turno se cortó al escribir. Ya tengo lo que faltaba, y lo que encontré ahora cambia la respuesta.
+
+────────────────────────────────────────────────────────────────────────────────
+
+1. Tres hallazgos nuevos (decisivos para tu pregunta)
+
+a) Hoy cualquiera puede borrar todo el cronograma.
+ supabaseClient.ts:4-5  tiene la URL y la anon key hardcodeadas en el repo; las 3 tablas tienen RLS con  using (true)  y  with check (true)  ( 01:58-70 ,  03:32-37 ). No hay  user_id  ni  created_by  en ninguna tabla. Cualquier persona con acceso a este repositorio puede leer, escribir y borrar los proyectos. Esto no es "deuda técnica": es una condición que impide cargar datos reales, y arreglarlo después de cargar datos no es más barato — es lo mismo, pero con el riesgo ya corrido.
+
+b) La BD real ya no coincide con el SQL del repo.
+ gestorProjectService.ts:31-42  hace  upsert  incluyendo  tenant_id  en  gestor_proyectos , pero  01_gestor_cronograma.sql  no define esa columna. Alguien la agregó a mano en el panel de Supabase. Es exactamente el escenario que advertí en la auditoría anterior, y confirma que el esquema no está versionado de verdad:  create table if not exists  no migra nada, solo crea si no existe. Ya perdiste la capacidad de reconstruir la BD desde el repo.
+
+c) Las PK son códigos de negocio, no identificadores.
+Los ids son  pt-1.7.1 ,  pt-1.6-dre-${slug} ,  unit-001 ,  p-1 . En multiusuario, dos personas creando el mismo nodo generan la misma PK y el segundo  insert  pisa al primero (o falla el  upsert ). Un id debe ser opaco ( uuid ) y el código ( 1.7.1 ) un atributo editable y único por proyecto.
+
+Súmale lo que ya sabíamos:  gestores text[]  (asignación por nombre, no por usuario), un solo par  baseline_start/end  (una sola línea base posible),  parent_id  sin FK, fechas  NOT NULL  (bloquea hitos y borradores), y  edt_type  inexistente.
+
+────────────────────────────────────────────────────────────────────────────────
+
+2. Respuesta directa
+
+Sí, rehacer el esquema es la decisión correcta. Y sí, es más barato ahora. Pero "eliminar todas las tablas" a secas no es el ahorro: el ahorro está en no cargar datos con un modelo que te obligará a 4 migraciones caras después.
+
+Y hay un matiz importante: el costo del reinicio no está en la base de datos, está en el código. La BD tiene 3 tablas y ~1 proyecto semilla. El código que la consume son 14 archivos. Ese trabajo de adaptación lo vas a pagar de todos modos (porque los mappers ya están mal: no persisten  edtType , ni  dependencies , ni tienen noción de usuario), así que hacerlo junto con el reinicio no duplica el costo, lo cobra una sola vez.
+
+────────────────────────────────────────────────────────────────────────────────
+
+3. Comparativa de costo
+
+┌───────────────┬───────────────────────────────────────────────────┬───────────────────────────────────────────┐
+│               │ A. Parchear el esquema actual                     │ B. Reinicio con esquema v2                │
+├───────────────┼───────────────────────────────────────────────────┼───────────────────────────────────────────┤
+│ Trabajo       │ 5-6 migraciones sueltas (edt_type, dependencies,  │ 1 carpeta de migraciones versionadas +    │
+│ inmediato     │ fase_id, FK de parent_id, RLS real, updated_by)   │ 00_reset.sql; re-seed de 251 unidades (ya │
+│               │                                                   │ está en el repo)                          │
+│ Datos que hay │ Ninguno hoy, pero los parches se aplican mientras │ Cero (no hay datos válidos, por tu propio │
+│ que migrar    │ ya hay datos                                      │ criterio)                                 │
+│ Riesgo de     │ Alto, y crece con cada usuario                    │ Se elimina (uuid)                         │
+│ colisión de   │                                                   │                                           │
+│ ids           │                                                   │                                           │
+│ Asignación de │ Se queda en text[] → migrar después exige mapear  │ item_assignees desde el día 1             │
+│ responsables  │ nombres a usuarios reales: la migración más       │                                           │
+│               │ dolorosa y con pérdida                            │                                           │
+│ Líneas base   │ Una sola; versionar después = reescribir historia │ baselines + baseline_items                │
+│ Seguridad     │ RLS permisiva convive con datos reales mientras   │ Se define antes de cargar                 │
+│               │ se arregla                                        │                                           │
+│ Reproducibili │ La BD real ya divergió del repo; seguir           │ El repo reconstruye la BD desde cero      │
+│ dad           │ parcheando agrava la deriva                       │                                           │
+│ Código a      │ Igual: mappers + 4 vistas                         │ Igual, y de una sola vez                  │
+│ tocar         │                                                   │                                           │
+└───────────────┴───────────────────────────────────────────────────┴───────────────────────────────────────────┘
+
+El costo de B es aproximadamente el de A, más un día de diseño de esquema, menos las 3-4 migraciones de datos que A te cobrará después con interés (usuarios, baseline, asignaciones). La ventaja no es económica: es que B te deja el modelo correcto antes de que exista algo que perder.
+
+────────────────────────────────────────────────────────────────────────────────
+
+4. Qué borraría y qué no
+
+┌──────────────────┬─────────────────────┬──────────────────────────────────────────────────────────────────────┐
+│ Objeto           │ Acción              │ Por qué                                                              │
+├──────────────────┼─────────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ gestor_cronogram │ Recrear (drop +     │ Sin datos válidos; el modelo cambia de raíz                          │
+│ a_items          │ create v2)          │                                                                      │
+│ gestor_proyectos │ Recrear             │ Le falta tenant_id, owner_id, status, archived_at                    │
+│ gestor_unidades  │ Conservar la        │ Sus 251 filas son un catálogo real (DRE/UGEL) que ya está en el repo │
+│                  │ estructura,         │ y el script es idempotente. No son datos de avance, pero tampoco     │
+│                  │ re-ejecutar el seed │ conviene perderlas: si las borras, se re-cargan del mismo .sql en 2  │
+│                  │                     │ segundos                                                             │
+│ 02_..._linea_bas │ Absorber en v2      │ Son parches incrementales que en v2 ya vienen de origen              │
+│ e.sql / 04_..._t │                     │                                                                      │
+│ ipo_icono.sql    │                     │                                                                      │
+│ localStorage (qa │ Dump antes de tocar │ Hoy es la única copia de edtType, dependencies y faseId. Si el reset │
+│ way-gantt-items- │ nada, luego dejar   │ coincide con un borrado de caché del navegador, se pierde la         │
+│ *)               │ de usarlo como      │ estructura que sí quieres conservar como referencia                  │
+│                  │ fuente              │                                                                      │
+└──────────────────┴─────────────────────┴──────────────────────────────────────────────────────────────────────┘
+
+Ese último punto es el único riesgo real de pérdida: la estructura que dices tener no está en Supabase, está en el navegador. Antes de cualquier  drop , exporta ese  localStorage  a un archivo.
+
+────────────────────────────────────────────────────────────────────────────────
+
+5. Modelo v2 mínimo (para crecer a multiproyecto y multiusuario)
+
+Lo mínimo que evita rehacer esto otra vez:
+
+tenants            (id, name, slug, plan, status)
+profiles           (id → auth.users, full_name, email, avatar_url)
+memberships        (tenant_id, user_id, role: owner|admin|pm|colaborador|lector)
+ 
+projects           (id uuid, tenant_id, code, name, region, owner_id,
+                    status, archived_at, methodology, budget, sponsor, ...)
+ 
+wbs_items          (id uuid, project_id, parent_id → wbs_items(id) on delete restrict,
+                    code '1.7.1' (unique per project), name,
+                    kind 'hito'|'tarea', is_entregable bool, is_milestone bool,
+                    start_date, end_date (nullable), sort_order,
+                    status, description, report_type,
+                    created_by, updated_by, created_at, updated_at)
+ 
+item_assignees     (item_id, user_id, role)          ← reemplaza gestores text[]
+item_dependencies  (item_id, predecessor_id, type, lag)  ← hoy no se persiste
+baselines          (id, project_id, name, approved_by, approved_at)
+baseline_items     (baseline_id, item_id, start_date, end_date, ...)
+item_attachments   (item_id, storage_path, name, ...) ← Storage, no jsonb
+activity_log       (tenant_id, item_id, user_id, action, payload, at)
+
+Reglas que van con el esquema y no con el código:
+-  progress  no se guarda en  wbs_items : se deriva de los hijos o de  item_progress  (esto elimina de raíz el bug que encontré, donde convertir una hoja en contenedor pisaba el avance).
+-  edt_type  no se guarda como columna editable;  is_entregable  es lo único que no se puede derivar (coherente con la auditoría anterior: nada de tabla catálogo).
+-  parent_id  con FK y  on delete restrict  + chequeo de ciclos en un trigger → se acaban los huérfanos.
+- RLS por  memberships , no  using (true) .
+-  updated_at  con trigger, no desde el cliente.
+
+────────────────────────────────────────────────────────────────────────────────
+
+6. Orden recomendado (5 fases, sin tocar nada aún)
+
+1. Congelar: dump de  localStorage  +  select count(*)  por tabla para confirmar que no hay nada más que el seed.
+2. Escribir v2 como migraciones numeradas en una carpeta nueva, con el  00_reset.sql  explícito y comentado. Así el paso destructivo es un archivo revisable, no una acción en el panel.
+3. Adaptar los 2 servicios ( gestorCronogramaService ,  gestorProjectService ) a v2, con los mappers completos. Hay que hacerlo en el mismo cambio que la migración: si se aplica el reset sin tocar los mappers, las 4 vistas dejan de guardar.
+4. Auth + memberships antes de invitar al primer usuario real.
+5. Cargar la estructura de referencia (proyecto + EDT semilla) por script, no por clics.
+
+────────────────────────────────────────────────────────────────────────────────
+
+7. Riesgos y lo que hay que confirmar
+
+- Bloqueante: nada de datos reales mientras siga  using (true)  con la anon key publicada en el repo. Es el argumento más fuerte a favor del reinicio.
+- Antes del  drop : confirmar en el panel que las 3 tablas solo tienen el seed. Yo no tengo acceso a la BD; solo veo los  .sql  del repo, y ya demostré que la BD real tiene al menos una columna ( tenant_id ) que el repo no tiene. Debe existir otra deriva más.
+- Preservar: el  localStorage  con la estructura actual, como referencia para re-sembrar.
+- No romper otros módulos: verifiqué que las tablas solo se usan dentro de  13-Gestor_Proyectos2  (14 archivos, 2 servicios). Ningún otro módulo del Hub las toca, así que el blast radius del reset está contenido.
+- Lo que sí se pierde: los ids con prefijo ( pt-1.7.1 ) que hoy funcionan como referencia en  OFFICIAL_WBS_DEPENDENCIES  y en los mapas de las 4 vistas. En v2 el código  1.7.1  sigue existiendo como atributo único por proyecto, así que hay que migrar esos mapas a buscar por  code , no por  id . Ese es el trabajo fino real.
+
+────────────────────────────────────────────────────────────────────────────────
+
+Conclusión: sí, reinicia — no porque sea más barato en horas de base de datos (son 3 tablas), sino porque es la última ventana en que puedes elegir el modelo en vez de adaptarte a él. Un esquema con  using(true) , PKs de negocio,  gestores text[]  y una sola línea base no está "a medio hacer": está diseñado para un proyecto único de un solo usuario. Y la buena noticia es que las dos piezas que más duelen de migrar después (usuarios y líneas base) hoy están vacías, así que hacerlo ahora cuesta casi nada.
+
+No ejecuté nada: todo lo anterior son lecturas del repo. El  drop  es destructivo y no está autorizado en este mensaje; cuando quieras, lo preparo como  00_reset.sql  versionado para que lo revises antes de aplicar.

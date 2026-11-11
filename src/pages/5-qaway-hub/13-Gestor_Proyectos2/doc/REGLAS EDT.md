@@ -6,8 +6,6 @@ Este documento establece la normativa conceptual, metodológica y técnica para 
 
 ## 1. Fundamentos Metodológicos (BID / PMBOK)
 
-> **Mala mía, asumí que estabas mostrándome las reglas de tu sistema en lugar de un caso de prueba para confrontar con el documento. Volvamos estrictamente a la teoría del PDF:**
-> 
 > Según el documento del BID, tu nivel 2 que quedó solo es un paquete de trabajo.
 > El texto define explícitamente las reglas que contradicen la jerarquía rígida por niveles fijos:
 > 
@@ -35,24 +33,27 @@ Este documento establece la normativa conceptual, metodológica y técnica para 
 
 ### 3.1. Reglas de Determinación de Tipo (`resolveEdtNodeType` / `getEdtNodeDisplayLabel`)
 ```text
-SI el nodo no tiene parentId:
-   -> COMPONENTE (Nivel 1, raíz del alcance)
+SI el nodo no tiene parentId (Nivel 1):
+   -> COMPONENTE (Raíz del alcance)
 
 SI el nodo tiene hijos (hasChildren == true):
-   -> PRODUCTO (Agrupador intermedio del entregable de esa rama)
+   SI nivel == 2:
+      -> PRODUCTO (Resultado principal dentro del componente)
+   SI nivel >= 3:
+      -> ENTREGABLE (Bien o servicio específico que agrupa paquetes)
 
 SI el nodo NO tiene hijos (hasChildren == false):
    SI start == end O tipo HITO:
       -> HITO (Punto de control de duración cero)
    EN OTRO CASO:
-      -> PAQUETE DE TRABAJO (Nodo hoja terminal de su rama)
-```
+      -> PAQUETE DE TRABAJO (Nodo hoja terminal de su rama, en nivel 2, 3 o 4)
+
 
 ### 3.2. Regla de Puntuación Decimal
 * **Componente:** `1.`, `2.`, `3.`...
 * **Hijos de Componente:** `1.1`, `1.2`, `1.3`...
-* **Sub-hijos (desglose de 1.7):** `1.7.1`, `1.7.2` (reemplazo oficial de `1.7a` y `1.7b`).
+* **Sub-hijos (desglose de 1.7):** `1.7.1`, `1.7.2` 
 * **Sub-sub-hijos:** `1.7.1.1`, `1.7.1.2`...
 
 ### 3.3. Aislamiento Visual en Módulo Proyecto
-* Los paquetes de trabajo y productos en el módulo **Proyecto** (`perspective="maestro"`) utilizan iconografía de entregables/tareas (`<ListChecks />`, `<Package />`, `<Flag />`), nunca iconos de edificios ni sedes institucionales.
+* Los paquetes de trabajo y productos siempre utilizan iconografía de compoentens, prdoctos, entregables, paqu trabajo, lucide como corresponden
