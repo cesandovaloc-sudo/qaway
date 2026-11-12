@@ -18,7 +18,6 @@ import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
-import EquipoOrganigramaView from '../equipo/EquipoOrganigramaView';
 import EquipoSedesView from '../equipo/EquipoSedesView';
 import EquipoCargaView from '../equipo/EquipoCargaView';
 import EquipoDrawer from '../equipo/EquipoDrawer';
@@ -7658,14 +7657,6 @@ export default function Reuniones2View({
 
 
           {/* Vistas específicas de perspectiva Equipo */}
-          {perspective === 'equipo' && viewMode === 'organigrama' && (
-            <EquipoOrganigramaView
-              integrantes={equipoIntegrantes}
-              areas={equipoAreas}
-              sedes={equipoSedes}
-              onSelectIntegrante={(id) => setEquipoSelectedId(id)}
-            />
-          )}
           {perspective === 'equipo' && viewMode === 'sedes' && (
             <EquipoSedesView
               integrantes={equipoIntegrantes}

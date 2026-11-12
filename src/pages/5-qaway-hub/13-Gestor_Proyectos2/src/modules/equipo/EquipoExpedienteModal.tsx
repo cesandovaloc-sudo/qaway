@@ -27,6 +27,8 @@ interface EquipoExpedienteModalProps {
   asignaciones: AsignacionViva[];
   sedes: SedeFrente[];
   areas: UnidadOrganizacional[];
+  embedded?: boolean;
+  backLabel?: string;
 }
 
 export default function EquipoExpedienteModal({
@@ -37,6 +39,8 @@ export default function EquipoExpedienteModal({
   asignaciones,
   sedes,
   areas,
+  embedded = false,
+  backLabel = 'Volver al Directorio',
 }: EquipoExpedienteModalProps) {
   const [activeTab, setActiveTab] = useState<'perfil' | 'estructura' | 'historial' | 'documentos'>('perfil');
   const [rolSeguridad, setRolSeguridad] = useState<RolSeguridad>(integrante?.rolSeguridad || 'Colaborador');
@@ -70,9 +74,9 @@ export default function EquipoExpedienteModal({
   return (
     <div
       style={{
-        position: 'fixed',
+        position: embedded ? 'absolute' : 'fixed',
         inset: 0,
-        zIndex: 1800,
+        zIndex: embedded ? 45 : 1800,
         background: '#f1f5f9',
         display: 'flex',
         flexDirection: 'column',
@@ -114,7 +118,7 @@ export default function EquipoExpedienteModal({
             }}
           >
             <ArrowLeft size={14} />
-            Volver al Directorio
+            {backLabel}
           </button>
 
           <div style={{ width: '1px', height: '24px', background: '#334155' }} />
@@ -158,27 +162,23 @@ export default function EquipoExpedienteModal({
         </div>
       </header>
 
-      {/* Contenedor Central */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Barra Lateral Izquierda de Navegación del Expediente */}
+      {/* Contenedor Central: Barra superior horizontal de secciones + Lienzo */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Barra Superior Horizontal de Navegación de la Ficha (debajo de cabecera y migajas) */}
         <nav
+          aria-label="Secciones de la ficha"
           style={{
-            width: '240px',
             background: '#ffffff',
-            borderRight: '1px solid #e2e8f0',
-            padding: '20px 12px',
+            borderBottom: '1px solid #e2e8f0',
+            padding: '8px 20px',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '4px',
+            flexDirection: 'row',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '6px',
             flexShrink: 0,
           }}
         >
-          <div style={{ padding: '0 10px 12px 10px', borderBottom: '1px solid #f1f5f9', marginBottom: '8px' }}>
-            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748b', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
-              SECCIONES DE LA FICHA
-            </span>
-          </div>
-
           {[
             { id: 'perfil', label: 'Perfil y Seguridad', icon: Shield },
             { id: 'estructura', label: 'Estructura y Sede', icon: Building2 },
@@ -190,26 +190,26 @@ export default function EquipoExpedienteModal({
             return (
               <button
                 key={item.id}
+                type="button"
                 onClick={() => setActiveTab(item.id as any)}
                 style={{
-                  width: '100%',
-                  height: '38px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  border: 'none',
+                  height: '34px',
+                  padding: '0 13px',
+                  borderRadius: '7px',
+                  border: isSel ? '1px solid #bae6fd' : '1px solid transparent',
                   background: isSel ? '#e0f2fe' : 'transparent',
                   color: isSel ? '#0369a1' : '#334155',
                   fontSize: '12.5px',
-                  fontWeight: isSel ? 700 : 500,
-                  display: 'flex',
+                  fontWeight: isSel ? 700 : 550,
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: '7px',
                   cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'background 0.15s ease',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease',
                 }}
               >
-                <Icon size={15} color={isSel ? '#0284c7' : '#64748b'} />
+                <Icon size={14} color={isSel ? '#0284c7' : '#64748b'} />
                 {item.label}
               </button>
             );
@@ -217,7 +217,7 @@ export default function EquipoExpedienteModal({
         </nav>
 
         {/* Lienzo Principal de Contenido del Expediente */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '28px 36px' }}>
+        <main style={{ flex: 1, overflowY: 'auto', padding: '24px 28px' }}>
           {/* TAB 1: PERFIL Y SEGURIDAD */}
           {activeTab === 'perfil' && (
             <div style={{ maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '22px' }}>

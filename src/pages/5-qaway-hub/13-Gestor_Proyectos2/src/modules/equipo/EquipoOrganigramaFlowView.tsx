@@ -91,6 +91,7 @@ export default function EquipoOrganigramaFlowView({
     <ReactFlowProvider>
       <div
         style={{
+          position: 'relative',
           display: 'flex',
           flexDirection: 'column',
           flex: 1,
@@ -179,7 +180,7 @@ export default function EquipoOrganigramaFlowView({
           </span>
         </div>
 
-        {/* Ficha de expediente local para inspección del integrante demo */}
+        {/* Ficha de expediente integrada en el área de trabajo (sin tapar sidebar ni migajas) */}
         <EquipoExpedienteModal
           isOpen={Boolean(expedienteIntegrante)}
           onClose={() => setExpedienteIntegrante(null)}
@@ -188,6 +189,8 @@ export default function EquipoOrganigramaFlowView({
           asignaciones={[]}
           sedes={[]}
           areas={[]}
+          embedded
+          backLabel="Volver al Organigrama"
         />
       </div>
     </ReactFlowProvider>
