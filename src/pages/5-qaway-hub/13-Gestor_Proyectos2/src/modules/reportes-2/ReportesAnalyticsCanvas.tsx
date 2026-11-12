@@ -162,6 +162,7 @@ export default function ReportesAnalyticsCanvas({
 }: {
   notify?: (m: string) => void;
 }) {
+  const [activeReportHito, setActiveReportHito] = useState<string | null>(null);
   const [milestones] = useState<Milestone[]>(initialMilestones);
   const [expanded, setExpanded] = useState<string[]>(['1.6']);
 
@@ -181,8 +182,21 @@ export default function ReportesAnalyticsCanvas({
   };
 
   const handleOpenReport = (m: Milestone) => {
-    notify?.(`Hito seleccionado: ${m.id} · ${m.name}`);
+    setActiveReportHito(m.id);
+    notify?.(`Abriendo reporte territorial: Hito ${m.id} · ${m.name}`);
   };
+
+  if (activeReportHito) {
+    return (
+      <div className="rep-analytics-canvas">
+        <TerritoryReporterV2Tab
+          initialHito={activeReportHito}
+          onBack={() => setActiveReportHito(null)}
+          notify={notify}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="rep-analytics-canvas">

@@ -98,6 +98,11 @@ const MODULE_CONTEXT_INFO: Record<ModuleKey, { title: string; hint: string; sugg
     hint: 'Consolidado de informes territoriales, analítica y estado de hitos.',
     suggestions: ['Revisar avance del proyecto', 'Analizar tareas críticas', 'Consultar próximos vencimientos']
   },
+  reportes: {
+    title: 'Reportes',
+    hint: 'Consolidado de informes territoriales, analítica y estado de hitos.',
+    suggestions: ['Revisar avance del proyecto', 'Analizar tareas críticas', 'Consultar próximos vencimientos']
+  },
   reuniones: {
     title: 'Reuniones y Coordinación',
     hint: 'Agendas de trabajo, traslados y minutas de coordinación.',

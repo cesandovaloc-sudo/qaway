@@ -23,6 +23,13 @@ import {
   X,
   Zap,
 } from 'lucide-react'
+import {
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts'
 import { territoryMonitoringService } from './territoryMonitoringService'
 
 export function buildWhatsAppUrl(phone: string, text: string) {
@@ -1414,7 +1421,7 @@ export function TerritoryReporterV2Tab({
   }
 
   return (
-    <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-['DM_Sans',sans-serif] text-slate-800 antialiased">
+    <div className="space-y-6 pb-36 print:space-y-3 print:pb-0 font-sans text-slate-800 antialiased" style={{ fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       {/* ════════════════════════════════════════════════════════════════════════
           1. CABECERA INSTITUCIONAL + FILTROS EN ESCALA DE GRISES Y BLANCOS
           ════════════════════════════════════════════════════════════════════════ */}
@@ -1627,7 +1634,7 @@ export function TerritoryReporterV2Tab({
                             title={`Oficio Múltiple: ${u.name} · ${hasOficio ? 'Oficio emitido y subido (SÍ)' : 'Pendiente de emisión (NO)'} (Clic para alternar)`}
                           >
                             <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
-                              hasOficio ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                              hasOficio ? 'bg-[#10b981]' : 'bg-[#ef4444]'
                             }`}>
                               {hasOficio ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
                             </span>
@@ -1663,7 +1670,7 @@ export function TerritoryReporterV2Tab({
                             title={`Sustento Difusión: ${u.name} · ${hasDifusion ? 'Difusión acreditada en Drive (SÍ)' : 'Sin evidencia en Drive (NO)'} (Clic para alternar)`}
                           >
                             <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
-                              hasDifusion ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                              hasDifusion ? 'bg-[#10b981]' : 'bg-[#ef4444]'
                             }`}>
                               {hasDifusion ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
                             </span>
@@ -1699,7 +1706,7 @@ export function TerritoryReporterV2Tab({
                             title={`Fase 1: ${u.name} · ${isDone ? 'Carga inicial completada' : 'Pendiente de carga'} (Clic para alternar)`}
                           >
                             <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
-                              isDone ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                              isDone ? 'bg-[#10b981]' : 'bg-[#ef4444]'
                             }`}>
                               {isDone ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
                             </span>
@@ -1733,7 +1740,7 @@ export function TerritoryReporterV2Tab({
                             title={`Drive: ${u.name} · ${ratioText} (${dirInfo.pct}% de direcciones)`}
                           >
                             <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs ${
-                              st === 'completado' ? 'bg-[#16a34a]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#dc2626]'
+                              st === 'completado' ? 'bg-[#10b981]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#ef4444]'
                             }`}>
                               {st === 'completado' ? <Check size={24} strokeWidth={3.2} /> : st === 'en_proceso' ? <Clock size={23} strokeWidth={2.8} /> : <X size={24} strokeWidth={3.2} />}
                             </span>
@@ -1767,7 +1774,7 @@ export function TerritoryReporterV2Tab({
                             title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado' : 'En plazo técnico'} (Clic para cambiar)`}
                           >
                             <span className={`grid h-11 w-11 place-items-center rounded-full shadow-xs transition-transform group-hover:scale-110 ${
-                              isDone ? 'bg-[#16a34a] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
+                              isDone ? 'bg-[#10b981] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
                             }`}>
                               {isDone ? <Check size={24} strokeWidth={3.2} /> : <Clock size={23} strokeWidth={2.8} />}
                             </span>
@@ -1784,16 +1791,16 @@ export function TerritoryReporterV2Tab({
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════════
-          2. FILA DE 4 TARJETAS KPI RESUMEN (ESTILO EJECUTIVO DEL FLYER)
+          2. FILA DE 4 TARJETAS KPI RESUMEN (ESTILO EJECUTIVO LIMPIO QAWAY)
           ════════════════════════════════════════════════════════════════════════ */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 print:grid-cols-4 print:gap-2">
-        {/* TOTAL DE UGEL */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-2xs">
-          <div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-blue-700">
+        {/* TOTAL DE UGEL (Azul #0066ff) */}
+        <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-50" style={{ color: '#0066ff' }}>
             <Building2 size={22} />
           </div>
           <div>
-            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-400">TOTAL DE {isPasco ? 'UNIDADES' : 'UGEL'}</span>
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-500">TOTAL DE {isPasco ? 'UNIDADES' : 'UGEL'}</span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.total}</span>
               <span className="text-[13px] font-semibold text-slate-500">Región {isPasco ? 'Pasco' : 'Junín'}</span>
@@ -1801,56 +1808,56 @@ export function TerritoryReporterV2Tab({
           </div>
         </div>
 
-        {/* UGEL QUE COMPLETAN LAS ETAPAS */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-emerald-200/90 bg-[#f4fbf7] p-4.5 shadow-2xs">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[#16a34a] text-white">
+        {/* UGEL QUE COMPLETAN LAS ETAPAS (Verde #10b981) */}
+        <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+            <span className="grid h-8 w-8 place-items-center rounded-full text-white" style={{ background: '#10b981' }}>
               <Check size={16} strokeWidth={3} />
             </span>
           </div>
           <div>
-            <span className="text-[11.5px] font-bold uppercase tracking-wider text-emerald-800">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-700">
               {is51a ? 'UGEL QUE COMPLETAN LAS 2 ETAPAS' : 'UGEL QUE COMPLETAN LAS 3 ETAPAS'}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.completed}</span>
-              <span className="text-[13px] font-bold text-slate-500">{ugelStats.completedPct}% del total</span>
+              <span className="text-[13px] font-bold" style={{ color: '#10b981' }}>{ugelStats.completedPct}% del total</span>
             </div>
           </div>
         </div>
 
-        {/* UGEL EN PROCESO */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-amber-200/90 bg-[#fefbf3] p-4.5 shadow-2xs">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-100 text-amber-700">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f59e0b] text-white">
+        {/* UGEL EN PROCESO (Ámbar #f59e0b) */}
+        <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-amber-50 text-amber-600">
+            <span className="grid h-8 w-8 place-items-center rounded-full text-white" style={{ background: '#f59e0b' }}>
               <Clock size={16} strokeWidth={2.6} />
             </span>
           </div>
           <div>
-            <span className="text-[11.5px] font-bold uppercase tracking-wider text-amber-800">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-700">
               {is51a ? 'UGEL EN PROCESO (1 DE 2)' : 'UGEL EN PROCESO'}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.inProgress}</span>
-              <span className="text-[13px] font-bold text-slate-500">{ugelStats.inProgressPct}% del total</span>
+              <span className="text-[13px] font-bold" style={{ color: '#f59e0b' }}>{ugelStats.inProgressPct}% del total</span>
             </div>
           </div>
         </div>
 
-        {/* UGEL PENDIENTES */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-rose-200/90 bg-[#fef5f5] p-4.5 shadow-2xs">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-rose-100 text-rose-700">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[#dc2626] text-white">
+        {/* UGEL PENDIENTES (Rojo #ef4444) */}
+        <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-rose-50 text-rose-600">
+            <span className="grid h-8 w-8 place-items-center rounded-full text-white" style={{ background: '#ef4444' }}>
               <X size={16} strokeWidth={3} />
             </span>
           </div>
           <div>
-            <span className="text-[11.5px] font-bold uppercase tracking-wider text-rose-800">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-700">
               {is51a ? 'UGEL PENDIENTES (0 DE 2)' : 'UGEL PENDIENTES'}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-slate-900 tabular-nums">{ugelStats.pending}</span>
-              <span className="text-[13px] font-bold text-slate-500">{ugelStats.pendingPct}% del total</span>
+              <span className="text-[13px] font-bold" style={{ color: '#ef4444' }}>{ugelStats.pendingPct}% del total</span>
             </div>
           </div>
         </div>
@@ -1929,27 +1936,30 @@ export function TerritoryReporterV2Tab({
                 </div>
 
                 <div className="relative flex-1">
-                  <div className="flex h-9 overflow-hidden rounded-xl bg-slate-100 shadow-inner">
+                  <div className="flex h-8 overflow-hidden rounded-full bg-slate-100 shadow-inner">
                     {f.ok > 0 && (
                       <div
-                        style={{ width: `${(f.ok / ugelStats.total) * 100}%` }}
-                        className="flex h-full items-center justify-center bg-emerald-600 border-r border-white/20"
+                        style={{ width: `${(f.ok / ugelStats.total) * 100}%`, background: '#10b981' }}
+                        className="flex h-full items-center justify-center transition-all"
+                        title={`Completado: ${f.ok} UGEL (${Math.round((f.ok / ugelStats.total) * 100)}%)`}
                       >
                         <span className="text-xs font-black text-white tabular-nums">{f.ok}</span>
                       </div>
                     )}
                     {f.prog > 0 && (
                       <div
-                        style={{ width: `${(f.prog / ugelStats.total) * 100}%` }}
-                        className="flex h-full items-center justify-center bg-amber-400 border-r border-white/20"
+                        style={{ width: `${(f.prog / ugelStats.total) * 100}%`, background: '#f59e0b' }}
+                        className="flex h-full items-center justify-center transition-all"
+                        title={`En proceso: ${f.prog} UGEL (${Math.round((f.prog / ugelStats.total) * 100)}%)`}
                       >
-                        <span className="text-xs font-black text-slate-900 tabular-nums">{f.prog}</span>
+                        <span className="text-xs font-black text-white tabular-nums">{f.prog}</span>
                       </div>
                     )}
                     {f.pend > 0 && (
                       <div
-                        style={{ width: `${(f.pend / ugelStats.total) * 100}%` }}
-                        className="flex h-full items-center justify-center bg-rose-600"
+                        style={{ width: `${(f.pend / ugelStats.total) * 100}%`, background: '#ef4444' }}
+                        className="flex h-full items-center justify-center transition-all"
+                        title={`Pendiente: ${f.pend} UGEL (${Math.round((f.pend / ugelStats.total) * 100)}%)`}
                       >
                         <span className="text-xs font-black text-white tabular-nums">{f.pend}</span>
                       </div>
@@ -2000,45 +2010,45 @@ export function TerritoryReporterV2Tab({
           </div>
 
           <div className="my-auto flex items-center justify-center gap-6 py-3">
-            <div className="relative flex items-center justify-center">
-              <svg width="136" height="136" viewBox="0 0 136 136" className="-rotate-90">
-                <circle cx="68" cy="68" r="52" fill="transparent" stroke="#f1f5f9" strokeWidth="18" />
-                <circle
-                  cx="68"
-                  cy="68"
-                  r="52"
-                  fill="transparent"
-                  stroke="#16a34a"
-                  strokeWidth="18"
-                  strokeDasharray={`${(ugelStats.completed / ugelStats.total) * 326.72} 326.72`}
-                  strokeDashoffset="0"
-                />
-                <circle
-                  cx="68"
-                  cy="68"
-                  r="52"
-                  fill="transparent"
-                  stroke="#fbbf24"
-                  strokeWidth="18"
-                  strokeDasharray={`${(ugelStats.inProgress / ugelStats.total) * 326.72} 326.72`}
-                  strokeDashoffset={`-${(ugelStats.completed / ugelStats.total) * 326.72}`}
-                />
-                <circle
-                  cx="68"
-                  cy="68"
-                  r="52"
-                  fill="transparent"
-                  stroke="#dc2626"
-                  strokeWidth="18"
-                  strokeDasharray={`${(ugelStats.pending / ugelStats.total) * 326.72} 326.72`}
-                  strokeDashoffset={`-${((ugelStats.completed + ugelStats.inProgress) / ugelStats.total) * 326.72}`}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <div className="relative flex items-center justify-center w-[140px] h-[140px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Tooltip
+                    formatter={(v: any, name: any) => [`${v} (${Math.round((Number(v) / (ugelStats.total || 1)) * 100)}%)`, name]}
+                    contentStyle={{
+                      background: '#ffffff',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      fontSize: '12px',
+                      boxShadow: '0 4px 14px rgba(15,23,42,0.08)',
+                      padding: '6px 10px',
+                    }}
+                  />
+                  <Pie
+                    data={[
+                      { name: 'Completado', value: ugelStats.completed, color: '#16a34a' },
+                      { name: 'En proceso', value: ugelStats.inProgress, color: '#f59e0b' },
+                      { name: 'Pendiente', value: ugelStats.pending, color: '#dc2626' },
+                    ]}
+                    innerRadius={44}
+                    outerRadius={66}
+                    paddingAngle={3}
+                    dataKey="value"
+                    isAnimationActive={true}
+                    animationDuration={1000}
+                    animationEasing="ease-out"
+                  >
+                    <Cell fill="#16a34a" />
+                    <Cell fill="#f59e0b" />
+                    <Cell fill="#dc2626" />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
                 <span className="text-2xl font-black text-slate-900 leading-none tabular-nums">
                   {ugelStats.total}
                 </span>
-                <span className="text-[10.5px] font-bold uppercase text-slate-400 leading-tight">
+                <span className="text-[10px] font-bold uppercase text-slate-400 leading-tight mt-0.5">
                   {isPasco ? 'UNIDADES' : 'UGEL'}
                 </span>
               </div>
@@ -2046,17 +2056,17 @@ export function TerritoryReporterV2Tab({
 
             <div className="space-y-2.5 text-xs">
               <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-emerald-600" />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#10b981' }} />
                 <span className="font-bold text-slate-800 text-[12.5px]">Completado ({ugelStats.completed})</span>
                 <span className="text-slate-500 font-bold">— {ugelStats.completedPct}%</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-amber-400" />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#f59e0b' }} />
                 <span className="font-bold text-slate-800 text-[12.5px]">En proceso ({ugelStats.inProgress})</span>
                 <span className="text-slate-500 font-bold">— {ugelStats.inProgressPct}%</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-rose-600" />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#ef4444' }} />
                 <span className="font-bold text-slate-800 text-[12.5px]">Pendiente ({ugelStats.pending})</span>
                 <span className="text-slate-500 font-bold">— {ugelStats.pendingPct}%</span>
               </div>
@@ -2151,10 +2161,10 @@ export function TerritoryReporterV2Tab({
                 <div key={d.code} className="flex items-center gap-2.5 text-xs">
                   <span className="w-13 font-black text-slate-800 text-[12.5px]">{d.code}</span>
                   <div className="relative flex-1">
-                    <div className="flex h-4 overflow-hidden rounded-full bg-slate-100 shadow-inner">
-                      <div style={{ width: `${(d.ok / d.total) * 100}%` }} className="bg-emerald-600" />
-                      <div style={{ width: `${(d.prog / d.total) * 100}%` }} className="bg-amber-400" />
-                      <div style={{ width: `${(d.pend / d.total) * 100}%` }} className="bg-rose-600" />
+                    <div className="flex h-3.5 overflow-hidden rounded-full bg-slate-100 p-0.5 shadow-inner gap-0.5">
+                      <div style={{ width: `${(d.ok / d.total) * 100}%`, background: '#10b981' }} className="rounded-full transition-all" title={`Completado: ${d.ok}`} />
+                      <div style={{ width: `${(d.prog / d.total) * 100}%`, background: '#f59e0b' }} className="rounded-full transition-all" title={`En proceso: ${d.prog}`} />
+                      <div style={{ width: `${(d.pend / d.total) * 100}%`, background: '#ef4444' }} className="rounded-full transition-all" title={`Pendiente: ${d.pend}`} />
                     </div>
                   </div>
                   <span className="w-11 text-right font-black text-slate-900 tabular-nums text-[12.5px]">

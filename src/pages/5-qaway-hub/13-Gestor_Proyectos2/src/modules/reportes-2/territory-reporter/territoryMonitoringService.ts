@@ -1,4 +1,4 @@
-import { supabaseClient as supabase } from '../../../services/supabaseClient'
+import { supabase } from '../../../services/supabaseClient'
 export type TerritoryStatus = 'completado' | 'en_proceso' | 'pendiente'
 export type DirectionCode =
   | 'DEI'
@@ -105,6 +105,7 @@ export const territoryMonitoringService = {
    * Cargar todas las UGELs de la Región Junín desde Supabase
    */
   async fetchJuninUgels(): Promise<UgelMonitoringV2Row[]> {
+    if (!supabase) return []
     const { data, error } = await supabase
       .from('territory_ugel_monitoring')
       .select('*')
@@ -127,6 +128,7 @@ export const territoryMonitoringService = {
    * Actualizar una UGEL en Supabase (Resiliente y persistente en la nube)
    */
   async updateUgel(row: UgelMonitoringV2Row): Promise<void> {
+    if (!supabase) return
     const dbPayload = mapUgelRowToDb(row)
     const { error } = await supabase
       .from('territory_ugel_monitoring')
@@ -143,6 +145,7 @@ export const territoryMonitoringService = {
    * Upsert universal para cualquier Hito y Región (Junín, Pasco, etc.)
    */
   async upsertUgel(row: UgelMonitoringV2Row, milestoneCode: string = 'H1.6', regionName: string = 'Junín'): Promise<void> {
+    if (!supabase) return
     const cleanMilestone = milestoneCode.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
     const dbId = milestoneCode === 'H1.6' && regionName === 'Junín'
       ? row.id
@@ -169,6 +172,7 @@ export const territoryMonitoringService = {
    * Cargar UGELs de un Hito y Región específicos desde Supabase
    */
   async fetchUgelsByMilestoneAndRegion(milestoneCode: string, regionName: string): Promise<UgelMonitoringV2Row[]> {
+    if (!supabase) return []
     const { data, error } = await supabase
       .from('territory_ugel_monitoring')
       .select('*')
@@ -184,6 +188,7 @@ export const territoryMonitoringService = {
    * Actualizar campo específico de una UGEL en Supabase
    */
   async updateUgelFields(id: string, fields: Partial<TerritoryUgelDbRecord>): Promise<void> {
+    if (!supabase) return
     const { error } = await supabase
       .from('territory_ugel_monitoring')
       .update({
