@@ -1,0 +1,97 @@
+# ETAPA 2C — Preparación para pruebas (entorno separado)
+
+> **Objetivo:** dejar el modelo v2 listo para validación en un entorno aislado (Supabase de pruebas / branch / proyecto separado), sin ejecutar en productivo, sin cutover y sin retirar `localStorage` ni estructuras antiguas.
+
+## 1. Prerrequisitos
+
+- Entorno Supabase/PostgreSQL separado con acceso a objetos de plataforma necesarios (o stubs): `auth.users`, `public.tenants`, `public.users/profiles`, funciones `public.is_admin()`, `public.get_auth_tenant_id()` según BD Central. Si no existen, adaptar FKs/políticas de forma controlada para la prueba (documentar diferencias).
+- Copia/snapshot de datos legados (`gestor_proyectos`, `gestor_cronograma_items`, `gestor_unidades`) y, si aplica, export de `localStorage` por proyecto para pruebas de merge.
+- **No** ejecutar `DROP`/`TRUNCATE`. **No** alterar infraestructura compartida de Qaway Hub.
+
+## 2. Orden de aplicación (reproducible)
+
+1. `sql/20261112_0001_gp_catalogos_base.sql`
+2. `sql/20261112_0002_gp_entidades_principales.sql`
+3. `sql/20261112_0003_gp_entidades_operativas_y_relaciones.sql`
+4. `sql/20261112_0004_gp_funciones_triggers_rls_indices.sql`
+5. (Opcional, con datos legados cargados) `sql/backfill/20261112_0100_backfill_idempotente.sql`
+
+Cada archivo es aditivo e idempotente en lo posible (`IF NOT EXISTS`, `ON CONFLICT DO NOTHING/UPDATE` controlado, `CREATE OR REPLACE` solo en funciones).
+
+## 3. Verificaciones requeridas
+
+### 3.1 Creación de todas las tablas
+- Confirmar existencia de todas las tablas `gp_*` (`_c`, principales/operativas, `_r`) según `02_diccionario_datos.md` y `01_erd.md`.
+- Confirmar columnas, tipos, defaults y `NOT NULL` conforme al diccionario.
+- Confirmar PK UUID y generación (`gen_random_uuid()` / `pgcrypto`).
+
+### 3.2 Relaciones y restricciones
+- FKs válidas y coherentes (proyecto↔hijos, jerarquías self-FK, catálogos, relaciones `_r`).
+- `UNIQUE` efectivas: `(empresa_id,codigo_proyecto)`, `(proyecto_id,wbs_code)`, membresías, dependencias sin duplicado, `codigo` en catálogos/territoriales.
+- `CHECK`: `kind in ('hito','subproceso')`, progreso 0–100, fechas coherentes, no autociclo en dependencias, actor presente en membresías.
+- Índices creados para `empresa_id`, `proyecto_id`, `nodo_padre_id`, `fase_id`, estados/fechas y FKs de consulta frecuente.
+
+### 3.3 Inserción, consulta y actualización
+- CRUD básico por entidad principal: `gp_proyectos`, `gp_personas`, `gp_fases`, `gp_nodos_edt` (con jerarquía padre-hijo y `fase_id` independiente), `gp_tareas`, `gp_entregables`, `gp_reuniones`, `gp_archivos` (metadata).
+- Relaciones `_r`: asignar responsables/membresías/participantes/dependencias por UUID (sin arrays de texto).
+- Verificar trigger `updated_at` en tablas mutables.
+
+### 3.4 Integridad referencial
+- Rechazo de FKs inválidas, duplicados UNIQUE, dependencias autocíclicas y valores fuera de rango.
+- Consistencia `empresa_id/proyecto_id` entre entidad y sus relaciones (validar en app/servicio y, donde aplique, reforzar con constraints/triggers futuros).
+- Confirmar ausencia de huérfanos tras inserciones controladas.
+
+### 3.5 Aislamiento entre empresas (multitenencia)
+- Con usuarios/sesiones de distintos tenants: un miembro de empresa A no debe ver/modificar datos de empresa B.
+- `gp_auth_empresa_id()` y `gp_is_empresa_member()` resuelven contexto correcto.
+- Proyectos y nodos filtrados por `empresa_id` y membresía.
+
+### 3.6 Permisos por usuario y proyecto
+- Roles por ámbito: `gp_empresa_miembros_r` (roles empresa) y `gp_proyecto_miembros_r` (roles proyecto) con `gp_roles_*_c` (`administrador, gestor, coordinador, supervisor, colaborador, lector`).
+- Lectura/escritura según membresía y rol; admin plataforma (`gp_is_platform_admin`) como bypass controlado si aplica.
+- Usuario sin membresía: sin acceso a datos privados.
+
+### 3.7 Backfill e idempotencia
+- Ejecutar `20261112_0100_backfill_idempotente.sql` dos veces: segunda ejecución no debe duplicar (conteos estables, `ON CONFLICT/NOT EXISTS` efectivos).
+- Validar `gp_corridas_migracion` (estado, conteos, errores).
+- Conteos: origen vs destino por `legacy_source_id`.
+- Huérfanos/ciclos/duplicados WBS: consultas de verificación post-backfill.
+- Merge `localStorage` (proceso app): comparación por `legacy_source_id`, completar campos faltantes, registrar conflictos sin sobrescritura silenciosa.
+
+### 3.8 Compatibilidad con servicios que consumirán los datos
+- Capa de servicio debe mapear `gp_nodos_edt` ↔ modelo `Item` (`cronograma-core/types.ts`) y derivar `edtType` vía `resolveEdtNodeType` (BD no es fuente manual de tipo).
+- Mantener `kind (hito|subproceso)`, `fase_id` (dimensión), `is_entregable`, dependencias (`gp_nodo_dependencias_r`), responsables vía `_r`, fechas plan/real y baselines.
+- `localStorage` permanece activo como respaldo/fallback hasta cutover aprobado.
+- Preparar adaptadores/feature flags para lectura dual (legado + v2) sin cambiar UI ni retirar funcionalidades.
+
+## 4. Consultas de verificación sugeridas (solo lectura, post-prueba)
+
+```sql
+-- Conteo por tabla gp_*
+SELECT relname AS tabla, n_live_tup AS filas_aprox
+FROM pg_stat_user_tables WHERE relname LIKE 'gp_%' ORDER BY relname;
+
+-- Proyectos migrados
+SELECT count(*) FROM public.gp_proyectos WHERE legacy_source_id IS NOT NULL;
+
+-- Nodos huérfanos de padre
+SELECT n.id, n.legacy_source_id FROM public.gp_nodos_edt n
+LEFT JOIN public.gp_nodos_edt p ON p.id = n.nodo_padre_id
+WHERE n.nodo_padre_id IS NOT NULL AND p.id IS NULL;
+
+-- Duplicados WBS
+SELECT proyecto_id, wbs_code, count(*) FROM public.gp_nodos_edt
+WHERE wbs_code IS NOT NULL AND is_deleted = false
+GROUP BY proyecto_id, wbs_code HAVING count(*) > 1;
+
+-- Corridas migración
+SELECT corrida_key, estado, filas_escritas, filas_omitidas, iniciado_at, finalizado_at FROM public.gp_corridas_migracion;
+```
+
+## 5. Criterios de salida de ETAPA 2C (para pasar a cutover futuro, no incluido)
+
+- Migraciones 0001–0004 aplicadas en entorno de pruebas sin errores.
+- Backfill idempotente validado y conciliado (BD + merge controlado de `localStorage` donde aplique).
+- RLS/aislamiento/permisos verificados por empresa y proyecto.
+- Servicios capaces de consumir `gp_*` con compatibilidad de lectura y `localStorage` aún vigente.
+- **Autorización explícita posterior** para cualquier cutover, retiro de legado o acción destructiva (ninguna autorizada en esta etapa).

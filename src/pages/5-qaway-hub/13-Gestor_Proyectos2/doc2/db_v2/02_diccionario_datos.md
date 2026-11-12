@@ -1,0 +1,124 @@
+# Diccionario de datos — Esquema `gp_*` v2 (Gestor de Proyectos 2)
+
+> Referencia para revisión en Supabase y preparación de integración. Nomenclatura: `gp_` + nombre; sin sufijo = entidad principal/operativa, `_c` = catálogo, `_r` = relacional. Todas las PK son `uuid` (identidad técnica, independiente de códigos de negocio).
+
+## 1. Catálogos (`_c`)
+
+| Tabla | Propósito | Columnas clave (tipo) | PK | UNIQUE/CHECK | Índices | RLS | Auditoría |
+|---|---|---|---|---|---|---|---|
+| `gp_estados_proyecto_c` | Estados de proyecto | `id uuid`, `codigo text`, `nombre text`, `activo bool`, `orden int`, `metadata jsonb`, timestamps | `id` | `UNIQUE(codigo)` | implícito PK/UNIQUE | SELECT público (auth), ALL admin plataforma | `created_at,updated_at` |
+| `gp_tipos_proyecto_c` | Tipos de proyecto | igual patrón | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_estados_tarea_c` | Estados de tarea | +`color` | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_prioridades_c` | Prioridades | +`nivel int` | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_roles_empresa_c` | Roles ámbito empresa | +`permisos jsonb` | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_roles_proyecto_c` | Roles ámbito proyecto | +`permisos jsonb` | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_ambitos_gobernanza_c` | Ámbitos de gobernanza | `codigo,nombre` | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_tipos_dependencia_c` | Tipos dependencia (FS/SS/FF/SF) | `codigo,nombre` | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_tipos_entregable_c` | Tipos de entregable | patrón catálogo | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_estados_entregable_c` | Estados de entregable | patrón | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_tipos_reunion_c` | Tipos de reunión | patrón | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_estados_reunion_c` | Estados de reunión | patrón | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_tipos_unidad_territorial_c` | Tipos unidad territorial | patrón | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_tipos_avance_c` | Tipos de registro de avance | patrón | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+| `gp_tipos_archivo_c` | Tipos de archivo | patrón | `id` | `UNIQUE(codigo)` | — | idem | timestamps |
+
+> **No incluido como `_c`:** tipos EDT canónicos (vocabulario normativo cerrado, centralizado en código; BD usa atributos fuente + checks).
+
+## 2. Entidades principales y operativas
+
+### `gp_proyectos` (principal)
+- **Propósito:** proyecto dentro de una empresa (tenant), contenedor de EDT, tareas, fases y artefactos.
+- **Columnas:** `id uuid PK`, `empresa_id uuid` (tenant plataforma), `codigo_proyecto text NOT NULL`, `nombre text NOT NULL`, `descripcion text`, `tipo_proyecto_codigo text FK→gp_tipos_proyecto_c.codigo`, `estado_codigo text FK→gp_estados_proyecto_c.codigo`, `fecha_inicio/fin date`, `presupuesto numeric(18,2)`, `moneda text`, `responsable_principal_persona_id uuid FK→gp_personas.id`, `metadata jsonb`, `legacy_source_id text`, `is_deleted bool`, `created_at/updated_at timestamptz`, `created_by/updated_by uuid`.
+- **UNIQUE/CHECK:** `UNIQUE(empresa_id,codigo_proyecto)` parcial (no eliminados); `CHECK fecha_fin>=fecha_inicio`.
+- **Índices:** `empresa_id`, `estado_codigo`.
+- **RLS:** SELECT miembros empresa/proyecto o admin; INSERT/UPDATE miembros empresa o admin (con coherencia `empresa_id`).
+- **Auditoría:** timestamps/actores + eventos en `gp_eventos_auditoria`.
+
+### `gp_personas` (principal)
+- **Propósito:** identidad de persona del dominio (sin credenciales); base para responsables/membresías.
+- **Columnas:** `id`, `empresa_id`, `nombres`, `apellidos`, `nombre_completo` (generado), `tipo_documento`, `numero_documento`, `correo`, `telefono`, `cargo`, `activo`, `metadata`, `legacy_source_id`, `is_deleted`, timestamps, actores.
+- **FKs:** (sin FK saliente obligatoria; referenciada por múltiples tablas).
+- **Índices:** `empresa_id`, `(empresa_id,tipo_documento,numero_documento)`.
+- **RLS:** por pertenencia a empresa (NULL visible según política controlada) / admin.
+
+### `gp_fases` (operativa, dimensión independiente)
+- **Propósito:** fases del ciclo de vida del proyecto (**no** nodo EDT).
+- **Columnas:** `id`, `proyecto_id FK→gp_proyectos`, `empresa_id`, `codigo`, `nombre`, `descripcion`, `orden`, `fecha_inicio_plan/fin_plan`, `fecha_inicio_real/fin_real`, `estado`, `activo`, `metadata`, `legacy_source_id`, `is_deleted`, timestamps, actores.
+- **CHECK:** coherencia fechas plan.
+- **Índices:** `proyecto_id`, `empresa_id`.
+
+### `gp_nodos_edt` (operativa, jerárquica WBS)
+- **Propósito:** nodo de la EDT/WBS; jerarquía por `nodo_padre_id`.
+- **Columnas:** `id`, `proyecto_id FK`, `empresa_id`, `nodo_padre_id FK self`, `fase_id FK→gp_fases` (dimensión), `wbs_code`, `nombre`, `descripcion`, `kind CHECK(hito,subproceso)`, `is_entregable bool`, `edt_type_cached text` (cache regenerable), `estado`, `progreso numeric(5,2) CHECK 0-100`, fechas plan/real, `region/distrito/sede_texto`, `sede_id FK→gp_sedes`, `unidad_territorial_id FK→gp_unidades_territoriales`, `orden`, `task_type`, `icon`, `metadata`, `legacy_source_id`, `is_deleted`, timestamps, actores.
+- **UNIQUE:** `(proyecto_id,wbs_code)` parcial.
+- **Índices:** `proyecto_id`, `empresa_id`, `(proyecto_id,nodo_padre_id)`, `fase_id`, `estado`.
+- **Regla:** tipo EDT efectivo **derivado** en dominio; `is_entregable` único atributo fuente declarable.
+
+### `gp_tareas` (operativa)
+- **Propósito:** tareas operativas (gestión tipo tablero), vinculables a nodo EDT/fase.
+- **Columnas:** `id`, `proyecto_id FK`, `empresa_id`, `nodo_edt_id FK`, `fase_id FK`, `tarea_padre_id FK self`, `codigo`, `titulo`, `descripcion`, `estado_codigo FK`, `prioridad_codigo FK`, fechas, `progreso`, `estimacion_horas`, `orden`, `metadata`, `legacy_source_id`, `is_deleted`, timestamps, actores.
+- **Índices:** `proyecto_id`, `empresa_id`, `nodo_edt_id`, `estado_codigo`, `fase_id`.
+
+### `gp_equipos`, `gp_unidades_territoriales`, `gp_sedes`
+- **`gp_equipos`:** equipos por empresa/proyecto (`id`, `empresa_id`, `proyecto_id FK`, `nombre`, `activo`, etc.). RLS por empresa.
+- **`gp_unidades_territoriales`:** jerarquía territorial (DRE/UGEL/RED/GRE), `codigo UNIQUE`, `tipo_codigo FK`. Índices región/empresa.
+- **`gp_sedes`:** sedes con `unidad_territorial_id FK` y datos de ubicación.
+
+### `gp_entregables` (operativa)
+- Entregables verificables ligados a proyecto/nodo/tarea; FKs a catálogos tipo/estado; fechas compromiso/entrega; metadatos y URL.
+
+### `gp_lineas_base`, `gp_linea_base_nodos` (operativa/histórico de control)
+- **`gp_lineas_base`:** versión/congelamiento por proyecto (estado, aprobación).
+- **`gp_linea_base_nodos`:** snapshot por nodo (`UNIQUE linea_base_id,nodo_edt_id`), fechas/progreso/estado plan y `snapshot jsonb`; `ON DELETE CASCADE` desde línea base.
+
+### `gp_avances` (histórico)
+- Serie temporal de avances por nodo/tarea: fecha, progreso/estado anterior→nuevo, comentario, autor persona; índices por proyecto/fecha y nodo/tarea.
+
+### `gp_archivos` (operativa, metadatos)
+- Metadatos de archivos y vínculos opcionales a proyecto/nodo/tarea/entregable/reunión; storage path/bucket/url/hash/tamaño/version.
+
+### `gp_reuniones` (operativa)
+- Reuniones de proyecto (tipo, estado, agenda, fechas, ubicación/enlace, acta) con vínculos a nodo/fase.
+
+### `gp_eventos_auditoria` (auditoría)
+- Registro de cambios: `empresa_id`, `proyecto_id`, `entidad`, `entidad_id`, `accion`, `payload_antes/despues`, `actor_user_id/persona_id`, `ocurrido_at`, `origen`.
+
+### `gp_corridas_migracion` (operativa de migración)
+- Trazabilidad de backfills: `corrida_key UNIQUE`, estado, conteos, errores jsonb, tiempos.
+
+## 3. Tablas relacionales (`_r`)
+
+| Tabla | Propósito | FKs principales | UNIQUE/CHECK | Cardinalidad |
+|---|---|---|---|---|
+| `gp_persona_cuentas_r` | Vínculo persona ↔ cuenta plataforma (`auth.users`) | `persona_id→gp_personas`, `user_id` (auth) | `UNIQUE(persona_id,user_id)` | 1:N persona→cuentas (opcional) |
+| `gp_empresa_miembros_r` | Membresía y rol en empresa (tenant) | `empresa_id`(tenant), `persona_id`, `rol_empresa_codigo` | UNIQUE parciales por persona/user en empresa; `CHECK` actor presente | N:M empresa↔persona/usuario |
+| `gp_proyecto_miembros_r` | Membresía y rol en proyecto | `proyecto_id`, `persona_id`, `rol_proyecto_codigo` | `UNIQUE(proyecto_id,persona_id)` | N:M proyecto↔persona |
+| `gp_equipo_miembros_r` | Composición de equipos | `equipo_id`, `persona_id` | `UNIQUE(equipo_id,persona_id)` | N:M equipo↔persona |
+| `gp_edt_responsables_r` | Responsables de nodo EDT (por id, no por nombre) | `proyecto_id`, `nodo_edt_id`, `persona_id` | `UNIQUE(nodo_edt_id,persona_id,tipo_responsabilidad)` | N:M nodo↔persona |
+| `gp_tarea_responsables_r` | Asignación de tareas | `proyecto_id`, `tarea_id`, `persona_id` | `UNIQUE(tarea_id,persona_id,tipo_responsabilidad)` | N:M tarea↔persona |
+| `gp_nodo_dependencias_r` | Dependencias entre nodos EDT | `predecesor_nodo_id`, `sucesor_nodo_id`, `tipo_codigo` | no autociclo, `UNIQUE` compuesto | N:M nodos (DAG esperado, validado en app/trigger futuro) |
+| `gp_tarea_dependencias_r` | Dependencias entre tareas | predecesora/sucesora, `tipo_codigo` | no autociclo, `UNIQUE` | N:M tareas |
+| `gp_reunion_participantes_r` | Participación en reuniones | `reunion_id`, `persona_id` | `UNIQUE(reunion_id,persona_id)` | N:M reunión↔persona |
+| `gp_proyecto_unidades_r` | Alcance territorial/sedes del proyecto | `proyecto_id`, `unidad_territorial_id?`, `sede_id?` | `CHECK` al menos un objetivo | N:M proyecto↔unidades/sedes |
+
+## 4. Reglas de eliminación/actualización (resumen)
+
+- `ON UPDATE CASCADE` en FKs de códigos/ids referenciados.
+- `ON DELETE RESTRICT` en referencias críticas (proyecto desde hijos operativos) para evitar huérfanos accidentales.
+- `ON DELETE SET NULL` en referencias opcionales (fase, sede, responsable principal, vínculos opcionales).
+- `ON DELETE CASCADE` solo en agregados dependientes estrictos (p.ej. `gp_linea_base_nodos` desde `gp_lineas_base`, membresías desde entidad contenedora donde aplica).
+- Borrado lógico (`is_deleted`) recomendado en entidades de negocio principales/operativas.
+
+## 5. RLS y seguridad (resumen)
+
+- RLS habilitado en todas las tablas `gp_*`.
+- Helpers: `gp_is_platform_admin()`, `gp_auth_empresa_id()`, `gp_is_empresa_member(empresa_id)`, `gp_is_project_member(proyecto_id)` (reutilizan plataforma cuando existe).
+- Catálogos `_c`: lectura amplia autenticada/controlada; escritura admin plataforma.
+- Datos de negocio: acceso por pertenencia a empresa y/o proyecto; escritura acotada a miembros autorizados; validación de coherencia `empresa_id/proyecto_id`.
+- Sin políticas permisivas globales `using(true)` en datos operativos multiempresa.
+
+## 6. Auditoría y trazabilidad
+
+- Columnas estándar: `created_at`, `updated_at`, `created_by`, `updated_by`.
+- `legacy_source_id`/`legacy_source_key` y `metadata` para origen/migración.
+- `gp_eventos_auditoria` para historial de cambios; `gp_corridas_migracion` para backfills idempotentes.

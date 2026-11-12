@@ -1,0 +1,130 @@
+# ETAPA 2A — Diseño definitivo de base de datos (Gestor de Proyectos 2)
+
+> **Estado:** diseño cerrado para preparación SQL (ETAPA 2B). No ejecutado en Supabase.  
+> **Alcance:** esquema relacional `gp_*` para Gestor de Proyectos 2, multiempresa y multiproyecto, alineado a gobernanza de plataforma Qaway Hub (BD Central).  
+> **Restricciones:** sin `DROP`/`TRUNCATE`, sin tocar Supabase productivo, sin retirar `localStorage`, sin cutover, sin duplicar auth/tenants/roles globales de plataforma.
+
+## 1. Decisiones técnicas cerradas
+
+| Punto | Decisión | Justificación |
+|---|---|---|
+| **Identificadores** | `id uuid primary key default gen_random_uuid()` en toda entidad/registro `gp_*`. Códigos de negocio (`wbs_code`, `project_code`, códigos territoriales) son atributos únicos por contexto, nunca PK ni FK. | Identidad técnica estable, independiente de EDT/negocio, apta para sync, merges y referencias. |
+| **Personas vs cuentas** | `gp_personas` = identidad de persona (dominio). Cuenta de acceso = `auth.users` (plataforma, no duplicada). Vínculo opcional persona↔cuenta en `gp_persona_cuentas_r` (referencia a `auth.users.id`). Membresías/roles operativos siempre por FKs a `persona_id`/`user_id`, nunca por arrays de nombres. | Evita duplicación y ambigüedad; permite personas sin cuenta y cuentas vinculadas; responsables trazables. |
+| **Multitenencia** | `empresa_id uuid` (FK a `public.tenants.id`, plataforma existente) en toda entidad de negocio aislada. Datos segregados por empresa/proyecto. Un usuario/persona puede pertenecer a varias empresas vía `gp_empresa_miembros_r`. RLS por pertenencia a empresa y proyecto. | Aislamiento obligatorio; reutiliza tenant global sin duplicarlo. |
+| **Fases** | `gp_fases` = dimensión/entidad independiente (catálogo operativo por proyecto o plantilla), relacionada a nodos/tareas por `fase_id` FK. **Nunca** un tipo de nodo EDT. `tipo_edt` no incluye `FASE`. | Separa ciclo de vida temporal de la descomposición WBS (PMBOK/BID). |
+| **Modelo funcional** | Entidades/relaciones explícitas para proyectos, EDT (nodos WBS), tareas, dependencias, entregables, responsables, equipos, sedes/unidades territoriales, avances históricos, líneas base, archivos, reuniones y auditoría (ver §4, §5). | Cobertura integral tipo gestor profesional (Trello/PM tools) con trazabilidad. |
+| **Gobernanza** | Tres ámbitos: **plataforma** (roles globales existentes, no duplicados), **empresa** (`gp_empresa_miembros_r` + `gp_roles_empresa_c`), **proyecto** (`gp_proyecto_miembros_r` + `gp_roles_proyecto_c`). Roles funcionales diferenciados: administrador, gestor, coordinador, supervisor, colaborador, lector (según ámbito). | Permisos claros y escalables por contexto. |
+| **Integridad** | Todas las relaciones con PK UUID, FKs, `UNIQUE`/`CHECK`, índices para consultas frecuentes y crecimiento, reglas `ON UPDATE/DELETE` explícitas, RLS por empresa/proyecto, auditoría/trazabilidad. Sin huérfanos ni duplicaciones ambiguas. | Consistencia y seguridad de datos a largo plazo. |
+
+## 2. Convención de nomenclatura SQL (obligatoria)
+
+Prefijo único de módulo: **`gp_`** (Gestor de Proyectos 2). Reconocible en Supabase por nombre.
+
+| Sufijo | Significado | Regla | Ejemplos |
+|---|---|---|---|
+| *(sin sufijo)* | Entidad principal u operativa | Representa objetos de negocio con ciclo de vida propio | `gp_empresas` (ref/vista si aplica), `gp_proyectos`, `gp_personas`, `gp_nodos_edt`, `gp_tareas`, `gp_equipos`, `gp_sedes`, `gp_unidades_territoriales`, `gp_lineas_base`, `gp_entregables`, `gp_archivos`, `gp_reuniones`, `gp_avances`, `gp_eventos_auditoria` |
+| `_c` | Catálogo | Vocabulario administrable/referencial controlado (valores con metadata, activos/inactivos) | `gp_estados_proyecto_c`, `gp_tipos_proyecto_c`, `gp_estados_tarea_c`, `gp_prioridades_c`, `gp_roles_empresa_c`, `gp_roles_proyecto_c`, `gp_tipos_dependencia_c`, `gp_tipos_entregable_c`, `gp_tipos_reunion_c`, `gp_tipos_unidad_territorial_c`, `gp_ambitos_gobernanza_c` |
+| `_r` | Tabla relacional | **Función principal = relacionar entidades** (membresías, asignaciones, vínculos N:M). No se usa solo porque tenga una FK. | `gp_empresa_miembros_r`, `gp_proyecto_miembros_r`, `gp_equipo_miembros_r`, `gp_edt_responsables_r`, `gp_tarea_responsables_r`, `gp_tarea_dependencias_r`, `gp_reunion_participantes_r`, `gp_proyecto_unidades_r`, `gp_persona_cuentas_r` |
+
+**Reglas adicionales:**
+- Vocabularios normativos cerrados y no administrables dinámicamente (p. ej. **tipos EDT** canónicos `COMPONENTE, PRODUCTO, ENTREGABLE, PAQUETE_TRABAJO, HITO`) se mantienen **centralizados en código** y, si se requiere en BD para integridad, como `CHECK`/dominio cerrado — **no** como catálogo `_c` editable innecesario.
+- `gp_roles_c` global del módulo **no se crea** si duplica gobernanza global de plataforma; se usan catálogos propios de ámbito (`gp_roles_empresa_c`, `gp_roles_proyecto_c`) solo para el dominio de Gestor de Proyectos.
+- Una tabla operativa con FKs (p. ej. `gp_tareas`, `gp_nodos_edt`) **no** lleva `_r`: su función principal es la entidad operativa.
+- Nombres en `snake_case`, singular conceptual consistente, sin abreviaturas ambiguas; columnas FK terminan en `_id`.
+
+## 3. Alineación con plataforma (sin duplicar)
+
+| Concepto plataforma (BD Central) | Uso en `gp_*` |
+|---|---|
+| `public.tenants` (empresa/tenant) | Referenciado por `empresa_id` (FK) en entidades aisladas. No se crea `gp_tenants`. |
+| `auth.users` (cuenta/autenticación) | Referenciado en `gp_persona_cuentas_r.user_id` y campos de actor (`created_by`, `updated_by`) cuando aplique. No se duplica auth. |
+| `public.users` / `public.profiles` (perfil/tenant de plataforma) | Fuente de verdad de cuenta-perfil-tenant global; `gp_*` consulta/vincula por ids, no copia datos maestros. |
+| Roles/permisos globales de plataforma (`is_admin()`, etc.) | Se respetan en RLS como bypass/condición superior donde corresponda; roles de negocio de GP se modelan en ámbito empresa/proyecto. |
+| `get_auth_tenant_id()` / helpers RLS existentes | Se reutilizan en políticas `gp_*` para aislar por empresa/tenant autenticado. |
+
+> Las migraciones SQL incluyen FKs a objetos de plataforma cuando existen (`public.tenants`, `auth.users`) y se redactan de forma defensiva/reproducible; si un entorno difiere, se documenta la dependencia.
+
+## 4. Modelo funcional (entidades y relaciones)
+
+### 4.1 Catálogos (`_c`)
+- `gp_estados_proyecto_c`, `gp_tipos_proyecto_c`
+- `gp_estados_tarea_c`, `gp_prioridades_c`
+- `gp_roles_empresa_c`, `gp_roles_proyecto_c`
+- `gp_tipos_dependencia_c` (FS/SS/FF/SF, lag)
+- `gp_tipos_entregable_c`, `gp_estados_entregable_c`
+- `gp_tipos_reunion_c`, `gp_estados_reunion_c`
+- `gp_tipos_unidad_territorial_c` (DRE/UGEL/RED/GRE/otro)
+- `gp_tipos_avance_c` (opcional, para clasificar hitos de avance)
+- `gp_tipos_archivo_c`, `gp_ambitos_gobernanza_c`
+
+### 4.2 Entidades principales/operativas
+- **`gp_proyectos`**: proyecto (pertenece a `empresa_id`/tenant); metadatos, fechas, estado, código de negocio único por empresa.
+- **`gp_personas`**: identidad de persona (nombres, documento, contacto, estado) dentro del contexto de empresa o global-referenciada; sin credenciales.
+- **`gp_fases`**: dimensión independiente del ciclo de vida por proyecto (nombre, orden, fechas plan/real, estado). **No es nodo EDT.**
+- **`gp_nodos_edt`**: nodo WBS/EDT (jerarquía `parent_id` self-FK), `fase_id` FK opcional, `is_entregable`, `kind` dominio (`hito|subproceso`), fechas/estado/progreso, `wbs_code`, territoriales, `legacy_source_id`; `tipo_edt` derivado en aplicación (cache regenerable opcional, no fuente de verdad).
+- **`gp_tareas`**: tarea operativa (puede vincularse a `nodo_edt_id` y/o `fase_id`), estado, prioridad, fechas, estimación, seguimiento.
+- **`gp_dependencias`** (operativa) o `gp_tarea_dependencias_r`/`gp_nodo_dependencias_r` según alcance: dependencias entre nodos/tareas con tipo y desfase.
+- **`gp_entregables`**: entregable verificable asociado a nodo/tarea/proyecto según corresponda.
+- **`gp_equipos`**: equipos de trabajo por empresa/proyecto.
+- **`gp_sedes`** y **`gp_unidades_territoriales`**: sedes operativas y unidades territoriales (jerárquicas), alineables con catálogo DRE/UGEL existente.
+- **`gp_lineas_base`** y **`gp_linea_base_nodos`** / snapshots: congelamiento de plan para control de desviación.
+- **`gp_avances`**: historial de avances (por nodo/tarea, porcentaje, nota, fecha efectiva, autor) — serie temporal auditable.
+- **`gp_archivos`**: metadatos de archivos/adjuntos (storage key/url, tipo, tamaño, hash opcional, entidad origen).
+- **`gp_reuniones`**: reuniones (agenda, fecha, tipo, estado, acta/resumen, vínculos).
+- **`gp_eventos_auditoria`**: auditoría de cambios relevantes (actor, entidad, acción, before/after jsonb, timestamp).
+
+### 4.3 Relaciones (`_r`)
+- `gp_persona_cuentas_r` (persona ↔ auth.user, vínculo opcional)
+- `gp_empresa_miembros_r` (empresa/tenant ↔ persona/usuario, rol empresa, estado)
+- `gp_proyecto_miembros_r` (proyecto ↔ miembro empresa/persona, rol proyecto)
+- `gp_equipo_miembros_r` (equipo ↔ persona, rol en equipo)
+- `gp_edt_responsables_r` (nodo EDT ↔ persona, tipo responsabilidad)
+- `gp_tarea_responsables_r` (tarea ↔ persona)
+- `gp_tarea_dependencias_r` (tarea predecesora ↔ sucesora, tipo/lag) y/o `gp_nodo_dependencias_r` (EDT) — ambas si el dominio lo requiere; función principal: relacionar.
+- `gp_reunion_participantes_r` (reunión ↔ persona, asistencia/rol)
+- `gp_proyecto_unidades_r` (proyecto ↔ unidad territorial/sede, alcance)
+
+> **Nota:** `gp_dependencias` EDT se materializa como `gp_nodo_dependencias_r` (tabla relacional pura entre nodos). Las dependencias de tareas como `gp_tarea_dependencias_r`.
+
+## 5. Gobernanza y RLS (diseño)
+
+- **Ámbitos:** plataforma (global, existente), empresa (`empresa_miembros_r`/`roles_empresa_c`), proyecto (`proyecto_miembros_r`/`roles_proyecto_c`).
+- **Roles funcionales (empresa/proyecto):** `administrador`, `gestor`, `coordinador`, `supervisor`, `colaborador`, `lector` (catálogos `_c`, asignables por ámbito; mapeo fino de permisos en políticas/funciones helper).
+- **Aislamiento:** toda fila con `empresa_id` exige pertenencia válida; acceso a datos de proyecto exige membresía/proyecto visible dentro de la empresa.
+- **Políticas:** `SELECT/INSERT/UPDATE/DELETE` separadas; `INSERT/UPDATE` validan coherencia `empresa_id`/`proyecto_id`/`parent_id`; `DELETE` preferentemente lógico (`is_deleted`) en operativas críticas. Bypass admin plataforma (`public.is_admin()` si existe) documentado.
+- **Helpers RLS (SQL):** funciones `SECURITY DEFINER` estables para `gp_es_miembro_empresa`, `gp_es_miembro_proyecto`, `gp_tiene_rol_proyecto` reutilizando `auth.uid()` y `public.get_auth_tenant_id()`.
+
+## 6. Integridad, índices y reglas
+
+- **FKs:** todas las relaciones explícitas; `ON DELETE` restrictivo por defecto en datos maestros, `CASCADE` controlado solo donde el agregado lo exige (p. ej. snapshots de línea base hijos) o `SET NULL` en referencias opcionales; `ON UPDATE CASCADE` en PKs UUID (inmutables en práctica).
+- **UNIQUE:** `(empresa_id, project_code)` en proyectos, `(project_id, wbs_code)` donde aplique, `(empresa_id, documento)` opcional según regla, unicidad de membresías `(empresa_id, persona_id)`/`(proyecto_id, persona_id)`, etc.
+- **CHECK:** rangos (progreso 0–100), fechas coherentes, enums cerrados donde aplique, no autociclo en dependencias, `kind in ('hito','subproceso')`.
+- **Índices:** por `empresa_id`, `proyecto_id`, `parent_id`, `fase_id`, `estado`, `fecha` de consulta frecuente, FKs de join y búsquedas de auditoría.
+- **Anti-huérfanos:** FKs obligatorias en dependientes; validaciones de mismo proyecto/empresa en triggers o constraints diferibles donde sea necesario.
+
+## 7. Auditoría y trazabilidad
+
+- Columnas estándar en mutables: `created_at`, `updated_at`, `created_by`, `updated_by` (uuid, actor plataforma).
+- `legacy_source_id` / `legacy_source_key` en entidades migradas.
+- `gp_eventos_auditoria`: `id`, `empresa_id`, `proyecto_id`, `entidad`, `entidad_id`, `accion`, `payload_antes`, `payload_despues`, `actor_user_id`, `ocurrido_at`.
+- `gp_corridas_migracion` (operativa de migración): registro idempotente de backfills (`corrida_key`, estado, conteos, notas).
+
+## 8. Fuentes para migración (análisis comparativo)
+
+| Fuente | Qué aporta | Riesgo/gap | Tratamiento |
+|---|---|---|---|
+| **Supabase actual** (`gestor_proyectos`, `gestor_cronograma_items`, `gestor_unidades`) | Proyectos, ítems cronograma (jerarquía, fechas, estado, baseline/actual si columnas existen), unidades DRE/UGEL | `id` texto, sin `empresa_id` real multiempresa, sin EDT tipado persistido completo, RLS permisiva actual | Mapear con `legacy_source_id`, asignar `empresa_id` de contexto (tenant Qaway Lab por defecto documentado), normalizar EDT derivado |
+| **`localStorage`** (`qaway-gantt-items-<pid>`) | Estado UI rico (edtType/faseId/dependencies/deliverables/attachments/gestores) que puede no estar en BD | Volátil, por cliente/navegador, heterogéneo | Comparar por `id`/`updated_at`/completitud; no asumir como única verdad; usar como complemento/merge controlado en backfill con reporte |
+| **Estructuras exportables** | Backups/exports si existen | Disponibilidad variable | Incluir en procedimiento de backfill como fuente opcional priorizada por frescura/integridad |
+| **Semillas/referencia** (`sedesCatalogSeeds`, `gestor_unidades` seed) | Catálogos territoriales/base | No son datos transaccionales de proyecto | Cargar como catálogos/referencia (`gp_unidades_territoriales`, sedes) idempotentemente |
+
+**Fuente canónica (recomendación adoptada):** para cada entidad, **triangulación**: BD Supabase actual como base transaccional persistida + merge de campos faltantes desde `localStorage`/exports cuando sean más completos y consistentes + semillas para catálogos. Cualquier conflicto se registra en reporte de migración (sin pérdida silenciosa).
+
+## 9. Entregables ETAPA 2B/2C (preparados en esta carpeta)
+
+- SQL versionado y reproducible: `sql/20261112_0001..0004_*.sql`
+- Backfill idempotente (plantilla/procedimiento SQL): `sql/backfill/20261112_0100_backfill_idempotente.sql`
+- ERD: `01_erd.md`
+- Diccionario de datos: `02_diccionario_datos.md`
+- Correspondencia antiguo→nuevo: `03_correspondencia_modelo_antiguo_nuevo.md`
+- Preparación de pruebas: `04_preparacion_pruebas_etapa_2c.md`
