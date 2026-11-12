@@ -18,6 +18,7 @@ import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
+import ReportesAnalyticsCanvas from './ReportesAnalyticsCanvas';
 import EquipoSedesView from '../equipo/EquipoSedesView';
 import EquipoCargaView from '../equipo/EquipoCargaView';
 import EquipoDrawer from '../equipo/EquipoDrawer';
@@ -5935,7 +5936,7 @@ export default function Reportes2View({
             <div className="fullscreen-exit-bar">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
-                <span>Modo Pantalla Completa — Vista {viewMode === 'gantt' ? 'Gantt' : viewMode === 'lista' ? 'Lista' : viewMode === 'kanban' ? 'Kanban' : viewMode === 'mapa' ? 'Mapa' : 'Calendario'}</span>
+                <span>Modo Pantalla Completa — Vista {viewMode === 'gantt' ? 'Analítica' : viewMode === 'lista' ? 'Lista' : viewMode === 'kanban' ? 'Kanban' : viewMode === 'mapa' ? 'Mapa' : 'Calendario'}</span>
               </div>
               <button
                 type="button"
@@ -6491,10 +6492,10 @@ export default function Reportes2View({
                     type="button"
                     className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
                     onClick={() => handleViewModeChange('gantt')}
-                    title="Vista Cronograma Gantt"
+                    title="Vista Analítica de Reportes"
                   >
-                    <FolderKanban size={14} />
-                    <span>Gantt</span>
+                    <BarChart3 size={14} />
+                    <span>Analítica</span>
                   </button>
                   <button
                     type="button"
@@ -7659,8 +7660,13 @@ export default function Reportes2View({
             />
           )}
 
-          {/* Presentación Oficial Aprobada: Gantt y Lista comparten 100% el mismo tablero unificado */}
-          {(viewMode === 'gantt' || viewMode === 'lista' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
+          {/* Vista Analítica de Reportes (reemplaza al Gantt en el lienzo central) */}
+          {viewMode === 'gantt' && perspective !== 'equipo' && (
+            <ReportesAnalyticsCanvas notify={notify} />
+          )}
+
+          {/* Presentación Oficial Aprobada: Lista y vistas de Equipo */}
+          {(viewMode === 'lista' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' || perspective === 'equipo' ? 'view-lista-fullwidth' : ''}`}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>

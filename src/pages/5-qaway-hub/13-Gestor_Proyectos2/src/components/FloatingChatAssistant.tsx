@@ -94,18 +94,9 @@ const MODULE_CONTEXT_INFO: Record<ModuleKey, { title: string; hint: string; sugg
     suggestions: ['Revisar avance del proyecto', 'Analizar tareas críticas', 'Consultar próximos vencimientos']
   },
   reportes2: {
-    title: 'Reportes 2',
-    hint: 'Perspectiva de reportes basada en el módulo Proyecto.',
+    title: 'Reportes',
+    hint: 'Consolidado de informes territoriales, analítica y estado de hitos.',
     suggestions: ['Revisar avance del proyecto', 'Analizar tareas críticas', 'Consultar próximos vencimientos']
-  },
-  reportes: {
-    title: 'Reporteador del Proyecto',
-    hint: 'Métricas de avance físico, financiero y ejecución operativa.',
-    suggestions: [
-      '📈 Explicar avance ponderado del proyecto',
-      '📊 Comparativa de cumplimiento entre sedes',
-      '📑 Generar resumen para informe mensual'
-    ]
   },
   reuniones: {
     title: 'Reuniones y Coordinación',

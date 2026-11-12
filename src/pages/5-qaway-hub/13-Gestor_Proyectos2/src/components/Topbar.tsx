@@ -42,7 +42,7 @@ const MODULE_LABELS: Record<ModuleKey, string> = {
   reuniones: 'Reuniones',
   reuniones2: 'Reuniones 2',
   reportes: 'Reportes y estadísticas',
-  reportes2: 'Reportes 2',
+  reportes2: 'Reportes',
   usuarios: 'Equipo del proyecto',
   actas: 'Actas y acuerdos',
   pruebas: 'PRUEBAS',

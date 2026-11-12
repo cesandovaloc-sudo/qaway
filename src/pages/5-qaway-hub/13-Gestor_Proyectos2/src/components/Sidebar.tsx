@@ -298,18 +298,11 @@ export default function Sidebar({
       </button>
 
       <button
-        className={active === 'reportes' ? 'side-link active' : 'side-link'}
-        onClick={() => handleModule('reportes')}
-      >
-        <BarChart3 size={18} />
-        <span>Reportes</span>
-      </button>
-      <button
         className={active === 'reportes2' ? 'side-link active' : 'side-link'}
         onClick={() => handleModule('reportes2')}
       >
         <BarChart3 size={18} />
-        <span>Reportes 2</span>
+        <span>Reportes</span>
       </button>
 
       {/* PRUEBAS queda oculto temporalmente para no cargar sus librerías experimentales. */}

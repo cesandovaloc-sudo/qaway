@@ -19,7 +19,6 @@ const CronogramaView = lazy(() => import('./modules/cronograma/CronogramaView'))
 const CronogramaGanttView = lazy(() => import('./modules/cronograma-gantt/CronogramaGanttView'));
 const GanttElementDetailView = lazy(() => import('./modules/cronograma-gantt/GanttElementDetailView'));
 const ReunionesView = lazy(() => import('./modules/reuniones/ReunionesView'));
-const ReporteadorView = lazy(() => import('./modules/reporteador/ReporteadorView'));
 const EquipoView = lazy(() => import('./modules/equipo/EquipoView'));
 const HitosView = lazy(() => import('./modules/hitos/HitosView'));
 const ActasAcuerdosView = lazy(() => import('./modules/actas/ActasAcuerdosView'));
@@ -65,7 +64,7 @@ const readStoredModule = (): ModuleKey => {
   try {
     const saved = localStorage.getItem(MODULE_STORAGE_KEY) as ModuleKey;
     if (saved === 'tareas') return 'tareas2';
-    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas2', 'reuniones', 'reuniones2', 'reportes', 'reportes2', 'usuarios', 'configuracion'];
+    const validModules: ModuleKey[] = ['resumen', 'cronograma', 'sedes', 'tareas2', 'reuniones', 'reuniones2', 'reportes2', 'usuarios', 'configuracion'];
     if (validModules.includes(saved)) return saved;
     return 'cronograma';
   } catch {
@@ -565,7 +564,7 @@ function GestorProyectosApp() {
            {visitedModules.has('reuniones2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Reuniones 2…" />}><div className={active === 'reuniones2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Reuniones2View activeProject={activeProject} isActive={active === 'reuniones2'} />
            </div></Suspense>}
-           {visitedModules.has('reportes2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Reportes 2…" />}><div className={active === 'reportes2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
+           {visitedModules.has('reportes2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Reportes…" />}><div className={active === 'reportes2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Reportes2View activeProject={activeProject} isActive={active === 'reportes2'} />
            </div></Suspense>}
            {visitedModules.has('cronograma') && (
@@ -615,9 +614,6 @@ function GestorProyectosApp() {
            </div></Suspense>}
            {visitedModules.has('reuniones') && <Suspense fallback={<ModuleLoadingFallback text="Cargando agenda de reuniones…" />}><div className={active === 'reuniones' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <ReunionesView onActions={(h) => { binds.current['reuniones'] = h; }} />
-           </div></Suspense>}
-           {visitedModules.has('reportes') && <Suspense fallback={<ModuleLoadingFallback text="Cargando reporteador…" />}><div className={active === 'reportes' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-            <ReporteadorView onActions={(h) => { binds.current['reportes'] = h; }} />
            </div></Suspense>}
            {visitedModules.has('usuarios') && <Suspense fallback={<ModuleLoadingFallback text="Cargando directorio de equipo…" />}><div className={active === 'usuarios' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
             <EquipoView

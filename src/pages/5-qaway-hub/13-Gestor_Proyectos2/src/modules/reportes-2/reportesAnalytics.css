@@ -1,0 +1,271 @@
+/* Estilos encapsulados para el lienzo analítico de Reportes 2 (.rep-analytics-canvas) */
+.rep-analytics-canvas {
+  width: 100%;
+  padding: 18px 20px 22px;
+  color: #1e293b;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.rep-analytics-canvas *,
+.rep-analytics-canvas *::before,
+.rep-analytics-canvas *::after {
+  box-sizing: border-box;
+}
+
+/* Paneles de gráficos */
+.rep-analytics-canvas .charts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1120px) {
+  .rep-analytics-canvas .charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes repChartPanelEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rep-analytics-canvas .panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 4px -1px rgba(15, 23, 42, 0.04), 2px 6px 16px -2px rgba(15, 23, 42, 0.05);
+  animation: repChartPanelEntrance 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s;
+}
+
+.rep-analytics-canvas .charts .panel:nth-child(1) { animation-delay: 0.06s; }
+.rep-analytics-canvas .charts .panel:nth-child(2) { animation-delay: 0.12s; }
+.rep-analytics-canvas .charts .panel:nth-child(3) { animation-delay: 0.18s; }
+
+.rep-analytics-canvas .charts .panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+  border-color: #cbd5e1;
+}
+
+.rep-analytics-canvas .panel-head {
+  margin-bottom: 14px;
+}
+
+.rep-analytics-canvas .panel-head h2 {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.rep-analytics-canvas .panel-head p {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #64748b;
+  margin: 2px 0 0;
+}
+
+.rep-analytics-canvas .bar-chart,
+.rep-analytics-canvas .line-chart {
+  height: 220px;
+}
+
+/* Donut y leyendas */
+.rep-analytics-canvas .donut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 18px;
+  height: 220px;
+}
+
+.rep-analytics-canvas .donut {
+  position: relative;
+  width: 136px;
+  height: 136px;
+  flex-shrink: 0;
+}
+
+.rep-analytics-canvas .donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 130px;
+}
+
+.rep-analytics-canvas .legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #475569;
+}
+
+.rep-analytics-canvas .legend-row b {
+  margin-left: auto;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.rep-analytics-canvas .legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rep-analytics-canvas .legend-dot.green { background: #10b981; }
+.rep-analytics-canvas .legend-dot.amber { background: #f59e0b; }
+.rep-analytics-canvas .legend-dot.red { background: #ef4444; }
+
+/* Tabla Jerárquica de Hitos y Subprocesos Reportables */
+.rep-analytics-canvas .cronograma-lista-table {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.rep-analytics-canvas .table-scroll {
+  overflow-x: auto;
+}
+
+.rep-analytics-canvas table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 860px;
+}
+
+.rep-analytics-canvas thead {
+  background: #f8fafc;
+}
+
+.rep-analytics-canvas th {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+  padding: 11px 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.rep-analytics-canvas td {
+  border-bottom: 1px solid #f1f5f9;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.rep-analytics-canvas .root-row {
+  background: #ffffff;
+  transition: background 0.15s ease;
+}
+
+.rep-analytics-canvas .root-row:hover,
+.rep-analytics-canvas .child-row:hover {
+  background: #f8fafc;
+}
+
+.rep-analytics-canvas .name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+}
+
+.rep-analytics-canvas .expand-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.rep-analytics-canvas .expand-btn:hover {
+  background: #e2e8f0;
+}
+
+.rep-analytics-canvas .name-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: #0f172a;
+  padding: 0;
+  cursor: pointer;
+}
+
+.rep-analytics-canvas .name-button b {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  display: block;
+}
+
+.rep-analytics-canvas .name-button small {
+  font-size: 12px;
+  color: #64748b;
+  display: block;
+  margin-top: 2px;
+}
+
+.rep-analytics-canvas .row-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.rep-analytics-canvas .row-icon.green { background: #ecfdf5; color: #059669; }
+.rep-analytics-canvas .row-icon.amber { background: #fef3c7; color: #d97706; }
+.rep-analytics-canvas .row-icon.slate { background: #f1f5f9; color: #64748b; }
+.rep-analytics-canvas .row-icon.child {
+  width: 26px;
+  height: 26px;
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
+.rep-analytics-canvas .status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rep-analytics-canvas .status.green { background: #ecfdf5; color: #047857; }
+.rep-analytics-canvas .status.amber { background: #fef3c7; color: #b45309; }
+.rep-analytics-canvas .status.slate { background: #f1f5f9; color: #475569; }
