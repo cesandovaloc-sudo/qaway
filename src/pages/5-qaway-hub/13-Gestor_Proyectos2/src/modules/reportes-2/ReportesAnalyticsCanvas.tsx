@@ -27,6 +27,7 @@ import {
   useTableEngine,
   type ColumnDef,
 } from '../../shared/table-engine';
+import { TerritoryReporterV2Tab } from './territory-reporter/TerritoryReporterV2View';
 import './reportesAnalytics.css';
 
 type Sub = {

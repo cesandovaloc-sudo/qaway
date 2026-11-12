@@ -2,12 +2,17 @@
 -- GESTOR DE PROYECTOS 2 · MIGRACIÓN v2 ADITIVA 0003
 -- Fecha: 2026-11-12 | Entidades operativas restantes y relaciones (_r)
 -- SIN DROP/TRUNCATE. SOLO ADITIVO.
+-- Ajustado según evaluación 3.6 §7.3:
+--   · se eliminan gp_persona_cuentas_r (vive en gp_personas.user_id)
+--   · se eliminan gp_empresa_miembros_r (la membresía la gobierna public.user_app_roles)
+--   · gp_proyecto_unidades_r apunta a public.gestor_unidades(id) con una sola columna unidad_id
+-- Tablas de este archivo: 16 (8 operativas + 8 relaciones; las 2 de control vienen incluidas)
 -- ==============================================================================
 
 -- Entregables verificables
 CREATE TABLE IF NOT EXISTS public.gp_entregables (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   nodo_edt_id uuid REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE SET NULL,
   tarea_id uuid REFERENCES public.gp_tareas(id) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -35,7 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_entregables_tarea ON public.gp_entregables (ta
 -- Líneas base
 CREATE TABLE IF NOT EXISTS public.gp_lineas_base (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   nombre text NOT NULL,
   descripcion text,
@@ -56,7 +61,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_lineas_base_proyecto ON public.gp_lineas_base 
 
 CREATE TABLE IF NOT EXISTS public.gp_linea_base_nodos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   linea_base_id uuid NOT NULL REFERENCES public.gp_lineas_base(id) ON UPDATE CASCADE ON DELETE CASCADE,
   nodo_edt_id uuid NOT NULL REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -74,7 +79,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_linea_base_nodos_lb ON public.gp_linea_base_no
 -- Avances históricos (serie temporal)
 CREATE TABLE IF NOT EXISTS public.gp_avances (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   nodo_edt_id uuid REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE SET NULL,
   tarea_id uuid REFERENCES public.gp_tareas(id) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -98,7 +103,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_avances_tarea ON public.gp_avances (tarea_id);
 -- Archivos (metadatos)
 CREATE TABLE IF NOT EXISTS public.gp_archivos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE SET NULL,
   nodo_edt_id uuid REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE SET NULL,
   tarea_id uuid REFERENCES public.gp_tareas(id) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -128,7 +133,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_archivos_nodo ON public.gp_archivos (nodo_edt_
 -- Reuniones
 CREATE TABLE IF NOT EXISTS public.gp_reuniones (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   nodo_edt_id uuid REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE SET NULL,
   fase_id uuid REFERENCES public.gp_fases(id) ON UPDATE CASCADE ON DELETE SET NULL,
@@ -161,7 +166,7 @@ ALTER TABLE public.gp_archivos
 -- Auditoría
 CREATE TABLE IF NOT EXISTS public.gp_eventos_auditoria (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid,
   entidad text NOT NULL,
   entidad_id uuid,
@@ -200,48 +205,12 @@ CREATE TABLE IF NOT EXISTS public.gp_corridas_migracion (
 -- TABLAS RELACIONALES (_r)
 -- =========================
 
--- Persona <-> cuenta de usuario (plataforma)
-CREATE TABLE IF NOT EXISTS public.gp_persona_cuentas_r (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
-  persona_id uuid NOT NULL REFERENCES public.gp_personas(id) ON UPDATE CASCADE ON DELETE CASCADE,
-  user_id uuid NOT NULL, -- auth.users(id) en plataforma
-  es_principal boolean NOT NULL DEFAULT false,
-  activo boolean NOT NULL DEFAULT true,
-  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  created_by uuid,
-  UNIQUE(persona_id, user_id)
-);
-CREATE INDEX IF NOT EXISTS idx_gp_persona_cuentas_user ON public.gp_persona_cuentas_r (user_id);
+-- Persona <-> cuenta: NO existe tabla puente. La relación es gp_personas.user_id (única por empresa).
 
--- Membresía empresa (tenant) <-> persona/usuario
-CREATE TABLE IF NOT EXISTS public.gp_empresa_miembros_r (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid NOT NULL, -- public.tenants(id)
-  persona_id uuid REFERENCES public.gp_personas(id) ON UPDATE CASCADE ON DELETE SET NULL,
-  user_id uuid, -- auth.users(id)
-  rol_empresa_codigo text NOT NULL REFERENCES public.gp_roles_empresa_c(codigo) ON UPDATE CASCADE,
-  estado text NOT NULL DEFAULT 'activo',
-  es_owner boolean NOT NULL DEFAULT false,
-  fecha_inicio date,
-  fecha_fin date,
-  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  created_by uuid,
-  updated_by uuid,
-  CONSTRAINT gp_empresa_miembros_actor_ck CHECK (persona_id IS NOT NULL OR user_id IS NOT NULL)
-);
-CREATE UNIQUE INDEX IF NOT EXISTS uq_gp_empresa_miembros_persona ON public.gp_empresa_miembros_r (empresa_id, persona_id) WHERE persona_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS uq_gp_empresa_miembros_user ON public.gp_empresa_miembros_r (empresa_id, user_id) WHERE user_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_gp_empresa_miembros_empresa ON public.gp_empresa_miembros_r (empresa_id);
-
--- Membresía proyecto <-> persona
+-- Membresía proyecto <-> persona: gobernanza propia del Gestor (rol DENTRO del proyecto).
 CREATE TABLE IF NOT EXISTS public.gp_proyecto_miembros_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
   persona_id uuid NOT NULL REFERENCES public.gp_personas(id) ON UPDATE CASCADE ON DELETE CASCADE,
   rol_proyecto_codigo text NOT NULL REFERENCES public.gp_roles_proyecto_c(codigo) ON UPDATE CASCADE,
@@ -260,7 +229,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_proyecto_miembros_persona ON public.gp_proyect
 -- Equipo <-> persona
 CREATE TABLE IF NOT EXISTS public.gp_equipo_miembros_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   equipo_id uuid NOT NULL REFERENCES public.gp_equipos(id) ON UPDATE CASCADE ON DELETE CASCADE,
   persona_id uuid NOT NULL REFERENCES public.gp_personas(id) ON UPDATE CASCADE ON DELETE CASCADE,
   rol_en_equipo text,
@@ -276,7 +245,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_equipo_miembros_equipo ON public.gp_equipo_mie
 -- Responsables EDT (nodo <-> persona)
 CREATE TABLE IF NOT EXISTS public.gp_edt_responsables_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
   nodo_edt_id uuid NOT NULL REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE CASCADE,
   persona_id uuid NOT NULL REFERENCES public.gp_personas(id) ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -293,7 +262,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_edt_responsables_nodo ON public.gp_edt_respons
 -- Responsables tarea
 CREATE TABLE IF NOT EXISTS public.gp_tarea_responsables_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
   tarea_id uuid NOT NULL REFERENCES public.gp_tareas(id) ON UPDATE CASCADE ON DELETE CASCADE,
   persona_id uuid NOT NULL REFERENCES public.gp_personas(id) ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -310,7 +279,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_tarea_responsables_tarea ON public.gp_tarea_re
 -- Dependencias EDT (nodo predecesor -> sucesor)
 CREATE TABLE IF NOT EXISTS public.gp_nodo_dependencias_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
   predecesor_nodo_id uuid NOT NULL REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE CASCADE,
   sucesor_nodo_id uuid NOT NULL REFERENCES public.gp_nodos_edt(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -327,7 +296,7 @@ CREATE INDEX IF NOT EXISTS idx_gp_nodo_dependencias_proyecto ON public.gp_nodo_d
 -- Dependencias tareas
 CREATE TABLE IF NOT EXISTS public.gp_tarea_dependencias_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
   predecesora_tarea_id uuid NOT NULL REFERENCES public.gp_tareas(id) ON UPDATE CASCADE ON DELETE CASCADE,
   sucesora_tarea_id uuid NOT NULL REFERENCES public.gp_tareas(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -343,7 +312,7 @@ CREATE TABLE IF NOT EXISTS public.gp_tarea_dependencias_r (
 -- Participantes reunión
 CREATE TABLE IF NOT EXISTS public.gp_reunion_participantes_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
   reunion_id uuid NOT NULL REFERENCES public.gp_reuniones(id) ON UPDATE CASCADE ON DELETE CASCADE,
   persona_id uuid NOT NULL REFERENCES public.gp_personas(id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -354,16 +323,17 @@ CREATE TABLE IF NOT EXISTS public.gp_reunion_participantes_r (
   UNIQUE(reunion_id, persona_id)
 );
 
--- Proyecto <-> unidad territorial / sede (alcance)
+-- Proyecto <-> unidad organizacional del Hub (alcance territorial)
+-- fuente única de la jerarquía: public.gestor_unidades (no se duplica)
 CREATE TABLE IF NOT EXISTS public.gp_proyecto_unidades_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  empresa_id uuid,
+  empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
-  unidad_territorial_id uuid REFERENCES public.gp_unidades_territoriales(id) ON UPDATE CASCADE ON DELETE CASCADE,
-  sede_id uuid REFERENCES public.gp_sedes(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  unidad_id uuid NOT NULL REFERENCES public.gestor_unidades(id) ON UPDATE CASCADE ON DELETE CASCADE,
   rol_alcance text, -- principal/secundaria/intervencion
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT gp_proyecto_unidades_obj_ck CHECK (unidad_territorial_id IS NOT NULL OR sede_id IS NOT NULL)
+  UNIQUE(proyecto_id, unidad_id)
 );
 CREATE INDEX IF NOT EXISTS idx_gp_proyecto_unidades_proyecto ON public.gp_proyecto_unidades_r (proyecto_id);
+CREATE INDEX IF NOT EXISTS idx_gp_proyecto_unidades_unidad ON public.gp_proyecto_unidades_r (unidad_id);

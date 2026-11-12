@@ -63,7 +63,8 @@ doc2/
 | ETAPA 2B | Migraciones SQL + backfill | ✅ (a recortar) |
 | ETAPA 2C | Preparación de pruebas | ✅ |
 | **ETAPA 2C-bis** | **Evaluación de pertinencia frente al Hub** | ✅ **3.6 entregado** |
-| **Aprobación** | Aplicar el recorte a 3.1–3.5, 3.7 y SQL | ⛔ **esperando tu "aplica"** |
+| Aprobación | Recorte 41 → 34 tablas | ✅ aplicado en `0001`–`0003` de 3.7 (`0004` RLS queda para el final) |
+| **ETAPA 3** | **Creación de las 34 tablas en Supabase, una por una** | 🟡 **en curso — bloque `4-`** |
 | ETAPA 2D | Integración real con el Hub (sesión compartida, slug en `app_catalog`, RLS activa) | ⬜ no iniciada |
 
 ### Siguiente acción concreta
@@ -78,9 +79,10 @@ doc2/
 
 | Bloque | Tema previsto | Estado |
 |---|---|---|
-| `4-Integracion-con-el-Hub/` | ETAPA 2D: sesión compartida con el Hub, slug `gestor-proyectos` en `app_catalog`, activación de RLS, resolución de usuario en el Gestor 2. | ⬜ reservado |
+| `4-Creacion-guiada-en-Supabase/` | **EN USO:** las 34 tablas, una por una, ejecutadas por el responsable en el SQL Editor. Arranca en `4.1-Paso-0-Verificar-terreno.md`. | 🟡 en curso |
 | `5-Implementacion-y-cutover/` | Plan de cutover: doble escritura, verificación de conteos, retiro de `localStorage`. | ⬜ reservado |
-| `6-Bitacoras/` | Registro de ejecuciones reales en Supabase (fecha, migración, resultado, rollback). | ⬜ reservado |
+| `6-Integracion-con-el-Hub/` | ETAPA 2D: sesión compartida con el Hub, slug `gestor-proyectos` en `app_catalog`, activación de RLS, resolución de usuario en el Gestor 2. | ⬜ reservado |
+| `7-Bitacoras/` | Registro de ejecuciones reales en Supabase (fecha, migración, resultado, rollback). | ⬜ reservado |
 
 **Nada se crea fuera de estos bloques.** Si aparece un tema nuevo, se crea `N-<Nombre>/` con su `N.1`.
 
