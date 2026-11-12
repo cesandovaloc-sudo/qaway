@@ -4631,6 +4631,68 @@ export default function Tareas2View({
   /* Orden multi-criterio del motor universal (respeta la jerarquía hito > subproceso) */
   const shown = useMemo(() => engine.sortRows(shownBase), [engine.sortRows, shownBase]);
 
+  /* Datos en vivo para los gráficos ejecutivos de Carátula (conversan 100% con shown / items) */
+  const portadaComponentBars = useMemo(() => {
+    const source = shown.length > 0 ? shown : items;
+    const roots = source.filter((it) => !it.parentId || it.kind === 'hito').slice(0, 8);
+    if (roots.length === 0) return [];
+    return roots.map((comp) => {
+      const children = source.filter((c) => c.parentId === comp.id);
+      const rawPct =
+        typeof comp.progress === 'number'
+          ? comp.progress
+          : children.length > 0
+            ? children.reduce((acc, c) => acc + (c.progress || 0), 0) / children.length
+            : 0;
+      const cleanCode = String(comp.code || '').replace(/\.$/, '') || comp.name.slice(0, 6);
+      return {
+        id: cleanCode,
+        name: comp.name,
+        v: Math.max(0, Math.min(100, Math.round(rawPct))),
+      };
+    });
+  }, [shown, items]);
+
+  const portadaStatusSummary = useMemo(() => {
+    const subItems = shown.filter((it) => it.kind === 'subproceso');
+    const target = subItems.length > 0 ? subItems : shown;
+    let cumplidos = 0;
+    let enProceso = 0;
+    let conRetraso = 0;
+    let pendientes = 0;
+
+    for (const it of target) {
+      const st = (it.status || '').toLowerCase();
+      if (st.includes('completado') || st.includes('cumple')) {
+        cumplidos += 1;
+      } else if (st.includes('retraso')) {
+        conRetraso += 1;
+      } else if (st.includes('proceso') || st.includes('curso')) {
+        enProceso += 1;
+      } else {
+        pendientes += 1;
+      }
+    }
+
+    const total = target.length;
+    const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
+
+    const rows = [
+      { name: 'Completado', value: cumplidos, pct: pct(cumplidos), color: '#10b981' },
+      { name: 'En proceso', value: enProceso, pct: pct(enProceso), color: '#f59e0b' },
+      { name: 'Con retraso', value: conRetraso, pct: pct(conRetraso), color: '#ef4444' },
+      ...(pendientes > 0
+        ? [{ name: 'Pendiente', value: pendientes, pct: pct(pendientes), color: '#94a3b8' }]
+        : []),
+    ];
+
+    return {
+      total,
+      rows,
+      chartData: rows.filter((r) => r.value > 0),
+    };
+  }, [shown]);
+
   useEffect(() => {
     setRenderedRowCount(120);
   }, [projectId, perspective, engine.hasFilters]);
@@ -8186,34 +8248,27 @@ export default function Tareas2View({
             <div style={{ display: 'flex', flexDirection: viewMode === 'portada' ? 'row' : 'column', gap: viewMode === 'portada' ? '16px' : '0px', width: '100%', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden', alignItems: 'stretch', marginTop: '0px' }}>
               {/* En Carátula: izquierda = gráficos + tablero · derecha = columna de tarjetas a alto completo (desde filtros hasta footer) */}
               <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden' }}>
-              {/* Tarjetas Principales Analíticas de Reportes 1 en Vista Carátula */}
+              {/* Tarjetas Principales Analíticas conectadas en vivo en Vista Carátula */}
               {viewMode === 'portada' && (
-                <div style={{ width: '100%', minHeight: 'auto', maxHeight: 'none', marginBottom: '14px', flexShrink: 0 }}>
+                <div style={{ width: '100%', minHeight: 'auto', maxHeight: 'none', marginBottom: '12px', flexShrink: 0 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(min(100%, 280px), 1fr))', gap: '16px', margin: 0, padding: 0 }}>
-                    {/* 1. Avance regional por hito */}
-                    <section style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
-                      <div style={{ marginBottom: '10px' }}>
-                        <h2 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Avance regional por hito</h2>
-                        <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Porcentaje promedio de cumplimiento en las 13 UGEL.</p>
+                    {/* 1. Avance por componente */}
+                    <section style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
+                      <div style={{ marginBottom: '6px' }}>
+                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Avance por componente</h2>
+                        <p style={{ fontSize: '11.5px', color: '#64748b', margin: '1px 0 0' }}>Porcentaje real según los registros visibles del cronograma.</p>
                       </div>
-                      <div style={{ height: '180px' }}>
+                      <div style={{ height: '130px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart
-                            data={[
-                              { id: '1.4', name: 'Preparación', v: 100 },
-                              { id: '1.6', name: 'CDL SIGA', v: 67 },
-                              { id: '2.1', name: 'Recepción', v: 42 },
-                              { id: '3.1', name: 'Distribución', v: 18 },
-                              { id: '4.1', name: 'Cierre', v: 0 },
-                              { id: '5.1', name: 'Informe', v: 0 },
-                            ]}
-                            margin={{ top: 14, right: 8, bottom: 0, left: -18 }}
+                            data={portadaComponentBars}
+                            margin={{ top: 10, right: 8, bottom: 0, left: -18 }}
                           >
                             <CartesianGrid stroke="#e2e8f0" vertical={false} strokeDasharray="3 4" />
                             <XAxis dataKey="id" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                            <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                            <YAxis domain={[0, 100]} ticks={[0, 50, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10.5, fill: '#64748b' }} axisLine={false} tickLine={false} />
                             <Tooltip
-                              formatter={(v) => [`${v}%`, 'Cumplimiento']}
+                              formatter={(v: any, _name: any, item: any) => [`${v}%`, item?.payload?.name || 'Avance']}
                               cursor={{ fill: 'rgba(37, 99, 235, 0.08)', radius: 4 }}
                               contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                             />
@@ -8223,7 +8278,7 @@ export default function Tareas2View({
                               fill="#2563eb"
                               isAnimationActive={true}
                               animationBegin={150}
-                              animationDuration={1200}
+                              animationDuration={900}
                               animationEasing="ease-out"
                               activeBar={{ fill: '#1d4ed8', stroke: '#1e40af', strokeWidth: 1.5 }}
                             />
@@ -8232,62 +8287,64 @@ export default function Tareas2View({
                       </div>
                     </section>
 
-                    {/* 2. Estado de los hitos (Donut) */}
-                    <section style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
-                      <div style={{ marginBottom: '10px' }}>
-                        <h2 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Estado de los hitos</h2>
-                        <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Distribución porcentual actual.</p>
+                    {/* 2. Estado de las tareas (Donut en vivo) */}
+                    <section style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px 16px', boxShadow: '0 1px 3px rgba(15,23,42,0.04)' }}>
+                      <div style={{ marginBottom: '6px' }}>
+                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Estado de las tareas</h2>
+                        <p style={{ fontSize: '11.5px', color: '#64748b', margin: '1px 0 0' }}>Distribución porcentual según filtros activos.</p>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', height: '180px' }}>
-                        <div style={{ position: 'relative', width: '136px', height: '136px', background: 'transparent' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', height: '130px' }}>
+                        <div style={{ position: 'relative', width: '112px', height: '112px', background: 'transparent' }}>
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Tooltip
-                                formatter={(v: any, name: any) => [`${v} hitos (${Math.round((Number(v) / 6) * 100)}%)`, name]}
+                                formatter={(v: any, name: any) => [
+                                  `${v} tareas (${portadaStatusSummary.total > 0 ? Math.round((Number(v) / portadaStatusSummary.total) * 100) : 0}%)`,
+                                  name,
+                                ]}
                                 contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                               />
                               <Pie
-                                data={[
-                                  { name: 'Cumplidos', value: 1, color: '#10b981' },
-                                  { name: 'En proceso', value: 3, color: '#f59e0b' },
-                                  { name: 'Pendientes', value: 2, color: '#ef4444' },
-                                ]}
-                                innerRadius={42}
-                                outerRadius={65}
-                                paddingAngle={3}
+                                data={
+                                  portadaStatusSummary.chartData.length > 0
+                                    ? portadaStatusSummary.chartData
+                                    : [{ name: 'Sin tareas', value: 1, color: '#e2e8f0' }]
+                                }
+                                innerRadius={34}
+                                outerRadius={52}
+                                paddingAngle={portadaStatusSummary.chartData.length > 1 ? 3 : 0}
                                 dataKey="value"
                                 isAnimationActive={true}
-                                animationBegin={200}
-                                animationDuration={1300}
+                                animationBegin={150}
+                                animationDuration={900}
                                 animationEasing="ease-out"
                               >
-                                <Cell fill="#10b981" />
-                                <Cell fill="#f59e0b" />
-                                <Cell fill="#ef4444" />
+                                {(portadaStatusSummary.chartData.length > 0
+                                  ? portadaStatusSummary.chartData
+                                  : [{ name: 'Sin tareas', value: 1, color: '#e2e8f0' }]
+                                ).map((entry) => (
+                                  <Cell key={entry.name} fill={entry.color} />
+                                ))}
                               </Pie>
                             </PieChart>
                           </ResponsiveContainer>
                           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                            <b style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>06</b>
-                            <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>hitos</small>
+                            <b style={{ fontSize: '19px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
+                              {String(portadaStatusSummary.total).padStart(2, '0')}
+                            </b>
+                            <small style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>tareas</small>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px' }}>
-                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
-                            <span style={{ color: '#475569' }}>Cumplidos</span>
-                            <b style={{ marginLeft: 'auto', color: '#0f172a' }}>1 (17%)</b>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px' }}>
-                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b' }} />
-                            <span style={{ color: '#475569' }}>En proceso</span>
-                            <b style={{ marginLeft: 'auto', color: '#0f172a' }}>3 (50%)</b>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px' }}>
-                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444' }} />
-                            <span style={{ color: '#475569' }}>Pendientes</span>
-                            <b style={{ marginLeft: 'auto', color: '#0f172a' }}>2 (33%)</b>
-                          </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {portadaStatusSummary.rows.map((row) => (
+                            <div key={row.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: row.color, flexShrink: 0 }} />
+                              <span style={{ color: '#475569' }}>{row.name}</span>
+                              <b style={{ marginLeft: 'auto', color: '#0f172a', paddingLeft: '8px' }}>
+                                {row.value} ({row.pct}%)
+                              </b>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </section>
