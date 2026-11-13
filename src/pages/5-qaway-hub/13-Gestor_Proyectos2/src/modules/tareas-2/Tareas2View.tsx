@@ -18,6 +18,7 @@ import {
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
 import AsignarTareaDrawer from './AsignarTareaDrawer';
 import TareasSideCards, { PERSON_AVATARS } from './TareasSideCards';
+import TareasDashboardView from './TareasDashboardView';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
@@ -2108,8 +2109,8 @@ export default function Tareas2View({
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<
-    'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
-  >(() => (perspective === 'equipo' ? 'directorio' : 'portada'));
+    'dashboard' | 'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
+  >(() => (perspective === 'equipo' ? 'directorio' : 'dashboard'));
 
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
   const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
@@ -2913,7 +2914,7 @@ export default function Tareas2View({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
-  const handleViewModeChange = (newMode: 'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
+  const handleViewModeChange = (newMode: 'dashboard' | 'portada' | 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
@@ -7064,6 +7065,15 @@ export default function Tareas2View({
                 <>
                   <button
                     type="button"
+                    className={`view-mode-btn ${viewMode === 'dashboard' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('dashboard')}
+                    title="Panel y Resumen Ejecutivo de Tareas"
+                  >
+                    <LayoutDashboard size={14} />
+                    <span>Panel</span>
+                  </button>
+                  <button
+                    type="button"
                     className={`view-mode-btn ${viewMode === 'portada' ? 'active' : ''}`}
                     onClick={() => handleViewModeChange('portada')}
                     title="Carátula y Asignación de Tareas"
@@ -8240,6 +8250,22 @@ export default function Tareas2View({
               sedes={equipoSedes}
               onSelectIntegrante={(id) => setEquipoSelectedId(id)}
               onReasignarTarea={handleReasignarTarea}
+            />
+          )}
+
+          {/* Presentación Oficial: Panel Dashboard (Idéntico a Maqueta) */}
+          {viewMode === 'dashboard' && (
+            <TareasDashboardView
+              items={shown}
+              allItems={items}
+              onSelectItem={openEditorForItem}
+              onOpenAsignar={(opts) => {
+                setDrawerInitialRole(opts?.role);
+                setAsignarTareaItem(opts?.item || null);
+                setIsAsignarTareaOpen(true);
+              }}
+              onViewGantt={() => handleViewModeChange('gantt')}
+              onViewLista={() => handleViewModeChange('lista')}
             />
           )}
 
