@@ -12,7 +12,7 @@ La ruta canónica usa plural y separa explícitamente el ámbito de proyecto:
 Ejemplo local:
 
 ```text
-http://localhost:5174/hub/gestor_proyectos/proyecto/gantt
+http://localhost:4100/hub/gestor_proyectos/proyecto
 ```
 
 Ejemplo productivo:
