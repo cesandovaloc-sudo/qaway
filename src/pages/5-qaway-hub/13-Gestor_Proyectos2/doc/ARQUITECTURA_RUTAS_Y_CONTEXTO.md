@@ -135,6 +135,61 @@ documentos ni publicaciones. Todo nuevo enlace debe usar:
 /hub/gestor_proyectos/proyecto/...
 ```
 
+## Estado real del acoplamiento al Hub (2026-11-13)
+
+La app **ya no se sirve como web independiente**: comparte el despliegue de
+`1-qawaylab-web` y se monta en el `AppRouter.jsx` central.
+
+| Pieza | Estado |
+|---|---|
+| Montaje en el router central | `/hub/gestor_proyectos/*` y `/hub/gestor_proyecto/*` → `GestorProyectos2AppPage` |
+| Ruta base interna | `BASE_PATH = '/hub/gestor_proyectos'` (`src/types.ts`) |
+| URLs antiguas sin prefijo | `/gestor_proyectos/*` redirige conservando subcamino y query |
+| Shell visual | Propio (sidebar + canvas del módulo); no usa el `Layout` del Hub, por lo que no hay doble cabecera |
+| Bundle | Entra al build principal como chunk `GestorProyectos2AppPage-*.js` |
+
+El servidor de desarrollo válido es el de la raíz del repo:
+
+```text
+http://localhost:4100/hub/gestor_proyectos/sedes
+```
+
+El `vite.config.ts` y el `index.html` propios de esta carpeta quedan solo como
+resto del modo standalone; no participan del despliegue.
+
+### Bitácora de acoplamiento
+
+**AC-09 · Rutas fuera del namespace del Hub**
+
+- *Falla detectada:* `BASE_PATH` apuntaba a `/gestor_proyectos`, fuera del
+  namespace `/hub`; el router central solo registra `/hub/gestor_proyectos`, así
+  que la navegación interna salía del módulo montado.
+- *Impacto:* URLs escritas a mano daban 404 y la app solo funcionaba en su
+  servidor standalone (`:5174`).
+- *Solución aplicada:* `BASE_PATH = '/hub/gestor_proyectos'`, alias anidados
+  preservados y `LegacyGestorProyectosRedirect` para las URLs antiguas.
+- *Validación:* `tsc --noEmit` sin errores nuevos en `types.ts` / `App.tsx`;
+  `oxlint` sin errores en `AppRouter.jsx`; `npm run build` de la raíz completo
+  (56.79 s) con el chunk del módulo generado.
+
+**AC-10 · Fuga de estilos globales al montar en el Hub**
+
+- *Falla detectada:* `src/styles.css` declaraba `body { font-family; margin: 0 }`,
+  que al importarse desde el wrapper reescribía el `body` de toda la web.
+- *Impacto:* tras visitar el Gestor, el resto del Hub quedaba con la tipografía y
+  márgenes del módulo.
+- *Solución aplicada:* la regla se acotó a `body:has(.qm-root)`; como la app
+  siempre renderiza `.qm-root`, el resultado visual es idéntico.
+- *Validación:* build de la raíz sin errores; sin cambios en clases ni en JSX.
+
+### Pendiente de acoplamiento
+
+- El módulo usa un cliente Supabase con `storageKey` propio
+  (`qaway_gestor_proyectos_auth`). Evita desconexiones cruzadas, pero al montarse
+  en el Hub no hereda la sesión del usuario, así que las lecturas con RLS caen a
+  modo local. Conectar la sesión compartida queda para cuando existan las tablas
+  `gp_*` y el slug en `app_catalog`.
+
 ## Límites actuales
 
 - No se ejecutan migraciones automáticamente.

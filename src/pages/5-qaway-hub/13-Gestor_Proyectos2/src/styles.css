@@ -43,7 +43,10 @@
   --fs-body: 14.5px; --fs-body-sm: 14px; --fs-meta: 12.5px; --fs-meta-sm: 12px;
 }
 
-body {
+/* Acotado a la app: al montarse dentro del Hub no debe reescribir el body global.
+   `:has(.qm-root)` mantiene el mismo resultado visual (la app siempre renderiza .qm-root)
+   y evita dejar fuente/margenes del Gestor aplicados al resto de la web. */
+body:has(.qm-root) {
   font-family: var(--font-sans);
   margin: 0;
 }
