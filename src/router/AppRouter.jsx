@@ -153,6 +153,17 @@ function renderRoute(routeKey, element) {
   return <Navigate to="/" replace />
 }
 
+/**
+ * Compatibilidad del Gestor de Proyectos 2: sus URLs públicas antiguas
+ * (`/gestor_proyectos/...`) ahora viven como módulo del Hub. Redirige
+ * conservando el subcamino y el query string.
+ */
+function LegacyGestorProyectosRedirect() {
+  const location = useLocation()
+  const rest = location.pathname.replace(/^\/gestor_proyectos/, '')
+  return <Navigate to={`/hub/gestor_proyectos${rest}${location.search}`} replace />
+}
+
 function renderPublicPathRoute(routeKey, pathname, element) {
   if (isRouteEnabled(routeKey) && isPublicPathAllowed(pathname)) return <RouteSuspense>{element}</RouteSuspense>
   return <Navigate to="/" replace />
@@ -462,6 +473,9 @@ export default function AppRouter() {
           path="/hub/gestor_proyectos"
           element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
         />
+        {/* Compatibilidad: URLs antiguas del Gestor sin el prefijo /hub. */}
+        <Route path="/gestor_proyectos/*" element={<LegacyGestorProyectosRedirect />} />
+        <Route path="/gestor_proyectos" element={<LegacyGestorProyectosRedirect />} />
         {/* RAG Hub (12-qaway_empresarial): nativo con shell oficial Hub */}
         <Route
           path="/hub/rag/*"

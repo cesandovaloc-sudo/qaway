@@ -20,8 +20,9 @@ export const CONFIGURABLE_MODULES: ConfigurableModuleInfo[] = [
   { key: 'reportes2', name: 'Reportes', defaultSubtitle: 'Consolidado de informes territoriales y analítica.' },
 ];
 
-// Ruta pública canónica del Gestor de Proyectos dentro del sistema (sin prefijo /hub)
-export const BASE_PATH = '/gestor_proyectos';
+// Ruta pública canónica del Gestor de Proyectos dentro del sistema:
+// vive como módulo del Hub, por lo que comparte el despliegue de la web principal.
+export const BASE_PATH = '/hub/gestor_proyectos';
 
 // Slugs canónicos oficiales para cada módulo en la URL
 export const MODULE_SLUGS: Record<ModuleKey, string> = {
@@ -84,23 +85,7 @@ export const SLUG_TO_MODULE: Record<string, ModuleKey> = {
   '/configuracion': 'configuracion',
   '/pruebas': 'pruebas',
 
-  // Compatibilidad hacia atrás con rutas legacy que contenían /hub
-  '/hub/gestor_proyectos/proyecto': 'cronograma',
-  '/hub/gestor_proyectos/cronograma': 'cronograma',
-  '/hub/gestor_proyectos/sedes': 'sedes',
-  '/hub/gestor_proyectos/resumen': 'resumen',
-  '/hub/gestor_proyectos/tareas': 'tareas',
-  '/hub/gestor_proyectos/tareas-2': 'tareas2',
-  '/hub/gestor_proyectos/componentes': 'hitos',
-  '/hub/gestor_proyectos/hitos': 'hitos',
-  '/hub/gestor_proyectos/reuniones': 'reuniones',
-  '/hub/gestor_proyectos/reuniones-2': 'reuniones2',
-  '/hub/gestor_proyectos/reportes': 'reportes2',
-  '/hub/gestor_proyectos/reportes-2': 'reportes2',
-  '/hub/gestor_proyectos/equipo': 'usuarios',
-  '/hub/gestor_proyectos/usuarios': 'usuarios',
-  '/hub/gestor_proyectos/actas': 'actas',
-  '/hub/gestor_proyectos/configuracion': 'configuracion',
+  // Compatibilidad hacia atrás con las URLs anidadas /hub/gestor_proyectos/proyecto/*
   '/hub/gestor_proyectos/proyecto/cronograma': 'cronograma',
   '/hub/gestor_proyectos/proyecto/sedes': 'sedes',
   '/hub/gestor_proyectos/proyecto/resumen': 'resumen',
