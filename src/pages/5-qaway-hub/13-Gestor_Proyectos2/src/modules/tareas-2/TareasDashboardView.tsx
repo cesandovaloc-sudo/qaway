@@ -1,24 +1,256 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import {
+  House,
   CalendarDays,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  UserRound,
+  FolderKanban,
+  MapPin,
+  UsersRound,
+  ClipboardCheck,
+  Presentation,
+  ChartNoAxesColumn,
+  Settings,
+  CircleHelp,
+  Bell,
+  ChevronDown,
   ChevronRight,
-  ChevronLeft,
+  Download,
+  Plus,
   MoreHorizontal,
-  Folder,
-  ArrowRight,
-  UserCheck,
   Check,
-} from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import type { Item } from './Tareas2View';
+  Info,
+  Zap,
+  CircleAlert,
+  Flag,
+  CircleCheck,
+  CalendarRange,
+  LayoutDashboard,
+  Columns3,
+  List,
+  Search,
+  SlidersHorizontal,
+  ArrowUpRight,
+  X,
+} from "lucide-react";
+import type { Item } from "./Tareas2View";
+
+type Priority = "Urgente" | "Alta" | "Media" | "Baja";
+type Status = "Pendiente" | "En proceso" | "En revisión" | "Completada";
+type Task = {
+  id: number;
+  title: string;
+  code: string;
+  area: string;
+  priority: Priority;
+  status: Status;
+  dueLabel: string;
+  assignees: string[];
+};
+
+const priorities: Priority[] = ["Urgente", "Alta", "Media", "Baja"];
+const priorityMeta: Record<
+  Priority,
+  {
+    header: string;
+    text: string;
+    count: string;
+    border: string;
+    date: string;
+    icon: React.ComponentType<{ size?: number; className?: string }>;
+  }
+> = {
+  Urgente: {
+    header: "bg-[#f04444]",
+    text: "text-white",
+    count: "bg-white/80 text-red-700",
+    border: "border-l-red-500",
+    date: "bg-red-100 text-red-700",
+    icon: Zap,
+  },
+  Alta: {
+    header: "bg-[#ffc52f]",
+    text: "text-[#3b2b00]",
+    count: "bg-white/80 text-amber-800",
+    border: "border-l-amber-500",
+    date: "bg-amber-100 text-amber-800",
+    icon: CircleAlert,
+  },
+  Media: {
+    header: "bg-[#8bb9ff]",
+    text: "text-[#082e70]",
+    count: "bg-white/80 text-blue-700",
+    border: "border-l-blue-600",
+    date: "bg-blue-100 text-blue-800",
+    icon: Flag,
+  },
+  Baja: {
+    header: "bg-[#8cdbb7]",
+    text: "text-[#064b32]",
+    count: "bg-white/80 text-emerald-800",
+    border: "border-l-emerald-600",
+    date: "bg-emerald-100 text-emerald-800",
+    icon: CircleCheck,
+  },
+};
+
+const defaultTasks: Task[] = [
+  { id: 1, title: "Validar documentación recibida", code: "SP-04", area: "Consolidación", priority: "Urgente", status: "En revisión", dueLabel: "Hoy", assignees: ["CS", "AM"] },
+  { id: 2, title: "Coordinar acciones de planificación", code: "SP-01", area: "Planificación", priority: "Urgente", status: "Pendiente", dueLabel: "Mañana", assignees: ["AM"] },
+  { id: 3, title: "Elaborar y validar el plan de distribución", code: "SP-01", area: "Planificación", priority: "Alta", status: "En proceso", dueLabel: "14 nov.", assignees: ["AM"] },
+  { id: 4, title: "Registro de recepción de materiales", code: "SP-02", area: "Almacenes", priority: "Alta", status: "En proceso", dueLabel: "18 nov.", assignees: ["CS", "JR"] },
+  { id: 5, title: "Informe de avance regional", code: "SP-05", area: "Seguimiento", priority: "Media", status: "En revisión", dueLabel: "13 nov.", assignees: ["JR"] },
+  { id: 6, title: "Conformación de comité regional", code: "SP-01", area: "Planificación", priority: "Media", status: "En proceso", dueLabel: "20 nov.", assignees: ["AM", "JR"] },
+  { id: 7, title: "Validación de información", code: "SP-04", area: "Consolidación", priority: "Baja", status: "Completada", dueLabel: "28 oct.", assignees: ["AM"] },
+  { id: 8, title: "Actualización de matriz de entregables", code: "SP-05", area: "Informe", priority: "Baja", status: "Completada", dueLabel: "30 oct.", assignees: ["CS"] },
+];
+
+const teams = [
+  { name: "Coord. Macroregionales", people: 12, values: [8, 5, 6, 4, 3], total: 26, tone: "green" },
+  { name: "Gestores", people: 28, values: [12, 14, 10, 9, 8], total: 53, tone: "amber" },
+  { name: "Equipo Central", people: 6, values: [4, 3, 5, 2, 4], total: 18, tone: "purple" },
+];
+
+const areas = ["Planificación", "Almacenes", "II.EE.", "Consolidación", "Informe"];
+
+const states = [
+  { name: "Completadas", value: 46, color: "#45bd86" },
+  { name: "En proceso", value: 18, color: "#1769f5" },
+  { name: "En revisión", value: 12, color: "#ffc52f" },
+  { name: "Por vencer", value: 6, color: "#ef4444" },
+  { name: "Pendientes", value: 15, color: "#c5ccd8" },
+];
+
+const priorityTotals: Record<Priority, number> = { Urgente: 6, Alta: 18, Media: 58, Baja: 15 };
+
+function Avatar({ initials }: { initials: string }) {
+  const colors: Record<string, string> = { CS: "bg-[#183d55]", AM: "bg-[#a96d4c]", JR: "bg-[#637b9c]" };
+  return (
+    <span
+      title={initials}
+      className={`grid h-7 w-7 place-items-center rounded-full border-2 border-white text-[9px] font-bold text-white shadow-sm ${
+        colors[initials] ?? "bg-slate-500"
+      }`}
+    >
+      {initials}
+    </span>
+  );
+}
+
+function Donut() {
+  return (
+    <div role="img" aria-label="97 tareas por estado" className="relative h-[142px] w-[142px] shrink-0">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={states}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius={48}
+            outerRadius={68}
+            paddingAngle={1}
+            stroke="none"
+            isAnimationActive={false}
+          >
+            {states.map((state) => (
+              <Cell key={state.name} fill={state.color} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
+        <div>
+          <div className="text-[32px] font-extrabold leading-none text-[#0f172a]">97</div>
+          <div className="mt-1 text-sm font-semibold text-slate-500">tareas</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeatCell({ value, tone }: { value: number; tone: string }) {
+  const color =
+    tone === "green"
+      ? value >= 8
+        ? "bg-[#50bd8b] text-white"
+        : "bg-[#d8f3e7] text-[#176b4b]"
+      : tone === "amber"
+      ? value >= 10
+        ? "bg-[#f7a51a] text-white"
+        : "bg-[#ffe6a8] text-[#855000]"
+      : value >= 5
+      ? "bg-[#bd8ce8] text-white"
+      : "bg-[#ead8f8] text-[#7440a3]";
+  return (
+    <div className={`grid h-9 place-items-center rounded-md text-sm font-bold ${color}`}>
+      {value}
+    </div>
+  );
+}
+
+function TaskCard({ task, onSelect }: { task: Task; onSelect?: () => void }) {
+  const meta = priorityMeta[task.priority];
+  const Icon = meta.icon;
+  const done = task.status === "Completada";
+  return (
+    <article
+      onClick={onSelect}
+      className={`cursor-pointer rounded-xl border border-slate-100 border-l-[3px] ${meta.border} bg-white p-3 shadow-[0_2px_8px_rgba(25,54,99,0.07)] transition hover:-translate-y-0.5 hover:shadow-md`}
+    >
+      <div className="flex items-start gap-2">
+        <h4 className="min-w-0 flex-1 text-[12px] font-bold leading-[1.35] text-[#15213d]">{task.title}</h4>
+        <button
+          type="button"
+          aria-label={`Opciones de ${task.title}`}
+          className="rounded p-0.5 text-slate-400 hover:bg-slate-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect?.();
+          }}
+        >
+          <MoreHorizontal size={17} />
+        </button>
+      </div>
+      <div className="mt-1.5 text-[11px] font-medium text-[#52688f]">
+        {task.code} · {task.area}
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <div className="flex -space-x-2">
+          {task.assignees.map((person) => (
+            <Avatar key={person} initials={person} />
+          ))}
+        </div>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${
+            done ? "bg-emerald-100 text-emerald-800" : meta.date
+          }`}
+        >
+          {done ? <Check size={12} /> : <CalendarDays size={12} />}
+          {task.dueLabel}
+        </span>
+      </div>
+      <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2">
+        <span className="text-[10px] text-slate-500">{task.status}</span>
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${
+            done
+              ? "bg-emerald-500"
+              : task.status === "En revisión"
+              ? "bg-amber-400"
+              : task.status === "En proceso"
+              ? "bg-blue-500"
+              : "bg-slate-300"
+          }`}
+        />
+      </div>
+    </article>
+  );
+}
 
 interface Props {
-  items: Item[];
-  allItems: Item[];
+  items?: Item[];
+  allItems?: Item[];
   onSelectItem?: (item: Item) => void;
   onOpenAsignar?: (opts?: { role?: string; item?: Item | null; gestorName?: string }) => void;
   onViewGantt?: () => void;
@@ -33,1223 +265,428 @@ export default function TareasDashboardView({
   onViewGantt,
   onViewLista,
 }: Props) {
-  // Tabs de filtrado en la tabla inferior
-  const [activeTab, setActiveTab] = useState<'todas' | 'macro' | 'gestores'>('todas');
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 4;
+  const [view, setView] = useState<"general" | "kanban" | "lista" | "equipo">("general");
+  const [priority, setPriority] = useState<"Todas" | Priority>("Todas");
+  const [search, setSearch] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Raíces o Componentes principales para el Mini Gantt
-  const componentsList = useMemo(() => {
-    const roots = allItems.filter((it) => !it.parentId || it.kind === 'hito').slice(0, 4);
-    if (roots.length > 0) return roots;
-    return [
-      { id: '1', code: '1.', name: 'Planificación de la distribución', progress: 60 },
-      { id: '2', code: '2.', name: 'Gestión de almacenes y recepción', progress: 40 },
-      { id: '3', code: '3.', name: 'Distribución a II.EE.', progress: 20 },
-      { id: '4', code: '4.', name: 'Cierre y consolidado regional', progress: 0 },
-    ] as Item[];
-  }, [allItems]);
+  const visible = useMemo(
+    () =>
+      defaultTasks.filter(
+        (task) =>
+          (priority === "Todas" || task.priority === priority) &&
+          `${task.title} ${task.area} ${task.code}`.toLowerCase().includes(search.toLowerCase())
+      ),
+    [priority, search]
+  );
 
-  // Lista de tareas (subprocesos) para la tabla
-  const subprocesos = useMemo(() => {
-    const list = items.filter((it) => it.kind === 'subproceso');
-    return list.length > 0 ? list : items;
-  }, [items]);
+  const grouped = useMemo(
+    () =>
+      priorities.reduce((acc, p) => {
+        acc[p] = visible.filter((task) => task.priority === p);
+        return acc;
+      }, {} as Record<Priority, Task[]>),
+    [visible]
+  );
 
-  // Filtrado por Tab
-  const filteredTasks = useMemo(() => {
-    if (activeTab === 'macro') {
-      return subprocesos.filter(
-        (t) =>
-          (t.gestor && t.gestor.toLowerCase().includes('macro')) ||
-          (t.role && t.role.toLowerCase().includes('macro')) ||
-          t.id.endsWith('1') ||
-          t.id.endsWith('3')
-      );
-    }
-    if (activeTab === 'gestores') {
-      return subprocesos.filter(
-        (t) =>
-          !(
-            (t.gestor && t.gestor.toLowerCase().includes('macro')) ||
-            (t.role && t.role.toLowerCase().includes('macro')) ||
-            t.id.endsWith('1') ||
-            t.id.endsWith('3')
-          )
-      );
-    }
-    return subprocesos;
-  }, [subprocesos, activeTab]);
-
-  // Conteos para los tabs
-  const countMacro = useMemo(() => {
-    return subprocesos.filter(
-      (t) =>
-        (t.gestor && t.gestor.toLowerCase().includes('macro')) ||
-        (t.role && t.role.toLowerCase().includes('macro')) ||
-        t.id.endsWith('1') ||
-        t.id.endsWith('3')
-    ).length;
-  }, [subprocesos]);
-
-  const countGestores = subprocesos.length - countMacro;
-
-  // Paginación
-  const totalPages = Math.max(1, Math.ceil(filteredTasks.length / pageSize));
-  const pageTasks = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredTasks.slice(start, start + pageSize);
-  }, [filteredTasks, currentPage, pageSize]);
-
-  // Resumen del Estado de las Tareas (Donut)
-  const donutData = useMemo(() => {
-    let completadas = 0;
-    let enProceso = 0;
-    let enRevision = 0;
-    let porVencer = 0;
-    let pendientes = 0;
-
-    for (const it of subprocesos) {
-      const st = (it.status || '').toLowerCase();
-      if (st.includes('completado') || st.includes('cumple')) {
-        completadas += 1;
-      } else if (st.includes('revisión') || st.includes('revision')) {
-        enRevision += 1;
-      } else if (st.includes('retraso') || st.includes('vencer')) {
-        porVencer += 1;
-      } else if (st.includes('proceso') || st.includes('curso')) {
-        enProceso += 1;
-      } else {
-        pendientes += 1;
-      }
-    }
-
-    const total = subprocesos.length || 63;
-    // Si la suma no tiene valores distribuidos, asignar una distribución equilibrada representativa
-    const cVal = completadas > 0 ? completadas : 30;
-    const pVal = enProceso > 0 ? enProceso : 8;
-    const rVal = enRevision > 0 ? enRevision : 6;
-    const vVal = porVencer > 0 ? porVencer : 4;
-    const penVal = pendientes > 0 ? pendientes : Math.max(1, total - (cVal + pVal + rVal + vVal));
-
-    const rows = [
-      { name: 'Completadas', value: cVal, color: '#10b981' },
-      { name: 'En proceso', value: pVal, color: '#2563eb' },
-      { name: 'En revisión', value: rVal, color: '#eab308' },
-      { name: 'Por vencer', value: vVal, color: '#f97316' },
-      { name: 'Pendientes', value: penVal, color: '#94a3b8' },
-    ];
-
-    const sum = rows.reduce((acc, r) => acc + r.value, 0);
-
-    return {
-      total: sum,
-      rows: rows.map((r) => ({
-        ...r,
-        pct: Math.round((r.value / sum) * 100),
-      })),
-    };
-  }, [subprocesos]);
-
-  // Próximos vencimientos para la tarjeta lateral
-  const upcomingTasks = useMemo(() => {
-    return subprocesos
-      .filter((it) => it.status !== 'Completado' && it.status !== 'Cumple')
-      .slice(0, 3);
-  }, [subprocesos]);
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.size === pageTasks.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(pageTasks.map((t) => t.id)));
-    }
-  };
+  const tabs = [
+    { id: "general", label: "Vista general", icon: LayoutDashboard },
+    { id: "kanban", label: "Kanban", icon: Columns3 },
+    { id: "lista", label: "Lista", icon: List },
+    { id: "equipo", label: "Por equipo", icon: UsersRound },
+  ] as const;
 
   return (
-    <div
-      className="tareas-dashboard-grid"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-        width: '100%',
-        height: '100%',
-        overflowY: 'auto',
-        padding: '0 2px 16px 2px',
-        boxSizing: 'border-box',
-      }}
-    >
-      {/* =========================================================================
-          FILA 1: Vista del cronograma de tareas (Izquierda) + Estado general de tareas (Derecha)
-         ========================================================================= */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.8fr) minmax(360px, 1fr)',
-          gap: '16px',
-          alignItems: 'stretch',
-        }}
-      >
-        {/* Tarjeta 1: Vista del cronograma de tareas (Mini Gantt) */}
-        <section
-          className="qm-card"
-          style={{
-            background: '#ffffff',
-            borderRadius: '14px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
-            padding: '16px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-              marginBottom: '14px',
-            }}
-          >
+    <div className="w-full flex-1 overflow-y-auto bg-[#f2f6fc] text-[#14213d]">
+      <div className="mx-auto max-w-[1700px] p-4 md:p-6">
+        {/* Cabecera Principal de Tareas del Proyecto */}
+        <section className="mb-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="grid h-14 w-14 place-items-center rounded-2xl border border-blue-200 bg-blue-50 text-[#1769f5] shadow-sm">
+              <ClipboardCheck size={30} />
+            </div>
             <div>
-              <h2
-                style={{
-                  fontSize: '15px',
-                  fontWeight: 700,
-                  color: '#0f172a',
-                  margin: 0,
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                Vista del cronograma de tareas
-              </h2>
-              <p style={{ fontSize: '12px', color: '#64748b', margin: '3px 0 0' }}>
-                Distribución temporal de las principales actividades.
+              <h1 className="text-[23px] font-extrabold tracking-tight text-[#111d39] md:text-[27px]">
+                Tareas del Proyecto
+              </h1>
+              <p className="text-xs text-[#52688f] md:text-sm">
+                Asignación, seguimiento y control del trabajo del equipo.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onViewGantt}
-              title="Abrir cronograma completo"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#0066ff',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '4px 6px',
-                borderRadius: '6px',
-              }}
-            >
-              <span>Ver cronograma</span>
-              <ArrowRight size={13} />
-            </button>
           </div>
-
-          {/* Mini-Gantt Timeline Container */}
-          <div
-            style={{
-              border: '1px solid #f1f5f9',
-              borderRadius: '10px',
-              background: '#ffffff',
-              overflow: 'hidden',
-            }}
-          >
-            {/* Header del Mini Gantt */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'minmax(200px, 1.4fr) minmax(260px, 2fr)',
-                borderBottom: '1px solid #f1f5f9',
-                background: '#fafbfc',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: '#64748b',
-                padding: '6px 12px',
-              }}
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 shadow-sm transition hover:bg-slate-50"
+              aria-label="Más opciones"
             >
-              <div>Componente / Producto</div>
-              <div>
-                {/* Años */}
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    textAlign: 'center',
-                    fontWeight: 700,
-                    color: '#0f172a',
-                    paddingBottom: '2px',
-                    borderBottom: '1px dashed #e2e8f0',
-                    fontSize: '11px',
-                  }}
-                >
-                  <span>2026</span>
-                  <span>2027</span>
-                </div>
-                {/* Meses */}
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(8, 1fr)',
-                    textAlign: 'center',
-                    fontSize: '10px',
-                    paddingTop: '2px',
-                    color: '#64748b',
-                  }}
-                >
-                  <span>Sep</span>
-                  <span>Oct</span>
-                  <span style={{ color: '#0066ff', fontWeight: 700 }}>Nov</span>
-                  <span>Dic</span>
-                  <span>Ene</span>
-                  <span>Feb</span>
-                  <span>Mar</span>
-                  <span>Abr</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Filas de Componentes con Barras */}
-            <div style={{ position: 'relative' }}>
-              {/* Línea vertical de 'Hoy' */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: 'calc(1.4fr / (1.4 + 2) * 100% + 2 * (100% - (1.4fr / (1.4 + 2) * 100%)) / 8 + 12px)',
-                  width: '1.5px',
-                  background: '#0066ff',
-                  zIndex: 2,
-                  pointerEvents: 'none',
-                }}
-              >
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '-6px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: '#0066ff',
-                    color: '#ffffff',
-                    fontSize: '9px',
-                    fontWeight: 700,
-                    padding: '1px 5px',
-                    borderRadius: '4px',
-                    boxShadow: '0 1px 3px rgba(0,102,255,0.3)',
-                  }}
-                >
-                  Hoy
-                </span>
-              </div>
-
-              {componentsList.map((comp, idx) => {
-                const colors = [
-                  { bar: '#3b82f6', diamond: '#1d4ed8', left: '26%', width: '38%' },
-                  { bar: '#10b981', diamond: '#047857', left: '16%', width: '22%' },
-                  { bar: '#eab308', diamond: '#b45309', left: '32%', width: '30%' },
-                  { bar: '#64748b', diamond: '#334155', left: '55%', width: '28%' },
-                ];
-                const c = colors[idx % colors.length];
-
-                return (
-                  <div
-                    key={comp.id || idx}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'minmax(200px, 1.4fr) minmax(260px, 2fr)',
-                      alignItems: 'center',
-                      padding: '7px 12px',
-                      borderBottom: idx < componentsList.length - 1 ? '1px solid #f8fafc' : 'none',
-                      fontSize: '11.5px',
-                    }}
-                  >
-                    {/* Nombre con icono carpeta */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        overflow: 'hidden',
-                        paddingRight: '8px',
-                      }}
-                    >
-                      <ChevronRight size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />
-                      <Folder size={14} style={{ color: '#64748b', flexShrink: 0 }} />
-                      <span
-                        style={{
-                          color: '#1e293b',
-                          fontWeight: 600,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                        title={comp.name}
-                      >
-                        {comp.code ? `${comp.code} ` : `${idx + 1}. `}
-                        {comp.name}
-                      </span>
-                    </div>
-
-                    {/* Timeline de la Barra */}
-                    <div style={{ position: 'relative', height: '18px', width: '100%' }}>
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: c.left,
-                          width: c.width,
-                          top: '2px',
-                          height: '14px',
-                          borderRadius: '999px',
-                          background: c.bar,
-                          opacity: 0.9,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          paddingRight: '2px',
-                        }}
-                      >
-                        {/* Diamante de Hito al final de la barra */}
-                        <div
-                          style={{
-                            width: '7px',
-                            height: '7px',
-                            background: c.diamond,
-                            transform: 'rotate(45deg)',
-                            borderRadius: '1px',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+              <MoreHorizontal size={19} />
+            </button>
+            <button
+              className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold shadow-sm transition hover:bg-slate-50 sm:flex"
+              onClick={onViewLista}
+            >
+              <Download size={16} />
+              Exportar
+            </button>
+            <button
+              className="inline-flex items-center gap-2 rounded-xl bg-[#0866f5] px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-blue-600"
+              onClick={() => onOpenAsignar?.()}
+            >
+              <Plus size={17} />
+              Asignar tarea
+            </button>
           </div>
         </section>
 
-        {/* Tarjeta 2: Estado general de tareas (Donut) */}
-        <section
-          className="qm-card"
-          style={{
-            background: '#ffffff',
-            borderRadius: '14px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
-            padding: '16px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                fontSize: '15px',
-                fontWeight: 700,
-                color: '#0f172a',
-                margin: 0,
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Estado general de tareas
-            </h2>
-            <p style={{ fontSize: '12px', color: '#64748b', margin: '3px 0 0' }}>
-              Distribución según su estado actual.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-around',
-              gap: '14px',
-              paddingTop: '6px',
-            }}
-          >
-            {/* Donut Chart */}
-            <div style={{ position: 'relative', width: '124px', height: '124px', flexShrink: 0 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    formatter={(v: any, name: any) => [
-                      `${v} tareas (${Math.round((Number(v) / donutData.total) * 100)}%)`,
-                      name,
-                    ]}
-                    contentStyle={{
-                      background: '#ffffff',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      fontSize: '12px',
-                      boxShadow: '0 4px 14px rgba(15,23,42,0.08)',
-                    }}
-                  />
-                  <Pie
-                    data={donutData.rows}
-                    innerRadius={38}
-                    outerRadius={56}
-                    paddingAngle={3}
-                    dataKey="value"
-                    isAnimationActive={true}
-                    animationBegin={150}
-                    animationDuration={1000}
-                    animationEasing="ease-out"
-                  >
-                    {donutData.rows.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  pointerEvents: 'none',
-                }}
-              >
-                <b style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
-                  {donutData.total}
-                </b>
-                <small style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 600 }}>
-                  tareas
-                </small>
-              </div>
-            </div>
-
-            {/* Leyenda con Porcentajes */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1 }}>
-              {donutData.rows.map((row) => (
-                <div
-                  key={row.name}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontSize: '11.5px',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                    <span
-                      style={{
-                        width: '7.5px',
-                        height: '7.5px',
-                        borderRadius: '50%',
-                        background: row.color,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span style={{ color: '#475569' }}>{row.name}</span>
-                  </div>
-                  <b style={{ color: '#0f172a', fontWeight: 700 }}>
-                    {row.value} <span style={{ color: '#64748b', fontWeight: 500 }}>({row.pct}%)</span>
-                  </b>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* =========================================================================
-          FILA 2: Tabla de tareas (Izquierda) + Acciones rápidas y Vencimientos (Derecha)
-         ========================================================================= */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.8fr) minmax(360px, 1fr)',
-          gap: '16px',
-          alignItems: 'stretch',
-        }}
-      >
-        {/* Tarjeta 3: Tabla de Tareas Operativas con Tabs y Paginación */}
-        <section
-          className="qm-card"
-          style={{
-            background: '#ffffff',
-            borderRadius: '14px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
-            padding: '14px 18px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          {/* Tabs superiores */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              borderBottom: '1px solid #f1f5f9',
-              marginBottom: '12px',
-              paddingBottom: '2px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('todas');
-                setCurrentPage(1);
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '6px 10px 8px 10px',
-                fontSize: '12.5px',
-                fontWeight: activeTab === 'todas' ? 700 : 500,
-                color: activeTab === 'todas' ? '#0066ff' : '#64748b',
-                borderBottom: activeTab === 'todas' ? '2.5px solid #0066ff' : '2.5px solid transparent',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              Todas ({subprocesos.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('macro');
-                setCurrentPage(1);
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '6px 10px 8px 10px',
-                fontSize: '12.5px',
-                fontWeight: activeTab === 'macro' ? 700 : 500,
-                color: activeTab === 'macro' ? '#0066ff' : '#64748b',
-                borderBottom: activeTab === 'macro' ? '2.5px solid #0066ff' : '2.5px solid transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <UserRound size={13} />
-              <span>A Macroregionales ({countMacro})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('gestores');
-                setCurrentPage(1);
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '6px 10px 8px 10px',
-                fontSize: '12.5px',
-                fontWeight: activeTab === 'gestores' ? 700 : 500,
-                color: activeTab === 'gestores' ? '#0066ff' : '#64748b',
-                borderBottom: activeTab === 'gestores' ? '2.5px solid #0066ff' : '2.5px solid transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <UserRound size={13} />
-              <span>A Gestores ({countGestores})</span>
-            </button>
-          </div>
-
-          {/* Tabla de Registros */}
-          <div style={{ overflowX: 'auto', flex: 1 }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                textAlign: 'left',
-                fontSize: '12px',
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    borderBottom: '1px solid #f1f5f9',
-                    color: '#64748b',
-                    fontWeight: 600,
-                    fontSize: '11px',
-                  }}
-                >
-                  <th style={{ width: '28px', padding: '6px 4px' }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.size > 0 && selectedIds.size === pageTasks.length}
-                      onChange={toggleSelectAll}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </th>
-                  <th style={{ padding: '6px 10px' }}>Tarea</th>
-                  <th style={{ padding: '6px 8px' }}>Asignada a</th>
-                  <th style={{ padding: '6px 8px' }}>Subproceso</th>
-                  <th style={{ padding: '6px 8px' }}>Vencimiento</th>
-                  <th style={{ padding: '6px 8px' }}>Estado</th>
-                  <th style={{ padding: '6px 8px' }}>Avance</th>
-                  <th style={{ width: '28px', padding: '6px 4px' }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {pageTasks.map((t, idx) => {
-                  const isChecked = selectedIds.has(t.id);
-                  const isMacro =
-                    (t.gestor && t.gestor.toLowerCase().includes('macro')) ||
-                    (t.role && t.role.toLowerCase().includes('macro')) ||
-                    idx % 2 === 0;
-
-                  const rawProgress = typeof t.progress === 'number' ? t.progress : idx === 0 ? 60 : idx === 1 ? 0 : idx === 2 ? 30 : 75;
-
-                  const statusLabel =
-                    t.status || (idx === 0 ? 'En proceso' : idx === 1 ? 'Pendiente' : idx === 2 ? 'En revisión' : 'En proceso');
-
-                  const statusColor =
-                    statusLabel === 'Completado'
-                      ? { bg: '#ecfdf5', text: '#047857', border: '#a7f3d0' }
-                      : statusLabel === 'En revisión'
-                      ? { bg: '#fffbeb', text: '#b45309', border: '#fde68a' }
-                      : statusLabel === 'Con retraso'
-                      ? { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' }
-                      : statusLabel === 'En proceso'
-                      ? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
-                      : { bg: '#f8fafc', text: '#475569', border: '#e2e8f0' };
-
-                  return (
-                    <tr
-                      key={t.id || idx}
-                      onClick={() => onSelectItem?.(t)}
-                      style={{
-                        borderBottom: '1px solid #f8fafc',
-                        cursor: 'pointer',
-                        transition: 'background 0.12s ease',
-                        background: isChecked ? '#f8fbff' : 'transparent',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#f8fafc';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = isChecked ? '#f8fbff' : 'transparent';
-                      }}
-                    >
-                      <td
-                        style={{ padding: '8px 4px' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleSelect(t.id);
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleSelect(t.id)}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </td>
-
-                      {/* Título + Subtítulo */}
-                      <td style={{ padding: '8px 10px', minWidth: '180px' }}>
-                        <div style={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.25 }}>
-                          {t.name}
-                        </div>
-                        <div style={{ fontSize: '10.5px', color: '#64748b', marginTop: '2px' }}>
-                          {t.notes || 'Definir y validar actividades con el equipo.'}
-                        </div>
-                      </td>
-
-                      {/* Asignada a (Badge) */}
-                      <td style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '10.5px',
-                            fontWeight: 600,
-                            padding: '2px 8px',
-                            borderRadius: '999px',
-                            background: isMacro ? '#f5f3ff' : '#f0fdf4',
-                            color: isMacro ? '#7c3aed' : '#16a34a',
-                            border: `1px solid ${isMacro ? '#ddd6fe' : '#bbf7d0'}`,
-                          }}
-                        >
-                          <UserRound size={11} />
-                          <span>{isMacro ? 'Macroregional' : 'Gestor'}</span>
-                        </span>
-                      </td>
-
-                      {/* Subproceso */}
-                      <td style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '11px',
-                            fontWeight: 500,
-                            color: '#475569',
-                          }}
-                        >
-                          <CalendarDays size={12} style={{ color: '#0066ff' }} />
-                          <span>SP-{String(idx + 1).padStart(2, '0')}</span>
-                        </span>
-                      </td>
-
-                      {/* Vencimiento */}
-                      <td style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '11px',
-                            fontWeight: 500,
-                            color: '#dc2626',
-                          }}
-                        >
-                          <CalendarDays size={12} />
-                          <span>{10 + idx} nov.</span>
-                        </span>
-                      </td>
-
-                      {/* Estado */}
-                      <td style={{ padding: '8px 8px', whiteSpace: 'nowrap' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '10.5px',
-                            fontWeight: 600,
-                            padding: '2px 8px',
-                            borderRadius: '999px',
-                            background: statusColor.bg,
-                            color: statusColor.text,
-                            border: `1px solid ${statusColor.border}`,
-                          }}
-                        >
-                          <Clock size={11} />
-                          <span>{statusLabel}</span>
-                        </span>
-                      </td>
-
-                      {/* Avance */}
-                      <td style={{ padding: '8px 8px', minWidth: '90px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#0f172a', width: '28px' }}>
-                            {rawProgress}%
-                          </span>
-                          <div
-                            style={{
-                              flex: 1,
-                              height: '5px',
-                              borderRadius: '999px',
-                              background: '#f1f5f9',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: `${rawProgress}%`,
-                                height: '100%',
-                                background: rawProgress > 0 ? '#10b981' : '#cbd5e1',
-                                borderRadius: '999px',
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Acciones */}
-                      <td style={{ padding: '8px 4px', textAlign: 'center' }}>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectItem?.(t);
-                          }}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#94a3b8',
-                            cursor: 'pointer',
-                            padding: '3px',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          <MoreHorizontal size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Footer de Paginación */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingTop: '10px',
-              borderTop: '1px solid #f1f5f9',
-              fontSize: '11.5px',
-              color: '#64748b',
-            }}
-          >
-            <div>
-              Mostrando {Math.min(1, filteredTasks.length)}-{Math.min(currentPage * pageSize, filteredTasks.length)} de{' '}
-              {filteredTasks.length} tareas
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <button
-                type="button"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '5px',
-                  border: '1px solid #e2e8f0',
-                  background: '#ffffff',
-                  display: 'grid',
-                  placeItems: 'center',
-                  cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  opacity: currentPage === 1 ? 0.4 : 1,
-                }}
-              >
-                <ChevronLeft size={13} />
-              </button>
-              {[1, 2, 3].map((page) => (
+        {/* Selector de sub-vistas internas */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-1 rounded-xl bg-white/60 p-1">
+            {tabs.map((tab) => {
+              const TabIcon = tab.icon;
+              return (
                 <button
-                  key={page}
-                  type="button"
-                  onClick={() => setCurrentPage(page)}
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '5px',
-                    border: page === currentPage ? 'none' : '1px solid #e2e8f0',
-                    background: page === currentPage ? '#0066ff' : '#ffffff',
-                    color: page === currentPage ? '#ffffff' : '#0f172a',
-                    fontWeight: 700,
-                    fontSize: '11px',
-                    cursor: 'pointer',
-                  }}
+                  key={tab.id}
+                  onClick={() => setView(tab.id)}
+                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-bold transition md:px-4 ${
+                    view === tab.id ? "bg-[#0866f5] text-white shadow-md" : "text-slate-700 hover:bg-white"
+                  }`}
                 >
-                  {page}
+                  <TabIcon size={16} />
+                  {tab.label}
                 </button>
-              ))}
-              <span>...</span>
-              <button
-                type="button"
-                onClick={() => setCurrentPage(totalPages)}
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '5px',
-                  border: totalPages === currentPage ? 'none' : '1px solid #e2e8f0',
-                  background: totalPages === currentPage ? '#0066ff' : '#ffffff',
-                  color: totalPages === currentPage ? '#ffffff' : '#0f172a',
-                  fontWeight: 700,
-                  fontSize: '11px',
-                  cursor: 'pointer',
-                }}
-              >
-                {totalPages > 3 ? totalPages : 16}
-              </button>
-              <button
-                type="button"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '5px',
-                  border: '1px solid #e2e8f0',
-                  background: '#ffffff',
-                  display: 'grid',
-                  placeItems: 'center',
-                  cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  opacity: currentPage === totalPages ? 0.4 : 1,
-                }}
-              >
-                <ChevronRight size={13} />
-              </button>
-            </div>
+              );
+            })}
           </div>
-        </section>
+          <button className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm">
+            <CalendarRange size={16} />
+            Sep. 2026 – Abr. 2027
+            <ChevronDown size={14} />
+          </button>
+        </div>
 
-        {/* Columna Derecha Inferior: Acciones Rápidas + Próximos Vencimientos */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Tarjeta 4: Acciones rápidas */}
-          <section
-            className="qm-card"
-            style={{
-              background: '#ffffff',
-              borderRadius: '14px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
-              padding: '14px 18px',
-            }}
+        {/* Buscador y Filtros */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[220px] flex-1 sm:max-w-[320px]">
+            <span className="absolute left-3 top-2.5 text-slate-400">
+              <Search size={15} />
+            </span>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar tarea, código o subproceso..."
+              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+          <button
+            onClick={() => setFiltersOpen((v) => !v)}
+            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold ${
+              filtersOpen ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-600"
+            }`}
           >
-            <h3
-              style={{
-                fontSize: '14px',
-                fontWeight: 700,
-                color: '#0f172a',
-                margin: '0 0 10px 0',
-                letterSpacing: '-0.01em',
-              }}
-            >
-              Acciones rápidas
-            </h3>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '10px',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => onOpenAsignar?.({ role: 'Macroregional' })}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '9px 12px',
-                  borderRadius: '9px',
-                  border: '1px solid #e9d5ff',
-                  background: '#faf5ff',
-                  color: '#7e22ce',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f3e8ff';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#faf5ff';
-                }}
+            <SlidersHorizontal size={15} />
+            Filtros
+          </button>
+          {filtersOpen && (
+            <>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as "Todas" | Priority)}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold"
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <UserCheck size={14} />
-                  <span>Asignar a Macroregionales</span>
+                <option>Todas</option>
+                {priorities.map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  setPriority("Todas");
+                  setSearch("");
+                }}
+                className="inline-flex items-center gap-1 px-2 text-xs font-semibold text-blue-700"
+              >
+                <X size={13} />
+                Limpiar
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Vista 1: General */}
+        {view === "general" && (
+          <>
+            <section className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.55fr_1fr]">
+              {/* Mapa de calor por equipo */}
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_rgba(30,64,120,0.06)]">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-sm font-extrabold text-[#111d39]">
+                    Carga de trabajo por equipo{" "}
+                    <span className="font-medium text-slate-500">(Mapa de calor)</span>{" "}
+                    <span className="inline-flex align-middle text-slate-400">
+                      <Info size={14} />
+                    </span>
+                  </h2>
+                  <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-600">
+                    Por subproceso <ChevronDown size={13} />
+                  </button>
                 </div>
-                <ChevronRight size={13} />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onOpenAsignar?.({ role: 'Gestor' })}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '9px 12px',
-                  borderRadius: '9px',
-                  border: '1px solid #bbf7d0',
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#dcfce7';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f0fdf4';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <UserCheck size={14} />
-                  <span>Asignar a Gestores</span>
-                </div>
-                <ChevronRight size={13} />
-              </button>
-            </div>
-          </section>
-
-          {/* Tarjeta 5: Próximos vencimientos */}
-          <section
-            className="qm-card"
-            style={{
-              background: '#ffffff',
-              borderRadius: '14px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
-              padding: '14px 18px',
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '10px',
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: '#0f172a',
-                  margin: 0,
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                Próximos vencimientos
-              </h3>
-              <button
-                type="button"
-                onClick={onViewLista}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#0066ff',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '2px',
-                  padding: 0,
-                }}
-              >
-                <span>Ver todas</span>
-                <ArrowRight size={12} />
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {upcomingTasks.map((t, idx) => {
-                const dates = ['10\nNOV', '11\nNOV', '12\nNOV'];
-                const roles = ['A Macroregional', 'A Gestor', 'A Macroregional'];
-                const dots = ['#eab308', '#10b981', '#eab308'];
-
-                return (
-                  <div
-                    key={t.id || idx}
-                    onClick={() => onSelectItem?.(t)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '7px 8px',
-                      borderRadius: '8px',
-                      border: '1px solid #f8fafc',
-                      background: '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#e2e8f0';
-                      e.currentTarget.style.background = '#fafbfc';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#f8fafc';
-                      e.currentTarget.style.background = '#ffffff';
-                    }}
-                  >
-                    {/* Fecha badge */}
-                    <div
-                      style={{
-                        minWidth: '32px',
-                        textAlign: 'center',
-                        lineHeight: 1.1,
-                      }}
-                    >
-                      <b style={{ fontSize: '13px', color: '#0f172a', display: 'block' }}>
-                        {10 + idx}
-                      </b>
-                      <small style={{ fontSize: '9px', color: '#64748b', fontWeight: 600 }}>
-                        NOV
-                      </small>
-                    </div>
-
-                    {/* Contenido */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            background: dots[idx % dots.length],
-                            flexShrink: 0,
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            color: '#1e293b',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}
-                          title={t.name}
-                        >
-                          {t.name}
+                <div className="overflow-x-auto">
+                  <div className="min-w-[620px]">
+                    <div className="grid grid-cols-[220px_repeat(5,minmax(0,1fr))_54px] items-center gap-2 rounded-lg bg-[#f2f6fc] px-3 py-2 text-[11px] font-bold text-[#273b61]">
+                      <span>Equipo</span>
+                      {areas.map((a) => (
+                        <span key={a} className="text-center">
+                          {a}
                         </span>
-                      </div>
+                      ))}
+                      <span className="text-center">Total</span>
+                    </div>
+                    {teams.map((team) => (
                       <div
-                        style={{
-                          fontSize: '10.5px',
-                          color: '#64748b',
-                          paddingLeft: '12px',
-                          marginTop: '2px',
-                        }}
+                        key={team.name}
+                        className="grid grid-cols-[220px_repeat(5,minmax(0,1fr))_54px] items-center gap-2 px-3 py-1"
                       >
-                        {roles[idx % roles.length]}
+                        <div className="flex items-center gap-2 text-[12px] font-bold">
+                          <UsersRound size={18} className="text-slate-600" />
+                          {team.name} <span className="font-medium text-slate-500">({team.people})</span>
+                        </div>
+                        {team.values.map((v, i) => (
+                          <HeatCell key={i} value={v} tone={team.tone} />
+                        ))}
+                        <span className="text-center text-sm font-extrabold text-[#111d39]">{team.total}</span>
                       </div>
+                    ))}
+                    <div className="mt-1 grid grid-cols-[220px_repeat(5,minmax(0,1fr))_54px] items-center gap-2 rounded-lg bg-[#edf3fc] px-3 py-2 text-[11px] font-extrabold text-[#273b61]">
+                      <span className="pl-8">Total por subproceso</span>
+                      {[24, 22, 21, 15, 15].map((v, i) => (
+                        <span key={i} className="text-center">
+                          {v}
+                        </span>
+                      ))}
+                      <span className="text-center">97</span>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              </div>
+
+              {/* Estado general de tareas */}
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_rgba(30,64,120,0.06)]">
+                <h2 className="mb-4 text-sm font-extrabold text-[#111d39]">Estado general de tareas</h2>
+                <div className="flex flex-wrap items-center justify-center gap-5 xl:justify-around">
+                  <Donut />
+                  <div className="min-w-[170px] flex-1 space-y-3">
+                    {states.map((s) => (
+                      <div key={s.name} className="flex items-center justify-between gap-3 text-xs">
+                        <span className="flex items-center gap-2 font-semibold text-slate-700">
+                          <i className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
+                          {s.name}
+                        </span>
+                        <b className="tabular-nums text-[#111d39]">
+                          {s.value} <span className="ml-1 font-medium text-slate-500">({Math.round((s.value / 97) * 100)}%)</span>
+                        </b>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,2.25fr)_minmax(280px,0.85fr)]">
+              {/* Tablero Kanban Mini */}
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_4px_16px_rgba(30,64,120,0.06)] md:p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-base font-extrabold text-[#111d39]">
+                    Tablero Kanban <span className="text-sm font-medium text-slate-500">(Ejecución del trabajo)</span>
+                  </h2>
+                  <span className="text-[11px] font-semibold text-slate-500">Columnas por prioridad</span>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+                  {priorities.map((p) => {
+                    const meta = priorityMeta[p];
+                    const Icon = meta.icon;
+                    return (
+                      <div key={p} className="min-w-0 overflow-hidden rounded-xl bg-slate-50/80">
+                        <div className={`flex items-center justify-between rounded-t-xl px-3 py-3 ${meta.header} ${meta.text}`}>
+                          <div className="flex items-center gap-2 text-sm font-extrabold">
+                            <Icon size={18} />
+                            {p}
+                          </div>
+                          <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-extrabold ${meta.count}`}>
+                            {priorityTotals[p]}
+                          </span>
+                        </div>
+                        <div className="space-y-2 p-2">
+                          {grouped[p].map((task) => (
+                            <TaskCard key={task.id} task={task} onSelect={() => onSelectItem?.(items?.[0] as any)} />
+                          ))}
+                          {grouped[p].length === 0 && (
+                            <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-[11px] text-slate-400">
+                              No hay tareas visibles
+                            </div>
+                          )}
+                          <button
+                            onClick={() => onOpenAsignar?.({ role: p })}
+                            className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-slate-200 bg-white/70 py-2.5 text-[11px] font-bold text-blue-600 transition hover:bg-blue-50"
+                          >
+                            <Plus size={14} />
+                            Agregar tarea
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Próximos vencimientos */}
+              <aside className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_rgba(30,64,120,0.06)]">
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <h2 className="flex items-center gap-2 text-sm font-extrabold text-[#111d39]">
+                    <CalendarDays size={17} />
+                    Próximos vencimientos
+                  </h2>
+                  <button
+                    onClick={onViewLista}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline"
+                  >
+                    Ver todos <ArrowUpRight size={13} />
+                  </button>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {[
+                    { day: "13", title: "Validar documentación recibida", owner: "A Macroregional", priority: "Urgente" },
+                    { day: "14", title: "Elaborar y validar el plan", owner: "A Gestor", priority: "Alta" },
+                    { day: "18", title: "Registro de recepción de materiales", owner: "A Gestor", priority: "Alta" },
+                  ].map((item) => (
+                    <div key={item.day} className="flex gap-3 py-3 first:pt-1">
+                      <div className="grid h-[54px] w-[48px] shrink-0 place-items-center rounded-xl bg-[#edf3ff]">
+                        <b className="text-xl leading-none text-[#1769f5]">{item.day}</b>
+                        <span className="text-[9px] font-bold text-slate-500">NOV</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start gap-2">
+                          <span
+                            className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+                              item.priority === "Urgente" ? "bg-red-500" : "bg-amber-400"
+                            }`}
+                          />
+                          <b className="text-[11px] leading-snug text-[#111d39]">{item.title}</b>
+                        </div>
+                        <div className="mt-1 pl-4 text-[10px] text-slate-500">{item.owner}</div>
+                        <div className="mt-1.5 flex justify-end">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                              item.priority === "Urgente" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {item.priority}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+            </section>
+          </>
+        )}
+
+        {/* Vista 2: Kanban Completo */}
+        {view === "kanban" && (
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+            {priorities.map((p) => (
+              <div key={p} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className={`flex items-center justify-between px-4 py-3 ${priorityMeta[p].header} ${priorityMeta[p].text}`}>
+                  <b>{p}</b>
+                  <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-bold">{grouped[p].length}</span>
+                </div>
+                <div className="space-y-2 bg-slate-50 p-3">
+                  {grouped[p].map((task) => (
+                    <TaskCard key={task.id} task={task} onSelect={() => onSelectItem?.(items?.[0] as any)} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {/* Vista 3: Lista */}
+        {view === "lista" && (
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left text-xs">
+                <thead className="bg-[#f2f6fc] text-[11px] font-bold text-slate-600">
+                  <tr>
+                    {["Tarea", "Subproceso", "Prioridad", "Estado", "Responsables", "Vencimiento"].map((h) => (
+                      <th key={h} className="px-4 py-3">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {visible.map((t) => (
+                    <tr key={t.id} className="transition hover:bg-slate-50">
+                      <td className="px-4 py-3 font-bold text-[#111d39]">{t.title}</td>
+                      <td className="px-4 py-3 text-slate-500">
+                        {t.code} · {t.area}
+                      </td>
+                      <td className="px-4 py-3">{t.priority}</td>
+                      <td className="px-4 py-3 text-slate-600">{t.status}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex -space-x-2">
+                          {t.assignees.map((a) => (
+                            <Avatar key={a} initials={a} />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-[#111d39]">{t.dueLabel}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </section>
-        </div>
+        )}
+
+        {/* Vista 4: Por equipo */}
+        {view === "equipo" && (
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {teams.map((team) => (
+              <article key={team.name} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-blue-50 text-blue-700">
+                    <UsersRound size={21} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-[#111d39]">{team.name}</h3>
+                    <p className="text-xs text-slate-500">{team.people} integrantes</p>
+                  </div>
+                </div>
+                <div className="mt-5 flex items-end justify-between">
+                  <span className="text-xs text-slate-500">Tareas asignadas</span>
+                  <b className="text-3xl text-[#111d39]">{team.total}</b>
+                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full rounded-full bg-blue-500" style={{ width: `${(team.total / 97) * 100}%` }} />
+                </div>
+                <div className="mt-4 space-y-2">
+                  {areas.map((a, i) => (
+                    <div key={a} className="flex justify-between text-xs">
+                      <span className="text-slate-500">{a}</span>
+                      <b className="text-[#111d39]">{team.values[i]}</b>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </section>
+        )}
+
+        <footer className="mt-5 flex flex-wrap items-center justify-between gap-2 px-1 text-[10px] text-slate-400">
+          <span>Vista de demostración · Datos ilustrativos</span>
+          <span>Qaway Gestor de Proyectos</span>
+        </footer>
       </div>
     </div>
   );
