@@ -47,12 +47,12 @@ export interface ProjectItem {
 const DEFAULT_PROJECTS: ProjectItem[] = [
   {
     id: 'p1',
-    code: 'PRJ-MIN-2027-01',
-    name: 'MINEDU · Dotación 2026',
+    code: 'PRJ-QAW-2026',
+    name: 'Proyecto Maestro · Operaciones Regionales',
     region: 'Nacional',
     subtext: 'Seguimiento de operaciones',
     descProyecto: 'Línea de tiempo oficial y calibración de entregables.',
-    descSedes: 'Seguimiento territorial de DRE y UGEL en tiempo real.',
+    descSedes: 'Seguimiento territorial de sedes y unidades en tiempo real.',
     budget: 'S/ 850,000',
     sponsor: 'Comité Directivo',
     riskLevel: 'Medio',
@@ -140,7 +140,12 @@ function GestorProyectosApp() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          return parsed.map((p: ProjectItem) => {
+            if (p.name && p.name.includes('MINEDU')) {
+              return { ...p, code: 'PRJ-QAW-2026', name: 'Proyecto Maestro · Operaciones Regionales' };
+            }
+            return p;
+          });
         }
       }
     } catch {

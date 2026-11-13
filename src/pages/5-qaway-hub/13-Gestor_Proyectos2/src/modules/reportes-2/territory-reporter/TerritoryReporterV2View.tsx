@@ -94,7 +94,7 @@ export const PASCO_DIRECTION_CODES: DirectionCode[] = [
 
 export const DIRECTION_CODES: DirectionCode[] = JUNIN_DIRECTION_CODES
 
-// Mapeo oficial de Direcciones aplicables por UGEL (MINEDU - Dotación 2027)
+// Mapeo oficial de Direcciones aplicables por UGEL (Operaciones Regionales)
 export const UGEL_APPLICABLE_DIRECTIONS: Record<string, DirectionCode[]> = {
   // Región Junín (13 UGEL)
   'ugel-chanchamayo': ['DEBA', 'DEBE', 'DEI', 'DEIB', 'DEP', 'DES', 'DISER'],
@@ -718,7 +718,7 @@ export const INITIAL_PASCO_UGELS_V2_HITO_17: UgelMonitoringV2Row[] = INITIAL_PAS
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DATASETS Y LLAVES DE PERSISTENCIA INDEPENDIENTES PARA HITO 5.1a
-// OM 00032-2026-MINEDU / Solicitud Personal de Apoyo a COGECO (Periodo Vacacional)
+// Oficio Múltiple Territorial / Solicitud Personal de Apoyo a COGECO (Periodo Vacacional)
 // Plazo de corte: 30 de octubre de 2026
 // Drive Oficial: https://drive.google.com/drive/folders/1PET25rsk8Aa-N_Wh7tPpyu5iK_kieCUF
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1441,108 +1441,22 @@ export function TerritoryReporterV2Tab({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="h-1 w-6 bg-[#dc2626] rounded-full" />
+              <span className="h-1 w-6 bg-[#0066ff] rounded-full" />
               <span className="text-[11.5px] font-bold uppercase tracking-wider text-slate-500">
-                DISTRIBUCIÓN DE MATERIALES EDUCATIVOS · DOTACIÓN 2027
+                OPERACIONES TERRITORIALES REGIONALES
               </span>
             </div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
               Reporte regional de cumplimiento
             </h2>
             <p className="text-[13px] font-semibold text-slate-600 mt-0.5">
-              DRE {isPasco ? 'Pasco' : 'Junín'} – {is51a ? 'Solicitud de Personal de Apoyo a COGECO en II.EE. (Hito 5.1a - OM 00032-2026-MINEDU)' : is17 ? 'Acondicionamiento de Almacenes y Contratos de Transporte (Actividad 1.7)' : 'Elaboración del CDL en MC SIGA (Actividad 1.6)'}
+              DRE {isPasco ? 'Pasco' : 'Junín'} – {is51a ? 'Solicitud de Personal de Apoyo a COGECO en II.EE. (Hito 5.1a - Oficio Múltiple)' : is17 ? 'Acondicionamiento de Almacenes y Contratos de Transporte (Actividad 1.7)' : 'Elaboración del CDL en MC SIGA (Actividad 1.6)'}
             </p>
           </div>
 
           <div className="text-right text-[11px] text-slate-400 font-medium">
             <span>Última actualización: </span>
             <strong className="text-slate-700 font-bold">{is51a ? '30 oct. 2026' : is17 ? '15 nov. 2026' : '22 oct. 2026'}</strong>
-          </div>
-        </div>
-
-        {/* BARRA DE FILTROS SOBRIA (ESCALA DE GRISES Y BLANCOS - ESTILO LÁMINA OFICIAL) */}
-        <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/70 p-2.5 text-xs">
-          {/* N1: Macrorregión */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-bold text-slate-500">Macrorregión:</span>
-            <select
-              value={selectedMacrorregion}
-              onChange={(e) => setSelectedMacrorregion(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
-            >
-              <option value="Centro">Centro (Junín, Pasco, Huánuco)</option>
-              <option value="Norte">Norte</option>
-              <option value="Sur">Sur</option>
-              <option value="Oriente">Oriente</option>
-            </select>
-          </div>
-
-          <span className="text-slate-300">/</span>
-
-          {/* N2: Región */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-bold text-slate-500">Región:</span>
-            <select
-              value={selectedRegion}
-              onChange={(e) => {
-                setSelectedRegion(e.target.value)
-                setSelectedUgelFilter('todas')
-              }}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
-            >
-              <option value="Región Junín (13 UGEL)">Junín (13 UGEL)</option>
-              <option value="Región Pasco (5 UGEL)">{is51a ? 'Pasco (4 UGEL)' : 'Pasco (5 UGEL)'}</option>
-              <option value="Región Cusco (14 UGEL)">Cusco (14 UGEL)</option>
-              <option value="Lima Provincias (9 UGEL)">Lima Provincias (9 UGEL)</option>
-            </select>
-          </div>
-
-          <span className="text-slate-300">/</span>
-
-          {/* N3: UGEL */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-bold text-slate-500">UGEL:</span>
-            <select
-              value={selectedUgelFilter}
-              onChange={(e) => setSelectedUgelFilter(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-800 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
-            >
-              <option value="todas">Todas las {ugels.length} {isPasco ? 'unidades' : 'UGEL'} ({isPasco ? 'Pasco' : 'Junín'})</option>
-              {ugels.map((u) => {
-                const displayName = formatUgelDisplayName(u.name)
-                return (
-                  <option key={u.id} value={u.id}>
-                    {displayName.startsWith('DRE') ? displayName : `UGEL ${displayName}`}
-                  </option>
-                )
-              })}
-            </select>
-          </div>
-
-          <span className="text-slate-300">/</span>
-
-          {/* N4: Hito (Selector para Hito 1.6 vs Hito 5.1a vs Hito 1.7) */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-bold text-slate-500">Hito:</span>
-            <select
-              value={selectedHito}
-              onChange={(e) => handleSelectHito(e.target.value as '1.6' | '1.7' | '5.1a')}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-900 shadow-2xs outline-none cursor-pointer focus:border-slate-400"
-            >
-              <option value="1.6">Hito 1.6 – Elaboración del CDL en MC SIGA</option>
-              <option value="5.1a">Hito 5.1a – Personal de Apoyo II.EE. (Oficio y Difusión)</option>
-              <option value="1.7">Hito 1.7 – Acondicionamiento y Transporte</option>
-            </select>
-          </div>
-
-          <span className="text-slate-300">/</span>
-
-          {/* N5: Gestor asignado */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10.5px] font-bold text-slate-500">Gestor de Campo:</span>
-            <span className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 shadow-2xs">
-              Carlos Sandoval (Gestor de Materiales)
-            </span>
           </div>
         </div>
 
@@ -1612,11 +1526,11 @@ export function TerritoryReporterV2Tab({
                   <tr className="hover:bg-slate-50/70 transition-colors">
                     <td className={`bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 ${ugels.length <= 6 ? 'w-80 min-w-[280px] max-w-[320px]' : 'w-56 min-w-[210px] max-w-[230px]'}`}>
                       <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-black text-[14px] shadow-2xs">
                           1
                         </span>
                         <div className="min-w-0">
-                          <span className="block text-[16px] font-black text-slate-900 leading-snug whitespace-nowrap">Oficio Múltiple</span>
+                          <span className="block text-[15.5px] font-black text-slate-900 leading-snug whitespace-nowrap">Oficio Múltiple</span>
                           <span className="block text-[12.5px] font-bold text-slate-600 leading-snug whitespace-nowrap mt-0.5">
                             A directores de II.EE.
                           </span>
@@ -1633,10 +1547,10 @@ export function TerritoryReporterV2Tab({
                             className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
                             title={`Oficio Múltiple: ${u.name} · ${hasOficio ? 'Oficio emitido y subido (SÍ)' : 'Pendiente de emisión (NO)'} (Clic para alternar)`}
                           >
-                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
-                              hasOficio ? 'bg-[#10b981]' : 'bg-[#ef4444]'
+                            <span className={`grid h-9 w-9 place-items-center rounded-full transition-transform group-hover:scale-105 shadow-2xs ${
+                              hasOficio ? 'bg-emerald-50 text-emerald-600 border border-emerald-300' : 'bg-rose-50 text-rose-600 border border-rose-300'
                             }`}>
-                              {hasOficio ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
+                              {hasOficio ? <Check size={18} strokeWidth={2.6} /> : <X size={18} strokeWidth={2.6} />}
                             </span>
                           </button>
                         </td>
@@ -1648,11 +1562,11 @@ export function TerritoryReporterV2Tab({
                   <tr className="hover:bg-slate-50/70 transition-colors">
                     <td className={`bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 ${ugels.length <= 6 ? 'w-80 min-w-[280px] max-w-[320px]' : 'w-56 min-w-[210px] max-w-[230px]'}`}>
                       <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-black text-[14px] shadow-2xs">
                           2
                         </span>
                         <div className="min-w-0">
-                          <span className="block text-[16px] font-black text-slate-900 leading-snug whitespace-nowrap">Sustento Difusión</span>
+                          <span className="block text-[15.5px] font-black text-slate-900 leading-snug whitespace-nowrap">Sustento Difusión</span>
                           <span className="block text-[12.5px] font-bold text-slate-600 leading-snug whitespace-nowrap mt-0.5">
                             Redes / WhatsApp / Web
                           </span>
@@ -1669,10 +1583,10 @@ export function TerritoryReporterV2Tab({
                             className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
                             title={`Sustento Difusión: ${u.name} · ${hasDifusion ? 'Difusión acreditada en Drive (SÍ)' : 'Sin evidencia en Drive (NO)'} (Clic para alternar)`}
                           >
-                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
-                              hasDifusion ? 'bg-[#10b981]' : 'bg-[#ef4444]'
+                            <span className={`grid h-9 w-9 place-items-center rounded-full transition-transform group-hover:scale-105 shadow-2xs ${
+                              hasDifusion ? 'bg-emerald-50 text-emerald-600 border border-emerald-300' : 'bg-rose-50 text-rose-600 border border-rose-300'
                             }`}>
-                              {hasDifusion ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
+                              {hasDifusion ? <Check size={18} strokeWidth={2.6} /> : <X size={18} strokeWidth={2.6} />}
                             </span>
                           </button>
                         </td>
@@ -1686,12 +1600,12 @@ export function TerritoryReporterV2Tab({
                   <tr className="hover:bg-slate-50/70 transition-colors">
                     <td className={`bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 ${ugels.length <= 6 ? 'w-80 min-w-[280px] max-w-[320px]' : 'w-56 min-w-[210px] max-w-[230px]'}`}>
                       <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-black text-[14px] shadow-2xs">
                           1
                         </span>
                         <div className="min-w-0">
-                          <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 1</span>
-                          <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Registro MC SIGA</span>
+                          <span className="block text-[16px] font-black text-slate-900 leading-tight">Fase 1</span>
+                          <span className="block text-[12.5px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Registro MC SIGA</span>
                         </div>
                       </div>
                     </td>
@@ -1705,10 +1619,10 @@ export function TerritoryReporterV2Tab({
                             className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
                             title={`Fase 1: ${u.name} · ${isDone ? 'Carga inicial completada' : 'Pendiente de carga'} (Clic para alternar)`}
                           >
-                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs transition-transform group-hover:scale-110 ${
-                              isDone ? 'bg-[#10b981]' : 'bg-[#ef4444]'
+                            <span className={`grid h-9 w-9 place-items-center rounded-full transition-transform group-hover:scale-105 shadow-2xs ${
+                              isDone ? 'bg-emerald-50 text-emerald-600 border border-emerald-300' : 'bg-rose-50 text-rose-600 border border-rose-300'
                             }`}>
-                              {isDone ? <Check size={24} strokeWidth={3.2} /> : <X size={24} strokeWidth={3.2} />}
+                              {isDone ? <Check size={18} strokeWidth={2.6} /> : <X size={18} strokeWidth={2.6} />}
                             </span>
                           </button>
                         </td>
@@ -1720,12 +1634,12 @@ export function TerritoryReporterV2Tab({
                   <tr className="hover:bg-slate-50/70 transition-colors">
                     <td className={`bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 ${ugels.length <= 6 ? 'w-80 min-w-[280px] max-w-[320px]' : 'w-56 min-w-[210px] max-w-[230px]'}`}>
                       <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-black text-[14px] shadow-2xs">
                           2
                         </span>
                         <div className="min-w-0">
-                          <span className="block text-[17px] font-black text-slate-900 leading-tight">Drive</span>
-                          <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Evidencia declarativa</span>
+                          <span className="block text-[16px] font-black text-slate-900 leading-tight">Drive</span>
+                          <span className="block text-[12.5px] font-bold text-slate-600 leading-tight mt-0.5 truncate">Evidencia declarativa</span>
                         </div>
                       </div>
                     </td>
@@ -1739,10 +1653,10 @@ export function TerritoryReporterV2Tab({
                             className="mx-auto flex items-center justify-center p-1"
                             title={`Drive: ${u.name} · ${ratioText} (${dirInfo.pct}% de direcciones)`}
                           >
-                            <span className={`grid h-11 w-11 place-items-center rounded-full text-white shadow-xs ${
-                              st === 'completado' ? 'bg-[#10b981]' : st === 'en_proceso' ? 'bg-[#f59e0b]' : 'bg-[#ef4444]'
+                            <span className={`grid h-9 w-9 place-items-center rounded-full shadow-2xs ${
+                              st === 'completado' ? 'bg-emerald-50 text-emerald-600 border border-emerald-300' : st === 'en_proceso' ? 'bg-amber-50 text-amber-600 border border-amber-300' : 'bg-rose-50 text-rose-600 border border-rose-300'
                             }`}>
-                              {st === 'completado' ? <Check size={24} strokeWidth={3.2} /> : st === 'en_proceso' ? <Clock size={23} strokeWidth={2.8} /> : <X size={24} strokeWidth={3.2} />}
+                              {st === 'completado' ? <Check size={18} strokeWidth={2.6} /> : st === 'en_proceso' ? <Clock size={17} strokeWidth={2.4} /> : <X size={18} strokeWidth={2.6} />}
                             </span>
                           </div>
                         </td>
@@ -1754,12 +1668,12 @@ export function TerritoryReporterV2Tab({
                   <tr className="hover:bg-slate-50/70 transition-colors">
                     <td className={`bg-[#f8fafc] px-3.5 py-4 text-left border-r border-slate-100 ${ugels.length <= 6 ? 'w-80 min-w-[280px] max-w-[320px]' : 'w-56 min-w-[210px] max-w-[230px]'}`}>
                       <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#1055b8] text-white text-[15px] font-black shadow-xs">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-black text-[14px] shadow-2xs">
                           3
                         </span>
                         <div className="min-w-0">
-                          <span className="block text-[17px] font-black text-slate-900 leading-tight">Fase 2</span>
-                          <span className="block text-[13px] font-bold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial</span>
+                          <span className="block text-[16px] font-black text-slate-900 leading-tight">Fase 2</span>
+                          <span className="block text-[12.5px] font-bold text-slate-600 leading-tight mt-0.5 truncate">RAR oficial</span>
                         </div>
                       </div>
                     </td>
@@ -1773,10 +1687,10 @@ export function TerritoryReporterV2Tab({
                             className="mx-auto flex items-center justify-center p-1 rounded-2xl hover:bg-slate-100/90 transition-all cursor-pointer group"
                             title={`Fase 2 RAR: ${u.name} · ${isDone ? 'Culminado' : 'En plazo técnico'} (Clic para cambiar)`}
                           >
-                            <span className={`grid h-11 w-11 place-items-center rounded-full shadow-xs transition-transform group-hover:scale-110 ${
-                              isDone ? 'bg-[#10b981] text-white' : 'bg-slate-200 text-slate-600 border border-slate-300/80'
+                            <span className={`grid h-9 w-9 place-items-center rounded-full transition-transform group-hover:scale-105 shadow-2xs ${
+                              isDone ? 'bg-emerald-50 text-emerald-600 border border-emerald-300' : 'bg-slate-100 text-slate-500 border border-slate-200'
                             }`}>
-                              {isDone ? <Check size={24} strokeWidth={3.2} /> : <Clock size={23} strokeWidth={2.8} />}
+                              {isDone ? <Check size={18} strokeWidth={2.6} /> : <Clock size={17} strokeWidth={2.4} />}
                             </span>
                           </button>
                         </td>
@@ -1936,40 +1850,22 @@ export function TerritoryReporterV2Tab({
                 </div>
 
                 <div className="relative flex-1">
-                  <div className="flex h-8 overflow-hidden rounded-full bg-slate-100 shadow-inner">
-                    {f.ok > 0 && (
-                      <div
-                        style={{ width: `${(f.ok / ugelStats.total) * 100}%`, background: '#10b981' }}
-                        className="flex h-full items-center justify-center transition-all"
-                        title={`Completado: ${f.ok} UGEL (${Math.round((f.ok / ugelStats.total) * 100)}%)`}
-                      >
-                        <span className="text-xs font-black text-white tabular-nums">{f.ok}</span>
-                      </div>
-                    )}
-                    {f.prog > 0 && (
-                      <div
-                        style={{ width: `${(f.prog / ugelStats.total) * 100}%`, background: '#f59e0b' }}
-                        className="flex h-full items-center justify-center transition-all"
-                        title={`En proceso: ${f.prog} UGEL (${Math.round((f.prog / ugelStats.total) * 100)}%)`}
-                      >
-                        <span className="text-xs font-black text-white tabular-nums">{f.prog}</span>
-                      </div>
-                    )}
-                    {f.pend > 0 && (
-                      <div
-                        style={{ width: `${(f.pend / ugelStats.total) * 100}%`, background: '#ef4444' }}
-                        className="flex h-full items-center justify-center transition-all"
-                        title={`Pendiente: ${f.pend} UGEL (${Math.round((f.pend / ugelStats.total) * 100)}%)`}
-                      >
-                        <span className="text-xs font-black text-white tabular-nums">{f.pend}</span>
-                      </div>
-                    )}
+                  <div className="h-4 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      style={{ width: `${(f.ok / ugelStats.total) * 100}%`, background: '#10b981' }}
+                      className="h-full rounded-full transition-all duration-500"
+                      title={`Completado: ${f.ok} de ${ugelStats.total}`}
+                    />
                   </div>
                 </div>
 
-                <div className="w-10 text-right">
-                  <span className="text-xs font-black text-slate-900 tabular-nums">{ugelStats.total}</span>
-                  <span className="block text-[8.5px] font-bold text-slate-400 uppercase leading-none">UGEL</span>
+                <div className="w-20 text-right whitespace-nowrap">
+                  <span className="text-[12.5px] font-black text-slate-800 tabular-nums">
+                    {f.ok} de {ugelStats.total}
+                  </span>
+                  <span className="block text-[10.5px] font-bold text-emerald-600 tabular-nums leading-none mt-0.5">
+                    {Math.round((f.ok / ugelStats.total) * 100)}%
+                  </span>
                 </div>
               </div>
             ))}
@@ -1977,18 +1873,8 @@ export function TerritoryReporterV2Tab({
 
           <div className="flex items-center gap-4 border-t border-slate-100 pt-3 text-[12px] font-bold text-slate-500">
             <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
-              <span>Completado</span>
-            </div>
-            {!is51a && (
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                <span>En proceso</span>
-              </div>
-            )}
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-rose-600" />
-              <span>Pendiente</span>
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#10b981' }} />
+              <span>Avance de Cumplimiento</span>
             </div>
           </div>
         </div>
@@ -2026,9 +1912,9 @@ export function TerritoryReporterV2Tab({
                   />
                   <Pie
                     data={[
-                      { name: 'Completado', value: ugelStats.completed, color: '#16a34a' },
+                      { name: 'Completado', value: ugelStats.completed, color: '#10b981' },
                       { name: 'En proceso', value: ugelStats.inProgress, color: '#f59e0b' },
-                      { name: 'Pendiente', value: ugelStats.pending, color: '#dc2626' },
+                      { name: 'Pendiente', value: ugelStats.pending, color: '#ef4444' },
                     ]}
                     innerRadius={44}
                     outerRadius={66}
@@ -2038,9 +1924,9 @@ export function TerritoryReporterV2Tab({
                     animationDuration={1000}
                     animationEasing="ease-out"
                   >
-                    <Cell fill="#16a34a" />
+                    <Cell fill="#10b981" />
                     <Cell fill="#f59e0b" />
-                    <Cell fill="#dc2626" />
+                    <Cell fill="#ef4444" />
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
@@ -2161,10 +2047,12 @@ export function TerritoryReporterV2Tab({
                 <div key={d.code} className="flex items-center gap-2.5 text-xs">
                   <span className="w-13 font-black text-slate-800 text-[12.5px]">{d.code}</span>
                   <div className="relative flex-1">
-                    <div className="flex h-3.5 overflow-hidden rounded-full bg-slate-100 p-0.5 shadow-inner gap-0.5">
-                      <div style={{ width: `${(d.ok / d.total) * 100}%`, background: '#10b981' }} className="rounded-full transition-all" title={`Completado: ${d.ok}`} />
-                      <div style={{ width: `${(d.prog / d.total) * 100}%`, background: '#f59e0b' }} className="rounded-full transition-all" title={`En proceso: ${d.prog}`} />
-                      <div style={{ width: `${(d.pend / d.total) * 100}%`, background: '#ef4444' }} className="rounded-full transition-all" title={`Pendiente: ${d.pend}`} />
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        style={{ width: `${(d.ok / d.total) * 100}%`, background: '#10b981' }}
+                        className="h-full rounded-full transition-all duration-500"
+                        title={`Completado: ${d.ok} de ${d.total}`}
+                      />
                     </div>
                   </div>
                   <span className="w-11 text-right font-black text-slate-900 tabular-nums text-[12.5px]">
@@ -2328,7 +2216,7 @@ export function TerritoryReporterV2Tab({
                         title={`Fase 1: ${isP1Done ? 'Completado' : 'Pendiente'} (Clic para alternar)`}
                       >
                         <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
-                          isP1Done ? 'bg-[#16a34a]' : 'bg-[#dc2626]'
+                          isP1Done ? 'bg-[#10b981]' : 'bg-[#ef4444]'
                         }`}>
                           {isP1Done ? <Check size={11} strokeWidth={3} /> : <X size={11} strokeWidth={3} />}
                         </span>
@@ -2347,7 +2235,7 @@ export function TerritoryReporterV2Tab({
                         title={`Fase 2 RAR: ${isP2Done ? 'Completado' : 'En plazo'} (Clic para alternar)`}
                       >
                         <span className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
-                          isP2Done ? 'bg-[#16a34a]' : 'bg-slate-400'
+                          isP2Done ? 'bg-[#10b981]' : 'bg-slate-400'
                         }`}>
                           {isP2Done ? <Check size={11} strokeWidth={3} /> : <Clock size={11} strokeWidth={2.4} />}
                         </span>
@@ -2375,10 +2263,10 @@ export function TerritoryReporterV2Tab({
 
                       const color =
                         st === 'completado'
-                          ? 'bg-[#16a34a] ring-2 ring-emerald-300'
+                          ? 'bg-[#10b981] ring-2 ring-emerald-300'
                           : st === 'en_proceso'
                             ? 'bg-[#f59e0b] ring-2 ring-amber-200'
-                            : 'bg-[#dc2626] ring-2 ring-rose-200'
+                            : 'bg-[#ef4444] ring-2 ring-rose-200'
                       return (
                         <td key={code} className="px-1.5 py-3 text-center">
                           <button
@@ -2408,10 +2296,10 @@ export function TerritoryReporterV2Tab({
                         <span
                           className={`grid h-4.5 w-4.5 place-items-center rounded-full text-white ${
                             computedDir.status === 'completado'
-                              ? 'bg-[#16a34a]'
+                              ? 'bg-[#10b981]'
                               : computedDir.status === 'en_proceso'
                                 ? 'bg-[#f59e0b]'
-                                : 'bg-[#dc2626]'
+                                : 'bg-[#ef4444]'
                           }`}
                         >
                           {computedDir.status === 'completado' ? (
@@ -2949,9 +2837,9 @@ export function TerritoryReporterV2Tab({
                 <div className="grid grid-cols-3 gap-1.5">
                   {(
                     [
-                      { id: 'completado', label: 'Completado', color: 'bg-[#16a34a] text-white' },
+                      { id: 'completado', label: 'Completado', color: 'bg-[#10b981] text-white' },
                       { id: 'en_proceso', label: 'En proceso', color: 'bg-[#f59e0b] text-white' },
-                      { id: 'pendiente', label: 'Pendiente', color: 'bg-[#dc2626] text-white' },
+                      { id: 'pendiente', label: 'Pendiente', color: 'bg-[#ef4444] text-white' },
                     ] as const
                   ).map((opt) => (
                     <button

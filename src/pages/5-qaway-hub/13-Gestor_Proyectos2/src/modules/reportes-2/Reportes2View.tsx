@@ -151,6 +151,7 @@ import {
   Tag,
   Target,
   Trash2,
+  Table2,
   Undo2,
   Redo2,
   Upload,
@@ -476,7 +477,7 @@ export const getPersonInstitutionalRole = (name: string): string => {
   switch (name) {
     case 'Carlos Mendoza':
     case 'Carlos Sandoval':
-      return 'Coordinador General (MINEDU)';
+      return 'Coordinador General';
     case 'María Salazar':
       return 'Coordinadora Regional Junín';
     case 'Javier Ruiz':
@@ -2166,6 +2167,7 @@ export default function Reportes2View({
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [selectedSedes, setSelectedSedes] = useState<string[]>([]);
   const [selectedEdtCodes, setSelectedEdtCodes] = useState<string[]>([]);
+  const [collapsedCompIds, setCollapsedCompIds] = useState<Record<string, boolean>>({});
 
   // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
   // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
@@ -2323,19 +2325,17 @@ export default function Reportes2View({
   }, [availableGestores, selectedSedes, selectedRegions, items]);
 
   const sedeButtonText = useMemo(() => {
-    if (selectedSedes.length === 0) {
-      if (gestorFilter !== 'Todos') return gestorFilter;
-      return 'Todas las sedes';
-    }
+    if (selectedSedes.length === 0) return 'Todas las sedes / UGEL';
     if (selectedSedes.length === 1) {
-      const short = (selectedSedes[0] || '').replace(' (Sede Regional Matriz)', '');
-      if (gestorFilter !== 'Todos') {
-        return `${short} · ${gestorFilter.split(' ')[0]}`;
-      }
-      return short;
+      return (selectedSedes[0] || '').replace(' (Sede Regional Matriz)', '');
     }
     return `${selectedSedes.length} sedes`;
-  }, [selectedSedes, gestorFilter]);
+  }, [selectedSedes]);
+
+  const gestorButtonText = useMemo(() => {
+    if (gestorFilter === 'Todos') return 'Todos los responsables';
+    return gestorFilter;
+  }, [gestorFilter]);
 
   const edtComponentsWithProducts = useMemo(() => {
     const components = items.filter((x) => !x.parentId && (x.kind === 'hito' || x.edtType === 'COMPONENTE'));
@@ -5657,20 +5657,8 @@ export default function Reportes2View({
         {/* Header Principal */}
         <ProjectShellHeader
           perspective={perspective}
-          title={
-            perspective === 'equipo'
-              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2026'}`
-              : perspective === 'territorial'
-              ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
-              : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`
-          }
-          description={
-            perspective === 'equipo'
-              ? (activeProject?.moduleDescriptions?.['usuarios'] || 'Padrón operativo y frentes territoriales.')
-              : perspective === 'territorial'
-              ? (activeProject?.moduleDescriptions?.['sedes'] || activeProject?.descSedes || 'Seguimiento territorial de DRE y UGEL en tiempo real.')
-              : (activeProject?.moduleDescriptions?.['cronograma'] || activeProject?.descProyecto || 'Línea de tiempo oficial y calibración de entregables.')
-          }
+          title={`Reportes · ${activeProject?.name || 'Gestión del Proyecto'}`}
+          description={activeProject?.moduleDescriptions?.['reportes'] || 'Consolidado analítico, evaluación de hitos rectores y cumplimiento territorial.'}
           actions={
             <>
               <button
@@ -5936,7 +5924,7 @@ export default function Reportes2View({
             <div className="fullscreen-exit-bar">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
-                <span>Modo Pantalla Completa — Vista {viewMode === 'gantt' ? 'Analítica' : viewMode === 'lista' ? 'Lista' : viewMode === 'kanban' ? 'Kanban' : viewMode === 'mapa' ? 'Mapa' : 'Calendario'}</span>
+                <span>Modo Pantalla Completa — Vista {viewMode === 'gantt' ? 'Reportes' : 'Analítica'}</span>
               </div>
               <button
                 type="button"
@@ -5969,178 +5957,7 @@ export default function Reportes2View({
                 Todos <span>({perspective === 'territorial' ? 251 : items.length})</span>
               </button>
 
-              {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
-              <div className="filter-dropdown-wrap wbs-filter-wrap tabs-filter-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn wbs-card-btn ${activeMenu === 'wbsLevel' ? 'active' : ''} ${
-                    wbsDepthFilter !== 'todos' || wbsRoleFilter !== 'todos' || wbsLevelFilter !== 'todos' ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('wbsLevel')}
-                  title="Filtrar por estructura WBS (profundidad jerárquica y rol metodológico PM4R)"
-                >
-                  <div className="filter-card-copy">
-                    <small>Nivel</small>
-                    <span>
-                      {(() => {
-                        const depthLabels: Record<string, string> = {
-                          todos: 'Todos los niveles',
-                          0: 'Nivel 1',
-                          1: 'Nivel 2',
-                          2: 'Nivel 3',
-                          3: 'Nivel 4',
-                          4: 'Nivel 5',
-                        };
-                        const roleLabels: Record<string, string> = {
-                          todos: 'Todos los roles',
-                          componentes: 'Componentes',
-                          productos: 'Productos / Entregables',
-                          paquetes: 'Paquetes de trabajo',
-                        };
-
-                        const dStr = depthLabels[String(wbsDepthFilter)];
-                        const rStr = roleLabels[wbsRoleFilter];
-
-                        if (wbsDepthFilter === 'todos' && wbsRoleFilter === 'todos') {
-                          return `Todos los niveles (${perspective === 'territorial' ? 251 : items.length})`;
-                        }
-                        if (wbsDepthFilter !== 'todos' && wbsRoleFilter === 'todos') {
-                          return dStr;
-                        }
-                        if (wbsDepthFilter === 'todos' && wbsRoleFilter !== 'todos') {
-                          return rStr;
-                        }
-                        return `${dStr} · ${rStr}`;
-                      })()}
-                    </span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'wbsLevel' && (
-                  <div
-                    className="filter-card-popover phase-filter-popover"
-                    onClick={(e) => e.stopPropagation()}
-                    onWheel={(e) => {
-                      e.stopPropagation();
-                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                      if (list && e.target !== list && !list.contains(e.target as Node)) {
-                        list.scrollTop += e.deltaY;
-                      }
-                    }}
-                    style={{ minWidth: 320, maxWidth: 380 }}
-                  >
-                    {/* Cabecera general */}
-                    <div className="filter-popover-title filter-popover-title-row">
-                      <span>Estructura WBS</span>
-                      {(wbsDepthFilter !== 'todos' || wbsRoleFilter !== 'todos' || wbsLevelFilter !== 'todos') && (
-                        <button
-                          type="button"
-                          className="filter-reset-link"
-                          onClick={() => {
-                            setWbsDepthFilter('todos');
-                            setWbsRoleFilter('todos');
-                            setWbsLevelFilter('todos');
-                          }}
-                        >
-                          Restablecer
-                        </button>
-                      )}
-                    </div>
-
-                    {/* SECCIÓN 1: PROFUNDIDAD JERÁRQUICA (DINÁMICA SEGÚN NIVELES REALES) */}
-                    <div className="filter-popover-title filter-popover-subtitle">
-                      <span>Profundidad jerárquica</span>
-                    </div>
-                    <div className="filter-popover-list">
-                      {/* Todos los niveles */}
-                      <button
-                        type="button"
-                        className={`filter-item-btn filter-item-check ${wbsDepthFilter === 'todos' ? 'selected' : ''}`}
-                        onClick={() => {
-                          setWbsDepthFilter('todos');
-                          setWbsLevelFilter('todos');
-                        }}
-                      >
-                        <span className="filter-item-main">
-                          <span className={`filter-radio ${wbsDepthFilter === 'todos' ? 'checked' : ''}`}>
-                            {wbsDepthFilter === 'todos' && <span className="filter-radio-dot" />}
-                          </span>
-                          <span className="filter-item-text">
-                            <strong>Todos los niveles</strong>
-                          </span>
-                        </span>
-                        <span className="wbs-level-badge">{perspective === 'territorial' ? 251 : items.length}</span>
-                      </button>
-
-                      {/* Niveles dinámicos 1..n existentes en el proyecto (no se renderizan si el conteo es 0) */}
-                      {Array.from({ length: maxProjectDepth + 1 }, (_, idx) => idx).map((depthIdx) => {
-                        const count = dynamicLevelCounts[depthIdx] || 0;
-                        if (count === 0) return null;
-                        const isSelected = wbsDepthFilter === depthIdx;
-                        return (
-                          <button
-                            key={depthIdx}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              setWbsDepthFilter(depthIdx);
-                              setWbsLevelFilter('todos');
-                            }}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-item-text">
-                                <strong>Nivel {depthIdx + 1}</strong>
-                              </span>
-                            </span>
-                            <span className="wbs-level-badge">{count}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* SECCIÓN 2: ROL METODOLÓGICO (PM4R / BID) */}
-                    <div className="filter-popover-title filter-popover-subtitle">
-                      <span>Rol metodológico</span>
-                    </div>
-                    <div className="filter-popover-list">
-                      {[
-                        { id: 'todos', label: 'Todos los roles', count: items.length },
-                        { id: 'componentes', label: 'Componentes', count: rolesCounts.componentes },
-                        { id: 'productos', label: 'Productos / Entregables', count: rolesCounts.productos },
-                        { id: 'paquetes', label: 'Paquetes de trabajo', count: rolesCounts.paquetes },
-                      ].map((role) => {
-                        const isSelected = wbsRoleFilter === role.id && wbsLevelFilter === 'todos';
-                        return (
-                          <button
-                            key={role.id}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              setWbsRoleFilter(role.id as any);
-                              setWbsLevelFilter('todos');
-                            }}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-item-text">
-                                <strong>{role.label}</strong>
-                              </span>
-                            </span>
-                            <span className="wbs-level-badge">{role.count}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Filtro Universal 2: Estado de avance (Multiselección) + plazos de vencimiento */}
+              {/* Filtro Universal 1: Estado de avance (Multiselección) + plazos de vencimiento */}
               <div className="filter-dropdown-wrap estado-filter-wrap tabs-filter-wrap">
                 <button
                   type="button"
@@ -6297,8 +6114,8 @@ export default function Reportes2View({
                 )}
               </div>
 
-              {/* Filtro Contextual 3 (Caja Roja): Componente / Producto EDT */}
-              <div className="filter-dropdown-wrap contextual-filter-wrap edt-filter-wrap">
+              {/* Filtro Universal 2: Componente / Producto EDT (con grupos colapsables via Chevron) */}
+              <div className="filter-dropdown-wrap contextual-filter-wrap edt-filter-wrap tabs-filter-wrap">
                 <button
                   type="button"
                   className={`filter-card-btn ${activeMenu === 'edtComponent' ? 'active' : ''} ${
@@ -6324,17 +6141,17 @@ export default function Reportes2View({
                         list.scrollTop += e.deltaY;
                       }
                     }}
-                    style={{ minWidth: 320 }}
+                    style={{ minWidth: 340, maxWidth: 420 }}
                   >
                     <div className="filter-popover-title filter-popover-title-row">
-                      <span>Componentes y Productos EDT</span>
+                      <span>Componentes y Productos</span>
                       {selectedEdtCodes.length > 0 && (
                         <button
                           type="button"
                           className="filter-reset-link"
                           onClick={() => setSelectedEdtCodes([])}
                         >
-                          Restablecer
+                          Restablecer ({selectedEdtCodes.length})
                         </button>
                       )}
                     </div>
@@ -6361,56 +6178,72 @@ export default function Reportes2View({
                         );
                       })()}
 
-                      {/* Grupos de Componentes y sus Productos */}
+                      {/* Grupos de Componentes con Chevrones para Desplegar/Colapsar */}
                       {edtComponentsWithProducts.map(({ comp, products }) => {
                         const isCompChecked = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
+                        const isCollapsed = Boolean(collapsedCompIds[comp.id]);
                         const compTotalItems = items.filter((x) => x.id === comp.id || x.parentId === comp.id || items.some(p => p.id === x.parentId && p.parentId === comp.id)).length;
                         return (
                           <React.Fragment key={comp.id}>
                             <div
                               className="filter-popover-group-label"
                               style={{
-                                marginTop: 8,
+                                marginTop: 6,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                background: 'rgba(37, 99, 235, 0.05)',
+                                background: '#f8fafc',
+                                border: '1px solid #e2e8f0',
                                 padding: '5px 8px',
-                                borderRadius: 4,
+                                borderRadius: '8px',
                               }}
                             >
-                              <button
-                                type="button"
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: 0,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 6,
-                                  textAlign: 'left',
-                                  font: 'inherit',
-                                  color: 'inherit',
-                                  flex: 1,
-                                }}
-                                onClick={() => {
-                                  setSelectedEdtCodes((prev) =>
-                                    prev.includes(comp.id) ? prev.filter((c) => c !== comp.id) : [...prev, comp.id]
-                                  );
-                                }}
-                              >
-                                <span className={`filter-checkbox ${isCompChecked ? 'checked' : ''}`}>
-                                  {isCompChecked && <Check size={10} strokeWidth={3} />}
-                                </span>
-                                <strong style={{ fontSize: 11, color: '#0f172a' }}>
-                                  {comp.code} {comp.name}
-                                </strong>
-                              </button>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setCollapsedCompIds((prev) => ({ ...prev, [comp.id]: !prev[comp.id] }));
+                                  }}
+                                  style={{ background: 'none', border: 'none', padding: '2px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b' }}
+                                  title={isCollapsed ? 'Desplegar productos' : 'Colapsar productos'}
+                                >
+                                  {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                                </button>
+                                <button
+                                  type="button"
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 6,
+                                    textAlign: 'left',
+                                    font: 'inherit',
+                                    color: 'inherit',
+                                    flex: 1,
+                                    minWidth: 0,
+                                  }}
+                                  onClick={() => {
+                                    setSelectedEdtCodes((prev) =>
+                                      prev.includes(comp.id) ? prev.filter((c) => c !== comp.id) : [...prev, comp.id]
+                                    );
+                                  }}
+                                >
+                                  <span className={`filter-checkbox ${isCompChecked ? 'checked' : ''}`}>
+                                    {isCompChecked && <Check size={10} strokeWidth={3} />}
+                                  </span>
+                                  <strong style={{ fontSize: '11.5px', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {comp.code ? `${comp.code} ` : ''}{comp.name}
+                                  </strong>
+                                </button>
+                              </div>
                               <span className="wbs-level-badge">{compTotalItems}</span>
                             </div>
 
-                            {products.map((prod) => {
+                            {!isCollapsed && products.map((prod) => {
                               const isProdChecked = selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
                               const prodSedesCount = items.filter((x) => x.parentId === prod.id).length;
                               return (
@@ -6418,7 +6251,7 @@ export default function Reportes2View({
                                   key={prod.id}
                                   type="button"
                                   className={`filter-item-btn filter-item-check ${isProdChecked ? 'selected' : ''}`}
-                                  style={{ paddingLeft: 18 }}
+                                  style={{ paddingLeft: 26 }}
                                   onClick={() => {
                                     setSelectedEdtCodes((prev) =>
                                       prev.includes(prod.id) ? prev.filter((c) => c !== prod.id) : [...prev, prod.id]
@@ -6444,226 +6277,24 @@ export default function Reportes2View({
                   </div>
                 )}
               </div>
-            </div>
 
-            <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
-              {perspective === 'equipo' ? (
-                <>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'directorio' || viewMode === 'lista' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('directorio')}
-                    title="Directorio de Integrantes"
-                  >
-                    <Users size={14} />
-                    <span>Directorio</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('organigrama')}
-                    title="Organigrama Estructural"
-                  >
-                    <GitBranch size={14} />
-                    <span>Organigrama</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('sedes')}
-                    title="Frentes Territoriales y Sedes"
-                  >
-                    <Building2 size={14} />
-                    <span>Frentes Territoriales</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'carga' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('carga')}
-                    title="Carga de Trabajo Operativa"
-                  >
-                    <Activity size={14} />
-                    <span>Carga de Trabajo</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('gantt')}
-                    title="Vista Analítica de Reportes"
-                  >
-                    <BarChart3 size={14} />
-                    <span>Analítica</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('lista')}
-                    title="Vista Tabla Analítica"
-                  >
-                    <List size={14} />
-                    <span>Lista</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('kanban')}
-                    title="Vista Tablero Kanban"
-                  >
-                    <LayoutDashboard size={14} />
-                    <span>Kanban</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('calendario')}
-                    title="Vista Calendario Mensual"
-                  >
-                    <CalendarDays size={14} />
-                    <span>Calendario</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('mapa')}
-                    title="Vista Mapa Territorial"
-                  >
-                    <MapPin size={14} />
-                    <span>Mapa</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </nav>
-
-          {/* Filtros Contextuales y Macro */}
-          <ProjectShellFilters>
-            {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
-            <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
-                  selectedRegions.length > 0 ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('region')}
-                title="Filtrar por región (DRE) del proyecto"
-              >
-                <div className="filter-card-copy">
-                  <small>Región</small>
-                  <span>{selectedRegions.length === 0 ? 'Todas las regiones' : regionButtonText}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'region' && (
-                <div
-                  className="filter-card-popover"
-                  onClick={(e) => e.stopPropagation()}
-                  onWheel={(e) => {
-                    e.stopPropagation();
-                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                    if (list && e.target !== list && !list.contains(e.target as Node)) {
-                      list.scrollTop += e.deltaY;
-                    }
-                  }}
-                  style={{ minWidth: 270 }}
-                >
-                  <div className="filter-popover-title filter-popover-title-row">
-                    <span>Regiones y sedes del catálogo</span>
-                    {selectedRegions.length > 0 && (
-                      <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions([])}>
-                        Limpiar ({selectedRegions.length})
-                      </button>
-                    )}
-                  </div>
-                  <div className="filter-popover-list" style={{ maxHeight: 320 }}>
-                    <button
-                      type="button"
-                      className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
-                      onClick={() => setSelectedRegions([])}
-                    >
-                      <span className="filter-item-text">
-                        <strong>Todas las regiones</strong>
-                        <small>{MACROREGIONES_NACIONAL.length} macro-regiones · {unidades.length} sedes</small>
-                      </span>
-                      <span className="wbs-level-badge">{unidades.length}</span>
-                    </button>
-                    {MACROREGIONES_NACIONAL.map((macro) => {
-                      const todasMacro = macro.regiones.every((r) => selectedRegions.includes(r));
-                      return (
-                        <React.Fragment key={macro.id}>
-                          <div className="filter-popover-group-label macro-group-row">
-                            <span>{macro.name}</span>
-                            <button
-                              type="button"
-                              className={`filter-reset-link ${todasMacro ? 'macro-all-active' : ''}`}
-                              onClick={() => toggleMacroRegions(macro.regiones)}
-                              aria-pressed={todasMacro}
-                              title={
-                                todasMacro
-                                  ? `Quitar las ${macro.regiones.length} regiones de esta macro`
-                                  : `Seleccionar las ${macro.regiones.length} regiones de esta macro`
-                              }
-                            >
-                              {todasMacro ? `Quitar (${macro.regiones.length})` : `Todas (${macro.regiones.length})`}
-                            </button>
-                          </div>
-                        {macro.regiones.map((regName) => {
-                          const isChecked = selectedRegions.includes(regName);
-                          const coordinador = getRegionCoordinador(regName);
-                          return (
-                            <button
-                              key={regName}
-                              type="button"
-                              className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                              onClick={() => toggleRegion(regName)}
-                              aria-pressed={isChecked}
-                            >
-                              <span className="filter-item-main">
-                                <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
-                                  {isChecked && <Check size={10} strokeWidth={3} />}
-                                </span>
-                                <span className="filter-item-text">
-                                  <strong>{regName}</strong>
-                                  <small>
-                                    {sedesPorRegion.get(normalizeRegionKey(regName)) || 0} sedes
-                                    {coordinador ? ` · Coord. regional: ${coordinador}` : ''}
-                                  </small>
-                                </span>
-                              </span>
-                              {(regionItemCounts[regName] || 0) > 0 && (
-                                <span className="wbs-level-badge">{regionItemCounts[regName]}</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-            </div>
-
-            {/* Filtro Contextual 2 (Vista Territorial): Sede Territorial / UGEL o Gestor de Campo */}
-            {perspective === 'territorial' ? (
-              <div className="filter-dropdown-wrap contextual-filter-wrap sede-filter-wrap">
+              {/* Filtro Universal 3: Región / DRE (Subido a la Fila 1) */}
+              <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap tabs-filter-wrap">
                 <button
                   type="button"
-                  className={`filter-card-btn ${activeMenu === 'sede' ? 'active' : ''} ${
-                    selectedSedes.length > 0 || gestorFilter !== 'Todos' ? 'filtered' : ''
+                  className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
+                    selectedRegions.length > 0 ? 'filtered' : ''
                   }`}
-                  onClick={() => toggleMenu('sede')}
-                  title="Filtrar por Sede Territorial / UGEL o Gestor de Campo"
+                  onClick={() => toggleMenu('region')}
+                  title="Filtrar por región (DRE) del proyecto"
                 >
                   <div className="filter-card-copy">
-                    <small>Sede / UGEL</small>
-                    <span>{sedeButtonText}</span>
+                    <small>Región</small>
+                    <span>{selectedRegions.length === 0 ? 'Todas las regiones' : regionButtonText}</span>
                   </div>
                   <ChevronDown size={14} className="filter-chevron" />
                 </button>
-                {activeMenu === 'sede' && (
+                {activeMenu === 'region' && (
                   <div
                     className="filter-card-popover"
                     onClick={(e) => e.stopPropagation()}
@@ -6674,269 +6305,602 @@ export default function Reportes2View({
                         list.scrollTop += e.deltaY;
                       }
                     }}
-                    style={{ minWidth: 310 }}
+                    style={{ minWidth: 270 }}
                   >
                     <div className="filter-popover-title filter-popover-title-row">
-                      <span>Sedes y Gestores de Campo</span>
-                      {(selectedSedes.length > 0 || gestorFilter !== 'Todos') && (
-                        <button
-                          type="button"
-                          className="filter-reset-link"
-                          onClick={() => {
-                            setSelectedSedes([]);
-                            setGestorFilter('Todos');
-                          }}
-                        >
-                          Restablecer
+                      <span>Regiones y sedes del catálogo</span>
+                      {selectedRegions.length > 0 && (
+                        <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions([])}>
+                          Limpiar ({selectedRegions.length})
                         </button>
                       )}
                     </div>
-                    <div className="filter-popover-list" style={{ maxHeight: 360 }}>
-                      {/* Sección 1: Sedes / UGEL */}
-                      <div className="filter-popover-group-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>Sedes / UGEL Operativas</span>
-                        <span className="wbs-level-badge">{availableSedesCascaded.length}</span>
-                      </div>
-                      {(() => {
-                        const isAllSedes = selectedSedes.length === 0;
-                        return (
-                          <button
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isAllSedes ? 'selected' : ''}`}
-                            onClick={() => setSelectedSedes([])}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isAllSedes ? 'checked' : ''}`}>
-                                {isAllSedes && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-item-text">
-                                <strong>Todas las sedes</strong>
-                              </span>
-                            </span>
-                            <span className="wbs-level-badge">{items.length}</span>
-                          </button>
-                        );
-                      })()}
-                      {sedesAgrupadas.length > 1
-                        ? sedesAgrupadas.map((grupo) => (
-                            <React.Fragment key={grupo.region}>
-                              <div className="filter-popover-group-label">{grupo.region}</div>
-                              {grupo.sedes.map((sede) => {
-                                const isChecked = selectedSedes.includes(sede);
-                                const sLower = sede.toLowerCase().trim();
-                                const count = items.filter((it) => {
-                                  const itS = (it.sede || '').toLowerCase().trim();
-                                  const itD = (it.distrito || '').toLowerCase().trim();
-                                  const itN = (it.name || '').toLowerCase().trim();
-                                  return (
-                                    (itS && (itS.includes(sLower) || sLower.includes(itS))) ||
-                                    (itD && (itD.includes(sLower) || sLower.includes(itD))) ||
-                                    (itN && (itN.includes(sLower) || sLower.includes(itN)))
-                                  );
-                                }).length;
-                                return (
-                                  <button
-                                    key={sede}
-                                    type="button"
-                                    className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                                    onClick={() => {
-                                      setSelectedSedes((prev) =>
-                                        prev.includes(sede)
-                                          ? prev.filter((s) => s !== sede)
-                                          : [...prev, sede]
-                                      );
-                                    }}
-                                  >
-                                    <span className="filter-item-main">
-                                      <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
-                                        {isChecked && <Check size={10} strokeWidth={3} />}
-                                      </span>
-                                      <span className="filter-item-text">
-                                        <strong>{sede}</strong>
-                                      </span>
-                                    </span>
-                                    {count > 0 && <span className="wbs-level-badge">{count}</span>}
-                                  </button>
-                                );
-                              })}
-                            </React.Fragment>
-                          ))
-                        : availableSedesCascaded.map((sede) => {
-                            const isChecked = selectedSedes.includes(sede);
-                            const sLower = sede.toLowerCase().trim();
-                            const count = items.filter((it) => {
-                              const itS = (it.sede || '').toLowerCase().trim();
-                              const itD = (it.distrito || '').toLowerCase().trim();
-                              const itN = (it.name || '').toLowerCase().trim();
-                              return (
-                                (itS && (itS.includes(sLower) || sLower.includes(itS))) ||
-                                (itD && (itD.includes(sLower) || sLower.includes(itD))) ||
-                                (itN && (itN.includes(sLower) || sLower.includes(itN)))
-                              );
-                            }).length;
-                            return (
-                              <button
-                                key={sede}
-                                type="button"
-                                className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                                onClick={() => {
-                                  setSelectedSedes((prev) =>
-                                    prev.includes(sede)
-                                      ? prev.filter((s) => s !== sede)
-                                      : [...prev, sede]
-                                  );
-                                }}
-                              >
-                                <span className="filter-item-main">
-                                  <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
-                                    {isChecked && <Check size={10} strokeWidth={3} />}
-                                  </span>
-                                  <span className="filter-item-text">
-                                    <strong>{sede}</strong>
-                                  </span>
-                                </span>
-                                {count > 0 && <span className="wbs-level-badge">{count}</span>}
-                              </button>
-                            );
-                          })}
-
-                      {/* Sección 2: Gestores de Campo Asignados */}
-                      <div className="filter-popover-group-label" style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>Gestor de Campo Asignado</span>
-                        <span className="wbs-level-badge">{availableGestoresCascaded.length}</span>
-                      </div>
+                    <div className="filter-popover-list" style={{ maxHeight: 320 }}>
                       <button
                         type="button"
-                        className={`filter-item-btn filter-item-check ${gestorFilter === 'Todos' ? 'selected' : ''}`}
+                        className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
+                        onClick={() => setSelectedRegions([])}
+                      >
+                        <span className="filter-item-text">
+                          <strong>Todas las regiones</strong>
+                          <small>{MACROREGIONES_NACIONAL.length} macro-regiones · {unidades.length} sedes</small>
+                        </span>
+                        <span className="wbs-level-badge">{unidades.length}</span>
+                      </button>
+                      {MACROREGIONES_NACIONAL.map((macro) => {
+                        const todasMacro = macro.regiones.every((r) => selectedRegions.includes(r));
+                        return (
+                          <React.Fragment key={macro.id}>
+                            <div className="filter-popover-group-label macro-group-row">
+                              <span>{macro.name}</span>
+                              <button
+                                type="button"
+                                className={`filter-reset-link ${todasMacro ? 'macro-all-active' : ''}`}
+                                onClick={() => toggleMacroRegions(macro.regiones)}
+                                aria-pressed={todasMacro}
+                                title={
+                                  todasMacro
+                                    ? `Quitar las ${macro.regiones.length} regiones de esta macro`
+                                    : `Seleccionar las ${macro.regiones.length} regiones de esta macro`
+                                }
+                              >
+                                {todasMacro ? `Quitar (${macro.regiones.length})` : `Todas (${macro.regiones.length})`}
+                              </button>
+                            </div>
+                            {macro.regiones.map((regName) => {
+                              const isChecked = selectedRegions.includes(regName);
+                              const coordinador = getRegionCoordinador(regName);
+                              return (
+                                <button
+                                  key={regName}
+                                  type="button"
+                                  className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                                  onClick={() => toggleRegion(regName)}
+                                  aria-pressed={isChecked}
+                                >
+                                  <span className="filter-item-main">
+                                    <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                      {isChecked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span className="filter-item-text">
+                                      <strong>{regName}</strong>
+                                      <small>
+                                        {sedesPorRegion.get(normalizeRegionKey(regName)) || 0} sedes
+                                        {coordinador ? ` · Coord. regional: ${coordinador}` : ''}
+                                      </small>
+                                    </span>
+                                  </span>
+                                  {(regionItemCounts[regName] || 0) > 0 && (
+                                    <span className="wbs-level-badge">{regionItemCounts[regName]}</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="tabs-right-actions" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+              {/* Bloque: Ajuste de Pantalla y Cuadrícula */}
+              {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa' || perspective === 'equipo' || viewMode === 'sedes') && (
+                <button
+                  type="button"
+                  className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
+                  onClick={toggleFullscreen}
+                  data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                  aria-label="Alternar modo pantalla completa"
+                >
+                  {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                </button>
+              )}
+
+              {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
+              <button
+                type="button"
+                className="btn secondary qm-btn-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetColWidths();
+                }}
+                data-tooltip="Ajustar anchos de columnas automáticamente"
+                aria-label="Ajustar anchos de columnas al contenido"
+              >
+                <ArrowLeftRight size={14} />
+              </button>
+
+              {/* Separador vertical: Ajustes | Historial de Deshacer */}
+              <div className="filter-group-divider" aria-hidden="true" />
+
+              {/* Bloque: Historial de Deshacer y Rehacer */}
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUndo();
+                }}
+                disabled={history.length === 0}
+                data-tooltip={history.length > 0 ? "Retroceder / Deshacer (Ctrl+Z)" : "Sin cambios para retroceder"}
+                aria-label="Retroceder o deshacer último cambio"
+              >
+                <Undo2 size={14} />
+              </button>
+
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRedo();
+                }}
+                disabled={redoHistory.length === 0}
+                data-tooltip={redoHistory.length > 0 ? "Adelantar / Rehacer (Ctrl+Y)" : "Sin cambios para adelantar"}
+                aria-label="Adelantar o rehacer último cambio"
+              >
+                <Redo2 size={14} />
+              </button>
+
+              {/* Separador vertical: Historial | Restablecer filtros */}
+              <div className="filter-group-divider" aria-hidden="true" />
+
+              {/* Bloque: Restablecimiento Universal de Todos los Filtros y Orden */}
+              <button
+                type="button"
+                className="btn secondary clear-btn qm-btn-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearch('');
+                  if (perspective === 'equipo') {
+                    setEquipoSedeFilter('todas');
+                    setEquipoEstadoOpFilter('todos');
+                    setEquipoEstadoCuentaFilter('todos');
+                    setEquipoAreaFilter('todas');
+                    setEquipoPill('Todos');
+                  }
+                  setStateFilter('Todos');
+                  setTypeFilter('Todos');
+                  setSelectedRegions([]);
+                  setPhaseFilter('Todas');
+                  setGestorFilter('Todos');
+                  setMacroFilter('Todos');
+                  setSelectedStates([]);
+                  setWbsDepthFilter('todos');
+                  setWbsRoleFilter('todos');
+                  setWbsLevelFilter('todos');
+                  setVencimientosFilter('todos');
+                  setListaTemporalFilter('Todos');
+                  setRangeFrom(DEFAULT_RANGE.from);
+                  setRangeTo(DEFAULT_RANGE.to);
+                  setTab('Todos');
+                  setCustomRules([]);
+                  setSelectedEdtCodes([]);
+                  setAdvancedFiltersOpen(false);
+                  setColFilterOpen(null);
+                  setShowBaseline(false);
+                  setCalShowBarLabels(true);
+                  setCalShowBaseline(false);
+                  setShowCriticalPath(false);
+                  engine.clearAllFilters();
+                  engine.clearSort();
+                  resetColWidths();
+                  closeMenus();
+                  if (viewMode === 'calendario') {
+                    handleTodayCal();
+                  } else {
+                    scrollToDate(RANGE_MIN);
+                  }
+                  notify('Todos los filtros restablecidos');
+                }}
+                data-tooltip="Restablecer todos los filtros"
+                aria-label="Restablecer todos los filtros y limpiar vista"
+              >
+                <RotateCcw size={15} />
+              </button>
+
+              {/* Separador vertical: Restablecer | Conmutador de vistas */}
+              <div className="filter-group-divider" aria-hidden="true" />
+
+              <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
+                {perspective === 'equipo' ? (
+                  <>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${viewMode === 'directorio' || viewMode === 'lista' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('directorio')}
+                      title="Directorio de Integrantes"
+                    >
+                      <Users size={14} />
+                      <span>Directorio</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('organigrama')}
+                      title="Organigrama Estructural"
+                    >
+                      <GitBranch size={14} />
+                      <span>Organigrama</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('sedes')}
+                      title="Frentes Territoriales y Sedes"
+                    >
+                      <Building2 size={14} />
+                      <span>Frentes Territoriales</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${viewMode === 'carga' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('carga')}
+                      title="Carga de Trabajo Operativa"
+                    >
+                      <Activity size={14} />
+                      <span>Carga de Trabajo</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('gantt')}
+                      title="Vista General de Reportes"
+                    >
+                      <BarChart3 size={14} />
+                      <span>Reportes</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('sedes')}
+                      title="Vista Analítica Territorial"
+                    >
+                      <Table2 size={14} />
+                      <span>Analítica</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </nav>
+
+          {/* Filtros Contextuales y Macro */}
+          <ProjectShellFilters>
+            {/* Filtro Contextual 1: UGEL / Sede Territorial */}
+            <div className="filter-dropdown-wrap contextual-filter-wrap sede-filter-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'sede' ? 'active' : ''} ${
+                  selectedSedes.length > 0 ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('sede')}
+                title="Filtrar por UGEL o sede territorial"
+              >
+                <div className="filter-card-copy">
+                  <small>UGEL / Sede</small>
+                  <span>{sedeButtonText}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'sede' && (
+                <div
+                  className="filter-card-popover"
+                  onClick={(e) => e.stopPropagation()}
+                  onWheel={(e) => {
+                    e.stopPropagation();
+                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                    if (list && e.target !== list && !list.contains(e.target as Node)) {
+                      list.scrollTop += e.deltaY;
+                    }
+                  }}
+                  style={{ minWidth: 290 }}
+                >
+                  <div className="filter-popover-title filter-popover-title-row">
+                    <span>Sedes y UGEL Operativas</span>
+                    {selectedSedes.length > 0 && (
+                      <button
+                        type="button"
+                        className="filter-reset-link"
+                        onClick={() => setSelectedSedes([])}
+                      >
+                        Limpiar ({selectedSedes.length})
+                      </button>
+                    )}
+                  </div>
+                  <div className="filter-popover-list" style={{ maxHeight: 340 }}>
+                    {(() => {
+                      const isAllSedes = selectedSedes.length === 0;
+                      return (
+                        <button
+                          type="button"
+                          className={`filter-item-btn filter-item-check ${isAllSedes ? 'selected' : ''}`}
+                          onClick={() => setSelectedSedes([])}
+                        >
+                          <span className="filter-item-main">
+                            <span className={`filter-radio ${isAllSedes ? 'checked' : ''}`}>
+                              {isAllSedes && <span className="filter-radio-dot" />}
+                            </span>
+                            <span className="filter-item-text">
+                              <strong>Todas las UGEL / sedes</strong>
+                              <small>{availableSedesCascaded.length} sedes disponibles</small>
+                            </span>
+                          </span>
+                          <span className="wbs-level-badge">{items.length}</span>
+                        </button>
+                      );
+                    })()}
+                    {sedesAgrupadas.length > 1
+                      ? sedesAgrupadas.map((grupo) => (
+                          <React.Fragment key={grupo.region}>
+                            <div className="filter-popover-group-label">{grupo.region}</div>
+                            {grupo.sedes.map((sede) => {
+                              const isChecked = selectedSedes.includes(sede);
+                              const sLower = sede.toLowerCase().trim();
+                              const count = items.filter((it) => {
+                                const itS = (it.sede || '').toLowerCase().trim();
+                                const itD = (it.distrito || '').toLowerCase().trim();
+                                const itN = (it.name || '').toLowerCase().trim();
+                                return (
+                                  (itS && (itS.includes(sLower) || sLower.includes(itS))) ||
+                                  (itD && (itD.includes(sLower) || sLower.includes(itD))) ||
+                                  (itN && (itN.includes(sLower) || sLower.includes(itN)))
+                                );
+                              }).length;
+                              return (
+                                <button
+                                  key={sede}
+                                  type="button"
+                                  className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    setSelectedSedes((prev) =>
+                                      prev.includes(sede)
+                                        ? prev.filter((s) => s !== sede)
+                                        : [...prev, sede]
+                                    );
+                                  }}
+                                >
+                                  <span className="filter-item-main">
+                                    <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                      {isChecked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span className="filter-item-text">
+                                      <strong>{sede}</strong>
+                                    </span>
+                                  </span>
+                                  {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                                </button>
+                              );
+                            })}
+                          </React.Fragment>
+                        ))
+                      : availableSedesCascaded.map((sede) => {
+                          const isChecked = selectedSedes.includes(sede);
+                          const sLower = sede.toLowerCase().trim();
+                          const count = items.filter((it) => {
+                            const itS = (it.sede || '').toLowerCase().trim();
+                            const itD = (it.distrito || '').toLowerCase().trim();
+                            const itN = (it.name || '').toLowerCase().trim();
+                            return (
+                              (itS && (itS.includes(sLower) || sLower.includes(itS))) ||
+                              (itD && (itD.includes(sLower) || sLower.includes(itD))) ||
+                              (itN && (itN.includes(sLower) || sLower.includes(itN)))
+                            );
+                          }).length;
+                          return (
+                            <button
+                              key={sede}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                              onClick={() => {
+                                setSelectedSedes((prev) =>
+                                  prev.includes(sede)
+                                    ? prev.filter((s) => s !== sede)
+                                    : [...prev, sede]
+                                );
+                              }}
+                            >
+                              <span className="filter-item-main">
+                                <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                  {isChecked && <Check size={10} strokeWidth={3} />}
+                                </span>
+                                <span className="filter-item-text">
+                                  <strong>{sede}</strong>
+                                </span>
+                              </span>
+                              {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                            </button>
+                          );
+                        })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Filtro Contextual 2: Fase del Proyecto */}
+            <div className="filter-dropdown-wrap contextual-filter-wrap phase-filter-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'phase' ? 'active' : ''} ${
+                  phaseFilter !== 'Todas' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('phase')}
+                title="Filtrar por Fase del Proyecto (PMBOK / Metodología de Dotación)"
+              >
+                <div className="filter-card-copy">
+                  <small>Fase</small>
+                  <span title={selectedPhaseLabel}>{selectedPhaseLabel}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'phase' && (
+                <div
+                  className="filter-card-popover phase-filter-popover"
+                  onClick={(e) => e.stopPropagation()}
+                  onWheel={(e) => {
+                    e.stopPropagation();
+                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                    if (list && e.target !== list && !list.contains(e.target as Node)) {
+                      list.scrollTop += e.deltaY;
+                    }
+                  }}
+                  style={{ minWidth: 320, maxWidth: 380 }}
+                >
+                  <div className="filter-popover-title filter-popover-title-row">
+                    <span>Fases del Proyecto</span>
+                    {phaseFilter !== 'Todas' && (
+                      <button type="button" className="filter-reset-link" onClick={() => setPhaseFilter('Todas')}>
+                        Restablecer
+                      </button>
+                    )}
+                  </div>
+                  <div className="filter-popover-list">
+                    <button
+                      type="button"
+                      className={`filter-item-btn ${phaseFilter === 'Todas' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setPhaseFilter('Todas');
+                        closeMenus();
+                      }}
+                    >
+                      <span className="filter-item-text">
+                        <strong>Todas las fases</strong>
+                        <small>Ciclo de vida completo del proyecto</small>
+                      </span>
+                      <span className="wbs-level-badge">{items.length}</span>
+                    </button>
+                    {PROJECT_PHASES_CATALOG.map((fase) => {
+                      const isSelected = phaseFilter === fase.id || phaseFilter === fase.name;
+                      const count = getPhaseItemCount(fase.id);
+                      return (
+                        <button
+                          key={fase.id}
+                          type="button"
+                          className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setPhaseFilter(fase.id);
+                            closeMenus();
+                          }}
+                        >
+                          <span className="filter-item-main">
+                            <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                              {isSelected && <span className="filter-radio-dot" />}
+                            </span>
+                            <span className="filter-item-text">
+                              <strong>{fase.code} · {fase.name}</strong>
+                              <small>{fase.description}</small>
+                            </span>
+                          </span>
+                          {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Filtro Contextual 3: Responsable / Gestor Territorial */}
+            <div className="filter-dropdown-wrap contextual-filter-wrap gestor-filter-wrap">
+              <button
+                type="button"
+                className={`filter-card-btn ${activeMenu === 'gestor' ? 'active' : ''} ${
+                  gestorFilter !== 'Todos' ? 'filtered' : ''
+                }`}
+                onClick={() => toggleMenu('gestor')}
+                title="Filtrar por Responsable o Gestor Territorial a cargo"
+              >
+                <div className="filter-card-copy">
+                  <small>Responsable</small>
+                  <span>{gestorButtonText}</span>
+                </div>
+                <ChevronDown size={14} className="filter-chevron" />
+              </button>
+              {activeMenu === 'gestor' && (
+                <div
+                  className="filter-card-popover"
+                  onClick={(e) => e.stopPropagation()}
+                  onWheel={(e) => {
+                    e.stopPropagation();
+                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                    if (list && e.target !== list && !list.contains(e.target as Node)) {
+                      list.scrollTop += e.deltaY;
+                    }
+                  }}
+                  style={{ minWidth: 290 }}
+                >
+                  <div className="filter-popover-title filter-popover-title-row">
+                    <span>Responsables y Gestores</span>
+                    {gestorFilter !== 'Todos' && (
+                      <button
+                        type="button"
+                        className="filter-reset-link"
                         onClick={() => {
                           setGestorFilter('Todos');
                           closeMenus();
                         }}
                       >
-                        <span className="filter-item-main">
-                          <span className={`filter-radio ${gestorFilter === 'Todos' ? 'checked' : ''}`}>
-                            {gestorFilter === 'Todos' && <span className="filter-radio-dot" />}
-                          </span>
-                          <span className="filter-item-text">
-                            <strong>Todos los gestores</strong>
-                            <small>Sin filtro de responsable</small>
-                          </span>
-                        </span>
+                        Restablecer
                       </button>
-                      {availableGestoresCascaded.map((gName) => {
-                        const isSelected = gestorFilter === gName;
-                        const count = items.filter((it) => getItemGestores(it).includes(gName)).length;
-                        return (
-                          <button
-                            key={gName}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              setGestorFilter(gName);
-                              closeMenus();
-                            }}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-avatar macro-avatar">{getGestorInitials(gName)}</span>
-                              <span className="filter-item-text">
-                                <strong>{gName}</strong>
-                                <small>{getPersonInstitutionalRole(gName)}</small>
-                              </span>
-                            </span>
-                            {count > 0 && <span className="wbs-level-badge">{count}</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="filter-dropdown-wrap contextual-filter-wrap phase-filter-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn ${activeMenu === 'phase' ? 'active' : ''} ${
-                    phaseFilter !== 'Todas' ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('phase')}
-                  title="Filtrar por Fase del Proyecto (PMBOK / Metodología de Dotación)"
-                >
-                  <div className="filter-card-copy">
-                    <small>Fase</small>
-                    <span title={selectedPhaseLabel}>{selectedPhaseLabel}</span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'phase' && (
-                  <div
-                    className="filter-card-popover phase-filter-popover"
-                    onClick={(e) => e.stopPropagation()}
-                    onWheel={(e) => {
-                      e.stopPropagation();
-                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                      if (list && e.target !== list && !list.contains(e.target as Node)) {
-                        list.scrollTop += e.deltaY;
-                      }
-                    }}
-                    style={{ minWidth: 320, maxWidth: 380 }}
-                  >
-                    <div className="filter-popover-title filter-popover-title-row">
-                      <span>Fases del Proyecto</span>
-                      {phaseFilter !== 'Todas' && (
-                        <button type="button" className="filter-reset-link" onClick={() => setPhaseFilter('Todas')}>
-                          Restablecer
-                        </button>
-                      )}
-                    </div>
-                    <div className="filter-popover-list">
-                      <button
-                        type="button"
-                        className={`filter-item-btn ${phaseFilter === 'Todas' ? 'selected' : ''}`}
-                        onClick={() => {
-                          setPhaseFilter('Todas');
-                          closeMenus();
-                        }}
-                      >
+                  <div className="filter-popover-list" style={{ maxHeight: 340 }}>
+                    <button
+                      type="button"
+                      className={`filter-item-btn filter-item-check ${gestorFilter === 'Todos' ? 'selected' : ''}`}
+                      onClick={() => {
+                        setGestorFilter('Todos');
+                        closeMenus();
+                      }}
+                    >
+                      <span className="filter-item-main">
+                        <span className={`filter-radio ${gestorFilter === 'Todos' ? 'checked' : ''}`}>
+                          {gestorFilter === 'Todos' && <span className="filter-radio-dot" />}
+                        </span>
                         <span className="filter-item-text">
-                          <strong>Todas las fases</strong>
-                          <small>Ciclo de vida completo del proyecto</small>
+                          <strong>Todos los responsables</strong>
+                          <small>Sin filtro de responsable</small>
                         </span>
-                        <span className="wbs-level-badge">{items.length}</span>
-                      </button>
-                      {PROJECT_PHASES_CATALOG.map((fase) => {
-                        const isSelected = phaseFilter === fase.id || phaseFilter === fase.name;
-                        const count = getPhaseItemCount(fase.id);
-                        return (
-                          <button
-                            key={fase.id}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              setPhaseFilter(fase.id);
-                              closeMenus();
-                            }}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-item-text">
-                                <strong>{fase.code} · {fase.name}</strong>
-                                <small>{fase.description}</small>
-                              </span>
+                      </span>
+                      <span className="wbs-level-badge">{items.length}</span>
+                    </button>
+                    {availableGestoresCascaded.map((gName) => {
+                      const isSelected = gestorFilter === gName;
+                      const count = items.filter((it) => getItemGestores(it).includes(gName)).length;
+                      return (
+                        <button
+                          key={gName}
+                          type="button"
+                          className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setGestorFilter(gName);
+                            closeMenus();
+                          }}
+                        >
+                          <span className="filter-item-main">
+                            <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                              {isSelected && <span className="filter-radio-dot" />}
                             </span>
-                            {count > 0 && <span className="wbs-level-badge">{count}</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
+                            <span className="filter-avatar macro-avatar">{getGestorInitials(gName)}</span>
+                            <span className="filter-item-text">
+                              <strong>{gName}</strong>
+                              <small>{getPersonInstitutionalRole(gName)}</small>
+                            </span>
+                          </span>
+                          {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
 
             {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
             <button
@@ -7182,125 +7146,6 @@ export default function Reportes2View({
                 </div>
               </div>
             )}
-
-            {/* Separador vertical: Capas y Visualización | Pantalla y Ajuste */}
-            <div className="filter-group-divider" aria-hidden="true" />
-
-            {/* Bloque 5: Ajuste de Pantalla y Cuadrícula */}
-            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa' || perspective === 'equipo') && (
-              <button
-                type="button"
-                className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
-                onClick={toggleFullscreen}
-                data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-                aria-label="Alternar modo pantalla completa"
-              >
-                {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-              </button>
-            )}
-
-            {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
-            <button
-              type="button"
-              className="btn secondary qm-btn-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                resetColWidths();
-              }}
-              data-tooltip="Ajustar anchos de columnas automáticamente"
-              aria-label="Ajustar anchos de columnas al contenido"
-            >
-              <ArrowLeftRight size={14} />
-            </button>
-
-            {/* Separador vertical: Ajustes | Historial de Deshacer */}
-            <div className="filter-group-divider" aria-hidden="true" />
-
-            {/* Bloque 6: Historial de Deshacer y Rehacer */}
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUndo();
-              }}
-              disabled={history.length === 0}
-              data-tooltip={history.length > 0 ? "Retroceder / Deshacer (Ctrl+Z)" : "Sin cambios para retroceder"}
-              aria-label="Retroceder o deshacer último cambio"
-            >
-              <Undo2 size={14} />
-            </button>
-
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRedo();
-              }}
-              disabled={redoHistory.length === 0}
-              data-tooltip={redoHistory.length > 0 ? "Adelantar / Rehacer (Ctrl+Y)" : "Sin cambios para adelantar"}
-              aria-label="Adelantar o rehacer último cambio"
-            >
-              <Redo2 size={14} />
-            </button>
-
-            {/* Separador vertical: Historial | Restablecer filtros */}
-            <div className="filter-group-divider" aria-hidden="true" />
-
-            {/* Bloque 7: Restablecimiento Universal de Todos los Filtros y Orden */}
-            <button
-              type="button"
-              className="btn secondary clear-btn qm-btn-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSearch('');
-                if (perspective === 'equipo') {
-                  setEquipoSedeFilter('todas');
-                  setEquipoEstadoOpFilter('todos');
-                  setEquipoEstadoCuentaFilter('todos');
-                  setEquipoAreaFilter('todas');
-                  setEquipoPill('Todos');
-                }
-                setStateFilter('Todos');
-                setTypeFilter('Todos');
-                setSelectedRegions([]);
-                setPhaseFilter('Todas');
-                setGestorFilter('Todos');
-                setMacroFilter('Todos');
-                setSelectedStates([]);
-                setWbsDepthFilter('todos');
-                setWbsRoleFilter('todos');
-                setWbsLevelFilter('todos');
-                setVencimientosFilter('todos');
-                setListaTemporalFilter('Todos');
-                setRangeFrom(DEFAULT_RANGE.from);
-                setRangeTo(DEFAULT_RANGE.to);
-                setTab('Todos');
-                setCustomRules([]);
-                setSelectedEdtCodes([]);
-                setAdvancedFiltersOpen(false);
-                setColFilterOpen(null);
-                setShowBaseline(false);
-                setCalShowBarLabels(true);
-                setCalShowBaseline(false);
-                setShowCriticalPath(false);
-                engine.clearAllFilters();
-                engine.clearSort();
-                resetColWidths();
-                closeMenus();
-                if (viewMode === 'calendario') {
-                  handleTodayCal();
-                } else {
-                  scrollToDate(RANGE_MIN);
-                }
-                notify('Todos los filtros restablecidos');
-              }}
-              data-tooltip="Restablecer todos los filtros"
-              aria-label="Restablecer todos los filtros y limpiar vista"
-            >
-              <RotateCcw size={15} />
-            </button>
 
             {/* Bloque 8: Extremo Derecho · Botón de Columnas en Azul App Primario */}
             <div className="filter-dropdown-wrap cols-dropdown-wrap cols-right-aligned">
@@ -7660,13 +7505,17 @@ export default function Reportes2View({
             />
           )}
 
-          {/* Vista Analítica de Reportes (reemplaza al Gantt en el lienzo central) */}
-          {viewMode === 'gantt' && perspective !== 'equipo' && (
-            <ReportesAnalyticsCanvas notify={notify} />
+          {/* Vistas del Módulo Reportes: Reportes (general) y Analítica (territorial) */}
+          {(viewMode === 'gantt' || viewMode === 'sedes') && perspective !== 'equipo' && (
+            <ReportesAnalyticsCanvas
+              notify={notify}
+              activeView={viewMode === 'sedes' ? 'analitica' : 'reportes'}
+              onViewChange={(v) => setViewMode(v === 'analitica' ? 'sedes' : 'gantt')}
+            />
           )}
 
-          {/* Presentación Oficial Aprobada: Lista y vistas de Equipo */}
-          {(viewMode === 'lista' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
+          {/* Presentación Oficial Aprobada: Vistas exclusivas de Equipo */}
+          {perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode) && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' || perspective === 'equipo' ? 'view-lista-fullwidth' : ''}`}>
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>

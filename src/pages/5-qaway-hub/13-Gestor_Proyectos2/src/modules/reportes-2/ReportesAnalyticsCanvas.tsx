@@ -159,8 +159,12 @@ const REPORTES_COLUMNS: ColumnDef<Milestone>[] = [
 
 export default function ReportesAnalyticsCanvas({
   notify,
+  activeView = 'reportes',
+  onViewChange,
 }: {
   notify?: (m: string) => void;
+  activeView?: 'reportes' | 'analitica';
+  onViewChange?: (view: 'reportes' | 'analitica') => void;
 }) {
   const [activeReportHito, setActiveReportHito] = useState<string | null>(null);
   const [milestones] = useState<Milestone[]>(initialMilestones);
@@ -183,15 +187,21 @@ export default function ReportesAnalyticsCanvas({
 
   const handleOpenReport = (m: Milestone) => {
     setActiveReportHito(m.id);
+    onViewChange?.('analitica');
     notify?.(`Abriendo reporte territorial: Hito ${m.id} · ${m.name}`);
   };
 
-  if (activeReportHito) {
+  const showAnalitica = activeView === 'analitica' || activeReportHito !== null;
+
+  if (showAnalitica) {
     return (
       <div className="rep-analytics-canvas">
         <TerritoryReporterV2Tab
-          initialHito={activeReportHito}
-          onBack={() => setActiveReportHito(null)}
+          initialHito={activeReportHito || '1.6'}
+          onBack={() => {
+            setActiveReportHito(null);
+            onViewChange?.('reportes');
+          }}
           notify={notify}
         />
       </div>
