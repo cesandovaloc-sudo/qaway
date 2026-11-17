@@ -21,7 +21,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AttachmentItem, DeliverableItem, Item, Status } from './CronogramaGanttView';
 import { OFFICIAL_WBS_DEPENDENCIES } from './CronogramaGanttView';
 import { DRE_JUNIN_DOTACION_2027_EDT, PROJECT_PHASES_CATALOG } from './edtPmbokModel';
-import { listarTiposDependenciaGestor } from '../../services/gpCatalogosService';
+import { listarTiposDependenciaGestor, listarEstadosEntregableGestor } from '../../services/gpCatalogosService';
 import './gantt.css';
 
 /* Tipos que viven solo en CronogramaGanttView: se replican aquí para no importar
@@ -130,6 +130,13 @@ export default function GanttElementDetailView() {
     FF: 'Fin a fin',
     SF: 'Comienzo a fin',
   });
+  const [estadosEntregableMap, setEstadosEntregableMap] = useState<Record<string, string>>({
+    pendiente: 'Pendiente',
+    en_proceso: 'En proceso',
+    aprobado: 'Aprobado',
+    rechazado: 'Rechazado',
+    completado: 'Completado',
+  });
   useEffect(() => {
     let cancelado = false;
     listarTiposDependenciaGestor().then((res) => {
@@ -139,6 +146,14 @@ export default function GanttElementDetailView() {
         mapa[v.codigo] = v.alias || v.nombre;
       }
       setTiposDepMap((prev) => ({ ...prev, ...mapa }));
+    });
+    listarEstadosEntregableGestor().then((res) => {
+      if (cancelado || res.estado !== 'lista') return;
+      const mapa: Record<string, string> = {};
+      for (const v of res.valores) {
+        mapa[v.codigo] = v.alias || v.nombre;
+      }
+      setEstadosEntregableMap((prev) => ({ ...prev, ...mapa }));
     });
     return () => { cancelado = true; };
   }, []);
@@ -445,10 +460,16 @@ export default function GanttElementDetailView() {
         )}
         {(item.deliverables || []).map((d: DeliverableItem) => {
           const Icon = DELIVERABLE_ICONS[d.type] || FileText;
+          const estCod = d.estadoCodigo || 'pendiente';
+          const estNombre = estadosEntregableMap[estCod] || 'Pendiente';
+          const estClass = estCod === 'aprobado' || estCod === 'completado' ? 'complete' : estCod === 'en_proceso' ? 'progress' : estCod === 'rechazado' ? 'late' : 'pending';
           return (
             <article key={d.id} className="gantt-element-row-item">
               <div><b><Icon size={15} /> {d.name}</b><span>{d.type === 'link' ? 'Enlace de referencia' : 'Documento / evidencia del entregable'}</span></div>
-              {d.url && <a href={d.url} target="_blank" rel="noreferrer" className="btn secondary" onClick={(e) => e.stopPropagation()}>Abrir</a>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className={`status ${estClass}`}>{estNombre}</span>
+                {d.url && <a href={d.url} target="_blank" rel="noreferrer" className="btn secondary" onClick={(e) => e.stopPropagation()}>Abrir</a>}
+              </div>
             </article>
           );
         })}

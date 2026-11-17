@@ -56,6 +56,10 @@ export interface DeliverableItem {
   id: string;
   name: string;
   type: DeliverableFormat;
+  /** Código estable del catálogo gp_tipos_entregable_c (ej. GEN-001). */
+  tipoCodigo?: string | undefined;
+  /** Código estable del catálogo gp_estados_entregable_c (pendiente, en_proceso, aprobado, rechazado, completado). */
+  estadoCodigo?: string | undefined;
   url?: string | undefined;
   fileName?: string;
 }

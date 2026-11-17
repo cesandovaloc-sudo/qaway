@@ -1,4 +1,5 @@
 import { GanttEditorDrawer } from './GanttEditorDrawer';
+import DeliverableCellPopover from '../../components/DeliverableCellPopover';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
@@ -689,7 +690,7 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 // Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
-const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'deliverable', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'region', 'actualEnd', 'actions'];
+const LISTA_PRESET_COLS: ColKey[] = ['code', 'name', 'kind', 'deliverable', 'start', 'end', 'duration', 'progress', 'status', 'region', 'actualEnd', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -2552,6 +2553,11 @@ export default function CronogramaGanttView({
   const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
 
   // Columnas dinámicas estilo Notion (matriz de base de datos extendible)
+  interface CustomColOption {
+    label: string;
+    color: string;
+  }
+
   interface CustomColDef {
     key: string;
     label: string;
@@ -2560,7 +2566,18 @@ export default function CronogramaGanttView({
     showInList?: boolean;
     appliesTo?: 'all' | 'hitos' | 'subprocesos';
     encapsular?: boolean;
+    badgeStyle?: 'dot' | 'solid';
+    options?: CustomColOption[];
   }
+
+  const DEFAULT_SELECT_OPTIONS: CustomColOption[] = [
+    { label: 'Alta', color: '#ef4444' },
+    { label: 'Media', color: '#f59e0b' },
+    { label: 'Baja', color: '#16a34a' },
+    { label: 'Urgente', color: '#dc2626' },
+    { label: 'Revisión', color: '#2563eb' },
+    { label: 'Aprobado', color: '#059669' },
+  ];
 
   const [customCols, setCustomCols] = useState<CustomColDef[]>(() => {
     try {
@@ -2627,7 +2644,95 @@ export default function CronogramaGanttView({
   const [newColRequired, setNewColRequired] = useState(false);
   const [newColShowInList, setNewColShowInList] = useState(true);
   const [newColEncapsular, setNewColEncapsular] = useState(false);
+  const [newColBadgeStyle, setNewColBadgeStyle] = useState<'dot' | 'solid'>('solid');
+  const [newColOptions, setNewColOptions] = useState<CustomColOption[]>([
+    { label: 'Alta', color: '#ef4444' },
+    { label: 'Media', color: '#f59e0b' },
+    { label: 'Baja', color: '#16a34a' },
+  ]);
+  const [newColOptInput, setNewColOptInput] = useState('');
+  const [newColOptColor, setNewColOptColor] = useState('#2563eb');
   const [newColAppliesTo, setNewColAppliesTo] = useState<'all' | 'hitos' | 'subprocesos'>('all');
+
+  const [badgeStyles, setBadgeStyles] = useState<Record<string, 'dot' | 'solid'>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(uiKey('col-badge-styles-v1')) || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const DEFAULT_STATUS_COLORS: Record<string, string> = {
+    Pendiente: '#64748b',
+    'En proceso': '#f59e0b',
+    'En curso': '#0066ff',
+    'Con retraso': '#ef4444',
+    Completado: '#16a34a',
+    Cumple: '#10b981',
+  };
+
+  const DEFAULT_KIND_COLORS: Record<string, string> = {
+    Componente: '#2563eb',
+    Producto: '#d97706',
+    'Paquete de Trabajo': '#0284c7',
+    Hito: '#7c3aed',
+  };
+
+  const [colOptionColors, setColOptionColors] = useState<Record<string, Record<string, string>>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(uiKey('col-option-colors-v1')) || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const handleUpdateOptionColor = useCallback((columnId: string, optionLabel: string, color: string) => {
+    setColOptionColors((prev) => {
+      const next = {
+        ...prev,
+        [columnId]: {
+          ...(prev[columnId] || {}),
+          [optionLabel]: color,
+        },
+      };
+      try {
+        localStorage.setItem(uiKey('col-option-colors-v1'), JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    setCustomCols((prev) => {
+      const idx = prev.findIndex((c) => c.key === columnId);
+      if (idx === -1) return prev;
+      const target = prev[idx];
+      const baseOpts = target.options && target.options.length > 0 ? target.options : DEFAULT_SELECT_OPTIONS;
+      const nextOpts = baseOpts.map((o) => (o.label === optionLabel ? { ...o, color } : o));
+      const next = prev.map((c, i) => (i === idx ? { ...c, options: nextOpts } : c));
+      try {
+        localStorage.setItem(uiKey('custom-cols-v1'), JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const handleChangeBadgeStyle = useCallback((columnId: string, style: 'dot' | 'solid') => {
+    setBadgeStyles((prev) => {
+      const next = { ...prev, [columnId]: style };
+      try {
+        localStorage.setItem(uiKey('col-badge-styles-v1'), JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const handleUpdateSelectOptions = useCallback((columnId: string, options: CustomColOption[]) => {
+    setCustomCols((prev) => {
+      const next = prev.map((c) => (c.key === columnId ? { ...c, options } : c));
+      try {
+        localStorage.setItem(uiKey('custom-cols-v1'), JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const handleCreateCustomCol = () => {
     if (!newColLabel.trim()) return;
@@ -2639,8 +2744,12 @@ export default function CronogramaGanttView({
       required: newColRequired,
       showInList: newColShowInList,
       appliesTo: newColAppliesTo,
-      encapsular: newColEncapsular,
+      encapsular: newColEncapsular || (newColType === 'select' && newColBadgeStyle === 'solid'),
+      ...(newColType === 'select' ? { badgeStyle: newColBadgeStyle, options: newColOptions } : {}),
     };
+    if (newColType === 'select') {
+      handleChangeBadgeStyle(key, newColBadgeStyle);
+    }
     const updated = [...customCols, newCol];
     setCustomCols(updated);
     try {
@@ -2648,7 +2757,7 @@ export default function CronogramaGanttView({
     } catch {}
 
     const isLista = viewMode === 'lista';
-    const storageKey = isLista ? uiKey('visible-cols-lista-v4') : uiKey('visible-cols-gantt-v3');
+    const storageKey = isLista ? uiKey('visible-cols-lista-v5') : uiKey('visible-cols-gantt-v3');
 
     setVisibleCols((prev) => {
       const next = [...prev, key as ColKey];
@@ -2672,6 +2781,13 @@ export default function CronogramaGanttView({
     setNewColRequired(false);
     setNewColShowInList(true);
     setNewColEncapsular(false);
+    setNewColBadgeStyle('solid');
+    setNewColOptions([
+      { label: 'Alta', color: '#ef4444' },
+      { label: 'Media', color: '#f59e0b' },
+      { label: 'Baja', color: '#16a34a' },
+    ]);
+    setNewColOptInput('');
     setNewColAppliesTo('all');
     setNewColModalOpen(false);
     notify(`Campo personalizado "${newCol.label}" creado con éxito`);
@@ -2706,12 +2822,12 @@ export default function CronogramaGanttView({
       return ['name'];
     }
     try {
-      const storageKey = uiKey('visible-cols-lista-v4');
+      const storageKey = uiKey('visible-cols-lista-v5');
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
       if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
-        const canonicalPart = CANONICAL_COLS.filter((k) => saved.includes(k));
-        const customPart = saved.filter((k) => typeof k === 'string' && k.startsWith('c_'));
-        return [...canonicalPart, ...customPart] as ColKey[];
+        const validSet = new Set<string>(CANONICAL_COLS);
+        const ordered = saved.filter((k) => typeof k === 'string' && (validSet.has(k) || k.startsWith('c_')));
+        if (ordered.length > 0) return ordered as ColKey[];
       }
     } catch {
       /* almacenamiento no disponible */
@@ -2727,7 +2843,7 @@ export default function CronogramaGanttView({
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem(uiKey('visible-cols-lista-v4'), JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v5'), JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
         localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
@@ -2747,7 +2863,7 @@ export default function CronogramaGanttView({
     if (viewMode === prevViewModeRef.current) return;
     try {
       if (prevViewModeRef.current === 'lista') {
-        localStorage.setItem(uiKey('visible-cols-lista-v4'), JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v5'), JSON.stringify(visibleCols));
       } else if (prevViewModeRef.current === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
         localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
@@ -2762,7 +2878,7 @@ export default function CronogramaGanttView({
   useEffect(() => {
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
-        localStorage.setItem(uiKey('visible-cols-lista-v4'), JSON.stringify(visibleCols));
+        localStorage.setItem(uiKey('visible-cols-lista-v5'), JSON.stringify(visibleCols));
       } else if (viewMode === 'gantt' && !visibleCols.includes('code') && visibleCols.length <= 6) {
         localStorage.setItem(uiKey('visible-cols-gantt-v3'), JSON.stringify(visibleCols));
       }
@@ -2863,7 +2979,7 @@ export default function CronogramaGanttView({
     if (headScrollRef.current) headScrollRef.current.scrollLeft = 0;
 
     try {
-      const storageKey = isLista ? uiKey('visible-cols-lista-v4') : uiKey('visible-cols-gantt-v3');
+      const storageKey = isLista ? uiKey('visible-cols-lista-v5') : uiKey('visible-cols-gantt-v3');
       localStorage.setItem(storageKey, JSON.stringify(pristineCols));
       localStorage.setItem(uiKey('gantt-cols-v5'), JSON.stringify(calibratedWidths));
     } catch {
@@ -3192,28 +3308,76 @@ export default function CronogramaGanttView({
     notify('Propiedad eliminada');
   }, [recordColumnChange, customCols, notify]);
 
-  const renderColumnHeaderMenu = (columnId: string, btnClass = 'th-action-btn') => (
-    <ColumnHeaderMenu
-      engine={engine}
-      columnId={columnId}
-      buttonClassName={btnClass}
-      onHideColumn={(id) => toggleColVisibility(id as ColKey)}
-      onFreezeColumn={handleFreezeColumn}
-      isFrozen={frozenCols.has(columnId)}
-      onRenameColumn={handleRenameColumn}
-      onChangeType={handleChangeType}
-      graphFormat={percentGraphFormats[columnId] || 'bar'}
-      onChangeGraphFormat={handleChangeGraphFormat}
-      onToggleWrap={handleToggleWrap}
-      isWrapped={wrappedCols.has(columnId)}
-      onCalculate={handleCalculate}
-      activeCalculation={colCalculations[columnId]}
-      onInsertLeft={(id) => handleInsertColumn(id, false)}
-      onInsertRight={(id) => handleInsertColumn(id, true)}
-      onDuplicate={handleDuplicateColumn}
-      onDelete={handleDeleteColumn}
-    />
-  );
+  const handleMoveColumn = useCallback((columnId: string, direction: 'left' | 'right') => {
+    setVisibleCols((prev) => {
+      const idx = prev.indexOf(columnId as ColKey);
+      if (idx === -1) return prev;
+      const targetIdx = direction === 'left' ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= prev.length) return prev;
+      const targetKey = prev[targetIdx];
+      if (targetKey === 'code' || targetKey === 'name') return prev;
+      const next = [...prev];
+      const [moved] = next.splice(idx, 1);
+      next.splice(targetIdx, 0, moved);
+      const isLista = viewMode === 'lista';
+      const storageKey = isLista ? uiKey('visible-cols-lista-v5') : uiKey('visible-cols-gantt-v3');
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, [viewMode]);
+
+  const renderColumnHeaderMenu = (columnId: string, btnClass = 'th-action-btn') => {
+    const customCol = customCols.find((c) => c.key === columnId);
+    const resolvedSelectOptions =
+      columnId === 'status'
+        ? STATUS_FLOW.map((s) => ({
+            label: s,
+            color: colOptionColors['status']?.[s] || DEFAULT_STATUS_COLORS[s] || '#64748b',
+          }))
+        : columnId === 'kind'
+        ? ['Componente', 'Producto', 'Paquete de Trabajo', 'Hito'].map((k) => ({
+            label: k,
+            color: colOptionColors['kind']?.[k] || DEFAULT_KIND_COLORS[k] || '#2563eb',
+          }))
+        : customCol
+        ? (customCol.options || DEFAULT_SELECT_OPTIONS).map((o) => ({
+            ...o,
+            color: colOptionColors[columnId]?.[o.label] || o.color,
+          }))
+        : undefined;
+
+    return (
+      <ColumnHeaderMenu
+        engine={engine}
+        columnId={columnId}
+        buttonClassName={btnClass}
+        onHideColumn={(id) => toggleColVisibility(id as ColKey)}
+        onFreezeColumn={handleFreezeColumn}
+        isFrozen={frozenCols.has(columnId)}
+        onRenameColumn={handleRenameColumn}
+        onChangeType={handleChangeType}
+        graphFormat={percentGraphFormats[columnId] || 'bar'}
+        onChangeGraphFormat={handleChangeGraphFormat}
+        badgeStyle={badgeStyles[columnId] || customCol?.badgeStyle || 'dot'}
+        onChangeBadgeStyle={handleChangeBadgeStyle}
+        selectOptions={resolvedSelectOptions}
+        onUpdateSelectOptions={customCol ? handleUpdateSelectOptions : undefined}
+        onUpdateOptionColor={handleUpdateOptionColor}
+        onToggleWrap={handleToggleWrap}
+        isWrapped={wrappedCols.has(columnId)}
+        onCalculate={handleCalculate}
+        activeCalculation={colCalculations[columnId]}
+        onInsertLeft={(id) => handleInsertColumn(id, false)}
+        onInsertRight={(id) => handleInsertColumn(id, true)}
+        onMoveLeft={(id) => handleMoveColumn(id, 'left')}
+        onMoveRight={(id) => handleMoveColumn(id, 'right')}
+        onDuplicate={handleDuplicateColumn}
+        onDelete={handleDeleteColumn}
+      />
+    );
+  };
 
   const computeColumnCalculation = useCallback((colId: string, calcId: string, rows: Item[]): string => {
     if (!rows.length) return '—';
@@ -4873,11 +5037,12 @@ export default function CronogramaGanttView({
     const customDef = customCols.find((c) => c.key === colKey);
     const defaultLabel = customDef?.label || ALL_COL_META.find((c) => c.key === colKey)?.label || colKey;
     const label = getColLabel(colKey, defaultLabel);
+    const hasActiveColState = engine.isFiltered(colKey) || engine.sortIndex(colKey) >= 0;
 
     return (
       <div key={colKey} className="th-col-header">
         <span className="th-label">{label}</span>
-        <div className="th-actions">
+        <div className={`th-actions ${hasActiveColState ? 'is-active' : ''}`}>
           <button
             type="button"
             className="th-action-btn"
@@ -5108,83 +5273,152 @@ export default function CronogramaGanttView({
     }
 
     if (colKey === 'kind') {
+      const kindLabel = getEdtNodeDisplayLabel(x, items);
+      const isSolidKind = badgeStyles['kind'] === 'solid';
+      const kindColor =
+        colOptionColors['kind']?.[kindLabel] ||
+        DEFAULT_KIND_COLORS[kindLabel] ||
+        '#0284c7';
       return (
         <div key="kind" className="kind-cell-col">
-          <span className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`}>
-            {getEdtNodeDisplayLabel(x, items)}
-          </span>
+          {isSolidKind ? (
+            <span className="status-pill-solid" style={{ background: kindColor }}>
+              <span>{kindLabel}</span>
+            </span>
+          ) : (
+            <span className={`type-text-label ${x.kind === 'hito' ? 'is-hito' : 'is-sub'}`} style={{ color: '#1e293b' }}>
+              {kindLabel}
+            </span>
+          )}
         </div>
       );
     }
 
     if (colKey === 'deliverable') {
-      const firstDeliv = x.deliverables && x.deliverables.length > 0 ? x.deliverables[0] : null;
+      const delivList = x.deliverables && x.deliverables.length > 0 ? x.deliverables : [];
+      const firstDeliv = delivList.length > 0 ? delivList[0] : null;
       const delivText = x.deliverable || firstDeliv?.name || '';
-      const delivFormat = firstDeliv?.type || 'document';
-      const DelivIcon =
-        delivFormat === 'spreadsheet'
-          ? FileSpreadsheet
-          : delivFormat === 'presentation'
-          ? Presentation
-          : delivFormat === 'link'
-          ? Link2
-          : delivFormat === 'physical'
-          ? Package
-          : FileText;
-      const delivColor =
-        delivFormat === 'spreadsheet'
-          ? '#16a34a'
-          : delivFormat === 'presentation'
-          ? '#ea580c'
-          : delivFormat === 'link'
-          ? '#7c3aed'
-          : delivFormat === 'physical'
-          ? '#d97706'
-          : '#2563eb';
+      const delivPrimary = firstDeliv?.name || delivText;
+      const delivCount = delivList.length > 0 ? delivList.length : (delivText ? 1 : 0);
+      const delivTooltip = delivList.length > 0 ? delivList.map((d) => d.name).join(' · ') : delivText;
+      const badgesToShow = delivList.length > 0
+        ? delivList.slice(0, 2)
+        : (delivText ? [{ id: `legacy-${x.id}`, name: delivText, type: 'document' as const }] : []);
+      const editingDeliv = isEditing(x, 'deliverable');
 
       return (
         <div
           key="deliverable"
           className="deliverable-cell-col editable"
-          style={{ display: 'flex', alignItems: 'center', minWidth: 0, padding: '0 8px', gap: '6px' }}
-          title={delivText || 'Clic para definir entregable oficial del EDT'}
+          style={{ position: 'relative', display: 'flex', alignItems: 'center', minWidth: 0, padding: '0 8px', gap: '7px', overflow: editingDeliv ? 'visible' : undefined, zIndex: editingDeliv ? 50 : undefined }}
+          title={delivTooltip || 'Clic para definir entregable oficial del EDT'}
           onClick={(e) => {
             e.stopPropagation();
             toggleEdit(x, 'deliverable');
           }}
         >
-          {isEditing(x, 'deliverable') ? (
-            <input
-              className="cell-editor cell-input"
-              type="text"
-              autoFocus
-              defaultValue={delivText}
-              onClick={(e) => e.stopPropagation()}
-              onBlur={(e) => {
-                const val = e.target.value.trim();
-                update(x.id, {
-                  deliverable: val,
-                  deliverables: val ? [{ id: firstDeliv?.id || `deliv-${x.id}`, name: val, type: delivFormat }] : [],
-                });
-                closeEdit();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') e.currentTarget.blur();
-                if (e.key === 'Escape') closeEdit();
-              }}
-            />
-          ) : delivText ? (
+          {delivCount > 0 ? (
             <>
-              <DelivIcon size={13} style={{ color: delivColor, flexShrink: 0 }} />
+              <div style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
+                {badgesToShow.map((itemDeliv, idx) => {
+                  const fmt = itemDeliv.type || 'document';
+                  const IconBadge =
+                    fmt === 'spreadsheet'
+                      ? FileSpreadsheet
+                      : fmt === 'presentation'
+                      ? Presentation
+                      : fmt === 'link'
+                      ? Link2
+                      : fmt === 'physical'
+                      ? Package
+                      : FileText;
+                  const colorBadge =
+                    fmt === 'spreadsheet'
+                      ? '#16a34a'
+                      : fmt === 'presentation'
+                      ? '#ea580c'
+                      : fmt === 'link'
+                      ? '#7c3aed'
+                      : fmt === 'physical'
+                      ? '#d97706'
+                      : '#2563eb';
+                  const bgBadge =
+                    fmt === 'spreadsheet'
+                      ? '#f0fdf4'
+                      : fmt === 'presentation'
+                      ? '#fff7ed'
+                      : fmt === 'link'
+                      ? '#f5f3ff'
+                      : fmt === 'physical'
+                      ? '#fffbeb'
+                      : '#eff6ff';
+                  return (
+                    <span
+                      key={itemDeliv.id || idx}
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '6px',
+                        background: bgBadge,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginLeft: idx === 0 ? 0 : '-5px',
+                        zIndex: 3 - idx,
+                        position: 'relative',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <IconBadge size={14} style={{ color: colorBadge }} strokeWidth={2} />
+                    </span>
+                  );
+                })}
+                {delivCount > 2 && (
+                  <span
+                    style={{
+                      height: '24px',
+                      minWidth: '24px',
+                      padding: '0 4px',
+                      borderRadius: '6px',
+                      background: '#f1f5f9',
+                      color: '#475569',
+                      fontSize: '10.5px',
+                      fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginLeft: '-5px',
+                      zIndex: 0,
+                      position: 'relative',
+                    }}
+                  >
+                    +{delivCount - 2}
+                  </span>
+                )}
+              </div>
               <span
                 className="cell-text"
-                style={{ fontSize: '12.5px', color: '#334155', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                style={{ fontSize: '12.5px', color: '#334155', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}
               >
-                {delivText}
+                {delivPrimary}
               </span>
             </>
           ) : (
-            <span style={{ color: '#94a3b8', fontSize: '12.5px' }}>—</span>
+            <span style={{ color: '#cbd5e1', fontSize: '12.5px' }}>—</span>
+          )}
+          {editingDeliv && (
+            <DeliverableCellPopover
+              itemId={x.id}
+              deliverables={x.deliverables}
+              deliverableText={x.deliverable}
+              onChange={(nextDeliverables, summaryText) => {
+                update(x.id, {
+                  deliverables: nextDeliverables,
+                  deliverable: summaryText,
+                });
+              }}
+              onClose={closeEdit}
+            />
           )}
         </div>
       );
@@ -5478,6 +5712,8 @@ export default function CronogramaGanttView({
     }
 
     if (colKey === 'status') {
+      const isSolidStatus = badgeStyles['status'] === 'solid';
+      const customStatusColor = colOptionColors['status']?.[x.status];
       return (
         <div
           key="status"
@@ -5490,27 +5726,41 @@ export default function CronogramaGanttView({
         >
           {isEditing(x, 'status') ? (
             <div className="cell-editor cell-pop status-pop" onClick={(e) => e.stopPropagation()}>
-              {STATUS_OPTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={s === x.status ? 'cur' : ''}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setStatusWithSync(x, s);
-                    closeEdit();
-                  }}
-                >
-                  <span className={`status-item ${STATUS_CLASS[s]}`}>
-                    <span className="status-dot" />
-                    <span className="status-label">{s}</span>
-                  </span>
-                </button>
-              ))}
+              {STATUS_OPTIONS.map((s) => {
+                const sColor = colOptionColors['status']?.[s];
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    className={s === x.status ? 'cur' : ''}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setStatusWithSync(x, s);
+                      closeEdit();
+                    }}
+                  >
+                    {isSolidStatus ? (
+                      <span className={`status-pill-solid ${STATUS_CLASS[s]}`} style={sColor ? { background: sColor } : undefined}>
+                        <span>{s}</span>
+                      </span>
+                    ) : (
+                      <span className={`status-item ${STATUS_CLASS[s]}`}>
+                        <span className="status-dot" style={sColor ? { background: sColor } : undefined} />
+                        <span className="status-label">{s}</span>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
+          ) : isSolidStatus ? (
+            <span className={`status-pill-solid ${STATUS_CLASS[x.status]}`} style={customStatusColor ? { background: customStatusColor } : undefined}>
+              <span>{x.status}</span>
+              <ChevronDown size={11} />
+            </span>
           ) : (
             <span className={`status-item ${STATUS_CLASS[x.status]}`}>
-              <span className="status-dot" />
+              <span className="status-dot" style={customStatusColor ? { background: customStatusColor } : undefined} />
               <span className="status-label">{x.status}</span>
             </span>
           )}
@@ -5954,22 +6204,40 @@ export default function CronogramaGanttView({
               onBlur={closeEdit}
             />
           ) : effectiveType === 'select' ? (
-            <div className="cell-editor cell-pop" onClick={(e) => e.stopPropagation()} style={{ padding: 6, minWidth: 120 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>Etiqueta rápida</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {['Alta', 'Media', 'Baja', 'Urgente', 'Revisión', 'Aprobado'].map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    style={{ fontSize: 10.5, padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', background: cellVal === tag ? '#dbeafe' : '#f8fafc', cursor: 'pointer' }}
-                    onClick={() => {
-                      update(x.id, { [cCol.key]: tag } as any);
-                      closeEdit();
-                    }}
-                  >
-                    {tag}
-                  </button>
-                ))}
+            <div className="cell-editor cell-pop" onClick={(e) => e.stopPropagation()} style={{ padding: 6, minWidth: 136 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 5 }}>Seleccionar opción</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {(cCol.options && cCol.options.length > 0 ? cCol.options : DEFAULT_SELECT_OPTIONS).map((opt) => {
+                  const isSolidOpt = (badgeStyles[cCol.key] || cCol.badgeStyle || (cCol.encapsular ? 'solid' : 'dot')) === 'solid';
+                  return (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontSize: 11.5,
+                        fontWeight: 600,
+                        padding: isSolidOpt ? '4px 9px' : '4px 7px',
+                        borderRadius: 6,
+                        border: isSolidOpt ? 'none' : '1px solid #e2e8f0',
+                        background: isSolidOpt ? opt.color : (cellVal === opt.label ? '#eff6ff' : '#ffffff'),
+                        color: isSolidOpt ? '#ffffff' : '#1e293b',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        update(x.id, { [cCol.key]: opt.label } as any);
+                        closeEdit();
+                      }}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        {!isSolidOpt && <span style={{ width: 7.5, height: 7.5, borderRadius: '50%', background: opt.color }} />}
+                        <span>{opt.label}</span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : (
@@ -5992,12 +6260,24 @@ export default function CronogramaGanttView({
         ) : effectiveType === 'percent' ? (
           renderProgressVisual(Number(cellVal) || 0, 'blue', cCol.key)
         ) : effectiveType === 'select' ? (
-          cellVal ? (
-            <span style={{ fontSize: 11.5, fontWeight: 500, background: '#f1f5f9', color: '#1e293b', padding: '2px 8px', borderRadius: 4, border: '1px solid #e2e8f0' }}>
-              {cellVal}
-            </span>
-          ) : (
-            <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>
+          cellVal ? (() => {
+            const opts = cCol.options && cCol.options.length > 0 ? cCol.options : DEFAULT_SELECT_OPTIONS;
+            const matchedOpt = opts.find((o) => o.label.toLowerCase() === String(cellVal).toLowerCase());
+            const optColor = matchedOpt?.color || '#2563eb';
+            const isSolid = (badgeStyles[cCol.key] || cCol.badgeStyle || (cCol.encapsular ? 'solid' : 'dot')) === 'solid';
+            return isSolid ? (
+              <span className="status-pill-solid" style={{ background: optColor }}>
+                <span>{cellVal}</span>
+                <ChevronDown size={11} />
+              </span>
+            ) : (
+              <span className="status-item">
+                <span className="status-dot" style={{ background: optColor }} />
+                <span className="status-label" style={{ color: '#1e293b', fontWeight: 500 }}>{cellVal}</span>
+              </span>
+            );
+          })() : (
+            <span style={{ color: '#cbd5e1', fontSize: 12 }}>—</span>
           )
         ) : effectiveType === 'date' ? (
           <span style={{ fontSize: 12, color: '#334155' }}>
@@ -7769,11 +8049,19 @@ export default function CronogramaGanttView({
                     </button>
                   </div>
                   <div className="cols-pop-list">
-                    {[
-                      ...ALL_COL_META,
-                      ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
-                    ].map((col) => {
+                    {(() => {
+                      const allMeta = [
+                        ...ALL_COL_META,
+                        ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
+                      ];
+                      const visibleOrdered = visibleCols
+                        .map((k) => allMeta.find((m) => m.key === k))
+                        .filter((m): m is typeof allMeta[number] => Boolean(m));
+                      const hiddenRemaining = allMeta.filter((m) => !visibleCols.includes(m.key));
+                      return [...visibleOrdered, ...hiddenRemaining];
+                    })().map((col) => {
                       const isVisible = visibleCols.includes(col.key);
+                      const isLocked = col.fixed || col.key === 'code' || col.key === 'name';
                       return (
                         <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
                           <input
@@ -7785,6 +8073,33 @@ export default function CronogramaGanttView({
                           <span className="col-option-name">{col.label}</span>
                           {col.fixed ? (
                             <small className="fixed-pill">Fija</small>
+                          ) : isVisible && !isLocked ? (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 2, marginLeft: 'auto' }} onClick={(e) => e.preventDefault()}>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleMoveColumn(col.key, 'left');
+                                }}
+                                title="Mover columna hacia la izquierda (arriba)"
+                                style={{ border: '1px solid #e2e8f0', background: '#fff', borderRadius: 4, width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#475569' }}
+                              >
+                                <ChevronUp size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleMoveColumn(col.key, 'right');
+                                }}
+                                title="Mover columna hacia la derecha (abajo)"
+                                style={{ border: '1px solid #e2e8f0', background: '#fff', borderRadius: 4, width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#475569' }}
+                              >
+                                <ChevronDown size={12} />
+                              </button>
+                            </div>
                           ) : (
                             <GripVertical size={13} className="col-grip-icon" />
                           )}
@@ -7829,7 +8144,7 @@ export default function CronogramaGanttView({
                         const isLista = viewMode === 'lista';
                         const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
                         setVisibleCols(defaultCols);
-                        const storageKey = isLista ? uiKey('visible-cols-lista-v4') : uiKey('visible-cols-gantt-v3');
+                        const storageKey = isLista ? uiKey('visible-cols-lista-v5') : uiKey('visible-cols-gantt-v3');
                         try {
                           localStorage.setItem(storageKey, JSON.stringify(defaultCols));
                         } catch {}
@@ -8105,6 +8420,7 @@ export default function CronogramaGanttView({
           {/* Presentación Oficial Aprobada: Gantt y Lista comparten 100% el mismo tablero unificado */}
           {(viewMode === 'gantt' || viewMode === 'lista' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' || perspective === 'equipo' ? 'view-lista-fullwidth' : ''}`}>
+              <div className="gantt-table-card">
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>
             <div
@@ -8688,6 +9004,7 @@ export default function CronogramaGanttView({
               </svg>
             )}
           </div>
+              </div>
 
           {/* Tooltip Minimalista estilo Módulo Reportes (1-2 datos limpios, cero sobrecarga) */}
           {hoveredTask && !resizingTaskId && (
@@ -9741,6 +10058,116 @@ export default function CronogramaGanttView({
                     <span>Encapsular valores (tarjeta/etiqueta)</span>
                   </label>
                 </div>
+
+                {newColType === 'select' && (
+                  <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span className="custom-col-label" style={{ margin: 0 }}>Estilo visual de opciones</span>
+                      <div style={{ display: 'inline-flex', gap: 6 }}>
+                        <button
+                          type="button"
+                          onClick={() => setNewColBadgeStyle('solid')}
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: '3px 9px',
+                            borderRadius: 6,
+                            border: newColBadgeStyle === 'solid' ? '1.5px solid #0066ff' : '1px solid #cbd5e1',
+                            background: newColBadgeStyle === 'solid' ? '#ef4444' : '#ffffff',
+                            color: newColBadgeStyle === 'solid' ? '#ffffff' : '#475569',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Cápsula sólida
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewColBadgeStyle('dot')}
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: '3px 9px',
+                            borderRadius: 6,
+                            border: newColBadgeStyle === 'dot' ? '1.5px solid #0066ff' : '1px solid #cbd5e1',
+                            background: '#ffffff',
+                            color: '#334155',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Punto y texto
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="custom-col-label" style={{ marginBottom: 6 }}>Opciones configuradas (colores vivos)</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                      {newColOptions.map((opt, idx) => (
+                        <span
+                          key={`${opt.label}-${idx}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            padding: '3px 8px',
+                            borderRadius: 6,
+                            background: newColBadgeStyle === 'solid' ? opt.color : '#ffffff',
+                            color: newColBadgeStyle === 'solid' ? '#ffffff' : '#1e293b',
+                            border: newColBadgeStyle === 'solid' ? 'none' : '1px solid #cbd5e1',
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                          }}
+                        >
+                          {newColBadgeStyle === 'dot' && <span style={{ width: 7, height: 7, borderRadius: '50%', background: opt.color }} />}
+                          <span>{opt.label}</span>
+                          <button
+                            type="button"
+                            onClick={() => setNewColOptions((prev) => prev.filter((_, i) => i !== idx))}
+                            style={{ border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0, opacity: 0.85 }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <input
+                        type="color"
+                        value={newColOptColor}
+                        onChange={(e) => setNewColOptColor(e.target.value)}
+                        style={{ width: 26, height: 26, padding: 0, border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer' }}
+                        title="Color de la opción"
+                      />
+                      <input
+                        type="text"
+                        className="custom-col-input"
+                        placeholder="Agregar opción (ej. Crítico)..."
+                        value={newColOptInput}
+                        onChange={(e) => setNewColOptInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && newColOptInput.trim()) {
+                            e.preventDefault();
+                            setNewColOptions((prev) => [...prev, { label: newColOptInput.trim(), color: newColOptColor }]);
+                            setNewColOptInput('');
+                          }
+                        }}
+                        style={{ flex: 1, height: 28, fontSize: 12 }}
+                      />
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        style={{ minHeight: 28, padding: '0 10px', fontSize: 11.5 }}
+                        onClick={() => {
+                          if (!newColOptInput.trim()) return;
+                          setNewColOptions((prev) => [...prev, { label: newColOptInput.trim(), color: newColOptColor }]);
+                          setNewColOptInput('');
+                        }}
+                      >
+                        Agregar
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="custom-col-radio-section">
                   <label className="custom-col-label">

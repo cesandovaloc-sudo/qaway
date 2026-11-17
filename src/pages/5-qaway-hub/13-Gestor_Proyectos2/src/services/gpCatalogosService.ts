@@ -34,14 +34,20 @@ export const TABLA_TIPOS_PROYECTO = 'gp_tipos_proyecto_c';
 export const TABLA_ESTADOS_EJECUCION = 'gp_estados_ejecucion_c';
 export const TABLA_PRIORIDADES = 'gp_prioridades_c';
 export const TABLA_TIPOS_DEPENDENCIA = 'gp_tipos_dependencia_c';
+export const TABLA_CATEGORIAS_ENTREGABLE = 'gp_categorias_entregable_c';
+export const TABLA_TIPOS_ENTREGABLE = 'gp_tipos_entregable_c';
+export const TABLA_ESTADOS_ENTREGABLE = 'gp_estados_entregable_c';
 
-/** Columnas por tabla (no todas comparten esquema: nivel solo existe en prioridades, alias en dependencias). */
+/** Columnas por tabla (no todas comparten esquema: nivel solo existe en prioridades, alias en dependencias/entregables). */
 const COLUMNAS_POR_TABLA: Record<string, string> = {
   [TABLA_PRIORIDADES]: 'codigo,nombre,nivel,orden,activo',
   [TABLA_ESTADOS_PROYECTO]: 'codigo,nombre,orden,activo',
   [TABLA_TIPOS_PROYECTO]: 'codigo,nombre,orden,activo',
   [TABLA_ESTADOS_EJECUCION]: 'codigo,nombre,orden,activo',
   [TABLA_TIPOS_DEPENDENCIA]: 'codigo,nombre,alias,orden,activo',
+  [TABLA_CATEGORIAS_ENTREGABLE]: 'codigo,nombre,alias,icono,alcance,orden,activo',
+  [TABLA_TIPOS_ENTREGABLE]: 'codigo,categoria_codigo,nombre,alias,icono,orden,activo',
+  [TABLA_ESTADOS_ENTREGABLE]: 'codigo,nombre,alias,icono,orden,activo',
 };
 
 /** Valor de catálogo normalizado para la UI (solo lo que un selector necesita). */
@@ -52,6 +58,12 @@ export interface ValorCatalogo {
   nombre: string;
   /** Alias amigable en español (ej. en gp_tipos_dependencia_c: 'Fin a comienzo'). */
   alias?: string | null;
+  /** Icono Lucide en kebab-case (usado en categorías/tipos de entregable). */
+  icono?: string | null;
+  /** FK a categoría padre (usado en gp_tipos_entregable_c). */
+  categoriaCodigo?: string | null;
+  /** Alcance de la categoría (Transversal / Proyectos / Sectorial). */
+  alcance?: string | null;
   /** Peso (solo gp_prioridades_c tiene columna nivel; seed 0001: baja=1..urgente=4). */
   nivel: number | null;
   /** Orden de presentación (default 0 en 0001). */
@@ -90,6 +102,9 @@ export function evaluarFilasCatalogo(filas: unknown, error: string | null): Resu
       codigo: r.codigo,
       nombre: r.nombre,
       alias: typeof r.alias === 'string' ? r.alias : null,
+      icono: typeof r.icono === 'string' ? r.icono : null,
+      categoriaCodigo: typeof r.categoria_codigo === 'string' ? r.categoria_codigo : null,
+      alcance: typeof r.alcance === 'string' ? r.alcance : null,
       nivel: typeof r.nivel === 'number' ? r.nivel : null,
       orden: typeof r.orden === 'number' ? r.orden : null,
     });
@@ -202,4 +217,19 @@ export function listarEstadosEjecucionGestor(): Promise<ResultadoCatalogo> {
 /** Atajo: tipos de dependencia activos (gp_tipos_dependencia_c). */
 export function listarTiposDependenciaGestor(): Promise<ResultadoCatalogo> {
   return listarCatalogo(TABLA_TIPOS_DEPENDENCIA);
+}
+
+/** Atajo: categorías de entregable activas (gp_categorias_entregable_c, ordenadas con GEN primero). */
+export function listarCategoriasEntregableGestor(): Promise<ResultadoCatalogo> {
+  return listarCatalogo(TABLA_CATEGORIAS_ENTREGABLE);
+}
+
+/** Atajo: tipos de entregable activos (gp_tipos_entregable_c). */
+export function listarTiposEntregableGestor(): Promise<ResultadoCatalogo> {
+  return listarCatalogo(TABLA_TIPOS_ENTREGABLE);
+}
+
+/** Atajo: estados de entregable activos (gp_estados_entregable_c). */
+export function listarEstadosEntregableGestor(): Promise<ResultadoCatalogo> {
+  return listarCatalogo(TABLA_ESTADOS_ENTREGABLE);
 }

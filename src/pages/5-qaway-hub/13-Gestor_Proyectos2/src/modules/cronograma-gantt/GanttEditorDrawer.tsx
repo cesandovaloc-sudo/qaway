@@ -43,6 +43,8 @@ import { getDeviationDays } from './scheduleMetrics';
 import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, EDT_NODE_LABELS, isContainerEdtType, normalizeEdtType, type EdtNodeType } from './edtPmbokModel';
 import { getLinkedTasksSummary } from '../cronograma-core/wbsHierarchy';
 import TipoDependenciaCatalogoSelect from '../../components/TipoDependenciaCatalogoSelect';
+import TipoEntregableCatalogoSelect from '../../components/TipoEntregableCatalogoSelect';
+import EstadoEntregableCatalogoSelect from '../../components/EstadoEntregableCatalogoSelect';
 
 import {
   REGIONES_PROYECTO,
@@ -276,6 +278,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [showAddDeliverable, setShowAddDeliverable] = useState(false);
   const [newDelivName, setNewDelivName] = useState('');
   const [newDelivType, setNewDelivType] = useState<DeliverableFormat>('document');
+  const [newDelivTipoCodigo, setNewDelivTipoCodigo] = useState<string>('');
   const [newDelivUrl, setNewDelivUrl] = useState('');
   const [attachment, setAttachment] = useState('');
 
@@ -650,6 +653,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
     });
     setShowAddDeliverable(false);
     setNewDelivName('');
+    setNewDelivTipoCodigo('');
     setNewDelivUrl('');
     notify(`Entregable "${deliv.name}" agregado`);
   };
@@ -1262,6 +1266,15 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                           );
                         })}
                       </div>
+                      <TipoEntregableCatalogoSelect
+                        value={newDelivTipoCodigo}
+                        onChange={(sel) => {
+                          setNewDelivTipoCodigo(sel?.codigo || '');
+                          if (sel && !newDelivName.trim()) {
+                            setNewDelivName(sel.nombre);
+                          }
+                        }}
+                      />
                       <input
                         value={newDelivName}
                         onChange={(e) => setNewDelivName(e.target.value)}
@@ -1337,6 +1350,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                             handleAddDeliverable({
                               name: newDelivName.trim(),
                               type: newDelivType,
+                              tipoCodigo: newDelivTipoCodigo || undefined,
                               url: newDelivUrl.trim() || undefined,
                             });
                           }}
@@ -1428,6 +1442,16 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                             </div>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <EstadoEntregableCatalogoSelect
+                              value={deliv.estadoCodigo || 'pendiente'}
+                              onChange={(nuevoEstado) => {
+                                const currentList = getActiveDeliverables(activeItem);
+                                const updated = currentList.map((d) =>
+                                  d.id === deliv.id ? { ...d, estadoCodigo: nuevoEstado } : d
+                                );
+                                updateDraft({ deliverables: updated });
+                              }}
+                            />
                             <button
                               type="button"
                               onClick={() => handleOpenDeliverable(deliv)}

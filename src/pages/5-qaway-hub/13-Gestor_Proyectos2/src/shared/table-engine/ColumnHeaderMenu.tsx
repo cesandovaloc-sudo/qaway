@@ -406,12 +406,19 @@ interface ColumnHeaderMenuProps<R> {
   onChangeType?: ((columnId: string, newType: string) => void) | undefined;
   graphFormat?: 'bar' | 'ring' | 'number' | undefined;
   onChangeGraphFormat?: ((columnId: string, format: 'bar' | 'ring' | 'number') => void) | undefined;
+  badgeStyle?: 'dot' | 'solid' | undefined;
+  onChangeBadgeStyle?: ((columnId: string, style: 'dot' | 'solid') => void) | undefined;
+  selectOptions?: { label: string; color: string }[] | undefined;
+  onUpdateSelectOptions?: ((columnId: string, options: { label: string; color: string }[]) => void) | undefined;
+  onUpdateOptionColor?: ((columnId: string, optionLabel: string, color: string) => void) | undefined;
   onToggleWrap?: ((columnId: string) => void) | undefined;
   isWrapped?: boolean | undefined;
   onCalculate?: ((columnId: string, calculation: string) => void) | undefined;
   activeCalculation?: string | undefined;
   onInsertLeft?: ((columnId: string) => void) | undefined;
   onInsertRight?: ((columnId: string) => void) | undefined;
+  onMoveLeft?: ((columnId: string) => void) | undefined;
+  onMoveRight?: ((columnId: string) => void) | undefined;
   onDuplicate?: ((columnId: string) => void) | undefined;
   onDelete?: ((columnId: string) => void) | undefined;
 }
@@ -430,12 +437,19 @@ export function ColumnHeaderMenu<R>({
   onChangeType,
   graphFormat,
   onChangeGraphFormat,
+  badgeStyle,
+  onChangeBadgeStyle,
+  selectOptions,
+  onUpdateSelectOptions,
+  onUpdateOptionColor,
   onToggleWrap,
   isWrapped,
   onCalculate,
   activeCalculation,
   onInsertLeft,
   onInsertRight,
+  onMoveLeft,
+  onMoveRight,
   onDuplicate,
   onDelete,
 }: ColumnHeaderMenuProps<R>) {
@@ -548,12 +562,19 @@ export function ColumnHeaderMenu<R>({
               onChangeType={onChangeType}
               graphFormat={graphFormat}
               onChangeGraphFormat={onChangeGraphFormat}
+              badgeStyle={badgeStyle}
+              onChangeBadgeStyle={onChangeBadgeStyle}
+              selectOptions={selectOptions}
+              onUpdateSelectOptions={onUpdateSelectOptions}
+              onUpdateOptionColor={onUpdateOptionColor}
               onToggleWrap={onToggleWrap}
               isWrapped={isWrapped}
               onCalculate={onCalculate}
               activeCalculation={activeCalculation}
               onInsertLeft={onInsertLeft}
               onInsertRight={onInsertRight}
+              onMoveLeft={onMoveLeft}
+              onMoveRight={onMoveRight}
               onDuplicate={onDuplicate}
               onDelete={onDelete}
             />
@@ -575,12 +596,19 @@ function MenuBody<R>({
   onChangeType,
   graphFormat,
   onChangeGraphFormat,
+  badgeStyle,
+  onChangeBadgeStyle,
+  selectOptions,
+  onUpdateSelectOptions,
+  onUpdateOptionColor,
   onToggleWrap,
   isWrapped,
   onCalculate,
   activeCalculation,
   onInsertLeft,
   onInsertRight,
+  onMoveLeft,
+  onMoveRight,
   onDuplicate,
   onDelete,
 }: {
@@ -594,12 +622,19 @@ function MenuBody<R>({
   onChangeType?: ((columnId: string, newType: string) => void) | undefined;
   graphFormat?: 'bar' | 'ring' | 'number' | undefined;
   onChangeGraphFormat?: ((columnId: string, format: 'bar' | 'ring' | 'number') => void) | undefined;
+  badgeStyle?: 'dot' | 'solid' | undefined;
+  onChangeBadgeStyle?: ((columnId: string, style: 'dot' | 'solid') => void) | undefined;
+  selectOptions?: { label: string; color: string }[] | undefined;
+  onUpdateSelectOptions?: ((columnId: string, options: { label: string; color: string }[]) => void) | undefined;
+  onUpdateOptionColor?: ((columnId: string, optionLabel: string, color: string) => void) | undefined;
   onToggleWrap?: ((columnId: string) => void) | undefined;
   isWrapped?: boolean | undefined;
   onCalculate?: ((columnId: string, calculation: string) => void) | undefined;
   activeCalculation?: string | undefined;
   onInsertLeft?: ((columnId: string) => void) | undefined;
   onInsertRight?: ((columnId: string) => void) | undefined;
+  onMoveLeft?: ((columnId: string) => void) | undefined;
+  onMoveRight?: ((columnId: string) => void) | undefined;
   onDuplicate?: ((columnId: string) => void) | undefined;
   onDelete?: ((columnId: string) => void) | undefined;
 }) {
@@ -615,9 +650,15 @@ function MenuBody<R>({
   // Submenús desplegables con puente de hover seguro + anclaje por clic
   const [activeFlyout, setActiveFlyout] = useState<'filter' | 'property' | null>(null);
   const [pinnedFlyout, setPinnedFlyout] = useState<'filter' | 'property' | null>(null);
-  const [nestedFlyout, setNestedFlyout] = useState<'type' | 'calc' | 'format' | null>(null);
+  const [nestedFlyout, setNestedFlyout] = useState<'type' | 'calc' | 'format' | 'badgeStyle' | 'options' | null>(null);
   const [currentFormat, setCurrentFormat] = useState(graphFormat || 'bar');
   useEffect(() => { if (graphFormat) setCurrentFormat(graphFormat); }, [graphFormat]);
+  const [currentBadgeStyle, setCurrentBadgeStyle] = useState<'dot' | 'solid'>(badgeStyle || 'dot');
+  useEffect(() => { if (badgeStyle) setCurrentBadgeStyle(badgeStyle); }, [badgeStyle]);
+  const [newOptLabel, setNewOptLabel] = useState('');
+  const [newOptColor, setNewOptColor] = useState('#ef4444');
+  const [editingOptIdx, setEditingOptIdx] = useState<number | null>(0);
+  const [hexDraft, setHexDraft] = useState('');
   const [selectedOp, setSelectedOp] = useState<OperatorDef | null>(null);
   const [opVal, setOpVal] = useState('');
   const [opVal2, setOpVal2] = useState('');
@@ -634,6 +675,8 @@ function MenuBody<R>({
   const typeBtnRef = useRef<HTMLButtonElement>(null);
   const calcBtnRef = useRef<HTMLButtonElement>(null);
   const formatBtnRef = useRef<HTMLButtonElement>(null);
+  const badgeStyleBtnRef = useRef<HTMLButtonElement>(null);
+  const optionsBtnRef = useRef<HTMLButtonElement>(null);
 
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const nestedTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -656,7 +699,7 @@ function MenuBody<R>({
     }, 220); // 220ms de gracia para cruzar el mouse sin perder el foco
   };
 
-  const cancelCloseNested = (target: 'type' | 'calc' | 'format') => {
+  const cancelCloseNested = (target: 'type' | 'calc' | 'format' | 'badgeStyle' | 'options') => {
     if (nestedTimerRef.current) {
       clearTimeout(nestedTimerRef.current);
       nestedTimerRef.current = null;
@@ -698,7 +741,16 @@ function MenuBody<R>({
       setNestedPos(null);
       return;
     }
-    const btn = nestedFlyout === 'type' ? typeBtnRef.current : nestedFlyout === 'calc' ? calcBtnRef.current : formatBtnRef.current;
+    const btn =
+      nestedFlyout === 'type'
+        ? typeBtnRef.current
+        : nestedFlyout === 'calc'
+        ? calcBtnRef.current
+        : nestedFlyout === 'badgeStyle'
+        ? badgeStyleBtnRef.current
+        : nestedFlyout === 'options'
+        ? optionsBtnRef.current
+        : formatBtnRef.current;
     if (!btn) return;
     const r = btn.getBoundingClientRect();
     const vw = window.innerWidth;
@@ -771,6 +823,12 @@ function MenuBody<R>({
     setNestedFlyout(null);
   };
 
+  const handleSelectBadgeStyle = (style: 'dot' | 'solid') => {
+    setCurrentBadgeStyle(style);
+    onChangeBadgeStyle?.(col.id, style);
+    setNestedFlyout(null);
+  };
+
   const handleToggleWrap = () => {
     const next = !wrappedState;
     setWrappedState(next);
@@ -806,6 +864,15 @@ function MenuBody<R>({
 
   return (
     <>
+      {/* 0. Identificador visible del tipo de columna */}
+      <div className="te-prop-header" style={{ padding: '6px 10px', borderBottom: '1px solid #f1f5f9' }}>
+        <div className="te-prop-title-wrap">
+          <span className="te-prop-icon">{getPropertyIcon(currentType)}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{col.label}</span>
+        </div>
+        <span className="te-prop-type-tag">{getPropertyTypeName(currentType)}</span>
+      </div>
+
       {/* 1. Opciones de Ordenar (1 sola fila limpia) */}
       {modes.length > 0 && (
         <div className="te-section te-sortlist" role="group" aria-label="Ordenar">
@@ -887,6 +954,20 @@ function MenuBody<R>({
           </div>
         )}
 
+        {/* Acción directa: Estilo de cápsula sólida / punto en menú principal */}
+        {(currentType === 'select' || currentType === 'processState' || col.id === 'status') && onChangeBadgeStyle && (
+          <div className="te-section" style={{ paddingBottom: 0 }}>
+            <button
+              type="button"
+              className="te-row-btn"
+              onClick={() => handleSelectBadgeStyle(currentBadgeStyle === 'solid' ? 'dot' : 'solid')}
+            >
+              <Tag size={12} />
+              <span>{currentBadgeStyle === 'solid' ? 'Cambiar a punto y texto' : 'Usar cápsula sólida (colores vivos)'}</span>
+            </button>
+          </div>
+        )}
+
         {/* Desplegable de Configuración de propiedad tipo Notion */}
         <div
           className="te-submenu-item"
@@ -957,6 +1038,36 @@ function MenuBody<R>({
             <Pin size={12} />
             <span>Inmovilizar columna</span>
           </button>
+        )}
+        {(onMoveLeft || onMoveRight) && col.id !== 'code' && col.id !== 'name' && (
+          <div style={{ display: 'flex', gap: 4, padding: '2px 4px' }}>
+            {onMoveLeft && (
+              <button
+                type="button"
+                className="te-row-btn"
+                style={{ flex: 1, justifyContent: 'center', border: '1px solid #e2e8f0', borderRadius: 6 }}
+                onClick={() => {
+                  onMoveLeft(col.id);
+                }}
+              >
+                <ArrowLeft size={12} />
+                <span>Mover izq.</span>
+              </button>
+            )}
+            {onMoveRight && (
+              <button
+                type="button"
+                className="te-row-btn"
+                style={{ flex: 1, justifyContent: 'center', border: '1px solid #e2e8f0', borderRadius: 6 }}
+                onClick={() => {
+                  onMoveRight(col.id);
+                }}
+              >
+                <span>Mover der.</span>
+                <ArrowRight size={12} />
+              </button>
+            )}
+          </div>
         )}
         {engine.sort.length > 0 && (
           <button
@@ -1125,6 +1236,56 @@ function MenuBody<R>({
                 <span className="te-calc-badge">
                   {currentFormat === 'ring' ? 'Circular' : currentFormat === 'number' ? 'Número' : 'Barra'}
                 </span>
+                <ChevronRight size={12} style={{ color: '#94a3b8' }} />
+              </div>
+            </button>
+          )}
+
+          {/* Estilo de etiqueta (para Selección / Estado) › */}
+          {(currentType === 'select' || currentType === 'processState' || col.id === 'status') && onChangeBadgeStyle && (
+            <button
+              ref={badgeStyleBtnRef}
+              type="button"
+              className={`te-flyout-item ${nestedFlyout === 'badgeStyle' ? 'open' : ''}`}
+              onMouseEnter={() => cancelCloseNested('badgeStyle')}
+              onMouseLeave={scheduleCloseNested}
+              onClick={(e) => {
+                e.stopPropagation();
+                setNestedFlyout((prev) => (prev === 'badgeStyle' ? null : 'badgeStyle'));
+              }}
+            >
+              <div className="te-submenu-left">
+                <Tag size={12} />
+                <span>Estilo de etiqueta</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <span className="te-calc-badge">
+                  {currentBadgeStyle === 'solid' ? 'Cápsula sólida' : 'Punto'}
+                </span>
+                <ChevronRight size={12} style={{ color: '#94a3b8' }} />
+              </div>
+            </button>
+          )}
+
+          {/* Opciones y colores personalizables (para Estado / Selección) › */}
+          {(currentType === 'select' || currentType === 'processState' || col.id === 'status') && selectOptions && selectOptions.length > 0 && (onUpdateOptionColor || onUpdateSelectOptions) && (
+            <button
+              ref={optionsBtnRef}
+              type="button"
+              className={`te-flyout-item ${nestedFlyout === 'options' ? 'open' : ''}`}
+              onMouseEnter={() => cancelCloseNested('options')}
+              onMouseLeave={scheduleCloseNested}
+              onClick={(e) => {
+                e.stopPropagation();
+                setNestedFlyout((prev) => (prev === 'options' ? null : 'options'));
+              }}
+            >
+              <div className="te-submenu-left">
+                <Sliders size={12} />
+                <span>Opciones y colores</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <span className="te-calc-badge">{selectOptions.length}</span>
                 <ChevronRight size={12} style={{ color: '#94a3b8' }} />
               </div>
             </button>
@@ -1309,6 +1470,199 @@ function MenuBody<R>({
       )}
 
       {/* 7. Sub-flyouts anidados (Cambiar tipo / Calcular) portaleados a document.body */}
+      {nestedFlyout === 'badgeStyle' && nestedPos && createPortal(
+        <div
+          className="te-nested-flyout"
+          style={{ top: nestedPos.top, left: nestedPos.left }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseEnter={() => cancelCloseNested('badgeStyle')}
+          onMouseLeave={scheduleCloseNested}
+        >
+          <div className="te-flyout-title" style={{ padding: '3px 6px' }}>Estilo de etiqueta</div>
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => handleSelectBadgeStyle('dot')}
+          >
+            <div className="te-submenu-left">
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+              <span>Punto y texto</span>
+            </div>
+            {currentBadgeStyle !== 'solid' && <Check size={12} className="te-tick" />}
+          </button>
+          <button
+            type="button"
+            className="te-flyout-item"
+            onClick={() => handleSelectBadgeStyle('solid')}
+          >
+            <div className="te-submenu-left">
+              <span style={{ padding: '1px 6px', borderRadius: 4, background: '#ef4444', color: '#fff', fontSize: 9.5, fontWeight: 700 }}>Etiqueta</span>
+              <span>Cápsula sólida (colores vivos)</span>
+            </div>
+            {currentBadgeStyle === 'solid' && <Check size={12} className="te-tick" />}
+          </button>
+        </div>,
+        document.body
+      )}
+
+      {nestedFlyout === 'options' && nestedPos && selectOptions && (onUpdateOptionColor || onUpdateSelectOptions) && createPortal(
+        <div
+          className="te-nested-flyout"
+          style={{ top: nestedPos.top, left: nestedPos.left, minWidth: 264, maxWidth: 280, padding: 10 }}
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseEnter={() => cancelCloseNested('options')}
+          onMouseLeave={scheduleCloseNested}
+        >
+          <div className="te-flyout-title" style={{ padding: '2px 4px', marginBottom: 6 }}>
+            Opciones y colores
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 240, overflowY: 'auto', marginBottom: 8 }}>
+            {selectOptions.map((opt, idx) => {
+              const isOpenOpt = editingOptIdx === idx;
+              const VIVID_PALETTE = [
+                { name: 'Rojo', hex: '#ef4444' },
+                { name: 'Naranja', hex: '#f97316' },
+                { name: 'Ámbar', hex: '#f59e0b' },
+                { name: 'Verde', hex: '#16a34a' },
+                { name: 'Esmeralda', hex: '#10b981' },
+                { name: 'Cian', hex: '#06b6d4' },
+                { name: 'Azul', hex: '#0066ff' },
+                { name: 'Índigo', hex: '#4f46e5' },
+                { name: 'Morado', hex: '#7c3aed' },
+                { name: 'Rosa', hex: '#ec4899' },
+                { name: 'Gris', hex: '#64748b' },
+              ];
+              const applyOptColor = (hex: string) => {
+                if (onUpdateOptionColor) {
+                  onUpdateOptionColor(col.id, opt.label, hex);
+                } else if (onUpdateSelectOptions) {
+                  onUpdateSelectOptions(col.id, selectOptions.map((o, i) => (i === idx ? { ...o, color: hex } : o)));
+                }
+              };
+              return (
+                <div key={`${opt.label}-${idx}`} style={{ borderRadius: 6, background: isOpenOpt ? '#f8fafc' : 'transparent', border: isOpenOpt ? '1px solid #e2e8f0' : '1px solid transparent', padding: 3 }}>
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+                    onClick={() => {
+                      setEditingOptIdx(isOpenOpt ? null : idx);
+                      setHexDraft(opt.color);
+                    }}
+                  >
+                    <span style={{ padding: '2px 8px', borderRadius: 5, background: opt.color, color: '#ffffff', fontSize: 11, fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {opt.label}
+                    </span>
+                    <ChevronDown size={12} style={{ color: '#64748b', transform: isOpenOpt ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                    {onUpdateSelectOptions && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpdateSelectOptions(col.id, selectOptions.filter((_, i) => i !== idx));
+                        }}
+                        style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', fontSize: 13, lineHeight: 1, padding: '0 2px' }}
+                        title="Eliminar opción"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                  {isOpenOpt && (
+                    <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+                        {VIVID_PALETTE.map((swatch) => (
+                          <button
+                            key={swatch.hex}
+                            type="button"
+                            title={swatch.name}
+                            onClick={() => {
+                              applyOptColor(swatch.hex);
+                              setHexDraft(swatch.hex);
+                            }}
+                            style={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: 4,
+                              background: swatch.hex,
+                              border: opt.color.toLowerCase() === swatch.hex.toLowerCase() ? '2px solid #0f172a' : '1px solid rgba(15,23,42,0.12)',
+                              cursor: 'pointer',
+                              padding: 0,
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <input
+                          type="color"
+                          value={/^#[0-9a-fA-F]{6}$/.test(opt.color) ? opt.color : '#0066ff'}
+                          onChange={(e) => {
+                            applyOptColor(e.target.value);
+                            setHexDraft(e.target.value);
+                          }}
+                          style={{ width: 24, height: 24, padding: 0, border: '1px solid #cbd5e1', borderRadius: 4, cursor: 'pointer', flexShrink: 0 }}
+                          title="Selector libre de color"
+                        />
+                        <input
+                          type="text"
+                          value={hexDraft || opt.color}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setHexDraft(val);
+                            if (/^#[0-9a-fA-F]{6}$/.test(val.trim())) {
+                              applyOptColor(val.trim());
+                            }
+                          }}
+                          placeholder="#RRGGBB"
+                          style={{ flex: 1, minWidth: 0, fontSize: 11, fontFamily: 'monospace', padding: '3px 6px', border: '1px solid #cbd5e1', borderRadius: 4, color: '#0f172a' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {onUpdateSelectOptions && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, borderTop: '1px solid #e2e8f0', paddingTop: 6 }}>
+              <input
+                type="color"
+                value={newOptColor}
+                onChange={(e) => setNewOptColor(e.target.value)}
+                style={{ width: 22, height: 22, padding: 0, border: '1px solid #cbd5e1', borderRadius: 4, cursor: 'pointer', flexShrink: 0 }}
+                title="Color vivo"
+              />
+              <input
+                type="text"
+                value={newOptLabel}
+                onChange={(e) => setNewOptLabel(e.target.value)}
+                placeholder="Nueva opción..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newOptLabel.trim()) {
+                    e.preventDefault();
+                    onUpdateSelectOptions(col.id, [...selectOptions, { label: newOptLabel.trim(), color: newOptColor }]);
+                    setNewOptLabel('');
+                  }
+                }}
+                style={{ flex: 1, minWidth: 0, fontSize: 11.5, padding: '3px 6px', border: '1px solid #cbd5e1', borderRadius: 4 }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newOptLabel.trim()) return;
+                  onUpdateSelectOptions(col.id, [...selectOptions, { label: newOptLabel.trim(), color: newOptColor }]);
+                  setNewOptLabel('');
+                }}
+                style={{ fontSize: 11, fontWeight: 600, padding: '3px 7px', borderRadius: 4, border: 'none', background: '#0066ff', color: '#fff', cursor: 'pointer' }}
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
+
       {nestedFlyout === 'type' && nestedPos && createPortal(
         <div
           className="te-nested-flyout"
