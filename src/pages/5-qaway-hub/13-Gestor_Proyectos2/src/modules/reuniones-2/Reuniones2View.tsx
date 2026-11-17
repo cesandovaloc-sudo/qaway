@@ -5700,10 +5700,10 @@ export default function Reuniones2View({
               <button
                 className="btn secondary"
                 onClick={exportExcelTemplate}
-                title="Descargar plantilla de cronograma para completar en Excel"
+                title="Descargar plantilla de agenda para completar en Excel"
               >
                 <FileSpreadsheet size={15} />
-                <span>Plantilla Excel</span>
+                <span>Plantilla Agenda</span>
               </button>
               <button
                 className="btn secondary"
@@ -5713,13 +5713,13 @@ export default function Reuniones2View({
                 }}
               >
                 <Upload size={15} />
-                <span>Importar Cronograma</span>
+                <span>Importar Calendario</span>
                 <ChevronDown size={14} />
               </button>
               <div className="menu-wrap">
                 <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
                   <Plus size={16} />
-                  <span>Agregar Componente</span>
+                  <span>Nueva Reunión</span>
                   <ChevronDown size={14} />
                 </button>
                 {newMenu && (
@@ -6513,6 +6513,7 @@ export default function Reuniones2View({
                     <CalendarDays size={14} />
                     <span>Calendario</span>
                   </button>
+                  {false && (
                   <button
                     type="button"
                     className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
@@ -6522,6 +6523,7 @@ export default function Reuniones2View({
                     <FolderKanban size={14} />
                     <span>Gantt</span>
                   </button>
+                  )}
                   <button
                     type="button"
                     className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
@@ -6540,6 +6542,7 @@ export default function Reuniones2View({
                     <LayoutDashboard size={14} />
                     <span>Kanban</span>
                   </button>
+                  {false && (
                   <button
                     type="button"
                     className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
@@ -6549,6 +6552,7 @@ export default function Reuniones2View({
                     <MapPin size={14} />
                     <span>Mapa</span>
                   </button>
+                  )}
                 </>
               )}
             </div>
@@ -7063,7 +7067,7 @@ export default function Reuniones2View({
                   >
                     <ChevronLeft size={15} />
                   </button>
-                  {(['Día', 'Semana', 'Mes', 'Trimestre'] as const).map((x) => (
+                  {(viewMode === 'calendario' ? (['Día', 'Semana', 'Mes'] as const) : (['Día', 'Semana', 'Mes'] as const)).map((x) => (
                     <button
                       type="button"
                       key={x}
@@ -7318,7 +7322,8 @@ export default function Reuniones2View({
               <RotateCcw size={15} />
             </button>
 
-            {/* Bloque 8: Extremo Derecho · Botón de Columnas en Azul App Primario */}
+            {/* Bloque 8: Botón de Columnas oculto en Reuniones 2 */}
+            {false && (
             <div className="filter-dropdown-wrap cols-dropdown-wrap cols-right-aligned">
               <button
                 type="button"
@@ -7432,6 +7437,7 @@ export default function Reuniones2View({
                 </div>
               )}
             </div>
+            )}
           </ProjectShellFilters>
 
           {/* Fila extra expandible de Filtros Personalizados */}
@@ -8362,6 +8368,31 @@ export default function Reuniones2View({
               calSubView={calSubView}
               onNavPrev={handlePrevCalPeriod}
               onNavNext={handleNextCalPeriod}
+              onNavPrevMonth={() => {
+                if (calMonth === 0) {
+                  setCalMonth(11);
+                  setCalYear((y) => y - 1);
+                } else {
+                  setCalMonth((m) => m - 1);
+                }
+              }}
+              onNavNextMonth={() => {
+                if (calMonth === 11) {
+                  setCalMonth(0);
+                  setCalYear((y) => y + 1);
+                } else {
+                  setCalMonth((m) => m + 1);
+                }
+              }}
+              onSelectDate={(iso) => {
+                const [y, m, d] = iso.split('-').map(Number);
+                if (y && m && d) {
+                  setCalYear(y);
+                  setCalMonth(m - 1);
+                  setCalDay(d);
+                  setCalSubView('Día');
+                }
+              }}
               onNavToday={handleTodayCal}
               onSubViewChange={setCalSubView}
               typeFilter={typeFilter}

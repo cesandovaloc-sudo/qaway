@@ -61,6 +61,9 @@ interface CronogramaCalendarioViewProps {
   calSubView: 'Mes' | 'Semana' | 'Día' | 'Agenda';
   onNavPrev: () => void;
   onNavNext: () => void;
+  onNavPrevMonth?: () => void;
+  onNavNextMonth?: () => void;
+  onSelectDate?: (iso: string) => void;
   onNavToday: () => void;
   onSubViewChange: (view: 'Mes' | 'Semana' | 'Día' | 'Agenda') => void;
   typeFilter?: string;
@@ -113,6 +116,9 @@ export default function CronogramaCalendarioView({
   calSubView,
   onNavPrev,
   onNavNext,
+  onNavPrevMonth,
+  onNavNextMonth,
+  onSelectDate,
   onNavToday,
   onSubViewChange,
   typeFilter = 'Todos',
@@ -778,67 +784,66 @@ export default function CronogramaCalendarioView({
                             <span className="cal-gantt-code">{it.code}</span>
                             <strong>{it.name}</strong>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div className="r2-day-card-right" onClick={(e) => e.stopPropagation()}>
                             {conflict && (
                               <span
                                 className="r2-conflict-pill"
                                 title={`Se cruza con ${conflict.code} · ${conflict.name}`}
                               >
-                                <AlertTriangle size={10} /> Cruce con {conflict.code}
+                                <AlertTriangle size={10} /> Cruce {conflict.code}
                               </span>
                             )}
                             <span className="cal-dia-tag">{it.status} · {it.progress}%</span>
+                            <button
+                              type="button"
+                              className="r2-export-btn is-icon"
+                              title="Agregar a Google Calendar"
+                              onClick={() => {
+                                const url = generateGoogleCalendarUrl({
+                                  id: it.id,
+                                  title: `${it.code} · ${it.name}`,
+                                  description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                  location: it.region || 'Qaway Lab',
+                                  startDate: it.start,
+                                  endDate: it.end || it.start,
+                                });
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                                onNotify?.('Abriendo Google Calendar...');
+                              }}
+                            >
+                              <CalendarPlus size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              className="r2-export-btn is-icon"
+                              title="Descargar archivo .ics"
+                              onClick={() => {
+                                downloadIcsFile({
+                                  id: it.id,
+                                  title: `${it.code} · ${it.name}`,
+                                  description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                  location: it.region || 'Qaway Lab',
+                                  startDate: it.start,
+                                  endDate: it.end || it.start,
+                                });
+                                onNotify?.('Archivo .ics descargado');
+                              }}
+                            >
+                              <Download size={13} />
+                            </button>
                           </div>
                         </div>
 
                         <div className="r2-day-card-meta">
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <Clock size={12} /> {formatDatePE(it.start)} – {formatDatePE(it.end || it.start)}
+                            <Clock size={11} /> {formatDatePE(it.start)} – {formatDatePE(it.end || it.start)}
                           </span>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <Users size={12} /> {it.gestor || 'Sin asignar'}
+                            <Users size={11} /> {it.gestor || 'Sin asignar'}
                           </span>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <MapPin size={12} /> {it.region || 'Nacional'}
+                            <MapPin size={11} /> {it.region || 'Nacional'}
                           </span>
-                        </div>
-
-                        <div className="r2-day-card-actions" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            className="r2-export-btn"
-                            onClick={() => {
-                              const url = generateGoogleCalendarUrl({
-                                id: it.id,
-                                title: `${it.code} · ${it.name}`,
-                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
-                                location: it.region || 'Qaway Lab',
-                                startDate: it.start,
-                                endDate: it.end || it.start,
-                              });
-                              window.open(url, '_blank', 'noopener,noreferrer');
-                              onNotify?.('Abriendo Google Calendar...');
-                            }}
-                          >
-                            <CalendarPlus size={13} /> Google Calendar
-                          </button>
-                          <button
-                            type="button"
-                            className="r2-export-btn"
-                            onClick={() => {
-                              downloadIcsFile({
-                                id: it.id,
-                                title: `${it.code} · ${it.name}`,
-                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
-                                location: it.region || 'Qaway Lab',
-                                startDate: it.start,
-                                endDate: it.end || it.start,
-                              });
-                              onNotify?.('Archivo .ics descargado');
-                            }}
-                          >
-                            <Download size={13} /> Descargar .ics
-                          </button>
                         </div>
                       </div>
                     );
@@ -855,13 +860,13 @@ export default function CronogramaCalendarioView({
         {/* Sección: Mini-calendario mensual sincronizado con el lienzo principal */}
         <div className="cal-sidebar-section cal-minical">
           <div className="cal-minical-head">
-            <button type="button" className="cal-minical-nav" onClick={onNavPrev} title="Mes anterior">
+            <button type="button" className="cal-minical-nav" onClick={onNavPrevMonth || onNavPrev} title="Mes anterior">
               <ChevronLeft size={14} />
             </button>
             <span className="cal-minical-title">
               {CAL_MONTH_NAMES[calMonth]} {calYear}
             </span>
-            <button type="button" className="cal-minical-nav" onClick={onNavNext} title="Mes siguiente">
+            <button type="button" className="cal-minical-nav" onClick={onNavNextMonth || onNavNext} title="Mes siguiente">
               <ChevronRight size={14} />
             </button>
           </div>
@@ -872,8 +877,10 @@ export default function CronogramaCalendarioView({
             {miniCalCells.map((c) => (
               <span
                 key={c.iso}
+                onClick={() => onSelectDate?.(c.iso)}
+                style={{ cursor: onSelectDate ? 'pointer' : undefined, outline: c.iso === activeDateIso ? '1.5px solid #2563eb' : undefined, borderRadius: '6px' }}
                 className={`cal-minical-day${c.isCurrentMonth ? '' : ' outside'}${c.iso === todayIso ? ' today' : ''}${deliverableDays.has(c.iso) ? ' has-event' : ''}`}
-                title={deliverableDays.has(c.iso) ? 'Entregable programado' : undefined}
+                title={deliverableDays.has(c.iso) ? 'Entregable programado · Clic para ver día' : 'Clic para ver día'}
               >
                 {c.dayNumber}
               </span>
