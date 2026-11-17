@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AttachmentItem, DeliverableItem, Item, Status } from './Tareas2View';
 import { OFFICIAL_WBS_DEPENDENCIES } from './Tareas2View';
 import { DRE_JUNIN_DOTACION_2027_EDT, PROJECT_PHASES_CATALOG } from './edtPmbokModel';
+import { listarTiposDependenciaGestor } from '../../services/gpCatalogosService';
 import './gantt.css';
 
 /* Tipos que viven solo en Tareas2View: se replican aquí para no importar
@@ -113,6 +114,24 @@ export default function GanttElementDetailView() {
 
   /* Pestañas derivadas de la configuración REAL del elemento */
   const [tab, setTab] = useState<'config' | 'paquetes' | 'entregables' | 'evidencias' | 'dependencias' | 'tareas'>('config');
+  const [tiposDepMap, setTiposDepMap] = useState<Record<string, string>>({
+    FS: 'Fin a comienzo',
+    SS: 'Comienzo a comienzo',
+    FF: 'Fin a fin',
+    SF: 'Comienzo a fin',
+  });
+  useEffect(() => {
+    let cancelado = false;
+    listarTiposDependenciaGestor().then((res) => {
+      if (cancelado || res.estado !== 'lista') return;
+      const mapa: Record<string, string> = {};
+      for (const v of res.valores) {
+        mapa[v.codigo] = v.alias || v.nombre;
+      }
+      setTiposDepMap((prev) => ({ ...prev, ...mapa }));
+    });
+    return () => { cancelado = true; };
+  }, []);
   const childEntries = useMemo(
     () => allEntries.filter((x) => x.parentId === item?.id),
     [allEntries, item]
@@ -445,9 +464,11 @@ export default function GanttElementDetailView() {
           ? emptyBox('dependencias')
           : dependencies.map((d) => {
             const dep = allEntries.find((x) => String(x.id) === String(d.id));
+            const tipoCod = (item as any)?.dependencyType || 'FS';
+            const tipoAlias = tiposDepMap[tipoCod] || 'Fin a comienzo';
             return (
               <article key={d.id} className="gantt-element-row-item" onClick={() => openChild(d.id)}>
-                <div><b><Link2 size={15} /> {d.code ? `${d.code} ` : ''}{d.name || d.id}</b><span>Predecesor requerido</span></div>
+                <div><b><Link2 size={15} /> {d.code ? `${d.code} ` : ''}{d.name || d.id}</b><span>Predecesor requerido · Tipo: {tipoCod} ({tipoAlias})</span></div>
                 {dep && <span className={`status ${statusClass(dep.status)}`}>{dep.status}</span>}
               </article>
             );

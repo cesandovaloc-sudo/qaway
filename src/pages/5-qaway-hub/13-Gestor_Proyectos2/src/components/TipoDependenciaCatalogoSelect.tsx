@@ -51,7 +51,7 @@ type Fuente =
   | { estado: 'vacio' }
   | { estado: 'error' };
 
-export default function TipoDependenciaCatalogoSelect({
+export function TipoDependenciaCatalogoSelect({
   value,
   onChange,
   disabled = false,
@@ -113,3 +113,5 @@ export default function TipoDependenciaCatalogoSelect({
     </select>
   );
 }
+
+export default TipoDependenciaCatalogoSelect;

@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AttachmentItem, DeliverableItem, Item, Status } from './CronogramaGanttView';
 import { OFFICIAL_WBS_DEPENDENCIES } from './CronogramaGanttView';
 import { DRE_JUNIN_DOTACION_2027_EDT, PROJECT_PHASES_CATALOG } from './edtPmbokModel';
+import { listarTiposDependenciaGestor } from '../../services/gpCatalogosService';
 import './gantt.css';
 
 /* Tipos que viven solo en CronogramaGanttView: se replican aquí para no importar
@@ -93,26 +94,54 @@ export default function GanttElementDetailView() {
 
   const { item, allEntries, projectId } = useMemo(() => {
     const fallbackCatalog = DRE_JUNIN_DOTACION_2027_EDT;
-    let storedEntries: Item[] = [];
     let pid = 'p1';
-    let flat: Item[] = [];
+    const flatten = (entries: Item[]): Item[] => entries.flatMap((entry) => [entry, ...(entry.children ? flatten(entry.children) : [])]);
     try {
       pid = localStorage.getItem('qaway-gp-active-project-id') || 'p1';
-      const raw = localStorage.getItem(`qaway-gantt-items-${pid}`) || localStorage.getItem('qaway-gantt-items-p1');
-      const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed) && parsed.length > 0) storedEntries = parsed as Item[];
+      const candidateKeys = [
+        `qaway-gantt-items-${pid}-maestro`,
+        `qaway-gantt-items-${pid}`,
+        'qaway-gantt-items-p1-maestro',
+        'qaway-gantt-items-p1',
+      ];
+      for (const key of candidateKeys) {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const flat = flatten(parsed as Item[]);
+          const match = flat.find((entry: Item) => String(entry.id) === String(elementoId));
+          if (match) return { item: match, allEntries: flat, projectId: pid };
+        }
+      }
     } catch {
-      storedEntries = [];
+      // Fallback abajo
     }
-    const source = storedEntries.length > 0 ? storedEntries : (fallbackCatalog as Item[]);
-    const flatten = (entries: Item[]): Item[] => entries.flatMap((entry) => [entry, ...(entry.children ? flatten(entry.children) : [])]);
-    flat = flatten(source);
-    const match = flat.find((entry: Item) => String(entry.id) === String(elementoId));
-    return { item: match, allEntries: flat, projectId: pid };
+    const flatFallback = flatten(fallbackCatalog as Item[]);
+    const match = flatFallback.find((entry: Item) => String(entry.id) === String(elementoId));
+    return { item: match, allEntries: flatFallback, projectId: pid };
   }, [elementoId]);
 
   /* Pestañas derivadas de la configuración REAL del elemento */
   const [tab, setTab] = useState<'config' | 'paquetes' | 'entregables' | 'evidencias' | 'dependencias' | 'tareas'>('config');
+  const [tiposDepMap, setTiposDepMap] = useState<Record<string, string>>({
+    FS: 'Fin a comienzo',
+    SS: 'Comienzo a comienzo',
+    FF: 'Fin a fin',
+    SF: 'Comienzo a fin',
+  });
+  useEffect(() => {
+    let cancelado = false;
+    listarTiposDependenciaGestor().then((res) => {
+      if (cancelado || res.estado !== 'lista') return;
+      const mapa: Record<string, string> = {};
+      for (const v of res.valores) {
+        mapa[v.codigo] = v.alias || v.nombre;
+      }
+      setTiposDepMap((prev) => ({ ...prev, ...mapa }));
+    });
+    return () => { cancelado = true; };
+  }, []);
   const childEntries = useMemo(
     () => allEntries.filter((x) => x.parentId === item?.id),
     [allEntries, item]
@@ -445,9 +474,11 @@ export default function GanttElementDetailView() {
           ? emptyBox('dependencias')
           : dependencies.map((d) => {
             const dep = allEntries.find((x) => String(x.id) === String(d.id));
+            const tipoCod = (item as any)?.dependencyType || 'FS';
+            const tipoAlias = tiposDepMap[tipoCod] || 'Fin a comienzo';
             return (
               <article key={d.id} className="gantt-element-row-item" onClick={() => openChild(d.id)}>
-                <div><b><Link2 size={15} /> {d.code ? `${d.code} ` : ''}{d.name || d.id}</b><span>Predecesor requerido</span></div>
+                <div><b><Link2 size={15} /> {d.code ? `${d.code} ` : ''}{d.name || d.id}</b><span>Predecesor requerido · Tipo: {tipoCod} ({tipoAlias})</span></div>
                 {dep && <span className={`status ${statusClass(dep.status)}`}>{dep.status}</span>}
               </article>
             );

@@ -42,6 +42,7 @@ import type {
 import { getDeviationDays } from './scheduleMetrics';
 import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, EDT_NODE_LABELS, isContainerEdtType, normalizeEdtType, type EdtNodeType } from './edtPmbokModel';
 import { getLinkedTasksSummary } from '../cronograma-core/wbsHierarchy';
+import TipoDependenciaCatalogoSelect from '../../components/TipoDependenciaCatalogoSelect';
 
 import {
   REGIONES_PROYECTO,
@@ -854,6 +855,31 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   </h2>
                 </div>
               </div>
+              {!isNewDraft && onOpenFullDetail && (
+                <button
+                  type="button"
+                  onClick={() => onOpenFullDetail(activeItem)}
+                  title="Abrir ficha completa del elemento"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '5px 10px',
+                    borderRadius: '7px',
+                    border: '1px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#1e293b',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    marginRight: 6,
+                    flexShrink: 0,
+                  }}
+                >
+                  <ExternalLink size={13} />
+                  <span>Ver ficha</span>
+                </button>
+              )}
               <button
                 type="button"
                 className="editor-icon-btn"
@@ -994,7 +1020,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                 className={editorTab === 'info' ? 'active' : ''}
                 onClick={() => setEditorTab('info')}
               >
-                {activeItem.kind === 'hito' ? 'Componente' : 'Subcomponente'}
+                General
               </button>
               <button
                 type="button"
@@ -1583,26 +1609,28 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                         <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Avance</span>
                         <b style={{ fontSize: '13px', color: '#0f172a' }}>{activeItem.progress}%</b>
                       </div>
-                      <div
-                        style={{
-                          height: '7px',
-                          width: '100%',
-                          backgroundColor: '#e2e8f0',
-                          borderRadius: '999px',
-                          overflow: 'hidden',
-                          marginBottom: isContainer || linkedTaskSummary ? '8px' : '6px',
-                        }}
-                      >
+                      {(isContainer || linkedTaskSummary) && (
                         <div
                           style={{
-                            height: '100%',
-                            width: `${Math.max(0, Math.min(100, activeItem.progress))}%`,
-                            backgroundColor: activeItem.progress >= 100 ? '#16a34a' : '#2563eb',
-                            borderRadius: 'inherit',
-                            transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                            height: '7px',
+                            width: '100%',
+                            backgroundColor: '#e2e8f0',
+                            borderRadius: '999px',
+                            overflow: 'hidden',
+                            marginBottom: '8px',
                           }}
-                        />
-                      </div>
+                        >
+                          <div
+                            style={{
+                              height: '100%',
+                              width: `${Math.max(0, Math.min(100, activeItem.progress))}%`,
+                              backgroundColor: activeItem.progress >= 100 ? '#16a34a' : '#2563eb',
+                              borderRadius: 'inherit',
+                              transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                            }}
+                          />
+                        </div>
+                      )}
                       {isContainer ? (
                         <div style={{ padding: '7px 10px', background: '#f1f5f9', borderRadius: '6px', fontSize: '11px', color: '#475569', display: 'flex', alignItems: 'center', gap: '7px' }}>
                           <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
@@ -1996,9 +2024,15 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   if (!predItem) return null;
                   return (
                     <div style={{ marginTop: 12, padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                      <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        Flujo de Prelación Configurado
-                      </small>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Flujo de Prelación Configurado
+                        </small>
+                        <TipoDependenciaCatalogoSelect
+                          value={activeItem.dependencyType || 'FS'}
+                          onChange={(codigo) => updateDraft({ dependencyType: codigo })}
+                        />
+                      </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: 8 }}>
                         <div style={{ padding: '6px 10px', background: '#e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#1e293b' }}>
                           {predItem.code} {predItem.name}

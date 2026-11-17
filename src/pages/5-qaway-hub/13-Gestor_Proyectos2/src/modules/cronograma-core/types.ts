@@ -109,6 +109,8 @@ export interface Item {
   actualEnd?: string | undefined;
   /** Tareas o hitos predecesores en la cadena de prelación / ruta crítica. */
   dependencies?: string[];
+  /** Tipo de dependencia PMI/PMBOK (FS, SS, FF, SF) proveniente de gp_tipos_dependencia_c. */
+  dependencyType?: string;
   /** Entidad responsable oficial del componente (DRE / UGEL / región). */
   entidadResponsable?: string | undefined;
   /** Estado de Nudo Critico o Solicitud de Prorroga desde sede territorial.

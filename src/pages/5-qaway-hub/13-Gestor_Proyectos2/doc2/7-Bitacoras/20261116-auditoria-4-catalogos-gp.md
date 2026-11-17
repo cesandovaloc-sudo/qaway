@@ -161,6 +161,25 @@ existió, se creó con la forma canónica de `0001` y el seed de `0008` §3. `00
 
 ---
 
+## 12 · 17-nov — Catálogos de entregable divididos (0016): 7.1 categorías + 7 tipos
+
+**Migración:** `20261117_0016_gp_categorias_entregable_c_y_tipos.sql` (aditiva, idempotente).
+
+**Decisión de diseño (corrección del usuario):** se dividen en dos tablas normalizadas:
+- `gp_categorias_entregable_c` (tabla 7.1): 24 categorías con icono Lucide y alcance.
+- `gp_tipos_entregable_c` (tabla 7): 261 tipos con `categoria_codigo` FK a 7.1, icono por tipo.
+
+`codigo` (GEN-001) es UNIQUE, no PK (PK sigue siendo `id` uuid).
+
+**Limpieza:** si se aplicó la versión integrada previa, se quitan las columnas denormalizadas `categoria` y `categoria_icono`.
+**Nombres:** `nombre` y `alias` duplican el español (no hay término inglés estándar que sume; regla "verifica, no fuerces").
+**Iconos inválidos corregidos en seed:** `chart-funnel` → `filter`, `clipboard-search` → `file-search`.
+**Alcance:** guardado en `metadata->>'alcance'` (Transversal/Proyectos/Sectorial).
+
+**Post-verificación esperada:** categorías: columnas=12 · filas=24 · políticas=4; tipos: columnas=12 · filas=261 · categorías distintas=24 · políticas=4.
+
+---
+
 ## Lo que sigue
 
 - **Paso 1 del tracker:** tablas **6 a 12** (los catálogos restantes de `0001`).
