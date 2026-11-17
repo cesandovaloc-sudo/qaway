@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import '../cronograma-gantt/gantt.css';
 import './reuniones.css';
+import { generateGoogleCalendarUrl, downloadIcsFile } from './calendarExport';
 import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import {
   Activity,
@@ -10,6 +11,7 @@ import {
   ArrowRight,
   Bell,
   CalendarDays,
+  CalendarPlus,
   Check,
   CheckCheck,
   ChevronDown,
@@ -317,7 +319,12 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
   const [detailOpen, setDetailOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [month, setMonth] = useState('2026-10');
+  const [calendarSubView, setCalendarSubView] = useState<'mes' | 'semana' | 'dia'>('mes');
+  const [selectedDateKey, setSelectedDateKey] = useState<string>('2026-10-26');
+  const [dayModalDate, setDayModalDate] = useState<string | null>(null);
+  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [toast, setToast] = useState('');
+  const [toastState, setToastState] = useState<{ msg: string; type?: 'success' | 'warning' | 'error' } | null>(null);
   const [newActOpen, setNewActOpen] = useState(false);
   const [actText, setActText] = useState('');
   const [actFiles, setActFiles] = useState<string[]>([]);
@@ -412,9 +419,36 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
     engine.clearAllFilters();
   };
 
-  const notify = (msg: string) => {
+  const notify = (msg: string, type: 'success' | 'warning' | 'error' = 'success') => {
     setToast(msg);
-    window.setTimeout(() => setToast(''), 2600);
+    setToastState({ msg, type });
+    window.setTimeout(() => {
+      setToast('');
+      setToastState(null);
+    }, 2800);
+  };
+
+  const checkMeetingConflict = (meeting: Meeting, list: Meeting[] = meetings): Meeting | undefined => {
+    return list.find(
+      (other) =>
+        other.id !== meeting.id &&
+        other.date === meeting.date &&
+        other.status !== 'CANCELADA' &&
+        meeting.status !== 'CANCELADA' &&
+        other.start < meeting.end &&
+        meeting.start < other.end
+    );
+  };
+
+  const handleDropOnDate = (targetDate: string, meetingId: string) => {
+    setDragOverDate(null);
+    const target = meetings.find((m) => m.id === meetingId);
+    if (!target) return;
+    if (target.date === targetDate) return;
+
+    const next = meetings.map((m) => (m.id === meetingId ? { ...m, date: targetDate } : m));
+    saveMeetings(next);
+    notify(`Reunión "${target.title}" reprogramada al ${formatDate(targetDate)}`, 'success');
   };
 
   const saveMeetings = (next: Meeting[]) => {
@@ -589,6 +623,69 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
     const [y, mo] = month.split('-').map(Number);
     const d = new Date(y!, mo! - 1 + delta, 1);
     setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
+  const getWeekDays = (refDateStr: string) => {
+    const ref = new Date(`${refDateStr}T12:00:00`);
+    const dayOfWeek = (ref.getDay() + 6) % 7;
+    const monday = new Date(ref);
+    monday.setDate(ref.getDate() - dayOfWeek);
+
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return {
+        date: d,
+        iso,
+        dayNum: d.getDate(),
+        dayName: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i],
+        isToday: iso === '2026-10-25',
+      };
+    });
+  };
+
+  const currentWeekDays = useMemo(() => getWeekDays(selectedDateKey), [selectedDateKey]);
+
+  const weekLabel = useMemo(() => {
+    if (!currentWeekDays.length) return '';
+    const first = currentWeekDays[0].date;
+    const last = currentWeekDays[6].date;
+    const fStr = first.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' }).replace('.', '');
+    const lStr = last.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' }).replace('.', '');
+    return `${fStr} – ${lStr}`;
+  }, [currentWeekDays]);
+
+  const dayLabel = useMemo(() => {
+    return new Date(`${selectedDateKey}T12:00:00`).toLocaleDateString('es-PE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }, [selectedDateKey]);
+
+  const changeDateOrPeriod = (delta: number) => {
+    if (calendarSubView === 'mes') {
+      changeMonth(delta);
+    } else if (calendarSubView === 'semana') {
+      const d = new Date(`${selectedDateKey}T12:00:00`);
+      d.setDate(d.getDate() + delta * 7);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      setSelectedDateKey(iso);
+      setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    } else {
+      const d = new Date(`${selectedDateKey}T12:00:00`);
+      d.setDate(d.getDate() + delta);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      setSelectedDateKey(iso);
+      setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+  };
+
+  const resetToToday = () => {
+    setMonth('2026-10');
+    setSelectedDateKey('2026-10-26');
   };
 
   useEffect(() => {
@@ -923,75 +1020,389 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
             {view === 'Agenda' && (
               <div className="agenda-layout">
                 <section className="panel calendar-panel">
-                  <div className="panel-head">
+                  <div className="panel-head" style={{ flexWrap: 'wrap', gap: '10px' }}>
                     <div>
                       <h2>Calendario de reuniones</h2>
-                      <p>Vista mensual · Selecciona una reunión para ver sus detalles</p>
+                      <p>
+                        {calendarSubView === 'mes'
+                          ? 'Vista mensual · Arrastra reuniones para reprogramar fecha o haz clic en un día'
+                          : calendarSubView === 'semana'
+                          ? 'Vista semanal · Franjas horarias y detección de superposiciones'
+                          : 'Vista diaria · Agenda de la jornada y logística territorial'}
+                      </p>
                     </div>
-                    <div className="calendar-controls">
-                      <button
-                        className="icon-button small"
-                        onClick={() => changeMonth(-1)}
-                        aria-label="Mes anterior"
-                      >
-                        <ChevronLeft size={17} />
-                      </button>
-                      <b>{monthLabel}</b>
-                      <button
-                        className="icon-button small"
-                        onClick={() => changeMonth(1)}
-                        aria-label="Mes siguiente"
-                      >
-                        <ChevronRight size={17} />
-                      </button>
-                      <button className="button compact secondary" onClick={() => setMonth('2026-10')}>
-                        Hoy
-                      </button>
-                    </div>
-                  </div>
-                  <div className="calendar-grid">
-                    <div className="weekday">Lun</div>
-                    <div className="weekday">Mar</div>
-                    <div className="weekday">Mié</div>
-                    <div className="weekday">Jue</div>
-                    <div className="weekday">Vie</div>
-                    <div className="weekday">Sáb</div>
-                    <div className="weekday">Dom</div>
-                    {monthDays().map((d, i) => {
-                      const date = d ? `${month}-${String(d).padStart(2, '0')}` : '';
-                      const dayMeetings = d ? filtered.filter((m) => m.date === date) : [];
-                      return (
-                        <div
-                          key={`${month}-${i}`}
-                          className={`calendar-day ${!d ? 'empty-day' : ''} ${date === '2026-10-25' ? 'today' : ''}`}
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      {/* Selector de Sub-vistas (Mes / Semana / Día) */}
+                      <div className="subview-controls" role="tablist">
+                        <button
+                          type="button"
+                          className={`subview-btn ${calendarSubView === 'mes' ? 'active' : ''}`}
+                          onClick={() => setCalendarSubView('mes')}
                         >
-                          <span className="day-num">{d}</span>
-                          <div className="day-events">
-                            {dayMeetings.slice(0, 2).map((m) => (
-                              <button
-                                key={m.id}
-                                className={`calendar-event ${
-                                  m.modality === 'Presencial' ? 'event-inperson' : 'event-virtual'
-                                } ${m.id === selectedId ? 'event-active' : ''}`}
-                                onClick={() => {
-                                  setSelectedId(m.id);
-                                  setDetailOpen(true);
-                                }}
-                                title={m.title}
-                              >
-                                <span>{m.start}</span> {m.title}
-                              </button>
-                            ))}
-                            {dayMeetings.length > 2 && (
-                              <button className="more-events" onClick={() => setView('Lista')}>
-                                +{dayMeetings.length - 2} más
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                          Mes
+                        </button>
+                        <button
+                          type="button"
+                          className={`subview-btn ${calendarSubView === 'semana' ? 'active' : ''}`}
+                          onClick={() => setCalendarSubView('semana')}
+                        >
+                          Semana
+                        </button>
+                        <button
+                          type="button"
+                          className={`subview-btn ${calendarSubView === 'dia' ? 'active' : ''}`}
+                          onClick={() => setCalendarSubView('dia')}
+                        >
+                          Día
+                        </button>
+                      </div>
+
+                      {/* Controles de Navegación Temporal */}
+                      <div className="calendar-controls">
+                        <button
+                          className="icon-button small"
+                          onClick={() => changeDateOrPeriod(-1)}
+                          aria-label="Periodo anterior"
+                          title="Anterior"
+                        >
+                          <ChevronLeft size={17} />
+                        </button>
+                        <b style={{ minWidth: calendarSubView === 'dia' ? '140px' : calendarSubView === 'semana' ? '120px' : '100px' }}>
+                          {calendarSubView === 'mes'
+                            ? monthLabel
+                            : calendarSubView === 'semana'
+                            ? weekLabel
+                            : dayLabel}
+                        </b>
+                        <button
+                          className="icon-button small"
+                          onClick={() => changeDateOrPeriod(1)}
+                          aria-label="Periodo siguiente"
+                          title="Siguiente"
+                        >
+                          <ChevronRight size={17} />
+                        </button>
+                        <button className="button compact secondary" onClick={resetToToday}>
+                          Hoy
+                        </button>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* ─── VISTA 1: MES (Con Drag & Drop y Popover de Día) ─── */}
+                  {calendarSubView === 'mes' && (
+                    <div className="calendar-grid">
+                      <div className="weekday">Lun</div>
+                      <div className="weekday">Mar</div>
+                      <div className="weekday">Mié</div>
+                      <div className="weekday">Jue</div>
+                      <div className="weekday">Vie</div>
+                      <div className="weekday">Sáb</div>
+                      <div className="weekday">Dom</div>
+                      {monthDays().map((d, i) => {
+                        const date = d ? `${month}-${String(d).padStart(2, '0')}` : '';
+                        const dayMeetings = d ? filtered.filter((m) => m.date === date) : [];
+                        const isDragTarget = dragOverDate === date;
+
+                        return (
+                          <div
+                            key={`${month}-${i}`}
+                            className={`calendar-day ${!d ? 'empty-day' : ''} ${date === '2026-10-25' ? 'today' : ''} ${
+                              isDragTarget ? 'drag-over' : ''
+                            }`}
+                            onDragOver={(e) => {
+                              if (!d) return;
+                              e.preventDefault();
+                              if (dragOverDate !== date) setDragOverDate(date);
+                            }}
+                            onDragLeave={() => {
+                              if (dragOverDate === date) setDragOverDate(null);
+                            }}
+                            onDrop={(e) => {
+                              if (!d) return;
+                              e.preventDefault();
+                              const meetingId = e.dataTransfer.getData('text/plain');
+                              if (meetingId) handleDropOnDate(date, meetingId);
+                            }}
+                          >
+                            <span
+                              className="day-num"
+                              style={{ cursor: d ? 'pointer' : 'default' }}
+                              onClick={() => {
+                                if (d) {
+                                  setSelectedDateKey(date);
+                                  setDayModalDate(date);
+                                }
+                              }}
+                              title={d ? `Ver agenda del ${d}` : undefined}
+                            >
+                              {d}
+                            </span>
+                            <div className="day-events">
+                              {dayMeetings.slice(0, 2).map((m) => {
+                                const conflict = checkMeetingConflict(m, filtered);
+                                return (
+                                  <button
+                                    key={m.id}
+                                    draggable={true}
+                                    onDragStart={(e) => {
+                                      e.dataTransfer.setData('text/plain', m.id);
+                                    }}
+                                    className={`calendar-event ${
+                                      m.modality === 'Presencial' ? 'event-inperson' : 'event-virtual'
+                                    } ${m.id === selectedId ? 'event-active' : ''}`}
+                                    onClick={() => {
+                                      setSelectedId(m.id);
+                                      setSelectedDateKey(m.date);
+                                      setDetailOpen(true);
+                                    }}
+                                    title={
+                                      conflict
+                                        ? `⚠️ Cruce de horario con: ${conflict.title} (${conflict.start}-${conflict.end}) · Arrastra para reprogramar`
+                                        : `${m.title} (${m.start}-${m.end}) · Arrastra para reprogramar`
+                                    }
+                                  >
+                                    <span>{m.start}</span> {m.title}
+                                    {conflict && (
+                                      <span className="conflict-badge" title={`Cruce con: ${conflict.title}`}>
+                                        <CircleAlert size={9} />
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                              {dayMeetings.length > 2 && (
+                                <button
+                                  className="more-events"
+                                  onClick={() => {
+                                    setSelectedDateKey(date);
+                                    setDayModalDate(date);
+                                  }}
+                                  title="Ver todas las reuniones del día"
+                                >
+                                  +{dayMeetings.length - 2} más
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* ─── VISTA 2: SEMANA (TimeGrid con horas 08:00 a 18:00) ─── */}
+                  {calendarSubView === 'semana' && (
+                    <div className="week-view-wrap">
+                      <div className="week-header-row">
+                        <div style={{ padding: '10px 4px', textAlign: 'center', fontSize: '9px', color: '#929eaf', fontWeight: 700 }}>
+                          HORA
+                        </div>
+                        {currentWeekDays.map((col) => (
+                          <div
+                            key={col.iso}
+                            className={`week-header-cell ${col.isToday ? 'today' : ''}`}
+                            onClick={() => {
+                              setSelectedDateKey(col.iso);
+                              setCalendarSubView('dia');
+                            }}
+                            style={{ cursor: 'pointer' }}
+                            title="Ver en vista diaria"
+                          >
+                            <span>{col.dayName}</span>
+                            <b>{col.dayNum}</b>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="week-body-scroll">
+                        <div className="week-grid-container">
+                          {/* Columna de Horas */}
+                          <div className="time-col">
+                            {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
+                              <div key={h} className="time-slot-label">
+                                {h}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* 7 Columnas de Días */}
+                          {currentWeekDays.map((col) => {
+                            const dayMeetings = filtered.filter((m) => m.date === col.iso);
+                            return (
+                              <div
+                                key={col.iso}
+                                className={`week-day-col ${col.isToday ? 'today' : ''}`}
+                                onDragOver={(e) => {
+                                  e.preventDefault();
+                                  if (dragOverDate !== col.iso) setDragOverDate(col.iso);
+                                }}
+                                onDragLeave={() => {
+                                  if (dragOverDate === col.iso) setDragOverDate(null);
+                                }}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  const meetingId = e.dataTransfer.getData('text/plain');
+                                  if (meetingId) handleDropOnDate(col.iso, meetingId);
+                                }}
+                              >
+                                {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
+                                  <div
+                                    key={h}
+                                    className="week-hour-cell"
+                                    onClick={() => {
+                                      setForm((prev) => ({ ...prev, date: col.iso, start: h }));
+                                      openCreate();
+                                    }}
+                                    title={`Clic para agendar reunión el ${col.dayName} a las ${h}`}
+                                  />
+                                ))}
+
+                                {/* Eventos colocados en la columna */}
+                                {dayMeetings.map((m) => {
+                                  const [sh, sm] = (m.start || '09:00').split(':').map(Number);
+                                  const [eh, em] = (m.end || '10:00').split(':').map(Number);
+                                  const startMin = (sh - 8) * 60 + (sm || 0);
+                                  const durMin = Math.max((eh - sh) * 60 + ((em || 0) - (sm || 0)), 30);
+                                  const topPx = Math.max(0, (startMin / 60) * 56);
+                                  const heightPx = Math.max(26, (durMin / 60) * 56 - 4);
+                                  const conflict = checkMeetingConflict(m, filtered);
+
+                                  return (
+                                    <div
+                                      key={m.id}
+                                      draggable={true}
+                                      onDragStart={(e) => e.dataTransfer.setData('text/plain', m.id)}
+                                      className={`week-event-card ${
+                                        m.modality === 'Presencial' ? 'event-inperson' : 'event-virtual'
+                                      }`}
+                                      style={{ top: `${topPx}px`, height: `${heightPx}px` }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedId(m.id);
+                                        setSelectedDateKey(m.date);
+                                        setDetailOpen(true);
+                                      }}
+                                      title={`${m.title} (${m.start} - ${m.end}) · ${m.site}`}
+                                    >
+                                      <strong>{m.title}</strong>
+                                      <small>
+                                        <Clock3 size={10} /> {m.start}–{m.end}
+                                        {conflict && (
+                                          <span className="conflict-badge" title={`Cruce con: ${conflict.title}`}>
+                                            <CircleAlert size={9} /> Solape
+                                          </span>
+                                        )}
+                                      </small>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ─── VISTA 3: DÍA (Timeline detallado por horas 08:00 a 19:00) ─── */}
+                  {calendarSubView === 'dia' && (
+                    <div className="day-view-wrap">
+                      <div className="day-view-head">
+                        <div>
+                          <h3>{dayLabel}</h3>
+                          <span>
+                            {filtered.filter((m) => m.date === selectedDateKey).length} reuniones programadas para este día
+                          </span>
+                        </div>
+                        <button
+                          className="button primary compact"
+                          onClick={() => {
+                            setForm((prev) => ({ ...prev, date: selectedDateKey }));
+                            openCreate();
+                          }}
+                        >
+                          <Plus size={14} /> Agendar reunión
+                        </button>
+                      </div>
+
+                      <div className="day-slots-list">
+                        {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'].map((h) => {
+                          const slotHour = parseInt(h.slice(0, 2), 10);
+                          const slotMeetings = filtered.filter((m) => {
+                            if (m.date !== selectedDateKey) return false;
+                            const mHour = parseInt((m.start || '').slice(0, 2), 10);
+                            return mHour === slotHour;
+                          });
+
+                          return (
+                            <div key={h} className="day-slot-row">
+                              <span className="day-slot-time">{h}</span>
+                              <div className="day-slot-events">
+                                {slotMeetings.length === 0 ? (
+                                  <div
+                                    className="day-slot-empty"
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => {
+                                      setForm((prev) => ({ ...prev, date: selectedDateKey, start: h }));
+                                      openCreate();
+                                    }}
+                                  >
+                                    + Libre · Clic para agendar a las {h}
+                                  </div>
+                                ) : (
+                                  slotMeetings.map((m) => {
+                                    const conflict = checkMeetingConflict(m, filtered);
+                                    return (
+                                      <div
+                                        key={m.id}
+                                        className={`day-card ${conflict ? 'has-conflict' : ''}`}
+                                        onClick={() => {
+                                          setSelectedId(m.id);
+                                          setDetailOpen(true);
+                                        }}
+                                      >
+                                        <div className="day-card-header">
+                                          <strong>{m.title}</strong>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            {conflict && (
+                                              <span className="conflict-badge" title={`Se cruza con: ${conflict.title} (${conflict.start}-${conflict.end})`}>
+                                                <CircleAlert size={10} /> Cruce de horario
+                                              </span>
+                                            )}
+                                            <span className={`status-pill ${claseEstadoReunion(m.status)}`}>
+                                              {etiquetaEstadoReunion(m.status)}
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div className="day-card-meta">
+                                          <span>
+                                            <Clock3 size={13} /> {m.start} – {m.end} ({durationMins(m.start, m.end)} min)
+                                          </span>
+                                          <span>
+                                            {m.modality === 'Google Meet' ? <Video size={13} /> : <MapPin size={13} />} {m.site}
+                                          </span>
+                                          <span>
+                                            <Users size={13} /> {m.attendees.length} asistentes
+                                          </span>
+                                          {m.modality === 'Presencial' && m.travel > 0 && (
+                                            <span>
+                                              <Navigation size={13} /> Traslado: {m.travel} min (+{m.buffer} min buffer)
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="calendar-legend">
                     <span>
                       <i className="legend-dot virtual-dot" /> Google Meet
@@ -1001,6 +1412,9 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                     </span>
                     <span>
                       <i className="legend-dot today-dot" /> Hoy
+                    </span>
+                    <span>
+                      <CircleAlert size={12} style={{ color: '#c9424c' }} /> Cruce de horario
                     </span>
                   </div>
                 </section>
@@ -1517,6 +1931,55 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                     aria-label="Editar reunión"
                   >
                     <Pencil size={15} />
+                  </button>
+                </div>
+
+                {/* Sincronización Externa de Calendario */}
+                <div className="export-calendar-group">
+                  <button
+                    type="button"
+                    className="export-calendar-btn"
+                    title="Añadir a Google Calendar"
+                    onClick={() => {
+                      const url = generateGoogleCalendarUrl({
+                        id: selected.id,
+                        title: selected.title,
+                        description: `${selected.purpose || ''}\n\nModalidad: ${selected.modality}\nProyecto: ${selected.project}`,
+                        location:
+                          selected.modality === 'Google Meet'
+                            ? selected.meetUrl || 'Reunión Virtual'
+                            : `${selected.site} ${selected.address ? `· ${selected.address}` : ''} (${selected.region})`,
+                        date: selected.date,
+                        start: selected.start,
+                        end: selected.end,
+                      });
+                      window.open(url, '_blank', 'noopener,noreferrer');
+                      notify('Abriendo Google Calendar...', 'success');
+                    }}
+                  >
+                    <CalendarPlus size={14} /> Google Calendar
+                  </button>
+                  <button
+                    type="button"
+                    className="export-calendar-btn"
+                    title="Descargar archivo universal .ics (Outlook, Apple Calendar)"
+                    onClick={() => {
+                      downloadIcsFile({
+                        id: selected.id,
+                        title: selected.title,
+                        description: `${selected.purpose || ''}\n\nModalidad: ${selected.modality}\nProyecto: ${selected.project}`,
+                        location:
+                          selected.modality === 'Google Meet'
+                            ? selected.meetUrl || 'Reunión Virtual'
+                            : `${selected.site} ${selected.address ? `· ${selected.address}` : ''} (${selected.region})`,
+                        date: selected.date,
+                        start: selected.start,
+                        end: selected.end,
+                      });
+                      notify('Archivo .ics descargado correctamente', 'success');
+                    }}
+                  >
+                    <Download size={14} /> Descargar .ics
                   </button>
                 </div>
                 <div className="detail-section">
@@ -2110,10 +2573,116 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
           </div>
         )}
 
+        {/* Modal de Reuniones del Día (Popover / Detalle diario) */}
+        {dayModalDate && (
+          <div className="rm-v1">
+            <div
+              className="modal-overlay"
+              role="presentation"
+              onMouseDown={() => setDayModalDate(null)}
+            >
+              <div
+                className="day-events-modal"
+                role="dialog"
+                aria-modal="true"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div className="day-events-modal-head">
+                  <div>
+                    <span className="drawer-kicker">AGENDA DEL DÍA</span>
+                    <h3>{dayName(dayModalDate)} · {formatDate(dayModalDate)}</h3>
+                  </div>
+                  <button
+                    className="icon-button small"
+                    onClick={() => setDayModalDate(null)}
+                    aria-label="Cerrar"
+                  >
+                    <X size={17} />
+                  </button>
+                </div>
+                <div className="day-events-modal-body">
+                  {filtered.filter((m) => m.date === dayModalDate).length === 0 ? (
+                    <div className="empty-state">No hay reuniones programadas para este día.</div>
+                  ) : (
+                    filtered
+                      .filter((m) => m.date === dayModalDate)
+                      .map((m) => {
+                        const conflict = checkMeetingConflict(m, filtered);
+                        return (
+                          <div
+                            key={m.id}
+                            className={`day-card ${conflict ? 'has-conflict' : ''}`}
+                            onClick={() => {
+                              setSelectedId(m.id);
+                              setSelectedDateKey(m.date);
+                              setDetailOpen(true);
+                              setDayModalDate(null);
+                            }}
+                          >
+                            <div className="day-card-header">
+                              <strong>{m.title}</strong>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {conflict && (
+                                  <span className="conflict-badge" title={`Se cruza con: ${conflict.title}`}>
+                                    <CircleAlert size={10} /> Cruce de horario
+                                  </span>
+                                )}
+                                <span className={`status-pill ${claseEstadoReunion(m.status)}`}>
+                                  {etiquetaEstadoReunion(m.status)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="day-card-meta">
+                              <span>
+                                <Clock3 size={13} /> {m.start} – {m.end} ({durationMins(m.start, m.end)} min)
+                              </span>
+                              <span>
+                                {m.modality === 'Google Meet' ? <Video size={13} /> : <MapPin size={13} />} {m.site}
+                              </span>
+                              <span>
+                                <Users size={13} /> {m.attendees.length} participantes
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                  )}
+                  <button
+                    className="button secondary full-width"
+                    style={{ marginTop: '8px' }}
+                    onClick={() => {
+                      setDayModalDate(null);
+                      setForm((prev) => ({ ...prev, date: dayModalDate }));
+                      openCreate();
+                    }}
+                  >
+                    <Plus size={15} /> Programar reunión en este día
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Notificación Toast Enriquecida */}
         {toast && (
-          <div className="toast">
-            <CheckCircle2 size={17} />
-            {toast}
+          <div
+            className={`toast ${
+              toastState?.type === 'warning'
+                ? 'toast-warning'
+                : toastState?.type === 'error'
+                ? 'toast-error'
+                : 'toast-success'
+            }`}
+          >
+            {toastState?.type === 'warning' ? (
+              <CircleAlert size={17} />
+            ) : toastState?.type === 'error' ? (
+              <CircleAlert size={17} />
+            ) : (
+              <CheckCircle2 size={17} />
+            )}
+            <span>{toast}</span>
           </div>
         )}
       </div>

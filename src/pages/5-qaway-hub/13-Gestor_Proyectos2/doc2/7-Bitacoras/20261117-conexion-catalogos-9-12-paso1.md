@@ -1,4 +1,4 @@
-# Bitácora · 17-nov-2026 · Conexión de código de los catálogos 9–12 (PASO 1: servicio)
+# Bitácora · 17-nov-2026 · Catálogos 9–12: servicio, UI conectada (10) y avisos "por conectar" (9, 11, 12) + inventario de tablas creadas
 
 **Alcance de esta entrada:** capa de lectura (`gpCatalogosService.ts`) + pruebas,
 y la conexión de UI de la tabla 10 (estados de reunión) tras la decisión del responsable
@@ -92,11 +92,84 @@ antiguo se mapea a lo más parecido.** Implementado así:
 Verificación: `tsc -b` sin errores atribuibles a estos archivos, `oxlint` 0 errores
 (17 warnings preexistentes de imports no usados en la cabecera del archivo).
 
-## 5 · Siguiente
+## 5 · Avisos "por conectar" en la UI (decisión: no paralizar)
 
-- Tabla 10: definir vocabulario (arriba) → selector de estado.
-- Tabla 9: decidir si el formulario de reunión gana el campo "Tipo de reunión" (8 valores PMI).
-- Tabla 11: no hay pantalla de avances/registro de progreso todavía.
-- Tabla 12: consumidor real identificado en `cronograma-gantt/GanttEditorDrawer.tsx`
-  (documentos de sustento) y `cronograma-core/types.ts` (§Adjunto) — requiere añadir el
-  tipo al modelo de adjunto, en un archivo que otro agente tiene modificado.
+**Criterio acordado con el responsable:** no se inventan formularios ni se conectan
+selectores a medias; en su lugar se deja **marcado en pantalla el punto exacto donde se
+insertará cada tabla** cuando el flujo la requiera. El aviso se retira en el mismo cambio
+en que se conecta el selector real.
+
+Componente reusable: `src/components/TablaPorConectar.tsx`
+(`campo` + `tabla` + `nota`, borde punteado, punto ámbar, `title` explicativo).
+
+| Tabla | Dónde queda el aviso | Texto visible |
+|---|---|---|
+| 9 `gp_tipos_reunion_c` | Formulario de reunión · campo "Tipo de reunión" | Select deshabilitado `Por conectar · gp_tipos_reunion_c` + "La tabla existe en Supabase con 8 tipos (PMI)…" |
+| 11 `gp_tipos_avance_c` | Editor Gantt · bloque **Avance** (§6) | "Tipo de avance: por conectar · gp_tipos_avance_c — 6 tipos PMI; aquí se clasificará cada registro de avance con su sustento" |
+| 12 `gp_tipos_archivo_c` | Expediente del integrante · pestaña **Documentos Adjuntos** | "Clasificación del adjunto: por conectar · gp_tipos_archivo_c — 7 tipos PMI" |
+
+Se verificó el inventario completo: **9, 11 y 12 son las ÚNICAS tablas `gp_*` sin
+consumidor en la UI**. El resto de catálogos ya tiene selector conectado
+(prioridades, tipos de proyecto/dependencia/entregable, estados, roles, categorías).
+
+## 6 · Inventario REAL de tablas `gp_*` creadas en Supabase (20)
+
+Consultado en vivo con `pg_tables` sobre `qrusdsqgygfolxfrafyd` (17-nov-2026).
+
+**Catálogos (14, comparten forma `codigo·nombre·alias·descripcion·orden·activo`):**
+
+| Tabla | Filas | Consumidor en UI |
+|---|---|---|
+| `gp_tipos_proyecto_c` | seed | `TipoProyectoCatalogoSelect` |
+| `gp_roles_proyecto_c` | seed | asignación de roles |
+| `gp_roles_proyecto_v2_c` | seed | resolución de discrepancia (tabla 8) |
+| `gp_estados_proyecto_c` | seed | `PanelCicloVidaProyecto` / `CicloVidaEstadoChip` |
+| `gp_prioridades_c` | seed | `PrioridadCatalogoSelect` |
+| `gp_estados_ejecucion_c` | seed | `EstadoEjecucionCatalogoSelect` |
+| `gp_tipos_entregable_c` | seed | `TipoEntregableCatalogoSelect` |
+| `gp_estados_entregable_c` | seed | `EstadoEntregableCatalogoSelect` |
+| `gp_categorias_entregable_c` | seed | clasificación de entregables |
+| `gp_tipos_dependencia_c` | seed | `TipoDependenciaCatalogoSelect` |
+| `gp_tipos_reunion_c` (9) | 8 | **sin conectar** → aviso en UI |
+| `gp_estados_reunion_c` (10) | 6 | **CONECTADA** (`EstadoReunionCatalogoSelect`) |
+| `gp_tipos_avance_c` (11) | 6 | **sin conectar** → aviso en UI |
+| `gp_tipos_archivo_c` (12) | 7 | **sin conectar** → aviso en UI |
+
+**Operativas (6):** `gp_proyectos`, `gp_fases`, `gp_nodos_edt`, `gp_tareas`,
+`gp_personas`, `gp_equipos`.
+
+**Salvedades detectadas al inventariar (no se corrigieron: requieren DDL y autorización):**
+
+1. `gp_eventos_auditoria` **está referenciada por el código pero NO existe** en la base
+   (no aparece en `pg_tables`). Cualquier escritura de auditoría fallará hasta crearla.
+2. `gp_tipos_avance_c` es la **única** tabla `gp_*` sin `COMMENT ON TABLE` (el resto de las
+   20 sí lo tiene) ⇒ no cumple la convención de documentación en origen.
+3. `gp_rol_proyecto_actual` y `gp_roles_proyecto_v` no son tablas: son función y vista
+   (por eso no entran en el conteo de 20).
+
+## 7 · Tablas NO conectadas · cerrado, no se vuelve sobre ellas
+
+| Tabla | Motivo por el que no se conecta | Estado |
+|---|---|---|
+| 9 `gp_tipos_reunion_c` | El formulario de reunión no tenía campo de tipo; inventarlo era decisión de producto | Aviso en UI. Se conecta cuando el flujo pida clasificar reuniones |
+| 11 `gp_tipos_avance_c` | **No existe pantalla de registro de avances** (solo % calculado/rollup) | Aviso en UI. Se conecta cuando exista la bitácora de avances |
+| 12 `gp_tipos_archivo_c` | Requiere ampliar el modelo de adjunto (`cronograma-core/types.ts` §Adjunto) en archivos que otro agente está tocando | Aviso en UI. Se conecta al definir si el tipo va por adjunto |
+
+**Decisión de cierre:** estas tres quedan documentadas y **no se les da más vueltas**
+ni se abren hilos nuevos por ellas hasta que el flujo funcional las requiera.
+
+## 8 · Siguiente (fuera de este alcance)
+
+- **Tablas 19–34** (bloque `0003_gp_entidades_operativas_y_relaciones.sql`, 16 tablas):
+  aquí **no falta UI, falta DDL**. Esperando "aplica".
+- Corregir las 2 salvedades de §6 (`gp_eventos_auditoria`, `COMMENT` de
+  `gp_tipos_avance_c`) en el próximo bloque SQL autorizado.
+- Ruta **authenticated/RLS sin probar en vivo** (falta credencial de usuario del tenant).
+
+## 9 · Nota de concurrencia
+
+Otro agente trabaja en `modules/reuniones/` al mismo tiempo (`calendarExport.ts` nuevo y
+`reuniones.css` modificado). Los cambios de esta bitácora **no tocan** ese CSS ni ese
+archivo; en `ReunionesView.tsx` ambos cambios conviven (imports de calendario + estado
+por catálogo). El commit global `5c4204e8` (14:33) arrastró `estadoReunion.ts`,
+`EstadoReunionCatalogoSelect.tsx` y `gpCatalogosService.ts`.

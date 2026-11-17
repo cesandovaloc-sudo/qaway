@@ -16,6 +16,9 @@
   --border-light: #e2e8f0;
   --border-card: #e9eef5;
 
+  /* Token único de altura para botones de filtro del shell */
+  --gp-filter-btn-height: 46px;
+
   /* Semáforo de cumplimiento vibrante */
   --status-green-bar: #10b981;  --status-green-bg: #ecfdf5;  --status-green-text: #065f46;  --status-green-dot: #059669;
   --status-yellow-bar: #f59e0b; --status-yellow-bg: #fef3c7; --status-yellow-text: #92400e; --status-yellow-dot: #d97706;

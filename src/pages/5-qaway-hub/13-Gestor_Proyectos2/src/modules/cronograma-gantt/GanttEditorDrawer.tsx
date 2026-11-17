@@ -40,6 +40,7 @@ import type {
   DeliverableFormat,
 } from './CronogramaGanttView';
 import { getDeviationDays } from './scheduleMetrics';
+import TablaPorConectar from '../../components/TablaPorConectar';
 import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, EDT_NODE_LABELS, isContainerEdtType, normalizeEdtType, type EdtNodeType } from './edtPmbokModel';
 import { getLinkedTasksSummary } from '../cronograma-core/wbsHierarchy';
 import TipoDependenciaCatalogoSelect from '../../components/TipoDependenciaCatalogoSelect';
@@ -1681,6 +1682,12 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                         <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Avance</span>
                         <b style={{ fontSize: '13px', color: '#0f172a' }}>{activeItem.progress}%</b>
                       </div>
+                      {/* Tabla 11: el catálogo existe, la pantalla de registro de avances aún no. */}
+                      <TablaPorConectar
+                        campo="Tipo de avance"
+                        tabla="gp_tipos_avance_c"
+                        nota="6 tipos PMI; aquí se clasificará cada registro de avance con su sustento"
+                      />
                       {(isContainer || linkedTaskSummary) && (
                         <div
                           style={{

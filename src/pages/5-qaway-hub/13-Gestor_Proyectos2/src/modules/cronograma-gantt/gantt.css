@@ -9609,9 +9609,9 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .tabs-list .filter-card-btn {
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
+  height: var(--gp-filter-btn-height, 46px) !important;
+  min-height: var(--gp-filter-btn-height, 46px) !important;
+  max-height: var(--gp-filter-btn-height, 46px) !important;
   border-radius: 6px !important;
   padding: 2px 11px !important;
   background: #ffffff;
@@ -9648,7 +9648,7 @@ body.gantt-resizing {
   width: 155px !important;
   min-width: 140px !important;
   max-width: 165px !important;
-  height: 42px !important;
+  height: var(--gp-filter-btn-height, 46px) !important;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -9731,9 +9731,9 @@ body.gantt-resizing {
 }
 
 .gantt-v2 .tabs-list .filter-card-btn {
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
+  height: var(--gp-filter-btn-height, 46px) !important;
+  min-height: var(--gp-filter-btn-height, 46px) !important;
+  max-height: var(--gp-filter-btn-height, 46px) !important;
   padding: 2px 11px !important;
   background: #ffffff;
   border: 1px solid #cbd5e1;
@@ -9769,7 +9769,9 @@ body.gantt-resizing {
   width: 165px !important;
   min-width: 165px !important;
   max-width: 165px !important;
-  height: 42px !important;
+  height: var(--gp-filter-btn-height, 46px) !important;
+  min-height: var(--gp-filter-btn-height, 46px) !important;
+  max-height: var(--gp-filter-btn-height, 46px) !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
 }

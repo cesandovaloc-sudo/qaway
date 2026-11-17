@@ -144,12 +144,7 @@ function GestorProyectosApp() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((p: ProjectItem) => {
-            if (p.name && p.name.includes('MINEDU')) {
-              return { ...p, code: 'PRJ-QAW-2026', name: 'Proyecto Maestro · Operaciones Regionales' };
-            }
-            return p;
-          });
+          return parsed;
         }
       }
     } catch {
@@ -400,8 +395,18 @@ function GestorProyectosApp() {
       .then((remoteProjects) => {
         if (cancelled || remoteProjects.length === 0) return;
         setProjects((current) => {
-          const localOnly = current.filter((project) => !remoteProjects.some((remote) => remote.id === project.id));
-          return [...remoteProjects, ...localOnly];
+          const localOnly = current.filter(
+            (project) => project.id !== 'p1' && !remoteProjects.some((remote) => remote.id === project.id)
+          );
+          const merged = [...remoteProjects, ...localOnly];
+          try {
+            localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(merged));
+          } catch {}
+          return merged;
+        });
+        setActiveProjectId((curr) => {
+          if (remoteProjects.some((r) => r.id === curr)) return curr;
+          return remoteProjects[0]?.id || curr;
         });
       })
       .catch((error) => console.warn('[Gestor Projects] modo local:', error?.message || error));

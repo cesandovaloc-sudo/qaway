@@ -1,7 +1,11 @@
 -- ==============================================================================
 -- GESTOR DE PROYECTOS 2 · PROPUESTA 0004a — Helpers tenant + RLS tenant-scoped
 -- (adelanto del bloque RLS de entidades de 0004, aplicado a las tablas 13–18)
--- Fecha: 2026-11-17 | Estado: PROPUESTO — espera la palabra "aplica" del responsable
+-- Fecha: 2026-11-17 | Estado: APLICADO (17-nov) como migraciones `gp_rls_tenant_capas` +
+-- `gp_rls_tenant_politicas_entidades` — VARIANTE C REFINADA con permisos granulares
+-- (user_app_roles.permissions jsonb) y gp_personas.unidad_id; ver bitácora
+-- 20261117-aplicacion-0004a-rls-tenant-granular.md. Este archivo queda como fuente original
+-- (Variante A); el contenido aplicado difiere según el modelo refinado por el responsable.
 -- ==============================================================================
 -- Modelo declarado por el responsable (17-nov):
 --   · Admin de plataforma: acceso a TODO.

@@ -9559,9 +9559,9 @@ body.gantt-resizing {
   width: 180px !important;
   min-width: 180px !important;
   max-width: 180px !important;
-  height: 46px !important;
-  min-height: 46px !important;
-  max-height: 46px !important;
+  height: var(--gp-filter-btn-height, 46px) !important;
+  min-height: var(--gp-filter-btn-height, 46px) !important;
+  max-height: var(--gp-filter-btn-height, 46px) !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
 }
@@ -9576,9 +9576,9 @@ body.gantt-resizing {
   width: 192px !important;
   min-width: 192px !important;
   max-width: 192px !important;
-  height: 46px !important;
-  min-height: 46px !important;
-  max-height: 46px !important;
+  height: var(--gp-filter-btn-height, 46px) !important;
+  min-height: var(--gp-filter-btn-height, 46px) !important;
+  max-height: var(--gp-filter-btn-height, 46px) !important;
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
 }

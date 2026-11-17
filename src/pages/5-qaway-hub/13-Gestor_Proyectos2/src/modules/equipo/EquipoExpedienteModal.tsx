@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Integrante, AsignacionViva, SedeFrente, UnidadOrganizacional, RolSeguridad } from './types';
+import TablaPorConectar from '../../components/TablaPorConectar';
 import {
   ArrowLeft,
   Shield,
@@ -398,6 +399,12 @@ export default function EquipoExpedienteModal({
           {/* TAB 4: DOCUMENTOS ADJUNTOS */}
           {activeTab === 'documentos' && (
             <div style={{ maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Tabla 12: el catálogo existe, la clasificación de adjuntos aún no. */}
+              <TablaPorConectar
+                campo="Clasificación del adjunto"
+                tabla="gp_tipos_archivo_c"
+                nota="7 tipos PMI; al conectar se clasifican los documentos del expediente"
+              />
               <div style={{ background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '22px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>

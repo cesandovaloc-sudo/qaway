@@ -1,14 +1,22 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   CalendarDays,
+  CalendarPlus,
   ChevronLeft,
   ChevronRight,
+  Download,
   FileText,
   Clock,
   ArrowRight,
   MoreHorizontal,
   Check,
+  AlertTriangle,
+  MapPin,
+  Users,
+  X,
 } from 'lucide-react';
+import './reuniones2Calendar.css';
+import { generateGoogleCalendarUrl, downloadIcsFile } from './calendarExport';
 import type { Item, Status } from './Reuniones2View';
 
 export interface CalendarWeekDay {
@@ -64,6 +72,8 @@ interface CronogramaCalendarioViewProps {
   showBarLabels?: boolean;
   showBaseline?: boolean;
   showBarAvatars?: boolean;
+  onRescheduleItem?: (itemId: string, targetDateIso: string) => void;
+  onNotify?: (msg: string) => void;
 }
 
 const WEEK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -114,7 +124,49 @@ export default function CronogramaCalendarioView({
   showBarLabels = true,
   showBaseline = true,
   showBarAvatars = false,
+  onRescheduleItem,
+  onNotify,
 }: CronogramaCalendarioViewProps) {
+  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+  const [dayModalDate, setDayModalDate] = useState<string | null>(null);
+
+  // Detector de cruces/solapamientos entre elementos en la misma fecha y responsable o región
+  const findItemConflict = (target: Item, pool: Item[]): Item | undefined => {
+    const startA = (target.start || '').slice(0, 10);
+    const endA = (target.end || target.start || '').slice(0, 10);
+    if (!startA) return undefined;
+    return pool.find((other) => {
+      if (other.id === target.id) return false;
+      const startB = (other.start || '').slice(0, 10);
+      const endB = (other.end || other.start || '').slice(0, 10);
+      if (!startB) return false;
+      if (!(startA <= endB && startB <= endA)) return false;
+      const sameOwner = target.gestor && other.gestor && target.gestor !== 'Sin asignar' && target.gestor === other.gestor;
+      const sameRegion = target.region && other.region && target.region === other.region;
+      return Boolean(sameOwner || sameRegion);
+    });
+  };
+
+  const activeDateIso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(calDay).padStart(2, '0')}`;
+
+  const activeWeekDays = useMemo(() => {
+    const ref = new Date(calYear, calMonth, calDay);
+    const dow = (ref.getDay() + 6) % 7;
+    const monday = new Date(ref);
+    monday.setDate(ref.getDate() - dow);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return {
+        date: d,
+        iso,
+        dayNumber: d.getDate(),
+        label: WEEK_DAY_LABELS[i]?.slice(0, 3) || '',
+        isToday: iso === activeDateIso,
+      };
+    });
+  }, [calYear, calMonth, calDay, activeDateIso]);
 
   // Generación dinámica de semanas para el mes/año seleccionado
   const monthWeeks = useMemo(() => {
@@ -445,23 +497,47 @@ export default function CronogramaCalendarioView({
                   className="cal-week-row-grid"
                   style={{ minHeight: `${dynamicMinHeight}px` }}
                 >
-                  {/* Celdas de fondo con número de día */}
+                  {/* Celdas de fondo con número de día (Soporta Drag & Drop y clic para ver Agenda del Día) */}
                   {week.days.map((day, idx) => (
                     <div
                       key={idx}
-                      className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''}`}
+                      className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''} ${
+                        dragOverDate === day.iso ? 'r2-drag-over' : ''
+                      }`}
+                      onDragOver={(e) => {
+                        if (!onRescheduleItem) return;
+                        e.preventDefault();
+                        if (dragOverDate !== day.iso) setDragOverDate(day.iso);
+                      }}
+                      onDragLeave={() => {
+                        if (dragOverDate === day.iso) setDragOverDate(null);
+                      }}
+                      onDrop={(e) => {
+                        if (!onRescheduleItem) return;
+                        e.preventDefault();
+                        setDragOverDate(null);
+                        const itemId = e.dataTransfer.getData('text/plain');
+                        if (itemId) onRescheduleItem(itemId, day.iso);
+                      }}
                     >
-                      <span className="cal-num">{day.dayNumber}</span>
+                      <span
+                        className="cal-num r2-clickable-num"
+                        onClick={() => setDayModalDate(day.iso)}
+                        title={`Ver agenda del ${formatDatePE(day.iso)}`}
+                      >
+                        {day.dayNumber}
+                      </span>
                     </div>
                   ))}
 
-                  {/* Capa de Barras de Calendario con colores oficiales Gantt y sombra de Línea Base */}
+                  {/* Capa de Barras de Calendario con colores oficiales Gantt, Drag & Drop y detección de cruces */}
                   <div className="cal-week-events-overlay">
                     {evs.map((ev) => {
                       const isMajor = ev.kind === 'hito';
                       const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
                       const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
                       const isLate = ev.status === 'Con retraso';
+                      const conflict = findItemConflict(ev.item, matchingItems);
 
                       const barColorClass = isMajor
                         ? 'bar-major'
@@ -486,9 +562,17 @@ export default function CronogramaCalendarioView({
                           }}
                         >
                           <div
+                            draggable={Boolean(onRescheduleItem)}
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData('text/plain', ev.item.id);
+                            }}
                             className={`cal-gantt-bar ${barColorClass}`}
                             onClick={() => onSelectItem(ev.item)}
-                            title={`${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status}) | Línea Base: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}`}
+                            title={
+                              conflict
+                                ? `⚠️ Cruce de agenda con: ${conflict.code} · ${conflict.name} (${conflict.gestor}) | Arrastra para reprogramar`
+                                : `${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status}) | Línea Base: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}`
+                            }
                           >
                             {/* Barra de avance interior con física y color Gantt */}
                             <div
@@ -511,6 +595,14 @@ export default function CronogramaCalendarioView({
                               )}
                               <strong className="cal-gantt-code">{ev.code}</strong>
                               <span className="cal-gantt-name">{ev.name}</span>
+                              {conflict && (
+                                <span
+                                  className="r2-conflict-pill"
+                                  title={`Cruce de agenda con ${conflict.code} (${conflict.gestor})`}
+                                >
+                                  <AlertTriangle size={9} /> Cruce
+                                </span>
+                              )}
                               {showBarAvatars && (
                                 <span
                                   className="cal-gantt-pct"
@@ -550,90 +642,212 @@ export default function CronogramaCalendarioView({
           </div>
         )}
 
-        {/* 2. SUB-VISTA: SEMANA */}
+        {/* 2. SUB-VISTA: SEMANA (TimeGrid Semanal Real Lunes–Domingo) */}
         {calSubView === 'Semana' && (
-          <div className="cal-subview-semana">
-            <div className="cal-semana-headers">
-              {monthWeeks[0]?.days.map((d, i) => (
-                <div key={d.iso} className="cal-semana-col-title">
-                  {WEEK_DAY_LABELS[i]?.slice(0, 3)} {String(d.dayNumber).padStart(2, '0')}
+          <div className="r2-week-wrap">
+            <div className="r2-week-header">
+              <div className="r2-week-head-time">HORA</div>
+              {activeWeekDays.map((d) => (
+                <div
+                  key={d.iso}
+                  className={`r2-week-head-day ${d.isToday ? 'is-today' : ''}`}
+                  onClick={() => setDayModalDate(d.iso)}
+                  title={`Ver agenda del ${formatDatePE(d.iso)}`}
+                >
+                  <span>{d.label}</span>
+                  <b>{d.dayNumber}</b>
                 </div>
               ))}
             </div>
-            <div className="cal-semana-content">
-              {matchingItems.slice(0, 6).map((it) => {
-                const isMajor = it.kind === 'hito';
-                const isComplete = it.status === 'Completado' || it.status === 'Cumple';
-                const isProgress = it.status === 'En proceso' || it.status === 'En curso';
-                const isLate = it.status === 'Con retraso';
-                const barColorClass = isMajor
-                  ? 'bar-major'
-                  : isComplete
-                  ? 'bar-complete'
-                  : isProgress
-                  ? 'bar-progress'
-                  : isLate
-                  ? 'bar-late'
-                  : 'bar-pending';
 
-                return (
-                  <div
-                    key={it.id}
-                    className={`cal-gantt-bar ${barColorClass}`}
-                    onClick={() => onSelectItem(it)}
-                    style={{ marginBottom: 8, height: '32px' }}
-                  >
-                    <div
-                      className="cal-gantt-progress-fill"
-                      style={{ width: `${it.progress}%` }}
-                    />
-                    <div className="cal-gantt-content">
-                      {isMajor && <span className="cal-gantt-hito-badge">◆</span>}
-                      <strong className="cal-gantt-code">{it.code}</strong>
-                      <span className="cal-gantt-name">{it.name}</span>
-                      <span className="cal-gantt-pct">{it.progress}%</span>
+            <div className="r2-week-body">
+              <div className="r2-week-grid">
+                <div className="r2-time-col">
+                  {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
+                    <div key={h} className="r2-time-slot-label">
+                      {h}
                     </div>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+
+                {activeWeekDays.map((col) => {
+                  const dayItems = matchingItems.filter((it) => {
+                    const s = (it.start || '').slice(0, 10);
+                    const e = (it.end || it.start || '').slice(0, 10);
+                    return s && s <= col.iso && col.iso <= e;
+                  });
+
+                  return (
+                    <div
+                      key={col.iso}
+                      className={`r2-week-day-col ${dragOverDate === col.iso ? 'r2-drag-over' : ''}`}
+                      onDragOver={(e) => {
+                        if (!onRescheduleItem) return;
+                        e.preventDefault();
+                        if (dragOverDate !== col.iso) setDragOverDate(col.iso);
+                      }}
+                      onDragLeave={() => {
+                        if (dragOverDate === col.iso) setDragOverDate(null);
+                      }}
+                      onDrop={(e) => {
+                        if (!onRescheduleItem) return;
+                        e.preventDefault();
+                        setDragOverDate(null);
+                        const itemId = e.dataTransfer.getData('text/plain');
+                        if (itemId) onRescheduleItem(itemId, col.iso);
+                      }}
+                    >
+                      {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
+                        <div key={h} className="r2-week-hour-cell" />
+                      ))}
+
+                      <div className="r2-week-events-stack">
+                        {dayItems.map((it) => {
+                          const isMajor = it.kind === 'hito';
+                          const isComplete = it.status === 'Completado' || it.status === 'Cumple';
+                          const conflict = findItemConflict(it, matchingItems);
+
+                          return (
+                            <div
+                              key={it.id}
+                              draggable={Boolean(onRescheduleItem)}
+                              onDragStart={(e) => e.dataTransfer.setData('text/plain', it.id)}
+                              className={`r2-week-event-card ${
+                                isMajor ? 'is-hito' : isComplete ? 'is-complete' : ''
+                              }`}
+                              onClick={() => onSelectItem(it)}
+                              title={`${it.code} · ${it.name} (${it.gestor || 'Sin asignar'})`}
+                            >
+                              <strong>{it.code} · {it.name}</strong>
+                              <div className="r2-week-event-meta">
+                                <span>{it.progress}% · {it.region || 'General'}</span>
+                                {conflict && (
+                                  <span className="r2-conflict-pill" title={`Cruce con ${conflict.code}`}>
+                                    <AlertTriangle size={9} /> Cruce
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
 
-        {/* 3. SUB-VISTA: DÍA */}
-        {calSubView === 'Día' && (
-          <div className="cal-subview-dia">
-            <div className="cal-dia-head-row">
-              <h3>
-                {WEEK_DAY_LABELS[(new Date(calYear, calMonth, calDay).getDay() + 6) % 7]} {calDay} de {CAL_MONTH_NAMES[calMonth]}, {calYear}
-              </h3>
-              <span className="cal-dia-tag">Corte Oficial</span>
-            </div>
-            <div className="cal-dia-schedule">
-              {['08:00', '10:00', '12:00', '14:00', '16:00'].map((h, i) => (
-                <div key={h} className="cal-dia-slot-row">
-                  <span className="cal-dia-hour">{h}</span>
-                  <div className="cal-dia-event-box">
-                    {matchingItems[i] && (
+        {/* 3. SUB-VISTA: DÍA (Timeline Real de la Fecha Seleccionada) */}
+        {calSubView === 'Día' && (() => {
+          const dayItems = matchingItems.filter((it) => {
+            const s = (it.start || '').slice(0, 10);
+            const e = (it.end || it.start || '').slice(0, 10);
+            return s && s <= activeDateIso && activeDateIso <= e;
+          });
+
+          return (
+            <div className="r2-day-wrap">
+              <div className="r2-day-header">
+                <div>
+                  <h3>
+                    {WEEK_DAY_LABELS[(new Date(calYear, calMonth, calDay).getDay() + 6) % 7]} {calDay} de {CAL_MONTH_NAMES[calMonth]}, {calYear}
+                  </h3>
+                  <p>{dayItems.length} reuniones / entregables activos en esta jornada</p>
+                </div>
+                <span className="cal-dia-tag">Agenda de la Jornada</span>
+              </div>
+
+              {dayItems.length === 0 ? (
+                <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                  No hay reuniones ni actividades programadas para el {formatDatePE(activeDateIso)}.
+                </div>
+              ) : (
+                <div className="r2-day-list">
+                  {dayItems.map((it) => {
+                    const conflict = findItemConflict(it, matchingItems);
+                    return (
                       <div
-                        className="cal-gantt-bar bar-progress"
-                        onClick={() => { const target = matchingItems[i]; if (target) onSelectItem(target); }}
-                        style={{ height: '30px' }}
+                        key={it.id}
+                        className={`r2-day-card ${conflict ? 'has-conflict' : ''}`}
+                        onClick={() => onSelectItem(it)}
                       >
-                        <div className="cal-gantt-progress-fill" style={{ width: `${matchingItems[i].progress}%` }} />
-                        <div className="cal-gantt-content">
-                          <strong className="cal-gantt-code">{matchingItems[i].code}</strong>
-                          <span className="cal-gantt-name">{matchingItems[i].name}</span>
-                          <span className="cal-gantt-pct">{matchingItems[i].progress}%</span>
+                        <div className="r2-day-card-top">
+                          <div className="r2-day-card-title">
+                            <span className="cal-gantt-code">{it.code}</span>
+                            <strong>{it.name}</strong>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {conflict && (
+                              <span
+                                className="r2-conflict-pill"
+                                title={`Se cruza con ${conflict.code} · ${conflict.name}`}
+                              >
+                                <AlertTriangle size={10} /> Cruce con {conflict.code}
+                              </span>
+                            )}
+                            <span className="cal-dia-tag">{it.status} · {it.progress}%</span>
+                          </div>
+                        </div>
+
+                        <div className="r2-day-card-meta">
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Clock size={12} /> {formatDatePE(it.start)} – {formatDatePE(it.end || it.start)}
+                          </span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <Users size={12} /> {it.gestor || 'Sin asignar'}
+                          </span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <MapPin size={12} /> {it.region || 'Nacional'}
+                          </span>
+                        </div>
+
+                        <div className="r2-day-card-actions" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="r2-export-btn"
+                            onClick={() => {
+                              const url = generateGoogleCalendarUrl({
+                                id: it.id,
+                                title: `${it.code} · ${it.name}`,
+                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                location: it.region || 'Qaway Lab',
+                                startDate: it.start,
+                                endDate: it.end || it.start,
+                              });
+                              window.open(url, '_blank', 'noopener,noreferrer');
+                              onNotify?.('Abriendo Google Calendar...');
+                            }}
+                          >
+                            <CalendarPlus size={13} /> Google Calendar
+                          </button>
+                          <button
+                            type="button"
+                            className="r2-export-btn"
+                            onClick={() => {
+                              downloadIcsFile({
+                                id: it.id,
+                                title: `${it.code} · ${it.name}`,
+                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                location: it.region || 'Qaway Lab',
+                                startDate: it.start,
+                                endDate: it.end || it.start,
+                              });
+                              onNotify?.('Archivo .ics descargado');
+                            }}
+                          >
+                            <Download size={13} /> Descargar .ics
+                          </button>
                         </div>
                       </div>
-                    )}
-                  </div>
+                    );
+                  })}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Barra Lateral Derecha Institucional: Mini-calendario, Próximos Entregables y Leyenda */}
@@ -778,6 +992,113 @@ export default function CronogramaCalendarioView({
           </div>
         </div>
       </aside>
+
+      {/* Modal de Agenda del Día al hacer clic en cualquier fecha */}
+      {dayModalDate && (() => {
+        const modalItems = matchingItems.filter((it) => {
+          const s = (it.start || '').slice(0, 10);
+          const e = (it.end || it.start || '').slice(0, 10);
+          return s && s <= dayModalDate && dayModalDate <= e;
+        });
+
+        return (
+          <div className="r2-modal-overlay" onMouseDown={() => setDayModalDate(null)}>
+            <div className="r2-day-modal" onMouseDown={(e) => e.stopPropagation()}>
+              <div className="r2-day-modal-head">
+                <div>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', letterSpacing: '0.06em' }}>
+                    AGENDA DEL DÍA
+                  </span>
+                  <h3>{formatDatePE(dayModalDate)}</h3>
+                </div>
+                <button
+                  type="button"
+                  className="cal-minical-nav"
+                  onClick={() => setDayModalDate(null)}
+                  aria-label="Cerrar"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="r2-day-modal-body">
+                {modalItems.length === 0 ? (
+                  <div style={{ padding: '24px 12px', textAlign: 'center', color: '#64748b', fontSize: '12.5px' }}>
+                    No hay reuniones o actividades activas para el {formatDatePE(dayModalDate)}.
+                  </div>
+                ) : (
+                  modalItems.map((it) => {
+                    const conflict = findItemConflict(it, matchingItems);
+                    return (
+                      <div
+                        key={it.id}
+                        className={`r2-day-card ${conflict ? 'has-conflict' : ''}`}
+                        onClick={() => {
+                          setDayModalDate(null);
+                          onSelectItem(it);
+                        }}
+                      >
+                        <div className="r2-day-card-top">
+                          <div className="r2-day-card-title">
+                            <span className="cal-gantt-code">{it.code}</span>
+                            <strong>{it.name}</strong>
+                          </div>
+                          {conflict && (
+                            <span className="r2-conflict-pill" title={`Cruce con ${conflict.code}`}>
+                              <AlertTriangle size={10} /> Cruce
+                            </span>
+                          )}
+                        </div>
+                        <div className="r2-day-card-meta">
+                          <span><Clock size={12} /> {formatDatePE(it.start)} – {formatDatePE(it.end || it.start)}</span>
+                          <span><Users size={12} /> {it.gestor || 'Sin asignar'}</span>
+                          <span><MapPin size={12} /> {it.region || 'Nacional'}</span>
+                        </div>
+                        <div className="r2-day-card-actions" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="r2-export-btn"
+                            onClick={() => {
+                              const url = generateGoogleCalendarUrl({
+                                id: it.id,
+                                title: `${it.code} · ${it.name}`,
+                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                location: it.region || 'Qaway Lab',
+                                startDate: it.start,
+                                endDate: it.end || it.start,
+                              });
+                              window.open(url, '_blank', 'noopener,noreferrer');
+                              onNotify?.('Abriendo Google Calendar...');
+                            }}
+                          >
+                            <CalendarPlus size={13} /> Google Calendar
+                          </button>
+                          <button
+                            type="button"
+                            className="r2-export-btn"
+                            onClick={() => {
+                              downloadIcsFile({
+                                id: it.id,
+                                title: `${it.code} · ${it.name}`,
+                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                location: it.region || 'Qaway Lab',
+                                startDate: it.start,
+                                endDate: it.end || it.start,
+                              });
+                              onNotify?.('Archivo .ics descargado');
+                            }}
+                          >
+                            <Download size={13} /> Descargar .ics
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

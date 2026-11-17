@@ -1979,7 +1979,7 @@ export default function Reuniones2View({
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<
     'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
-  >(() => (perspective === 'equipo' ? 'directorio' : 'gantt'));
+  >(() => (perspective === 'equipo' ? 'directorio' : 'calendario'));
 
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
   const [equipoIntegrantes, setEquipoIntegrantes] = useState<any[]>([]);
@@ -6506,6 +6506,15 @@ export default function Reuniones2View({
                 <>
                   <button
                     type="button"
+                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('calendario')}
+                    title="Vista Calendario"
+                  >
+                    <CalendarDays size={14} />
+                    <span>Calendario</span>
+                  </button>
+                  <button
+                    type="button"
                     className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
                     onClick={() => handleViewModeChange('gantt')}
                     title="Vista Cronograma Gantt"
@@ -6530,15 +6539,6 @@ export default function Reuniones2View({
                   >
                     <LayoutDashboard size={14} />
                     <span>Kanban</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('calendario')}
-                    title="Vista Calendario Mensual"
-                  >
-                    <CalendarDays size={14} />
-                    <span>Calendario</span>
                   </button>
                   <button
                     type="button"
@@ -8350,7 +8350,7 @@ export default function Reuniones2View({
             />
           )}
 
-          {/* Presentación 4: Calendario Mensual */}
+          {/* Presentación 1: Calendario */}
           {viewMode === 'calendario' && (
             <CronogramaCalendarioView
               items={shown}
@@ -8372,6 +8372,31 @@ export default function Reuniones2View({
               showBarLabels={calShowBarLabels}
               showBaseline={calShowBaseline}
               showBarAvatars={showBarAvatars}
+              onNotify={notify}
+              onRescheduleItem={(itemId, targetDateIso) => {
+                setItems((prev) => {
+                  const target = prev.find((it) => it.id === itemId);
+                  if (!target) return prev;
+                  const oldStart = new Date(`${(target.start || targetDateIso).slice(0, 10)}T12:00:00`);
+                  const oldEnd = new Date(`${(target.end || target.start || targetDateIso).slice(0, 10)}T12:00:00`);
+                  const durationDays = Math.max(0, Math.round((oldEnd.getTime() - oldStart.getTime()) / 86400000));
+                  const newStart = new Date(`${targetDateIso}T12:00:00`);
+                  const newEnd = new Date(newStart);
+                  newEnd.setDate(newEnd.getDate() + durationDays);
+                  const newEndIso = newEnd.toISOString().slice(0, 10);
+
+                  const updated = prev.map((it) =>
+                    it.id === itemId ? { ...it, start: targetDateIso, end: newEndIso } : it
+                  );
+                  const recomputed = computeWbsHierarchy(updated, rawTasks);
+                  try {
+                    localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
+                    window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+                  } catch {}
+                  return recomputed;
+                });
+                notify(`Reprogramado al ${formatDatePE(targetDateIso)}`);
+              }}
             />
           )}
 

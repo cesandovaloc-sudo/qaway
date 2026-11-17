@@ -84,9 +84,10 @@ doc2/
 > BLOQUE B aplicado el mismo día (`0002` verbatim + 6 COMMENT ON TABLE; tablas 13–18 verificadas:
 > columnas exactas, 22 FKs ok, FK diferida del responsable creada, 4 índices únicos, anon 200+`[]`;
 > evidencia: `7-Bitacoras/20261117-aplicacion-bloque-b-0002-entidades.md`). **RLS del Bloque B
-> aplicada el mismo día por orden del responsable** — patrón de las tablas 1–9 en las 6 entidades
-> (4 políticas · `anon` sin política · script de verificación en verde: sin_rls=0, permisivas=0,
-> anon=0; evidencia: `7-Bitacoras/20261117-aplicacion-rls-entidades-bloque-b.md`). El estado del 16-nov queda como historia.
+> aplicada y refinada el mismo día** — del patrón 1–9 al **modelo tenant-scoped granular** del
+> responsable (`0004a`): roles `admin/editor/operativo/visor` + permisos delicados granulares +
+> `gp_personas.unidad_id`; script §0–§9 en verde + anon 200+`[]` en las 6 (evidencia:
+> `7-Bitacoras/20261117-aplicacion-0004a-rls-tenant-granular.md`). El estado del 16-nov queda como historia.
 >
 > **ESTADO REAL MEDIDO EL 16-NOV-2026** (evidencia: `7-Bitacoras/20261116-auditoria-4-catalogos-gp.md`):
 > existen **5 de 12** catálogos del BLOQUE A — `gp_estados_proyecto_c` (5), `gp_tipos_proyecto_c` (6),
