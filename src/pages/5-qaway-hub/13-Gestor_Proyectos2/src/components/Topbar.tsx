@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { ModuleKey, UserRole } from '../types';
 import { NotificationPopover } from './NotificationPopover';
+import { supabase } from '../services/supabaseClient';
 import {
   Bell,
   Check,
@@ -61,6 +62,83 @@ export default function Topbar({
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLDivElement | null>(null);
+  const [authProfile, setAuthProfile] = useState<{
+    name: string;
+    email: string;
+    roleLabel: string;
+    initials: string;
+  }>({
+    name: 'Cargando...',
+    email: '',
+    roleLabel: 'Sesión activa',
+    initials: '..',
+  });
+
+  useEffect(() => {
+    if (!supabase) return;
+    let alive = true;
+
+    const loadUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!alive) return;
+        if (!user) {
+          window.location.assign('/login');
+          return;
+        }
+        const { data: uRow } = await supabase
+          .from('users')
+          .select('full_name, last_name, email, role, is_platform_admin, tenant_id')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        let tenantName = '';
+        if (uRow?.tenant_id) {
+          const { data: tRow } = await supabase
+            .from('tenants')
+            .select('name')
+            .eq('id', uRow.tenant_id)
+            .maybeSingle();
+          tenantName = tRow?.name || '';
+        }
+
+        if (!alive) return;
+        const fullName = [uRow?.full_name, uRow?.last_name].filter(Boolean).join(' ').trim()
+          || (user.user_metadata?.full_name as string)
+          || user.email?.split('@')[0]
+          || 'Usuario';
+        const email = uRow?.email || user.email || '';
+        const roleLabel = uRow?.is_platform_admin
+          ? 'Super Administrador'
+          : tenantName
+            ? `${tenantName}${uRow?.role ? ` · ${uRow.role}` : ''}`
+            : (uRow?.role || 'Usuario');
+        const words = fullName.split(/\s+/).filter(Boolean);
+        const initials = (words.length >= 2
+          ? `${words[0][0]}${words[1][0]}`
+          : fullName.slice(0, 2)
+        ).toUpperCase();
+
+        setAuthProfile({ name: fullName, email, roleLabel, initials });
+      } catch {
+        // Silencioso en caso de error transitorio
+      }
+    };
+
+    loadUser();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        window.location.assign('/login');
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        loadUser();
+      }
+    });
+
+    return () => {
+      alive = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -143,11 +221,11 @@ export default function Topbar({
               boxShadow: '0 2px 6px rgba(0, 102, 255, 0.28)',
             }}
           >
-             CS
+            {authProfile.initials}
           </div>
           <div className="qm-topbar-profile-info">
-            <b>Carlos Sandoval</b>
-            <small>Coordinador General</small>
+            <b>{authProfile.name}</b>
+            <small>{authProfile.roleLabel}</small>
           </div>
           <ChevronDown
             size={14}
@@ -196,14 +274,14 @@ export default function Topbar({
                   flexShrink: 0,
                 }}
               >
-                CM
+                {authProfile.initials}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <b style={{ fontSize: '14px', color: '#0f172a', display: 'block', fontWeight: 700, lineHeight: 1.3 }}>
-                  Carlos Sandoval
+                  {authProfile.name}
                 </b>
                 <span style={{ fontSize: '12px', color: '#64748b', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                  csandoval.digere@gmail.com
+                  {authProfile.email}
                 </span>
                 <span
                   style={{
@@ -219,7 +297,7 @@ export default function Topbar({
                     letterSpacing: '0.2px',
                   }}
                 >
-                  Coordinador General
+                  {authProfile.roleLabel}
                 </span>
               </div>
             </div>
@@ -326,9 +404,12 @@ export default function Topbar({
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
                 }}
-                onClick={() => {
+                onClick={async () => {
                   setIsProfileMenuOpen(false);
-                  notify('Sesión cerrada en modo demostración');
+                  if (supabase) {
+                    await supabase.auth.signOut();
+                  }
+                  window.location.assign('/login');
                 }}
               >
                 <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#fee2e2', display: 'grid', placeItems: 'center', color: '#dc2626', flexShrink: 0 }}>

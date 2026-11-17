@@ -111,7 +111,7 @@ const SUPER_ADMIN_NAV = [
 
 // Navegación del Tenant Admin: mismo shell y mismo diseño, solo los módulos permitidos
 // para su empresa (se excluye el listado global de Empresas). No se duplica el panel.
-const TENANT_ADMIN_NAV = SUPER_ADMIN_NAV.filter((nav) => nav.id !== 'Empresas')
+const TENANT_ADMIN_NAV = SUPER_ADMIN_NAV.filter((nav) => nav.id === 'Usuarios' || nav.id === 'Suscripciones')
 
 // Navegación base del trabajador (editor/viewer/guest): su espacio y sus apps.
 // Usuarios y Configuración son EXCLUSIVAS de administrador (jamás otorgables);
@@ -2167,6 +2167,31 @@ function HubPanelContent({ canvasOnly = false }) {
   }, [anyShellOverlay, isTenantSwitcherOpen, isBrandUsersOpen, isProfileOpen, globalSearchQuery])
   // Contexto real (sesion + tenant) para las vistas que viven dentro del shell (30.X).
   const [panelAuth, setPanelAuth] = useState(null)
+  const [allowedAppSlugs, setAllowedAppSlugs] = useState(null)
+
+  useEffect(() => {
+    let alive = true
+    if (panelAuth?.isPlatformAdmin && !scopedTenant) {
+      setAllowedAppSlugs(null)
+      return
+    }
+    const targetId = scopedTenant?.id || panelAuth?.tenantId
+    if (!targetId) {
+      setAllowedAppSlugs([])
+      return
+    }
+    supabase
+      .from('tenant_app_subscriptions')
+      .select('status, app_catalog(slug)')
+      .eq('tenant_id', targetId)
+      .in('status', ['active', 'trialing'])
+      .then(({ data }) => {
+        if (!alive) return
+        const slugs = (data || []).map((r) => r.app_catalog?.slug).filter(Boolean)
+        setAllowedAppSlugs(slugs)
+      })
+    return () => { alive = false }
+  }, [panelAuth?.isPlatformAdmin, panelAuth?.tenantId, scopedTenant?.id])
   useEffect(() => {
     let alive = true
     ;(async () => {
@@ -2579,7 +2604,11 @@ function HubPanelContent({ canvasOnly = false }) {
                 <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">Apps</span>
                 <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-[var(--hub-faint)] group-hover:text-white/80 transition-transform duration-200" />
               </button>
-              <AppSwitcherDropdown isOpen={isWaffleOpen} onClose={() => setIsWaffleOpen(false)} />
+              <AppSwitcherDropdown
+                isOpen={isWaffleOpen}
+                onClose={() => setIsWaffleOpen(false)}
+                allowedAppSlugs={allowedAppSlugs}
+              />
             </div>
 
             {/* Tenant Global Switcher Pill: plataforma elige la marca ("ver como");
@@ -3011,6 +3040,7 @@ function HubPanelContent({ canvasOnly = false }) {
                 <AplicacionesModule
                   tenantId={effectiveTenantId}
                   session={panelAuth.session}
+                  allowedAppSlugs={allowedAppSlugs}
                 />
               ) : (
                 <div className="py-24 text-center">

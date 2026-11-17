@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { X, Building2, Building, ShieldCheck, MapPin, User, Check, Layers } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { X, Building2, Building, ShieldCheck, MapPin, User, Check, Layers, AlertTriangle } from 'lucide-react';
 import { createGestorUnit, type GestorUnit, type GestorUnitType } from '../../services/gestorOrganizacionService';
 
 interface SedeNuevaModalProps {
@@ -42,11 +42,18 @@ export default function SedeNuevaModal({
   const [responsable, setResponsable] = useState('');
   const [direccion, setDireccion] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  // Etapa 4: los fallos de persistencia se MUESTRAN — sin fallback local silencioso.
+  const [errorGuardado, setErrorGuardado] = useState('');
 
   // Lista de sedes superiores elegibles (matrices regionales o sedes centrales)
   const sedesSuperiores = useMemo(() => {
     return unidadesExistentes.filter((u) => u.unitType === 'central' || u.unitType === 'dre' || !u.unitType);
   }, [unidadesExistentes]);
+
+  // Reinicia el error al reabrir el modal (los datos locales siguen intactos).
+  useEffect(() => {
+    if (isOpen) setErrorGuardado('');
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -83,26 +90,14 @@ export default function SedeNuevaModal({
       onClose();
     } catch (err) {
       console.error('Error al guardar nueva sede:', err);
-      // Fallback local
-      if (onSave) {
-        onSave({
-          id: `unit-local-${Date.now()}`,
-          tenantId: null,
-          parentUnitId: unitType === 'central' ? null : (parentUnitId || null),
-          name: nombre.trim(),
-          code: generatedCode,
-          unitType: unitType,
-          region: region,
-          macroregion: macro,
-          address: direccion.trim() || null,
-          status: 'active',
-          ...(responsable.trim() ? { gestor: responsable.trim() } : {}),
-          progress: 0,
-          complianceStatus: 'En proceso',
-          metadata: {},
-        });
-      }
-      onClose();
+      // Etapa 4: SIN fallback local. La operación debía persistir en Supabase;
+      // fingir éxito dejaría una sede huérfana que desaparecería al recargar.
+      // El modal permanece abierto y se muestra el motivo real del fallo.
+      setErrorGuardado(
+        err instanceof Error && err.message
+          ? `No se pudo guardar la sede: ${err.message}`
+          : 'No se pudo guardar la sede. Verifica tu sesión y permisos, e inténtalo de nuevo.',
+      );
     } finally {
       setIsSaving(false);
     }
@@ -190,6 +185,26 @@ export default function SedeNuevaModal({
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '72vh', overflowY: 'auto' }}>
+          {/* Etapa 4: banner de error de persistencia (sin fallback local) */}
+          {errorGuardado !== '' && (
+            <div
+              style={{
+                padding: '10px 14px',
+                borderRadius: '8px',
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#b91c1c',
+                fontSize: '12px',
+                fontWeight: 600,
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'flex-start',
+              }}
+            >
+              <AlertTriangle size={15} color="#b91c1c" style={{ flexShrink: 0, marginTop: '1px' }} />
+              <span>{errorGuardado}</span>
+            </div>
+          )}
           {/* Nivel / Tipo de Sede: ORDEN JERÁRQUICO ESTRICTO 1° Central -> 2° Regional -> 3° Operativa */}
           <div>
             <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>

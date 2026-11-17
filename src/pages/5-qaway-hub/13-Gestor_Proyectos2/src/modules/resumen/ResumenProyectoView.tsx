@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import '../cronograma-gantt/gantt.css';
 import './resumen.css';
 import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
+import PanelCicloVidaProyecto from '../../components/PanelCicloVidaProyecto';
 import {
   Activity,
   AlertTriangle,
@@ -75,10 +76,22 @@ export default function ResumenProyectoView({
   onActions,
   userRole = 'gestor',
   onOpenCreateProject,
+  proyecto,
+  onEstadoCambiado,
 }: {
   onActions?: (h: any) => void;
   userRole?: 'gestor' | 'coordinador';
   onOpenCreateProject?: () => void;
+  /** Etapa 6.3: proyecto activo (para el chip de estado y el menú de dirección). */
+  proyecto?: {
+    id: string;
+    name?: string;
+    code?: string;
+    estadoCodigo?: string | null | undefined;
+    tipoProyectoCodigo?: string | null | undefined;
+  } | undefined;
+  /** Tras una transición exitosa (persistida en Supabase por la RPC atómica). */
+  onEstadoCambiado?: (proyectoId: string, estadoNuevo: string) => void;
 }) {
   const engine = useTableEngine<(typeof DEMO_UGEL)[0]>({ tableId: 'resumen-ugel', columns: RESUMEN_COLUMNS, rows: DEMO_UGEL });
 
@@ -297,6 +310,16 @@ export default function ResumenProyectoView({
             </div>
           </div>
           <div className="head-actions">
+            {/* Etapa 6.3 · Ciclo de vida del proyecto: chip de estado + menú de
+                acciones de dirección (solo roles autorizados — fail-closed).
+                El estado vive aquí (ficha), NO en Configuración (solo lectura). */}
+            {proyecto && (
+              <PanelCicloVidaProyecto
+                proyecto={proyecto}
+                onEstadoCambiado={onEstadoCambiado}
+                notify={notify}
+              />
+            )}
             <button
               type="button"
               className="btn secondary"

@@ -6,7 +6,12 @@
 --   · se eliminan gp_persona_cuentas_r (vive en gp_personas.user_id)
 --   · se eliminan gp_empresa_miembros_r (la membresía la gobierna public.user_app_roles)
 --   · gp_proyecto_unidades_r apunta a public.gestor_unidades(id) con una sola columna unidad_id
+--   · (v2.2) unidad_id es text: coincide con gestor_unidades.id (TEXT en vivo,
+--     verificado 14-nov); misma corrección aplicada a gp_nodos_edt.sede_unidad_id en 0002
 -- Tablas de este archivo: 16 (8 operativas + 8 relaciones; las 2 de control vienen incluidas)
+-- (M-7) PRERREQUISITOS: 0002 aplicado y public.gestor_unidades existente
+-- (supabase\03_gestor_unidades.sql, id = text — v2.2): gp_proyecto_unidades_r
+-- tiene FK a ella con unidad_id text.
 -- ==============================================================================
 
 -- Entregables verificables
@@ -329,7 +334,7 @@ CREATE TABLE IF NOT EXISTS public.gp_proyecto_unidades_r (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   empresa_id uuid REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   proyecto_id uuid NOT NULL REFERENCES public.gp_proyectos(id) ON UPDATE CASCADE ON DELETE CASCADE,
-  unidad_id uuid NOT NULL REFERENCES public.gestor_unidades(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  unidad_id text NOT NULL REFERENCES public.gestor_unidades(id) ON UPDATE CASCADE ON DELETE CASCADE, -- (v2.2: PK de gestor_unidades = text, verificado 14-nov)
   rol_alcance text, -- principal/secundaria/intervencion
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now(),

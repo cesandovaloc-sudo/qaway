@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { exigirContextoEscritura, exigirContextoLectura, ErrorSesion } from './contextoSesion';
 
 export type GestorUnitType =
   | 'central'
@@ -76,8 +77,14 @@ const mapMember = (row: any): GestorUnitMember => ({
 });
 
 /**
- * Data-only organization service. It intentionally receives tenantId explicitly
- * until the Hub authentication/context integration is approved.
+ * Etapa 4: la identidad ya NO se recibe por parámetro. El parámetro `tenantId`
+ * es solo un FILTRO opcional validado contra la sesión real del Hub:
+ *  · Plataforma (public.users.is_platform_admin): todas las unidades, o las del
+ *    tenant pedido si se filtra.
+ *  · Empresa autorizada (user_can_use_app 'gestor-proyectos'): SUS unidades +
+ *    el catálogo nacional (251 semillas con tenant_id NULL, solo lectura).
+ *    Nunca unidades privadas de otra empresa.
+ *  · Sin sesión / sin acceso a la app / filtro ajeno: ErrorSesion (fail-closed).
  */
 /**
  * P1 (gstack 08): dedup de peticiones en vuelo por recurso (misma firma ⇒ misma promesa compartida).
@@ -87,8 +94,19 @@ const inFlightUnitMembers = new Map<string, Promise<GestorUnitMember[]>>();
 const inFlightProjectUnits = new Map<string, Promise<GestorProjectUnit[]>>();
 
 export async function listGestorUnits(tenantId?: string | null): Promise<GestorUnit[]> {
-  if (!supabase) return [];
+  if (!supabase) return []; // modo local explícito: no hay datos que filtrar (fail-closed)
   const db = supabase;
+  const ctx = await exigirContextoLectura();
+  const pedido = typeof tenantId === 'string' && tenantId.trim() !== '' ? tenantId.trim() : null;
+  if (!ctx.esPlataforma) {
+    if (pedido !== null && pedido !== ctx.tenantId) {
+      throw new ErrorSesion(
+        'TENANT_AJENO',
+        `El tenantId solicitado ("${pedido}") no es la empresa autenticada ("${ctx.tenantId ?? 'sin tenant'}"): ` +
+        'la identidad real no puede sustituirse por parámetro.',
+      );
+    }
+  }
   const key = `tenant:${tenantId ?? 'all'}`;
   const existing = inFlightUnits.get(key);
   if (existing) return existing;
@@ -98,7 +116,17 @@ export async function listGestorUnits(tenantId?: string | null): Promise<GestorU
       .from('gestor_unidades')
       .select('id,tenant_id,parent_unit_id,name,code,unit_type,region,macroregion,address,status,metadata')
       .order('name');
-    if (tenantId) query = query.eq('tenant_id', tenantId);
+    if (ctx.esPlataforma) {
+      if (pedido !== null) query = query.eq('tenant_id', pedido);
+    } else if (ctx.tenantId !== null) {
+      // Empresa: propias + catálogo nacional (tenant NULL). Filtro complementario
+      // a RLS (defensa en profundidad + UX); la garantía final es RLS (0006b).
+      // tenant_id es uuid-text del perfil: sin caracteres que rompan el filtro or.
+      query = query.or(`tenant_id.is.null,tenant_id.eq.${ctx.tenantId}`);
+    } else {
+      // Inalcanzable (evaluarLectura lo deniega), guardia explícita fail-closed.
+      throw new ErrorSesion('SIN_ACCESO_APP', 'La cuenta autenticada no tiene empresa asignada.');
+    }
     const { data, error } = await query;
     if (error) throw error;
     return (data ?? []).map(mapUnit);
@@ -169,13 +197,46 @@ export async function listGestorProjectUnits(projectId: string): Promise<GestorP
   }
 }
 
+/** Id NUEVO con randomUUID (colisión ⇒ error explícito; jamás reutiliza ids). */
+function generarIdUnidad(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return `unit-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e12).toString(36)}`;
+}
+
+/**
+ * Etapa 4 — creación con la sesión real del Hub:
+ *  · INSERT puro (NUNCA upsert): jamás sobrescribe una unidad existente
+ *    (p. ej. una de las 251 semillas); colisión de id/code ⇒ error explícito.
+ *  · Empresa: tenant_id = empresa AUTENTICADA (obligatorio). El tenantId del
+ *    parámetro, si viene, solo se acepta si COINCIDE — nunca lo sustituye.
+ *  · Plataforma: puede fijar tenant explícito (o NULL ⇒ catálogo nacional).
+ *  · Sin cliente / sin sesión / sin acceso / rol insuficiente: ErrorSesion.
+ *  · Fallo de BD: se PROPAGA. Sin fallback local silencioso: la operación debía
+ *    persistir; fingir éxito dejaría datos huérfanos en la UI.
+ */
 export async function createGestorUnit(unit: Partial<GestorUnit>): Promise<GestorUnit> {
-  const newId = unit.id || `unit-${Date.now().toString(36)}-${Math.floor(Math.random() * 1000)}`;
+  if (!supabase) {
+    throw new ErrorSesion(
+      'CLIENTE_INDISPONIBLE',
+      'No hay cliente Supabase disponible: la unidad no puede persistirse.',
+    );
+  }
+  const tenantParam = typeof unit.tenantId === 'string' && unit.tenantId.trim() !== '' ? unit.tenantId.trim() : null;
+  const ctx = await exigirContextoEscritura(tenantParam);
+  const tenantIdFinal = ctx.esPlataforma ? tenantParam : ctx.tenantId;
+  if (!ctx.esPlataforma && tenantIdFinal === null) {
+    throw new ErrorSesion(
+      'SIN_ACCESO_APP',
+      'La empresa autenticada no tiene tenant asignado: no se puede crear la unidad.',
+    );
+  }
+
+  const newId = typeof unit.id === 'string' && unit.id.trim() !== '' ? unit.id.trim() : generarIdUnidad();
   const cleanCode = (unit.code || unit.name?.replace(/\s+/g, '-').toUpperCase() || `UNIT-${Date.now()}`).trim();
 
   const row = {
     id: newId,
-    tenant_id: unit.tenantId ?? null,
+    tenant_id: tenantIdFinal,
     parent_unit_id: unit.parentUnitId ?? null,
     name: unit.name?.trim() || 'Nueva Sede',
     code: cleanCode,
@@ -193,21 +254,19 @@ export async function createGestorUnit(unit: Partial<GestorUnit>): Promise<Gesto
     updated_at: new Date().toISOString(),
   };
 
-  if (supabase) {
-    const { data, error } = await supabase
-      .from('gestor_unidades')
-      .upsert(row, { onConflict: 'id' })
-      .select('id,tenant_id,parent_unit_id,name,code,unit_type,region,macroregion,address,status,metadata')
-      .single();
-
-    if (!error && data) {
-      inFlightUnits.clear();
-      return mapUnit(data);
-    }
+  const { data, error } = await supabase
+    .from('gestor_unidades')
+    .insert(row)
+    .select('id,tenant_id,parent_unit_id,name,code,unit_type,region,macroregion,address,status,metadata')
+    .single();
+  if (error) {
+    throw new Error(`No se pudo crear la unidad: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error('No se pudo crear la unidad: la base de datos no devolvió la fila insertada.');
   }
 
-  // Fallback si supabase no responde o modo offline
   inFlightUnits.clear();
-  return mapUnit(row);
+  return mapUnit(data);
 }
 

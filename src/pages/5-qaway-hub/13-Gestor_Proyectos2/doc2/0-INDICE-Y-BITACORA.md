@@ -3,7 +3,7 @@
 **Este es el archivo que se abre primero.** Dice qué es cada documento, en qué orden se leen,
 en qué etapa estamos y cuál es el siguiente archivo a crear.
 
-Última actualización: **12-11-2026**
+Última actualización: **15-11-2026**
 
 ---
 
@@ -65,13 +65,81 @@ doc2/
 | **ETAPA 2C-bis** | **Evaluación de pertinencia frente al Hub** | ✅ **3.6 entregado** |
 | Aprobación | Recorte 41 → 34 tablas | ✅ aplicado en `0001`–`0003` de 3.7 (`0004` RLS queda para el final) |
 | **ETAPA 3** | **Creación de las 34 tablas en Supabase, una por una** | 🟡 **en curso — bloque `4-`** |
-| ETAPA 2D | Integración real con el Hub (sesión compartida, slug en `app_catalog`, RLS activa) | ⬜ no iniciada |
+| **ETAPA 4** | **Unidades seguras e integradas con el Hub** (implementación definitiva: cliente/sesión compartida, `contextoSesion`, servicios fail-closed, `0004` v3, `0006a`/`0006b`, pruebas, `3.9`) | 🟢 **entregado — pendiente de aplicación SQL y verificación en vivo (procedimiento en `3.9`)** |
+| ETAPA 2D | Integración real con el Hub (sesión compartida, slug en `app_catalog`, RLS activa) | 🟢 absorbida por ETAPA 4 (queda la verificación en vivo) |
+| **ETAPA 5** | **Creación progresiva de tablas `gp_*`** (tracker `5.2`) | 🟡 tabla 4 `gp_prioridades_c` APROBADA (SQL `0007` + paquete `5.5`) — pendiente de aplicación y verificación en vivo; tabla 5 congelada (`5.4` §3) |
+| **ETAPA 6** | **Vinculación de catálogos GP con la app** (`doc2/6.1`) | 🟡 6.1 entregada (selector de prioridad ← `gp_prioridades_c`, pendiente de verificación viva); **6.2 arquitectura APROBADA** y **6.3 IMPLEMENTADA** (`doc2/6.3`: clasificación + ciclo de vida + permisos reales, 44/44 pruebas del núcleo, SQL pendiente de aplicación manual); **6.4 AUDITADA Y EMPAQUETADA** (`doc2/6.4`: paquete único con las 12 migraciones en orden definitivo FASE 0-4, diagnósticos D, verificaciones V, riesgos R-1..R-10, recuperación y checklist — cero correcciones de contenido, `0011` opcional) |
 
 ### Siguiente acción concreta
 
-> Aplicar el §7 de `3.6` a `3.1`–`3.5` y a los 4 SQL + backfill.
-> Resultado esperado: **34 tablas propias** (hoy 41), 6 helpers de RLS nuevos y el bug de
-> `gp_is_project_member` corregido. **No se ejecuta nada en Supabase.**
+> **ESTADO REAL MEDIDO EL 16-NOV-2026** (evidencia: `7-Bitacoras/20261116-auditoria-4-catalogos-gp.md`):
+> existen **5 de 12** catálogos del BLOQUE A — `gp_estados_proyecto_c` (5), `gp_tipos_proyecto_c` (6),
+> `gp_estados_ejecucion_c` (6), `gp_prioridades_c` (4) y `gp_roles_proyecto_c` (6, creada el 16-nov,
+> marcada DEUDA en `0013`) — con RLS activa y el patrón del Hub. Además se creó
+> `gp_roles_proyecto_v2_c` (4 roles internacionales owner/manager/member/viewer + alias en
+> español), que es el catálogo canónico a partir de ahora.
+> (lectura con `user_can_use_app('gestor-proyectos')`, escritura con `is_platform_admin()`).
+> La discrepancia de `gp_roles_proyecto_c` queda **disuelta** (no existía y ya se creó limpia). `0007` y `0009`
+> ya están reflejados en vivo; `0008` deja de ser necesario. `0004` fue **corregido** para no
+> duplicar ni ampliar políticas ⇒ **ya es aplicable**. Por tanto, la secuencia FASE por FASE de
+> `6.4` sigue siendo válida, pero debe omitir lo que ya está aplicado (`0001` tablas 1-4, `0007`,
+> `0009`) y puede saltar `0008`.
+>
+> **Responsable:**
+> **1) Prerrequisitos de la Etapa 4** (procedimiento exacto en `3.9`): aplicar en
+> Supabase, en este orden, los SQL de `3.7-SQL-propuesto-sin-ejecutar/` —
+> `20261114_0006a` (registro en `app_catalog`) → `20261114_0005` (columna `orden`)
+> → `20261114_0006b` (RLS definitiva de `gestor_unidades`) — y después `0004`
+> (v3, cuando toque la capa `gp_*`). Queries de contraste: `5.4` §1.
+> **2) Etapa 5 — creación progresiva de tablas:** aplicar la tabla 4
+> `gp_prioridades_c` (APROBADA) con el paquete completo
+> **`5.5-Paquete-aplicacion-tabla-4-gp_prioridades_c.md`** (consulta previa → SQL
+> `0007` → verificaciones V-1..V-8 → criterios exactos → registro). No tocar
+> `gp_roles_proyecto_c` (tabla 5, **congelada** por discrepancia — dump de
+> contraste y decisiones en `5.4` §3). Tras validar la tabla 4, continuar con la
+> tabla 6 `gp_tipos_dependencia_c`.
+> **3) Etapa 6 — vinculación de catálogos con la app** (`doc2/6.1`): integración de
+> lectura entregada (selector de prioridad ← `gp_prioridades_c` vía servicio con el
+> cliente compartido). Para VERLA funcionar en producción: aplicar `0007` (punto 2),
+> ejecutar la query de acceso de `6.1` §4 y comprobar el hover/Network según `6.1` §6.
+> El resto de catálogos tiene su punto de conexión mapeado y decisiones abiertas
+> (`6.1` §7). Nada se declara operativo sin verificación viva.
+> **4) Etapa 6.2 — arquitectura de configuración y ciclo de vida** (`doc2/6.2`):
+> ✅ **APROBADA** por el responsable (decisiones ratificadas: estado se cambia desde
+> la FICHA Resumen, no desde Configuración; historial reutiliza `gp_eventos_auditoria`
+> sin tablas nuevas; tipo = clasificación administrativa sin efecto automático en
+> EDT/cronograma; resolver `5.4 §3` (roles) de forma no destructiva antes del Paso 3).
+> **5) Etapa 6.3 — implementación de clasificación y ciclo de vida** (`doc2/6.3`,
+> ✅ ENTREGADA): servicio central `gpCicloVidaService` (núcleo puro probado + única
+> vía de escritura = RPC atómica), componentes `TipoProyectoCatalogoSelect` /
+> `CicloVidaEstadoChip` / `PanelCicloVidaProyecto`, cableado en creación del
+> proyecto, ficha Resumen y Configuración (Clasificación + Estado solo lectura +
+> Equipo y accesos con banner de bloqueo), historial en Auditoría, **44/44
+> pruebas** del núcleo (módulo 192/194; 2 fallos PRE-existentes de cronograma,
+> fuera de alcance) y **3 SQL listos, SIN EJECUTAR**:
+> `20261115_0008` (resolución aditiva roles 9↔10 + seed con `permisos jsonb`) →
+> `20261115_0009` (seed 6 tipos) → `20261115_0010` (RPCs SECURITY DEFINER
+> atómicas). ⚠️ **SUPERADO por 6.4:** la cadena `0006a → 0005 → 0006b → 0004 →
+> 0008 → 0009 → 0010` propuesta aquí resultó INCOMPLETA en la auditoría 6.4
+> (omitía `0007`, `0001`, `0002`, `0003` y colocaba `0004` antes de sus tablas).
+> NO aplicar tal cual: el orden definitivo y el paquete verbatim están en
+> `doc2/6.4` §1 y §4.
+> **6) Etapa 6.4 — paquete de ejecución en producción** (`doc2/6.4`,
+> ✅ ENTREGADO): auditoría íntegra de los 12 SQL (`0006a`, `0005`, `0006b`,
+> `0001`, `0007`, `0008`, `0009`, `0002`, `0003`, `0004`, `0010` + `0011`
+> opcional): **cero operaciones destructivas sobre datos**; inconsistencias
+> resueltas por ORDEN (R-1: `0007` antes de `0002` por el FK de prioridad;
+> R-2: `0008` antes de `0003` por `UNIQUE(codigo)`; `0002`/`0003` faltaban en
+> TODA secuencia anterior y `0010` §1 aborta sin ellas) y hallazgo R-4
+> (bypass de `estado_codigo` por UPDATE directo) mitigado con `0011` opcional.
+> PRÓXIMA ACCIÓN DEL RESPONSABLE: aplicar el paquete `6.4` FASE por FASE —
+> FASE 0 diagnósticos D-1..D-8 con dumps de respaldo → FASE 1 `0006a` →
+> acciones admin del Hub (suscripción + rol) → `0005` → `0006b` → FASE 2
+> `0001` → `0007` → `0008` → `0009` → FASE 3 `0002` → `0003` → `0004` →
+> FASE 4 `0010` → (`0011` si se decide) — con las verificaciones V de `6.4`
+> §5, cada migración envuelta en BEGIN/COMMIT (`6.4` §7) y todo registrado en
+> `7-Bitacoras/`. Backfill `0100` y cutover quedan para la Etapa 7.
+> **Sin evidencia real pegada en bitácora, nada se marca ✅.**
 
 ---
 
@@ -82,7 +150,7 @@ doc2/
 | `4-Creacion-guiada-en-Supabase/` | **EN USO:** las 34 tablas, una por una, ejecutadas por el responsable en el SQL Editor. Arranca en `4.1-Paso-0-Verificar-terreno.md`. | 🟡 en curso |
 | `5-Implementacion-y-cutover/` | Plan de cutover: doble escritura, verificación de conteos, retiro de `localStorage`. | ⬜ reservado |
 | `6-Integracion-con-el-Hub/` | ETAPA 2D: sesión compartida con el Hub, slug `gestor-proyectos` en `app_catalog`, activación de RLS, resolución de usuario en el Gestor 2. | ⬜ reservado |
-| `7-Bitacoras/` | Registro de ejecuciones reales en Supabase (fecha, migración, resultado, rollback). | ⬜ reservado |
+| `7-Bitacoras/` | Registro de ejecuciones reales en Supabase (fecha, migración, resultado, rollback). | 🟡 en uso — primer registro: `20261116-auditoria-4-catalogos-gp.md` |
 
 **Nada se crea fuera de estos bloques.** Si aparece un tema nuevo, se crea `N-<Nombre>/` con su `N.1`.
 

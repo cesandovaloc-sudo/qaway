@@ -8,7 +8,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock3,
+  ExternalLink,
   Filter,
+  FolderKanban,
   Link2,
   MoreHorizontal,
   Plus,
@@ -137,6 +139,19 @@ const INITIAL_APPS = [
     updatedAt: "15 Ago 2026",
     icon: Settings2,
     tone: "slate",
+  },
+  {
+    id: "gestor_proyectos",
+    name: "Gestor de Proyectos 2",
+    slug: "gestor_proyectos",
+    route: "/gestor_proyectos",
+    description: "Gestión territorial de proyectos, cronograma Gantt y sedes.",
+    status: "active",
+    activeCompanies: 1,
+    basePlan: "Premium",
+    updatedAt: "16 Nov 2026",
+    icon: FolderKanban,
+    tone: "blue",
   },
 ];
 
@@ -275,9 +290,21 @@ const PLAN_LABEL = { basico: "Básico", intermedio: "Intermedio", premium: "Prem
 
 const EXTRA_META = {
   blog: { description: "Contenido y publicaciones digitales.", icon: BookOpen, tone: "slate" },
+  gestor_proyectos: {
+    description: "Gestión territorial de proyectos, cronograma Gantt y sedes.",
+    icon: FolderKanban,
+    tone: "blue",
+    route: "/gestor_proyectos",
+  },
+  "gestor-proyectos": {
+    description: "Gestión territorial de proyectos, cronograma Gantt y sedes.",
+    icon: FolderKanban,
+    tone: "blue",
+    route: "/gestor_proyectos",
+  },
 };
 
-export default function AplicacionesModule({ tenantId, session }) {
+export default function AplicacionesModule({ tenantId, session, allowedAppSlugs = null }) {
   const [apps, setApps] = useState(INITIAL_APPS);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -346,8 +373,9 @@ export default function AplicacionesModule({ tenantId, session }) {
             updatedAt: latestByApp[c.id]
               ? new Date(latestByApp[c.id]).toLocaleDateString("es-PE", { day: "numeric", month: "short" })
               : "—",
-            icon: meta?.icon || Link2,
-            tone: meta?.tone || "slate",
+            icon: meta?.icon || (c.slug?.includes("gestor") ? FolderKanban : Link2),
+            tone: meta?.tone || (c.slug?.includes("gestor") ? "blue" : "slate"),
+            route: meta?.route || (c.slug?.includes("gestor") ? "/gestor_proyectos" : undefined),
           };
         });
 
@@ -367,6 +395,9 @@ export default function AplicacionesModule({ tenantId, session }) {
     const normalized = query.trim().toLowerCase();
 
     return apps.filter((app) => {
+      if (Array.isArray(allowedAppSlugs) && !allowedAppSlugs.includes(app.slug)) {
+        return false;
+      }
       const matchesQuery =
         !normalized ||
         app.name.toLowerCase().includes(normalized) ||
@@ -646,6 +677,16 @@ export default function AplicacionesModule({ tenantId, session }) {
                               Ver aplicación
                             </button>
 
+                            {(app.route || app.slug?.includes("gestor")) && (
+                              <a
+                                href={app.route || "/gestor_proyectos"}
+                                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+                              >
+                                Abrir aplicación
+                                <ExternalLink size={13} />
+                              </a>
+                            )}
+
                             {app.status !== "active" && (
                               <button
                                 type="button"
@@ -877,7 +918,16 @@ export default function AplicacionesModule({ tenantId, session }) {
               </div>
             </div>
 
-            <div className="flex justify-end border-t border-zinc-100 p-5">
+            <div className="flex items-center justify-end gap-2 border-t border-zinc-100 p-5">
+              {(selectedApp.route || selectedApp.slug?.includes("gestor")) && (
+                <a
+                  href={selectedApp.route || "/gestor_proyectos"}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-blue-700"
+                >
+                  Abrir aplicación
+                  <ExternalLink size={13} />
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() => setSelectedApp(null)}

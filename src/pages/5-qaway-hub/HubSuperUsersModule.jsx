@@ -17,6 +17,8 @@ import {
   X,
   Save,
   ShieldCheck,
+  KeyRound,
+  Copy,
 } from "lucide-react";
 import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
@@ -326,6 +328,211 @@ function UserAccessEditor({ userId, userName, tenantId, isPlatformAdmin, supabas
   );
 }
 
+/*
+ * Alta asistida (solo plataforma): crea la cuenta con contraseña provisional
+ * reutilizando user_invites + handle_new_user (tenant/rol/apps se vinculan
+ * solos vía trigger). Es la modalidad EXTRA; la invitación por correo
+ * (invite-user) sigue siendo el flujo por defecto y no se toca aquí.
+ */
+function AssistedProvisionPanel({ supabase, onClose, onCreated }) {
+  const [tenants, setTenants] = useState([]);
+  const [apps, setApps] = useState([]);
+  const [form, setForm] = useState({ email: "", full_name: "", last_name: "", tenant_id: "", role: "viewer", password: "" });
+  const [appSlugs, setAppSlugs] = useState([]);
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const [{ data: t }, { data: a }] = await Promise.all([
+        supabase.from("tenants").select("id, name, status").order("name"),
+        supabase.from("app_catalog").select("id, name, slug").order("name"),
+      ]);
+      if (!alive) return;
+      setTenants(t || []);
+      setApps(a || []);
+    })();
+    return () => { alive = false; };
+  }, [supabase]);
+
+  async function submit() {
+    setMsg("");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) { setMsg("Introduce un correo válido."); return; }
+    if (!form.tenant_id) { setMsg("Elige la empresa."); return; }
+    if (!appSlugs.length) { setMsg("Selecciona al menos una aplicación."); return; }
+    if (form.password && form.password.length < 8) { setMsg("La contraseña provisional debe tener al menos 8 caracteres."); return; }
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-provision-user", {
+        body: {
+          action: "create",
+          email: form.email.trim().toLowerCase(),
+          full_name: form.full_name.trim(),
+          last_name: form.last_name.trim(),
+          tenant_id: form.tenant_id,
+          role: form.role,
+          app_slugs: appSlugs,
+          ...(form.password ? { password: form.password } : {}),
+        },
+      });
+      if (error || data?.error) { setMsg("Error: " + (data?.error || error.message)); return; }
+      if (data?.status === "already_exists") {
+        setMsg("Ese correo ya tiene cuenta Qaway. Usa «Restablecer contraseña» en su fila.");
+        return;
+      }
+      onCreated({ email: data.email, password: data.provisional_password });
+      setForm((f) => ({ ...f, email: "", full_name: "", last_name: "", password: "" }));
+      setAppSlugs([]);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const inputCls =
+    "mt-1 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-800 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100";
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-bold text-zinc-950">Alta asistida con contraseña</h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            La cuenta queda creada y lista para ingresar con la contraseña provisional.
+            La invitación por correo sigue disponible como siempre.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-950"
+          aria-label="Cerrar alta asistida"
+        >
+          <X size={15} />
+        </button>
+      </div>
+
+      {msg && (
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+          {msg}
+        </div>
+      )}
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <label className="block text-xs font-bold text-zinc-500">
+          Correo *
+          <input
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            placeholder="persona@correo.com"
+            className={inputCls}
+          />
+        </label>
+
+        <label className="block text-xs font-bold text-zinc-500">
+          Nombre
+          <input
+            value={form.full_name}
+            onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+            placeholder="Nombres"
+            className={inputCls}
+          />
+        </label>
+
+        <label className="block text-xs font-bold text-zinc-500">
+          Apellido
+          <input
+            value={form.last_name}
+            onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+            placeholder="Apellidos"
+            className={inputCls}
+          />
+        </label>
+
+        <label className="block text-xs font-bold text-zinc-500">
+          Empresa *
+          <select
+            value={form.tenant_id}
+            onChange={(e) => setForm({ ...form, tenant_id: e.target.value })}
+            className={inputCls}
+          >
+            <option value="">Selecciona…</option>
+            {tenants.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}{t.status === "draft" ? " (borrador)" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-xs font-bold text-zinc-500">
+          Rol
+          <select
+            value={form.role}
+            onChange={(e) => setForm({ ...form, role: e.target.value })}
+            className={inputCls}
+          >
+            {APP_ROLES.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-xs font-bold text-zinc-500">
+          Contraseña provisional (opcional)
+          <input
+            type="text"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            placeholder="Vacío = se genera una segura"
+            className={inputCls}
+          />
+        </label>
+      </div>
+
+      <p className="mb-2 mt-4 text-xs font-bold text-zinc-700">Aplicaciones *</p>
+      <div className="flex flex-wrap gap-2">
+        {apps.length ? (
+          apps.map((a) => {
+            const active = appSlugs.includes(a.slug);
+            return (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => setAppSlugs((s) => (active ? s.filter((x) => x !== a.slug) : [...s, a.slug]))}
+                className={`rounded-full border px-4 py-2 text-xs font-bold transition ${
+                  active
+                    ? "border-[#ff4b0b] bg-[#ff4b0b] text-white"
+                    : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                }`}
+              >
+                {a.name}
+              </button>
+            );
+          })
+        ) : (
+          <p className="text-xs text-zinc-400">Sin aplicaciones en el catálogo.</p>
+        )}
+      </div>
+
+      <div className="mt-5 flex items-center gap-3">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={submit}
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06] disabled:opacity-50"
+        >
+          <Icon size={15}><KeyRound /></Icon>
+          {busy ? "Creando…" : "Crear cuenta"}
+        </button>
+        <span className="text-[11px] text-zinc-400">
+          La contraseña se muestra una sola vez al terminar.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function UsersModule({
   tenantId,
   session,
@@ -347,6 +554,12 @@ export default function UsersModule({
   const [openMenu, setOpenMenu] = useState(null);
   const [permUserId, setPermUserId] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  // Alta asistida (solo plataforma): crear cuenta con contraseña provisional
+  // y mostrar las credenciales una sola vez. La invitación por correo sigue
+  // disponible aparte (onInviteUser).
+  const [showProvision, setShowProvision] = useState(false);
+  const [creds, setCreds] = useState(null);
+  const [refreshTick, setRefreshTick] = useState(0);
 
   useDismissOnEscapeOrOutside(!!openMenu, () => setOpenMenu(null));
   useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
@@ -383,6 +596,27 @@ export default function UsersModule({
     } catch (err) {
       console.error("Error al eliminar usuario:", err);
       alert("No se pudo eliminar el usuario: " + err.message);
+    }
+  };
+
+  // Alta asistida: restablecimiento de contraseña (solo plataforma).
+  // La edge function devuelve la contraseña provisional una sola vez.
+  const handleResetPassword = async (user) => {
+    const ok = window.confirm(
+      `¿Restablecer la contraseña de ${user.email}? Se generará una contraseña provisional y se cerrarán sus sesiones activas.`
+    );
+    if (!ok) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-provision-user", {
+        body: { action: "reset_password", user_id: user.id },
+      });
+      if (error || data?.error) {
+        alert("No se pudo restablecer: " + (data?.error || error.message));
+        return;
+      }
+      setCreds({ email: user.email, password: data.provisional_password });
+    } catch (err) {
+      alert("No se pudo restablecer: " + (err?.message || err));
     }
   };
 
@@ -498,7 +732,7 @@ export default function UsersModule({
     return () => {
       cancelled = true;
     };
-  }, [supabase, tenantId, isPlatformAdmin, session, tenantName]);
+  }, [supabase, tenantId, isPlatformAdmin, session, tenantName, refreshTick]);
 
   const filteredUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -668,6 +902,21 @@ export default function UsersModule({
               <Icon size={18}><MoreHorizontal /></Icon>
             </button>
 
+            {isPlatformAdmin && (
+              <button
+                type="button"
+                onClick={() => setShowProvision((v) => !v)}
+                className={`inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm font-bold shadow-sm transition active:scale-[0.99] ${
+                  showProvision
+                    ? "border border-zinc-300 bg-zinc-100 text-zinc-950"
+                    : "border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:text-zinc-950"
+                }`}
+              >
+                <Icon size={17}><KeyRound /></Icon>
+                Alta con contraseña
+              </button>
+            )}
+
             <button
               type="button"
               onClick={onInviteUser}
@@ -678,6 +927,53 @@ export default function UsersModule({
             </button>
           </div>
         </header>
+
+        {/* Credenciales provisionales del alta asistida / reset: se muestran una sola vez */}
+        {creds && (
+          <div className="flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-emerald-700">
+                Credenciales provisionales — cópialas ahora, no se mostrarán de nuevo
+              </p>
+              <p className="mt-1 font-mono text-sm font-bold text-zinc-900">
+                {creds.email} · {creds.password}
+              </p>
+              <p className="mt-0.5 text-[11px] text-zinc-500">
+                Entrégalas por un canal distinto al correo y pide que la cambien al ingresar.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(`${creds.email} / ${creds.password}`)}
+                className="inline-flex h-9 items-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 text-xs font-bold text-emerald-700 transition hover:border-emerald-400"
+              >
+                <Icon size={14}><Copy /></Icon>
+                Copiar
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreds(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-300 bg-white text-zinc-500 transition hover:text-zinc-950"
+                aria-label="Cerrar credenciales"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Panel de alta asistida (solo plataforma) */}
+        {showProvision && isPlatformAdmin && (
+          <AssistedProvisionPanel
+            supabase={supabase}
+            onClose={() => setShowProvision(false)}
+            onCreated={(c) => {
+              setCreds(c);
+              setRefreshTick((t) => t + 1);
+            }}
+          />
+        )}
 
         {/* KPI grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -1013,6 +1309,18 @@ export default function UsersModule({
                                     >
                                       Gestionar permisos
                                     </button>
+                                    {isPlatformAdmin && !user.isSuperAdmin && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenMenu(null);
+                                          handleResetPassword(user);
+                                        }}
+                                        className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-zinc-700 hover:bg-zinc-50"
+                                      >
+                                        Restablecer contraseña
+                                      </button>
+                                    )}
                                     {!user.isSuperAdmin && (
                                       <button
                                         type="button"

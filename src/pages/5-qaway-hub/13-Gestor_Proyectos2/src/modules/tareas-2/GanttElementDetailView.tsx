@@ -27,7 +27,7 @@ import './gantt.css';
    módulo pesado. El matching de tareas es compatible con getLinkedTasksSummary. */
 type StatusOption = Status;
 
-const STATUS_OPTIONS: StatusOption[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
+const STATUS_OPTIONS: StatusOption[] = ['Completado', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
 /** Etiquetas de tipo EDT para vista de detalle (taxonomía vigente). */
 const KIND_LABELS: Record<string, string> = {

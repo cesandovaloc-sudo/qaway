@@ -11,6 +11,7 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
+import TipoProyectoCatalogoSelect from './TipoProyectoCatalogoSelect';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ interface CreateProjectModalProps {
     region: string;
     entidad: string;
     metodologia: string;
+    tipoProyectoCodigo?: string | null;
   }) => void;
 }
 
@@ -245,6 +247,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
   const [sponsor, setSponsor] = useState('');
   const [riskLevel, setRiskLevel] = useState('Bajo');
   const [metodologia, setMetodologia] = useState('Híbrido: Hitos Clave + Tareas de Campo');
+  const [tipoProyecto, setTipoProyecto] = useState<string | null>(null);
   const [startDate, setStartDate] = useState('2026-11-01');
   const [endDate, setEndDate] = useState('2027-06-30');
   const [openCal, setOpenCal] = useState<'start' | 'end' | null>(null);
@@ -261,6 +264,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
       region: region.trim() || 'Zona Central',
       entidad: entidad.trim() || 'Qaway Lab',
       metodologia,
+      tipoProyectoCodigo: tipoProyecto,
       budget: presupuesto.trim() || 'S/ 350,000',
       sponsor: sponsor.trim() || 'Directorio General',
       riskLevel,
@@ -270,6 +274,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
     setEntidad('');
     setPresupuesto('');
     setSponsor('');
+    setTipoProyecto(null);
     setOpenCal(null);
     onClose();
   };
@@ -493,6 +498,23 @@ export default function CreateProjectModal({ isOpen, onClose, onCreate }: Create
                 <option>Crítico</option>
               </select>
             </label>
+          </div>
+
+          {/* Etapa 6.3 · Clasificación administrativa del proyecto (catálogo real
+              gp_tipos_proyecto_c). Opcional: NULL ⇒ "Sin clasificar" (B-8).
+              NO influye en EDT/cronograma — decisión aprobada 6.2/6.3. */}
+          <div style={{ marginBottom: '14px' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px', fontWeight: 650, color: '#334155' }}>
+              Tipo de Proyecto (Clasificación)
+              <TipoProyectoCatalogoSelect
+                value={tipoProyecto}
+                onChange={(codigo) => setTipoProyecto(codigo)}
+                etiquetaNula="Sin clasificar — opcional"
+              />
+            </label>
+            <p style={{ margin: '5px 0 0', fontSize: '11px', color: '#94a3b8' }}>
+              Clasificación administrativa (obra pública, inversión, mantenimiento…). No modifica la EDT ni el cronograma.
+            </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>

@@ -14,7 +14,7 @@ import {
   ExternalLink,
 } from "@/components/ui/icons/hubIcons";
 
-export function AppSwitcherDropdown({ isOpen, onClose }) {
+export function AppSwitcherDropdown({ isOpen, onClose, allowedAppSlugs = null }) {
   const dropdownRef = useRef(null);
   const location = useLocation();
 
@@ -40,8 +40,17 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const APPS = [
+  const ALL_APPS = [
     {
+      slug: "gestor-proyectos",
+      name: "Gestor de Proyectos 2",
+      desc: "Seguimiento territorial, cronograma Gantt y sedes",
+      path: "/gestor_proyectos",
+      icon: FolderKanban,
+      badge: "v2"
+    },
+    {
+      slug: "gestor-proyectos",
       name: "Gestor de Proyectos",
       desc: "Suite P6, Scrum y Monitoreo Territorial",
       path: "/hub/proyectos",
@@ -49,6 +58,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
       badge: "Pro"
     },
     {
+      slug: "crm",
       name: "CRM Comercial & Leads",
       desc: "Gestión de oportunidades y pipeline",
       path: "/hub/crm",
@@ -56,6 +66,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
       badge: "Pro"
     },
     {
+      slug: "inventario",
       name: "Inventario & ERP Comercial",
       desc: "Control de stock, compras y facturación",
       path: "/hub/inventario",
@@ -63,6 +74,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
       badge: "Pro"
     },
     {
+      slug: "blog",
       name: "Editor de Blog & Artículos",
       desc: "Redactor visual Tiptap con SEO y anclas",
       path: "/hub/blog-editor",
@@ -70,6 +82,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
       badge: "Pro"
     },
     {
+      slug: "agenda",
       name: "Agenda & Citas",
       desc: "Gestión de citas, calendario y reservas",
       path: "/hub/agenda",
@@ -77,6 +90,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
       badge: "Pro"
     },
     {
+      slug: "academia",
       name: "Qaway Academy",
       desc: "LMS de cursos, lecciones y certificados",
       path: "/hub/academy",
@@ -84,6 +98,10 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
       badge: "LMS"
     }
   ];
+
+  const APPS = Array.isArray(allowedAppSlugs)
+    ? ALL_APPS.filter((a) => allowedAppSlugs.includes(a.slug))
+    : ALL_APPS;
 
   return (
     <div

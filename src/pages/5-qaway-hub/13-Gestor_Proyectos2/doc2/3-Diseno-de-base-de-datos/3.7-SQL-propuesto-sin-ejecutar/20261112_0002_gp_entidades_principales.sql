@@ -8,6 +8,24 @@
 --   · se eliminan gp_unidades_territoriales y gp_sedes: la jerarquía es public.gestor_unidades
 --   · gp_nodos_edt apunta a gestor_unidades con UNA sola columna (sede_unidad_id)
 -- Tablas de este archivo: 6 (gp_proyectos, gp_personas, gp_fases, gp_nodos_edt, gp_tareas, gp_equipos)
+--
+-- v2 (2026-11-13, correcciones aprobadas):
+--   · (corr. 4) gp_proyectos ampliado con 5 columnas nuevas:
+--     cliente_entidad, ambito, metodologia, nivel_riesgo, patrocinador.
+--     (presupuesto/moneda ya existían en esta versión; no son columnas nuevas.)
+--   · (corr. 2) estado_codigo pasa a NULL-able: el backfill NO asigna estado a
+--     filas históricas sin evidencia (quedan NULL + metadata.revision_pendiente).
+--     El DEFAULT 'planificacion' aplica solo a INSERT nuevos que lo omiten.
+--   · (corr. 2) nivel_riesgo sin default: NULL cuando no hay evidencia.
+--   · (corr. 1) descripcion reservada EXCLUSIVAMENTE a descripción libre del
+--     proyecto; nunca concatena subtext ni metodologia.
+--   · (corr. 1) cliente_entidad NO se deriva de subtext en la migración.
+--   · (corr. 5) metadata.subtitulos_modulos documenta las claves canónicas.
+--   · (M-7) PRERREQUISITOS de ejecución: public.gestor_unidades ya existente
+--     (supabase\03_gestor_unidades.sql, PK/FK id = text — verificado 14-nov) por
+--     la FK gp_nodos_edt.sede_unidad_id (v2.2: text, ya no uuid), y tablas de
+--     plataforma tenants/users (FKs de gp_proyectos y gp_personas).
+--     Sin ellas este archivo aborta.
 -- ==============================================================================
 
 -- Proyectos (principal). empresa_id = tenant del Hub; NO se duplica la tabla de empresas.
@@ -16,15 +34,38 @@ CREATE TABLE IF NOT EXISTS public.gp_proyectos (
   empresa_id uuid NOT NULL REFERENCES public.tenants(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   codigo_proyecto text NOT NULL, -- código de negocio, no PK
   nombre text NOT NULL,
-  descripcion text,
+  descripcion text, -- (corr. 1) SOLO descripción libre del proyecto: NUNCA concatena subtext ni metodologia
   tipo_proyecto_codigo text REFERENCES public.gp_tipos_proyecto_c(codigo) ON UPDATE CASCADE,
-  estado_codigo text NOT NULL DEFAULT 'planificacion' REFERENCES public.gp_estados_proyecto_c(codigo) ON UPDATE CASCADE,
+  -- (corr. 2) NULL-able: filas históricas migradas sin evidencia de estado quedan
+  -- NULL + metadata.revision_pendiente; NO se asume 'en_curso' ni otro valor.
+  -- El DEFAULT aplica solo a INSERT nuevos (proyectos creados desde el formulario).
+  -- (B-8) UI/servicio futuros: NULL se muestra como "Sin clasificar" (bucket explícito
+  -- en filtros y KPIs); PROHIBIDO coercerlo a 'planificacion' al leer o re-tighten
+  -- esta columna a NOT NULL tras la migración.
+  estado_codigo text DEFAULT 'planificacion' REFERENCES public.gp_estados_proyecto_c(codigo) ON UPDATE CASCADE,
   fecha_inicio date,
   fecha_fin date,
   presupuesto numeric(18,2),
-  moneda text DEFAULT 'PEN',
+  moneda text DEFAULT 'PEN', -- (corr. 3) default solo para INSERT nuevos; la migración NO asume moneda sin evidencia
+  -- ---------------------------------------------------------------------------
+  -- v2 2026-11-13 · Características maestras aprobadas: 5 columnas nuevas (corr. 4)
+  -- ---------------------------------------------------------------------------
+  cliente_entidad text, -- Cliente / Empresa Contratante. NO es empresa_id (tenant propietario). NO se deriva de subtext en migración (corr. 1)
+  ambito text,          -- Ámbito / Zona Operativa (texto libre). Detalle territorial: gp_proyecto_unidades_r ↔ gestor_unidades
+  metodologia text,     -- Metodología operativa. Opciones canónicas viven en capa app (no en catálogo ni en descripcion)
+  nivel_riesgo text,    -- Dominio cerrado bajo|medio|alto|critico. NULL si sin evidencia; SIN default (corr. 2)
+  patrocinador text,    -- Patrocinador / Stakeholder principal
+  CONSTRAINT gp_proyectos_riesgo_ck CHECK (nivel_riesgo IS NULL OR nivel_riesgo IN ('bajo','medio','alto','critico')),
   responsable_principal_persona_id uuid, -- FK diferida a gp_personas
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  -- (corr. 5) metadata.subtitulos_modulos: {resumen,cronograma,sedes,usuarios,tareas2,
+  --   reuniones,reuniones2,reportes,reportes2} → texto de cabecera por módulo.
+  --   Claves canónicas = CONFIGURABLE_MODULES (src/types.ts). Alias legacy integrados
+  --   en lectura: descProyecto→cronograma, descSedes→sedes.
+  --   Consumidores actuales: Tareas2View, Reuniones2View, Reportes2View, CronogramaGanttView
+  --   (fallback defaultSubtitle intacto). NO se generan claves ni textos: solo lo
+  --   capturado en ConfiguracionView; la migración de localStorage se hace desde el
+  --   servicio comparando claves, sin descartar ninguna.
   legacy_source_id text,
   is_deleted boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -121,7 +162,7 @@ CREATE TABLE IF NOT EXISTS public.gp_nodos_edt (
   region text,
   distrito text,
   sede_texto text, -- legado: texto libre mientras dura el backfill (se retira después)
-  sede_unidad_id uuid REFERENCES public.gestor_unidades(id) ON UPDATE CASCADE ON DELETE SET NULL,
+  sede_unidad_id text REFERENCES public.gestor_unidades(id) ON UPDATE CASCADE ON DELETE SET NULL, -- (v2.2: PK de gestor_unidades = text, verificado 14-nov)
   orden integer,
   task_type text,
   icon text,
@@ -152,7 +193,9 @@ CREATE TABLE IF NOT EXISTS public.gp_tareas (
   codigo text,
   titulo text NOT NULL,
   descripcion text,
-  estado_codigo text REFERENCES public.gp_estados_tarea_c(codigo) ON UPDATE CASCADE,
+  -- (v2.1, 14-nov) FK → gp_estados_ejecucion_c: catálogo UNIFICADO de estados de
+  -- ejecución (tareas + nodos EDT). Sustituye a gp_estados_tarea_c.
+  estado_codigo text REFERENCES public.gp_estados_ejecucion_c(codigo) ON UPDATE CASCADE,
   prioridad_codigo text REFERENCES public.gp_prioridades_c(codigo) ON UPDATE CASCADE,
   fecha_inicio date,
   fecha_fin date,

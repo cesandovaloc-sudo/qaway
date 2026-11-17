@@ -26,7 +26,9 @@ import {
   Sliders,
   SlidersHorizontal,
   Sparkles,
+  Tags,
   Trash2,
+  Users,
   X,
 } from 'lucide-react';
 import {
@@ -40,6 +42,9 @@ import {
   type AgentToneId
 } from '../../services/geminiRAGService';
 import { CONFIGURABLE_MODULES } from '../../types';
+import TipoProyectoCatalogoSelect from '../../components/TipoProyectoCatalogoSelect';
+import CicloVidaEstadoChip from '../../components/CicloVidaEstadoChip';
+import { capacidadesDeProyecto, historialEstado } from '../../services/gpCicloVidaService';
 
 export type ConfigBinds = { notify: (m: string) => void };
 
@@ -65,6 +70,8 @@ export interface ConfiguracionViewProps {
   onSelectProject?: (id: string) => void;
   onUpdateProject?: (updated: ProjectItem) => void;
   onDeleteProject?: (id: string) => void;
+  /** Etapa 6.3: navegar a la ficha Resumen (donde viven las acciones de dirección). */
+  onIrAFicha?: () => void;
 }
 
 const TIMEZONES = [
@@ -82,6 +89,7 @@ export default function ConfiguracionView({
   onSelectProject,
   onUpdateProject,
   onDeleteProject,
+  onIrAFicha,
 }: ConfiguracionViewProps) {
   const [activeTab, setActiveTab] = useState<'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente'>('general');
   const [timezone, setTimezone] = useState(() => {
@@ -123,6 +131,38 @@ export default function ConfiguracionView({
       ...(currentProj.moduleDescriptions || {}),
     };
   });
+
+  // -------------------------------------------------------------------------
+  // Etapa 6.3 · Clasificación (tipo) y ciclo de vida (estado, solo lectura)
+  // -------------------------------------------------------------------------
+  const [editTipo, setEditTipo] = useState<string | null>(currentProj.tipoProyectoCodigo ?? null);
+  /** Capacidades del usuario real del Hub sobre el proyecto activo (fail-closed). */
+  const [capacidadesProy, setCapacidadesProy] = useState(null);
+  /** Historial de cambios de estado (gp_eventos_auditoria) para la pestaña auditoría. */
+  const [historialProy, setHistorialProy] = useState(null);
+  const [historialCargando, setHistorialCargando] = useState(false);
+
+  const cargarHistorialProy = () => {
+    setHistorialCargando(true);
+    historialEstado(currentProj.id).then((r) => {
+      setHistorialProy(r);
+      setHistorialCargando(false);
+    });
+  };
+
+  useEffect(() => {
+    setEditTipo(currentProj.tipoProyectoCodigo ?? null);
+  }, [currentProj]);
+
+  useEffect(() => {
+    let vigente = true;
+    capacidadesDeProyecto(currentProj.id).then((r) => {
+      if (vigente) setCapacidadesProy(r);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [currentProj.id]);
   
   // Flujo estricto de eliminación en dos pasos (Doble candado de confirmación)
   const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
@@ -172,6 +212,8 @@ export default function ConfiguracionView({
       subtext: editSubtext.trim(),
       descProyecto: cronoDesc,
       descSedes: sedesDesc,
+      // Etapa 6.3: la clasificación se conserva (se edita desde su tarjeta).
+      tipoProyectoCodigo: editTipo || undefined,
       moduleDescriptions: {
         ...moduleDescriptions,
         cronograma: cronoDesc,
@@ -179,6 +221,12 @@ export default function ConfiguracionView({
       },
     });
     notify(`Proyecto "${editName}" actualizado correctamente.`);
+  };
+
+  /** Etapa 6.3: guarda SOLO la clasificación (tipo) del proyecto activo. */
+  const handleGuardarClasificacion = () => {
+    onUpdateProject?.({ ...currentProj, tipoProyectoCodigo: editTipo || undefined });
+    notify(editTipo ? `Clasificación actualizada: "${editTipo}".` : 'Clasificación actualizada: "Sin clasificar".');
   };
 
   const handleExportProject = () => {
@@ -697,6 +745,162 @@ export default function ConfiguracionView({
               </form>
             </div>
 
+             {/* Tarjeta: Clasificación del Proyecto (Etapa 6.3 — tipo, catálogo real) */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                  <Tags size={20} />
+                </div>
+                <div>
+                  <h2>Clasificación del Proyecto</h2>
+                  <p>
+                    Tipo administrativo del proyecto (obra pública, inversión, mantenimiento, servicio, mejora interna u otro).
+                    Es clasificación para filtros y reportes: NO modifica la EDT ni el cronograma.
+                  </p>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label>Tipo de Proyecto (gp_tipos_proyecto_c)</label>
+                  <p>Persistencia definitiva: <b>gp_proyectos.tipo_proyecto_codigo</b> (0002 · FK por código). "Sin clasificar" = NULL (B-8).</p>
+                </div>
+                <div className="field-control">
+                  <TipoProyectoCatalogoSelect
+                    value={editTipo || null}
+                    onChange={(codigo) => setEditTipo(codigo)}
+                    disabled={capacidadesProy ? !capacidadesProy.capacidades?.editarTipo : false}
+                  />
+                  <div style={{ marginTop: '8px', fontSize: '11.5px', color: '#64748b', lineHeight: 1.45 }}>
+                    {capacidadesProy == null && <span>Verificando permisos con la sesión del Hub…</span>}
+                    {capacidadesProy && capacidadesProy.estado === 'ok' && (capacidadesProy.capacidades?.editarTipo
+                      ? <span style={{ color: '#047857', fontWeight: 600 }}>✓ Tu rol permite editar la clasificación.</span>
+                      : <span>Solo consulta: editar la clasificación requiere gerente del proyecto, admin de empresa o plataforma.</span>)}
+                    {capacidadesProy && capacidadesProy.estado === 'sin_sesion' && (
+                      <span style={{ color: '#b45309', fontWeight: 600 }}>Sin sesión del Hub (fail-closed): inicia sesión para editar la clasificación.</span>
+                    )}
+                    {capacidadesProy && capacidadesProy.estado === 'indisponible' && (
+                      <span style={{ color: '#b45309', fontWeight: 600 }}>No se pudo verificar el rol (fail-closed): {capacidadesProy.mensaje}</span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGuardarClasificacion}
+                    disabled={capacidadesProy ? !capacidadesProy.capacidades?.editarTipo : true}
+                    style={{
+                      marginTop: '10px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      border: '1px solid #7c3aed',
+                      background: capacidadesProy?.capacidades?.editarTipo ? '#7c3aed' : '#ede9fe',
+                      color: capacidadesProy?.capacidades?.editarTipo ? '#ffffff' : '#a78bfa',
+                      fontSize: '12.5px',
+                      fontWeight: 700,
+                      cursor: capacidadesProy?.capacidades?.editarTipo ? 'pointer' : 'not-allowed',
+                    }}
+                    title="Guarda el tipo del proyecto activo"
+                  >
+                    <Save size={14} />
+                    <span>Guardar Clasificación</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Tarjeta: Estado y Ciclo de Vida (Etapa 6.3 — SOLO LECTURA aquí) */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h2>Estado y Ciclo de Vida · Solo Lectura</h2>
+                  <p>
+                    El estado general es una condición de DIRECCIÓN: se consulta aquí, pero se cambia desde la ficha del
+                    proyecto (iniciar, pausar, reanudar, completar, cancelar, reabrir — con motivo y auditoría).
+                  </p>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="field-info">
+                  <label>Estado general actual</label>
+                  <p>Persistencia definitiva: <b>gp_proyectos.estado_codigo</b> (0002 · FK a gp_estados_proyecto_c). Cada transición queda en gp_eventos_auditoria.</p>
+                </div>
+                <div className="field-control">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                    <CicloVidaEstadoChip codigo={currentProj.estadoCodigo ?? null} />
+                    {onIrAFicha && (
+                      <button
+                        type="button"
+                        onClick={onIrAFicha}
+                        title="Las acciones de dirección se realizan desde la ficha del proyecto"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 13px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          background: '#ffffff',
+                          color: '#2563eb',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <ChevronRight size={13} />
+                        <span>Acciones en la ficha Resumen</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tarjeta: Equipo y Accesos (Etapa 6.3 — estado del bloqueo honesto) */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#fffbeb', color: '#b45309' }}>
+                  <Users size={20} />
+                </div>
+                <div>
+                  <h2>Equipo y Accesos (roles del proyecto)</h2>
+                  <p>
+                    Aquí se administrará el equipo del proyecto con roles (`gp_roles_proyecto_c` + `gp_proyecto_miembros_r`):
+                    permisos asignados a ROLES, nunca a personas sueltas. La pertenencia al proyecto no otorga permisos administrativos.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  padding: '14px 16px',
+                  borderRadius: '8px',
+                  background: '#ffffff',
+                  border: '1px solid #fde68a',
+                }}
+              >
+                <div>
+                  <b style={{ fontSize: '13px', color: '#92400e', display: 'block' }}>
+                    ⚠️ Bloqueado por discrepancia estructural · SQL de resolución preparado
+                  </b>
+                  <span style={{ fontSize: '12px', color: '#78350f', lineHeight: 1.5 }}>
+                    La tabla viva tiene 9 columnas frente a las 10 del SQL del repo (`5.4` §3). La resolución ADITIVA y no
+                    destructiva está lista en <b>20261115_0008</b> (completa columnas faltantes + seed de 6 roles con la matriz
+                    de permisos en `permisos jsonb`). Tras aplicarla (y con `0003`), esta sección gestionará integrantes y roles.
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Tarjeta 2: Zona de Peligro (Danger Zone) */}
             <div
               className="cfg-card"
@@ -821,6 +1025,100 @@ export default function ConfiguracionView({
               <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
                 Todas las modificaciones de cronograma, asignaciones de responsables territoriales y fechas de hito se registran con firma digital y marca temporal conforme a los lineamientos institucionales y directivas del proyecto.
               </p>
+            </div>
+
+            {/* Tarjeta: Historial de estado del proyecto (Etapa 6.3 — gp_eventos_auditoria) */}
+            <div className="cfg-card">
+              <div className="card-header">
+                <div className="card-icon-wrap" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                  <Clock3 size={20} />
+                </div>
+                <div>
+                  <h2>Historial de Estado del Proyecto</h2>
+                  <p>
+                    Transiciones de dirección (STATE_CHANGE) registradas en <b>gp_eventos_auditoria</b>: actor, fecha y motivo
+                    de cada iniciar / pausar / reanudar / completar / cancelar / reabrir. Sin tablas nuevas.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={cargarHistorialProy}
+                disabled={historialCargando}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  padding: '7px 13px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: historialCargando ? 'wait' : 'pointer',
+                  marginBottom: '10px',
+                }}
+                title="Consulta el historial de transiciones del proyecto activo"
+              >
+                <RefreshCw size={13} />
+                <span>{historialCargando ? 'Consultando…' : 'Consultar historial'}</span>
+              </button>
+
+              {historialProy == null && (
+                <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: 0 }}>
+                  Pulsa "Consultar historial" para leer los registros del proyecto <b>{currentProj.name}</b>.
+                </p>
+              )}
+
+              {historialProy && historialProy.estado === 'vacio' && (
+                <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0 }}>
+                  Sin registros de cambio de estado todavía. Aparecerán al ejecutar acciones de dirección
+                  (requiere la capa gp_* aplicada: SQL 0008 → 0009 → 0010 + prerrequisitos).
+                </p>
+              )}
+
+              {historialProy && historialProy.estado === 'error' && (
+                <div style={{ padding: '10px 12px', borderRadius: '8px', background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '12px', fontWeight: 600 }}>
+                  {historialProy.mensaje}
+                </div>
+              )}
+
+              {historialProy && historialProy.estado === 'lista' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {historialProy.eventos.map((ev, i) => (
+                    <div
+                      key={ev.id || i}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                      }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '12.5px', color: '#0f172a', fontWeight: 700 }}>
+                          {ev.estadoAnterior || 'Sin clasificar'} <span style={{ color: '#94a3b8' }}>→</span> {ev.estadoNuevo || 'Sin clasificar'}
+                          {ev.accion && (
+                            <span style={{ marginLeft: '8px', fontSize: '10.5px', fontWeight: 800, letterSpacing: '0.4px', color: '#2563eb', background: '#eff6ff', padding: '2px 7px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                              {ev.accion}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '3px', lineHeight: 1.45 }}>
+                          {ev.ocurridoAt ? new Date(ev.ocurridoAt).toLocaleString('es-PE') : '—'}
+                          {ev.motivo ? <> · Motivo: <b>{ev.motivo}</b></> : ' · Sin motivo registrado'}
+                          {ev.actorUserId ? <> · Actor: {ev.actorUserId.slice(0, 8)}…</> : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -2178,7 +2178,7 @@ export default function Reuniones2View({
       return;
     }
     let alive = true;
-    listGestorUnits(null)
+    listGestorUnits()
       .then((rows) => {
         if (!alive || !rows || rows.length === 0) return;
         const mapped = rows

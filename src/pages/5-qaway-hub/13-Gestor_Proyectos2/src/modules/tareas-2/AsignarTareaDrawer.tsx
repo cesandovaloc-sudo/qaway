@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { Item } from './Tareas2View';
 import { MACROREGIONES, REGIONES_PROYECTO } from './regionalCoordinationModel';
+import PrioridadCatalogoSelect from './PrioridadCatalogoSelect';
 
 interface Props {
   isOpen: boolean;
@@ -418,25 +419,12 @@ export default function AsignarTareaDrawer({
               >
                 Prioridad
               </label>
-              <select
+              {/* Etapa 6: opciones desde el catálogo real gp_prioridades_c (Supabase).
+                  Fallback: vocabulario operativo vigente si el catálogo no está disponible. */}
+              <PrioridadCatalogoSelect
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as any)}
-                style={{
-                  width: '100%',
-                  padding: '9px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '13.5px',
-                  color: '#0f172a',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                  backgroundColor: '#ffffff',
-                }}
-              >
-                <option value="Alta">🔴 Alta</option>
-                <option value="Media">🟡 Media</option>
-                <option value="Baja">⚪ Baja</option>
-              </select>
+                onChange={(valor) => setPriority(valor)}
+              />
             </div>
           </div>
 

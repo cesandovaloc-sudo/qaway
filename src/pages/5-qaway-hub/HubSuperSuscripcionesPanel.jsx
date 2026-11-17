@@ -20,6 +20,9 @@ import {
   ArrowDownRight,
   ChevronDown,
   Loader2,
+  KeyRound,
+  Copy,
+  Check,
 } from "lucide-react";
 import { supabase } from "@/config/supabase";
 import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
@@ -376,6 +379,188 @@ export default function SuscripcionesPanel({
   const [planFilter, setPlanFilter] = useState("Todos");
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Estado del pop-up Nuevo Tenant (alta directa sin pago / con o sin contraseña)
+  const [newTenantModalOpen, setNewTenantModalOpen] = useState(false);
+  const [ntName, setNtName] = useState("");
+  const [ntSlug, setNtSlug] = useState("");
+  const [ntSlugEdited, setNtSlugEdited] = useState(false);
+  const [ntPlan, setNtPlan] = useState("basico");
+  const [ntApps, setNtApps] = useState(["gestor-proyectos"]);
+  const [ntWithPassword, setNtWithPassword] = useState(true);
+  const [ntDni, setNtDni] = useState("");
+  const [ntEmail, setNtEmail] = useState("");
+  const [ntFullName, setNtFullName] = useState("");
+  const [ntCreating, setNtCreating] = useState(false);
+  const [ntError, setNtError] = useState("");
+  const [ntSuccess, setNtSuccess] = useState(null);
+  const [ntCopied, setNtCopied] = useState(false);
+
+  const APP_OPTIONS = [
+    { slug: "gestor-proyectos", label: "Gestor de Proyectos" },
+    { slug: "inventario", label: "Inventario" },
+    { slug: "crm", label: "CRM" },
+    { slug: "agenda", label: "Agenda" },
+    { slug: "blog", label: "Blog" },
+  ];
+
+  const handleNtNameChange = (val) => {
+    setNtName(val);
+    if (!ntSlugEdited) {
+      const autoSlug = val
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      setNtSlug(autoSlug);
+    }
+  };
+
+  const toggleNtApp = (slug) => {
+    setNtApps((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+    );
+  };
+
+  const openNewTenantModal = () => {
+    setNtName("");
+    setNtSlug("");
+    setNtSlugEdited(false);
+    setNtPlan("basico");
+    setNtApps(["gestor-proyectos"]);
+    setNtWithPassword(true);
+    setNtDni("");
+    setNtEmail("");
+    setNtFullName("");
+    setNtError("");
+    setNtSuccess(null);
+    setNtCopied(false);
+    setNewTenantModalOpen(true);
+  };
+
+  async function handleCreateNewTenant(e) {
+    e.preventDefault();
+    setNtError("");
+    const cleanName = ntName.trim();
+    const cleanSlug = ntSlug.trim().toLowerCase();
+    if (cleanName.length < 2) {
+      setNtError("Ingresa el nombre de la empresa (mín. 2 caracteres).");
+      return;
+    }
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(cleanSlug)) {
+      setNtError("El slug solo puede tener minúsculas, números y guiones.");
+      return;
+    }
+    if (ntApps.length === 0) {
+      setNtError("Selecciona al menos una aplicación.");
+      return;
+    }
+    if (ntWithPassword) {
+      if (!/^\d{8}$/.test(ntDni.trim())) {
+        setNtError("Ingresa un DNI válido de 8 dígitos.");
+        return;
+      }
+      if (ntEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ntEmail.trim())) {
+        setNtError("El correo ingresado no es válido.");
+        return;
+      }
+    }
+
+    setNtCreating(true);
+    try {
+      // 1. Crear tenant activo con onboarding_completed = true (sin pasar por pagos ni onboarding)
+      const { data: tenantData, error: tErr } = await supabase
+        .from("tenants")
+        .insert({
+          name: cleanName.slice(0, 120),
+          slug: cleanSlug,
+          status: "active",
+          features: { onboarding_completed: true },
+        })
+        .select("id, name, slug")
+        .single();
+
+      if (tErr || !tenantData) {
+        throw new Error(tErr?.message || "No se pudo crear el tenant (verifica que el slug no esté en uso).");
+      }
+
+      // 2. Activar suscripciones seleccionadas en tenant_app_subscriptions
+      const { data: catalogApps } = await supabase
+        .from("app_catalog")
+        .select("id, slug")
+        .in("slug", ntApps);
+
+      if (catalogApps && catalogApps.length > 0) {
+        const subRows = catalogApps.map((app) => ({
+          tenant_id: tenantData.id,
+          app_id: app.id,
+          plan: ntPlan,
+          status: "active",
+          billing_type: "one_time",
+          auto_renew: false,
+          contracted_price: 0,
+        }));
+        const { error: subErr } = await supabase
+          .from("tenant_app_subscriptions")
+          .upsert(subRows, { onConflict: "tenant_id,app_id" });
+        if (subErr) throw new Error(subErr.message);
+      }
+
+      // 3. Si "Alta con contraseña" está activo, provisionar usuario admin con DNI como contraseña inicial
+      let provisionedPassword = null;
+      const cleanDni = ntDni.trim();
+      const effectiveEmail = ntEmail.trim()
+        ? ntEmail.trim().toLowerCase()
+        : `${cleanDni}@${cleanSlug}.qaway.local`;
+
+      if (ntWithPassword) {
+        const { data: provData, error: provErr } = await supabase.functions.invoke("admin-provision-user", {
+          body: {
+            action: "create",
+            email: effectiveEmail,
+            tenant_id: tenantData.id,
+            role: "admin",
+            app_slugs: ntApps,
+            full_name: ntFullName.trim() || `Admin ${cleanDni}`,
+            password: cleanDni,
+          },
+        });
+        if (provErr || provData?.error) {
+          throw new Error(provData?.error || provErr?.message || "Tenant creado, pero falló el alta del usuario.");
+        }
+        provisionedPassword = cleanDni;
+      }
+
+      setNtSuccess({
+        tenantName: tenantData.name,
+        slug: tenantData.slug,
+        dni: ntWithPassword ? cleanDni : null,
+        email: ntWithPassword ? effectiveEmail : null,
+        password: provisionedPassword,
+        accessUrl: `${window.location.origin}/login`,
+      });
+
+      // Actualizar tabla local inmediatamente
+      const newRow = {
+        id: tenantData.id,
+        tenant_id: tenantData.id,
+        company: tenantData.name,
+        subtitle: tenantData.slug,
+        plan: ntPlan === "premium" ? "Premium" : ntPlan === "intermedio" ? "Intermedio" : "Básico",
+        apps: ntApps.map((s) => APP_OPTIONS.find((o) => o.slug === s)?.label || s),
+        status: "Activa",
+        startedAt: new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "short", year: "numeric" }),
+        renewsAt: "-",
+        amount: 0,
+      };
+      setDbSubscriptions((prev) => [newRow, ...(prev || [])]);
+    } catch (err) {
+      setNtError(err?.message || "Error inesperado al crear el tenant.");
+    } finally {
+      setNtCreating(false);
+    }
+  }
 
   useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
 
@@ -780,8 +965,8 @@ export default function SuscripcionesPanel({
 
           <button
             type="button"
-            onClick={onNewSubscription}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06]"
+            onClick={openNewTenantModal}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06] cursor-pointer"
           >
             <span className="text-lg leading-none">+</span>
             Nueva suscripción
@@ -1415,14 +1600,324 @@ export default function SuscripcionesPanel({
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setSelectedSub(null)}
-                  className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition cursor-pointer"
-                >
-                  Cerrar
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${window.location.origin}/login?redirect=/gestor_proyectos`;
+                      navigator.clipboard?.writeText(url);
+                      setActionFeedback({ type: "success", text: `Link App copiado: ${url}` });
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#ff4b0b] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#e03f06] transition cursor-pointer"
+                  >
+                    <Copy size={13} />
+                    Copiar link App
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${window.location.origin}/login?redirect=/hub/panel`;
+                      navigator.clipboard?.writeText(url);
+                      setActionFeedback({ type: "success", text: `Link Hub Panel copiado: ${url}` });
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
+                  >
+                    <Copy size={13} />
+                    Copiar link Hub Panel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSub(null)}
+                    className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition cursor-pointer"
+                  >
+                    Cerrar
+                  </button>
+                </div>
               </div>
+            </div>
+          </div>
+        )}
+        {/* Pop-up: Nuevo Tenant (Alta directa sin pago / con o sin contraseña) */}
+        {newTenantModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 p-4 backdrop-blur-[2px]">
+            <div className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white shadow-2xl overflow-hidden">
+              {/* Encabezado con toggle Alta con contraseña */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 bg-zinc-50/70 px-6 py-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#ff4b0b]">
+                    <Building2 size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-extrabold text-zinc-950">Nueva suscripción</h2>
+                    <p className="text-xs text-zinc-500">Alta directa activa, sin pago ni onboarding</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <label className="inline-flex items-center gap-2 cursor-pointer select-none rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50">
+                    <KeyRound size={14} className={ntWithPassword ? "text-[#ff4b0b]" : "text-zinc-400"} />
+                    <span>Alta con contraseña</span>
+                    <input
+                      type="checkbox"
+                      checked={ntWithPassword}
+                      onChange={(e) => setNtWithPassword(e.target.checked)}
+                      className="h-3.5 w-3.5 accent-[#ff4b0b] cursor-pointer"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setNewTenantModalOpen(false)}
+                    className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition cursor-pointer"
+                    aria-label="Cerrar"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {ntSuccess ? (
+                <div className="p-6 space-y-4">
+                  <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                    <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-emerald-600" />
+                    <div className="text-sm text-emerald-900">
+                      <p className="font-bold">Tenant "{ntSuccess.tenantName}" creado y activado</p>
+                      <p className="mt-0.5 text-xs text-emerald-700">
+                        Slug: <span className="font-mono font-semibold">{ntSuccess.slug}</span> · Estado: Activo
+                      </p>
+                    </div>
+                  </div>
+
+                  {ntSuccess.email && (
+                    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-2.5">
+                      <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                        Credenciales de acceso (Admin)
+                      </p>
+                      <div className="text-sm text-zinc-800 space-y-1">
+                        <p>Correo: <span className="font-mono font-semibold">{ntSuccess.email}</span></p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p>Contraseña inicial: <span className="font-mono font-bold text-zinc-950">{ntSuccess.password}</span></p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(ntSuccess.password);
+                              setNtCopied(true);
+                              setTimeout(() => setNtCopied(false), 2000);
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 cursor-pointer"
+                          >
+                            {ntCopied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                            {ntCopied ? "Copiada" : "Copiar"}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-zinc-500">
+                          Al ingresar por primera vez, el sistema le pedirá cambiar su contraseña.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {ntSuccess.accessUrl && (
+                    <div className="rounded-xl border border-orange-200 bg-orange-50/60 p-3.5 space-y-2.5">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-[#ff4b0b]">
+                        Links de acceso directo
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const appUrl = `${window.location.origin}/login?redirect=/gestor_proyectos`;
+                            const msg = ntSuccess.email
+                              ? `Acceso directo a tu App (${ntSuccess.tenantName}):\nLink: ${appUrl}\nUsuario: ${ntSuccess.email}\nContraseña inicial: ${ntSuccess.password} (te pedirá cambiarla al entrar)`
+                              : `Acceso directo a tu App (${ntSuccess.tenantName}):\n${appUrl}`;
+                            navigator.clipboard?.writeText(msg);
+                            setNtCopied("app");
+                            setTimeout(() => setNtCopied(false), 2000);
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-[#ff4b0b] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#e03f06] transition cursor-pointer"
+                        >
+                          <Copy size={13} />
+                          {ntCopied === "app" ? "¡Link App copiado!" : "Copiar link App"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const hubUrl = `${window.location.origin}/login?redirect=/hub/panel`;
+                            const msg = ntSuccess.email
+                              ? `Acceso a Hub Panel (${ntSuccess.tenantName}):\nLink: ${hubUrl}\nUsuario: ${ntSuccess.email}\nContraseña inicial: ${ntSuccess.password} (te pedirá cambiarla al entrar)`
+                              : `Acceso a Hub Panel (${ntSuccess.tenantName}):\n${hubUrl}`;
+                            navigator.clipboard?.writeText(msg);
+                            setNtCopied("hub");
+                            setTimeout(() => setNtCopied(false), 2000);
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
+                        >
+                          <Copy size={13} />
+                          {ntCopied === "hub" ? "¡Link Hub copiado!" : "Copiar link Hub Panel"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewTenantModalOpen(false)}
+                      className="rounded-xl bg-[#ff4b0b] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e03f06] transition cursor-pointer"
+                    >
+                      Listo
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleCreateNewTenant} className="p-6 space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-700 mb-1">
+                        Nombre de la empresa <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={ntName}
+                        onChange={(e) => handleNtNameChange(e.target.value)}
+                        placeholder="Ej. Mi Empresa S.A.C."
+                        className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#ff4b0b]"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-700 mb-1">
+                        Slug <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={ntSlug}
+                        onChange={(e) => {
+                          setNtSlugEdited(true);
+                          setNtSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+                        }}
+                        placeholder="mi-empresa"
+                        className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm font-mono text-zinc-900 outline-none focus:border-[#ff4b0b]"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-700 mb-1.5">
+                      Aplicaciones a activar <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {APP_OPTIONS.map((app) => {
+                        const active = ntApps.includes(app.slug);
+                        return (
+                          <button
+                            key={app.slug}
+                            type="button"
+                            onClick={() => toggleNtApp(app.slug)}
+                            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                              active
+                                ? "border-[#ff4b0b] bg-orange-50 text-[#ff4b0b]"
+                                : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+                            }`}
+                          >
+                            {app.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-700 mb-1">Plan</label>
+                    <select
+                      value={ntPlan}
+                      onChange={(e) => setNtPlan(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#ff4b0b]"
+                    >
+                      <option value="basico">Básico</option>
+                      <option value="intermedio">Intermedio</option>
+                      <option value="premium">Premium</option>
+                    </select>
+                  </div>
+
+                  {ntWithPassword && (
+                    <div className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-zinc-700">Usuario administrador inicial</p>
+                        <span className="text-[11px] font-semibold text-[#ff4b0b]">
+                          Contraseña inicial = DNI (cambio obligatorio al entrar)
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                            DNI (8 dígitos) <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={8}
+                            value={ntDni}
+                            onChange={(e) => setNtDni(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                            placeholder="Ej. 45678912"
+                            className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-mono text-zinc-900 outline-none focus:border-[#ff4b0b]"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                            Nombre completo
+                          </label>
+                          <input
+                            type="text"
+                            value={ntFullName}
+                            onChange={(e) => setNtFullName(e.target.value)}
+                            placeholder="Opcional"
+                            className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#ff4b0b]"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-600 mb-1">
+                          Correo de contacto (opcional)
+                        </label>
+                        <input
+                          type="email"
+                          value={ntEmail}
+                          onChange={(e) => setNtEmail(e.target.value)}
+                          placeholder="Si queda vacío, se genera automático con el DNI"
+                          className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#ff4b0b]"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {ntError && (
+                    <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                      <AlertCircle size={15} className="shrink-0" />
+                      <span>{ntError}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
+                    <button
+                      type="button"
+                      onClick={() => setNewTenantModalOpen(false)}
+                      className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={ntCreating}
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#e03f06] disabled:opacity-60 transition cursor-pointer"
+                    >
+                      {ntCreating && <Loader2 size={14} className="animate-spin" />}
+                      {ntCreating ? "Creando..." : "Crear suscripción"}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}

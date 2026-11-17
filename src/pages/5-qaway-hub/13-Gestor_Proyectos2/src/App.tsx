@@ -42,6 +42,10 @@ export interface ProjectItem {
   sponsor?: string | undefined;
   riskLevel?: string | undefined;
   metodologia?: string | undefined;
+  /** Etapa 6.3: estado general (código de gp_estados_proyecto_c). NULL/ausente = "Sin clasificar" (B-8). */
+  estadoCodigo?: string | undefined;
+  /** Etapa 6.3: clasificación administrativa (código de gp_tipos_proyecto_c). NULL = "Sin clasificar". */
+  tipoProyectoCodigo?: string | undefined;
 }
 
 const DEFAULT_PROJECTS: ProjectItem[] = [
@@ -435,6 +439,7 @@ function GestorProyectosApp() {
     region: string;
     entidad: string;
     metodologia: string;
+    tipoProyectoCodigo?: string | null;
     budget?: string;
     sponsor?: string;
     riskLevel?: string;
@@ -449,6 +454,11 @@ function GestorProyectosApp() {
       sponsor: newProj.sponsor,
       riskLevel: newProj.riskLevel,
       metodologia: newProj.metodologia,
+      // Etapa 6.3: nuevo proyecto arranca en 'planificacion' (equivale al DEFAULT
+      // de INSERT nuevos en gp_proyectos.estado_codigo, 0002 L45) y conserva la
+      // clasificación elegida en el modal (NULL ⇒ "Sin clasificar").
+      estadoCodigo: 'planificacion',
+      tipoProyectoCodigo: newProj.tipoProyectoCodigo || undefined,
     };
     try {
       localStorage.setItem(`qaway-gantt-items-${item.id}`, JSON.stringify([]));
@@ -521,6 +531,25 @@ function GestorProyectosApp() {
     notifyActive(`Proyecto "${updated.name}" actualizado con éxito.`);
   };
 
+  /**
+   * Etapa 6.3 · Ciclo de vida: tras una transición EXITOSA (ya persistida en
+   * Supabase por la RPC atómica gp_cambiar_estado_proyecto), la app actualiza su
+   * modelo del proyecto para reflejar el chip/estado. La fuente de verdad del
+   * estado es gp_proyectos.estado_codigo; este modelo local es el reflejo
+   * transicional (mismo patrón que el resto de campos de ProjectItem).
+   */
+  const handleEstadoCambiado = (proyectoId: string, estadoNuevo: string) => {
+    setProjects((prev) => {
+      const next = prev.map((p) => (p.id === proyectoId ? { ...p, estadoCodigo: estadoNuevo } : p));
+      try {
+        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(next));
+      } catch {
+        /* fallback */
+      }
+      return next;
+    });
+  };
+
   const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
 
   const notifyActive = (m: string) => {
@@ -561,7 +590,7 @@ function GestorProyectosApp() {
         />
         <main ref={canvasRef} className="qm-canvas">
            {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-             <ResumenProyectoView userRole={userRole} onOpenCreateProject={() => setIsCreateProjectOpen(true)} onActions={(h) => { binds.current['resumen'] = h; }} />
+             <ResumenProyectoView userRole={userRole} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={() => setIsCreateProjectOpen(true)} onActions={(h) => { binds.current['resumen'] = h; }} />
            </div>}
            {visitedModules.has('tareas2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Tareas 2…" />}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />
@@ -644,6 +673,7 @@ function GestorProyectosApp() {
               onSelectProject={setActiveProjectId}
               onUpdateProject={handleUpdateProject}
               onDeleteProject={handleDeleteProject}
+              onIrAFicha={() => navigate(MODULE_SLUGS['resumen'])}
               onActions={(h) => { binds.current['configuracion'] = h; }}
             />
            </div></Suspense>}

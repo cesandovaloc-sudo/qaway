@@ -460,7 +460,7 @@ export const STATUS_CLASS: Record<Status, string> = {
 
 /* Semáforo oficial de 5 estados (tablero operativo). 'Completado' se mantiene
    como señal de retrocompatibilidad para datos persistidos previos. */
-const STATUS_OPTIONS: Status[] = ['Cumple', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
+const STATUS_OPTIONS: Status[] = ['Completado', 'En curso', 'En proceso', 'Con retraso', 'Pendiente'];
 
 export interface LocationHierarchyNode {
   name: string;
@@ -1758,7 +1758,7 @@ export default function Tareas2View({
     if (!drawerDraft) return;
     updateDraft({
       progress: v,
-      status: v >= 100 ? 'Cumple' : v === 0 ? 'Pendiente' : 'En proceso',
+      status: v >= 100 ? 'Completado' : v === 0 ? 'Pendiente' : 'En proceso',
     });
   };
 
@@ -2467,7 +2467,7 @@ export default function Tareas2View({
       return;
     }
     let alive = true;
-    listGestorUnits(null)
+    listGestorUnits()
       .then((rows) => {
         if (!alive || !rows || rows.length === 0) return;
         const mapped = rows
@@ -3901,7 +3901,7 @@ export default function Tareas2View({
   const setProgress = (x: Item, v: number) =>
     update(x.id, {
       progress: v,
-      status: v >= 100 ? 'Cumple' : v === 0 ? 'Pendiente' : 'En proceso',
+      status: v >= 100 ? 'Completado' : v === 0 ? 'Pendiente' : 'En proceso',
     });
 
   /* Sincronización bidireccional Estado <-> Avance */
