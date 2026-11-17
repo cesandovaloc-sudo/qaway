@@ -3,7 +3,9 @@
  * =====================
  * Etapa 6 · Lectura SOLO-LECTURA de los catálogos gp_*_c de Supabase
  * (gp_estados_proyecto_c · gp_tipos_proyecto_c · gp_estados_ejecucion_c ·
- * gp_prioridades_c), reutilizando el cliente COMPARTIDO con Qaway Hub
+ * gp_prioridades_c · dependencias/entregables · y desde el BLOQUE A las tablas
+ * 9–12: gp_tipos_reunion_c · gp_estados_reunion_c · gp_tipos_avance_c ·
+ * gp_tipos_archivo_c), reutilizando el cliente COMPARTIDO con Qaway Hub
  * (supabaseClient.ts, Etapa 4). NO crea mecanismos paralelos ni catálogos
  * duplicados: los valores vivos son la única fuente de verdad.
  *
@@ -37,6 +39,11 @@ export const TABLA_TIPOS_DEPENDENCIA = 'gp_tipos_dependencia_c';
 export const TABLA_CATEGORIAS_ENTREGABLE = 'gp_categorias_entregable_c';
 export const TABLA_TIPOS_ENTREGABLE = 'gp_tipos_entregable_c';
 export const TABLA_ESTADOS_ENTREGABLE = 'gp_estados_entregable_c';
+// Tablas 9–12 (BLOQUE A, 17-nov): operativas, con seed vivo en producción.
+export const TABLA_TIPOS_REUNION = 'gp_tipos_reunion_c';
+export const TABLA_ESTADOS_REUNION = 'gp_estados_reunion_c';
+export const TABLA_TIPOS_AVANCE = 'gp_tipos_avance_c';
+export const TABLA_TIPOS_ARCHIVO = 'gp_tipos_archivo_c';
 
 /** Columnas por tabla (no todas comparten esquema: nivel solo existe en prioridades, alias en dependencias/entregables). */
 const COLUMNAS_POR_TABLA: Record<string, string> = {
@@ -48,6 +55,11 @@ const COLUMNAS_POR_TABLA: Record<string, string> = {
   [TABLA_CATEGORIAS_ENTREGABLE]: 'codigo,nombre,alias,icono,alcance,orden,activo',
   [TABLA_TIPOS_ENTREGABLE]: 'codigo,categoria_codigo,nombre,alias,icono,orden,activo',
   [TABLA_ESTADOS_ENTREGABLE]: 'codigo,nombre,alias,icono,orden,activo',
+  // 9–12: misma forma (codigo/nombre/alias/descripcion/activo/orden/metadata).
+  [TABLA_TIPOS_REUNION]: 'codigo,nombre,alias,orden,activo',
+  [TABLA_ESTADOS_REUNION]: 'codigo,nombre,alias,orden,activo',
+  [TABLA_TIPOS_AVANCE]: 'codigo,nombre,alias,orden,activo',
+  [TABLA_TIPOS_ARCHIVO]: 'codigo,nombre,alias,orden,activo',
 };
 
 /** Valor de catálogo normalizado para la UI (solo lo que un selector necesita). */
@@ -232,4 +244,24 @@ export function listarTiposEntregableGestor(): Promise<ResultadoCatalogo> {
 /** Atajo: estados de entregable activos (gp_estados_entregable_c). */
 export function listarEstadosEntregableGestor(): Promise<ResultadoCatalogo> {
   return listarCatalogo(TABLA_ESTADOS_ENTREGABLE);
+}
+
+/** Atajo: tipos de reunión activos (gp_tipos_reunion_c · seed 8 valores). */
+export function listarTiposReunionGestor(): Promise<ResultadoCatalogo> {
+  return listarCatalogo(TABLA_TIPOS_REUNION);
+}
+
+/** Atajo: estados de reunión activos (gp_estados_reunion_c · seed 6 valores). */
+export function listarEstadosReunionGestor(): Promise<ResultadoCatalogo> {
+  return listarCatalogo(TABLA_ESTADOS_REUNION);
+}
+
+/** Atajo: tipos de avance activos (gp_tipos_avance_c · seed 6 valores). */
+export function listarTiposAvanceGestor(): Promise<ResultadoCatalogo> {
+  return listarCatalogo(TABLA_TIPOS_AVANCE);
+}
+
+/** Atajo: tipos de archivo activos (gp_tipos_archivo_c · seed 7 valores). */
+export function listarTiposArchivoGestor(): Promise<ResultadoCatalogo> {
+  return listarCatalogo(TABLA_TIPOS_ARCHIVO);
 }

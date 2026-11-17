@@ -533,12 +533,12 @@
   font-size: 11px;
 }
 
-.gantt-v2 .tabs-list button.active {
+.gantt-v2 .tabs-list > button.active {
   font-weight: 700;
   color: #0066ff;
 }
 
-.gantt-v2 .tabs-list button.active:after {
+.gantt-v2 .tabs-list > button.active:after {
   content: "";
   position: absolute;
   bottom: -1px;
@@ -547,6 +547,14 @@
   height: 3px;
   background: #0066ff;
   border-radius: 3px 3px 0 0;
+}
+
+.gantt-v2 .tabs-list .filter-card-btn:after,
+.gantt-v2 .tabs-list .filter-card-btn.active:after,
+.gantt-v2 .filter-card-btn:after,
+.gantt-v2 .filter-card-btn.active:after {
+  display: none !important;
+  content: none !important;
 }
 
 /* Filtros */
@@ -5884,6 +5892,51 @@ body.gantt-resizing {
   min-width: 1040px;
 }
 
+.kanban-board-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.kanban-toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kanban-toolbar-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.kanban-toolbar-pill {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.kanban-toolbar-pill:hover {
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.kanban-toolbar-pill.active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #0066ff;
+}
+
 .kanban-column {
   flex: 1;
   min-width: 250px;
@@ -5896,6 +5949,124 @@ body.gantt-resizing {
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kanban-column.is-drop-target {
+  border-color: #0066ff;
+  background: #eff6ff;
+  box-shadow: inset 0 0 0 1px rgba(0, 102, 255, 0.25);
+}
+
+.kanban-card.is-dragging {
+  opacity: 0.45;
+  transform: scale(0.985);
+}
+
+.kanban-card.is-drop-before {
+  box-shadow: 0 -3px 0 0 #0066ff;
+}
+
+.kanban-card.is-drop-after {
+  box-shadow: 0 3px 0 0 #0066ff;
+}
+
+.kanban-column.is-wip-exceeded {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.kanban-column.is-wip-exceeded .kanban-column-header {
+  border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+  padding-bottom: 8px;
+}
+
+.kanban-column.is-collapsed {
+  flex: 0 0 54px !important;
+  min-width: 54px !important;
+  max-width: 54px !important;
+  padding: 12px 6px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.kanban-wip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #475569;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.kanban-wip-badge:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
+.kanban-wip-badge.exceeded {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.kanban-inline-creator {
+  background: #ffffff;
+  border: 1.5px solid #0066ff;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.1);
+}
+
+.kanban-inline-creator input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  background: transparent;
+  margin-bottom: 8px;
+}
+
+.kanban-context-menu {
+  position: fixed;
+  z-index: 99999;
+  min-width: 210px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.18), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kanban-context-menu .kanban-status-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  text-align: left;
+}
+
+.kanban-context-menu .kanban-status-opt:hover {
+  background: #f1f5f9;
 }
 
 .kanban-column-header {

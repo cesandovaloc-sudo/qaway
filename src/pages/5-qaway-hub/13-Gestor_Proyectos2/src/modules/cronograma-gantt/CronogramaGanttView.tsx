@@ -4730,7 +4730,7 @@ export default function CronogramaGanttView({
   const todayPos = calcPosition(currentTodayIso);
   const denseZoom = zoom === 'Día' || zoom === 'Semana';
 
-  const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false, initialStatus?: Status) => {
+  const add = (kind: Kind, parentHitoId?: string, openInline: boolean = false, initialStatus?: Status, initialName?: string) => {
     const id = (kind === 'hito' ? 'comp-' : 'sub-') + Date.now();
     const pId = parentHitoId || (kind === 'subproceso' ? (drawerDraft?.id || hitos[0]?.id) : undefined);
     let code = `${hitos.length + 1}.`;
@@ -4764,7 +4764,7 @@ export default function CronogramaGanttView({
     const draftItem: Item = {
       id,
       code,
-      name: kind === 'hito' ? 'Nuevo componente' : 'Nuevo paquete de trabajo',
+      name: initialName?.trim() || (kind === 'hito' ? 'Nuevo componente' : 'Nuevo paquete de trabajo'),
       kind,
       edtType: kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO',
       wbsNodeType: kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO',
@@ -4831,9 +4831,13 @@ export default function CronogramaGanttView({
         return [...old, draftItem];
       });
       setSelectedId(id);
+      if (initialName?.trim()) {
+        notify(`Paquete de trabajo "${initialName.trim()}" creado en ${initialStatus || 'Pendiente'}.`);
+        return;
+      }
       setInlineDraftCreatedId(id);
       toggleEdit(draftItem, 'name');
-      notify(`Nuevo ${kind === 'hito' ? 'componente' : 'subcomponente'} creado. Escribe el nombre y pulsa Enter para guardar.`);
+      notify(`Nuevo ${kind === 'hito' ? 'componente' : 'paquete de trabajo'} creado. Escribe el nombre y pulsa Enter para guardar.`);
       return;
     };
 
@@ -4844,7 +4848,7 @@ export default function CronogramaGanttView({
     setEditorTab('info');
     setPanelOpen(true);
     setNewMenu(false);
-    notify(`Borrador de nuevo ${kind === 'hito' ? 'componente' : 'subcomponente'} abierto. Configura y pulsa "Guardar cambios".`);
+    notify(`Borrador de nuevo ${kind === 'hito' ? 'componente' : 'paquete de trabajo'} abierto. Configura y pulsa "Guardar cambios".`);
   };
 
   const exportCSV = () => {
@@ -6375,7 +6379,7 @@ export default function CronogramaGanttView({
                         }}
                       >
                         <FileText size={15} />
-                        <span>Nuevo subcomponente / subproceso</span>
+                        <span>Nuevo paquete de trabajo</span>
                       </button>
                       {perspective === 'equipo' && (
                         <button
@@ -9059,8 +9063,9 @@ export default function CronogramaGanttView({
               allItems={items}
               onSelectItem={openEditorForItem}
               todayIso={currentTodayIso}
-              onAddItem={(targetStatus) => {
-                add('subproceso', undefined, true, targetStatus);
+              notify={notify}
+              onAddItem={(targetStatus, title) => {
+                add('subproceso', undefined, true, targetStatus, title);
               }}
               onUpdateStatus={(itemId, nextStatus) => {
                 setItems((prev) => {

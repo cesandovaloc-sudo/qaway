@@ -13,9 +13,53 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   crearListadorCatalogo,
   evaluarFilasCatalogo,
+  TABLA_ESTADOS_REUNION,
   TABLA_PRIORIDADES,
+  TABLA_TIPOS_ARCHIVO,
+  TABLA_TIPOS_AVANCE,
+  TABLA_TIPOS_REUNION,
   type FetchCatalogo,
 } from './gpCatalogosService';
+
+// Seeds vivos del BLOQUE A (000022/000023), en el orden de `orden` de cada tabla.
+const SEED_TIPOS_REUNION = [
+  { codigo: 'KICKOFF', nombre: 'Kickoff meeting', alias: 'Reunión de inicio', orden: 1, activo: true },
+  { codigo: 'SEGUIMIENTO', nombre: 'Status meeting', alias: 'Reunión de seguimiento', orden: 2, activo: true },
+  { codigo: 'COMITE', nombre: 'Steering committee', alias: 'Comité directivo', orden: 3, activo: true },
+  { codigo: 'PLANIFICACION', nombre: 'Planning session', alias: 'Sesión de planificación', orden: 4, activo: true },
+  { codigo: 'REVISION', nombre: 'Review meeting', alias: 'Reunión de revisión', orden: 5, activo: true },
+  { codigo: 'RETROSPECTIVA', nombre: 'Retrospective', alias: 'Retrospectiva', orden: 6, activo: true },
+  { codigo: 'CIERRE', nombre: 'Closure meeting', alias: 'Reunión de cierre', orden: 7, activo: true },
+  { codigo: 'DAILY', nombre: 'Daily standup', alias: 'Reunión diaria', orden: 8, activo: true },
+];
+
+const SEED_ESTADOS_REUNION = [
+  { codigo: 'PROGRAMADA', nombre: 'Scheduled', alias: 'Programada', orden: 1, activo: true },
+  { codigo: 'EN_CURSO', nombre: 'In progress', alias: 'En curso', orden: 2, activo: true },
+  { codigo: 'REALIZADA', nombre: 'Completed', alias: 'Realizada', orden: 3, activo: true },
+  { codigo: 'CANCELADA', nombre: 'Cancelled', alias: 'Cancelada', orden: 4, activo: true },
+  { codigo: 'POSPUESTA', nombre: 'Postponed', alias: 'Pospuesta', orden: 5, activo: true },
+  { codigo: 'REPROGRAMADA', nombre: 'Rescheduled', alias: 'Reprogramada', orden: 6, activo: true },
+];
+
+const SEED_TIPOS_AVANCE = [
+  { codigo: 'FISICO', nombre: 'Physical progress', alias: 'Avance físico', orden: 1, activo: true },
+  { codigo: 'FINANCIERO', nombre: 'Financial progress', alias: 'Avance financiero', orden: 2, activo: true },
+  { codigo: 'HITO', nombre: 'Milestone', alias: 'Hito alcanzado', orden: 3, activo: true },
+  { codigo: 'CRONOGRAMA', nombre: 'Schedule progress', alias: 'Avance de cronograma', orden: 4, activo: true },
+  { codigo: 'COSTO', nombre: 'Cost progress', alias: 'Avance de costo', orden: 5, activo: true },
+  { codigo: 'CALIDAD', nombre: 'Quality progress', alias: 'Avance de calidad', orden: 6, activo: true },
+];
+
+const SEED_TIPOS_ARCHIVO = [
+  { codigo: 'PLANO', nombre: 'Drawing', alias: 'Plano', orden: 1, activo: true },
+  { codigo: 'CONTRATO', nombre: 'Contract', alias: 'Contrato', orden: 2, activo: true },
+  { codigo: 'FOTO', nombre: 'Photo', alias: 'Fotografía', orden: 3, activo: true },
+  { codigo: 'ACTA', nombre: 'Minutes', alias: 'Acta', orden: 4, activo: true },
+  { codigo: 'INFORME', nombre: 'Report', alias: 'Informe', orden: 5, activo: true },
+  { codigo: 'CORRESPONDENCIA', nombre: 'Correspondence', alias: 'Correspondencia', orden: 6, activo: true },
+  { codigo: 'OTRO', nombre: 'Other', alias: 'Otro', orden: 7, activo: true },
+];
 
 const SEED_PRIORIDADES = [
   { codigo: 'baja', nombre: 'Baja', nivel: 1, orden: 0, activo: true },
@@ -53,7 +97,16 @@ describe('evaluarFilasCatalogo (núcleo puro)', () => {
     expect(r.estado).toBe('lista');
     if (r.estado === 'lista') {
       expect(r.valores).toHaveLength(1);
-      expect(r.valores[0]).toEqual({ codigo: 'ok', nombre: 'Ok', nivel: null, orden: 2 });
+      expect(r.valores[0]).toEqual({
+        codigo: 'ok',
+        nombre: 'Ok',
+        alias: null,
+        icono: null,
+        categoriaCodigo: null,
+        alcance: null,
+        nivel: null,
+        orden: 2,
+      });
     }
   });
 
@@ -82,6 +135,77 @@ describe('evaluarFilasCatalogo (núcleo puro)', () => {
     );
     if (r.estado === 'lista') expect(r.valores.map((v) => v.codigo)).toEqual(['a', 'b']);
     else throw new Error('esperaba lista');
+  });
+});
+
+describe('BLOQUE A · catálogos 9–12 (núcleo y enrutado por tabla)', () => {
+  it('tipos de reunión: 8 códigos en orden de presentación (KICKOFF→DAILY)', () => {
+    const r = evaluarFilasCatalogo(SEED_TIPOS_REUNION, null);
+    expect(r.estado).toBe('lista');
+    if (r.estado !== 'lista') throw new Error('esperaba lista');
+    expect(r.valores.map((v) => v.codigo)).toEqual([
+      'KICKOFF',
+      'SEGUIMIENTO',
+      'COMITE',
+      'PLANIFICACION',
+      'REVISION',
+      'RETROSPECTIVA',
+      'CIERRE',
+      'DAILY',
+    ]);
+    expect(r.valores[0]?.alias).toBe('Reunión de inicio');
+  });
+
+  it('estados de reunión: 6 códigos y alias en español', () => {
+    const r = evaluarFilasCatalogo(SEED_ESTADOS_REUNION, null);
+    expect(r.estado).toBe('lista');
+    if (r.estado !== 'lista') throw new Error('esperaba lista');
+    expect(r.valores.map((v) => v.codigo)).toEqual([
+      'PROGRAMADA',
+      'EN_CURSO',
+      'REALIZADA',
+      'CANCELADA',
+      'POSPUESTA',
+      'REPROGRAMADA',
+    ]);
+    expect(r.valores.map((v) => v.alias)).toContain('En curso');
+  });
+
+  it('tipos de avance (6) y tipos de archivo (7) llegan completos', () => {
+    const avance = evaluarFilasCatalogo(SEED_TIPOS_AVANCE, null);
+    const archivo = evaluarFilasCatalogo(SEED_TIPOS_ARCHIVO, null);
+    expect(avance.estado).toBe('lista');
+    expect(archivo.estado).toBe('lista');
+    if (avance.estado !== 'lista' || archivo.estado !== 'lista') throw new Error('esperaba lista');
+    expect(avance.valores).toHaveLength(6);
+    expect(archivo.valores).toHaveLength(7);
+    expect(archivo.valores.map((v) => v.codigo)).toContain('CORRESPONDENCIA');
+  });
+
+  it('cada constante de tabla 9–12 se enruta a su propio catálogo (sin colisión de caché)', async () => {
+    const POR_TABLA: Record<string, unknown> = {
+      [TABLA_TIPOS_REUNION]: SEED_TIPOS_REUNION,
+      [TABLA_ESTADOS_REUNION]: SEED_ESTADOS_REUNION,
+      [TABLA_TIPOS_AVANCE]: SEED_TIPOS_AVANCE,
+      [TABLA_TIPOS_ARCHIVO]: SEED_TIPOS_ARCHIVO,
+    };
+    const pedidas: string[] = [];
+    const { listar } = crearListadorCatalogo((tabla) => {
+      pedidas.push(tabla);
+      return Promise.resolve({ filas: POR_TABLA[tabla] ?? null, error: null });
+    });
+
+    const reunion = await listar(TABLA_TIPOS_REUNION);
+    const estado = await listar(TABLA_ESTADOS_REUNION);
+    const avance = await listar(TABLA_TIPOS_AVANCE);
+    const archivo = await listar(TABLA_TIPOS_ARCHIVO);
+
+    expect(pedidas).toEqual([TABLA_TIPOS_REUNION, TABLA_ESTADOS_REUNION, TABLA_TIPOS_AVANCE, TABLA_TIPOS_ARCHIVO]);
+    expect(reunion.estado).toBe('lista');
+    if (reunion.estado === 'lista') expect(reunion.valores).toHaveLength(8);
+    if (estado.estado === 'lista') expect(estado.valores).toHaveLength(6);
+    if (avance.estado === 'lista') expect(avance.valores).toHaveLength(6);
+    if (archivo.estado === 'lista') expect(archivo.valores).toHaveLength(7);
   });
 });
 

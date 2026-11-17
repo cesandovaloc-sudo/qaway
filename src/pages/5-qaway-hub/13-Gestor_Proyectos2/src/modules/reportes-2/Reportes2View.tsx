@@ -132,6 +132,7 @@ import {
   MapPin,
   Maximize2,
   Minimize2,
+  Minus,
   MoreHorizontal,
   Package,
   PanelRightOpen,
@@ -2106,6 +2107,7 @@ export default function Reportes2View({
   };
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
+  const [expandedMacroIds, setExpandedMacroIds] = useState<Record<string, boolean>>({});
 
   const toggleRegion = (regionName: string) => {
     setSelectedRegions((prev) => {
@@ -2167,7 +2169,61 @@ export default function Reportes2View({
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [selectedSedes, setSelectedSedes] = useState<string[]>([]);
   const [selectedEdtCodes, setSelectedEdtCodes] = useState<string[]>([]);
-  const [collapsedCompIds, setCollapsedCompIds] = useState<Record<string, boolean>>({});
+  const [expandedCompIds, setExpandedCompIds] = useState<Record<string, boolean>>({});
+  const [compPopoverWidth, setCompPopoverWidth] = useState<number>(330);
+  const isResizingCompPopover = useRef(false);
+  const startResizeX = useRef(0);
+  const startPopoverWidth = useRef(330);
+
+  const handlePopoverResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isResizingCompPopover.current = true;
+    startResizeX.current = e.clientX;
+    startPopoverWidth.current = compPopoverWidth;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isResizingCompPopover.current) return;
+      const delta = ev.clientX - startResizeX.current;
+      const newWidth = Math.max(320, Math.min(850, startPopoverWidth.current + delta));
+      setCompPopoverWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      isResizingCompPopover.current = false;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [compPopoverWidth]);
+
+  // Formateador de títulos de macro-regiones a minúsculas con mayúscula inicial (ej. Macro Norte, Macro Centro)
+  const formatMacroName = useCallback((name: string): string => {
+    if (!name) return '';
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map((w) => (w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
+      .join(' ');
+  }, []);
+
+  // Límite uniforme y calibrado de caracteres con puntos suspensivos para padres e hijos.
+  // Al estirar el desplegable, el límite se amplía dinámicamente permitiendo ver el título completo.
+  const getTruncatedLabel = useCallback(
+    (label: string, currentWidth: number = 330, isChild: boolean = false): string => {
+      if (!label) return '';
+      const extraWidth = Math.max(0, currentWidth - 330);
+      const baseChars = isChild ? 27 : 29;
+      const maxChars = baseChars + Math.floor(extraWidth / 7.2);
+      if (label.length > maxChars) {
+        return `${label.slice(0, maxChars).trim()}...`;
+      }
+      return label;
+    },
+    []
+  );
 
   // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
   // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
@@ -2337,6 +2393,39 @@ export default function Reportes2View({
     return gestorFilter;
   }, [gestorFilter]);
 
+  const formatEdtLabel = useCallback((code: string | undefined, name: string): string => {
+    if (!name) return '';
+    let clean = name.trim();
+    const codePrefixMatch = clean.match(/^(\d+(?:\.\d+)*\.?)\s*(.+)$/);
+    let effectiveCode = code ? code.trim() : '';
+    let rest = clean;
+    if (codePrefixMatch) {
+      if (!effectiveCode && codePrefixMatch[1]) effectiveCode = codePrefixMatch[1];
+      if (codePrefixMatch[2]) rest = codePrefixMatch[2];
+    }
+
+    const isAllCaps = rest === rest.toUpperCase() && rest !== rest.toLowerCase();
+    let sentence = rest;
+    if (isAllCaps) {
+      const lower = rest.toLowerCase();
+      sentence = lower.charAt(0).toUpperCase() + lower.slice(1);
+    }
+
+    const formatted = sentence
+      .replace(/\bdre\b/gi, 'DRE')
+      .replace(/\bugel\b/gi, 'UGEL')
+      .replace(/\bii\.ee\.\b/gi, 'II.EE.')
+      .replace(/\biiee\b/gi, 'II.EE.')
+      .replace(/\bmc siga\b/gi, 'MC SIGA')
+      .replace(/\bsiga\b/gi, 'SIGA')
+      .replace(/\bcdl\b/gi, 'CDL')
+      .replace(/\brar\b/gi, 'RAR')
+      .replace(/\bedt\b/gi, 'EDT');
+
+    const prefix = effectiveCode ? (effectiveCode.endsWith('.') ? `${effectiveCode} ` : `${effectiveCode}. `) : '';
+    return `${prefix}${formatted}`;
+  }, []);
+
   const edtComponentsWithProducts = useMemo(() => {
     const components = items.filter((x) => !x.parentId && (x.kind === 'hito' || x.edtType === 'COMPONENTE'));
     return components.map((comp) => {
@@ -2347,20 +2436,86 @@ export default function Reportes2View({
     });
   }, [items]);
 
+  const getCompSelectionState = useCallback(
+    (comp: any, products: any[]): 'checked' | 'indeterminate' | 'unchecked' => {
+      const isCompExplicit = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
+      if (isCompExplicit) return 'checked';
+
+      if (!products || products.length === 0) return 'unchecked';
+
+      const selectedCount = products.filter(
+        (p) => selectedEdtCodes.includes(p.id) || selectedEdtCodes.includes(p.code)
+      ).length;
+
+      if (selectedCount === products.length) return 'checked';
+      if (selectedCount > 0) return 'indeterminate';
+      return 'unchecked';
+    },
+    [selectedEdtCodes]
+  );
+
+  const toggleComponentSelection = useCallback(
+    (comp: any, products: any[]) => {
+      const currentState = getCompSelectionState(comp, products);
+      const compKeys = [comp.id, comp.code].filter(Boolean);
+      const prodKeys = (products || []).flatMap((p) => [p.id, p.code].filter(Boolean));
+      const allSubKeys = new Set([...compKeys, ...prodKeys]);
+
+      setSelectedEdtCodes((prev) => {
+        if (currentState === 'checked' || currentState === 'indeterminate') {
+          return prev.filter((k) => !allSubKeys.has(k));
+        } else {
+          return [...prev.filter((k) => !allSubKeys.has(k)), comp.id];
+        }
+      });
+    },
+    [getCompSelectionState]
+  );
+
+  const toggleProductSelection = useCallback(
+    (comp: any, prod: any, products: any[]) => {
+      const compKeys = [comp.id, comp.code].filter(Boolean);
+      const isCompExplicit = selectedEdtCodes.some((k) => compKeys.includes(k));
+      const isProdChecked =
+        isCompExplicit || selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
+
+      setSelectedEdtCodes((prev) => {
+        if (isCompExplicit) {
+          const otherProdIds = (products || [])
+            .filter((p) => p.id !== prod.id && p.code !== prod.id)
+            .map((p) => p.id);
+          return [...prev.filter((k) => !compKeys.includes(k)), ...otherProdIds];
+        } else if (isProdChecked) {
+          return prev.filter((k) => k !== prod.id && k !== prod.code);
+        } else {
+          const next = [...prev, prod.id];
+          const allSelected = (products || []).every(
+            (p) => p.id === prod.id || next.includes(p.id) || next.includes(p.code)
+          );
+          if (allSelected) {
+            const prodKeys = (products || []).flatMap((p) => [p.id, p.code].filter(Boolean));
+            return [...next.filter((k) => !prodKeys.includes(k)), comp.id];
+          }
+          return next;
+        }
+      });
+    },
+    [selectedEdtCodes]
+  );
+
   const edtButtonText = useMemo(() => {
     if (selectedEdtCodes.length === 0) return 'Todos los componentes';
     if (selectedEdtCodes.length === 1) {
       const target = selectedEdtCodes[0];
       const it = items.find((x) => x.id === target || x.code === target);
       if (it) {
-        const prefix = it.code ? `${it.code} ` : '';
-        const namePart = it.name.length > 20 ? `${it.name.slice(0, 20)}...` : it.name;
-        return `${prefix}${namePart}`;
+        const formatted = formatEdtLabel(it.code, it.name);
+        return formatted.length > 24 ? `${formatted.slice(0, 24)}...` : formatted;
       }
       return target;
     }
-    return `${selectedEdtCodes.length} componentes/prod.`;
-  }, [selectedEdtCodes, items]);
+    return `${selectedEdtCodes.length} seleccionados`;
+  }, [selectedEdtCodes, items, formatEdtLabel]);
 
   // Filtro de cargo territorial: Coordinador Macro-regional (supervisa 2 regiones)
   const [macroFilter, setMacroFilter] = useState<string>('Todos');
@@ -6141,8 +6296,39 @@ export default function Reportes2View({
                         list.scrollTop += e.deltaY;
                       }
                     }}
-                    style={{ minWidth: 340, maxWidth: 420 }}
+                    style={{
+                      width: compPopoverWidth ? `${compPopoverWidth}px` : 330,
+                      minWidth: 320,
+                      maxWidth: 850,
+                      position: 'relative',
+                      resize: 'horizontal',
+                      overflow: 'hidden',
+                    }}
                   >
+                    {/* Asa interactiva en el borde derecho para estirar horizontalmente el desplegable */}
+                    <div
+                      className="popover-resize-handle-right"
+                      onMouseDown={handlePopoverResizeStart}
+                      title="Arrastrar para ajustar ancho del desplegable"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: 7,
+                        cursor: 'ew-resize',
+                        zIndex: 20,
+                        background: 'transparent',
+                        transition: 'background 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 102, 255, 0.25)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                      }}
+                    />
+
                     <div className="filter-popover-title filter-popover-title-row">
                       <span>Componentes y Productos</span>
                       {selectedEdtCodes.length > 0 && (
@@ -6155,7 +6341,7 @@ export default function Reportes2View({
                         </button>
                       )}
                     </div>
-                    <div className="filter-popover-list" style={{ maxHeight: 380 }}>
+                    <div className="filter-popover-list" style={{ maxHeight: 380, overflowX: 'hidden' }}>
                       {/* Opción Todos */}
                       {(() => {
                         const isAll = selectedEdtCodes.length === 0;
@@ -6178,24 +6364,34 @@ export default function Reportes2View({
                         );
                       })()}
 
-                      {/* Grupos de Componentes con Chevrones para Desplegar/Colapsar */}
+                      {/* Título de sección sutil idéntico a ESTADO DE AVANCE y MACRO NORTE */}
+                      <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                        <span>Componentes Rectores EDT</span>
+                      </div>
+
+                      {/* Grupos de Componentes con Chevrones para Desplegar/Colapsar (Colapsados por defecto) */}
                       {edtComponentsWithProducts.map(({ comp, products }) => {
-                        const isCompChecked = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
-                        const isCollapsed = Boolean(collapsedCompIds[comp.id]);
-                        const compTotalItems = items.filter((x) => x.id === comp.id || x.parentId === comp.id || items.some(p => p.id === x.parentId && p.parentId === comp.id)).length;
+                        const selectionState = getCompSelectionState(comp, products);
+                        const isCompChecked = selectionState === 'checked' || selectionState === 'indeterminate';
+                        const isExpanded = Boolean(expandedCompIds[comp.id]);
+                        const compTotalItems = items.filter(
+                          (x) => x.id === comp.id || x.parentId === comp.id || items.some((p) => p.id === x.parentId && p.parentId === comp.id)
+                        ).length;
+                        const compLabel = formatEdtLabel(comp.code, comp.name);
+
                         return (
                           <React.Fragment key={comp.id}>
                             <div
-                              className="filter-popover-group-label"
+                              className={`filter-item-btn filter-item-check ${isCompChecked ? 'selected' : ''}`}
                               style={{
-                                marginTop: 6,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                background: '#f8fafc',
-                                border: '1px solid #e2e8f0',
-                                padding: '5px 8px',
-                                borderRadius: '8px',
+                                padding: '7px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                background: isCompChecked ? '#eff6ff' : 'transparent',
+                                transition: 'background 0.12s ease',
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
@@ -6203,71 +6399,143 @@ export default function Reportes2View({
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setCollapsedCompIds((prev) => ({ ...prev, [comp.id]: !prev[comp.id] }));
+                                    setExpandedCompIds((prev) => ({ ...prev, [comp.id]: !prev[comp.id] }));
                                   }}
-                                  style={{ background: 'none', border: 'none', padding: '2px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b' }}
-                                  title={isCollapsed ? 'Desplegar productos' : 'Colapsar productos'}
-                                >
-                                  {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-                                </button>
-                                <button
-                                  type="button"
                                   style={{
                                     background: 'none',
                                     border: 'none',
-                                    padding: 0,
+                                    padding: '2px',
+                                    margin: '0',
                                     cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#64748b',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                    lineHeight: 1,
+                                  }}
+                                  title={isExpanded ? 'Colapsar productos' : 'Desplegar productos'}
+                                  aria-expanded={isExpanded}
+                                >
+                                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                                <div
+                                  style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 6,
-                                    textAlign: 'left',
-                                    font: 'inherit',
-                                    color: 'inherit',
+                                    gap: 8,
                                     flex: 1,
                                     minWidth: 0,
+                                    cursor: 'pointer',
                                   }}
-                                  onClick={() => {
-                                    setSelectedEdtCodes((prev) =>
-                                      prev.includes(comp.id) ? prev.filter((c) => c !== comp.id) : [...prev, comp.id]
-                                    );
-                                  }}
+                                  onClick={() => toggleComponentSelection(comp, products)}
+                                  title={compLabel}
                                 >
-                                  <span className={`filter-checkbox ${isCompChecked ? 'checked' : ''}`}>
-                                    {isCompChecked && <Check size={10} strokeWidth={3} />}
+                                  <span
+                                    className={`filter-checkbox ${selectionState === 'checked' ? 'checked' : selectionState === 'indeterminate' ? 'indeterminate' : ''}`}
+                                    style={{
+                                      flexShrink: 0,
+                                      ...(selectionState === 'indeterminate' ? { background: '#0066ff', borderColor: '#0066ff' } : {}),
+                                    }}
+                                  >
+                                    {selectionState === 'checked' && <Check size={10} strokeWidth={3} />}
+                                    {selectionState === 'indeterminate' && <Minus size={10} strokeWidth={3} color="#ffffff" />}
                                   </span>
-                                  <strong style={{ fontSize: '11.5px', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {comp.code ? `${comp.code} ` : ''}{comp.name}
-                                  </strong>
-                                </button>
+                                  <span
+                                    className="filter-item-text"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    <strong
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        color: '#0f172a',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: 'block',
+                                      }}
+                                    >
+                                      {getTruncatedLabel(compLabel, compPopoverWidth, false)}
+                                    </strong>
+                                  </span>
+                                </div>
                               </div>
-                              <span className="wbs-level-badge">{compTotalItems}</span>
+                              <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                {compTotalItems}
+                              </span>
                             </div>
 
-                            {!isCollapsed && products.map((prod) => {
-                              const isProdChecked = selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
+                            {/* Productos hijos desplegables: sangría alineada a la derecha, color sólido y una sola fila */}
+                            {isExpanded && products.map((prod) => {
+                              const isProdChecked =
+                                selectionState === 'checked' ||
+                                selectedEdtCodes.includes(prod.id) ||
+                                selectedEdtCodes.includes(prod.code);
                               const prodSedesCount = items.filter((x) => x.parentId === prod.id).length;
+                              const prodLabel = formatEdtLabel(prod.code, prod.name);
+                              const prodDisplayLabel = getTruncatedLabel(prodLabel, compPopoverWidth, true);
+
                               return (
-                                <button
+                                <div
                                   key={prod.id}
-                                  type="button"
                                   className={`filter-item-btn filter-item-check ${isProdChecked ? 'selected' : ''}`}
-                                  style={{ paddingLeft: 26 }}
-                                  onClick={() => {
-                                    setSelectedEdtCodes((prev) =>
-                                      prev.includes(prod.id) ? prev.filter((c) => c !== prod.id) : [...prev, prod.id]
-                                    );
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 8px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    background: isProdChecked ? '#eff6ff' : 'transparent',
                                   }}
+                                  onClick={() => toggleProductSelection(comp, prod, products)}
+                                  title={prodLabel}
                                 >
-                                  <span className="filter-item-main">
-                                    <span className={`filter-checkbox ${isProdChecked ? 'checked' : ''}`}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                    {/* Sangría estructural que desplaza el checkbox 24px a la derecha del padre */}
+                                    <div style={{ width: 24, flexShrink: 0 }} aria-hidden="true" />
+                                    <span className={`filter-checkbox ${isProdChecked ? 'checked' : ''}`} style={{ flexShrink: 0 }}>
                                       {isProdChecked && <Check size={10} strokeWidth={3} />}
                                     </span>
-                                    <span className="filter-item-text">
-                                      <strong>{prod.code ? `${prod.code} ` : ''}{prod.name}</strong>
+                                    <span
+                                      className="filter-item-text"
+                                      style={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        flex: 1,
+                                        minWidth: 0,
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontSize: '12.5px',
+                                          color: isProdChecked ? '#0066ff' : '#1e293b',
+                                          fontWeight: isProdChecked ? 600 : 500,
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          display: 'block',
+                                        }}
+                                      >
+                                        {prodDisplayLabel}
+                                      </span>
                                     </span>
-                                  </span>
-                                  {prodSedesCount > 0 && <span className="wbs-level-badge">{prodSedesCount}</span>}
-                                </button>
+                                  </div>
+                                  {prodSedesCount > 0 && (
+                                    <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                      {prodSedesCount}
+                                    </span>
+                                  )}
+                                </div>
                               );
                             })}
                           </React.Fragment>
@@ -6320,60 +6588,206 @@ export default function Reportes2View({
                         type="button"
                         className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
                         onClick={() => setSelectedRegions([])}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          background: selectedRegions.length === 0 ? '#eff6ff' : 'transparent',
+                          border: 'none',
+                          width: '100%',
+                        }}
                       >
-                        <span className="filter-item-text">
-                          <strong>Todas las regiones</strong>
-                          <small>{MACROREGIONES_NACIONAL.length} macro-regiones · {unidades.length} sedes</small>
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span
+                            className={`filter-checkbox ${selectedRegions.length === 0 ? 'checked' : ''}`}
+                            style={{ borderRadius: '50%' }}
+                          >
+                            {selectedRegions.length === 0 && (
+                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0066ff' }} />
+                            )}
+                          </span>
+                          <span className="filter-item-text">
+                            <strong style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                              Todas las regiones
+                            </strong>
+                          </span>
+                        </div>
                         <span className="wbs-level-badge">{unidades.length}</span>
                       </button>
+
+                      {/* Título de sección sutil idéntico a Componentes y Estado */}
+                      <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                        <span>Macro-regiones y sedes</span>
+                      </div>
+
+                      {/* Grupos de Macro-regiones con Chevrones para Desplegar/Colapsar (Colapsados por defecto) */}
                       {MACROREGIONES_NACIONAL.map((macro) => {
-                        const todasMacro = macro.regiones.every((r) => selectedRegions.includes(r));
+                        const totalSedesMacro = macro.regiones.reduce(
+                          (acc, reg) => acc + (sedesPorRegion.get(normalizeRegionKey(reg)) || 0),
+                          0
+                        );
+                        const selectedCountInMacro = macro.regiones.filter((r) => selectedRegions.includes(r)).length;
+                        const isAllMacroSelected = macro.regiones.length > 0 && selectedCountInMacro === macro.regiones.length;
+                        const isMacroIndeterminate = selectedCountInMacro > 0 && selectedCountInMacro < macro.regiones.length;
+                        const isCompChecked = isAllMacroSelected || isMacroIndeterminate;
+                        const isExpanded = Boolean(expandedMacroIds[macro.id]);
+
                         return (
                           <React.Fragment key={macro.id}>
-                            <div className="filter-popover-group-label macro-group-row">
-                              <span>{macro.name}</span>
-                              <button
-                                type="button"
-                                className={`filter-reset-link ${todasMacro ? 'macro-all-active' : ''}`}
-                                onClick={() => toggleMacroRegions(macro.regiones)}
-                                aria-pressed={todasMacro}
-                                title={
-                                  todasMacro
-                                    ? `Quitar las ${macro.regiones.length} regiones de esta macro`
-                                    : `Seleccionar las ${macro.regiones.length} regiones de esta macro`
-                                }
-                              >
-                                {todasMacro ? `Quitar (${macro.regiones.length})` : `Todas (${macro.regiones.length})`}
-                              </button>
-                            </div>
-                            {macro.regiones.map((regName) => {
-                              const isChecked = selectedRegions.includes(regName);
-                              const coordinador = getRegionCoordinador(regName);
-                              return (
+                            <div
+                              className={`filter-item-btn filter-item-check ${isCompChecked ? 'selected' : ''}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '7px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                background: isCompChecked ? '#eff6ff' : 'transparent',
+                                transition: 'background 0.12s ease',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
                                 <button
-                                  key={regName}
                                   type="button"
-                                  className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                                  onClick={() => toggleRegion(regName)}
-                                  aria-pressed={isChecked}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedMacroIds((prev) => ({ ...prev, [macro.id]: !prev[macro.id] }));
+                                  }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '2px',
+                                    margin: '0',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#64748b',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                    lineHeight: 1,
+                                  }}
+                                  title={isExpanded ? 'Colapsar macro-región' : 'Desplegar macro-región'}
+                                  aria-expanded={isExpanded}
                                 >
-                                  <span className="filter-item-main">
-                                    <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    flex: 1,
+                                    minWidth: 0,
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => toggleMacroRegions(macro.regiones)}
+                                  title={formatMacroName(macro.name)}
+                                >
+                                  <span
+                                    className={`filter-checkbox ${isAllMacroSelected ? 'checked' : isMacroIndeterminate ? 'indeterminate' : ''}`}
+                                    style={{
+                                      flexShrink: 0,
+                                      ...(isMacroIndeterminate ? { background: '#0066ff', borderColor: '#0066ff' } : {}),
+                                    }}
+                                  >
+                                    {isAllMacroSelected && <Check size={10} strokeWidth={3} />}
+                                    {isMacroIndeterminate && <Minus size={10} strokeWidth={3} color="#ffffff" />}
+                                  </span>
+                                  <span
+                                    className="filter-item-text"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    <strong
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        color: '#0f172a',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: 'block',
+                                      }}
+                                    >
+                                      {formatMacroName(macro.name)}
+                                    </strong>
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                {totalSedesMacro}
+                              </span>
+                            </div>
+
+                            {/* Regiones hijas desplegables: sangría a la derecha (26px), peso normal, una sola fila */}
+                            {isExpanded && macro.regiones.map((regName) => {
+                              const isChecked = selectedRegions.includes(regName);
+                              const numSedes = sedesPorRegion.get(normalizeRegionKey(regName)) || 0;
+                              const coordinador = getRegionCoordinador(regName);
+
+                              return (
+                                <div
+                                  key={regName}
+                                  className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 8px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    background: isChecked ? '#eff6ff' : 'transparent',
+                                  }}
+                                  onClick={() => toggleRegion(regName)}
+                                  title={`${regName} (${numSedes} sedes)${coordinador ? ` · Coord. regional: ${coordinador}` : ''}`}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                    {/* Sangría estructural que desplaza el checkbox 24px a la derecha del padre */}
+                                    <div style={{ width: 24, flexShrink: 0 }} aria-hidden="true" />
+                                    <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`} style={{ flexShrink: 0 }}>
                                       {isChecked && <Check size={10} strokeWidth={3} />}
                                     </span>
-                                    <span className="filter-item-text">
-                                      <strong>{regName}</strong>
-                                      <small>
-                                        {sedesPorRegion.get(normalizeRegionKey(regName)) || 0} sedes
-                                        {coordinador ? ` · Coord. regional: ${coordinador}` : ''}
-                                      </small>
+                                    <span
+                                      className="filter-item-text"
+                                      style={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        flex: 1,
+                                        minWidth: 0,
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontSize: '12.5px',
+                                          color: isChecked ? '#0066ff' : '#1e293b',
+                                          fontWeight: isChecked ? 600 : 500,
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          display: 'block',
+                                        }}
+                                      >
+                                        {regName}
+                                      </span>
                                     </span>
-                                  </span>
-                                  {(regionItemCounts[regName] || 0) > 0 && (
-                                    <span className="wbs-level-badge">{regionItemCounts[regName]}</span>
+                                  </div>
+                                  {numSedes > 0 && (
+                                    <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                      {numSedes}
+                                    </span>
                                   )}
-                                </button>
+                                </div>
                               );
                             })}
                           </React.Fragment>

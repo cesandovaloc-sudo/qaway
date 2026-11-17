@@ -3,7 +3,7 @@
 **Este es el archivo que se abre primero.** Dice qué es cada documento, en qué orden se leen,
 en qué etapa estamos y cuál es el siguiente archivo a crear.
 
-Última actualización: **15-11-2026**
+Última actualización: **17-11-2026**
 
 ---
 
@@ -67,11 +67,27 @@ doc2/
 | **ETAPA 3** | **Creación de las 34 tablas en Supabase, una por una** | 🟡 **en curso — bloque `4-`** |
 | **ETAPA 4** | **Unidades seguras e integradas con el Hub** (implementación definitiva: cliente/sesión compartida, `contextoSesion`, servicios fail-closed, `0004` v3, `0006a`/`0006b`, pruebas, `3.9`) | 🟢 **entregado — pendiente de aplicación SQL y verificación en vivo (procedimiento en `3.9`)** |
 | ETAPA 2D | Integración real con el Hub (sesión compartida, slug en `app_catalog`, RLS activa) | 🟢 absorbida por ETAPA 4 (queda la verificación en vivo) |
-| **ETAPA 5** | **Creación progresiva de tablas `gp_*`** (tracker `5.2`) | 🟡 tabla 4 `gp_prioridades_c` APROBADA (SQL `0007` + paquete `5.5`) — pendiente de aplicación y verificación en vivo; tabla 5 congelada (`5.4` §3) |
+| **ETAPA 5** | **Creación progresiva de tablas `gp_*`** (tracker `5.2`) | 🟢 **18/34 numeradas** — BLOQUE A 12/12 + BLOQUE B 6/6 (17-nov, vía MCP; evidencia en bitácoras `20261117-*`) — siguiente: BLOQUE C+D (`0003`, tablas 19–34, con exposición previa por tabla); RLS de entidades en `0004` (Paso 4) |
 | **ETAPA 6** | **Vinculación de catálogos GP con la app** (`doc2/6.1`) | 🟡 6.1 entregada (selector de prioridad ← `gp_prioridades_c`, pendiente de verificación viva); **6.2 arquitectura APROBADA** y **6.3 IMPLEMENTADA** (`doc2/6.3`: clasificación + ciclo de vida + permisos reales, 44/44 pruebas del núcleo, SQL pendiente de aplicación manual); **6.4 AUDITADA Y EMPAQUETADA** (`doc2/6.4`: paquete único con las 12 migraciones en orden definitivo FASE 0-4, diagnósticos D, verificaciones V, riesgos R-1..R-10, recuperación y checklist — cero correcciones de contenido, `0011` opcional) |
 
 ### Siguiente acción concreta
 
+> **ESTADO REAL MEDIDO EL 17-NOV-2026 (vía MCP de Supabase, verificación viva):**
+> **BLOQUE A COMPLETO — 12/12 catálogos** con el patrón del Hub (RLS true · 4 políticas por
+> tabla · lectura `user_can_use_app('gestor-proyectos')` · escritura `is_platform_admin()` ·
+> `anon` sin política, probado 200 + `[]`). Tablas 9–11 verificadas en vivo con códigos
+> exactos de `0022` (`gp_tipos_reunion_c` 8, `gp_estados_reunion_c` 6, `gp_tipos_avance_c` 6).
+> Tabla 12 `gp_tipos_archivo_c` **creada hoy vía MCP** con `0023` verbatim (10 cols · 7 filas
+> PMI/PMBOK · COMMENT ON TABLE único · 0 alias nulos) — cierra la decisión abierta de `4.2` §85
+> (lista vs mime: LISTA) y el "sin seed hasta definición" de `3.8`. Sin referentes en la app
+> actual ⇒ definido aquí, autorizado por el responsable. Evidencia: `7-Bitacoras/20261117-aplicacion-tabla-12-gp_tipos_archivo_c.md`.
+> BLOQUE B aplicado el mismo día (`0002` verbatim + 6 COMMENT ON TABLE; tablas 13–18 verificadas:
+> columnas exactas, 22 FKs ok, FK diferida del responsable creada, 4 índices únicos, anon 200+`[]`;
+> evidencia: `7-Bitacoras/20261117-aplicacion-bloque-b-0002-entidades.md`). **RLS del Bloque B
+> aplicada el mismo día por orden del responsable** — patrón de las tablas 1–9 en las 6 entidades
+> (4 políticas · `anon` sin política · script de verificación en verde: sin_rls=0, permisivas=0,
+> anon=0; evidencia: `7-Bitacoras/20261117-aplicacion-rls-entidades-bloque-b.md`). El estado del 16-nov queda como historia.
+>
 > **ESTADO REAL MEDIDO EL 16-NOV-2026** (evidencia: `7-Bitacoras/20261116-auditoria-4-catalogos-gp.md`):
 > existen **5 de 12** catálogos del BLOQUE A — `gp_estados_proyecto_c` (5), `gp_tipos_proyecto_c` (6),
 > `gp_estados_ejecucion_c` (6), `gp_prioridades_c` (4) y `gp_roles_proyecto_c` (6, creada el 16-nov,

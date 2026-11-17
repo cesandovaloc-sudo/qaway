@@ -4,6 +4,24 @@ import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supa
 import { logoutUser } from '@/config/auth'
 import { RouteLoading } from './RouteSuspense'
 
+/**
+ * ¿Hay una sesión de Supabase guardada en el navegador?
+ *
+ * Supabase JS persiste la sesión como `sb-<project-ref>-auth-token` (localStorage o
+ * sessionStorage). Se usa solo como último recurso cuando la verificación en red
+ * tarda demasiado: la autorización real la sigue haciendo RLS en el servidor.
+ */
+function hasLocalSupabaseSession() {
+  try {
+    const stores = [localStorage, sessionStorage]
+    return stores.some((store) =>
+      Object.keys(store).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')),
+    )
+  } catch (_) {
+    return false
+  }
+}
+
 export default function HubAccessGuard({ children }) {
   const location = useLocation()
   const [state, setState] = useState({ checking: true, redirect: null })
@@ -11,9 +29,25 @@ export default function HubAccessGuard({ children }) {
   useEffect(() => {
     let alive = true
 
+    // Destino de vuelta al login CON la ruta actual. Sin esto, cualquier fallo de la
+    // verificación perdía la ruta pedida (p. ej. /hub/gestor_proyectos) y el usuario
+    // acababa en el destino por defecto del login: /hub/panel.
+    const loginHref = `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`
+
+    // La verificación encadena 3 llamadas a Supabase (getSession → users → tenants) y
+    // en frío cada una ronda los 2-3 s. Con 3.5 s el guard se rendía en cada arranque
+    // y expulsaba al login a usuarios con sesión válida.
     const timeoutId = setTimeout(() => {
-      if (alive) resolve('/login')
-    }, 3500)
+      if (!alive) return
+      if (hasLocalSupabaseSession()) {
+        // Sesión local presente: no expulsar ni rebotar en bucle; se renderiza y RLS
+        // sigue siendo la autoridad sobre los datos.
+        console.warn('[HubAccessGuard] Verificación lenta; se renderiza con la sesión local.')
+        resolve(null)
+        return
+      }
+      resolve(loginHref)
+    }, 10000)
 
     const resolve = (next) => {
       clearTimeout(timeoutId)
@@ -23,14 +57,14 @@ export default function HubAccessGuard({ children }) {
     const checkAccess = async () => {
       const supabase = getSupabaseClient()
       if (!supabase) {
-        resolve('/login')
+        resolve(loginHref)
         return
       }
 
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       const session = sessionData?.session
       if (sessionError || !session) {
-        resolve(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)
+        resolve(loginHref)
         return
       }
 
@@ -55,7 +89,7 @@ export default function HubAccessGuard({ children }) {
             if (k.startsWith('sb-') && k.endsWith('-auth-token')) sessionStorage.removeItem(k)
           })
         } catch (_) {}
-        resolve('/login')
+        resolve(loginHref)
         return
       }
 
@@ -86,12 +120,16 @@ export default function HubAccessGuard({ children }) {
 
       const locallyCompleted = localStorage.getItem(`qaway.onboarding_completed.${user.tenant_id}`) === 'true'
       const onboardingCompleted = tenant.features?.onboarding_completed === true || locallyCompleted
-      const needsOnboarding = tenant.status === 'draft' || !onboardingCompleted
+      // Un tenant `active` ya salió del onboarding: el wizard lo trata asi y rebota al
+      // panel (HubOnboardingPage: status active -> /hub/panel). Si aqui se le mandaba a
+      // /onboarding/tu-plan, el usuario abria una app (p. ej. /hub/gestor_proyectos),
+      // veia cargar y acababa devuelto a /hub/panel sin poder entrar nunca.
+      const needsOnboarding = tenant.status !== 'active' && (tenant.status === 'draft' || !onboardingCompleted)
 
       resolve(needsOnboarding ? '/onboarding/tu-plan' : null)
     }
 
-    checkAccess().catch(() => resolve('/login'))
+    checkAccess().catch(() => resolve(loginHref))
     return () => { alive = false }
   }, [location.pathname, location.search])
 

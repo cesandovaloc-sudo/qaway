@@ -58,7 +58,17 @@ import {
   ChartNoAxesColumnIncreasing,
 } from 'lucide-react';
 
-type MeetingStatus = 'Programada' | 'En preparación' | 'Realizada' | 'Por confirmar';
+import EstadoReunionCatalogoSelect from './EstadoReunionCatalogoSelect';
+import {
+  ESTADOS_REUNION,
+  claseEstadoReunion,
+  etiquetaEstadoReunion,
+  normalizarEstadoReunion,
+  type EstadoReunionCodigo,
+} from './estadoReunion';
+
+/** Estado = código del catálogo real `gp_estados_reunion_c` (ver estadoReunion.ts). */
+type MeetingStatus = EstadoReunionCodigo;
 type Modality = 'Presencial' | 'Google Meet';
 type Meeting = {
   id: string;
@@ -98,7 +108,7 @@ const initialMeetings: Meeting[] = [
     region: 'Junín',
     site: 'Reunión virtual',
     address: '',
-    status: 'Programada',
+    status: 'PROGRAMADA',
     attendees: ['María Rojas', 'Luis Salazar', 'Ana Torres'],
     owner: 'Carlos Sandoval',
     meetUrl: 'https://meet.google.com/',
@@ -121,7 +131,7 @@ const initialMeetings: Meeting[] = [
     region: 'Junín',
     site: 'Sede Huancayo',
     address: 'Huancayo, Junín, Perú',
-    status: 'En preparación',
+    status: 'EN_CURSO', // antes 'En preparación'
     attendees: ['Rosa Paredes', 'Luis Salazar'],
     owner: 'Carlos Sandoval',
     meetUrl: '',
@@ -144,7 +154,7 @@ const initialMeetings: Meeting[] = [
     region: 'Junín',
     site: 'Sede Concepción',
     address: 'Concepción, Junín, Perú',
-    status: 'Por confirmar',
+    status: 'PROGRAMADA', // antes 'Por confirmar' (mapeado a lo más parecido)
     attendees: ['Elena Cárdenas', 'Rosa Paredes', 'Luis Salazar'],
     owner: 'Carlos Sandoval',
     meetUrl: '',
@@ -167,7 +177,7 @@ const initialMeetings: Meeting[] = [
     region: 'Nacional',
     site: 'Reunión virtual',
     address: '',
-    status: 'Programada',
+    status: 'PROGRAMADA',
     attendees: ['Ana Torres', 'María Rojas'],
     owner: 'Carlos Sandoval',
     meetUrl: 'https://meet.google.com/',
@@ -190,7 +200,7 @@ const initialMeetings: Meeting[] = [
     region: 'Junín',
     site: 'Reunión virtual',
     address: '',
-    status: 'Programada',
+    status: 'PROGRAMADA',
     attendees: ['Luis Salazar', 'Rosa Paredes'],
     owner: 'Carlos Sandoval',
     meetUrl: 'https://meet.google.com/',
@@ -213,7 +223,7 @@ const initialMeetings: Meeting[] = [
     region: 'Junín',
     site: 'Sede Chupaca',
     address: 'Chupaca, Junín, Perú',
-    status: 'Realizada',
+    status: 'REALIZADA',
     attendees: ['Rosa Paredes', 'Elena Cárdenas'],
     owner: 'Carlos Sandoval',
     meetUrl: '',
@@ -234,9 +244,6 @@ const views: { label: ViewKey; icon: typeof CalendarDays }[] = [
   { label: 'Actas', icon: FileText },
 ];
 
-const statusClass = (s: MeetingStatus) =>
-  s === 'Realizada' ? 'done' : s === 'En preparación' ? 'prep' : s === 'Por confirmar' ? 'pending' : 'scheduled';
-
 const formatDate = (date: string) =>
   new Date(`${date}T12:00:00`)
     .toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -253,7 +260,8 @@ const durationMins = (start: string, end: string) => {
 
 const uid = () => `QW-${Math.floor(100 + Math.random() * 899)}`;
 
-const MEETING_STATUS_FLOW: MeetingStatus[] = ['Programada', 'En preparación', 'Realizada', 'Por confirmar'];
+/** Flujo de estados = catálogo vivo, en su columna `orden`. */
+const MEETING_STATUS_FLOW: MeetingStatus[] = ESTADOS_REUNION.map((e) => e.codigo);
 const MEETING_ACT_STATUS = ['Pendiente', 'En proceso', 'Cumple'];
 
 const MEETING_COLUMNS: ColumnDef<Meeting>[] = [
@@ -266,7 +274,7 @@ const MEETING_COLUMNS: ColumnDef<Meeting>[] = [
     label: 'Estado',
     type: 'processState',
     accessor: (m) => m.status,
-    options: MEETING_STATUS_FLOW.map((s) => ({ value: s, label: s })),
+    options: MEETING_STATUS_FLOW.map((s) => ({ value: s, label: etiquetaEstadoReunion(s) })),
   },
   {
     id: 'actStatus',
@@ -283,7 +291,13 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
       const saved = localStorage.getItem('qaway-meetings-v1');
       const list = saved ? (JSON.parse(saved) as Meeting[]) : initialMeetings;
       const fixAct = (s: any) => ({ Borrador: 'En proceso', Aprobada: 'Cumple' }[s] || s);
-      return list.map((m: any) => ({ ...m, actStatus: fixAct(m.actStatus) }));
+      // Migración de lo ya guardado en localStorage: vocabulario viejo
+      // ('Programada'|'En preparación'|'Por confirmar'|'Realizada') → códigos del catálogo.
+      return list.map((m: any) => ({
+        ...m,
+        actStatus: fixAct(m.actStatus),
+        status: normalizarEstadoReunion(m.status),
+      }));
     } catch {
       return initialMeetings;
     }
@@ -318,7 +332,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
     region: 'Junín',
     site: 'Reunión virtual',
     address: '',
-    status: 'Programada',
+    status: 'PROGRAMADA',
     attendees: [],
     owner: 'Carlos Sandoval',
     meetUrl: '',
@@ -362,25 +376,26 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
 
   const listView = useMemo(() => engine.apply(filtered), [engine.apply, filtered]);
 
-  const upcoming = meetings.filter((m) => m.status !== 'Realizada').length;
-  const inPerson = meetings.filter((m) => m.modality === 'Presencial' && m.status !== 'Realizada').length;
+  const upcoming = meetings.filter((m) => m.status !== 'REALIZADA').length;
+  const inPerson = meetings.filter((m) => m.modality === 'Presencial' && m.status !== 'REALIZADA').length;
   const minutesTravel = meetings
-    .filter((m) => m.modality === 'Presencial' && m.status !== 'Realizada')
+    .filter((m) => m.modality === 'Presencial' && m.status !== 'REALIZADA')
     .reduce((n, m) => n + m.travel, 0);
-  const pendingActs = meetings.filter((m) => m.status === 'Realizada' && m.actStatus !== 'Cumple').length;
+  const pendingActs = meetings.filter((m) => m.status === 'REALIZADA' && m.actStatus !== 'Cumple').length;
 
-  const countAll = meetings.length;
-  const countScheduled = meetings.filter((m) => m.status === 'Programada').length;
-  const countPrep = meetings.filter((m) => m.status === 'En preparación').length;
-  const countPending = meetings.filter((m) => m.status === 'Por confirmar').length;
-  const countDone = meetings.filter((m) => m.status === 'Realizada').length;
+  // Conteo y pestañas generados desde el catálogo (sin listas hardcodeadas).
+  const conteoPorEstado = meetings.reduce<Record<string, number>>((acc, m) => {
+    acc[m.status] = (acc[m.status] ?? 0) + 1;
+    return acc;
+  }, {});
 
   const tabPills = [
-    { id: 'Todas', label: 'Todas las reuniones', count: countAll },
-    { id: 'Programada', label: 'Programadas', count: countScheduled },
-    { id: 'En preparación', label: 'En preparación', count: countPrep },
-    { id: 'Por confirmar', label: 'Por confirmar', count: countPending },
-    { id: 'Realizada', label: 'Realizadas', count: countDone },
+    { id: 'Todas', label: 'Todas las reuniones', count: meetings.length },
+    ...ESTADOS_REUNION.map((e) => ({
+      id: e.codigo as string,
+      label: e.etiqueta,
+      count: conteoPorEstado[e.codigo] ?? 0,
+    })),
   ];
 
   const hasActiveFilters =
@@ -424,7 +439,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
       region: 'Junín',
       site: 'Reunión virtual',
       address: '',
-      status: 'Programada',
+      status: 'PROGRAMADA',
       attendees: [],
       owner: 'Carlos Sandoval',
       meetUrl: '',
@@ -465,7 +480,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
       region: form.region || 'Nacional',
       site: form.modality === 'Google Meet' ? 'Reunión virtual' : form.site || 'Sede por definir',
       address: form.modality === 'Google Meet' ? '' : form.address || '',
-      status: form.status || 'Programada',
+      status: form.status || 'PROGRAMADA',
       attendees: form.attendees || [],
       owner: form.owner || 'Sin asignar',
       meetUrl: form.meetUrl || '',
@@ -516,7 +531,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
       m.modality,
       m.region,
       m.site,
-      m.status,
+      etiquetaEstadoReunion(m.status),
       m.owner,
       m.attendees.join('; '),
       m.actStatus,
@@ -559,7 +574,8 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
 
   const regions = ['Todas las regiones', 'Junín', 'Nacional', 'Pasco', 'Huancavelica', 'Ayacucho'];
   const modalities = ['Todas las modalidades', 'Presencial', 'Google Meet'];
-  const statusOptions = ['Todos los estados', 'Programada', 'En preparación', 'Por confirmar', 'Realizada'];
+  const statusOptions = ['Todos los estados', ...ESTADOS_REUNION.map((e) => e.codigo as string)];
+  const etiquetaFiltro = (v: string) => (v === 'Todos los estados' ? v : etiquetaEstadoReunion(v));
 
   const monthLabel = new Date(`${month}-15T12:00:00`).toLocaleDateString('es-PE', { month: 'long', year: 'numeric' });
   const monthDays = () => {
@@ -652,7 +668,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
             <div className="metric-copy">
               <b>
                 {String(
-                  meetings.filter((m) => m.modality === 'Google Meet' && m.status !== 'Realizada').length
+                  meetings.filter((m) => m.modality === 'Google Meet' && m.status !== 'REALIZADA').length
                 ).padStart(2, '0')}
               </b>
               <strong>Sesiones Virtuales</strong>
@@ -860,7 +876,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
               >
                 <div className="filter-card-copy">
                   <small>Estado</small>
-                  <span>{statusFilter}</span>
+                  <span>{etiquetaFiltro(statusFilter)}</span>
                 </div>
                 <ChevronDown size={14} className="filter-chevron" />
               </button>
@@ -879,7 +895,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                           setOpenDropdown(null);
                         }}
                       >
-                        <span>{st}</span>
+                        <span>{etiquetaFiltro(st)}</span>
                         {statusFilter === st && <Check size={14} className="item-check" />}
                       </button>
                     ))}
@@ -1001,7 +1017,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                   </div>
                   <div className="upcoming-list">
                     {filtered
-                      .filter((m) => m.status !== 'Realizada')
+                      .filter((m) => m.status !== 'REALIZADA')
                       .slice(0, 4)
                       .map((m) => (
                         <button
@@ -1023,7 +1039,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                           <div className="upcoming-info">
                             <div className="upcoming-title-row">
                               <strong>{m.title}</strong>
-                              <span className={`status-pill ${statusClass(m.status)}`}>{m.status}</span>
+                              <span className={`status-pill ${claseEstadoReunion(m.status)}`}>{etiquetaEstadoReunion(m.status)}</span>
                             </div>
                             <p>
                               <Clock3 size={13} />
@@ -1038,7 +1054,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                           <ChevronRight className="upcoming-chevron" size={16} />
                         </button>
                       ))}
-                    {filtered.filter((m) => m.status !== 'Realizada').length === 0 && (
+                    {filtered.filter((m) => m.status !== 'REALIZADA').length === 0 && (
                       <div className="empty-state">No hay reuniones con estos filtros.</div>
                     )}
                   </div>
@@ -1122,7 +1138,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                           </td>
                           <td>{m.owner}</td>
                           <td>
-                            <span className={`status-pill ${statusClass(m.status)}`}>{m.status}</span>
+                            <span className={`status-pill ${claseEstadoReunion(m.status)}`}>{etiquetaEstadoReunion(m.status)}</span>
                           </td>
                           <td>
                             <span
@@ -1337,7 +1353,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                             </td>
                             <td>{m.buffer} min</td>
                             <td>
-                              <span className={`status-pill ${statusClass(m.status)}`}>{m.status}</span>
+                              <span className={`status-pill ${claseEstadoReunion(m.status)}`}>{etiquetaEstadoReunion(m.status)}</span>
                             </td>
                             <td>
                               <button
@@ -1472,7 +1488,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
               </div>
               <div className="drawer-body">
                 <div className="drawer-status-row">
-                  <span className={`status-pill ${statusClass(selected.status)}`}>{selected.status}</span>
+                  <span className={`status-pill ${claseEstadoReunion(selected.status)}`}>{etiquetaEstadoReunion(selected.status)}</span>
                   <span
                     className={`act-pill ${
                       selected.actStatus === 'Cumple'
@@ -1879,15 +1895,24 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                       </label>
                       <label className="field">
                         <span>Estado inicial</span>
-                        <select
-                          value={form.status || 'Programada'}
-                          onChange={(e) => setForm({ ...form, status: e.target.value as MeetingStatus })}
-                        >
-                          <option>Programada</option>
-                          <option>En preparación</option>
-                          <option>Por confirmar</option>
-                          <option>Realizada</option>
+                        <EstadoReunionCatalogoSelect
+                          value={form.status || 'PROGRAMADA'}
+                          onChange={(status) => setForm({ ...form, status })}
+                        />
+                        <small className="field-help">
+                          Catálogo gp_estados_reunion_c (Supabase): Programada · En curso · Realizada ·
+                          Cancelada · Pospuesta · Reprogramada.
+                        </small>
+                      </label>
+                      <label className="field">
+                        <span>Tipo de reunión</span>
+                        <select disabled defaultValue="" title="Tabla gp_tipos_reunion_c aún no conectada">
+                          <option value="">Por conectar · gp_tipos_reunion_c</option>
                         </select>
+                        <small className="field-help">
+                          La tabla existe en Supabase con 8 tipos (PMI). El selector se conectará en el
+                          siguiente paso; hasta entonces no se registra este dato.
+                        </small>
                       </label>
                       <label className="field">
                         <span>
