@@ -67,7 +67,7 @@ doc2/
 | **ETAPA 3** | **Creación de las 34 tablas en Supabase, una por una** | 🟡 **en curso — bloque `4-`** |
 | **ETAPA 4** | **Unidades seguras e integradas con el Hub** (implementación definitiva: cliente/sesión compartida, `contextoSesion`, servicios fail-closed, `0004` v3, `0006a`/`0006b`, pruebas, `3.9`) | 🟢 **entregado — pendiente de aplicación SQL y verificación en vivo (procedimiento en `3.9`)** |
 | ETAPA 2D | Integración real con el Hub (sesión compartida, slug en `app_catalog`, RLS activa) | 🟢 absorbida por ETAPA 4 (queda la verificación en vivo) |
-| **ETAPA 5** | **Creación progresiva de tablas `gp_*`** (tracker `5.2`) | 🟢 **34/34 numeradas** — BLOQUE A 12/12 + BLOQUE B 6/6 + BLOQUE C+D 16/16 (17-nov, vía MCP; evidencia en bitácoras `20261117-*`) · **36 físicas en vivo** (34 + extras `5b`/`7.1`) · RLS tenant-scoped granular en TODAS (145 políticas; §9: sin_rls=0 · permisivas=0 · anon=0) · pendiente explícito: `gp_is_project_member` + rama en `_select` (requiere orden del responsable) |
+| **ETAPA 5** | **Creación progresiva de tablas `gp_*`** (tracker `5.2`) | 🟢 **34/34 numeradas** — BLOQUE A 12/12 + BLOQUE B 6/6 + BLOQUE C+D 16/16 (17-nov, vía MCP; evidencia en bitácoras `20261117-*`) · **36 físicas en vivo** (34 + extras `5b`/`7.1`) · RLS tenant-scoped granular en TODAS (145 políticas; §9: sin_rls=0 · permisivas=0 · anon=0) · helper `gp_is_project_member` creado y conectado a las `_select` de entidades (17-nov) |
 | **ETAPA 6** | **Vinculación de catálogos GP con la app** (`doc2/6.1`) | 🟡 6.1 entregada (selector de prioridad ← `gp_prioridades_c`, pendiente de verificación viva); **6.2 arquitectura APROBADA** y **6.3 IMPLEMENTADA** (`doc2/6.3`: clasificación + ciclo de vida + permisos reales, 44/44 pruebas del núcleo, SQL pendiente de aplicación manual); **6.4 AUDITADA Y EMPAQUETADA** (`doc2/6.4`: paquete único con las 12 migraciones en orden definitivo FASE 0-4, diagnósticos D, verificaciones V, riesgos R-1..R-10, recuperación y checklist — cero correcciones de contenido, `0011` opcional) |
 
 ### Siguiente acción concreta
@@ -95,9 +95,11 @@ doc2/
 > `operativo` registra avances/archivos (cada quien edita lo suyo), auditoría escrita SOLO
 > plataforma (`service_role`); bloques gruesos de `0004` OMITIDOS por conflicto con el modelo.
 > Verificación: 36 físicas, §9 verde (`tablas_gp=36 · sin_rls=0 · permisivas=0 · anon=0`,
-> 145 políticas) + anon 200+`[]` en las 16. **CIERRA ETAPA 5: 34/34 numeradas.** Pendiente
-> explícito: `gp_is_project_member` + rama en `_select` de entidades (requiere orden del
-> responsable). Evidencia: `7-Bitacoras/20261117-aplicacion-bloques-cd-0003-rls-granular.md`.
+> 145 políticas) + anon 200+`[]` en las 16. **CIERRA ETAPA 5: 34/34 numeradas.** ✅
+> `gp_is_project_member` CREADA y CONECTADA el mismo día (helper verbatim de `0004` + rama en las
+> 12 `_select` de entidades; §9: 145 políticas, drop+create 1:1; anon 200+`[]` en las 12; evidencia:
+> `7-Bitacoras/20261117-helper-gp_is_project_member-rama-select.md`). Evidencia C+D:
+> `7-Bitacoras/20261117-aplicacion-bloques-cd-0003-rls-granular.md`.
 > El estado del 16-nov queda como historia.
 >
 > **ESTADO REAL MEDIDO EL 16-NOV-2026** (evidencia: `7-Bitacoras/20261116-auditoria-4-catalogos-gp.md`):

@@ -166,7 +166,28 @@ ni se abren hilos nuevos por ellas hasta que el flujo funcional las requiera.
   `gp_tipos_avance_c`) en el próximo bloque SQL autorizado.
 - Ruta **authenticated/RLS sin probar en vivo** (falta credencial de usuario del tenant).
 
-## 9 · Nota de concurrencia
+## 9 · Verificación · las 34 tablas y el caso "sedes / 251 unidades"
+
+**Aplicado:** las 34 tablas del tracker ya existen. En `public` hay **36 tablas `gp_*`**
+(34 numeradas + `gp_roles_proyecto_v2_c` y `gp_categorias_entregable_c`).
+
+**Las 251 sedes NO están en ninguna tabla `gp_*`.** Viven en la tabla **legacy**
+`public.gestor_unidades` (id `text` `unit-001..251`, `tenant_id NULL`, jerarquía
+`parent_unit_id`, `address` **vacío en las 251**): 228 UGEL + 23 DRE.
+`gp_unidades_territoriales` y `gp_tipos_unidad_territorial_c` del diseño (3.4 / 3.8)
+**no existen todavía**.
+
+El grafo `gp_*` ya depende de la legacy por **FK `text`**:
+`gp_nodos_edt.sede_unidad_id`, `gp_personas.unidad_id`, `gp_proyecto_unidades_r.unidad_id`.
+⇒ Crear `gp_unidades_territoriales` **no rompe nada** mientras las FK sigan apuntando a
+`gestor_unidades`; la migración debe ser aditiva (columna `uuid` nueva + backfill por
+`code`), nunca reemplazo.
+
+`territory_ugel_monitoring.directions` **no son direcciones postales**: es un jsonb de
+avance por dirección/departamento de la UGEL (DEI, DEP, DES, DEBA, DEIB, DISER).
+No sirve como fuente de domicilios.
+
+## 10 · Nota de concurrencia
 
 Otro agente trabaja en `modules/reuniones/` al mismo tiempo (`calendarExport.ts` nuevo y
 `reuniones.css` modificado). Los cambios de esta bitácora **no tocan** ese CSS ni ese

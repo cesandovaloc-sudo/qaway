@@ -136,17 +136,68 @@ export default function CronogramaCalendarioView({
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [dayModalDate, setDayModalDate] = useState<string | null>(null);
 
-  // Detector de cruces/solapamientos entre elementos en la misma fecha y responsable o región
+  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+    try {
+      const saved = Number(localStorage.getItem('qaway-r2-cal-sidebar-w'));
+      if (Number.isFinite(saved) && saved >= 260 && saved <= 560) return saved;
+    } catch {}
+    return 340;
+  });
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
+
+  const startSidebarResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = sidebarWidth;
+    setIsResizingSidebar(true);
+    const onMove = (ev: MouseEvent) => {
+      const next = Math.max(260, Math.min(560, startW + (startX - ev.clientX)));
+      setSidebarWidth(next);
+    };
+    const onUp = (ev: MouseEvent) => {
+      const finalW = Math.max(260, Math.min(560, startW + (startX - ev.clientX)));
+      setSidebarWidth(finalW);
+      try {
+        localStorage.setItem('qaway-r2-cal-sidebar-w', String(finalW));
+      } catch {}
+      setIsResizingSidebar(false);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  const toMinutes = (hhmm?: string, fallbackMin = 540) => {
+    if (!hhmm || !hhmm.includes(':')) return fallbackMin;
+    const [h, m] = hhmm.split(':').map(Number);
+    return (Number.isFinite(h) ? h : 9) * 60 + (Number.isFinite(m) ? m : 0);
+  };
+
+  // Detector de cruce real: si son reuniones con horario, solo cruza si coinciden fecha y hora
   const findItemConflict = (target: Item, pool: Item[]): Item | undefined => {
     const startA = (target.start || '').slice(0, 10);
     const endA = (target.end || target.start || '').slice(0, 10);
     if (!startA) return undefined;
+    const tA = (target as any).meetingTime as string | undefined;
+    const tEndA = (target as any).meetingEndTime as string | undefined;
     return pool.find((other) => {
       if (other.id === target.id) return false;
       const startB = (other.start || '').slice(0, 10);
       const endB = (other.end || other.start || '').slice(0, 10);
       if (!startB) return false;
       if (!(startA <= endB && startB <= endA)) return false;
+
+      const tB = (other as any).meetingTime as string | undefined;
+      const tEndB = (other as any).meetingEndTime as string | undefined;
+      if (tA && tB) {
+        const sA = toMinutes(tA, 540);
+        const eA = toMinutes(tEndA, sA + 60);
+        const sB = toMinutes(tB, 540);
+        const eB = toMinutes(tEndB, sB + 60);
+        if (!(sA < eB && sB < eA)) return false;
+      }
+
       const sameOwner = target.gestor && other.gestor && target.gestor !== 'Sin asignar' && target.gestor === other.gestor;
       const sameRegion = target.region && other.region && target.region === other.region;
       return Boolean(sameOwner || sameRegion);
@@ -573,11 +624,21 @@ export default function CronogramaCalendarioView({
                               e.dataTransfer.setData('text/plain', ev.item.id);
                             }}
                             className={`cal-gantt-bar ${barColorClass}`}
+                            style={
+                              (ev.item as any).hitoColor
+                                ? {
+                                    borderLeft: `3.5px solid ${(ev.item as any).hitoColor}`,
+                                    borderColor: `${(ev.item as any).hitoColor}44`,
+                                    background: `${(ev.item as any).hitoColor}18`,
+                                    color: '#0f172a',
+                                  }
+                                : undefined
+                            }
                             onClick={() => onSelectItem(ev.item)}
                             title={
                               conflict
                                 ? `⚠️ Cruce de agenda con: ${conflict.code} · ${conflict.name} (${conflict.gestor}) | Arrastra para reprogramar`
-                                : `${ev.code} · ${ev.name} (${ev.progress}% · ${ev.status}) | Línea Base: ${formatDatePE(bStart)} – ${formatDatePE(bEnd)}`
+                                : `${(ev.item as any).meetingTime ? `${(ev.item as any).meetingTime} · ` : ''}${ev.name}${(ev.item as any).hitoLabel ? ` (${(ev.item as any).hitoLabel})` : ''}`
                             }
                           >
                             {/* Barra de avance interior con física y color Gantt */}
@@ -712,6 +773,14 @@ export default function CronogramaCalendarioView({
                           const isMajor = it.kind === 'hito';
                           const isComplete = it.status === 'Completado' || it.status === 'Cumple';
                           const conflict = findItemConflict(it, matchingItems);
+                          const mTime = (it as any).meetingTime as string | undefined;
+                          const mEndTime = (it as any).meetingEndTime as string | undefined;
+                          const hitoColor = (it as any).hitoColor as string | undefined;
+                          const hitoLabel = (it as any).hitoLabel as string | undefined;
+                          const startMin = toMinutes(mTime, 540);
+                          const endMin = toMinutes(mEndTime, startMin + 60);
+                          const topPx = Math.max(0, ((startMin - 480) / 60) * 54) + 2;
+                          const heightPx = Math.max(42, ((endMin - startMin) / 60) * 54 - 4);
 
                           return (
                             <div
@@ -721,12 +790,24 @@ export default function CronogramaCalendarioView({
                               className={`r2-week-event-card ${
                                 isMajor ? 'is-hito' : isComplete ? 'is-complete' : ''
                               }`}
+                              style={{
+                                top: `${topPx}px`,
+                                height: `${heightPx}px`,
+                                ...(hitoColor
+                                  ? {
+                                      borderLeftColor: hitoColor,
+                                      borderColor: `${hitoColor}33`,
+                                      background: `${hitoColor}14`,
+                                      color: '#0f172a',
+                                    }
+                                  : {}),
+                              }}
                               onClick={() => onSelectItem(it)}
-                              title={`${it.code} · ${it.name} (${it.gestor || 'Sin asignar'})`}
+                              title={`${it.code} · ${it.name}${mTime ? ` (${mTime}–${mEndTime || ''})` : ''} · ${hitoLabel || it.gestor || 'Sin asignar'}`}
                             >
-                              <strong>{it.code} · {it.name}</strong>
+                              <strong>{mTime ? `${mTime} ` : ''}{it.name}</strong>
                               <div className="r2-week-event-meta">
-                                <span>{it.progress}% · {it.region || 'General'}</span>
+                                <span>{hitoLabel || `${it.region || 'General'}`}</span>
                                 {conflict && (
                                   <span className="r2-conflict-pill" title={`Cruce con ${conflict.code}`}>
                                     <AlertTriangle size={9} /> Cruce
@@ -855,8 +936,15 @@ export default function CronogramaCalendarioView({
         })()}
       </div>
 
-      {/* Barra Lateral Derecha Institucional: Mini-calendario, Próximos Entregables y Leyenda */}
-      <aside className="cal-sidebar-clean">
+      {/* Divisor vertical arrastrable para agrandar o achicar el panel derecho */}
+      <div
+        className={`r2-sidebar-resizer ${isResizingSidebar ? 'is-resizing' : ''}`}
+        onMouseDown={startSidebarResize}
+        title="Arrastra para agrandar o disminuir el panel derecho"
+      />
+
+      {/* Barra Lateral Derecha Institucional: Mini-calendario, Próximas Reuniones y Leyenda */}
+      <aside className="cal-sidebar-clean" style={{ width: `${sidebarWidth}px` }}>
         {/* Sección: Mini-calendario mensual sincronizado con el lienzo principal */}
         <div className="cal-sidebar-section cal-minical">
           <div className="cal-minical-head">
@@ -891,9 +979,9 @@ export default function CronogramaCalendarioView({
         {/* Sección: Próximos Entregables Dinámicos */}
         <div className="cal-sidebar-section">
           <div className="cal-sidebar-head">
-            <h3 className="cal-sidebar-title">Próximos entregables</h3>
+            <h3 className="cal-sidebar-title">Próximas reuniones</h3>
             <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>
-              {upcomingDeliverables.length} pendientes
+              {upcomingDeliverables.length} agendadas
             </span>
           </div>
 

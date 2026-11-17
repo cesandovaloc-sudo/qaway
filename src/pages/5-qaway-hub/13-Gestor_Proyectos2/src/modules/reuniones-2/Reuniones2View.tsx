@@ -1205,6 +1205,247 @@ export default function Reuniones2View({
     }
   });
 
+  type MeetingAgendaSeedItem = Item & {
+    meetingTime: string;
+    meetingEndTime: string;
+    modality: 'Google Meet' | 'Presencial';
+    hitoLabel: string;
+    hitoColor: string;
+  };
+
+  const REUNIONES2_MEETINGS_SEED: MeetingAgendaSeedItem[] = [
+    {
+      id: 'reu2-101',
+      code: 'REU-101',
+      name: 'Comité Técnico de Planificación y Rutas Regionales',
+      type: 'sub',
+      parentId: null,
+      start: '2026-10-26',
+      end: '2026-10-26',
+      meetingTime: '09:00',
+      meetingEndTime: '10:30',
+      modality: 'Google Meet',
+      hitoLabel: '1. Planificación de la Distribución',
+      hitoColor: '#2563EB',
+      progress: 100,
+      status: 'Completado',
+      gestor: 'Javier Ruíz',
+      gestores: ['Javier Ruíz'],
+      region: 'Junín',
+      faseId: 'F1',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-102',
+      code: 'REU-102',
+      name: 'Mesa de Validación de Padrón de II.EE. y Almacenes',
+      type: 'sub',
+      parentId: null,
+      start: '2026-11-18',
+      end: '2026-11-18',
+      meetingTime: '11:00',
+      meetingEndTime: '12:30',
+      modality: 'Presencial',
+      hitoLabel: '2. Gestión de Almacenes',
+      hitoColor: '#0D9488',
+      progress: 80,
+      status: 'En proceso',
+      gestor: 'María Jiménez',
+      gestores: ['María Jiménez'],
+      region: 'Lima Metropolitana',
+      faseId: 'F2',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-103',
+      code: 'REU-103',
+      name: 'Revisión de Actas PECOSA y Recepción en DRE / UGEL',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-07',
+      end: '2026-12-07',
+      meetingTime: '09:00',
+      meetingEndTime: '10:30',
+      modality: 'Google Meet',
+      hitoLabel: '3. Recepción DRE / UGEL',
+      hitoColor: '#D97706',
+      progress: 60,
+      status: 'En proceso',
+      gestor: 'Lucía Flores',
+      gestores: ['Lucía Flores'],
+      region: 'Cusco',
+      faseId: 'F2',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-104',
+      code: 'REU-104',
+      name: 'Seguimiento Contractual de Transportistas y Rutas',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-08',
+      end: '2026-12-08',
+      meetingTime: '10:00',
+      meetingEndTime: '11:30',
+      modality: 'Google Meet',
+      hitoLabel: '4. Gestión de Contratos',
+      hitoColor: '#7C3AED',
+      progress: 45,
+      status: 'En proceso',
+      gestor: 'Juan Pérez',
+      gestores: ['Juan Pérez'],
+      region: 'Arequipa',
+      faseId: 'F2',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-105',
+      code: 'REU-105',
+      name: 'Taller de Acreditación de Personal y Gestores Territoriales',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-09',
+      end: '2026-12-09',
+      meetingTime: '09:30',
+      meetingEndTime: '11:00',
+      modality: 'Presencial',
+      hitoLabel: '5. Registro de Personal',
+      hitoColor: '#E11D48',
+      progress: 50,
+      status: 'En proceso',
+      gestor: 'Carlos Sandoval',
+      gestores: ['Carlos Sandoval'],
+      region: 'Todas las Regiones',
+      faseId: 'F2',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-106',
+      code: 'REU-106',
+      name: 'Comité de Calibración de Cronograma y Entregables Hito 1',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-09',
+      end: '2026-12-09',
+      meetingTime: '15:00',
+      meetingEndTime: '16:30',
+      modality: 'Google Meet',
+      hitoLabel: '1. Planificación de la Distribución',
+      hitoColor: '#2563EB',
+      progress: 30,
+      status: 'Pendiente',
+      gestor: 'Javier Ruíz',
+      gestores: ['Javier Ruíz'],
+      region: 'Todas las Regiones',
+      faseId: 'F1',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-107',
+      code: 'REU-107',
+      name: 'Coordinación SIAGIE y Registro de Recepción en II.EE.',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-10',
+      end: '2026-12-10',
+      meetingTime: '11:00',
+      meetingEndTime: '12:30',
+      modality: 'Google Meet',
+      hitoLabel: '9. Entrega a Beneficiarios',
+      hitoColor: '#059669',
+      progress: 20,
+      status: 'Pendiente',
+      gestor: 'María Jiménez',
+      gestores: ['María Jiménez'],
+      region: 'Piura',
+      faseId: 'F3',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-108',
+      code: 'REU-108',
+      name: 'Auditoría Preventiva de Guías de Remisión y Almacén',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-11',
+      end: '2026-12-11',
+      meetingTime: '14:00',
+      meetingEndTime: '15:30',
+      modality: 'Presencial',
+      hitoLabel: '2. Gestión de Almacenes',
+      hitoColor: '#0D9488',
+      progress: 0,
+      status: 'Pendiente',
+      gestor: 'Lucía Flores',
+      gestores: ['Lucía Flores'],
+      region: 'La Libertad',
+      faseId: 'F2',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-109',
+      code: 'REU-109',
+      name: 'Cierre Mensual de Conformidades y Liquidación de Rutas',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-15',
+      end: '2026-12-15',
+      meetingTime: '10:00',
+      meetingEndTime: '11:30',
+      modality: 'Google Meet',
+      hitoLabel: '4. Gestión de Contratos',
+      hitoColor: '#7C3AED',
+      progress: 0,
+      status: 'Pendiente',
+      gestor: 'Juan Pérez',
+      gestores: ['Juan Pérez'],
+      region: 'Todas las Regiones',
+      faseId: 'F3',
+      dependencies: [],
+    },
+    {
+      id: 'reu2-110',
+      code: 'REU-110',
+      name: 'Sesión Macroregional de Preparación BIAE 2027',
+      type: 'sub',
+      parentId: null,
+      start: '2026-12-22',
+      end: '2026-12-22',
+      meetingTime: '16:00',
+      meetingEndTime: '17:30',
+      modality: 'Google Meet',
+      hitoLabel: '9. Entrega a Beneficiarios',
+      hitoColor: '#059669',
+      progress: 0,
+      status: 'Pendiente',
+      gestor: 'Carlos Sandoval',
+      gestores: ['Carlos Sandoval'],
+      region: 'Todas las Regiones',
+      faseId: 'F3',
+      dependencies: [],
+    },
+  ];
+
+  const loadReuniones2Items = (pid: string): Item[] => {
+    const r2Key = `qaway-reuniones2-meetings-v1:${pid || 'default'}`;
+    try {
+      const saved = localStorage.getItem(r2Key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+      if (pid === 'p1' || !pid) {
+        localStorage.setItem(r2Key, JSON.stringify(REUNIONES2_MEETINGS_SEED));
+        return REUNIONES2_MEETINGS_SEED;
+      }
+      return [];
+    } catch {
+      return pid === 'p1' || !pid ? REUNIONES2_MEETINGS_SEED : [];
+    }
+  };
+
   const loadProjectItems = (pid: string, tasksOverride?: any[]): Item[] => {
     const isMaestro = perspective === 'maestro';
     const targetInitialItems = isMaestro ? MASTER_INITIAL_ITEMS : TERRITORIAL_INITIAL_ITEMS;
@@ -1294,7 +1535,7 @@ export default function Reuniones2View({
     }
   };
 
-  const [items, setItems] = useState<Item[]>(() => loadProjectItems(projectId, rawTasks));
+  const [items, setItems] = useState<Item[]>(() => loadReuniones2Items(projectId));
 
   // Sincronización reactiva con Keep-Alive al conmutar de proyecto o perspectiva
   const currentPerspectiveRef = useRef(perspective);
@@ -1302,147 +1543,25 @@ export default function Reuniones2View({
     if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective) {
       currentPidRef.current = projectId;
       currentPerspectiveRef.current = perspective;
-      const loaded = loadProjectItems(projectId, rawTasks);
+      const loaded = loadReuniones2Items(projectId);
       setItems(loaded);
       setSelectedId(null);
     }
   }, [projectId, perspective]);
 
-  // Autocuración y persistencia inmediata de dependencias si provienen de caché anterior sin dependencias
-  useEffect(() => {
-    const hasAnyDep = items.some((it) => it.dependencies && it.dependencies.length > 0);
-    if (!hasAnyDep && items.length > 0) {
-      const targetInitial = perspective === 'maestro' ? MASTER_INITIAL_ITEMS : TERRITORIAL_INITIAL_ITEMS;
-      const initialMap = new Map(targetInitial.map((x) => [x.id, x]));
-      setItems((prev) =>
-        prev.map((it) => {
-          const init = initialMap.get(it.id);
-          const official = OFFICIAL_WBS_DEPENDENCIES[it.id] || [];
-          return {
-            ...it,
-            dependencies: it.dependencies && it.dependencies.length > 0 ? it.dependencies : (init?.dependencies && init.dependencies.length > 0 ? init.dependencies : official),
-          };
-        })
-      );
-    }
-  }, [items, perspective]);
-
-  // Carga asíncrona de datos desde Supabase (respaldo en nube permanente)
-  useEffect(() => {
-    if (!isActive || perspective !== 'maestro') return;
-    let isCancelled = false;
-    fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
-      if (!isCancelled && cloudItems && cloudItems.length > 0) {
-        const isMaestro = perspective === 'maestro';
-        const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
-
-        // Filtrar datos contaminados obsoletos si provienen de sesiones anteriores en BD y ordenar canónicamente
-        let cleanCloudItems = sortWbsHierarchy(
-          cloudItems.filter(
-            (it) =>
-              !isLegacyCronogramaItem(it) &&
-              (!it.parentId || cloudItems.some((p) => p.id === it.parentId))
-          ) as Item[]
-        );
-
-        if (isMaestro) {
-          cleanCloudItems = cleanCloudItems.filter((it) => !isTerritorialSedeOnlyItem(it));
-          // Reconciliar sobre MASTER_INITIAL_ITEMS garantizando los 11 componentes completos siempre
-          const cloudMap = new Map(cleanCloudItems.map((c) => [c.id, c]));
-          const merged: Item[] = MASTER_INITIAL_ITEMS.map((masterItem) => {
-            const cloud = cloudMap.get(masterItem.id);
-            if (!cloud) return masterItem;
-            const updated: Item = { ...masterItem };
-            if (typeof cloud.progress === 'number') updated.progress = cloud.progress;
-            if (cloud.status) updated.status = cloud.status;
-            if (cloud.start) updated.start = cloud.start;
-            if (cloud.end) updated.end = cloud.end;
-            if (cloud.actualStart) updated.actualStart = cloud.actualStart;
-            if (cloud.actualEnd) updated.actualEnd = cloud.actualEnd;
-            if (cloud.baselineStart) updated.baselineStart = cloud.baselineStart;
-            if (cloud.baselineEnd) updated.baselineEnd = cloud.baselineEnd;
-            return updated;
-          });
-          const recomputed = computeWbsHierarchy(merged, rawTasks);
-          setItems(recomputed);
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(recomputed));
-            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
-          } catch {}
-          return;
-        }
-
-        if (projectId === 'p1' && (cleanCloudItems.length < 5000 || !cleanCloudItems.some((it) => it.id === 'pt-2.1-unit-001'))) {
-          setItems(TERRITORIAL_INITIAL_ITEMS);
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
-            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
-          } catch {}
-        } else if (cleanCloudItems.length >= 5000) {
-          const recomputed = computeWbsHierarchy(cleanCloudItems, rawTasks);
-          setItems(recomputed);
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(recomputed));
-            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
-          } catch {}
-        }
-      }
-    });
-    return () => {
-      isCancelled = true;
-    };
-  }, [projectId, isActive, perspective]);
-
-  // Sincronización reactiva bidireccional con el módulo de tareas operativas (/tareas)
-  useEffect(() => {
-    if (!isActive) return;
-    const handleTasksUpdated = () => {
-      try {
-        const saved = localStorage.getItem('qaway-tasks-v1');
-        const parsed = saved ? JSON.parse(saved) : [];
-        setRawTasks(parsed);
-        setItems((prevItems) => {
-          const recomputed = computeWbsHierarchy(prevItems, parsed);
-          try {
-            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
-            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
-          } catch {}
-          return recomputed;
-        });
-      } catch (e) {
-        console.error('Error sincronizando tareas operativas con WBS:', e);
-      }
-    };
-
-    window.addEventListener('qaway-tasks-updated', handleTasksUpdated);
-    window.addEventListener('storage', handleTasksUpdated);
-    return () => {
-      window.removeEventListener('qaway-tasks-updated', handleTasksUpdated);
-      window.removeEventListener('storage', handleTasksUpdated);
-    };
-  }, [projectId, isActive]);
-
-  // Persistencia segura por proyecto activo (Doble capa: LocalStorage inmediato + Sincronización Supabase)
+  // En Reuniones 2 las agendas no se sobrescriben con el cronograma Gantt maestro de Supabase ni con qaway-gantt-items
+  // Persistencia aislada por proyecto activo para Reuniones 2
   useEffect(() => {
     if (!isActive) return;
     if (currentPidRef.current === projectId) {
-      const isMaestro = perspective === 'maestro';
-      const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
+      const r2Key = `qaway-reuniones2-meetings-v1:${projectId || 'default'}`;
       try {
-        localStorage.setItem(storageKey, JSON.stringify(items));
-        window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+        localStorage.setItem(r2Key, JSON.stringify(items));
       } catch {
         /* fallback */
       }
-      // Sincronización a Supabase con debounce de 2.5s para no saturar la red ni congelar la UI
-      if (isMaestro && items.length > 0) {
-        const timer = setTimeout(() => {
-          syncAllCronogramaItemsToSupabase(projectId, items as GanttItemData[]);
-        }, 2500);
-        return () => clearTimeout(timer);
-      }
     }
-  }, [items, projectId, isActive, perspective]);
+  }, [items, projectId, isActive]);
 
   const [resizingCol, setResizingCol] = useState<ColKey | null>(null);
   const prevVisibleColsRef = useRef<ColKey[]>([...DEFAULT_VISIBLE_COLS]);

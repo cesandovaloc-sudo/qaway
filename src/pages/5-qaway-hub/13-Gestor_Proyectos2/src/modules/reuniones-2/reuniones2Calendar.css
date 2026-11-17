@@ -152,12 +152,16 @@
 }
 
 .r2-week-event-card {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  overflow: hidden;
   pointer-events: auto;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
-  border-left: 3px solid #2563eb;
+  border-left: 3.5px solid #2563eb;
   border-radius: 7px;
-  padding: 6px 8px;
+  padding: 4px 7px;
   font-size: 11px;
   color: #1e3a8a;
   cursor: pointer;
@@ -221,13 +225,44 @@
 }
 
 .cal-workspace-clean .cal-sidebar-clean {
-  width: 340px;
-  min-width: 280px;
-  max-width: 480px;
+  min-width: 0;
   flex-shrink: 0;
-  resize: horizontal;
   overflow-y: auto;
-  overflow-x: auto;
+  overflow-x: hidden;
+  transition: width 0.12s ease;
+}
+
+.r2-sidebar-resizer {
+  width: 7px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid #e2e8f0;
+  background: #f8fafc;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.r2-sidebar-resizer::after {
+  content: "";
+  width: 2px;
+  height: 36px;
+  border-radius: 2px;
+  background: #cbd5e1;
+  transition: background 0.15s ease, height 0.15s ease;
+}
+
+.r2-sidebar-resizer:hover,
+.r2-sidebar-resizer.is-resizing {
+  background: #eff6ff;
+}
+
+.r2-sidebar-resizer:hover::after,
+.r2-sidebar-resizer.is-resizing::after {
+  background: #0066ff;
+  height: 56px;
 }
 
 /* Vista Día Timeline Real (Compacta y Limpia) */
