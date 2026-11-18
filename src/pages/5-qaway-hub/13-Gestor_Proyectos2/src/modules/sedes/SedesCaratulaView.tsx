@@ -51,8 +51,8 @@ const REGION_CENTERS: Record<string, [number, number]> = {
   UCAYALI: [-9.0, -73.8],
 };
 
-const normRegKey = (val: string = '') =>
-  val.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
+const normRegKey = (val: any = '') =>
+  String(val || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
 
 interface SedesCaratulaViewProps {
   items?: any[];
@@ -86,6 +86,66 @@ export default function SedesCaratulaView({
   const [expandedDreKey, setExpandedDreKey] = useState<string | null>(null);
   const [mapMode, setMapMode] = useState<CaratulaMapMode>('macro');
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+
+  // Anchos móviles de columnas (Columna 2 por defecto a 280px, igual al panel analítico de Vista Mapa)
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const col3SectionRef = useRef<HTMLElement>(null);
+  const [col2Width, setCol2Width] = useState<number>(() => {
+    try {
+      const saved = Number(localStorage.getItem('qaway-caratula-col2-w'));
+      return Number.isFinite(saved) && saved >= 220 && saved <= 440 ? saved : 280;
+    } catch {
+      return 280;
+    }
+  });
+  const [col3Width, setCol3Width] = useState<number | null>(() => {
+    try {
+      const saved = Number(localStorage.getItem('qaway-caratula-col3-w'));
+      return Number.isFinite(saved) && saved >= 260 && saved <= 640 ? saved : null;
+    } catch {
+      return null;
+    }
+  });
+  const [hoveredDivider, setHoveredDivider] = useState<1 | 2 | null>(null);
+  const [activeDivider, setActiveDivider] = useState<1 | 2 | null>(null);
+
+  const startColResize = (divider: 1 | 2, e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startCol2 = col2Width;
+    const startCol3 = col3Width ?? (col3SectionRef.current?.getBoundingClientRect().width || 360);
+    setActiveDivider(divider);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const onMove = (ev: MouseEvent) => {
+      const dx = ev.clientX - startX;
+      if (divider === 1) {
+        const nextW = Math.min(440, Math.max(220, Math.round(startCol2 - dx)));
+        setCol2Width(nextW);
+        try {
+          localStorage.setItem('qaway-caratula-col2-w', String(nextW));
+        } catch {}
+      } else {
+        const nextW = Math.min(640, Math.max(260, Math.round(startCol3 - dx)));
+        setCol3Width(nextW);
+        try {
+          localStorage.setItem('qaway-caratula-col3-w', String(nextW));
+        } catch {}
+      }
+    };
+
+    const onUp = () => {
+      setActiveDivider(null);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
 
   // Mapa rápido de avance desde items reales del cronograma (por nombre de sede/región)
   const itemsProgressByName = useMemo(() => {
@@ -148,17 +208,19 @@ export default function SedesCaratulaView({
     ];
   }, [unidades, itemsProgressByName]);
 
-  // 2. Conteos por macrorregión y resumen compacto para la Columna 2
+  // 2. Conteos por macrorregión y resumen compacto SOLO sobre DREs / Sedes Matrices
   const macroStats = useMemo(() => {
+    const dreOnly = entidadesAsignadas.filter((e) => e.type === 'DRE');
+    const source = dreOnly.length > 0 ? dreOnly : entidadesAsignadas;
     const calc = (m: string) => {
-      const list = entidadesAsignadas.filter((e) => e.macro === m);
+      const list = source.filter((e) => e.macro === m);
       const regs = new Set(list.map((e) => normRegKey(e.region)));
       return { regions: regs.size, entities: list.length };
     };
-    const totalCumple = entidadesAsignadas.filter((e) => e.progress >= 80).length;
-    const totalProceso = entidadesAsignadas.filter((e) => e.progress > 0 && e.progress < 80).length;
-    const avg = entidadesAsignadas.length
-      ? Math.round(entidadesAsignadas.reduce((s, e) => s + e.progress, 0) / entidadesAsignadas.length)
+    const totalCumple = source.filter((e) => e.progress >= 80).length;
+    const totalProceso = source.filter((e) => e.progress > 0 && e.progress < 80).length;
+    const avg = source.length
+      ? Math.round(source.reduce((s, e) => s + e.progress, 0) / source.length)
       : 0;
     return {
       norte: calc('norte'),
@@ -166,6 +228,7 @@ export default function SedesCaratulaView({
       sur: calc('sur'),
       totalCumple,
       totalProceso,
+      totalDres: source.length,
       avg,
     };
   }, [entidadesAsignadas]);
@@ -453,19 +516,23 @@ export default function SedesCaratulaView({
   }, [filteredEntidades]);
 
   return (
-    <div className="sd-caratula-wrapper" style={{
-      display: 'grid',
-      gridTemplateColumns: '1.35fr 224px 1fr',
-      gap: '12px',
-      padding: '10px 14px',
-      flex: '1 1 0%',
-      height: '100%',
-      minHeight: 0,
-      maxHeight: '100%',
-      boxSizing: 'border-box',
-      width: '100%',
-      overflow: 'hidden',
-    }}>
+    <div
+      ref={wrapperRef}
+      className="sd-caratula-wrapper"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `minmax(280px, 1fr) 10px ${col2Width}px 10px ${col3Width ? `${col3Width}px` : 'minmax(260px, 0.62fr)'}`,
+        gap: 0,
+        padding: '10px 14px',
+        flex: '1 1 0%',
+        height: '100%',
+        minHeight: 0,
+        maxHeight: '100%',
+        boxSizing: 'border-box',
+        width: '100%',
+        overflow: 'hidden',
+      }}
+    >
       {/* =========================================================================
           COLUMNA 1: Cápsula del Mapa Oficial (100% de altura, sin título superior)
           Aloja las 5 vistas interactivas + dock flotante
@@ -619,8 +686,39 @@ export default function SedesCaratulaView({
         </div>
       </section>
 
+      {/* Divisor móvil invisible en reposo entre Mapa y Panel Macrorregional */}
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        title="Arrastra para ajustar el ancho de columna"
+        onMouseDown={(e) => startColResize(1, e)}
+        onMouseEnter={() => setHoveredDivider(1)}
+        onMouseLeave={() => setHoveredDivider((prev) => (prev === 1 ? null : prev))}
+        style={{
+          width: '10px',
+          height: '100%',
+          cursor: 'col-resize',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'transparent',
+          userSelect: 'none',
+        }}
+      >
+        <div
+          style={{
+            width: '2px',
+            height: hoveredDivider === 1 || activeDivider === 1 ? '100%' : '36px',
+            borderRadius: '99px',
+            background:
+              hoveredDivider === 1 || activeDivider === 1 ? '#3b82f6' : 'transparent',
+            transition: 'background 0.15s ease, height 0.15s ease',
+          }}
+        />
+      </div>
+
       {/* =========================================================================
-          COLUMNA 2: Controles de Macrorregión, Leyenda y Resumen Compacto (196px)
+          COLUMNA 2: Controles de Macrorregión, Leyenda y Resumen Compacto (280px inicial)
           ========================================================================= */}
       <aside style={{
         background: '#ffffff',
@@ -641,7 +739,7 @@ export default function SedesCaratulaView({
           <h3 style={{ fontSize: '12px', fontWeight: 750, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
             Cobertura por macrorregión
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <button
               type="button"
               onClick={(e) => handleMacroClick('norte', e)}
@@ -649,23 +747,23 @@ export default function SedesCaratulaView({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                padding: '9px 11px',
+                padding: '10px 12px',
                 borderRadius: '10px',
                 background: activeMacro === 'norte' ? '#eff6ff' : '#f8fafc',
-                border: '1px solid',
-                borderColor: activeMacro === 'norte' ? '#93c5fd' : '#e2e8f0',
-                boxShadow: activeMacro === 'norte' ? '0 2px 6px rgba(37,99,235,0.12)' : '0 1px 2px rgba(15,23,42,0.03)',
+                border: '1.5px solid',
+                borderColor: activeMacro === 'norte' ? '#2563eb' : '#cbd5e1',
+                boxShadow: activeMacro === 'norte' ? '0 3px 8px rgba(37,99,235,0.16)' : '0 1px 2px rgba(15,23,42,0.05)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.15s ease',
                 width: '100%',
               }}
             >
-              <span style={{ width: '13px', height: '13px', borderRadius: '4px', background: '#1e40af', flexShrink: 0 }} />
+              <span style={{ width: '14px', height: '14px', borderRadius: '4px', background: '#1e40af', flexShrink: 0 }} />
               <div>
-                <strong style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>Norte</strong>
-                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 500 }}>
-                  {macroStats.norte.regions} reg. · {macroStats.norte.entities} sedes
+                <strong style={{ display: 'block', fontSize: '13px', fontWeight: 750, color: '#0f172a', lineHeight: 1.25 }}>Norte</strong>
+                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                  {macroStats.norte.regions} regiones · {macroStats.norte.entities} DRE
                 </small>
               </div>
             </button>
@@ -677,23 +775,23 @@ export default function SedesCaratulaView({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                padding: '9px 11px',
+                padding: '10px 12px',
                 borderRadius: '10px',
                 background: activeMacro === 'centro' ? '#eff6ff' : '#f8fafc',
-                border: '1px solid',
-                borderColor: activeMacro === 'centro' ? '#93c5fd' : '#e2e8f0',
-                boxShadow: activeMacro === 'centro' ? '0 2px 6px rgba(37,99,235,0.12)' : '0 1px 2px rgba(15,23,42,0.03)',
+                border: '1.5px solid',
+                borderColor: activeMacro === 'centro' ? '#2563eb' : '#cbd5e1',
+                boxShadow: activeMacro === 'centro' ? '0 3px 8px rgba(37,99,235,0.16)' : '0 1px 2px rgba(15,23,42,0.05)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.15s ease',
                 width: '100%',
               }}
             >
-              <span style={{ width: '13px', height: '13px', borderRadius: '4px', background: '#3b82f6', flexShrink: 0 }} />
+              <span style={{ width: '14px', height: '14px', borderRadius: '4px', background: '#3b82f6', flexShrink: 0 }} />
               <div>
-                <strong style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>Centro</strong>
-                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 500 }}>
-                  {macroStats.centro.regions} reg. · {macroStats.centro.entities} sedes
+                <strong style={{ display: 'block', fontSize: '13px', fontWeight: 750, color: '#0f172a', lineHeight: 1.25 }}>Centro</strong>
+                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                  {macroStats.centro.regions} regiones · {macroStats.centro.entities} DRE
                 </small>
               </div>
             </button>
@@ -705,23 +803,23 @@ export default function SedesCaratulaView({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                padding: '9px 11px',
+                padding: '10px 12px',
                 borderRadius: '10px',
                 background: activeMacro === 'sur' ? '#eff6ff' : '#f8fafc',
-                border: '1px solid',
-                borderColor: activeMacro === 'sur' ? '#93c5fd' : '#e2e8f0',
-                boxShadow: activeMacro === 'sur' ? '0 2px 6px rgba(37,99,235,0.12)' : '0 1px 2px rgba(15,23,42,0.03)',
+                border: '1.5px solid',
+                borderColor: activeMacro === 'sur' ? '#2563eb' : '#cbd5e1',
+                boxShadow: activeMacro === 'sur' ? '0 3px 8px rgba(37,99,235,0.16)' : '0 1px 2px rgba(15,23,42,0.05)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.15s ease',
                 width: '100%',
               }}
             >
-              <span style={{ width: '13px', height: '13px', borderRadius: '4px', background: '#93c5fd', flexShrink: 0 }} />
+              <span style={{ width: '14px', height: '14px', borderRadius: '4px', background: '#93c5fd', flexShrink: 0 }} />
               <div>
-                <strong style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>Sur</strong>
-                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 500 }}>
-                  {macroStats.sur.regions} reg. · {macroStats.sur.entities} sedes
+                <strong style={{ display: 'block', fontSize: '13px', fontWeight: 750, color: '#0f172a', lineHeight: 1.25 }}>Sur</strong>
+                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                  {macroStats.sur.regions} regiones · {macroStats.sur.entities} DRE
                 </small>
               </div>
             </button>
@@ -729,72 +827,106 @@ export default function SedesCaratulaView({
         </div>
 
         {/* 2. Leyenda del mapa */}
-        <div>
-          <h3 style={{ fontSize: '11.5px', fontWeight: 750, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+        <div style={{
+          background: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          padding: '10px 12px',
+        }}>
+          <h3 style={{ fontSize: '11.5px', fontWeight: 750, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
             Leyenda del mapa
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11px', color: '#475569' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0f172a', display: 'grid', placeItems: 'center', color: '#fff', flexShrink: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: '#334155', fontWeight: 500 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: 15, height: 15, borderRadius: '50%', background: '#0f172a', display: 'grid', placeItems: 'center', color: '#fff', flexShrink: 0 }}>
                 <MapPin size={8} />
               </span>
               <span>DRE (Sede regional)</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0284c7', display: 'grid', placeItems: 'center', color: '#fff', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: 15, height: 15, borderRadius: '50%', background: '#0284c7', display: 'grid', placeItems: 'center', color: '#fff', flexShrink: 0 }}>
                 <MapPin size={8} />
               </span>
               <span>UGEL</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid #38bdf8', background: 'transparent', flexShrink: 0, marginLeft: 2 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: 11, height: 11, borderRadius: '50%', border: '2px solid #38bdf8', background: 'transparent', flexShrink: 0, marginLeft: 2 }} />
               <span>Unidad intervención</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#bfdbfe', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: 15, height: 9, borderRadius: '2px', background: '#bfdbfe', flexShrink: 0 }} />
               <span>Región asignada</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#e2e8f0', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span style={{ width: 15, height: 9, borderRadius: '2px', background: '#e2e8f0', flexShrink: 0 }} />
               <span>Sin asignación</span>
             </div>
           </div>
         </div>
 
-        {/* 3. Indicador compacto de avance territorial */}
+        {/* 3. Indicador compacto de avance territorial (Solo DREs) */}
         <div style={{
           marginTop: 'auto',
           background: '#f8fafc',
-          border: '1px solid #e2e8f0',
+          border: '1px solid #cbd5e1',
           borderRadius: '10px',
-          padding: '10px',
+          padding: '11px 12px',
           display: 'flex',
           flexDirection: 'column',
           gap: '6px',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Avance</span>
-            <strong style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>{macroStats.avg}%</strong>
+            <span style={{ fontSize: '10.5px', fontWeight: 750, color: '#475569', textTransform: 'uppercase' }}>Avance DRE</span>
+            <strong style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>{macroStats.avg}%</strong>
           </div>
-          <div style={{ height: 6, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
+          <div style={{ height: 7, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
             <div style={{ width: `${macroStats.avg}%`, height: '100%', background: '#1e40af', borderRadius: 99 }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px', color: '#475569' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 600, color: '#475569' }}>
             <span>● {macroStats.totalCumple} cumplen</span>
             <span>● {macroStats.totalProceso} proc.</span>
           </div>
         </div>
       </aside>
 
+      {/* Divisor móvil invisible en reposo entre Panel Macrorregional y Tabla de Sedes */}
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        title="Arrastra para ajustar el ancho de columna"
+        onMouseDown={(e) => startColResize(2, e)}
+        onMouseEnter={() => setHoveredDivider(2)}
+        onMouseLeave={() => setHoveredDivider((prev) => (prev === 2 ? null : prev))}
+        style={{
+          width: '10px',
+          height: '100%',
+          cursor: 'col-resize',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'transparent',
+          userSelect: 'none',
+        }}
+      >
+        <div
+          style={{
+            width: '2px',
+            height: hoveredDivider === 2 || activeDivider === 2 ? '100%' : '36px',
+            borderRadius: '99px',
+            background:
+              hoveredDivider === 2 || activeDivider === 2 ? '#3b82f6' : 'transparent',
+            transition: 'background 0.15s ease, height 0.15s ease',
+          }}
+        />
+      </div>
+
       {/* =========================================================================
-          COLUMNA 3: Tablero Completo de Sedes (Altura 100%, colapsado por DRE)
-          Columnas: N.° | UGEL / SEDE | ESTADO | AVANCE ACTUAL | >
+          COLUMNA 3: Tablero Oficial de Sedes (Estilo Lista, colapsado por DRE)
           ========================================================================= */}
-      <section style={{
+      <section ref={col3SectionRef} className="gantt-table-card" style={{
         background: '#ffffff',
         border: '1px solid #e2e8f0',
         borderRadius: '14px',
-        padding: '12px 14px',
         boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
         height: '100%',
         minHeight: 0,
@@ -803,207 +935,186 @@ export default function SedesCaratulaView({
         overflow: 'hidden',
         boxSizing: 'border-box',
       }}>
+        {/* Cabecera oficial alineada al 100% sin desborde horizontal */}
         <div style={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) 104px 104px',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '8px',
+          background: '#f1f5f9',
+          borderBottom: '1px solid #e2e8f0',
+          padding: '0 10px',
+          height: '40px',
           flexShrink: 0,
         }}>
-          <h2 style={{ fontSize: '13.5px', fontWeight: 750, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
-            Estado por Sede Regional (DRE)
-          </h2>
-          <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>
-            {groupedDres.length} DREs
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 0, paddingRight: '8px' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: 750, color: '#1e3a8a', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              Sede Regional (DRE)
+            </span>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              color: '#1e40af',
+              background: '#dbeafe',
+              padding: '2px 7px',
+              borderRadius: '999px',
+            }}>
+              {groupedDres.length} DREs
+            </span>
+          </div>
+          <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#334155', paddingLeft: '6px' }}>
+            Estado
+          </span>
+          <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#334155', paddingLeft: '6px' }}>
+            Avance
           </span>
         </div>
 
-        {/* Tabla con scroll interno contenido y colapso por DRE */}
+        {/* Filas con scroll vertical limpio (cero scroll horizontal) */}
         <div style={{
           flex: '1 1 0%',
           minHeight: 0,
-          height: '100%',
           overflowY: 'auto',
-          border: '1px solid #e2e8f0',
-          borderRadius: '10px',
+          overflowX: 'hidden',
         }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            fontSize: '12px',
-            textAlign: 'left',
-          }}>
-            <thead style={{ position: 'sticky', top: 0, zIndex: 5 }}>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
-                <th style={{ padding: '8px 10px', fontWeight: 700, fontSize: '10.5px', width: '38px', textAlign: 'center' }}>N.°</th>
-                <th style={{ padding: '8px 8px', fontWeight: 700, fontSize: '10.5px' }}>UGEL / SEDE</th>
-                <th style={{ padding: '8px 8px', fontWeight: 700, fontSize: '10.5px', width: '92px' }}>ESTADO</th>
-                <th style={{ padding: '8px 8px', fontWeight: 700, fontSize: '10.5px', width: '115px' }}>AVANCE ACTUAL</th>
-                <th style={{ padding: '8px 6px', width: '24px' }} />
-              </tr>
-            </thead>
-            <tbody>
-              {groupedDres.map((group) => {
-                const isExpanded = expandedDreKey === group.key;
-                const dre = group.dre;
-                const isDreSelected = selectedEntityId === dre.id;
-                const pillBg = dre.estadoAvance === 'Cumple' ? '#ecfdf5' : dre.estadoAvance === 'En proceso' ? '#fffbeb' : '#fef2f2';
-                const pillColor = dre.estadoAvance === 'Cumple' ? '#047857' : dre.estadoAvance === 'En proceso' ? '#b45309' : '#b91c1c';
-                const pillBorder = dre.estadoAvance === 'Cumple' ? '#a7f3d0' : dre.estadoAvance === 'En proceso' ? '#fde68a' : '#fecaca';
-                const barColor = dre.progress >= 80 ? '#10b981' : dre.progress > 0 ? '#f59e0b' : '#ef4444';
+          {groupedDres.map((group, idx) => {
+            const isExpanded = expandedDreKey === group.key;
+            const dre = group.dre;
+            const isDreSelected = selectedEntityId === dre.id;
+            const dotColor = dre.progress >= 80 ? '#10b981' : dre.progress > 0 ? '#f59e0b' : '#ef4444';
+            const statusTextColor = dre.progress >= 80 ? '#047857' : dre.progress > 0 ? '#b45309' : '#dc2626';
 
-                return (
-                  <React.Fragment key={group.key}>
-                    {/* Fila DRE Padre (colapsada por defecto) */}
-                    <tr
-                      onClick={() => {
-                        setSelectedEntityId(dre.id);
-                        setExpandedDreKey((prev) => (prev === group.key ? null : group.key));
-                        onSelectSede?.(dre);
+            return (
+              <React.Fragment key={group.key}>
+                {/* Fila DRE Padre */}
+                <div
+                  onClick={() => {
+                    setSelectedEntityId(dre.id);
+                    setExpandedDreKey((prev) => (prev === group.key ? null : group.key));
+                    onSelectSede?.(dre);
+                  }}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 1fr) 104px 104px',
+                    alignItems: 'center',
+                    padding: '9px 10px',
+                    borderBottom: '1px solid #f1f5f9',
+                    cursor: 'pointer',
+                    background: isDreSelected || isExpanded ? '#eff6ff' : idx % 2 === 1 ? '#f8fafc' : '#ffffff',
+                    transition: 'background 0.12s ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0, paddingRight: '8px' }}>
+                    {group.ugels.length > 0 ? (
+                      isExpanded ? (
+                        <ChevronDown size={14} color="#1e40af" style={{ flexShrink: 0 }} />
+                      ) : (
+                        <ChevronRight size={14} color="#64748b" style={{ flexShrink: 0 }} />
+                      )
+                    ) : (
+                      <span style={{ width: 14, flexShrink: 0 }} />
+                    )}
+                    <Building2 size={14} style={{ color: '#1e40af', flexShrink: 0 }} />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{
+                        color: '#0f172a',
+                        fontWeight: 650,
+                        fontSize: '12.5px',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {dre.name}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 500 }}>
+                        {dre.region} · {group.ugels.length} UGEL
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', paddingLeft: '6px', minWidth: 0 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: dotColor, flexShrink: 0 }} />
+                    <span style={{
+                      fontSize: '11.5px',
+                      fontWeight: 600,
+                      color: statusTextColor,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}>
+                      {dre.estadoAvance}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px', paddingLeft: '6px' }}>
+                    <div style={{ flex: 1, height: 6, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
+                      <div style={{ width: `${dre.progress}%`, height: '100%', background: dotColor, borderRadius: 99 }} />
+                    </div>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#334155', minWidth: '30px', textAlign: 'right' }}>
+                      {dre.progress}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Filas UGEL Hijas (solo al expandir su DRE) */}
+                {isExpanded && group.ugels.map((ugel) => {
+                  const isUgelSelected = selectedEntityId === ugel.id;
+                  const uDotColor = ugel.progress >= 80 ? '#10b981' : ugel.progress > 0 ? '#f59e0b' : '#ef4444';
+                  const uStatusColor = ugel.progress >= 80 ? '#047857' : ugel.progress > 0 ? '#b45309' : '#dc2626';
+
+                  return (
+                    <div
+                      key={ugel.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedEntityId(ugel.id);
+                        onSelectSede?.(ugel);
                       }}
                       style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'minmax(0, 1fr) 104px 104px',
+                        alignItems: 'center',
+                        padding: '7px 10px 7px 26px',
                         borderBottom: '1px solid #f1f5f9',
                         cursor: 'pointer',
-                        background: isDreSelected || isExpanded ? '#f0f7ff' : '#ffffff',
+                        background: isUgelSelected ? '#e0f2fe' : '#f8fafc',
                         transition: 'background 0.12s ease',
                       }}
                     >
-                      <td style={{ padding: '8px 6px', textAlign: 'center', color: '#64748b', fontWeight: 600, fontSize: '11px' }}>
-                        {group.index}
-                      </td>
-                      <td style={{ padding: '8px 8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {group.ugels.length > 0 ? (
-                            isExpanded ? (
-                              <ChevronDown size={13} color="#1e40af" style={{ flexShrink: 0 }} />
-                            ) : (
-                              <ChevronRight size={13} color="#64748b" style={{ flexShrink: 0 }} />
-                            )
-                          ) : (
-                            <span style={{ width: 13, flexShrink: 0 }} />
-                          )}
-                          <Building2 size={13} style={{ color: '#1e40af', flexShrink: 0 }} />
-                          <div style={{ minWidth: 0 }}>
-                            <strong style={{ display: 'block', color: '#0f172a', fontWeight: 700, fontSize: '12px', lineHeight: 1.25 }}>
-                              {dre.name}
-                            </strong>
-                            <small style={{ display: 'block', color: '#64748b', fontSize: '10px', textTransform: 'uppercase' }}>
-                              {dre.region} · {group.ugels.length} UGEL
-                            </small>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '8px 6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, paddingRight: '8px' }}>
+                        <Building size={12} style={{ color: '#0284c7', flexShrink: 0 }} />
                         <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '10.5px',
-                          fontWeight: 650,
-                          padding: '2px 7px',
-                          borderRadius: '999px',
-                          background: pillBg,
-                          color: pillColor,
-                          border: `1px solid ${pillBorder}`,
+                          color: '#1e293b',
+                          fontWeight: 550,
+                          fontSize: '12px',
                           whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
                         }}>
-                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: barColor }} />
-                          {dre.estadoAvance}
+                          {ugel.name}
                         </span>
-                      </td>
-                      <td style={{ padding: '8px 8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <div style={{ flex: 1, height: 5, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
-                            <div style={{ width: `${dre.progress}%`, height: '100%', background: barColor, borderRadius: 99 }} />
-                          </div>
-                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', minWidth: '28px', textAlign: 'right' }}>
-                            {dre.progress}%
-                          </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', paddingLeft: '6px', minWidth: 0 }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: uDotColor, flexShrink: 0 }} />
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: uStatusColor, whiteSpace: 'nowrap' }}>
+                          {ugel.estadoAvance}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', paddingLeft: '6px' }}>
+                        <div style={{ flex: 1, height: 5, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
+                          <div style={{ width: `${ugel.progress}%`, height: '100%', background: uDotColor, borderRadius: 99 }} />
                         </div>
-                      </td>
-                      <td style={{ padding: '8px 4px', textAlign: 'center', color: '#94a3b8' }}>
-                        <ChevronRight size={13} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }} />
-                      </td>
-                    </tr>
-
-                    {/* Filas UGEL Hijas (visibles solo cuando la DRE está expandida) */}
-                    {isExpanded && group.ugels.map((ugel, uIdx) => {
-                      const isUgelSelected = selectedEntityId === ugel.id;
-                      const uPillBg = ugel.estadoAvance === 'Cumple' ? '#ecfdf5' : ugel.estadoAvance === 'En proceso' ? '#fffbeb' : '#fef2f2';
-                      const uPillColor = ugel.estadoAvance === 'Cumple' ? '#047857' : ugel.estadoAvance === 'En proceso' ? '#b45309' : '#b91c1c';
-                      const uPillBorder = ugel.estadoAvance === 'Cumple' ? '#a7f3d0' : ugel.estadoAvance === 'En proceso' ? '#fde68a' : '#fecaca';
-                      const uBarColor = ugel.progress >= 80 ? '#10b981' : ugel.progress > 0 ? '#f59e0b' : '#ef4444';
-
-                      return (
-                        <tr
-                          key={ugel.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedEntityId(ugel.id);
-                            onSelectSede?.(ugel);
-                          }}
-                          style={{
-                            borderBottom: '1px solid #f1f5f9',
-                            cursor: 'pointer',
-                            background: isUgelSelected ? '#e0f2fe' : '#f8fafc',
-                            transition: 'background 0.12s ease',
-                          }}
-                        >
-                          <td style={{ padding: '7px 6px', textAlign: 'center', color: '#94a3b8', fontSize: '10.5px' }}>
-                            {group.index}.{uIdx + 1}
-                          </td>
-                          <td style={{ padding: '7px 8px 7px 22px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Building size={12} style={{ color: '#0284c7', flexShrink: 0 }} />
-                              <div style={{ minWidth: 0 }}>
-                                <span style={{ display: 'block', color: '#1e293b', fontWeight: 600, fontSize: '11.5px', lineHeight: 1.25 }}>
-                                  {ugel.name}
-                                </span>
-                                <small style={{ display: 'block', color: '#94a3b8', fontSize: '9.5px' }}>
-                                  {ugel.region}
-                                </small>
-                              </div>
-                            </div>
-                          </td>
-                          <td style={{ padding: '7px 6px' }}>
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '10px',
-                              fontWeight: 650,
-                              padding: '2px 6px',
-                              borderRadius: '999px',
-                              background: uPillBg,
-                              color: uPillColor,
-                              border: `1px solid ${uPillBorder}`,
-                              whiteSpace: 'nowrap',
-                            }}>
-                              <span style={{ width: 5, height: 5, borderRadius: '50%', background: uBarColor }} />
-                              {ugel.estadoAvance}
-                            </span>
-                          </td>
-                          <td style={{ padding: '7px 8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ flex: 1, height: 5, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
-                                <div style={{ width: `${ugel.progress}%`, height: '100%', background: uBarColor, borderRadius: 99 }} />
-                              </div>
-                              <span style={{ fontSize: '10.5px', fontWeight: 650, color: '#475569', minWidth: '28px', textAlign: 'right' }}>
-                                {ugel.progress}%
-                              </span>
-                            </div>
-                          </td>
-                          <td style={{ padding: '7px 4px', textAlign: 'center', color: '#cbd5e1' }}>
-                            <ChevronRight size={12} />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                        <span style={{ fontSize: '11px', fontWeight: 650, color: '#475569', minWidth: '30px', textAlign: 'right' }}>
+                          {ugel.progress}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            );
+          })}
         </div>
       </section>
     </div>

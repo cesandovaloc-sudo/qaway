@@ -36,13 +36,6 @@ export const navItems = [
   {
     label: 'Blog',
     path: '/blog',
-    items: [
-      { label: 'Artificial', path: '/blog/artificial' },
-      { label: 'Productividad', path: '/blog/productividad' },
-      { label: 'Marketing', path: '/blog/marketing' },
-      { label: 'Diseño', path: '/blog/diseno' },
-      { label: 'Automatización', path: '/blog/automatizacion' },
-    ],
   },
   {
     label: 'Landings',

@@ -1,9 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-@import "tailwindcss";
 
 /* ==== Tokens corporativos · Estándar Qaway Lab v4.0 — dirección visual aprobada 2026-10-26 ==== */
-/* Canvas claro con matiz gris-azulado, superficies blancas flotantes (Power BI / Trello), semáforo vibrante. */
-:root {
+/* Encapsulado exclusivamente en los nodos raíz de Gestor de Proyectos 2 (nunca en :root global)
+   para no pisar variables de otras páginas externas (--shadow-card, --border-light, --font-sans). */
+.qm-root,
+.gantt-element-page,
+.te-menu,
+.kanban-context-menu {
   /* Fondo general del Canvas */
   --bg-canvas: #f4f7fb;
   --bg-surface: #ffffff;
@@ -62,7 +65,19 @@ body:has(.qm-root) {
   display: flex;
   align-items: stretch;
   background: var(--bg-canvas);
+  color: var(--text-body);
   font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.qm-root ::selection,
+.gantt-element-page ::selection {
+  background: #dbeafe;
+  color: #0f172a;
 }
 .qm-side,
 .qm-side.qt-v2 {

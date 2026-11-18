@@ -9,6 +9,7 @@ import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, TAREAS_SEED_COUNT, US
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
+import { usePerfilGp } from './services/gpPermisosService';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
@@ -164,6 +165,18 @@ function GestorProyectosApp() {
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   // Fase previa al login: se mantiene explícito y vacío hasta conectar el Hub.
   const gestorTenantId: string | null = null;
+  // Etapa 6-B: permisos granulares del modelo GP. El gating SOLO aplica con
+  // sesión real (perfilGp no nulo); en modo local (sin sesión) se conserva el
+  // comportamiento demo actual (documentado en bitácora 6-B). La DB (RLS)
+  // sigue siendo el mando real; esto es UX.
+  const { perfil: perfilGp, capacidades: capGp } = usePerfilGp();
+  const handleOpenCreateProject = () => {
+    if (perfilGp && !capGp.crearProyecto) {
+      notifyActive('No tienes permiso para crear proyectos (requiere rol admin o la llave gp.crear_proyecto).');
+      return;
+    }
+    setIsCreateProjectOpen(true);
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     try {
       const saved = localStorage.getItem('qaway-sidebar-collapsed');
@@ -580,7 +593,7 @@ function GestorProyectosApp() {
           projects={projects}
           activeProjectId={activeProjectId}
           onSelectProject={setActiveProjectId}
-          onOpenCreateProject={() => setIsCreateProjectOpen(true)}
+          onOpenCreateProject={handleOpenCreateProject}
         />
       </div>
       <div className="qm-main-container">
@@ -595,7 +608,7 @@ function GestorProyectosApp() {
         />
         <main ref={canvasRef} className="qm-canvas">
            {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-             <ResumenProyectoView userRole={userRole} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={() => setIsCreateProjectOpen(true)} onActions={(h) => { binds.current['resumen'] = h; }} />
+             <ResumenProyectoView userRole={userRole} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={handleOpenCreateProject} onActions={(h) => { binds.current['resumen'] = h; }} />
            </div>}
            {visitedModules.has('tareas2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Tareas 2…" />}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />

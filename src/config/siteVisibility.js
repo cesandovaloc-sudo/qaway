@@ -16,7 +16,7 @@ export const routeVisibility = {
   sistemasDigitales: true,
   academy: false,
   hub: true,
-  recursos: true,
+  recursos: false,
   blog: true,
   landings: true,
   auth: true,

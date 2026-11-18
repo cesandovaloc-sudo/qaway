@@ -35,7 +35,7 @@ type Fuente =
   | { estado: 'catalogo'; opciones: { codigo: string; etiqueta: string }[] }
   | { estado: 'vacio' };
 
-export default function TipoReunionCatalogoSelect({ value, onChange, disabled = false }: Props) {
+export function TipoReunionCatalogoSelect({ value, onChange, disabled = false }: Props) {
   const [fuente, setFuente] = useState<Fuente>({ estado: 'local' });
 
   useEffect(() => {
@@ -93,3 +93,5 @@ export default function TipoReunionCatalogoSelect({ value, onChange, disabled = 
     </select>
   );
 }
+
+export default TipoReunionCatalogoSelect;

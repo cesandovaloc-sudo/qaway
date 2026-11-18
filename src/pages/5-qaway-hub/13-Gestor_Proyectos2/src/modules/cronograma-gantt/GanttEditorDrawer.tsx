@@ -41,6 +41,7 @@ import type {
 } from './CronogramaGanttView';
 import { getDeviationDays } from './scheduleMetrics';
 import TablaPorConectar from '../../components/TablaPorConectar';
+import { usePerfilGp } from '../../services/gpPermisosService';
 import { getEdtNodeDisplayLabel, resolveEdtNodeType, PROJECT_PHASES_CATALOG, EDT_NODE_LABELS, isContainerEdtType, normalizeEdtType, type EdtNodeType } from './edtPmbokModel';
 import { getLinkedTasksSummary } from '../cronograma-core/wbsHierarchy';
 import TipoDependenciaCatalogoSelect from '../../components/TipoDependenciaCatalogoSelect';
@@ -282,6 +283,15 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [newDelivTipoCodigo, setNewDelivTipoCodigo] = useState<string>('');
   const [newDelivUrl, setNewDelivUrl] = useState('');
   const [attachment, setAttachment] = useState('');
+
+  // Etapa 6-B: permisos granulares del modelo GP. El gating SOLO aplica con
+  // sesión real (perfilGp no nulo); en modo local (sin sesión) se conserva la
+  // edición actual del cronograma (documentado en bitácora 6-B). La DB (RLS)
+  // sigue siendo el mando real; esto es UX.
+  const { perfil: perfilGp, capacidades: capGp } = usePerfilGp();
+  const aplicarPermisos = Boolean(perfilGp);
+  const puedeEstructura = !aplicarPermisos || capGp.administrarEdt;
+  const puedeOperar = !aplicarPermisos || capGp.crearTarea || capGp.editarPropio;
 
   const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [taskModalMilestone, setTaskModalMilestone] = useState('');
@@ -1266,6 +1276,8 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                         padding: 0,
                       }}
                       onClick={() => setShowAddDeliverable((v) => !v)}
+                      disabled={!puedeEstructura}
+                      title={puedeEstructura ? undefined : 'Solo lectura: agregar entregables requiere permiso de estructura (rol admin o llave gp.administrar_edt)'}
                     >
                       <Plus size={12} />
                       <span>Agregar entregable</span>
@@ -1524,6 +1536,8 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                             <button
                               type="button"
                               onClick={() => handleRemoveDeliverable(deliv.id)}
+                              disabled={!puedeEstructura}
+                              title={!puedeEstructura ? 'Solo lectura: eliminar entregables requiere permiso de estructura (rol admin o llave gp.administrar_edt)' : 'Eliminar entregable'}
                               style={{
                                 background: 'transparent',
                                 border: 'none',
@@ -1880,6 +1894,8 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     className="btn primary"
                     style={{ height: '32px', padding: '0 12px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                     onClick={() => add('subproceso', activeItem.id)}
+                    disabled={!puedeEstructura}
+                    title={!puedeEstructura ? 'Solo lectura: la estructura EDT requiere rol admin o llave gp.administrar_edt' : undefined}
                   >
                     <Plus size={14} />
                     <span>{activeItem.kind === 'hito' ? 'Agregar Subcomponente' : 'Agregar Sub-elemento'}</span>
@@ -1947,6 +1963,8 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                         className="btn primary"
                         style={{ height: '32px', padding: '0 14px', fontSize: '12px', margin: '0 auto', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         onClick={() => add('subproceso', activeItem.id)}
+                        disabled={!puedeEstructura}
+                        title={!puedeEstructura ? 'Solo lectura: la estructura EDT requiere rol admin o llave gp.administrar_edt' : undefined}
                       >
                         <Plus size={14} />
                         <span>{activeItem.kind === 'hito' ? 'Crear primer subcomponente' : 'Crear primer sub-elemento'}</span>
@@ -2228,8 +2246,19 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
               </div>
             )}
 
+            {aplicarPermisos && !puedeEstructura && !puedeOperar && (
+              <div style={{ padding: '6px 12px 0', fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <ShieldCheck size={13} />
+                <span>Solo lectura: tu rol no permite editar este elemento (la estructura requiere rol admin o llave gp.administrar_edt).</span>
+              </div>
+            )}
             <div className="editor-footer">
-              <button className="delete" onClick={deleteItem}>
+              <button
+                className="delete"
+                onClick={deleteItem}
+                disabled={!puedeEstructura && !isNewDraft}
+                title={!puedeEstructura && !isNewDraft ? 'Solo lectura: eliminar requiere permiso de estructura (rol admin o llave gp.administrar_edt)' : undefined}
+              >
                 <Trash2 size={15} />
                 <span>{isNewDraft ? 'Cancelar borrador' : 'Eliminar'}</span>
               </button>
@@ -2237,6 +2266,8 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                 className="btn primary"
                 style={{ flex: 1 }}
                 onClick={handleSaveDrawer}
+                disabled={!puedeEstructura && !puedeOperar}
+                title={!puedeEstructura && !puedeOperar ? 'Solo lectura: tu rol no permite guardar cambios en este elemento' : undefined}
               >
                 <Save size={15} />
                 <span>Guardar cambios</span>

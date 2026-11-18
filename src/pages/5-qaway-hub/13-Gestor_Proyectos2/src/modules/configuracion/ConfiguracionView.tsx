@@ -45,6 +45,8 @@ import { CONFIGURABLE_MODULES } from '../../types';
 import TipoProyectoCatalogoSelect from '../../components/TipoProyectoCatalogoSelect';
 import CicloVidaEstadoChip from '../../components/CicloVidaEstadoChip';
 import { capacidadesDeProyecto, historialEstado } from '../../services/gpCicloVidaService';
+import PermisosTab from './PermisosTab';
+import { usePerfilGp } from '../../services/gpPermisosService';
 
 export type ConfigBinds = { notify: (m: string) => void };
 
@@ -91,7 +93,10 @@ export default function ConfiguracionView({
   onDeleteProject,
   onIrAFicha,
 }: ConfiguracionViewProps) {
-  const [activeTab, setActiveTab] = useState<'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente' | 'permisos'>('general');
+  // Etapa 6-B: perfil GP real. El gating de guardado SOLO aplica con sesión
+  // real (perfilGp no nulo); en modo local se conserva el comportamiento actual.
+  const { perfil: perfilGp, capacidades: capGp } = usePerfilGp();
   const [timezone, setTimezone] = useState(() => {
     return localStorage.getItem('qaway-system-timezone-v1') || 'America/Lima';
   });
@@ -200,6 +205,11 @@ export default function ConfiguracionView({
     e.preventDefault();
     if (!editName.trim()) {
       notify('El nombre del proyecto no puede estar vacío');
+      return;
+    }
+    // Etapa 6-B: gating solo con sesión real (modo local conserva la edición).
+    if (perfilGp && !capGp.editarProyecto) {
+      notify('Solo lectura: editar el proyecto requiere rol admin o la llave gp.editar_proyecto.');
       return;
     }
     const cronoDesc = (moduleDescriptions['cronograma'] || '').trim();
@@ -395,6 +405,14 @@ export default function ConfiguracionView({
           >
             <ShieldCheck size={15} />
             <span>Seguridad y Auditoría Institucional</span>
+          </button>
+          <button
+            type="button"
+            className={`tab-item ${activeTab === 'permisos' ? 'active' : ''}`}
+            onClick={() => setActiveTab('permisos')}
+          >
+            <Users size={15} />
+            <span>Permisos del Equipo</span>
           </button>
           <button
             type="button"
@@ -1121,6 +1139,10 @@ export default function ConfiguracionView({
               )}
             </div>
           </div>
+        )}
+
+        {activeTab === 'permisos' && (
+          <PermisosTab />
         )}
 
         {activeTab === 'asistente' && (
