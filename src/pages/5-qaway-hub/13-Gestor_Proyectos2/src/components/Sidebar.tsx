@@ -35,6 +35,8 @@ type SidebarProps = {
   notifyActive: (m: string) => void;
   setTasksView?: (v: string) => void;
   userRole: UserRole;
+  /** 6-D: capacidad real de UI (sesión) o fallback demo por perspectiva. */
+  canCreateProject?: boolean;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   projects?: ProjectSummary[];
@@ -49,6 +51,7 @@ export default function Sidebar({
   tasksCount,
   notifyActive,
   userRole,
+  canCreateProject,
   collapsed = false,
   onToggleCollapse,
   projects = [
@@ -58,6 +61,7 @@ export default function Sidebar({
   onSelectProject,
   onOpenCreateProject,
 }: SidebarProps) {
+  const puedeCrearProyecto = canCreateProject ?? userRole === 'coordinador';
   const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
   const projectDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -209,8 +213,8 @@ export default function Sidebar({
               );
             })}
 
-            {/* Acción de creación al final del desplegable (Exclusivo Coordinador) */}
-            {userRole === 'coordinador' && (
+            {/* Acción de creación: capacidad real (6-B/6-D) o perspectiva demo */}
+            {puedeCrearProyecto && (
               <button
                 onClick={() => {
                   setIsProjectMenuOpen(false);

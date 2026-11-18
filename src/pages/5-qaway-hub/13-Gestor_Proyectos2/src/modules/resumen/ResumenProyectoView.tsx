@@ -75,12 +75,18 @@ const RESUMEN_COLUMNS: ColumnDef<(typeof DEMO_UGEL)[0]>[] = [
 export default function ResumenProyectoView({
   onActions,
   userRole = 'gestor',
+  canCreateProject,
+  sesionReal = false,
   onOpenCreateProject,
   proyecto,
   onEstadoCambiado,
 }: {
   onActions?: (h: any) => void;
   userRole?: 'gestor' | 'coordinador';
+  /** 6-D: capacidad real de UI o fallback demo. */
+  canCreateProject?: boolean;
+  /** 6-D: true si la perspectiva viene de sesión real del Hub. */
+  sesionReal?: boolean;
   onOpenCreateProject?: () => void;
   /** Etapa 6.3: proyecto activo (para el chip de estado y el menú de dirección). */
   proyecto?: {
@@ -93,6 +99,8 @@ export default function ResumenProyectoView({
   /** Tras una transición exitosa (persistida en Supabase por la RPC atómica). */
   onEstadoCambiado?: (proyectoId: string, estadoNuevo: string) => void;
 }) {
+  const puedeCrearProyecto = canCreateProject ?? userRole === 'coordinador';
+  const mostrarBannerDemoCoordinador = !sesionReal && userRole === 'coordinador';
   const engine = useTableEngine<(typeof DEMO_UGEL)[0]>({ tableId: 'resumen-ugel', columns: RESUMEN_COLUMNS, rows: DEMO_UGEL });
 
   const [selectedTab, setSelectedTab] = useState<string>('Todas');
@@ -329,7 +337,7 @@ export default function ResumenProyectoView({
               <RefreshCw size={15} />
               <span>Sincronizar ({actualizado})</span>
             </button>
-            {userRole === 'coordinador' && (
+            {puedeCrearProyecto && (
               <button
                 type="button"
                 className="btn primary"
@@ -343,8 +351,8 @@ export default function ResumenProyectoView({
           </div>
         </header>
 
-        {/* Banner de Gobernanza Multirregional para Coordinador */}
-        {userRole === 'coordinador' && (
+        {/* Banner de Gobernanza Multirregional (demo sin sesión) */}
+        {mostrarBannerDemoCoordinador && (
           <div
             style={{
               background: '#0f172a',

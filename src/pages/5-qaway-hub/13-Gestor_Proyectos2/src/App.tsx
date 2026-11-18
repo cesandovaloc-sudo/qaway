@@ -9,7 +9,7 @@ import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, TAREAS_SEED_COUNT, US
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
-import { usePerfilGp } from './services/gpPermisosService';
+import { usePerfilGp, capacidadesDe } from './services/gpPermisosService';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
@@ -101,6 +101,12 @@ const seedTasksCount = (): number => {
 };
 
 const readStoredRole = (): UserRole => {
+  try {
+    const saved = localStorage.getItem(USER_ROLE_STORAGE_KEY) as UserRole | null;
+    if (saved === 'gestor' || saved === 'coordinador') return saved;
+  } catch {
+    /* fallback */
+  }
   return 'coordinador';
 };
 
@@ -169,7 +175,32 @@ function GestorProyectosApp() {
   // sesión real (perfilGp no nulo); en modo local (sin sesión) se conserva el
   // comportamiento demo actual (documentado en bitácora 6-B). La DB (RLS)
   // sigue siendo el mando real; esto es UX.
-  const { perfil: perfilGp, capacidades: capGp } = usePerfilGp();
+  const { perfil: perfilGp, capacidades: capGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  const sesionReal = !cargandoPerfilGp && perfilGp !== null;
+
+  // Etapa 6-D: perspectiva UI desde sesión real (Hub); fallback demo sin sesión.
+  useEffect(() => {
+    if (cargandoPerfilGp) return;
+    if (perfilGp) {
+      const cap = capacidadesDe(perfilGp.rol, perfilGp.permisos, perfilGp.esPlataforma, true);
+      const derived: UserRole =
+        perfilGp.esPlataforma ||
+        perfilGp.rol === 'admin' ||
+        perfilGp.rol === 'editor' ||
+        cap.crearProyecto ||
+        cap.editarProyecto ||
+        cap.administrarEdt ||
+        cap.administrarPermisos
+          ? 'coordinador'
+          : 'gestor';
+      setUserRole(derived);
+      setCronogramaPerspective(derived === 'coordinador' ? 'maestro' : 'territorial');
+    }
+    // sin sesión real: se mantiene la perspectiva demo (readStoredRole)
+  }, [cargandoPerfilGp, perfilGp]);
+
+  const puedeCrearProyectoUi = sesionReal ? capGp.crearProyecto : userRole === 'coordinador';
+
   const handleOpenCreateProject = () => {
     if (perfilGp && !capGp.crearProyecto) {
       notifyActive('No tienes permiso para crear proyectos (requiere rol admin o la llave gp.crear_proyecto).');
@@ -385,12 +416,13 @@ function GestorProyectosApp() {
   }, [active]);
 
   useEffect(() => {
+    if (sesionReal) return; // sesión real: no persistir perspectiva simulada
     try {
       localStorage.setItem(USER_ROLE_STORAGE_KEY, userRole);
     } catch {
       /* almacenamiento no disponible */
     }
-  }, [userRole]);
+  }, [userRole, sesionReal]);
 
   useEffect(() => {
     try {
@@ -441,6 +473,10 @@ function GestorProyectosApp() {
   };
 
   const handleChangeRole = (next: UserRole) => {
+    if (sesionReal) {
+      notifyActive('La perspectiva se deriva de tu sesión en Qaway Hub.');
+      return;
+    }
     setUserRole(next);
     setCronogramaPerspective(next === 'coordinador' ? 'maestro' : 'territorial');
     notifyActive(
@@ -588,6 +624,7 @@ function GestorProyectosApp() {
           notifyActive={notifyActive}
           setTasksView={setTasksView}
           userRole={userRole}
+          canCreateProject={puedeCrearProyectoUi}
           collapsed={sidebarCollapsed}
           onToggleCollapse={toggleSidebar}
           projects={projects}
@@ -608,7 +645,7 @@ function GestorProyectosApp() {
         />
         <main ref={canvasRef} className="qm-canvas">
            {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
-             <ResumenProyectoView userRole={userRole} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={handleOpenCreateProject} onActions={(h) => { binds.current['resumen'] = h; }} />
+             <ResumenProyectoView userRole={userRole} canCreateProject={puedeCrearProyectoUi} sesionReal={sesionReal} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={handleOpenCreateProject} onActions={(h) => { binds.current['resumen'] = h; }} />
            </div>}
            {visitedModules.has('tareas2') && <Suspense fallback={<ModuleLoadingFallback text="Cargando Tareas 2…" />}><div className={active === 'tareas2' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <Tareas2View activeProject={activeProject} isActive={active === 'tareas2'} />
