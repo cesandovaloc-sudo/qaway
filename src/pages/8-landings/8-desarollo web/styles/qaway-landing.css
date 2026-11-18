@@ -19,7 +19,7 @@
   --qw-bg-light: #fafafa;
   
   --qw-font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --qw-font-display: "Space Grotesk", "Inter", sans-serif;
+  --qw-font-display: "Inter", system-ui, -apple-system, sans-serif;
   --qw-font-mono: "JetBrains Mono", monospace;
 }
 
@@ -55,7 +55,7 @@
 /* Títulos de Sección Unificados (Mismo peso 600 que Hero, 1 punto menos de tamaño) */
 .qaway-landing-root h2 {
   font-family: var(--qw-font-display) !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   letter-spacing: -0.03em !important;
   line-height: 1.15 !important;
 }
@@ -215,7 +215,7 @@
 
 .qaway-landing-root .h-hero-title-real {
   font-size: clamp(2.4rem, 4vw, 3.4rem);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.12;
   color: #111111;
   margin: 0 0 24px;

@@ -488,6 +488,16 @@ export default function ProyectosPage() {
             </div>
           )}
 
+          <div className="pb-12 flex justify-center">
+            <Link
+              to="/landings/desarrollo-web#precios"
+              className="inline-flex items-center gap-2.5 rounded-full bg-[#fe6612] px-9 py-4 text-[15px] font-bold text-white shadow-[0_12px_30px_rgba(254,102,18,0.24)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:bg-[#e85505] hover:shadow-[0_16px_38px_rgba(254,102,18,0.32)]"
+            >
+              <span>Ver precios</span>
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+
         </div>
       </section>
 

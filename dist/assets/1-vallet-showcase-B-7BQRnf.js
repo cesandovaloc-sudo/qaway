@@ -1,0 +1,1 @@
+var e=`/assets/1-vallet-showcase-B2F31bE4.webp`;export{e as t};

@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
-import mockup1 from "../assets/Landing-Pages.webp";
-import mockup2 from "../assets/Sitios-Web.webp";
-import mockup3 from "../assets/Tiendas-Online.webp";
+import showcaseVallet from "../../../11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/1-vallet-showcase.webp";
 import { Layers, Sparkles, TrendingUp, Gauge, Search, Smartphone } from "lucide-react";
 
 export function QawayWebTypesSection() {
@@ -29,9 +27,9 @@ export function QawayWebTypesSection() {
           </motion.div>
 
           <div className="h-three-cards-grid">
-            {/* Tarjeta 1: Landing Pages (Enlace a Vallet) */}
+            {/* Tarjeta 1: Landing Pages de Captación (Vallet) */}
             <motion.a
-              href="/proyectos/vallet"
+              href="/proyectos/vallet-inmobiliaria"
               className="h-ai-feature-card"
               style={{ background: "#ffffff", cursor: "pointer", textDecoration: "none", color: "inherit" }}
               initial={{ opacity: 0, y: 22 }}
@@ -43,7 +41,7 @@ export function QawayWebTypesSection() {
               <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
-                    src={mockup1}
+                    src={showcaseVallet}
                     alt="Landing Pages de Captación"
                     style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block", transition: "transform 0.35s ease" }}
                   />
@@ -58,10 +56,11 @@ export function QawayWebTypesSection() {
               </div>
             </motion.a>
 
-            {/* Tarjeta 2: Sitios Corporativos */}
-            <motion.div
+            {/* Tarjeta 2: Tiendas Online (Aurea Skincare) */}
+            <motion.a
+              href="/proyectos/aurea-skincare"
               className="h-ai-feature-card"
-              style={{ background: "#ffffff", cursor: "pointer" }}
+              style={{ background: "#ffffff", cursor: "pointer", textDecoration: "none", color: "inherit" }}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)", transition: { duration: 0.2, ease: "easeOut" } }}
@@ -71,35 +70,7 @@ export function QawayWebTypesSection() {
               <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
-                    src={mockup2}
-                    alt="Sitios Web Corporativos"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block", transition: "transform 0.35s ease" }}
-                  />
-                </div>
-              </div>
-
-              <div className="h-ai-feature-card-body">
-                <h3>Sitios Web Corporativos</h3>
-                <p>
-                  Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales.
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Tarjeta 3: Tiendas Online */}
-            <motion.div
-              className="h-ai-feature-card"
-              style={{ background: "#ffffff", cursor: "pointer" }}
-              initial={{ opacity: 0, y: 22 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)", transition: { duration: 0.2, ease: "easeOut" } }}
-              viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.5, delay: 0.40, ease: [0.21, 0.47, 0.32, 0.98] }}
-            >
-              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-                <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
-                  <img
-                    src={mockup3}
+                    src="/aurea-images/showcase/1-aurea-skincare-showcase.webp"
                     alt="Tiendas Online E-commerce"
                     style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block", transition: "transform 0.35s ease" }}
                   />
@@ -109,10 +80,39 @@ export function QawayWebTypesSection() {
               <div className="h-ai-feature-card-body">
                 <h3>Tiendas Online (E-commerce)</h3>
                 <p>
-                  Plataforma completa de ventas con catálogo autogestionable, carrito de compras y pasarelas de pago para vender 24/7.
+                  E-commerce con catálogo interactivo de productos, carrito de compras integrado y diseño editorial de alta conversión.
                 </p>
               </div>
-            </motion.div>
+            </motion.a>
+
+            {/* Tarjeta 3: Sitios Web One Page (Panadería Josué) */}
+            <motion.a
+              href="/proyectos/panaderia-josue"
+              className="h-ai-feature-card"
+              style={{ background: "#ffffff", cursor: "pointer", textDecoration: "none", color: "inherit" }}
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)", transition: { duration: 0.2, ease: "easeOut" } }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.5, delay: 0.40, ease: [0.21, 0.47, 0.32, 0.98] }}
+            >
+              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
+                  <img
+                    src="/josue-images/showcase/1-josue-panaderia-hero-productos.webp"
+                    alt="Sitios Web One Page"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block", transition: "transform 0.35s ease" }}
+                  />
+                </div>
+              </div>
+
+              <div className="h-ai-feature-card-body">
+                <h3>Sitios Web One Page</h3>
+                <p>
+                  Sitios web de una sola página, pedidos directos por WhatsApp y presencia local.
+                </p>
+              </div>
+            </motion.a>
           </div>
 
           {/* Botón CTA */}
