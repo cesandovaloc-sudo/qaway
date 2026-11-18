@@ -148,9 +148,9 @@ const routes = [
   },
   {
     icon: FolderKanban,
-    title: 'Gestor de Proyectos 2 · Tareas',
-    description: 'Modulo de tareas del proyecto: kanban, hitos, checklist, consultas y trazabilidad del trabajo.',
-    path: '/hub/tareas',
+    title: 'Gestor de Proyectos 2',
+    description: 'Seguimiento territorial de proyectos, cronograma Gantt, sedes, tareas y reuniones.',
+    path: '/hub/gestor_proyectos',
     access: 'pro',
     badge: 'Nuevo',
     category: 'Product Management',

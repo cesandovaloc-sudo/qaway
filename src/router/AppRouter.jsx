@@ -56,8 +56,7 @@ const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/A
 // PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
 const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
-// Gestor de Proyectos 2 · Módulo Tareas v2 (qaway-tareas-v2-completo)
-const TareasV2AppPage = lazy(() => import('@/pages/5-qaway-hub/13-Gestor_Proyectos2/TareasV2AppPage'))
+// Gestor de Proyectos 2 (app consolidada)
 const GestorProyectos2AppPage = lazy(() => import('@/pages/5-qaway-hub/13-Gestor_Proyectos2/GestorProyectos2AppPage'))
 const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
 const PreguntasFrecuentesAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAppPage'))
@@ -438,23 +437,11 @@ export default function AppRouter() {
           path="hub/gestor-proyectos-app/*"
           element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
         />
-        {/* Gestor de Proyectos 2 · Módulo Tareas v2 (13-Gestor_Proyectos2/qaway-tareas-v2-completo): standalone acoplado al Hub */}
-        <Route
-          path="/hub/tareas/*"
-          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
-        />
-        <Route
-          path="/hub/tareas"
-          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
-        />
-        <Route
-          path="hub/tareas/*"
-          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
-        />
-        <Route
-          path="hub/tareas"
-          element={renderRoute('hub', <HubAccessGuard><TareasV2AppPage /></HubAccessGuard>)}
-        />
+        {/* Compatibilidad: /hub/tareas redirige al módulo Tareas dentro de Gestor de Proyectos 2 */}
+        <Route path="/hub/tareas/*" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
+        <Route path="/hub/tareas" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
+        <Route path="hub/tareas/*" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
+        <Route path="hub/tareas" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
         {/* Gestor de Proyectos 2: acceso directo para usuarios autorizados del proyecto. */}
         <Route
           path="/hub/gestor_proyecto/*"
