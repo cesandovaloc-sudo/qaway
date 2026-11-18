@@ -17,7 +17,7 @@ import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
-import ItinerarioView from './ItinerarioView';
+import MeetingFormModal, { type MeetingFormData } from './MeetingFormModal';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import EquipoSedesView from '../equipo/EquipoSedesView';
@@ -638,6 +638,7 @@ const LS_PERCENT_FORMATS = `${LS_UI_PREFIX}-percent-formats-v1`;
 const LS_FROZEN_COLS = `${LS_UI_PREFIX}-frozen-cols-v1`;
 const LS_VISIBLE_COLS_GANTT = `${LS_UI_PREFIX}-visible-cols-gantt-v3`;
 const LS_VISIBLE_COLS_LISTA = `${LS_UI_PREFIX}-visible-cols-lista-v5`;
+const LS_VISIBLE_COLS_ITINERARIO = `${LS_UI_PREFIX}-visible-cols-itinerario-v1`;
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'name', label: 'COMPONENTE / REUNIÓN', fixed: true },
@@ -661,6 +662,8 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
 // Preset inicial y predeterminado para vista Lista de Reuniones 2 (Componente 1° + contenido de reuniones)
 const LISTA_PRESET_COLS: ColKey[] = ['name', 'code', 'start', 'region', 'gestor', 'status', 'actualEnd', 'actions'];
+// Preset inicial y predeterminado para vista Itinerario (misma tabla oficial con columnas de visitas presenciales)
+const ITINERARIO_PRESET_COLS: ColKey[] = ['name', 'code', 'start', 'region', 'duration', 'status', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -2534,6 +2537,70 @@ export default function Reuniones2View({
   const [newColEncapsular, setNewColEncapsular] = useState(false);
   const [newColAppliesTo, setNewColAppliesTo] = useState<'all' | 'hitos' | 'subprocesos'>('all');
 
+  const [badgeStyles, setBadgeStyles] = useState<Record<string, 'dot' | 'solid'>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`${LS_UI_PREFIX}-col-badge-styles-v1`) || 'null');
+      if (saved && typeof saved === 'object') return saved;
+    } catch {}
+    return { status: 'solid', actualEnd: 'solid', kind: 'solid' };
+  });
+
+  const DEFAULT_STATUS_COLORS: Record<string, string> = {
+    Pendiente: '#64748b',
+    'En proceso': '#f59e0b',
+    'En curso': '#0066ff',
+    'Con retraso': '#ef4444',
+    Completado: '#16a34a',
+    Cumple: '#10b981',
+  };
+
+  const DEFAULT_ACT_COLORS: Record<string, string> = {
+    Pendiente: '#64748b',
+    'En proceso': '#f59e0b',
+    Cumple: '#16a34a',
+  };
+
+  const DEFAULT_KIND_COLORS: Record<string, string> = {
+    Componente: '#2563eb',
+    Producto: '#d97706',
+    'Paquete de Trabajo': '#0284c7',
+    Hito: '#7c3aed',
+  };
+
+  const [colOptionColors, setColOptionColors] = useState<Record<string, Record<string, string>>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(`${LS_UI_PREFIX}-col-option-colors-v1`) || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const handleUpdateOptionColor = useCallback((columnId: string, optionLabel: string, color: string) => {
+    setColOptionColors((prev) => {
+      const next = {
+        ...prev,
+        [columnId]: {
+          ...(prev[columnId] || {}),
+          [optionLabel]: color,
+        },
+      };
+      try {
+        localStorage.setItem(`${LS_UI_PREFIX}-col-option-colors-v1`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const handleChangeBadgeStyle = useCallback((columnId: string, style: 'dot' | 'solid') => {
+    setBadgeStyles((prev) => {
+      const next = { ...prev, [columnId]: style };
+      try {
+        localStorage.setItem(`${LS_UI_PREFIX}-col-badge-styles-v1`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
   const handleCreateCustomCol = () => {
     if (!newColLabel.trim()) return;
     const key = 'c_' + Date.now().toString(36);
@@ -2610,6 +2677,15 @@ export default function Reuniones2View({
       // En modo Gantt, el lienzo temporal es protagonista absoluto: inicia en vista compacta con solo 'name'
       return ['name'];
     }
+    if (mode === 'itinerario') {
+      try {
+        const saved = JSON.parse(localStorage.getItem(LS_VISIBLE_COLS_ITINERARIO) || 'null');
+        if (Array.isArray(saved) && saved.length > 0 && saved.includes('name')) {
+          return saved;
+        }
+      } catch {}
+      return [...ITINERARIO_PRESET_COLS];
+    }
     try {
       const storageKey = LS_VISIBLE_COLS_LISTA;
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
@@ -2622,6 +2698,82 @@ export default function Reuniones2View({
       /* almacenamiento no disponible */
     }
     return [...LISTA_PRESET_COLS];
+  };
+
+  const [meetingModalOpen, setMeetingModalOpen] = useState(false);
+  const [meetingModalIsEdit, setMeetingModalIsEdit] = useState(false);
+  const [meetingModalData, setMeetingModalData] = useState<MeetingFormData>({
+    title: '',
+    project: 'Distribución de Materiales DOT 2027',
+    owner: 'Carlos Sandoval',
+    purpose: '',
+    modality: 'Presencial',
+    region: 'Junín',
+    site: '',
+    address: '',
+    travel: 30,
+    buffer: 15,
+    meetUrl: '',
+    date: '2026-10-26',
+    status: 'PROGRAMADA',
+    tipoCodigo: '',
+    start: '09:00',
+    end: '10:00',
+    attendees: [],
+    agenda: '',
+    notes: '',
+  });
+
+  const openMeetingModalForItem = (it?: Item, forcePresencial = false) => {
+    if (it) {
+      setMeetingModalIsEdit(true);
+      setMeetingModalData({
+        id: it.id,
+        title: it.name || '',
+        project: (it as any).project || 'Distribución de Materiales DOT 2027',
+        owner: it.gestor || 'Carlos Sandoval',
+        purpose: it.description || '',
+        modality: ((it as any).modality as 'Google Meet' | 'Presencial') || (forcePresencial ? 'Presencial' : 'Google Meet'),
+        region: it.region || 'Junín',
+        site: (it as any).site || `Sede ${it.region || 'Junín'}`,
+        address: (it as any).address || '',
+        travel: Number((it as any).travel) || 0,
+        buffer: Number((it as any).buffer) || 15,
+        meetUrl: (it as any).meetUrl || '',
+        date: (it.start || '2026-10-26').slice(0, 10),
+        status: it.status === 'Completado' ? 'REALIZADA' : it.status === 'En proceso' || it.status === 'En curso' ? 'EN_CURSO' : 'PROGRAMADA',
+        tipoCodigo: (it as any).tipoCodigo || '',
+        start: (it as any).meetingTime || '09:00',
+        end: (it as any).meetingEndTime || '10:00',
+        attendees: (it as any).attendees || (it.gestores || []),
+        agenda: (it as any).agenda || '',
+        notes: (it as any).notes || '',
+      });
+    } else {
+      setMeetingModalIsEdit(false);
+      setMeetingModalData({
+        title: '',
+        project: 'Distribución de Materiales DOT 2027',
+        owner: 'Carlos Sandoval',
+        purpose: '',
+        modality: forcePresencial ? 'Presencial' : 'Google Meet',
+        region: 'Junín',
+        site: forcePresencial ? 'Sede Huancayo' : 'Reunión virtual',
+        address: '',
+        travel: forcePresencial ? 30 : 0,
+        buffer: 15,
+        meetUrl: '',
+        date: '2026-10-26',
+        status: 'PROGRAMADA',
+        tipoCodigo: '',
+        start: '09:00',
+        end: '10:00',
+        attendees: [],
+        agenda: '',
+        notes: '',
+      });
+    }
+    setMeetingModalOpen(true);
   };
 
   const [visibleCols, setVisibleCols] = useState<ColKey[]>(() => loadSavedCols(viewMode));
@@ -3095,28 +3247,61 @@ export default function Reuniones2View({
     notify('Propiedad eliminada');
   }, [recordColumnChange, customCols, notify]);
 
-  const renderColumnHeaderMenu = (columnId: string, btnClass = 'th-action-btn') => (
-    <ColumnHeaderMenu
-      engine={engine}
-      columnId={columnId}
-      buttonClassName={btnClass}
-      onHideColumn={(id) => toggleColVisibility(id as ColKey)}
-      onFreezeColumn={handleFreezeColumn}
-      isFrozen={frozenCols.has(columnId)}
-      onRenameColumn={handleRenameColumn}
-      onChangeType={handleChangeType}
-      graphFormat={percentGraphFormats[columnId] || 'bar'}
-      onChangeGraphFormat={handleChangeGraphFormat}
-      onToggleWrap={handleToggleWrap}
-      isWrapped={wrappedCols.has(columnId)}
-      onCalculate={handleCalculate}
-      activeCalculation={colCalculations[columnId]}
-      onInsertLeft={(id) => handleInsertColumn(id, false)}
-      onInsertRight={(id) => handleInsertColumn(id, true)}
-      onDuplicate={handleDuplicateColumn}
-      onDelete={handleDeleteColumn}
-    />
-  );
+  const renderColumnHeaderMenu = (columnId: string, btnClass = 'th-action-btn') => {
+    const customCol = customCols.find((c) => c.key === columnId);
+    const resolvedSelectOptions =
+      columnId === 'status'
+        ? STATUS_FLOW.map((s) => ({
+            id: s,
+            label: s,
+            color: colOptionColors['status']?.[s] || DEFAULT_STATUS_COLORS[s] || '#64748b',
+          }))
+        : columnId === 'actualEnd'
+        ? (['Pendiente', 'En proceso', 'Cumple'] as const).map((s) => ({
+            id: s,
+            label: s,
+            color: colOptionColors['actualEnd']?.[s] || DEFAULT_ACT_COLORS[s] || '#64748b',
+          }))
+        : columnId === 'kind'
+        ? Object.keys(DEFAULT_KIND_COLORS).map((k) => ({
+            id: k,
+            label: k,
+            color: colOptionColors['kind']?.[k] || DEFAULT_KIND_COLORS[k] || '#2563eb',
+          }))
+        : customCol
+        ? (customCol.options || []).map((o) => ({
+            ...o,
+            color: colOptionColors[columnId]?.[o.label] || o.color,
+          }))
+        : undefined;
+
+    return (
+      <ColumnHeaderMenu
+        engine={engine}
+        columnId={columnId}
+        buttonClassName={btnClass}
+        onHideColumn={(id) => toggleColVisibility(id as ColKey)}
+        onFreezeColumn={handleFreezeColumn}
+        isFrozen={frozenCols.has(columnId)}
+        onRenameColumn={handleRenameColumn}
+        onChangeType={handleChangeType}
+        graphFormat={percentGraphFormats[columnId] || 'bar'}
+        onChangeGraphFormat={handleChangeGraphFormat}
+        badgeStyle={badgeStyles[columnId] || customCol?.badgeStyle || 'dot'}
+        onChangeBadgeStyle={handleChangeBadgeStyle}
+        selectOptions={resolvedSelectOptions}
+        onUpdateOptionColor={handleUpdateOptionColor}
+        onToggleWrap={handleToggleWrap}
+        isWrapped={wrappedCols.has(columnId)}
+        onCalculate={handleCalculate}
+        activeCalculation={colCalculations[columnId]}
+        onInsertLeft={(id) => handleInsertColumn(id, false)}
+        onInsertRight={(id) => handleInsertColumn(id, true)}
+        onDuplicate={handleDuplicateColumn}
+        onDelete={handleDeleteColumn}
+      />
+    );
+  };
 
   const computeColumnCalculation = useCallback((colId: string, calcId: string, rows: Item[]): string => {
     if (!rows.length) return '—';
@@ -4772,8 +4957,11 @@ export default function Reuniones2View({
     }
 
     const customDef = customCols.find((c) => c.key === colKey);
-    const defaultLabel = customDef?.label || ALL_COL_META.find((c) => c.key === colKey)?.label || colKey;
-    const label = getColLabel(colKey, defaultLabel);
+    const baseDefaultLabel =
+      colKey === 'duration' && viewMode === 'itinerario'
+        ? 'Traslado / Margen'
+        : customDef?.label || ALL_COL_META.find((c) => c.key === colKey)?.label || colKey;
+    const label = getColLabel(colKey, baseDefaultLabel);
 
     return (
       <div key={colKey} className="th-col-header">
@@ -5102,6 +5290,25 @@ export default function Reuniones2View({
     }
 
     if (colKey === 'duration') {
+      if (viewMode === 'itinerario') {
+        const travelMin = Number((x as any).travel) || 0;
+        const bufferMin = (x as any).buffer !== undefined ? Number((x as any).buffer) : 15;
+        return (
+          <div
+            key="duration"
+            className="duration editable"
+            title="Clic para editar traslado y margen"
+            onClick={(e) => {
+              e.stopPropagation();
+              openMeetingModalForItem(x, true);
+            }}
+          >
+            <span className="cell-text">
+              {travelMin > 0 ? `${travelMin} min trasl.` : 'Sin trasl.'} · {bufferMin} min marg.
+            </span>
+          </div>
+        );
+      }
       const isPercent = colTypeOverrides['duration'] === 'percent';
       const isPlainNum = colTypeOverrides['duration'] === 'number';
       const durationVal = getDays(x.start, x.end);
@@ -5288,6 +5495,8 @@ export default function Reuniones2View({
     }
 
     if (colKey === 'status') {
+      const isSolidStatus = badgeStyles['status'] === 'solid';
+      const customStatusColor = colOptionColors['status']?.[x.status];
       return (
         <div
           key="status"
@@ -5300,27 +5509,38 @@ export default function Reuniones2View({
         >
           {isEditing(x, 'status') ? (
             <div className="cell-editor cell-pop status-pop" onClick={(e) => e.stopPropagation()}>
-              {STATUS_OPTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={s === x.status ? 'cur' : ''}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setStatusWithSync(x, s);
-                    closeEdit();
-                  }}
-                >
-                  <span className={`status-item ${STATUS_CLASS[s]}`}>
-                    <span className="status-dot" />
-                    <span className="status-label">{s}</span>
-                  </span>
-                </button>
-              ))}
+              {STATUS_OPTIONS.map((s) => {
+                const optColor = colOptionColors['status']?.[s];
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    className={s === x.status ? 'cur' : ''}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setStatusWithSync(x, s);
+                      closeEdit();
+                    }}
+                  >
+                    <span className={`status-item ${STATUS_CLASS[s]}`}>
+                      <span className="status-dot" style={optColor ? { background: optColor } : undefined} />
+                      <span className="status-label">{s}</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+          ) : isSolidStatus ? (
+            <span
+              className={`status-pill-solid ${STATUS_CLASS[x.status]}`}
+              style={customStatusColor ? { background: customStatusColor } : undefined}
+            >
+              <span>{x.status}</span>
+              <ChevronDown size={11} />
+            </span>
           ) : (
             <span className={`status-item ${STATUS_CLASS[x.status]}`}>
-              <span className="status-dot" />
+              <span className="status-dot" style={customStatusColor ? { background: customStatusColor } : undefined} />
               <span className="status-label">{x.status}</span>
             </span>
           )}
@@ -5527,6 +5747,8 @@ export default function Reuniones2View({
 
     if (colKey === 'actualEnd') {
       const actStatus = ((x as any).actStatus as string) || 'Pendiente';
+      const isSolidAct = badgeStyles['actualEnd'] === 'solid';
+      const customActColor = colOptionColors['actualEnd']?.[actStatus];
       const actCls =
         actStatus === 'Cumple'
           ? 'is-complete'
@@ -5558,9 +5780,17 @@ export default function Reuniones2View({
               <option value="En proceso">En proceso</option>
               <option value="Cumple">Cumple</option>
             </select>
+          ) : isSolidAct ? (
+            <span
+              className={`status-pill-solid ${actCls}`}
+              style={customActColor ? { background: customActColor } : undefined}
+            >
+              <span>{actStatus}</span>
+              <ChevronDown size={11} />
+            </span>
           ) : (
             <span className={`status-item ${actCls}`}>
-              <span className="status-dot" />
+              <span className="status-dot" style={customActColor ? { background: customActColor } : undefined} />
               <span className="status-label">{actStatus}</span>
             </span>
           )}
@@ -5575,6 +5805,17 @@ export default function Reuniones2View({
           className="actions-cell-col"
           onClick={(e) => e.stopPropagation()}
         >
+          <button
+            type="button"
+            className="row-action-btn"
+            title="Editar reunión (Registro Operativo)"
+            onClick={(e) => {
+              e.stopPropagation();
+              openMeetingModalForItem(x, viewMode === 'itinerario');
+            }}
+          >
+            <Pencil size={14} />
+          </button>
           <button
             type="button"
             className="row-action-btn"
@@ -7729,8 +7970,8 @@ export default function Reuniones2View({
           )}
 
           {/* Presentación Oficial Aprobada: Gantt y Lista comparten 100% el mismo tablero unificado */}
-          {(viewMode === 'gantt' || viewMode === 'lista' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
-            <div className={`gantt-master-view-wrap ${viewMode === 'lista' || perspective === 'equipo' ? 'view-lista-fullwidth' : ''}`}>
+          {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'itinerario' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
+            <div className={`gantt-master-view-wrap ${viewMode === 'lista' || viewMode === 'itinerario' || perspective === 'equipo' ? 'view-lista-fullwidth' : ''}`}>
               <div className="gantt-table-card">
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>
@@ -7836,7 +8077,7 @@ export default function Reuniones2View({
             <div
               className="gantt"
               style={
-                viewMode === 'lista'
+                viewMode === 'lista' || viewMode === 'itinerario'
                   ? ({ width: `${fixedWidth}px`, minWidth: `${fixedWidth}px` } as React.CSSProperties)
                   : ({
                       '--fixed': `${fixedWidth}px`,
@@ -7846,7 +8087,15 @@ export default function Reuniones2View({
               }
             >
               {/* Filas */}
-              {shown.slice(0, renderedRowCount).map((x, i) => (
+              {(viewMode === 'itinerario'
+                ? shown
+                    .filter((it) => (it as any).modality === 'Presencial')
+                    .slice()
+                    .sort((a, b) => (a.start || '').localeCompare(b.start || ''))
+                : shown
+              )
+                .slice(0, renderedRowCount)
+                .map((x, i) => (
                 <div
                   key={x.id}
                   className={`row ${x.kind === 'hito' ? 'hito' : 'sub'} ${i % 2 ? 'stripe' : ''} ${
@@ -8514,75 +8763,101 @@ export default function Reuniones2View({
             />
           )}
 
-          {/* Presentación Itinerario de Visitas Presenciales */}
-          {viewMode === 'itinerario' && (
-            <ItinerarioView
-              items={shown}
-              formatDatePE={formatDatePE}
-              onNotify={notify}
-              onSaveVisit={(draft, editingId) => {
-                setItems((prev) => {
-                  let updated: Item[];
-                  if (editingId) {
-                    updated = prev.map((it) =>
-                      it.id === editingId
-                        ? {
-                            ...it,
-                            name: draft.name,
-                            site: draft.site,
-                            region: draft.region,
-                            address: draft.address,
-                            start: draft.date,
-                            end: draft.date,
-                            meetingTime: draft.startTime,
-                            meetingEndTime: draft.endTime,
-                            travel: draft.travel,
-                            buffer: draft.buffer,
-                            status: draft.status,
-                            modality: 'Presencial',
-                          }
-                        : it
-                    );
-                  } else {
-                    const newVisit: any = {
-                      id: `reu2-vis-${Date.now()}`,
-                      code: `VIS-${Math.floor(400 + Math.random() * 500)}`,
-                      name: draft.name,
-                      kind: 'subproceso',
-                      type: 'sub',
-                      parentId: null,
-                      start: draft.date,
-                      end: draft.date,
-                      meetingTime: draft.startTime,
-                      meetingEndTime: draft.endTime,
-                      modality: 'Presencial',
-                      site: draft.site,
-                      region: draft.region,
-                      address: draft.address,
-                      travel: draft.travel,
-                      buffer: draft.buffer,
-                      hitoLabel: '8. Monitoreo en Campo',
-                      hitoColor: '#4F46E5',
-                      progress: draft.status === 'Completado' ? 100 : 0,
-                      status: draft.status,
-                      gestor: 'Carlos Sandoval',
-                      gestores: ['Carlos Sandoval'],
-                      faseId: 'F2',
-                      dependencies: [],
-                    };
-                    updated = [newVisit, ...prev];
-                  }
-                  try {
-                    localStorage.setItem(`qaway-reuniones2-meetings-v2:${projectId || 'default'}`, JSON.stringify(updated));
-                    localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(updated));
-                    window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
-                  } catch {}
-                  return updated;
-                });
-                notify(editingId ? 'Visita presencial actualizada' : 'Nueva visita agregada al itinerario');
-              }}
-            />
-          )}
+          {/* Pop-up exacto de Reuniones 1 (Registro Operativo) al pulsar el Lápiz */}
+          <MeetingFormModal
+            open={meetingModalOpen}
+            isEdit={meetingModalIsEdit}
+            initialData={meetingModalData}
+            onClose={() => setMeetingModalOpen(false)}
+            onNotify={notify}
+            onSave={(data) => {
+              const mappedStatus: Status =
+                data.status === 'REALIZADA'
+                  ? 'Completado'
+                  : data.status === 'EN_CURSO'
+                  ? 'En curso'
+                  : data.status === 'CANCELADA'
+                  ? 'Con retraso'
+                  : 'Pendiente';
+
+              setItems((prev) => {
+                let updated: Item[];
+                if (data.id) {
+                  updated = prev.map((it) =>
+                    it.id === data.id
+                      ? {
+                          ...it,
+                          name: data.title,
+                          project: data.project,
+                          gestor: data.owner,
+                          gestores: data.attendees.length ? data.attendees : [data.owner],
+                          description: data.purpose,
+                          modality: data.modality,
+                          region: data.region,
+                          site: data.site,
+                          address: data.address,
+                          travel: data.travel,
+                          buffer: data.buffer,
+                          meetUrl: data.meetUrl,
+                          start: data.date,
+                          end: data.date,
+                          meetingTime: data.start,
+                          meetingEndTime: data.end,
+                          status: mappedStatus,
+                          tipoCodigo: data.tipoCodigo,
+                          attendees: data.attendees,
+                          agenda: data.agenda,
+                          notes: data.notes,
+                        }
+                      : it
+                  );
+                } else {
+                  const newItem: any = {
+                    id: `reu2-${Date.now()}`,
+                    code: `REU-${Math.floor(400 + Math.random() * 500)}`,
+                    name: data.title,
+                    kind: 'subproceso',
+                    type: 'sub',
+                    parentId: null,
+                    project: data.project,
+                    gestor: data.owner,
+                    gestores: data.attendees.length ? data.attendees : [data.owner],
+                    description: data.purpose,
+                    modality: data.modality,
+                    region: data.region,
+                    site: data.site,
+                    address: data.address,
+                    travel: data.travel,
+                    buffer: data.buffer,
+                    meetUrl: data.meetUrl,
+                    start: data.date,
+                    end: data.date,
+                    meetingTime: data.start,
+                    meetingEndTime: data.end,
+                    status: mappedStatus,
+                    tipoCodigo: data.tipoCodigo,
+                    attendees: data.attendees,
+                    agenda: data.agenda,
+                    notes: data.notes,
+                    hitoLabel: data.modality === 'Presencial' ? '8. Monitoreo en Campo' : '1. Planificación de la Distribución',
+                    hitoColor: data.modality === 'Presencial' ? '#4F46E5' : '#2563EB',
+                    progress: mappedStatus === 'Completado' ? 100 : 0,
+                    faseId: 'F1',
+                    dependencies: [],
+                  };
+                  updated = [newItem, ...prev];
+                }
+                try {
+                  localStorage.setItem(`qaway-reuniones2-meetings-v2:${projectId || 'default'}`, JSON.stringify(updated));
+                  localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(updated));
+                  window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+                } catch {}
+                return updated;
+              });
+              setMeetingModalOpen(false);
+              notify(data.id ? 'Reunión actualizada' : 'Reunión registrada');
+            }}
+          />
 
           {/* Presentación Mapa Territorial */}
           {viewMode === 'mapa' && (

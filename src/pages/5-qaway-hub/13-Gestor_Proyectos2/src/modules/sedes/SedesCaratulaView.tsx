@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   Building2,
+  Building,
   MapPin,
-  MoreHorizontal,
   Globe2,
   Layers,
   BarChart3,
@@ -10,8 +10,9 @@ import {
   Maximize2,
   Minimize2,
   Compass,
+  ChevronRight,
+  ChevronDown,
 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import PERU_GEOJSON from '../../data/peru_departamental_simple.json';
 import 'leaflet/dist/leaflet.css';
 import PeruChoroplethView from './PeruChoroplethView';
@@ -82,89 +83,90 @@ export default function SedesCaratulaView({
   const geoMapRef = useRef<any>(null);
   const [activeMacro, setActiveMacro] = useState<string>('todas');
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [expandedDreKey, setExpandedDreKey] = useState<string | null>(null);
   const [mapMode, setMapMode] = useState<CaratulaMapMode>('macro');
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
-  // 1. Datos de entidades asignadas vinculados a Supabase (gestor_unidades) con fallback
+  // Mapa rápido de avance desde items reales del cronograma (por nombre de sede/región)
+  const itemsProgressByName = useMemo(() => {
+    const map = new Map<string, number>();
+    if (Array.isArray(items)) {
+      items.forEach((it: any) => {
+        if (it?.name && typeof it.progress === 'number') {
+          map.set(normRegKey(it.name), Math.round(it.progress));
+        }
+      });
+    }
+    return map;
+  }, [items]);
+
+  // 1. Datos completos de entidades vinculadas a Supabase (gestor_unidades) con fallback
   const entidadesAsignadas = useMemo(() => {
     if (unidades && unidades.length > 0) {
-      return unidades.slice(0, 30).map((u: any, idx: number) => {
-        const isDre = u.unitType === 'dre' || u.name?.includes('DRE') || u.name?.includes('GRE');
-        const reg = u.region || 'Junín';
-        const rNorm = reg.toUpperCase();
+      return unidades.map((u: any, idx: number) => {
+        const uType = (u.unitType || '').toLowerCase();
+        const isDre = uType === 'dre' || uType === 'central' || uType === 'regional' || u.name?.startsWith('DRE') || u.name?.startsWith('GRE');
+        const reg = u.region || 'JUNÍN';
+        const rNorm = normRegKey(reg);
         let macro = 'centro';
-        if (['TUMBES', 'PIURA', 'LAMBAYEQUE', 'LA LIBERTAD', 'CAJAMARCA', 'AMAZONAS', 'SAN MARTÍN', 'LORETO'].includes(rNorm)) {
+        if (['TUMBES', 'PIURA', 'LAMBAYEQUE', 'LA LIBERTAD', 'CAJAMARCA', 'AMAZONAS', 'SAN MARTIN', 'LORETO'].includes(rNorm)) {
           macro = 'norte';
-        } else if (['AREQUIPA', 'MOQUEGUA', 'TACNA', 'PUNO', 'CUSCO', 'APURÍMAC', 'MADRE DE DIOS'].includes(rNorm)) {
+        } else if (['AREQUIPA', 'MOQUEGUA', 'TACNA', 'PUNO', 'CUSCO', 'APURIMAC', 'MADRE DE DIOS'].includes(rNorm)) {
           macro = 'sur';
         }
-        const resp = u.gestor || u.responsable || (isDre ? 'Coordinador Regional' : 'Gestor Territorial');
-        const initials = resp.split(' ').map((p: string) => p[0]).slice(0, 2).join('').toUpperCase();
-        const estado = u.status === 'active' || u.status === 'Activa' ? 'Activa' : u.status === 'inactive' ? 'Inactiva' : 'En proceso';
+
+        const matchedPct = itemsProgressByName.get(normRegKey(u.name));
+        const fallbackPct = typeof u.progress === 'number'
+          ? u.progress
+          : [85, 75, 50, 33, 20, 65, 90, 45][idx % 8];
+        const progress = matchedPct !== undefined ? matchedPct : fallbackPct;
+        const estadoAvance = progress >= 80 ? 'Cumple' : progress > 0 ? 'En proceso' : 'Pendiente';
 
         return {
           id: u.id || `u-${idx + 1}`,
           name: u.name,
           code: u.code || (isDre ? 'DRE' : 'UGEL'),
           type: isDre ? 'DRE' : 'UGEL',
+          unitType: u.unitType || (isDre ? 'dre' : 'ugel'),
           region: reg,
           macro: macro,
-          responsable: resp,
-          avatar: initials || 'GT',
-          estado: estado,
+          progress,
+          estadoAvance,
+          estado: progress >= 80 ? 'Activa' : progress > 0 ? 'En proceso' : 'Inactiva',
         };
       });
     }
 
     return [
-      { id: 'u-1', name: 'DRE Junín', code: 'DRE-JUN', type: 'DRE', region: 'Junín', macro: 'centro', responsable: 'Javier Ruiz', avatar: 'JR', estado: 'Activa' },
-      { id: 'u-2', name: 'UGEL Huancayo', code: 'UGEL-HYO', type: 'UGEL', region: 'Junín', macro: 'centro', responsable: 'María Rojas', avatar: 'MR', estado: 'Activa' },
-      { id: 'u-3', name: 'UGEL Tarma', code: 'UGEL-TAR', type: 'UGEL', region: 'Junín', macro: 'centro', responsable: 'Carlos Mendoza', avatar: 'CM', estado: 'En proceso' },
-      { id: 'u-4', name: 'UGEL Chanchamayo', code: 'UGEL-CHM', type: 'UGEL', region: 'Junín', macro: 'centro', responsable: 'Ana Beltrán', avatar: 'AB', estado: 'Activa' },
-      { id: 'u-5', name: 'UGEL Ayacucho', code: 'UGEL-AYA', type: 'UGEL', region: 'Ayacucho', macro: 'centro', responsable: 'Lucía Flores', avatar: 'LF', estado: 'En proceso' },
-      { id: 'u-6', name: 'DRE Ayacucho', code: 'DRE-AYA', type: 'DRE', region: 'Ayacucho', macro: 'centro', responsable: 'Jorge Huamán', avatar: 'JH', estado: 'Activa' },
-      { id: 'u-7', name: 'DRE Piura', code: 'DRE-PIU', type: 'DRE', region: 'Piura', macro: 'norte', responsable: 'Carlos Vílchez', avatar: 'CV', estado: 'Activa' },
-      { id: 'u-8', name: 'UGEL Piura', code: 'UGEL-PIU', type: 'UGEL', region: 'Piura', macro: 'norte', responsable: 'Marcos Soto', avatar: 'MS', estado: 'Activa' },
-      { id: 'u-9', name: 'UGEL Sullana', code: 'UGEL-SUL', type: 'UGEL', region: 'Piura', macro: 'norte', responsable: 'Rosa Panta', avatar: 'RP', estado: 'En proceso' },
-      { id: 'u-10', name: 'DRE La Libertad', code: 'DRE-LAL', type: 'DRE', region: 'La Libertad', macro: 'norte', responsable: 'Víctor Chávez', avatar: 'VC', estado: 'Activa' },
-      { id: 'u-11', name: 'UGEL Trujillo', code: 'UGEL-TRU', type: 'UGEL', region: 'La Libertad', macro: 'norte', responsable: 'Elena Benites', avatar: 'EB', estado: 'Activa' },
-      { id: 'u-12', name: 'DRE Lambayeque', code: 'DRE-LAM', type: 'DRE', region: 'Lambayeque', macro: 'norte', responsable: 'Miguel Benites', avatar: 'MB', estado: 'Activa' },
-      { id: 'u-13', name: 'UGEL Chiclayo', code: 'UGEL-CHI', type: 'UGEL', region: 'Lambayeque', macro: 'norte', responsable: 'Walter Torres', avatar: 'WT', estado: 'En proceso' },
-      { id: 'u-14', name: 'DRE Cajamarca', code: 'DRE-CAJ', type: 'DRE', region: 'Cajamarca', macro: 'norte', responsable: 'Segundo Díaz', avatar: 'SD', estado: 'Activa' },
-      { id: 'u-15', name: 'UGEL Cajamarca', code: 'UGEL-CAJ', type: 'UGEL', region: 'Cajamarca', macro: 'norte', responsable: 'Patricia Mera', avatar: 'PM', estado: 'Inactiva' },
-      { id: 'u-16', name: 'DRE Amazonas', code: 'DRE-AMA', type: 'DRE', region: 'Amazonas', macro: 'norte', responsable: 'Wilson Valqui', avatar: 'WV', estado: 'Activa' },
-      { id: 'u-17', name: 'UGEL Chachapoyas', code: 'UGEL-CHA', type: 'UGEL', region: 'Amazonas', macro: 'norte', responsable: 'Manuel Mamani', avatar: 'MM', estado: 'Activa' },
-      { id: 'u-18', name: 'DRE Arequipa', code: 'DRE-ARE', type: 'DRE', region: 'Arequipa', macro: 'sur', responsable: 'Gabriel Delgado', avatar: 'GD', estado: 'Activa' },
-      { id: 'u-19', name: 'UGEL Arequipa Norte', code: 'UGEL-ARN', type: 'UGEL', region: 'Arequipa', macro: 'sur', responsable: 'Fabiola Arce', avatar: 'FA', estado: 'Activa' },
-      { id: 'u-20', name: 'UGEL Arequipa Sur', code: 'UGEL-ARS', type: 'UGEL', region: 'Arequipa', macro: 'sur', responsable: 'Raúl Pinto', avatar: 'RP', estado: 'Activa' },
-      { id: 'u-21', name: 'DRE Cusco', code: 'DRE-CUS', type: 'DRE', region: 'Cusco', macro: 'sur', responsable: 'Ronald Quispe', avatar: 'RQ', estado: 'Activa' },
-      { id: 'u-22', name: 'UGEL Cusco', code: 'UGEL-CUS', type: 'UGEL', region: 'Cusco', macro: 'sur', responsable: 'Celia Nina', avatar: 'CN', estado: 'Activa' },
-      { id: 'u-23', name: 'UGEL Urubamba', code: 'UGEL-URU', type: 'UGEL', region: 'Cusco', macro: 'sur', responsable: 'Edwin Paucar', avatar: 'EP', estado: 'Inactiva' },
-      { id: 'u-24', name: 'DRE Puno', code: 'DRE-PUN', type: 'DRE', region: 'Puno', macro: 'sur', responsable: 'Walter Mamani', avatar: 'WM', estado: 'Activa' },
-      { id: 'u-25', name: 'UGEL Puno', code: 'UGEL-PUN', type: 'UGEL', region: 'Puno', macro: 'sur', responsable: 'David Cutipa', avatar: 'DC', estado: 'En proceso' },
-      { id: 'u-26', name: 'DRE Tacna', code: 'DRE-TAC', type: 'DRE', region: 'Tacna', macro: 'sur', responsable: 'Óscar Calizaya', avatar: 'OC', estado: 'Activa' },
-      { id: 'u-27', name: 'UGEL Tacna', code: 'UGEL-TAC', type: 'UGEL', region: 'Tacna', macro: 'sur', responsable: 'Gloria Choque', avatar: 'GC', estado: 'Activa' },
-      { id: 'u-28', name: 'UGEL Jauja', code: 'UGEL-JAU', type: 'UGEL', region: 'Junín', macro: 'centro', responsable: 'Alberto Vega', avatar: 'AV', estado: 'Inactiva' },
+      { id: 'u-1', name: 'DRE JUNÍN', code: 'DRE-JUN', type: 'DRE', unitType: 'dre', region: 'JUNÍN', macro: 'centro', progress: 75, estadoAvance: 'En proceso', estado: 'Activa' },
+      { id: 'u-2', name: 'UGEL HUANCAYO', code: 'UGEL-HYO', type: 'UGEL', unitType: 'ugel', region: 'JUNÍN', macro: 'centro', progress: 85, estadoAvance: 'Cumple', estado: 'Activa' },
+      { id: 'u-3', name: 'UGEL TARMA', code: 'UGEL-TAR', type: 'UGEL', unitType: 'ugel', region: 'JUNÍN', macro: 'centro', progress: 50, estadoAvance: 'En proceso', estado: 'En proceso' },
+      { id: 'u-4', name: 'DRE AMAZONAS', code: 'DRE-AMA', type: 'DRE', unitType: 'dre', region: 'AMAZONAS', macro: 'norte', progress: 75, estadoAvance: 'En proceso', estado: 'Activa' },
+      { id: 'u-5', name: 'UGEL BAGUA', code: 'UGEL-BAG', type: 'UGEL', unitType: 'ugel', region: 'AMAZONAS', macro: 'norte', progress: 80, estadoAvance: 'Cumple', estado: 'Activa' },
+      { id: 'u-6', name: 'DRE AREQUIPA', code: 'DRE-ARE', type: 'DRE', unitType: 'dre', region: 'AREQUIPA', macro: 'sur', progress: 85, estadoAvance: 'Cumple', estado: 'Activa' },
+      { id: 'u-7', name: 'UGEL AREQUIPA NORTE', code: 'UGEL-ARN', type: 'UGEL', unitType: 'ugel', region: 'AREQUIPA', macro: 'sur', progress: 85, estadoAvance: 'Cumple', estado: 'Activa' },
     ];
-  }, [unidades]);
+  }, [unidades, itemsProgressByName]);
 
-  // 2. Cálculo dinámico de estados para el Gráfico Donut (Componente 2)
-  const donutData = useMemo(() => {
-    const activas = entidadesAsignadas.filter((e) => e.estado === 'Activa').length;
-    const enProceso = entidadesAsignadas.filter((e) => e.estado === 'En proceso').length;
-    const inactivas = entidadesAsignadas.filter((e) => e.estado === 'Inactiva').length;
-    const total = entidadesAsignadas.length;
-
+  // 2. Conteos por macrorregión y resumen compacto para la Columna 2
+  const macroStats = useMemo(() => {
+    const calc = (m: string) => {
+      const list = entidadesAsignadas.filter((e) => e.macro === m);
+      const regs = new Set(list.map((e) => normRegKey(e.region)));
+      return { regions: regs.size, entities: list.length };
+    };
+    const totalCumple = entidadesAsignadas.filter((e) => e.progress >= 80).length;
+    const totalProceso = entidadesAsignadas.filter((e) => e.progress > 0 && e.progress < 80).length;
+    const avg = entidadesAsignadas.length
+      ? Math.round(entidadesAsignadas.reduce((s, e) => s + e.progress, 0) / entidadesAsignadas.length)
+      : 0;
     return {
-      total,
-      activas: { count: activas, pct: Math.round((activas / total) * 100) },
-      enProceso: { count: enProceso, pct: Math.round((enProceso / total) * 100) },
-      inactivas: { count: inactivas, pct: Math.round((inactivas / total) * 100) },
-      series: [
-        { name: 'Activas', value: activas, color: '#10b981' },
-        { name: 'En proceso', value: enProceso, color: '#f59e0b' },
-        { name: 'Inactivas', value: inactivas, color: '#ef4444' },
-      ],
+      norte: calc('norte'),
+      centro: calc('centro'),
+      sur: calc('sur'),
+      totalCumple,
+      totalProceso,
+      avg,
     };
   }, [entidadesAsignadas]);
 
@@ -410,11 +412,51 @@ export default function SedesCaratulaView({
     };
   }, [mapMode, mapRows, isMapFullscreen]);
 
+  // Agrupación jerárquica por DRE / Sede Matriz (colapsada por defecto, acordeón)
+  const groupedDres = useMemo(() => {
+    const groups = new Map<string, { key: string; dre: any | null; ugels: any[] }>();
+    filteredEntidades.forEach((ent) => {
+      const regKey = normRegKey(ent.region) || 'GENERAL';
+      if (!groups.has(regKey)) {
+        groups.set(regKey, { key: regKey, dre: null, ugels: [] });
+      }
+      const g = groups.get(regKey)!;
+      if (ent.type === 'DRE' && !g.dre) {
+        g.dre = ent;
+      } else {
+        g.ugels.push(ent);
+      }
+    });
+
+    return Array.from(groups.values()).map((g, idx) => {
+      const allInGroup = g.dre ? [g.dre, ...g.ugels] : g.ugels;
+      const avgProgress = allInGroup.length
+        ? Math.round(allInGroup.reduce((s, x) => s + (x.progress || 0), 0) / allInGroup.length)
+        : 0;
+      const dreEntity = g.dre || {
+        id: `dre-group-${g.key}`,
+        name: `DRE ${g.key}`,
+        code: `DRE-${g.key}`,
+        type: 'DRE',
+        unitType: 'dre',
+        region: g.ugels[0]?.region || g.key,
+        progress: avgProgress,
+      };
+      const estadoAvance = avgProgress >= 80 ? 'Cumple' : avgProgress > 0 ? 'En proceso' : 'Pendiente';
+      return {
+        index: idx + 1,
+        key: g.key,
+        dre: { ...dreEntity, progress: avgProgress, estadoAvance },
+        ugels: g.ugels,
+      };
+    });
+  }, [filteredEntidades]);
+
   return (
     <div className="sd-caratula-wrapper" style={{
       display: 'grid',
-      gridTemplateColumns: '1.28fr 0.72fr',
-      gap: '14px',
+      gridTemplateColumns: '1.35fr 224px 1fr',
+      gap: '12px',
       padding: '10px 14px',
       flex: '1 1 0%',
       height: '100%',
@@ -425,15 +467,14 @@ export default function SedesCaratulaView({
       overflow: 'hidden',
     }}>
       {/* =========================================================================
-          COMPONENTE 1 (Izquierda): Cobertura territorial del proyecto con Mapa
-          Los botones de macrorregión y la leyenda se mantienen a la derecha del mapa
-          pero con espaciado compacto optimizado, eliminando el hueco blanco vacío.
+          COLUMNA 1: Cápsula del Mapa Oficial (100% de altura, sin título superior)
+          Aloja las 5 vistas interactivas + dock flotante
           ========================================================================= */}
       <section style={{
         background: '#ffffff',
         border: '1px solid #e2e8f0',
         borderRadius: '14px',
-        padding: '10px 12px',
+        padding: '8px',
         boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
         display: 'flex',
         flexDirection: 'column',
@@ -442,25 +483,9 @@ export default function SedesCaratulaView({
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}>
-        {/* Cabecera Mínima: Título en una sola línea compacta sin párrafos redundantes */}
+        {/* Cápsula del Mapa Oficial a 100% de alto */}
         <div style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginBottom: '8px',
-          flexShrink: 0,
-        }}>
-          <MapPin size={15} color="#0284c7" />
-          <h2 style={{ fontSize: '13.5px', fontWeight: 750, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
-            Cobertura territorial del proyecto
-          </h2>
-        </div>
-
-        {/* Lienzo del Mapa + Panel Lateral de Macrorregiones y Leyenda */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 180px',
-          gap: '10px',
           flex: '1 1 0%',
           height: '100%',
           minHeight: 0,
@@ -591,381 +616,396 @@ export default function SedesCaratulaView({
               </button>
             </div>
           </div>
-
-          {/* Panel Lateral: Botones de Macrorregión + Leyenda en su ubicación original pero sin huecos vacíos */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '10px',
-            background: '#ffffff',
-            padding: '2px 0',
-            overflowY: 'auto',
-          }}>
-            {/* 1. Cobertura por macrorregión */}
-            <div>
-              <h3 style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
-                Cobertura por macrorregión
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <button
-                  type="button"
-                  onClick={(e) => handleMacroClick('norte', e)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px 8px',
-                    borderRadius: '8px',
-                    background: activeMacro === 'norte' ? '#eff6ff' : '#f8fafc',
-                    border: '1px solid',
-                    borderColor: activeMacro === 'norte' ? '#bfdbfe' : '#eef2f6',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                    width: '100%',
-                  }}
-                >
-                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#1e40af', flexShrink: 0 }} />
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '12px', color: '#0f172a', lineHeight: 1.2 }}>Norte</strong>
-                    <small style={{ fontSize: '10.5px', color: '#64748b' }}>5 regiones · 11 entidades</small>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => handleMacroClick('centro', e)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px 8px',
-                    borderRadius: '8px',
-                    background: activeMacro === 'centro' ? '#eff6ff' : '#f8fafc',
-                    border: '1px solid',
-                    borderColor: activeMacro === 'centro' ? '#bfdbfe' : '#eef2f6',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                    width: '100%',
-                  }}
-                >
-                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#3b82f6', flexShrink: 0 }} />
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '12px', color: '#0f172a', lineHeight: 1.2 }}>Centro</strong>
-                    <small style={{ fontSize: '10.5px', color: '#64748b' }}>4 regiones · 9 entidades</small>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => handleMacroClick('sur', e)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px 8px',
-                    borderRadius: '8px',
-                    background: activeMacro === 'sur' ? '#eff6ff' : '#f8fafc',
-                    border: '1px solid',
-                    borderColor: activeMacro === 'sur' ? '#bfdbfe' : '#eef2f6',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                    width: '100%',
-                  }}
-                >
-                  <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#93c5fd', flexShrink: 0 }} />
-                  <div>
-                    <strong style={{ display: 'block', fontSize: '12px', color: '#0f172a', lineHeight: 1.2 }}>Sur</strong>
-                    <small style={{ fontSize: '10.5px', color: '#64748b' }}>4 regiones · 8 entidades</small>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* 2. Leyenda del mapa */}
-            <div>
-              <h3 style={{ fontSize: '11.5px', fontWeight: 700, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
-                Leyenda del mapa
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11px', color: '#475569' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0f172a', display: 'grid', placeItems: 'center', color: '#fff' }}>
-                    <MapPin size={8} />
-                  </span>
-                  <span>DRE (Sede regional)</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0284c7', display: 'grid', placeItems: 'center', color: '#fff' }}>
-                    <MapPin size={8} />
-                  </span>
-                  <span>UGEL</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid #38bdf8', background: 'transparent' }} />
-                  <span>Unidad intervención</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#bfdbfe' }} />
-                  <span>Región asignada</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#e2e8f0' }} />
-                  <span>Sin asignación</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
       {/* =========================================================================
-          COLUMNA DERECHA:
-          - Componente 2: Gráfico Dona "Entidades por estado" (con Tooltip aprobado)
-          - Componente 3: Tablero "Entidades y unidades asignadas" (28 registros)
+          COLUMNA 2: Controles de Macrorregión, Leyenda y Resumen Compacto (196px)
           ========================================================================= */}
-      <div style={{
+      <aside style={{
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '14px',
+        padding: '12px 11px',
+        boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
+        gap: '12px',
         height: '100%',
         minHeight: 0,
         boxSizing: 'border-box',
-        overflow: 'hidden',
+        overflowY: 'auto',
       }}>
-        {/* COMPONENTE 2: Entidades por estado (Donut con Tooltip interactivo) */}
-        <section style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '14px',
-          padding: '14px 18px',
-          boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
-          flexShrink: 0,
-        }}>
-          <h2 style={{ fontSize: '14.5px', fontWeight: 750, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
-            Entidades por estado
-          </h2>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '130px' }}>
-            {/* Anillo Donut Recharts con Tooltip interactivo */}
-            <div style={{ position: 'relative', width: '125px', height: '125px', flexShrink: 0 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    formatter={(val: any, name: any) => [
-                      `${val} entidades (${Math.round((Number(val) / donutData.total) * 100)}%)`,
-                      name,
-                    ]}
-                    contentStyle={{
-                      background: '#ffffff',
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      fontSize: '12px',
-                      boxShadow: '0 4px 14px rgba(15,23,42,0.08)',
-                    }}
-                  />
-                  <Pie
-                    data={donutData.series}
-                    innerRadius={38}
-                    outerRadius={58}
-                    paddingAngle={3}
-                    dataKey="value"
-                    isAnimationActive={true}
-                    animationDuration={900}
-                    animationEasing="ease-out"
-                  >
-                    {donutData.series.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{
-                position: 'absolute',
-                inset: 0,
+        {/* 1. Cobertura por macrorregión */}
+        <div>
+          <h3 style={{ fontSize: '12px', fontWeight: 750, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
+            Cobertura por macrorregión
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+            <button
+              type="button"
+              onClick={(e) => handleMacroClick('norte', e)}
+              style={{
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                pointerEvents: 'none',
-              }}>
-                <b style={{ fontSize: '19px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{donutData.total}</b>
-                <small style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>entidades</small>
+                gap: '10px',
+                padding: '9px 11px',
+                borderRadius: '10px',
+                background: activeMacro === 'norte' ? '#eff6ff' : '#f8fafc',
+                border: '1px solid',
+                borderColor: activeMacro === 'norte' ? '#93c5fd' : '#e2e8f0',
+                boxShadow: activeMacro === 'norte' ? '0 2px 6px rgba(37,99,235,0.12)' : '0 1px 2px rgba(15,23,42,0.03)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.15s ease',
+                width: '100%',
+              }}
+            >
+              <span style={{ width: '13px', height: '13px', borderRadius: '4px', background: '#1e40af', flexShrink: 0 }} />
+              <div>
+                <strong style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>Norte</strong>
+                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 500 }}>
+                  {macroStats.norte.regions} reg. · {macroStats.norte.entities} sedes
+                </small>
               </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => handleMacroClick('centro', e)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '9px 11px',
+                borderRadius: '10px',
+                background: activeMacro === 'centro' ? '#eff6ff' : '#f8fafc',
+                border: '1px solid',
+                borderColor: activeMacro === 'centro' ? '#93c5fd' : '#e2e8f0',
+                boxShadow: activeMacro === 'centro' ? '0 2px 6px rgba(37,99,235,0.12)' : '0 1px 2px rgba(15,23,42,0.03)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.15s ease',
+                width: '100%',
+              }}
+            >
+              <span style={{ width: '13px', height: '13px', borderRadius: '4px', background: '#3b82f6', flexShrink: 0 }} />
+              <div>
+                <strong style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>Centro</strong>
+                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 500 }}>
+                  {macroStats.centro.regions} reg. · {macroStats.centro.entities} sedes
+                </small>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => handleMacroClick('sur', e)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '9px 11px',
+                borderRadius: '10px',
+                background: activeMacro === 'sur' ? '#eff6ff' : '#f8fafc',
+                border: '1px solid',
+                borderColor: activeMacro === 'sur' ? '#93c5fd' : '#e2e8f0',
+                boxShadow: activeMacro === 'sur' ? '0 2px 6px rgba(37,99,235,0.12)' : '0 1px 2px rgba(15,23,42,0.03)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.15s ease',
+                width: '100%',
+              }}
+            >
+              <span style={{ width: '13px', height: '13px', borderRadius: '4px', background: '#93c5fd', flexShrink: 0 }} />
+              <div>
+                <strong style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>Sur</strong>
+                <small style={{ fontSize: '11px', color: '#475569', fontWeight: 500 }}>
+                  {macroStats.sur.regions} reg. · {macroStats.sur.entities} sedes
+                </small>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* 2. Leyenda del mapa */}
+        <div>
+          <h3 style={{ fontSize: '11.5px', fontWeight: 750, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+            Leyenda del mapa
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11px', color: '#475569' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0f172a', display: 'grid', placeItems: 'center', color: '#fff', flexShrink: 0 }}>
+                <MapPin size={8} />
+              </span>
+              <span>DRE (Sede regional)</span>
             </div>
-
-            {/* Leyenda y porcentaje en lista vertical */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', flex: 1, paddingLeft: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#334155' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
-                  Activas
-                </span>
-                <b style={{ color: '#0f172a' }}>{donutData.activas.count} ({donutData.activas.pct}%)</b>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#334155' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b' }} />
-                  En proceso
-                </span>
-                <b style={{ color: '#0f172a' }}>{donutData.enProceso.count} ({donutData.enProceso.pct}%)</b>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#334155' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444' }} />
-                  Inactivas
-                </span>
-                <b style={{ color: '#0f172a' }}>{donutData.inactivas.count} ({donutData.inactivas.pct}%)</b>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#0284c7', display: 'grid', placeItems: 'center', color: '#fff', flexShrink: 0 }}>
+                <MapPin size={8} />
+              </span>
+              <span>UGEL</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid #38bdf8', background: 'transparent', flexShrink: 0, marginLeft: 2 }} />
+              <span>Unidad intervención</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#bfdbfe', flexShrink: 0 }} />
+              <span>Región asignada</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: 14, height: 8, borderRadius: '2px', background: '#e2e8f0', flexShrink: 0 }} />
+              <span>Sin asignación</span>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* COMPONENTE 3: Tablero / Tabla "Entidades y unidades asignadas" (Fijo al alto de la columna) */}
-        <section style={{
-          background: '#ffffff',
+        {/* 3. Indicador compacto de avance territorial */}
+        <div style={{
+          marginTop: 'auto',
+          background: '#f8fafc',
           border: '1px solid #e2e8f0',
-          borderRadius: '14px',
-          padding: '16px 18px',
-          boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
-          flex: '1 1 0%',
-          height: '100%',
-          minHeight: 0,
+          borderRadius: '10px',
+          padding: '10px',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
-          boxSizing: 'border-box',
+          gap: '6px',
         }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '10px',
-            flexShrink: 0,
-          }}>
-            <h2 style={{ fontSize: '14.5px', fontWeight: 750, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
-              Entidades y unidades asignadas
-            </h2>
-            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
-              {filteredEntidades.length} registros
-            </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Avance</span>
+            <strong style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>{macroStats.avg}%</strong>
           </div>
+          <div style={{ height: 6, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
+            <div style={{ width: `${macroStats.avg}%`, height: '100%', background: '#1e40af', borderRadius: 99 }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px', color: '#475569' }}>
+            <span>● {macroStats.totalCumple} cumplen</span>
+            <span>● {macroStats.totalProceso} proc.</span>
+          </div>
+        </div>
+      </aside>
 
-          {/* Tabla con scroll interno contenido que nunca estira la página */}
-          <div style={{
-            flex: '1 1 0%',
-            minHeight: 0,
-            height: '100%',
-            overflowY: 'auto',
-            border: '1px solid #f1f5f9',
-            borderRadius: '10px',
+      {/* =========================================================================
+          COLUMNA 3: Tablero Completo de Sedes (Altura 100%, colapsado por DRE)
+          Columnas: N.° | UGEL / SEDE | ESTADO | AVANCE ACTUAL | >
+          ========================================================================= */}
+      <section style={{
+        background: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '14px',
+        padding: '12px 14px',
+        boxShadow: '0 1px 3px rgba(15,23,42,0.04)',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '8px',
+          flexShrink: 0,
+        }}>
+          <h2 style={{ fontSize: '13.5px', fontWeight: 750, color: '#0f172a', margin: 0, letterSpacing: '-0.01em' }}>
+            Estado por Sede Regional (DRE)
+          </h2>
+          <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>
+            {groupedDres.length} DREs
+          </span>
+        </div>
+
+        {/* Tabla con scroll interno contenido y colapso por DRE */}
+        <div style={{
+          flex: '1 1 0%',
+          minHeight: 0,
+          height: '100%',
+          overflowY: 'auto',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+        }}>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontSize: '12px',
+            textAlign: 'left',
           }}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '12.5px',
-              textAlign: 'left',
-            }}>
-              <thead style={{ position: 'sticky', top: 0, zIndex: 5 }}>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
-                  <th style={{ padding: '8px 12px', fontWeight: 650, fontSize: '11.5px' }}>Entidad</th>
-                  <th style={{ padding: '8px 8px', fontWeight: 650, fontSize: '11.5px' }}>Tipo</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 650, fontSize: '11.5px' }}>Región</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 650, fontSize: '11.5px' }}>Responsable</th>
-                  <th style={{ padding: '8px 10px', fontWeight: 650, fontSize: '11.5px' }}>Estado</th>
-                  <th style={{ padding: '8px 6px', width: '32px' }} />
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEntidades.map((ent) => {
-                  const isSelected = selectedEntityId === ent.id;
-                  return (
+            <thead style={{ position: 'sticky', top: 0, zIndex: 5 }}>
+              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
+                <th style={{ padding: '8px 10px', fontWeight: 700, fontSize: '10.5px', width: '38px', textAlign: 'center' }}>N.°</th>
+                <th style={{ padding: '8px 8px', fontWeight: 700, fontSize: '10.5px' }}>UGEL / SEDE</th>
+                <th style={{ padding: '8px 8px', fontWeight: 700, fontSize: '10.5px', width: '92px' }}>ESTADO</th>
+                <th style={{ padding: '8px 8px', fontWeight: 700, fontSize: '10.5px', width: '115px' }}>AVANCE ACTUAL</th>
+                <th style={{ padding: '8px 6px', width: '24px' }} />
+              </tr>
+            </thead>
+            <tbody>
+              {groupedDres.map((group) => {
+                const isExpanded = expandedDreKey === group.key;
+                const dre = group.dre;
+                const isDreSelected = selectedEntityId === dre.id;
+                const pillBg = dre.estadoAvance === 'Cumple' ? '#ecfdf5' : dre.estadoAvance === 'En proceso' ? '#fffbeb' : '#fef2f2';
+                const pillColor = dre.estadoAvance === 'Cumple' ? '#047857' : dre.estadoAvance === 'En proceso' ? '#b45309' : '#b91c1c';
+                const pillBorder = dre.estadoAvance === 'Cumple' ? '#a7f3d0' : dre.estadoAvance === 'En proceso' ? '#fde68a' : '#fecaca';
+                const barColor = dre.progress >= 80 ? '#10b981' : dre.progress > 0 ? '#f59e0b' : '#ef4444';
+
+                return (
+                  <React.Fragment key={group.key}>
+                    {/* Fila DRE Padre (colapsada por defecto) */}
                     <tr
-                      key={ent.id}
-                      onClick={() => setSelectedEntityId(ent.id)}
+                      onClick={() => {
+                        setSelectedEntityId(dre.id);
+                        setExpandedDreKey((prev) => (prev === group.key ? null : group.key));
+                        onSelectSede?.(dre);
+                      }}
                       style={{
                         borderBottom: '1px solid #f1f5f9',
                         cursor: 'pointer',
-                        background: isSelected ? '#f0f7ff' : '#ffffff',
+                        background: isDreSelected || isExpanded ? '#f0f7ff' : '#ffffff',
                         transition: 'background 0.12s ease',
                       }}
                     >
-                      <td style={{ padding: '8px 12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Building2 size={13} style={{ color: ent.type === 'DRE' ? '#1e40af' : '#0284c7', flexShrink: 0 }} />
-                          <strong style={{ color: '#0f172a', fontWeight: 650 }}>{ent.name}</strong>
-                        </div>
+                      <td style={{ padding: '8px 6px', textAlign: 'center', color: '#64748b', fontWeight: 600, fontSize: '11px' }}>
+                        {group.index}
                       </td>
                       <td style={{ padding: '8px 8px' }}>
-                        <span style={{
-                          fontSize: '10.5px',
-                          fontWeight: 700,
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          background: ent.type === 'DRE' ? '#eff6ff' : '#f0fdf4',
-                          color: ent.type === 'DRE' ? '#1e40af' : '#15803d',
-                        }}>
-                          {ent.type}
-                        </span>
-                      </td>
-                      <td style={{ padding: '8px 10px', color: '#475569' }}>
-                        {ent.region}
-                      </td>
-                      <td style={{ padding: '8px 10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                          <span style={{
-                            width: 20,
-                            height: 20,
-                            borderRadius: '50%',
-                            background: '#0284c7',
-                            color: '#ffffff',
-                            fontSize: '9px',
-                            fontWeight: 700,
-                            display: 'grid',
-                            placeItems: 'center',
-                            flexShrink: 0,
-                          }}>
-                            {ent.avatar}
-                          </span>
-                          <span style={{ color: '#1e293b', fontWeight: 500 }}>{ent.responsable}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {group.ugels.length > 0 ? (
+                            isExpanded ? (
+                              <ChevronDown size={13} color="#1e40af" style={{ flexShrink: 0 }} />
+                            ) : (
+                              <ChevronRight size={13} color="#64748b" style={{ flexShrink: 0 }} />
+                            )
+                          ) : (
+                            <span style={{ width: 13, flexShrink: 0 }} />
+                          )}
+                          <Building2 size={13} style={{ color: '#1e40af', flexShrink: 0 }} />
+                          <div style={{ minWidth: 0 }}>
+                            <strong style={{ display: 'block', color: '#0f172a', fontWeight: 700, fontSize: '12px', lineHeight: 1.25 }}>
+                              {dre.name}
+                            </strong>
+                            <small style={{ display: 'block', color: '#64748b', fontSize: '10px', textTransform: 'uppercase' }}>
+                              {dre.region} · {group.ugels.length} UGEL
+                            </small>
+                          </div>
                         </div>
                       </td>
-                      <td style={{ padding: '8px 10px' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11.5px', fontWeight: 600 }}>
-                          <span style={{
-                            width: 7,
-                            height: 7,
-                            borderRadius: '50%',
-                            background: ent.estado === 'Activa' ? '#10b981' : ent.estado === 'En proceso' ? '#f59e0b' : '#ef4444',
-                          }} />
-                          <span style={{
-                            color: ent.estado === 'Activa' ? '#15803d' : ent.estado === 'En proceso' ? '#b45309' : '#b91c1c',
-                          }}>
-                            {ent.estado}
-                          </span>
+                      <td style={{ padding: '8px 6px' }}>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '10.5px',
+                          fontWeight: 650,
+                          padding: '2px 7px',
+                          borderRadius: '999px',
+                          background: pillBg,
+                          color: pillColor,
+                          border: `1px solid ${pillBorder}`,
+                          whiteSpace: 'nowrap',
+                        }}>
+                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: barColor }} />
+                          {dre.estadoAvance}
                         </span>
                       </td>
-                      <td style={{ padding: '8px 6px', textAlign: 'center' }}>
-                        <button
-                          type="button"
-                          style={{ border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
-                          title="Opciones"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal size={14} />
-                        </button>
+                      <td style={{ padding: '8px 8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div style={{ flex: 1, height: 5, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
+                            <div style={{ width: `${dre.progress}%`, height: '100%', background: barColor, borderRadius: 99 }} />
+                          </div>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#334155', minWidth: '28px', textAlign: 'right' }}>
+                            {dre.progress}%
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '8px 4px', textAlign: 'center', color: '#94a3b8' }}>
+                        <ChevronRight size={13} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s ease' }} />
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
+
+                    {/* Filas UGEL Hijas (visibles solo cuando la DRE está expandida) */}
+                    {isExpanded && group.ugels.map((ugel, uIdx) => {
+                      const isUgelSelected = selectedEntityId === ugel.id;
+                      const uPillBg = ugel.estadoAvance === 'Cumple' ? '#ecfdf5' : ugel.estadoAvance === 'En proceso' ? '#fffbeb' : '#fef2f2';
+                      const uPillColor = ugel.estadoAvance === 'Cumple' ? '#047857' : ugel.estadoAvance === 'En proceso' ? '#b45309' : '#b91c1c';
+                      const uPillBorder = ugel.estadoAvance === 'Cumple' ? '#a7f3d0' : ugel.estadoAvance === 'En proceso' ? '#fde68a' : '#fecaca';
+                      const uBarColor = ugel.progress >= 80 ? '#10b981' : ugel.progress > 0 ? '#f59e0b' : '#ef4444';
+
+                      return (
+                        <tr
+                          key={ugel.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEntityId(ugel.id);
+                            onSelectSede?.(ugel);
+                          }}
+                          style={{
+                            borderBottom: '1px solid #f1f5f9',
+                            cursor: 'pointer',
+                            background: isUgelSelected ? '#e0f2fe' : '#f8fafc',
+                            transition: 'background 0.12s ease',
+                          }}
+                        >
+                          <td style={{ padding: '7px 6px', textAlign: 'center', color: '#94a3b8', fontSize: '10.5px' }}>
+                            {group.index}.{uIdx + 1}
+                          </td>
+                          <td style={{ padding: '7px 8px 7px 22px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Building size={12} style={{ color: '#0284c7', flexShrink: 0 }} />
+                              <div style={{ minWidth: 0 }}>
+                                <span style={{ display: 'block', color: '#1e293b', fontWeight: 600, fontSize: '11.5px', lineHeight: 1.25 }}>
+                                  {ugel.name}
+                                </span>
+                                <small style={{ display: 'block', color: '#94a3b8', fontSize: '9.5px' }}>
+                                  {ugel.region}
+                                </small>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{ padding: '7px 6px' }}>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '10px',
+                              fontWeight: 650,
+                              padding: '2px 6px',
+                              borderRadius: '999px',
+                              background: uPillBg,
+                              color: uPillColor,
+                              border: `1px solid ${uPillBorder}`,
+                              whiteSpace: 'nowrap',
+                            }}>
+                              <span style={{ width: 5, height: 5, borderRadius: '50%', background: uBarColor }} />
+                              {ugel.estadoAvance}
+                            </span>
+                          </td>
+                          <td style={{ padding: '7px 8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{ flex: 1, height: 5, borderRadius: 99, background: '#e2e8f0', overflow: 'hidden' }}>
+                                <div style={{ width: `${ugel.progress}%`, height: '100%', background: uBarColor, borderRadius: 99 }} />
+                              </div>
+                              <span style={{ fontSize: '10.5px', fontWeight: 650, color: '#475569', minWidth: '28px', textAlign: 'right' }}>
+                                {ugel.progress}%
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '7px 4px', textAlign: 'center', color: '#cbd5e1' }}>
+                            <ChevronRight size={12} />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

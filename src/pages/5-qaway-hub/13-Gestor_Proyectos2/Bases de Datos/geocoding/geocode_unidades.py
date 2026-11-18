@@ -235,10 +235,12 @@ def main():
             if not valida(hit, region_norm):
                 continue
             campo = "calle"
-            if nv >= 3:
+            if 3 <= nv <= 4:
                 campo = valida_localidad(hit, loc_norm)
                 if not campo:
                     continue  # centroide de otra localidad: no sirve
+            elif nv >= 5:
+                campo = "region"  # centroide de region: no se exige localidad
             elegido, nivel, query, campo_hit = hit, nv, q, campo
             break
 

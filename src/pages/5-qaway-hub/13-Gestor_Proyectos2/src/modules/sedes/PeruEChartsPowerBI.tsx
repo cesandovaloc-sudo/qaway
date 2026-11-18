@@ -227,9 +227,9 @@ export default function PeruEChartsPowerBI({
         zoom: 1.15,
         center: [-75.0, -9.2],
         label: {
-          show: true,
+          show: false,
           color: '#334155',
-          fontSize: 9,
+          fontSize: 10,
           fontWeight: 600,
         },
         itemStyle: {
