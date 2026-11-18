@@ -11,7 +11,7 @@ import {
   getDeviationTone,
   hasBaseline,
 } from './scheduleMetrics';
-import './gantt.css';
+import '../cronograma-gantt/gantt.css';
 import {
   Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';

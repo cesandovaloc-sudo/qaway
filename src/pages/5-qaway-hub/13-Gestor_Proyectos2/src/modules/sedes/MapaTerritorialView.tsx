@@ -18,9 +18,10 @@ import {
 import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
 import PeruChoroplethView from './PeruChoroplethView';
 import PeruPowerBIMapView from './PeruPowerBIMapView';
+import PeruEChartsPowerBI from './PeruEChartsPowerBI';
 
 type Status = 'Cumple' | 'En proceso' | 'No cumple';
-export type TerritorialSubView = 'geo-real' | 'tematico-regional' | 'powerbi-analitico';
+export type TerritorialSubView = 'geo-real' | 'tematico-regional' | 'powerbi-analitico' | 'echarts-powerbi';
 
 // Coordenadas por región del Perú (lat, lng, zoom)
 const REGION_CONFIG: Record<string, { center: [number, number]; zoom: number }> = {
@@ -636,6 +637,7 @@ export default function MapaTerritorialView({
                   {subView === 'geo-real' && 'Mapa Geográfico Satelital'}
                   {subView === 'tematico-regional' && 'Mapa Regional Temático (Poligonal)'}
                   {subView === 'powerbi-analitico' && 'Tablero Analítico Territorial'}
+                  {subView === 'echarts-powerbi' && 'Analítica Territorial Power BI (ECharts)'}
                 </h4>
               </div>
               <div className="map-legend-pills">
@@ -792,7 +794,7 @@ export default function MapaTerritorialView({
                 </div>
               )}
 
-              {/* VISTA 3 */}
+              {/* VISTA 3: Tablero Analítico Territorial (Conservado intacto) */}
               {subView === 'powerbi-analitico' && (
                 <div className="stage-pane is-active powerbi-analytics-pane">
                   <PeruPowerBIMapView
@@ -904,6 +906,22 @@ export default function MapaTerritorialView({
                   </div>
                 </div>
               )}
+
+              {/* VISTA 4: Nueva Vista Analítica Power BI con Apache ECharts */}
+              {subView === 'echarts-powerbi' && (
+                <div className="stage-pane is-active powerbi-analytics-pane" style={{ width: '100%', height: '100%', padding: '10px 12px', boxSizing: 'border-box' }}>
+                  <PeruEChartsPowerBI
+                    rows={visibleRows.length > 0 ? visibleRows : allRows}
+                    selectedRegion={selectedRegion}
+                    selectedUgelId={selectedUgelId}
+                    onUgelSelect={handleSelectUgel}
+                    onRegionSelect={(reg) => {
+                      if (onSelectRegion) onSelectRegion(reg);
+                    }}
+                  />
+                </div>
+              )}
+
               {/* DOCK FLOTANTE SOBRE EL MAPA (Solo iconos, estilo app) */}
               <div className="territorial-floating-dock" role="tablist" aria-label="Modos de Vista del Mapa">
                 <button
@@ -934,6 +952,16 @@ export default function MapaTerritorialView({
                   aria-label="Analítica Power BI"
                 >
                   <BarChart3 size={16} />
+                </button>
+
+                <button
+                  type="button"
+                  className={`floating-dock-btn ${subView === 'echarts-powerbi' ? 'is-active' : ''}`}
+                  onClick={() => setSubView('echarts-powerbi')}
+                  title="Analítica Territorial Power BI (Apache ECharts)"
+                  aria-label="Power BI ECharts"
+                >
+                  <TrendingUp size={16} />
                 </button>
 
                 <span className="floating-dock-divider" />

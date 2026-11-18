@@ -41,7 +41,7 @@ const MODULE_LABELS: Record<ModuleKey, string> = {
   tareas2: 'Tareas 2',
   hitos: 'Componentes del proyecto',
   reuniones: 'Reuniones',
-  reuniones2: 'Reuniones 2',
+  reuniones2: 'Agenda',
   reportes: 'Reportes y estadísticas',
   reportes2: 'Reportes',
   usuarios: 'Equipo del proyecto',

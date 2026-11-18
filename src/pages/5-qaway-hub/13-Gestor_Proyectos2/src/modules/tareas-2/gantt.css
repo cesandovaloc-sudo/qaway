@@ -1,4 +1,4 @@
-/* Scope aislado para el módulo Cronograma Gantt Maestro (Coordinador) */
+﻿/* Scope aislado para el mÃ³dulo Cronograma Gantt Maestro (Coordinador) */
 .gantt-v2 {
   width: 100%;
   height: auto;
@@ -196,7 +196,7 @@
   color: #0f172a;
 }
 
-/* Métricas directivas */
+/* MÃ©tricas directivas */
 .gantt-v2 .metrics {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1.15fr;
@@ -619,7 +619,7 @@
   cursor: pointer;
 }
 
-/* --- Dropdowns y Menús Desplegables Tipo Tarjeta (Diseño Unificado 12px / 14px) --- */
+/* --- Dropdowns y MenÃºs Desplegables Tipo Tarjeta (DiseÃ±o Unificado 12px / 14px) --- */
 .gantt-v2 .filter-dropdown-wrap {
   position: relative;
 }
@@ -659,7 +659,7 @@
   background: #f0f7ff;
 }
 
-/* Delimitación fija y estable de los filtros desplegables para evitar saltos en la barra */
+/* DelimitaciÃ³n fija y estable de los filtros desplegables para evitar saltos en la barra */
 .gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap,
 .gantt-v2 .filter-dropdown-wrap.wbs-filter-wrap .filter-card-btn {
   width: 192px;
@@ -1186,7 +1186,7 @@
   background: #0052cc;
 }
 
-/* --- Navegador Temporal / Deslizador Hoy (Estándar Qaway de imagen 1) --- */
+/* --- Navegador Temporal / Deslizador Hoy (EstÃ¡ndar Qaway de imagen 1) --- */
 .gantt-v2 .timeline-nav {
   display: inline-flex;
   align-items: center;
@@ -1308,7 +1308,7 @@
   color: #ffffff;
 }
 
-/* Botón Deshacer (Undo / Retroceder) y Limpiar */
+/* BotÃ³n Deshacer (Undo / Retroceder) y Limpiar */
 .gantt-v2 .undo-btn,
 .gantt-v2 .clear-btn {
   height: 42px;
@@ -1421,7 +1421,7 @@
   font-weight: 700;
 }
 
-/* --- Divisores verticales de zonificación funcional de filtros --- */
+/* --- Divisores verticales de zonificaciÃ³n funcional de filtros --- */
 .gantt-v2 .filter-group-divider {
   width: 1px;
   height: 24px;
@@ -1824,7 +1824,7 @@
   border-color: #fca5a5;
 }
 
-/* Área de Gantt con Scroll */
+/* Ãrea de Gantt con Scroll */
 .gantt-v2 .gantt-scroll {
   overflow: auto;
   position: relative;
@@ -1885,7 +1885,7 @@
   border-right: 1px solid #dbeafe !important;
 }
 
-/* Separación y respiro holgado en el borde izquierdo del tablero (para que no esté pegado al borde) */
+/* SeparaciÃ³n y respiro holgado en el borde izquierdo del tablero (para que no estÃ© pegado al borde) */
 .gantt-v2 .table-head .fixed-cols > div:first-child,
 .gantt-v2 .row .fixed-cols > div:first-child {
   padding-left: 20px !important;
@@ -2118,7 +2118,7 @@
   letter-spacing: 0.02em !important;
 }
 
-/* Acciones en la cabecera de columnas al extremo derecho alineadas con las demás columnas */
+/* Acciones en la cabecera de columnas al extremo derecho alineadas con las demÃ¡s columnas */
 .gantt-v2 .head-col-actions {
   display: flex;
   align-items: center;
@@ -2168,7 +2168,7 @@
   border-color: #93c5fd;
 }
 
-/* Popover de configuración de columnas visibles (Estándar Notion) */
+/* Popover de configuraciÃ³n de columnas visibles (EstÃ¡ndar Notion) */
 .gantt-v2 .cols-popover {
   position: absolute;
   top: calc(100% + 4px);
@@ -2420,7 +2420,7 @@
   background: #f1f5f9;
 }
 
-/* Fila activa en edición para elevar z-index sobre filas inferiores */
+/* Fila activa en ediciÃ³n para elevar z-index sobre filas inferiores */
 .gantt-v2 .row.is-editing-row {
   z-index: 120 !important;
   position: relative;
@@ -2459,7 +2459,7 @@
   align-items: center;
 }
 
-/* Íconos EDT limpios y elegantes acordes a Módulo Reportes (Flat, sin degradados) */
+/* Ãconos EDT limpios y elegantes acordes a MÃ³dulo Reportes (Flat, sin degradados) */
 .gantt-v2 .gantt-row-icon {
   width: 26px;
   height: 26px;
@@ -2496,7 +2496,7 @@
   color: #4f46e5;
 }
 
-/* Columna Formato de Reporte estilo Módulo Reportes */
+/* Columna Formato de Reporte estilo MÃ³dulo Reportes */
 .gantt-v2 .report-type-cell {
   display: flex;
   align-items: center;
@@ -2529,7 +2529,7 @@
   font-weight: 400;
 }
 
-/* Botón de acción estilo Módulo Reportes */
+/* BotÃ³n de acciÃ³n estilo MÃ³dulo Reportes */
 .gantt-v2 .btn-open-report {
   display: inline-flex;
   align-items: center;
@@ -2575,7 +2575,7 @@
   flex-shrink: 0;
 }
 
-/* Botón interactivo de icono de fila para abrir panel de detalles */
+/* BotÃ³n interactivo de icono de fila para abrir panel de detalles */
 .gantt-v2 .row-icon-action {
   display: inline-flex;
   align-items: center;
@@ -2639,7 +2639,7 @@
   max-width: 100%;
 }
 
-/* Celda Gestor y Región en la tabla fija */
+/* Celda Gestor y RegiÃ³n en la tabla fija */
 .gantt-v2 .gestor-cell,
 .gantt-v2 .region-cell {
   position: relative;
@@ -3005,7 +3005,7 @@
   border: 1px solid #fecaca;
 }
 
-/* -- Indicador de Estado estilo Semáforo (punto de color + texto sin cápsula) -- */
+/* -- Indicador de Estado estilo SemÃ¡foro (punto de color + texto sin cÃ¡psula) -- */
 .gantt-v2 .status-item {
   display: inline-flex;
   align-items: center;
@@ -3229,7 +3229,7 @@
   margin-left: 2px;
 }
 
-/* Flechas y líneas SVG de Dependencia */
+/* Flechas y lÃ­neas SVG de Dependencia */
 .gantt-v2 .gantt-dependency-svg {
   pointer-events: none;
 }
@@ -3368,7 +3368,7 @@
   right: 18px;
 }
 
-/* Micro-diamante distintivo para Hitos en la tabla de tareas (ocupa mínimo espacio y conserva alineación) */
+/* Micro-diamante distintivo para Hitos en la tabla de tareas (ocupa mÃ­nimo espacio y conserva alineaciÃ³n) */
 .gantt-v2 .hito-micro-diamond {
   color: #0066ff;
   font-size: 10px;
@@ -3395,7 +3395,7 @@
   flex-shrink: 0;
 }
 
-/* Capa Overlay de Línea de Tiempo para alineación exacta con las columnas */
+/* Capa Overlay de LÃ­nea de Tiempo para alineaciÃ³n exacta con las columnas */
 .gantt-v2 .timeline-grid-overlay {
   position: absolute;
   top: 0;
@@ -3405,7 +3405,7 @@
   overflow: visible;
 }
 
-/* Máscara de Zona Fuera de Plazo (Translúcida con rayado suave) */
+/* MÃ¡scara de Zona Fuera de Plazo (TranslÃºcida con rayado suave) */
 .gantt-v2 .range-mask-before,
 .gantt-v2 .range-mask-after {
   position: absolute;
@@ -3428,7 +3428,7 @@
   border-left: 1px dashed #cbd5e1;
 }
 
-/* Líneas de delimitación del rango oficial (Gris moderno neutro) */
+/* LÃ­neas de delimitaciÃ³n del rango oficial (Gris moderno neutro) */
 .gantt-v2 .range-boundary-line {
   position: absolute;
   top: 0;
@@ -3837,7 +3837,7 @@
 }
 
 .gantt-v2 .drawer-select-grid .field > span {
-  /* Misma jerarquía que "Descripción y alcance" y el resto de campos. */
+  /* Misma jerarquÃ­a que "DescripciÃ³n y alcance" y el resto de campos. */
   font-size: 12px;
   font-weight: 700;
   color: #475569;
@@ -4188,7 +4188,7 @@
 }
 
 /* =========================================================
-   INTERACTIVIDAD GANTT MAESTRO (aditivo — candado visual)
+   INTERACTIVIDAD GANTT MAESTRO (aditivo â€” candado visual)
    ========================================================= */
 
 /* --- B) Viewport Inteligente: scroll interno contenido en la tabla --- */
@@ -4246,7 +4246,7 @@
   width: 2px !important;
 }
 
-/* Botón colapsador de columnas secundarias (Tipo imagen 4) */
+/* BotÃ³n colapsador de columnas secundarias (Tipo imagen 4) */
 .gantt-v2 .panel-collapse-btn {
   display: inline-flex;
   align-items: center;
@@ -4284,7 +4284,7 @@ body.gantt-resizing {
 }
 
 
-/* --- Celda Nombre: texto editable ergonómico --- */
+/* --- Celda Nombre: texto editable ergonÃ³mico --- */
 .gantt-v2 .name-cell .name {
   flex: 1 1 auto;
   min-width: 0;
@@ -4298,7 +4298,7 @@ body.gantt-resizing {
   background: #f1f5f9;
 }
 
-/* --- E) Afinidad de celdas editables (Inicio/Fin/Duración/Avance/Estado) --- */
+/* --- E) Afinidad de celdas editables (Inicio/Fin/DuraciÃ³n/Avance/Estado) --- */
 .gantt-v2 .row > div.editable {
   cursor: pointer;
   transition: background 0.12s ease, box-shadow 0.12s ease;
@@ -4457,7 +4457,7 @@ body.gantt-resizing {
   background: #e6f4ff;
 }
 
-/* --- F) Tooltip Minimalista de Barras Gantt (Estilo Exacto Módulo Reportes) --- */
+/* --- F) Tooltip Minimalista de Barras Gantt (Estilo Exacto MÃ³dulo Reportes) --- */
 .gantt-v2 .gantt-modern-tooltip {
   position: fixed;
   transform: translate(-50%, -100%);
@@ -4527,7 +4527,7 @@ body.gantt-resizing {
   font-weight: 400;
 }
 
-/* Estabilidad Total de Líneas de Dependencia (Cero parpadeo, Cero destello/halo) */
+/* Estabilidad Total de LÃ­neas de Dependencia (Cero parpadeo, Cero destello/halo) */
 .gantt-v2 .dep-line-group {
   cursor: pointer;
 }
@@ -4617,7 +4617,7 @@ body.gantt-resizing {
   text-overflow: ellipsis;
 }
 
-/* --- G) Botón Toggle de Avance en Barras y Etiquetas Limpias --- */
+/* --- G) BotÃ³n Toggle de Avance en Barras y Etiquetas Limpias --- */
 .gantt-v2 .btn-toggle-labels {
   display: inline-flex;
   align-items: center;
@@ -4701,7 +4701,7 @@ body.gantt-resizing {
   left: calc(100% + 14px);
 }
 
-/* --- H) Modificación Interactiva de Fechas en Barras (Drag to Resize) --- */
+/* --- H) ModificaciÃ³n Interactiva de Fechas en Barras (Drag to Resize) --- */
 .gantt-v2 .bar-resizer-right {
   position: absolute;
   top: 0;
@@ -5072,7 +5072,7 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   BOTÓN CONTEXTUAL QUICK-ADD Y FILA INLINE AL PIE (ESTILO CLICKUP/MONDAY)
+   BOTÃ“N CONTEXTUAL QUICK-ADD Y FILA INLINE AL PIE (ESTILO CLICKUP/MONDAY)
    ========================================================================== */
 
 .gantt-v2 .name-cell {
@@ -5206,7 +5206,7 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   Mejoras Estándar Excel / Buildern: Colapsador derecho, Multiselección y Fullscreen
+   Mejoras EstÃ¡ndar Excel / Buildern: Colapsador derecho, MultiselecciÃ³n y Fullscreen
    ========================================================================== */
 
 /* Posicionamiento del colapsador de panel al borde derecho de la columna principal */
@@ -5257,7 +5257,7 @@ body.gantt-resizing {
   color: #0066ff;
 }
 
-/* Popover de Filtro Estilo Excel (Buscador reactivo + Multiselección) */
+/* Popover de Filtro Estilo Excel (Buscador reactivo + MultiselecciÃ³n) */
 .gantt-v2 .excel-filter-popover {
   position: absolute;
   top: calc(100% + 4px);
@@ -5555,10 +5555,10 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   Ajustes Críticos: Reubicación Colapsador y Aprovechamiento Total de Ancho
+   Ajustes CrÃ­ticos: ReubicaciÃ³n Colapsador y Aprovechamiento Total de Ancho
    ========================================================================== */
 
-/* Cabecera name-head: Colapsador de panel al borde derecho con contención responsive */
+/* Cabecera name-head: Colapsador de panel al borde derecho con contenciÃ³n responsive */
 .gantt-v2 .name-head {
   display: flex !important;
   align-items: center !important;
@@ -5641,7 +5641,7 @@ body.gantt-resizing {
 }
 
 
-/* --- Estilos para Línea Base y Ruta Crítica (Benchmark Imagen 2) --- */
+/* --- Estilos para LÃ­nea Base y Ruta CrÃ­tica (Benchmark Imagen 2) --- */
 .gantt-v2 .baseline-shadow-bar {
   position: absolute;
   top: calc(50% + 9px);
@@ -5754,7 +5754,7 @@ body.gantt-resizing {
   display: none !important;
 }
 
-/* Árbol y Multi-selección de Ubicación Territorial */
+/* Ãrbol y Multi-selecciÃ³n de UbicaciÃ³n Territorial */
 .gantt-v2 .location-tree-group {
   display: flex;
   flex-direction: column;
@@ -6122,7 +6122,7 @@ body.gantt-resizing {
 }
 
 /* --------------------------------------------------------------------------
-   B) TABLA PLANA ANALÍTICA (LISTA)
+   B) TABLA PLANA ANALÃTICA (LISTA)
    -------------------------------------------------------------------------- */
 .cronograma-lista-container {
   flex: 1;
@@ -6354,7 +6354,7 @@ body.gantt-resizing {
 }
 
 /* --------------------------------------------------------------------------
-   C) VISTA CALENDARIO INSTITUCIONAL (DISEÑO EXACTO A IMAGEN 2)
+   C) VISTA CALENDARIO INSTITUCIONAL (DISEÃ‘O EXACTO A IMAGEN 2)
    -------------------------------------------------------------------------- */
 .cronograma-cal-container.cal-master-layout {
   flex: 1;
@@ -6518,7 +6518,7 @@ body.gantt-resizing {
   pointer-events: auto;
 }
 
-/* Barras de Calendario Oficiales · Exactos Colores Gantt (.bar.complete, .bar.progress, .bar.late, .bar.pending) */
+/* Barras de Calendario Oficiales Â· Exactos Colores Gantt (.bar.complete, .bar.progress, .bar.late, .bar.pending) */
 .gantt-v2 .cal-gantt-bar,
 .cal-gantt-bar {
   pointer-events: auto;
@@ -6561,7 +6561,7 @@ body.gantt-resizing {
   text-shadow: none !important;
 }
 
-/* Diamante característico en la punta del Hito Rector */
+/* Diamante caracterÃ­stico en la punta del Hito Rector */
 .cal-gantt-diamond-badge {
   position: absolute;
   right: 6px;
@@ -6899,7 +6899,7 @@ body.gantt-resizing {
   background: #e2e8f0;
 }
 
-/* Píldoras de Estado Gantt para Entregables */
+/* PÃ­ldoras de Estado Gantt para Entregables */
 .cal-status-pill-mini {
   font-size: 10px;
   font-weight: 700;
@@ -6959,7 +6959,7 @@ body.gantt-resizing {
   flex-shrink: 0;
 }
 
-/* Leyenda Cuadrícula 2x2 · Estricto Estándar Gantt */
+/* Leyenda CuadrÃ­cula 2x2 Â· Estricto EstÃ¡ndar Gantt */
 .cal-legend-section {
   margin-top: auto;
   padding-top: 16px;
@@ -7157,7 +7157,7 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   COLUMNAS EXTRA MODO LISTA: Código · Tipo · Hito padre · Acciones
+   COLUMNAS EXTRA MODO LISTA: CÃ³digo Â· Tipo Â· Hito padre Â· Acciones
    ========================================================================== */
 
 /* -- shared cell base -- */
@@ -7172,7 +7172,7 @@ body.gantt-resizing {
   overflow: hidden;
 }
 
-/* -- Código header and cell with checkbox & flag icon -- */
+/* -- CÃ³digo header and cell with checkbox & flag icon -- */
 .gantt-v2 .th-col-code {
   display: flex;
   align-items: center;
@@ -7405,13 +7405,13 @@ body.gantt-resizing {
   position: relative;
 }
 
-/* Alineación al extremo derecho del botón de columnas */
+/* AlineaciÃ³n al extremo derecho del botÃ³n de columnas */
 .gantt-v2 .cols-dropdown-wrap.cols-right-aligned {
   margin-left: auto !important;
   flex-shrink: 0 !important;
 }
 
-/* Estilo azul App Primario institucional para el botón Columnas */
+/* Estilo azul App Primario institucional para el botÃ³n Columnas */
 .gantt-v2 .cols-dropdown-wrap .btn-primary-blue {
   background: #0066ff !important;
   color: #ffffff !important;
@@ -7447,7 +7447,7 @@ body.gantt-resizing {
   stroke: #ffffff !important;
 }
 
-/* En pantallas pequeñas o medianas, el botón de columnas se compacta a solo icono para optimizar el espacio horizontal */
+/* En pantallas pequeÃ±as o medianas, el botÃ³n de columnas se compacta a solo icono para optimizar el espacio horizontal */
 @media (max-width: 1360px) {
   .gantt-v2 .cols-dropdown-wrap .cols-trigger-main-btn {
     padding: 0 10px !important;
@@ -7940,7 +7940,7 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
-   Fase 1 · Control de plazos: Desviación, Fecha real y bloque de línea base
+   Fase 1 Â· Control de plazos: DesviaciÃ³n, Fecha real y bloque de lÃ­nea base
    ========================================================================== */
 .gantt-v2 .deviation-cell {
   display: flex;
@@ -7983,7 +7983,7 @@ body.gantt-resizing {
   font-weight: 400;
 }
 
-/* Bloque "Línea base y cumplimiento" del panel de detalle */
+/* Bloque "LÃ­nea base y cumplimiento" del panel de detalle */
 .gantt-v2 .baseline-box {
   display: flex;
   flex-direction: column;
@@ -8078,7 +8078,7 @@ body.gantt-resizing {
   background: #64748b;
 }
 
-/* Popover interactivo para celda Desviación */
+/* Popover interactivo para celda DesviaciÃ³n */
 .gantt-v2 .deviation-pop {
   min-width: 250px;
   padding: 12px;
@@ -8111,7 +8111,7 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   ESTRUCTURA JERÁRQUICA WBS (VISTA ÁRBOL / DESGLOSE DE TRABAJO - IMAGEN 1)
+   ESTRUCTURA JERÃRQUICA WBS (VISTA ÃRBOL / DESGLOSE DE TRABAJO - IMAGEN 1)
    ========================================================================== */
 .gantt-v2 .arbol-wbs-container {
   flex: 1;
@@ -8184,7 +8184,7 @@ body.gantt-resizing {
   box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2) !important;
 }
 
-/* Tarjeta Raíz Master */
+/* Tarjeta RaÃ­z Master */
 .gantt-v2 .arbol-card.master-project {
   background: #0f172a;
   border-color: #0f172a;
@@ -8322,7 +8322,7 @@ body.gantt-resizing {
   margin-top: 1px;
 }
 
-/* Centro: Métrica y Fechas */
+/* Centro: MÃ©trica y Fechas */
 .gantt-v2 .arbol-card-center {
   display: flex;
   align-items: center;
@@ -8424,7 +8424,7 @@ body.gantt-resizing {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-/* Conectores Jerárquicos WBS (Ramas y Brazos) */
+/* Conectores JerÃ¡rquicos WBS (Ramas y Brazos) */
 .gantt-v2 .arbol-branches-level1 {
   position: relative;
   margin-left: 28px;
@@ -8499,7 +8499,7 @@ body.gantt-resizing {
 }
 
 /* =========================================================
-   ESTILOS: BOTÓN ÚNICO CRÍTICOS Y DROPDOWN WBS PM4R/BID
+   ESTILOS: BOTÃ“N ÃšNICO CRÃTICOS Y DROPDOWN WBS PM4R/BID
    ========================================================= */
 
 .gantt-v2 .alert-criticos-pill {
@@ -8698,7 +8698,7 @@ body.gantt-resizing {
 /* Calendario: contraste limpio respetando cada estado de barra Gantt */
 
 /* =========================================================
-   VISTA EDT / ORGANIGRAMA ESTRUCTURADA (DIAGRAMA JERÁRQUICO)
+   VISTA EDT / ORGANIGRAMA ESTRUCTURADA (DIAGRAMA JERÃRQUICO)
    ========================================================= */
 
 .gantt-v2 .organigrama-wbs-container {
@@ -8822,7 +8822,7 @@ body.gantt-resizing {
   text-align: center;
 }
 
-/* LIENZO DEL DIAGRAMA JERÁRQUICO */
+/* LIENZO DEL DIAGRAMA JERÃRQUICO */
 .gantt-v2 .organigrama-canvas-scroll {
   flex: 1;
   min-height: 0;
@@ -8902,7 +8902,7 @@ body.gantt-resizing {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
 }
 
-/* PUNTOS DE CONEXIÓN (•) EN BORDES Y BIFURCACIONES */
+/* PUNTOS DE CONEXIÃ“N (â€¢) EN BORDES Y BIFURCACIONES */
 .gantt-v2 .edt-junction-dot {
   position: absolute;
   left: 50%;
@@ -8923,7 +8923,7 @@ body.gantt-resizing {
   bottom: -3.5px;
 }
 
-/* NIVEL 0: PROYECTO RAÍZ */
+/* NIVEL 0: PROYECTO RAÃZ */
 .gantt-v2 .organigrama-root-wrapper {
   display: flex;
   flex-direction: column;
@@ -8986,7 +8986,7 @@ body.gantt-resizing {
   color: #1e293b;
 }
 
-/* SISTEMA AUTOMÁTICO DE CONECTORES ORTOGONALES PADRE-HIJO */
+/* SISTEMA AUTOMÃTICO DE CONECTORES ORTOGONALES PADRE-HIJO */
 .gantt-v2 .organigrama-trunk-down,
 .gantt-v2 .edt-trunk-down {
   width: 1.5px;
@@ -9022,7 +9022,7 @@ body.gantt-resizing {
   padding: 0 14px;
 }
 
-/* Línea horizontal automática exacta de centro a centro entre hermanos */
+/* LÃ­nea horizontal automÃ¡tica exacta de centro a centro entre hermanos */
 .gantt-v2 .edt-tree-col::before,
 .gantt-v2 .edt-tree-col::after {
   content: '';
@@ -9216,7 +9216,7 @@ body.gantt-resizing {
 }
 
 /* =========================================================
-   MINIMAPA DE NAVEGACIÓN (ESQUINA INFERIOR DERECHA)
+   MINIMAPA DE NAVEGACIÃ“N (ESQUINA INFERIOR DERECHA)
    ========================================================= */
 
 .gantt-v2 .edt-minimap-card {
@@ -9359,7 +9359,7 @@ body.gantt-resizing {
    ARQUITECTURA DE FILTROS REORGANIZADOS: UNIVERSALES (FILA 1) + CONTEXTUALES (FILA 2)
    ========================================================================== */
 
-/* Fila 1: Pestañas Superiores y Filtros Universales (Nivel WBS y Vencimientos) */
+/* Fila 1: PestaÃ±as Superiores y Filtros Universales (Nivel WBS y Vencimientos) */
 .gantt-v2 .tabs {
   position: relative;
   z-index: 95 !important;
@@ -9418,7 +9418,7 @@ body.gantt-resizing {
   z-index: 120 !important;
 }
 
-/* Fila 2: Filtros Contextuales para la Vista (Macro-región, Sedes/UGEL, Gestor de Campo) */
+/* Fila 2: Filtros Contextuales para la Vista (Macro-regiÃ³n, Sedes/UGEL, Gestor de Campo) */
 .gantt-v2 .filters .search {
   max-width: 200px !important;
   min-width: 165px !important;
@@ -9426,8 +9426,8 @@ body.gantt-resizing {
   flex-shrink: 0;
 }
 
-.gantt-v2 .filter-dropdown-wrap.contextual-filter-wrap,
-.gantt-v2 .filter-dropdown-wrap.contextual-filter-wrap .filter-card-btn {
+.gantt-v2.tareas2-scope .filter-dropdown-wrap.contextual-filter-wrap,
+.gantt-v2.tareas2-scope .filter-dropdown-wrap.contextual-filter-wrap .filter-card-btn {
   width: 180px !important;
   min-width: 180px !important;
   max-width: 180px !important;
@@ -9436,13 +9436,13 @@ body.gantt-resizing {
   box-sizing: border-box;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-btn {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-btn {
   padding: 2px 8px !important;
   border-radius: 8px !important;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-copy small,
-.gantt-v2 .tabs-list .filter-card-copy small {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-copy small,
+.gantt-v2.tareas2-scope .tabs-list .filter-card-copy small {
   font-size: 10.5px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
@@ -9451,15 +9451,15 @@ body.gantt-resizing {
   line-height: 1.15;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-copy span,
-.gantt-v2 .tabs-list .filter-card-copy span {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-copy span,
+.gantt-v2.tareas2-scope .tabs-list .filter-card-copy span {
   font-size: 12.5px !important;
   font-weight: 600 !important;
   color: #0f172a !important;
   line-height: 1.25;
 }
 
-.gantt-v2 .custom-filter-trigger-btn {
+.gantt-v2.tareas2-scope .custom-filter-trigger-btn {
   height: 46px !important;
 }
 
@@ -9469,11 +9469,11 @@ body.gantt-resizing {
    ========================================================================== */
 
 /* Popovers y capas flotantes con alta visibilidad y sin recortes */
-.gantt-v2 .workspace {
+.gantt-v2.tareas2-scope .workspace {
   overflow: visible !important;
 }
 
-.gantt-v2 .tabs {
+.gantt-v2.tareas2-scope .tabs {
   position: relative;
   z-index: 130 !important;
   overflow: visible !important;
@@ -9485,7 +9485,7 @@ body.gantt-resizing {
   box-sizing: border-box !important;
 }
 
-.gantt-v2 .tabs-list {
+.gantt-v2.tareas2-scope .tabs-list {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
@@ -9494,7 +9494,7 @@ body.gantt-resizing {
   overflow: visible !important;
 }
 
-.gantt-v2 .filters {
+.gantt-v2.tareas2-scope .filters {
   position: relative;
   z-index: 110 !important;
   overflow: visible !important;
@@ -9512,15 +9512,15 @@ body.gantt-resizing {
 }
 
 /* Desrondeado formal estilo SaaS (border-radius: 6px a 8px) */
-.gantt-v2 .tabs-list .filter-card-btn,
-.gantt-v2 .filters .filter-card-btn,
-.gantt-v2 .filters .search {
+.gantt-v2.tareas2-scope .tabs-list .filter-card-btn,
+.gantt-v2.tareas2-scope .filters .filter-card-btn,
+.gantt-v2.tareas2-scope .filters .search {
   border-radius: 8px !important;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
   transition: all 0.15s ease-in-out !important;
 }
 
-.gantt-v2 .tabs-list .filter-card-btn {
+.gantt-v2.tareas2-scope .tabs-list .filter-card-btn {
   height: 46px !important;
   min-height: 46px !important;
   max-height: 46px !important;
@@ -9529,33 +9529,33 @@ body.gantt-resizing {
   border: 1px solid #cbd5e1;
 }
 
-.gantt-v2 .tabs-list .filter-card-btn:hover {
+.gantt-v2.tareas2-scope .tabs-list .filter-card-btn:hover {
   background: #f1f5f9;
   border-color: #b0bccd;
 }
 
-.gantt-v2 .tabs-list .filter-card-btn.active,
-.gantt-v2 .filters .filter-card-btn.active {
+.gantt-v2.tareas2-scope .tabs-list .filter-card-btn.active,
+.gantt-v2.tareas2-scope .filters .filter-card-btn.active {
   background: #f8fbff !important;
   border-color: #0066ff !important;
   box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.15) !important;
 }
 
-.gantt-v2 .tabs-list .filter-card-btn.filtered,
-.gantt-v2 .filters .filter-card-btn.filtered {
+.gantt-v2.tareas2-scope .tabs-list .filter-card-btn.filtered,
+.gantt-v2.tareas2-scope .filters .filter-card-btn.filtered {
   border-color: #0066ff !important;
   background: #f0f7ff !important;
 }
 
-/* Fila 2: Filtros Contextuales Fijos y Homogéneos (Región y Fase / Sede) a altura uniforme 46px */
-.gantt-v2 .contextual-filter-wrap.region-filter-wrap,
-.gantt-v2 .contextual-filter-wrap.region-filter-wrap .filter-card-btn,
-.gantt-v2 .contextual-filter-wrap.phase-filter-wrap,
-.gantt-v2 .contextual-filter-wrap.phase-filter-wrap .filter-card-btn,
-.gantt-v2 .contextual-filter-wrap.sede-filter-wrap,
-.gantt-v2 .contextual-filter-wrap.sede-filter-wrap .filter-card-btn,
-.gantt-v2 .contextual-filter-wrap.macro-filter-wrap,
-.gantt-v2 .contextual-filter-wrap.macro-filter-wrap .filter-card-btn {
+/* Fila 2: Filtros Contextuales Fijos y HomogÃ©neos (RegiÃ³n y Fase / Sede) a altura uniforme 46px */
+.gantt-v2.tareas2-scope .contextual-filter-wrap.region-filter-wrap,
+.gantt-v2.tareas2-scope .contextual-filter-wrap.region-filter-wrap .filter-card-btn,
+.gantt-v2.tareas2-scope .contextual-filter-wrap.phase-filter-wrap,
+.gantt-v2.tareas2-scope .contextual-filter-wrap.phase-filter-wrap .filter-card-btn,
+.gantt-v2.tareas2-scope .contextual-filter-wrap.sede-filter-wrap,
+.gantt-v2.tareas2-scope .contextual-filter-wrap.sede-filter-wrap .filter-card-btn,
+.gantt-v2.tareas2-scope .contextual-filter-wrap.macro-filter-wrap,
+.gantt-v2.tareas2-scope .contextual-filter-wrap.macro-filter-wrap .filter-card-btn {
   width: 180px !important;
   min-width: 180px !important;
   max-width: 180px !important;
@@ -9567,12 +9567,12 @@ body.gantt-resizing {
 }
 
 /* Fila 1: Filtros Superiores Inmutables (NIVEL, ESTADO, COMPONENTE / PRODUCTO) a ancho uniforme 192px y alto 46px */
-.gantt-v2 .tabs-list .filter-dropdown-wrap.wbs-filter-wrap,
-.gantt-v2 .tabs-list .filter-dropdown-wrap.wbs-filter-wrap .filter-card-btn,
-.gantt-v2 .tabs-list .filter-dropdown-wrap.estado-filter-wrap,
-.gantt-v2 .tabs-list .filter-dropdown-wrap.estado-filter-wrap .filter-card-btn,
-.gantt-v2 .tabs-list .filter-dropdown-wrap.edt-filter-wrap,
-.gantt-v2 .tabs-list .filter-dropdown-wrap.edt-filter-wrap .filter-card-btn {
+.gantt-v2.tareas2-scope .tabs-list .filter-dropdown-wrap.wbs-filter-wrap,
+.gantt-v2.tareas2-scope .tabs-list .filter-dropdown-wrap.wbs-filter-wrap .filter-card-btn,
+.gantt-v2.tareas2-scope .tabs-list .filter-dropdown-wrap.estado-filter-wrap,
+.gantt-v2.tareas2-scope .tabs-list .filter-dropdown-wrap.estado-filter-wrap .filter-card-btn,
+.gantt-v2.tareas2-scope .tabs-list .filter-dropdown-wrap.edt-filter-wrap,
+.gantt-v2.tareas2-scope .tabs-list .filter-dropdown-wrap.edt-filter-wrap .filter-card-btn {
   width: 192px !important;
   min-width: 192px !important;
   max-width: 192px !important;
@@ -9583,7 +9583,7 @@ body.gantt-resizing {
   box-sizing: border-box !important;
 }
 
-.gantt-v2 .tabs-list .filter-card-copy span {
+.gantt-v2.tareas2-scope .tabs-list .filter-card-copy span {
   width: 100% !important;
   max-width: 142px !important;
   overflow: hidden !important;
@@ -9592,8 +9592,8 @@ body.gantt-resizing {
   display: block !important;
 }
 
-/* Botón 'Todos' con ancho fijo estable para que no empuje a los demás controles */
-.gantt-v2 .tabs-list > button:first-child {
+/* BotÃ³n 'Todos' con ancho fijo estable para que no empuje a los demÃ¡s controles */
+.gantt-v2.tareas2-scope .tabs-list > button:first-child {
   width: 98px !important;
   min-width: 98px !important;
   max-width: 98px !important;
@@ -9610,7 +9610,7 @@ body.gantt-resizing {
   white-space: nowrap !important;
 }
 
-.gantt-v2 .tabs-list > button:first-child span {
+.gantt-v2.tareas2-scope .tabs-list > button:first-child span {
   display: inline-block !important;
   min-width: 44px !important;
   text-align: left !important;
@@ -9618,7 +9618,7 @@ body.gantt-resizing {
 }
 
 /* Uniformidad de altura a 46px para todos los controles en la barra de filtros */
-.gantt-v2 .filters .today-pill {
+.gantt-v2.tareas2-scope .filters .today-pill {
   height: 46px !important;
   min-height: 46px !important;
   max-height: 46px !important;
@@ -9626,7 +9626,7 @@ body.gantt-resizing {
   box-sizing: border-box !important;
 }
 
-.gantt-v2 .filters .zoom {
+.gantt-v2.tareas2-scope .filters .zoom {
   height: 46px !important;
   min-height: 46px !important;
   max-height: 46px !important;
@@ -9634,13 +9634,13 @@ body.gantt-resizing {
   box-sizing: border-box !important;
 }
 
-.gantt-v2 .filters .zoom button {
+.gantt-v2.tareas2-scope .filters .zoom button {
   height: 100% !important;
   box-sizing: border-box !important;
 }
 
-.gantt-v2 .filters .qm-btn-icon,
-.gantt-v2 .filters .custom-filter-trigger-btn {
+.gantt-v2.tareas2-scope .filters .qm-btn-icon,
+.gantt-v2.tareas2-scope .filters .custom-filter-trigger-btn {
   width: 46px !important;
   min-width: 46px !important;
   max-width: 46px !important;
@@ -9654,7 +9654,7 @@ body.gantt-resizing {
   box-sizing: border-box !important;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-btn {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-btn {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -9665,7 +9665,7 @@ body.gantt-resizing {
   overflow: hidden !important;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-copy {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-copy {
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
@@ -9674,7 +9674,7 @@ body.gantt-resizing {
   flex: 1 1 auto !important;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-copy small {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-copy small {
   font-size: 10.5px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
@@ -9686,7 +9686,7 @@ body.gantt-resizing {
   text-overflow: ellipsis !important;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-copy span {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-copy span {
   font-size: 12.5px !important;
   font-weight: 600 !important;
   color: #0f172a !important;
@@ -9698,12 +9698,12 @@ body.gantt-resizing {
   max-width: 115px !important;
 }
 
-.gantt-v2 .contextual-filter-wrap .filter-card-btn:hover {
+.gantt-v2.tareas2-scope .contextual-filter-wrap .filter-card-btn:hover {
   border-color: #b0bccd;
   background: #fcfdfe;
 }
 
-/* Popovers flotantes con z-index de máxima prioridad para evitar colapso */
+/* Popovers flotantes con z-index de mÃ¡xima prioridad para evitar colapso */
 .gantt-v2 .filter-card-popover {
   position: absolute !important;
   top: calc(100% + 4px) !important;
@@ -9755,7 +9755,7 @@ body.gantt-resizing {
   letter-spacing: 0.04em !important;
 }
 
-/* Fila de macro-región: nombre + acción "Todas" alineada, mesmo estilo del popover */
+/* Fila de macro-regiÃ³n: nombre + acciÃ³n "Todas" alineada, mesmo estilo del popover */
 .gantt-v2 .filter-popover-group-label.macro-group-row {
   display: flex !important;
   align-items: center !important;
@@ -9887,7 +9887,7 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   HOMOLOGACIÓN VISUAL DE ALTA GAMA: NIVELES WBS, ESTADO Y COORD. MACRO
+   HOMOLOGACIÃ“N VISUAL DE ALTA GAMA: NIVELES WBS, ESTADO Y COORD. MACRO
    ========================================================================== */
 
 /* Radios circulares elegantes alineados con el sistema de checkboxes */
@@ -9915,7 +9915,7 @@ body.gantt-resizing {
   background: #0066ff !important;
 }
 
-/* Íconos de nivel WBS con cápsulas de color suave */
+/* Ãconos de nivel WBS con cÃ¡psulas de color suave */
 .gantt-v2 .filter-lvl-icon-wrap {
   width: 24px !important;
   height: 24px !important;
@@ -9926,7 +9926,7 @@ body.gantt-resizing {
   flex-shrink: 0 !important;
 }
 
-/* Semáforo oficial dot status */
+/* SemÃ¡foro oficial dot status */
 .gantt-v2 .filter-status-dot {
   width: 8px !important;
   height: 8px !important;
@@ -9965,7 +9965,7 @@ body.gantt-resizing {
   flex-shrink: 0 !important;
 }
 
-/* Cápsula de alcance para macro-regional */
+/* CÃ¡psula de alcance para macro-regional */
 .gantt-v2 .macro-scope-pill {
   font-size: 10.5px !important;
   font-weight: 600 !important;
@@ -9985,10 +9985,10 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   HOMOLOGACIÓN DE TONOS Y FONDOS: Fila 1 (Nivel y Estado) idéntica a Fila 2
+   HOMOLOGACIÃ“N DE TONOS Y FONDOS: Fila 1 (Nivel y Estado) idÃ©ntica a Fila 2
    ========================================================================== */
 
-/* Fondo uniforme blanco estándar para todos los botones de filtro */
+/* Fondo uniforme blanco estÃ¡ndar para todos los botones de filtro */
 .gantt-v2 .tabs-list .filter-card-btn,
 .gantt-v2 .filters .filter-card-btn {
   background: #ffffff !important;
@@ -10003,7 +10003,7 @@ body.gantt-resizing {
   border-color: #b0bccd !important;
 }
 
-/* Estado activo / abierto: mínima variación con sutil contorno azul */
+/* Estado activo / abierto: mÃ­nima variaciÃ³n con sutil contorno azul */
 .gantt-v2 .tabs-list .filter-card-btn.active,
 .gantt-v2 .filters .filter-card-btn.active {
   background: #f8fbff !important;
@@ -10077,7 +10077,7 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
-   ACORDEÓN DESPLEGABLE EN HOVER PARA HERRAMIENTAS DE CAPAS Y LÍNEA BASE
+   ACORDEÃ“N DESPLEGABLE EN HOVER PARA HERRAMIENTAS DE CAPAS Y LÃNEA BASE
    ========================================================================== */
 .gantt-v2 .bar-tools-accordion {
   display: inline-flex;
@@ -10210,7 +10210,7 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
-   MINI-CALENDARIO LATERAL (Vista Calendario) · tokens del sidebar existente
+   MINI-CALENDARIO LATERAL (Vista Calendario) Â· tokens del sidebar existente
    ========================================================================== */
 .cal-minical {
   gap: 10px;
@@ -10300,7 +10300,7 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
-   FICHA COMPLETA DEL ELEMENTO (v2) · layout de 3 columnas con pestañas
+   FICHA COMPLETA DEL ELEMENTO (v2) Â· layout de 3 columnas con pestaÃ±as
    ========================================================================== */
 .gantt-element-page-v2 {
   max-width: 1200px;
@@ -10793,7 +10793,7 @@ body.gantt-resizing {
   }
 }
 
-/* Badge de estado en la cabecera de la ficha (estilo píldora) */
+/* Badge de estado en la cabecera de la ficha (estilo pÃ­ldora) */
 .gantt-element-page .gantt-element-page-head .status {
   display: inline-flex;
   align-items: center;
@@ -10863,7 +10863,7 @@ body.gantt-resizing {
   font-weight: 700;
 }
 
-/* 1. Sub-barra de navegación superior de la vista */
+/* 1. Sub-barra de navegaciÃ³n superior de la vista */
 .territorial-subbar {
   display: flex;
   align-items: center;
@@ -11041,7 +11041,7 @@ body.gantt-resizing {
 .summary-status-chips .chip.proceso .chip-dot { background: #fa8c16; }
 .summary-status-chips .chip.retraso .chip-dot { background: #ef4444; }
 
-/* 3. Área de Trabajo Split */
+/* 3. Ãrea de Trabajo Split */
 .territorial-canvas-body {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
@@ -11512,7 +11512,7 @@ body.gantt-resizing {
   margin-top: 2px;
 }
 
-/* 1. Vista Temática Poligonal (Estilo HubPro) */
+/* 1. Vista TemÃ¡tica Poligonal (Estilo HubPro) */
 .thematic-svg-pane {
   display: flex;
   flex-direction: column;
@@ -11626,7 +11626,7 @@ body.gantt-resizing {
 .phase-fill.orange { background: #fa8c16; }
 .phase-fill.red { background: #ef4444; }
 
-/* 2. Vista Power BI Analítica */
+/* 2. Vista Power BI AnalÃ­tica */
 .powerbi-analytics-pane {
   padding: 16px;
   overflow-y: auto;
@@ -11889,7 +11889,7 @@ body.gantt-resizing {
 }
 
 /* ==========================================================================
-   SELECCIÓN MASIVA Y BARRA FLOTANTE DE ACCIONES EN LOTE (MODO LISTA)
+   SELECCIÃ“N MASIVA Y BARRA FLOTANTE DE ACCIONES EN LOTE (MODO LISTA)
    ========================================================================== */
 
 /* Fila seleccionada en lote */
@@ -12033,13 +12033,13 @@ body.gantt-resizing {
 
 
 /* ==========================================================================
-   Alineación de Modo Lista y Formatos de Gráfico de Porcentaje
+   AlineaciÃ³n de Modo Lista y Formatos de GrÃ¡fico de Porcentaje
    ========================================================================== */
 .gantt-v2 .view-lista-fullwidth .row .fixed-cols {
   position: static !important;
 }
 
-/* Tipografía de Porcentajes y Celdas de Tabla sin negritas excesivas */
+/* TipografÃ­a de Porcentajes y Celdas de Tabla sin negritas excesivas */
 .gantt-v2 .progress.editable b,
 .gantt-v2 .progress.is-rollup b,
 .gantt-v2 .progress.is-linked-tasks b,
@@ -12084,7 +12084,7 @@ body.gantt-resizing {
   transition: stroke-dashoffset 0.35s ease;
 }
 
-/* Formato Solo Número para Porcentaje */
+/* Formato Solo NÃºmero para Porcentaje */
 .progress-num-only {
   display: inline-flex;
   align-items: center;

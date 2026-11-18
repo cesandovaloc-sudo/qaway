@@ -157,6 +157,7 @@ import {
   Tag,
   Target,
   Trash2,
+  TrendingUp,
   Undo2,
   Redo2,
   Upload,
@@ -7652,6 +7653,15 @@ export default function CronogramaGanttView({
                 >
                   <BarChart3 size={13} style={{ marginRight: 4 }} />
                   Analítica Power BI
+                </button>
+                <button
+                  type="button"
+                  className={mapSubView === 'echarts-powerbi' ? 'active' : ''}
+                  onClick={() => setMapSubView('echarts-powerbi')}
+                  title="Vista 4: Analítica Territorial Power BI con Apache ECharts"
+                >
+                  <TrendingUp size={13} style={{ marginRight: 4 }} />
+                  Power BI ECharts
                 </button>
               </div>
             ) : viewMode === 'lista' ? (

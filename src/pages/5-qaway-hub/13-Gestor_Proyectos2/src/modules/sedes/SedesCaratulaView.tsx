@@ -3,10 +3,55 @@ import {
   Building2,
   MapPin,
   MoreHorizontal,
+  Globe2,
+  Layers,
+  BarChart3,
+  TrendingUp,
+  Maximize2,
+  Minimize2,
+  Compass,
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import PERU_GEOJSON from '../../data/peru_departamental_simple.json';
 import 'leaflet/dist/leaflet.css';
+import PeruChoroplethView from './PeruChoroplethView';
+import PeruPowerBIMapView from './PeruPowerBIMapView';
+import PeruEChartsPowerBI from './PeruEChartsPowerBI';
+
+type CaratulaMapMode = 'macro' | 'geo-real' | 'tematico-regional' | 'powerbi-analitico' | 'echarts-powerbi';
+
+const REGION_CENTERS: Record<string, [number, number]> = {
+  AMAZONAS: [-5.5, -78.2],
+  ANCASH: [-9.5, -77.5],
+  APURIMAC: [-14.1, -73.0],
+  AREQUIPA: [-16.2, -71.8],
+  AYACUCHO: [-13.6, -74.2],
+  CAJAMARCA: [-6.8, -78.6],
+  CALLAO: [-12.05, -77.12],
+  CUSCO: [-13.3, -71.8],
+  HUANCAVELICA: [-12.9, -75.0],
+  HUANUCO: [-9.6, -75.8],
+  ICA: [-14.3, -75.5],
+  JUNIN: [-11.5, -75.1],
+  'LA LIBERTAD': [-8.0, -78.5],
+  LAMBAYEQUE: [-6.4, -79.8],
+  'LIMA METROPOLITANA': [-12.05, -77.03],
+  'LIMA PROVINCIAS': [-11.8, -76.8],
+  LIMA: [-11.8, -76.8],
+  LORETO: [-4.2, -74.5],
+  'MADRE DE DIOS': [-12.3, -70.5],
+  MOQUEGUA: [-17.0, -70.9],
+  PASCO: [-10.5, -75.5],
+  PIURA: [-5.0, -80.2],
+  PUNO: [-15.0, -70.0],
+  'SAN MARTIN': [-6.8, -76.7],
+  TACNA: [-17.8, -70.3],
+  TUMBES: [-3.8, -80.5],
+  UCAYALI: [-9.0, -73.8],
+};
+
+const normRegKey = (val: string = '') =>
+  val.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
 
 interface SedesCaratulaViewProps {
   items?: any[];
@@ -33,8 +78,12 @@ export default function SedesCaratulaView({
 }: SedesCaratulaViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
+  const geoContainerRef = useRef<HTMLDivElement>(null);
+  const geoMapRef = useRef<any>(null);
   const [activeMacro, setActiveMacro] = useState<string>('todas');
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [mapMode, setMapMode] = useState<CaratulaMapMode>('macro');
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
   // 1. Datos de entidades asignadas vinculados a Supabase (gestor_unidades) con fallback
   const entidadesAsignadas = useMemo(() => {
@@ -275,6 +324,92 @@ export default function SedesCaratulaView({
     return entidadesAsignadas.filter((e) => e.macro.toLowerCase() === activeMacro.toLowerCase());
   }, [entidadesAsignadas, activeMacro]);
 
+  // Filas georreferenciadas para las 4 vistas analíticas/geográficas dentro de la cápsula
+  const mapRows = useMemo(() => {
+    const source = filteredEntidades.length > 0 ? filteredEntidades : entidadesAsignadas;
+    return source.map((ent, idx) => {
+      const rKey = normRegKey(ent.region);
+      const center = REGION_CENTERS[rKey] || [-9.2, -75.0];
+      const seed = (ent.id?.charCodeAt(ent.id.length - 1) || idx) % 15 - 7;
+      const seed2 = (ent.id?.charCodeAt(0) || idx) % 15 - 7;
+      const progress = ent.estado === 'Activa' ? 85 : ent.estado === 'En proceso' ? 52 : 15;
+      const state = ent.estado === 'Activa' ? 'Cumple' : ent.estado === 'En proceso' ? 'En proceso' : 'No cumple';
+      return {
+        ...ent,
+        progress,
+        state,
+        coords: [center[0] + seed * 0.06, center[1] + seed2 * 0.06] as [number, number],
+      };
+    });
+  }, [filteredEntidades, entidadesAsignadas]);
+
+  // Recalcular tamaño del mapa Macrorregional al volver a él o cambiar fullscreen
+  useEffect(() => {
+    if (mapMode === 'macro' && leafletMapRef.current) {
+      setTimeout(() => leafletMapRef.current?.invalidateSize(), 120);
+    }
+  }, [mapMode, isMapFullscreen]);
+
+  // Inicializar Mapa Geográfico Satelital (Vista 2) dentro de la cápsula
+  useEffect(() => {
+    if (mapMode !== 'geo-real' || !geoContainerRef.current) return;
+    let cancelled = false;
+
+    import('leaflet').then((LModule) => {
+      if (cancelled || !geoContainerRef.current) return;
+      const L = (LModule as any).default || LModule;
+
+      if ((geoContainerRef.current as any)._leaflet_id && geoMapRef.current) {
+        geoMapRef.current.remove();
+        geoMapRef.current = null;
+      }
+      (geoContainerRef.current as any)._leaflet_id = null;
+
+      const map = L.map(geoContainerRef.current, {
+        center: [-9.19, -75.0152],
+        zoom: 5,
+        minZoom: 4,
+        maxZoom: 14,
+        zoomControl: true,
+        attributionControl: false,
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+      }).addTo(map);
+
+      mapRows.forEach((row) => {
+        const pinColor = row.state === 'Cumple' ? '#00b96b' : row.state === 'En proceso' ? '#fa8c16' : '#ef4444';
+        const icon = L.divIcon({
+          html: `<div class="qaway-map-pin" style="--pin-color: ${pinColor}"></div>`,
+          className: 'qaway-div-icon',
+          iconSize: [18, 18],
+          iconAnchor: [9, 9],
+          popupAnchor: [0, -10],
+        });
+        const popupHtml = `
+          <div style="font-family: inherit; font-size: 12px; min-width: 150px;">
+            <strong style="color: #0f172a;">${row.name}</strong><br/>
+            <span style="color: #64748b;">Región:</span> <b>${row.region}</b><br/>
+            <span style="color: #64748b;">Estado:</span> <b style="color: ${pinColor};">${row.estado}</b>
+          </div>
+        `;
+        L.marker(row.coords, { icon }).addTo(map).bindPopup(popupHtml);
+      });
+
+      geoMapRef.current = map;
+      setTimeout(() => map.invalidateSize(), 150);
+    });
+
+    return () => {
+      cancelled = true;
+      if (geoMapRef.current) {
+        geoMapRef.current.remove();
+        geoMapRef.current = null;
+      }
+    };
+  }, [mapMode, mapRows, isMapFullscreen]);
+
   return (
     <div className="sd-caratula-wrapper" style={{
       display: 'grid',
@@ -330,8 +465,17 @@ export default function SedesCaratulaView({
           height: '100%',
           minHeight: 0,
         }}>
-          {/* Contenedor del Mapa Leaflet Oficial (Se expande ocupando todo el ancho y alto disponible) */}
-          <div style={{
+          {/* Cápsula del Mapa Oficial (Aloja las 5 vistas interactivas sin alterar el diseño) */}
+          <div style={isMapFullscreen ? {
+            position: 'fixed',
+            inset: '16px',
+            zIndex: 2200,
+            borderRadius: '14px',
+            overflow: 'hidden',
+            border: '1px solid #cbd5e1',
+            background: '#ffffff',
+            boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.35)',
+          } : {
             position: 'relative',
             borderRadius: '10px',
             overflow: 'hidden',
@@ -341,7 +485,111 @@ export default function SedesCaratulaView({
             minHeight: 0,
             width: '100%',
           }}>
-            <div ref={mapContainerRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+            {/* Vista 1: Cobertura Macrorregional (Carátula original) */}
+            <div
+              ref={mapContainerRef}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                display: mapMode === 'macro' ? 'block' : 'none',
+              }}
+            />
+
+            {/* Vista 2: Geográfico Satelital con Pines */}
+            {mapMode === 'geo-real' && (
+              <div
+                ref={geoContainerRef}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+              />
+            )}
+
+            {/* Vista 3: Temático Poligonal */}
+            {mapMode === 'tematico-regional' && (
+              <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                <PeruChoroplethView rows={mapRows} compact />
+              </div>
+            )}
+
+            {/* Vista 4: Analítica Power BI (Burbujas Leaflet) */}
+            {mapMode === 'powerbi-analitico' && (
+              <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                <PeruPowerBIMapView rows={mapRows} compact />
+              </div>
+            )}
+
+            {/* Vista 5: Power BI Analítica (Apache ECharts) */}
+            {mapMode === 'echarts-powerbi' && (
+              <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                <PeruEChartsPowerBI rows={mapRows} compact />
+              </div>
+            )}
+
+            {/* DOCK FLOTANTE CON LAS 5 VISTAS DENTRO DE LA CÁPSULA */}
+            <div className="territorial-floating-dock" role="tablist" aria-label="Vistas del Mapa en Carátula">
+              <button
+                type="button"
+                className={`floating-dock-btn ${mapMode === 'macro' ? 'is-active' : ''}`}
+                onClick={() => setMapMode('macro')}
+                title="Vista 1: Cobertura Macrorregional"
+                aria-label="Cobertura Macrorregional"
+              >
+                <Compass size={16} />
+              </button>
+
+              <button
+                type="button"
+                className={`floating-dock-btn ${mapMode === 'geo-real' ? 'is-active' : ''}`}
+                onClick={() => setMapMode('geo-real')}
+                title="Vista 2: Mapa Geográfico Satelital (Pines)"
+                aria-label="Mapa Geográfico"
+              >
+                <Globe2 size={16} />
+              </button>
+
+              <button
+                type="button"
+                className={`floating-dock-btn ${mapMode === 'tematico-regional' ? 'is-active' : ''}`}
+                onClick={() => setMapMode('tematico-regional')}
+                title="Vista 3: Mapa Temático Poligonal (Regiones)"
+                aria-label="Mapa Temático Poligonal"
+              >
+                <Layers size={16} />
+              </button>
+
+              <button
+                type="button"
+                className={`floating-dock-btn ${mapMode === 'powerbi-analitico' ? 'is-active' : ''}`}
+                onClick={() => setMapMode('powerbi-analitico')}
+                title="Vista 4: Tablero Analítico Territorial (Power BI)"
+                aria-label="Analítica Power BI"
+              >
+                <BarChart3 size={16} />
+              </button>
+
+              <button
+                type="button"
+                className={`floating-dock-btn ${mapMode === 'echarts-powerbi' ? 'is-active' : ''}`}
+                onClick={() => setMapMode('echarts-powerbi')}
+                title="Vista 5: Analítica Power BI (Apache ECharts)"
+                aria-label="Power BI ECharts"
+              >
+                <TrendingUp size={16} />
+              </button>
+
+              <span className="floating-dock-divider" />
+
+              <button
+                type="button"
+                className="floating-dock-btn"
+                onClick={() => setIsMapFullscreen((v) => !v)}
+                title={isMapFullscreen ? 'Salir de pantalla completa' : 'Ver mapa en pantalla completa'}
+                aria-label="Pantalla Completa"
+              >
+                {isMapFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
+            </div>
           </div>
 
           {/* Panel Lateral: Botones de Macrorregión + Leyenda en su ubicación original pero sin huecos vacíos */}

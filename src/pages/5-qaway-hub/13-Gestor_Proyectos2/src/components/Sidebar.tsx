@@ -293,8 +293,8 @@ export default function Sidebar({
         className={active === 'reuniones2' ? 'side-link active' : 'side-link'}
         onClick={() => handleModule('reuniones2')}
       >
-        <Users size={18} />
-        <span>Reuniones 2</span>
+        <CalendarDays size={18} />
+        <span>Agenda</span>
       </button>
 
       <button

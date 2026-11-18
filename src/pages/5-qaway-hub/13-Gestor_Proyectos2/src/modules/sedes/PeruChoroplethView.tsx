@@ -42,6 +42,7 @@ export interface PeruChoroplethViewProps {
   selectedUgelId?: string | null;
   onRegionSelect?: (region: { name: string; progress: number; status: string; ugel: number }) => void;
   onUgelSelect?: (ugel: any) => void;
+  compact?: boolean;
 }
 
 export default function PeruChoroplethView({
@@ -50,6 +51,7 @@ export default function PeruChoroplethView({
   selectedUgelId,
   onRegionSelect,
   onUgelSelect,
+  compact = false,
 }: PeruChoroplethViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
@@ -287,7 +289,7 @@ export default function PeruChoroplethView({
   }, [selectedUgelId, rows]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 400 }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: compact ? 0 : 400 }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 
       {selected && (

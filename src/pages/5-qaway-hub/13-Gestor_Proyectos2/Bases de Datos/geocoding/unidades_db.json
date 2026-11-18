@@ -1,0 +1,1759 @@
+[
+{
+"code": "DRE-AMAZONAS",
+"name": "DRE AMAZONAS",
+"unit_type": "dre",
+"region": "AMAZONAS",
+"clave": "AMAZONAS"
+},
+{
+"code": "DRE-ANCASH",
+"name": "DRE ANCASH",
+"unit_type": "dre",
+"region": "ANCASH",
+"clave": "ANCASH"
+},
+{
+"code": "DRE-APURIMAC",
+"name": "DRE APURÍMAC",
+"unit_type": "dre",
+"region": "APURÍMAC",
+"clave": "APURIMAC"
+},
+{
+"code": "DRE-AYACUCHO",
+"name": "DRE AYACUCHO",
+"unit_type": "dre",
+"region": "AYACUCHO",
+"clave": "AYACUCHO"
+},
+{
+"code": "DRE-CAJAMARCA",
+"name": "DRE CAJAMARCA",
+"unit_type": "dre",
+"region": "CAJAMARCA",
+"clave": "CAJAMARCA"
+},
+{
+"code": "DRE-CALLAO",
+"name": "DRE CALLAO",
+"unit_type": "dre",
+"region": "CALLAO",
+"clave": "CALLAO"
+},
+{
+"code": "DRE-CUSCO",
+"name": "DRE CUSCO",
+"unit_type": "dre",
+"region": "CUSCO",
+"clave": "CUSCO"
+},
+{
+"code": "DRE-HUANCAVELICA",
+"name": "DRE HUANCAVELICA",
+"unit_type": "dre",
+"region": "HUANCAVELICA",
+"clave": "HUANCAVELICA"
+},
+{
+"code": "DRE-HUANUCO",
+"name": "DRE HUÁNUCO",
+"unit_type": "dre",
+"region": "HUÁNUCO",
+"clave": "HUANUCO"
+},
+{
+"code": "DRE-ICA",
+"name": "DRE ICA",
+"unit_type": "dre",
+"region": "ICA",
+"clave": "ICA"
+},
+{
+"code": "DRE-JUNIN",
+"name": "DRE JUNÍN",
+"unit_type": "dre",
+"region": "JUNÍN",
+"clave": "JUNIN"
+},
+{
+"code": "DRE-LIMA-METROPOLITANA",
+"name": "DRE LIMA METROPOLITANA",
+"unit_type": "dre",
+"region": "LIMA METROPOLITANA",
+"clave": "LIMA METROPOLITANA"
+},
+{
+"code": "DRE-LIMA-PROVINCIAS",
+"name": "DRE LIMA PROVINCIAS",
+"unit_type": "dre",
+"region": "LIMA PROVINCIAS",
+"clave": "LIMA PROVINCIAS"
+},
+{
+"code": "DRE-LORETO",
+"name": "DRE LORETO",
+"unit_type": "dre",
+"region": "LORETO",
+"clave": "LORETO"
+},
+{
+"code": "DRE-MADRE-DE-DIOS",
+"name": "DRE MADRE DE DIOS",
+"unit_type": "dre",
+"region": "MADRE DE DIOS",
+"clave": "MADRE DIOS"
+},
+{
+"code": "DRE-MOQUEGUA",
+"name": "DRE MOQUEGUA",
+"unit_type": "dre",
+"region": "MOQUEGUA",
+"clave": "MOQUEGUA"
+},
+{
+"code": "DRE-PASCO",
+"name": "DRE PASCO",
+"unit_type": "dre",
+"region": "PASCO",
+"clave": "PASCO"
+},
+{
+"code": "DRE-PIURA",
+"name": "DRE PIURA",
+"unit_type": "dre",
+"region": "PIURA",
+"clave": "PIURA"
+},
+{
+"code": "DRE-PUNO",
+"name": "DRE PUNO",
+"unit_type": "dre",
+"region": "PUNO",
+"clave": "PUNO"
+},
+{
+"code": "DRE-SAN-MARTIN",
+"name": "DRE SAN MARTÍN",
+"unit_type": "dre",
+"region": "SAN MARTÍN",
+"clave": "SAN MARTIN"
+},
+{
+"code": "DRE-TACNA",
+"name": "DRE TACNA",
+"unit_type": "dre",
+"region": "TACNA",
+"clave": "TACNA"
+},
+{
+"code": "DRE-TUMBES",
+"name": "DRE TUMBES",
+"unit_type": "dre",
+"region": "TUMBES",
+"clave": "TUMBES"
+},
+{
+"code": "DRE-UCAYALI",
+"name": "DRE UCAYALI",
+"unit_type": "dre",
+"region": "UCAYALI",
+"clave": "UCAYALI"
+},
+{
+"code": "GRE-AREQUIPA",
+"name": "GRE AREQUIPA",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "AREQUIPA"
+},
+{
+"code": "GRE-LA-LIBERTAD",
+"name": "GRE LA LIBERTAD",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "LIBERTAD"
+},
+{
+"code": "GRE-LAMBAYEQUE",
+"name": "GRE LAMBAYEQUE",
+"unit_type": "ugel",
+"region": "LAMBAYEQUE",
+"clave": "LAMBAYEQUE"
+},
+{
+"code": "RED-HUEPETUHE",
+"name": "RED HUEPETUHE",
+"unit_type": "ugel",
+"region": "MADRE DE DIOS",
+"clave": "RED HUEPETUHE"
+},
+{
+"code": "UGEL-01-EL-PORVENIR",
+"name": "UGEL 01 - EL PORVENIR",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "01 PORVENIR"
+},
+{
+"code": "UGEL-01-SAN-JUAN-DE-MIRAFLORES",
+"name": "UGEL 01 - SAN JUAN DE MIRAFLORES",
+"unit_type": "ugel",
+"region": "LIMA METROPOLITANA",
+"clave": "01 SAN JUAN MIRAFLORES"
+},
+{
+"code": "UGEL-02-LA-ESPERANZA",
+"name": "UGEL 02 - LA ESPERANZA",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "02 ESPERANZA"
+},
+{
+"code": "UGEL-02-RIMAC",
+"name": "UGEL 02 - RÍMAC",
+"unit_type": "ugel",
+"region": "LIMA METROPOLITANA",
+"clave": "02 RIMAC"
+},
+{
+"code": "UGEL-03-BRENA",
+"name": "UGEL 03 - BREÑA",
+"unit_type": "ugel",
+"region": "LIMA METROPOLITANA",
+"clave": "03 BRENA"
+},
+{
+"code": "UGEL-03-TRUJILLO-NOR-OESTE",
+"name": "UGEL 03 - TRUJILLO NOR OESTE",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "03 TRUJILLO NOR OESTE"
+},
+{
+"code": "UGEL-04-COMAS",
+"name": "UGEL 04 - COMAS",
+"unit_type": "ugel",
+"region": "LIMA METROPOLITANA",
+"clave": "04 COMAS"
+},
+{
+"code": "UGEL-04-TRUJILLO-SUR-ESTE",
+"name": "UGEL 04 - TRUJILLO SUR ESTE",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "04 TRUJILLO SUR ESTE"
+},
+{
+"code": "UGEL-05-SAN-JUAN-DE-LURIGANCHO",
+"name": "UGEL 05 - SAN JUAN DE LURIGANCHO",
+"unit_type": "ugel",
+"region": "LIMA METROPOLITANA",
+"clave": "05 SAN JUAN LURIGANCHO"
+},
+{
+"code": "UGEL-06-ATE",
+"name": "UGEL 06 - ATE",
+"unit_type": "ugel",
+"region": "LIMA METROPOLITANA",
+"clave": "06 ATE"
+},
+{
+"code": "UGEL-07-SAN-BORJA",
+"name": "UGEL 07 - SAN BORJA",
+"unit_type": "ugel",
+"region": "LIMA METROPOLITANA",
+"clave": "07 SAN BORJA"
+},
+{
+"code": "UGEL-08-CANETE",
+"name": "UGEL 08 - CAÑETE",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "08 CANETE"
+},
+{
+"code": "UGEL-09-HUAURA",
+"name": "UGEL 09 - HUAURA",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "09 HUAURA"
+},
+{
+"code": "UGEL-10-HUARAL",
+"name": "UGEL 10 - HUARAL",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "10 HUARAL"
+},
+{
+"code": "UGEL-11-CAJATAMBO",
+"name": "UGEL 11 - CAJATAMBO",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "11 CAJATAMBO"
+},
+{
+"code": "UGEL-12-CANTA",
+"name": "UGEL 12 - CANTA",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "12 CANTA"
+},
+{
+"code": "UGEL-13-YAUYOS",
+"name": "UGEL 13 - YAUYOS",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "13 YAUYOS"
+},
+{
+"code": "UGEL-14-OYON",
+"name": "UGEL 14 - OYÓN",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "14 OYON"
+},
+{
+"code": "UGEL-15-HUAROCHIRI",
+"name": "UGEL 15 - HUAROCHIRÍ",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "15 HUAROCHIRI"
+},
+{
+"code": "UGEL-16-BARRANCA",
+"name": "UGEL 16 - BARRANCA",
+"unit_type": "ugel",
+"region": "LIMA PROVINCIAS",
+"clave": "16 BARRANCA"
+},
+{
+"code": "UGEL-ABANCAY",
+"name": "UGEL ABANCAY",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "ABANCAY"
+},
+{
+"code": "UGEL-ACOBAMBA",
+"name": "UGEL ACOBAMBA",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "ACOBAMBA"
+},
+{
+"code": "UGEL-ACOMAYO",
+"name": "UGEL ACOMAYO",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "ACOMAYO"
+},
+{
+"code": "UGEL-AIJA",
+"name": "UGEL AIJA",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "AIJA"
+},
+{
+"code": "UGEL-ALTO-AMAZONAS-SAN-LORENZO",
+"name": "UGEL ALTO AMAZONAS - SAN LORENZO",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "ALTO AMAZONAS SAN LORENZO"
+},
+{
+"code": "UGEL-ALTO-AMAZONAS-YURIMAGUAS",
+"name": "UGEL ALTO AMAZONAS - YURIMAGUAS",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "ALTO AMAZONAS YURIMAGUAS"
+},
+{
+"code": "UGEL-AMBO",
+"name": "UGEL AMBO",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "AMBO"
+},
+{
+"code": "UGEL-ANDAHUAYLAS",
+"name": "UGEL ANDAHUAYLAS",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "ANDAHUAYLAS"
+},
+{
+"code": "UGEL-ANGARAES",
+"name": "UGEL ANGARAES",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "ANGARAES"
+},
+{
+"code": "UGEL-ANTA",
+"name": "UGEL ANTA",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "ANTA"
+},
+{
+"code": "UGEL-ANTABAMBA",
+"name": "UGEL ANTABAMBA",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "ANTABAMBA"
+},
+{
+"code": "UGEL-ANTONIO-RAYMONDI",
+"name": "UGEL ANTONIO RAYMONDI",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "ANTONIO RAYMONDI"
+},
+{
+"code": "UGEL-AREQUIPA-NORTE",
+"name": "UGEL AREQUIPA NORTE",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "AREQUIPA NORTE"
+},
+{
+"code": "UGEL-AREQUIPA-SUR",
+"name": "UGEL AREQUIPA SUR",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "AREQUIPA SUR"
+},
+{
+"code": "UGEL-ASCOPE",
+"name": "UGEL ASCOPE",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "ASCOPE"
+},
+{
+"code": "UGEL-ASUNCION",
+"name": "UGEL ASUNCIÓN",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "ASUNCION"
+},
+{
+"code": "UGEL-ATALAYA",
+"name": "UGEL ATALAYA",
+"unit_type": "ugel",
+"region": "UCAYALI",
+"clave": "ATALAYA"
+},
+{
+"code": "UGEL-AYABACA",
+"name": "UGEL AYABACA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "AYABACA"
+},
+{
+"code": "UGEL-AYMARAES",
+"name": "UGEL AYMARAES",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "AYMARAES"
+},
+{
+"code": "UGEL-AZANGARO",
+"name": "UGEL AZÁNGARO",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "AZANGARO"
+},
+{
+"code": "UGEL-BAGUA",
+"name": "UGEL BAGUA",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "BAGUA"
+},
+{
+"code": "UGEL-BELLAVISTA",
+"name": "UGEL BELLAVISTA",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "BELLAVISTA"
+},
+{
+"code": "UGEL-BOLIVAR",
+"name": "UGEL BOLIVAR",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "BOLIVAR"
+},
+{
+"code": "UGEL-BOLOGNESI",
+"name": "UGEL BOLOGNESI",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "BOLOGNESI"
+},
+{
+"code": "UGEL-BONGARA",
+"name": "UGEL BONGARÁ",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "BONGARA"
+},
+{
+"code": "UGEL-CAJABAMBA",
+"name": "UGEL CAJABAMBA",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "CAJABAMBA"
+},
+{
+"code": "UGEL-CAJAMARCA",
+"name": "UGEL CAJAMARCA",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "CAJAMARCA"
+},
+{
+"code": "UGEL-CALCA",
+"name": "UGEL CALCA",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "CALCA"
+},
+{
+"code": "UGEL-CAMANA",
+"name": "UGEL CAMANÁ",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "CAMANA"
+},
+{
+"code": "UGEL-CANAS",
+"name": "UGEL CANAS",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "CANAS"
+},
+{
+"code": "UGEL-CANCHIS",
+"name": "UGEL CANCHIS",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "CANCHIS"
+},
+{
+"code": "UGEL-CANDARAVE",
+"name": "UGEL CANDARAVE",
+"unit_type": "ugel",
+"region": "TACNA",
+"clave": "CANDARAVE"
+},
+{
+"code": "UGEL-CANGALLO",
+"name": "UGEL CANGALLO",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "CANGALLO"
+},
+{
+"code": "UGEL-CARABAYA",
+"name": "UGEL CARABAYA",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "CARABAYA"
+},
+{
+"code": "UGEL-CARAVELI",
+"name": "UGEL CARAVELI",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "CARAVELI"
+},
+{
+"code": "UGEL-CARHUAZ",
+"name": "UGEL CARHUÁZ",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "CARHUAZ"
+},
+{
+"code": "UGEL-CARLOS-FERMIN-FITZCARRALD",
+"name": "UGEL CARLOS FERMIN FITZCARRALD",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "CARLOS FERMIN FITZCARRALD"
+},
+{
+"code": "UGEL-CASMA",
+"name": "UGEL CASMA",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "CASMA"
+},
+{
+"code": "UGEL-CASTILLA",
+"name": "UGEL CASTILLA",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "CASTILLA"
+},
+{
+"code": "UGEL-CASTROVIRREYNA",
+"name": "UGEL CASTROVIRREYNA",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "CASTROVIRREYNA"
+},
+{
+"code": "UGEL-CAYLLOMA",
+"name": "UGEL CAYLLOMA",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "CAYLLOMA"
+},
+{
+"code": "UGEL-CELENDIN",
+"name": "UGEL CELENDÍN",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "CELENDIN"
+},
+{
+"code": "UGEL-CHACHAPOYAS",
+"name": "UGEL CHACHAPOYAS",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "CHACHAPOYAS"
+},
+{
+"code": "UGEL-CHANCHAMAYO",
+"name": "UGEL CHANCHAMAYO",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "CHANCHAMAYO"
+},
+{
+"code": "UGEL-CHEPEN",
+"name": "UGEL CHEPÉN",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "CHEPEN"
+},
+{
+"code": "UGEL-CHICLAYO",
+"name": "UGEL CHICLAYO",
+"unit_type": "ugel",
+"region": "LAMBAYEQUE",
+"clave": "CHICLAYO"
+},
+{
+"code": "UGEL-CHINCHA",
+"name": "UGEL CHINCHA",
+"unit_type": "ugel",
+"region": "ICA",
+"clave": "CHINCHA"
+},
+{
+"code": "UGEL-CHINCHEROS",
+"name": "UGEL CHINCHEROS",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "CHINCHEROS"
+},
+{
+"code": "UGEL-CHOTA",
+"name": "UGEL CHOTA",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "CHOTA"
+},
+{
+"code": "UGEL-CHUCUITO",
+"name": "UGEL CHUCUITO",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "CHUCUITO"
+},
+{
+"code": "UGEL-CHULUCANAS",
+"name": "UGEL CHULUCANAS",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "CHULUCANAS"
+},
+{
+"code": "UGEL-CHUMBIVILCAS",
+"name": "UGEL CHUMBIVILCAS",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "CHUMBIVILCAS"
+},
+{
+"code": "UGEL-CHUPACA",
+"name": "UGEL CHUPACA",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "CHUPACA"
+},
+{
+"code": "UGEL-CHURCAMPA",
+"name": "UGEL CHURCAMPA",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "CHURCAMPA"
+},
+{
+"code": "UGEL-CONCEPCION",
+"name": "UGEL CONCEPCIÓN",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "CONCEPCION"
+},
+{
+"code": "UGEL-CONDESUYOS",
+"name": "UGEL CONDESUYOS",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "CONDESUYOS"
+},
+{
+"code": "UGEL-CONDORCANQUI",
+"name": "UGEL CONDORCANQUI",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "CONDORCANQUI"
+},
+{
+"code": "UGEL-CONTRALMIRANTE-VILLAR",
+"name": "UGEL CONTRALMIRANTE VILLAR",
+"unit_type": "ugel",
+"region": "TUMBES",
+"clave": "CONTRALMIRANTE VILLAR"
+},
+{
+"code": "UGEL-CONTUMAZA",
+"name": "UGEL CONTUMAZÁ",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "CONTUMAZA"
+},
+{
+"code": "UGEL-CORONEL-PORTILLO",
+"name": "UGEL CORONEL PORTILLO",
+"unit_type": "ugel",
+"region": "UCAYALI",
+"clave": "CORONEL PORTILLO"
+},
+{
+"code": "UGEL-CORONGO",
+"name": "UGEL CORONGO",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "CORONGO"
+},
+{
+"code": "UGEL-COTABAMBAS",
+"name": "UGEL COTABAMBAS",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "COTABAMBAS"
+},
+{
+"code": "UGEL-CRUCERO",
+"name": "UGEL CRUCERO",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "CRUCERO"
+},
+{
+"code": "UGEL-CUSCO",
+"name": "UGEL CUSCO",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "CUSCO"
+},
+{
+"code": "UGEL-CUTERVO",
+"name": "UGEL CUTERVO",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "CUTERVO"
+},
+{
+"code": "UGEL-DANIEL-ALCIDES-CARRION",
+"name": "UGEL DANIEL ALCIDES CARRIÓN",
+"unit_type": "ugel",
+"region": "PASCO",
+"clave": "DANIEL ALCIDES CARRION"
+},
+{
+"code": "UGEL-DOS-DE-MAYO",
+"name": "UGEL DOS DE MAYO",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "DOS MAYO"
+},
+{
+"code": "UGEL-EL-COLLAO",
+"name": "UGEL EL COLLAO",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "COLLAO"
+},
+{
+"code": "UGEL-EL-DORADO",
+"name": "UGEL EL DORADO",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "DORADO"
+},
+{
+"code": "UGEL-ESPINAR",
+"name": "UGEL ESPINAR",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "ESPINAR"
+},
+{
+"code": "UGEL-FERRENAFE",
+"name": "UGEL FERREÑAFE",
+"unit_type": "ugel",
+"region": "LAMBAYEQUE",
+"clave": "FERRENAFE"
+},
+{
+"code": "UGEL-GENERAL-SANCHEZ-CERRO",
+"name": "UGEL GENERAL SÁNCHEZ CERRO",
+"unit_type": "ugel",
+"region": "MOQUEGUA",
+"clave": "GENERAL SANCHEZ CERRO"
+},
+{
+"code": "UGEL-GRAN-CHIMU",
+"name": "UGEL GRAN CHIMÚ",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "GRAN CHIMU"
+},
+{
+"code": "UGEL-GRAU",
+"name": "UGEL GRAU",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "GRAU"
+},
+{
+"code": "UGEL-HUACAYBAMBA",
+"name": "UGEL HUACAYBAMBA",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "HUACAYBAMBA"
+},
+{
+"code": "UGEL-HUALGAYOC",
+"name": "UGEL HUALGAYOC",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "HUALGAYOC"
+},
+{
+"code": "UGEL-HUALLAGA",
+"name": "UGEL HUALLAGA",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "HUALLAGA"
+},
+{
+"code": "UGEL-HUAMALIES",
+"name": "UGEL HUAMALÍES",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "HUAMALIES"
+},
+{
+"code": "UGEL-HUAMANGA",
+"name": "UGEL HUAMANGA",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "HUAMANGA"
+},
+{
+"code": "UGEL-HUANCABAMBA",
+"name": "UGEL HUANCABAMBA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "HUANCABAMBA"
+},
+{
+"code": "UGEL-HUANCANE",
+"name": "UGEL HUANCANÉ",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "HUANCANE"
+},
+{
+"code": "UGEL-HUANCARAMA",
+"name": "UGEL HUANCARAMA",
+"unit_type": "ugel",
+"region": "APURÍMAC",
+"clave": "HUANCARAMA"
+},
+{
+"code": "UGEL-HUANCASANCOS",
+"name": "UGEL HUANCASANCOS",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "HUANCASANCOS"
+},
+{
+"code": "UGEL-HUANCAVELICA",
+"name": "UGEL HUANCAVELICA",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "HUANCAVELICA"
+},
+{
+"code": "UGEL-HUANCAYO",
+"name": "UGEL HUANCAYO",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "HUANCAYO"
+},
+{
+"code": "UGEL-HUANTA",
+"name": "UGEL HUANTA",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "HUANTA"
+},
+{
+"code": "UGEL-HUANUCO",
+"name": "UGEL HUÁNUCO",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "HUANUCO"
+},
+{
+"code": "UGEL-HUARAZ",
+"name": "UGEL HUARAZ",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "HUARAZ"
+},
+{
+"code": "UGEL-HUARI",
+"name": "UGEL HUARI",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "HUARI"
+},
+{
+"code": "UGEL-HUARMACA",
+"name": "UGEL HUARMACA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "HUARMACA"
+},
+{
+"code": "UGEL-HUARMEY",
+"name": "UGEL HUARMEY",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "HUARMEY"
+},
+{
+"code": "UGEL-HUAYLAS",
+"name": "UGEL HUAYLAS",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "HUAYLAS"
+},
+{
+"code": "UGEL-HUAYTARA",
+"name": "UGEL HUAYTARÁ",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "HUAYTARA"
+},
+{
+"code": "UGEL-IBIR-IMAZA",
+"name": "UGEL IBIR - IMAZA",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "IBIR IMAZA"
+},
+{
+"code": "UGEL-ICA",
+"name": "UGEL ICA",
+"unit_type": "ugel",
+"region": "ICA",
+"clave": "ICA"
+},
+{
+"code": "UGEL-ILO",
+"name": "UGEL ILO",
+"unit_type": "ugel",
+"region": "MOQUEGUA",
+"clave": "ILO"
+},
+{
+"code": "UGEL-INTERCULTURAL-BILINGUE-CENEPA",
+"name": "UGEL INTERCULTURAL BILINGÜE CENEPA",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "INTERCULTURAL BILINGUE CENEPA"
+},
+{
+"code": "UGEL-INTERCULTURAL-BILINGUE-RIO-SANTIAGO",
+"name": "UGEL INTERCULTURAL BILINGÜE RIO SANTIAGO",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "INTERCULTURAL BILINGUE RIO SANTIAGO"
+},
+{
+"code": "UGEL-ISLAY",
+"name": "UGEL ISLAY",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "ISLAY"
+},
+{
+"code": "UGEL-JAEN",
+"name": "UGEL JAÉN",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "JAEN"
+},
+{
+"code": "UGEL-JAUJA",
+"name": "UGEL JAUJA",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "JAUJA"
+},
+{
+"code": "UGEL-JORGE-BASADRE",
+"name": "UGEL JORGE BASADRE",
+"unit_type": "ugel",
+"region": "TACNA",
+"clave": "JORGE BASADRE"
+},
+{
+"code": "UGEL-JULCAN",
+"name": "UGEL JULCÁN",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "JULCAN"
+},
+{
+"code": "UGEL-JUNIN",
+"name": "UGEL JUNÍN",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "JUNIN"
+},
+{
+"code": "UGEL-LA-CONVENCION",
+"name": "UGEL LA CONVENCIÓN",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "CONVENCION"
+},
+{
+"code": "UGEL-LA-JOYA",
+"name": "UGEL LA JOYA",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "JOYA"
+},
+{
+"code": "UGEL-LA-MAR",
+"name": "UGEL LA MAR",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "MAR"
+},
+{
+"code": "UGEL-LA-UNION-A",
+"name": "UGEL LA UNIÓN (A)",
+"unit_type": "ugel",
+"region": "AREQUIPA",
+"clave": "UNION A"
+},
+{
+"code": "UGEL-LA-UNION-P",
+"name": "UGEL LA UNIÓN (P)",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "UNION P"
+},
+{
+"code": "UGEL-LAMAS",
+"name": "UGEL LAMAS",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "LAMAS"
+},
+{
+"code": "UGEL-LAMBAYEQUE",
+"name": "UGEL LAMBAYEQUE",
+"unit_type": "ugel",
+"region": "LAMBAYEQUE",
+"clave": "LAMBAYEQUE"
+},
+{
+"code": "UGEL-LAMPA",
+"name": "UGEL LAMPA",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "LAMPA"
+},
+{
+"code": "UGEL-LAURICOCHA",
+"name": "UGEL LAURICOCHA",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "LAURICOCHA"
+},
+{
+"code": "UGEL-LEONCIO-PRADO",
+"name": "UGEL LEONCIO PRADO",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "LEONCIO PRADO"
+},
+{
+"code": "UGEL-LORETO-NAUTA",
+"name": "UGEL LORETO - NAUTA",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "LORETO NAUTA"
+},
+{
+"code": "UGEL-LUCANAS",
+"name": "UGEL LUCANAS",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "LUCANAS"
+},
+{
+"code": "UGEL-LUYA",
+"name": "UGEL LUYA",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "LUYA"
+},
+{
+"code": "UGEL-MANU",
+"name": "UGEL MANU",
+"unit_type": "ugel",
+"region": "MADRE DE DIOS",
+"clave": "MANU"
+},
+{
+"code": "UGEL-MARANON",
+"name": "UGEL MARAÑÓN",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "MARANON"
+},
+{
+"code": "UGEL-MARISCAL-CACERES",
+"name": "UGEL MARISCAL CÁCERES",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "MARISCAL CACERES"
+},
+{
+"code": "UGEL-MARISCAL-LUZURIAGA",
+"name": "UGEL MARISCAL LUZURIAGA",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "MARISCAL LUZURIAGA"
+},
+{
+"code": "UGEL-MARISCAL-NIETO",
+"name": "UGEL MARISCAL NIETO",
+"unit_type": "ugel",
+"region": "MOQUEGUA",
+"clave": "MARISCAL NIETO"
+},
+{
+"code": "UGEL-MAYNAS",
+"name": "UGEL MAYNAS",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "MAYNAS"
+},
+{
+"code": "UGEL-MELGAR",
+"name": "UGEL MELGAR",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "MELGAR"
+},
+{
+"code": "UGEL-MOHO",
+"name": "UGEL MOHO",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "MOHO"
+},
+{
+"code": "UGEL-MORROPON",
+"name": "UGEL MORROPÓN",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "MORROPON"
+},
+{
+"code": "UGEL-MOYOBAMBA",
+"name": "UGEL MOYOBAMBA",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "MOYOBAMBA"
+},
+{
+"code": "UGEL-NASCA",
+"name": "UGEL NASCA",
+"unit_type": "ugel",
+"region": "ICA",
+"clave": "NASCA"
+},
+{
+"code": "UGEL-OCROS",
+"name": "UGEL OCROS",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "OCROS"
+},
+{
+"code": "UGEL-OTUZCO",
+"name": "UGEL OTUZCO",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "OTUZCO"
+},
+{
+"code": "UGEL-OXAPAMPA",
+"name": "UGEL OXAPAMPA",
+"unit_type": "ugel",
+"region": "PASCO",
+"clave": "OXAPAMPA"
+},
+{
+"code": "UGEL-PACASMAYO",
+"name": "UGEL PACASMAYO",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "PACASMAYO"
+},
+{
+"code": "UGEL-PACHITEA",
+"name": "UGEL PACHITEA",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "PACHITEA"
+},
+{
+"code": "UGEL-PADRE-ABAD",
+"name": "UGEL PADRE ABAD",
+"unit_type": "ugel",
+"region": "UCAYALI",
+"clave": "PADRE ABAD"
+},
+{
+"code": "UGEL-PAITA",
+"name": "UGEL PAITA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "PAITA"
+},
+{
+"code": "UGEL-PALLASCA",
+"name": "UGEL PALLASCA",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "PALLASCA"
+},
+{
+"code": "UGEL-PALPA",
+"name": "UGEL PALPA",
+"unit_type": "ugel",
+"region": "ICA",
+"clave": "PALPA"
+},
+{
+"code": "UGEL-PANGOA",
+"name": "UGEL PANGOA",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "PANGOA"
+},
+{
+"code": "UGEL-PARINACOCHAS",
+"name": "UGEL PARINACOCHAS",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "PARINACOCHAS"
+},
+{
+"code": "UGEL-PARURO",
+"name": "UGEL PARURO",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "PARURO"
+},
+{
+"code": "UGEL-PASCO",
+"name": "UGEL PASCO",
+"unit_type": "ugel",
+"region": "PASCO",
+"clave": "PASCO"
+},
+{
+"code": "UGEL-PATAZ",
+"name": "UGEL PATAZ",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "PATAZ"
+},
+{
+"code": "UGEL-PAUCAR-DE-SARASARA",
+"name": "UGEL PAUCAR DE SARASARA",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "PAUCAR SARASARA"
+},
+{
+"code": "UGEL-PAUCARTAMBO",
+"name": "UGEL PAUCARTAMBO",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "PAUCARTAMBO"
+},
+{
+"code": "UGEL-PICHANAKI",
+"name": "UGEL PICHANAKI",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "PICHANAKI"
+},
+{
+"code": "UGEL-PICHARI-KIMBIRI-VILLA-VIRGEN",
+"name": "UGEL PICHARI KIMBIRI VILLA VIRGEN",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "PICHARI KIMBIRI VILLA VIRGEN"
+},
+{
+"code": "UGEL-PICOTA",
+"name": "UGEL PICOTA",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "PICOTA"
+},
+{
+"code": "UGEL-PISCO",
+"name": "UGEL PISCO",
+"unit_type": "ugel",
+"region": "ICA",
+"clave": "PISCO"
+},
+{
+"code": "UGEL-PIURA",
+"name": "UGEL PIURA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "PIURA"
+},
+{
+"code": "UGEL-POMABAMBA",
+"name": "UGEL POMABAMBA",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "POMABAMBA"
+},
+{
+"code": "UGEL-PUERTO-BERMUDEZ",
+"name": "UGEL PUERTO BERMUDEZ",
+"unit_type": "ugel",
+"region": "PASCO",
+"clave": "PUERTO BERMUDEZ"
+},
+{
+"code": "UGEL-PUERTO-INCA",
+"name": "UGEL PUERTO INCA",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "PUERTO INCA"
+},
+{
+"code": "UGEL-PUNO",
+"name": "UGEL PUNO",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "PUNO"
+},
+{
+"code": "UGEL-PURUS",
+"name": "UGEL PURUS",
+"unit_type": "ugel",
+"region": "UCAYALI",
+"clave": "PURUS"
+},
+{
+"code": "UGEL-PUTUMAYO",
+"name": "UGEL PUTUMAYO",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "PUTUMAYO"
+},
+{
+"code": "UGEL-QUISPICANCHI",
+"name": "UGEL QUISPICANCHI",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "QUISPICANCHI"
+},
+{
+"code": "UGEL-RAMON-CASTILLA-CABALLOCOCHA",
+"name": "UGEL RAMÓN CASTILLA - CABALLOCOCHA",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "RAMON CASTILLA CABALLOCOCHA"
+},
+{
+"code": "UGEL-RECUAY",
+"name": "UGEL RECUAY",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "RECUAY"
+},
+{
+"code": "UGEL-REQUENA",
+"name": "UGEL REQUENA",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "REQUENA"
+},
+{
+"code": "UGEL-RIO-ENE-MANTARO",
+"name": "UGEL RIO ENE - MANTARO",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "RIO ENE MANTARO"
+},
+{
+"code": "UGEL-RIO-TAMBO",
+"name": "UGEL RIO TAMBO",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "RIO TAMBO"
+},
+{
+"code": "UGEL-RIOJA",
+"name": "UGEL RIOJA",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "RIOJA"
+},
+{
+"code": "UGEL-RODRIGUEZ-DE-MENDOZA",
+"name": "UGEL RODRÍGUEZ DE MENDOZA",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "RODRIGUEZ MENDOZA"
+},
+{
+"code": "UGEL-SAN-ANTONIO-DE-PUTINA",
+"name": "UGEL SAN ANTONIO DE PUTINA",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "SAN ANTONIO PUTINA"
+},
+{
+"code": "UGEL-SAN-IGNACIO",
+"name": "UGEL SAN IGNACIO",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "SAN IGNACIO"
+},
+{
+"code": "UGEL-SAN-IGNACIO-DE-LOYOLA-ICHUNA",
+"name": "UGEL SAN IGNACIO DE LOYOLA - ICHUÑA",
+"unit_type": "ugel",
+"region": "MOQUEGUA",
+"clave": "SAN IGNACIO LOYOLA ICHUNA"
+},
+{
+"code": "UGEL-SAN-MARCOS",
+"name": "UGEL SAN MARCOS",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "SAN MARCOS"
+},
+{
+"code": "UGEL-SAN-MARTIN",
+"name": "UGEL SAN MARTÍN",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "SAN MARTIN"
+},
+{
+"code": "UGEL-SAN-MIGUEL",
+"name": "UGEL SAN MIGUEL",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "SAN MIGUEL"
+},
+{
+"code": "UGEL-SAN-PABLO",
+"name": "UGEL SAN PABLO",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "SAN PABLO"
+},
+{
+"code": "UGEL-SAN-ROMAN",
+"name": "UGEL SAN ROMÁN",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "SAN ROMAN"
+},
+{
+"code": "UGEL-SANCHEZ-CARRION",
+"name": "UGEL SÁNCHEZ CARRIÓN",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "SANCHEZ CARRION"
+},
+{
+"code": "UGEL-SANDIA",
+"name": "UGEL SANDIA",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "SANDIA"
+},
+{
+"code": "UGEL-SANTA",
+"name": "UGEL SANTA",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "SANTA"
+},
+{
+"code": "UGEL-SANTA-CRUZ",
+"name": "UGEL SANTA CRUZ",
+"unit_type": "ugel",
+"region": "CAJAMARCA",
+"clave": "SANTA CRUZ"
+},
+{
+"code": "UGEL-SANTIAGO-DE-CHUCO",
+"name": "UGEL SANTIAGO DE CHUCO",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "SANTIAGO CHUCO"
+},
+{
+"code": "UGEL-SATIPO",
+"name": "UGEL SATIPO",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "SATIPO"
+},
+{
+"code": "UGEL-SECHURA",
+"name": "UGEL SECHURA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "SECHURA"
+},
+{
+"code": "UGEL-SIHUAS",
+"name": "UGEL SIHUAS",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "SIHUAS"
+},
+{
+"code": "UGEL-SUCRE",
+"name": "UGEL SUCRE",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "SUCRE"
+},
+{
+"code": "UGEL-SULLANA",
+"name": "UGEL SULLANA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "SULLANA"
+},
+{
+"code": "UGEL-SURCUBAMBA",
+"name": "UGEL SURCUBAMBA",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "SURCUBAMBA"
+},
+{
+"code": "UGEL-TACNA",
+"name": "UGEL TACNA",
+"unit_type": "ugel",
+"region": "TACNA",
+"clave": "TACNA"
+},
+{
+"code": "UGEL-TAHUAMANU",
+"name": "UGEL TAHUAMANU",
+"unit_type": "ugel",
+"region": "MADRE DE DIOS",
+"clave": "TAHUAMANU"
+},
+{
+"code": "UGEL-TALARA",
+"name": "UGEL TALARA",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "TALARA"
+},
+{
+"code": "UGEL-TAMBOGRANDE",
+"name": "UGEL TAMBOGRANDE",
+"unit_type": "ugel",
+"region": "PIURA",
+"clave": "TAMBOGRANDE"
+},
+{
+"code": "UGEL-TAMBOPATA",
+"name": "UGEL TAMBOPATA",
+"unit_type": "ugel",
+"region": "MADRE DE DIOS",
+"clave": "TAMBOPATA"
+},
+{
+"code": "UGEL-TARATA",
+"name": "UGEL TARATA",
+"unit_type": "ugel",
+"region": "TACNA",
+"clave": "TARATA"
+},
+{
+"code": "UGEL-TARMA",
+"name": "UGEL TARMA",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "TARMA"
+},
+{
+"code": "UGEL-TAYACAJA",
+"name": "UGEL TAYACAJA",
+"unit_type": "ugel",
+"region": "HUANCAVELICA",
+"clave": "TAYACAJA"
+},
+{
+"code": "UGEL-TOCACHE",
+"name": "UGEL TOCACHE",
+"unit_type": "ugel",
+"region": "SAN MARTÍN",
+"clave": "TOCACHE"
+},
+{
+"code": "UGEL-TUMBES",
+"name": "UGEL TUMBES",
+"unit_type": "ugel",
+"region": "TUMBES",
+"clave": "TUMBES"
+},
+{
+"code": "UGEL-UCAYALI-CONTAMANA",
+"name": "UGEL UCAYALI - CONTAMANA",
+"unit_type": "ugel",
+"region": "LORETO",
+"clave": "UCAYALI CONTAMANA"
+},
+{
+"code": "UGEL-URUBAMBA",
+"name": "UGEL URUBAMBA",
+"unit_type": "ugel",
+"region": "CUSCO",
+"clave": "URUBAMBA"
+},
+{
+"code": "UGEL-UTCUBAMBA",
+"name": "UGEL UTCUBAMBA",
+"unit_type": "ugel",
+"region": "AMAZONAS",
+"clave": "UTCUBAMBA"
+},
+{
+"code": "UGEL-VENTANILLA",
+"name": "UGEL VENTANILLA",
+"unit_type": "ugel",
+"region": "CALLAO",
+"clave": "VENTANILLA"
+},
+{
+"code": "UGEL-VICTOR-FAJARDO",
+"name": "UGEL VÍCTOR FAJARDO",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "VICTOR FAJARDO"
+},
+{
+"code": "UGEL-VILCASHUAMAN",
+"name": "UGEL VILCASHUAMÁN",
+"unit_type": "ugel",
+"region": "AYACUCHO",
+"clave": "VILCASHUAMAN"
+},
+{
+"code": "UGEL-VIRU",
+"name": "UGEL VIRÚ",
+"unit_type": "ugel",
+"region": "LA LIBERTAD",
+"clave": "VIRU"
+},
+{
+"code": "UGEL-YAROWILCA",
+"name": "UGEL YAROWILCA",
+"unit_type": "ugel",
+"region": "HUÁNUCO",
+"clave": "YAROWILCA"
+},
+{
+"code": "UGEL-YAULI",
+"name": "UGEL YAULI",
+"unit_type": "ugel",
+"region": "JUNÍN",
+"clave": "YAULI"
+},
+{
+"code": "UGEL-YUNGAY",
+"name": "UGEL YUNGAY",
+"unit_type": "ugel",
+"region": "ANCASH",
+"clave": "YUNGAY"
+},
+{
+"code": "UGEL-YUNGUYO",
+"name": "UGEL YUNGUYO",
+"unit_type": "ugel",
+"region": "PUNO",
+"clave": "YUNGUYO"
+},
+{
+"code": "UGEL-ZARUMILLA",
+"name": "UGEL ZARUMILLA",
+"unit_type": "ugel",
+"region": "TUMBES",
+"clave": "ZARUMILLA"
+}
+]

@@ -61,6 +61,7 @@ import {
 } from 'lucide-react';
 
 import EstadoReunionCatalogoSelect from './EstadoReunionCatalogoSelect';
+import TipoReunionCatalogoSelect from './TipoReunionCatalogoSelect';
 import {
   ESTADOS_REUNION,
   claseEstadoReunion,
@@ -85,6 +86,7 @@ type Meeting = {
   site: string;
   address: string;
   status: MeetingStatus;
+  tipoCodigo?: string;
   attendees: string[];
   owner: string;
   meetUrl: string;
@@ -474,6 +476,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
       site: 'Reunión virtual',
       address: '',
       status: 'PROGRAMADA',
+      tipoCodigo: '',
       attendees: [],
       owner: 'Carlos Sandoval',
       meetUrl: '',
@@ -515,6 +518,7 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
       site: form.modality === 'Google Meet' ? 'Reunión virtual' : form.site || 'Sede por definir',
       address: form.modality === 'Google Meet' ? '' : form.address || '',
       status: form.status || 'PROGRAMADA',
+      tipoCodigo: form.tipoCodigo || '',
       attendees: form.attendees || [],
       owner: form.owner || 'Sin asignar',
       meetUrl: form.meetUrl || '',
@@ -2369,12 +2373,14 @@ export default function ReunionesView({ onActions }: { onActions?: (h: { notify:
                       </label>
                       <label className="field">
                         <span>Tipo de reunión</span>
-                        <select disabled defaultValue="" title="Tabla gp_tipos_reunion_c aún no conectada">
-                          <option value="">Por conectar · gp_tipos_reunion_c</option>
-                        </select>
+                        <TipoReunionCatalogoSelect
+                          value={form.tipoCodigo || ''}
+                          onChange={(tipoCodigo) => setForm({ ...form, tipoCodigo })}
+                        />
                         <small className="field-help">
-                          La tabla existe en Supabase con 8 tipos (PMI). El selector se conectará en el
-                          siguiente paso; hasta entonces no se registra este dato.
+                          Catálogo gp_tipos_reunion_c (Supabase, 8 tipos PMI): Reunión de inicio ·
+                          Seguimiento · Comité directivo · Planificación · Revisión · Retrospectiva ·
+                          Cierre · Diaria.
                         </small>
                       </label>
                       <label className="field">

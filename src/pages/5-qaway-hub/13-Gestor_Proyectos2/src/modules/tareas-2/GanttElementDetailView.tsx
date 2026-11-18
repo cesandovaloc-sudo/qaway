@@ -22,7 +22,7 @@ import type { AttachmentItem, DeliverableItem, Item, Status } from './Tareas2Vie
 import { OFFICIAL_WBS_DEPENDENCIES } from './Tareas2View';
 import { DRE_JUNIN_DOTACION_2027_EDT, PROJECT_PHASES_CATALOG } from './edtPmbokModel';
 import { listarTiposDependenciaGestor } from '../../services/gpCatalogosService';
-import './gantt.css';
+import '../cronograma-gantt/gantt.css';
 
 /* Tipos que viven solo en Tareas2View: se replican aquí para no importar
    módulo pesado. El matching de tareas es compatible con getLinkedTasksSummary. */

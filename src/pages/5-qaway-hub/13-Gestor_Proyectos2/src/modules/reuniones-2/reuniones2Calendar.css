@@ -1,6 +1,54 @@
 /* ─── Estilos dedicados para el Calendario Potenciado de Reuniones 2 ─── */
 /* Aislado de cronograma-gantt/gantt.css para no afectar al módulo Proyecto */
 
+.cal-day-bg-cell.r2-day-cell {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+
+.cal-week-events-overlay {
+  z-index: 2;
+  pointer-events: none !important;
+}
+
+.cal-day-bg-cell.r2-day-cell:hover {
+  background: #f8fafc;
+}
+
+.cal-day-bg-cell.r2-day-cell.is-selected {
+  background: #eff6ff;
+}
+
+.cal-day-bg-cell.r2-day-cell.is-selected .cal-num {
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.cal-day-bg-cell.r2-day-cell {
+  pointer-events: auto !important;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+
+.cal-day-bg-cell.r2-day-cell:hover {
+  background: #f8fafc;
+}
+
+.cal-day-bg-cell.r2-day-cell.is-selected {
+  background: #eff6ff;
+  box-shadow: inset 0 0 0 1.5px #2563eb;
+}
+
 .cal-day-bg-cell.r2-drag-over {
   background: #e8f0fe !important;
   outline: 2px dashed #4263df;
@@ -19,6 +67,65 @@
   color: #1d4ed8;
 }
 
+/* Tarjetas sólidas sin % ni sombras en Reuniones 2 */
+.gantt-v2 .cal-gantt-bar.r2-solid-bar,
+.cal-gantt-bar.r2-solid-bar {
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 5px;
+}
+
+.gantt-v2 .cal-gantt-bar.r2-solid-bar:hover,
+.cal-gantt-bar.r2-solid-bar:hover {
+  box-shadow: none !important;
+  filter: brightness(0.94);
+  transform: translateY(-1px);
+}
+
+.gantt-v2 .cal-gantt-bar.r2-solid-bar .cal-gantt-content,
+.gantt-v2 .cal-gantt-bar.r2-solid-bar .cal-gantt-code,
+.gantt-v2 .cal-gantt-bar.r2-solid-bar .cal-gantt-name,
+.cal-gantt-bar.r2-solid-bar .cal-gantt-content,
+.cal-gantt-bar.r2-solid-bar .cal-gantt-code,
+.cal-gantt-bar.r2-solid-bar .cal-gantt-name {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+/* Toggle L-V / L-D */
+.r2-workweek-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.r2-workweek-btn {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.r2-workweek-btn:hover {
+  color: #0f172a;
+}
+
+.r2-workweek-btn.active {
+  background: #ffffff;
+  color: #2563eb;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
 .r2-conflict-pill {
   display: inline-flex;
   align-items: center;
@@ -33,19 +140,28 @@
   white-space: nowrap;
 }
 
-/* TimeGrid Semanal Real */
+/* TimeGrid Semanal Real con marco redondeado y cabecera sticky alineada 1:1 */
 .r2-week-wrap {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #e2e8f0;
+  border: 1px solid #e2e8f0;
   background: #ffffff;
-  border-radius: 0 0 12px 12px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
+.r2-week-body {
+  max-height: 580px;
+  overflow-y: auto;
+  position: relative;
+}
+
 .r2-week-header {
+  position: sticky;
+  top: 0;
+  z-index: 6;
   display: grid;
-  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  grid-template-columns: 56px repeat(5, minmax(0, 1fr));
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
 }
@@ -98,14 +214,9 @@
   color: #ffffff;
 }
 
-.r2-week-body {
-  max-height: 540px;
-  overflow-y: auto;
-}
-
 .r2-week-grid {
   display: grid;
-  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  grid-template-columns: 56px repeat(5, minmax(0, 1fr));
 }
 
 .r2-time-col {
@@ -267,8 +378,10 @@
 
 /* Vista Día Timeline Real (Compacta y Limpia) */
 .r2-day-wrap {
-  padding: 14px 18px;
+  padding: 16px 20px;
   background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
 }
 
 .r2-day-header {
@@ -444,5 +557,184 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.r2-modal-tabs {
+  display: flex;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 9px;
+}
+
+.r2-modal-tab {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.r2-modal-tab.active {
+  background: #ffffff;
+  color: #2563eb;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.r2-quick-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.r2-quick-title-input {
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 6px 2px 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+  background: transparent;
+  transition: border-color 0.15s;
+}
+
+.r2-quick-title-input:focus {
+  border-bottom-color: #2563eb;
+}
+
+.r2-quick-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.r2-quick-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.r2-quick-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.r2-quick-field input,
+.r2-quick-field select,
+.r2-quick-field textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.r2-quick-field input:focus,
+.r2-quick-field select:focus,
+.r2-quick-field textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.r2-modality-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.r2-modality-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.r2-modality-card:hover {
+  border-color: #93c5fd;
+}
+
+.r2-modality-card.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+.r2-modality-card strong {
+  display: block;
+  font-size: 11.5px;
+  color: #0f172a;
+}
+
+.r2-modality-card small {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.r2-quick-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.r2-btn-cancel {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.r2-btn-cancel:hover {
+  background: #f8fafc;
+}
+
+.r2-btn-save {
+  border: 0;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.r2-btn-save:hover {
+  background: #1d4ed8;
+}
+
+/* Asegurar que en Agenda / Lista la tabla ocupe el 100% de la cápsula gantt-table-card */
+.gantt-v2 .view-lista-fullwidth .table-head .fixed-cols,
+.gantt-v2 .view-lista-fullwidth .row .fixed-cols {
+  min-width: 100% !important;
 }

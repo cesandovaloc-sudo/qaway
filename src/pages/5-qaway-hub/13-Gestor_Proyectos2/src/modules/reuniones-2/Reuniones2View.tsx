@@ -12,10 +12,12 @@ import {
   hasBaseline,
 } from './scheduleMetrics';
 import '../cronograma-gantt/gantt.css';
+import './reuniones2Calendar.css';
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
 import CronogramaKanbanView from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
+import ItinerarioView from './ItinerarioView';
 import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
 import { CronogramaArbolView } from './CronogramaArbolView';
 import EquipoSedesView from '../equipo/EquipoSedesView';
@@ -141,6 +143,7 @@ import {
   Presentation,
   RefreshCw,
   RotateCcw,
+  Route,
   Save,
   Search,
   ShieldCheck,
@@ -575,7 +578,7 @@ const PROJECT_MONTHS = [
 const RANGE_MIN = '2026-09-01';
 const RANGE_MAX = '2027-04-30';
 
-const CANONICAL_COLS: ColKey[] = ['code', 'name', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'actions'];
+const CANONICAL_COLS: ColKey[] = ['name', 'code', 'kind', 'parent', 'start', 'end', 'duration', 'progress', 'deviation', 'status', 'dependencies', 'gestor', 'region', 'actualEnd', 'actions'];
 
 const DEFAULT_COLS: Record<ColKey, number> = {
   code: 80,
@@ -634,14 +637,14 @@ const LS_WRAPPED_COLS = `${LS_UI_PREFIX}-wrapped-cols-v1`;
 const LS_PERCENT_FORMATS = `${LS_UI_PREFIX}-percent-formats-v1`;
 const LS_FROZEN_COLS = `${LS_UI_PREFIX}-frozen-cols-v1`;
 const LS_VISIBLE_COLS_GANTT = `${LS_UI_PREFIX}-visible-cols-gantt-v3`;
-const LS_VISIBLE_COLS_LISTA = `${LS_UI_PREFIX}-visible-cols-lista-v3`;
+const LS_VISIBLE_COLS_LISTA = `${LS_UI_PREFIX}-visible-cols-lista-v5`;
 
 const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
-  { key: 'name', label: 'COMPONENTE / PRODUCTO', fixed: true },
+  { key: 'name', label: 'COMPONENTE / REUNIÓN', fixed: true },
   { key: 'code', label: 'Código' },
   { key: 'kind', label: 'Tipo' },
   { key: 'parent', label: 'Componente padre' },
-  { key: 'start', label: 'Inicio' },
+  { key: 'start', label: 'Fecha y hora' },
   { key: 'end', label: 'Fin' },
   { key: 'duration', label: 'Duración' },
   { key: 'progress', label: 'Avance' },
@@ -649,15 +652,15 @@ const ALL_COL_META: { key: ColKey; label: string; fixed?: boolean }[] = [
   { key: 'status', label: 'Estado' },
   { key: 'dependencies', label: 'Predecesores' },
   { key: 'gestor', label: 'Responsable' },
-  { key: 'region', label: 'Ámbito' },
-  { key: 'actualEnd', label: 'Fecha real' },
+  { key: 'region', label: 'Modalidad / Sede' },
+  { key: 'actualEnd', label: 'Acta' },
   { key: 'actions', label: 'Acciones' },
 ];
 
 // Preset inicial y predeterminado para vista Gantt (7 columnas compactas alineadas con la línea de tiempo)
 const GANTT_PRESET_COLS: ColKey[] = ['name', 'start', 'end', 'duration', 'progress', 'status', 'gestor'];
-// Preset inicial y predeterminado para vista Lista (14 columnas canónicas completas ordenadas)
-const LISTA_PRESET_COLS: ColKey[] = [...CANONICAL_COLS];
+// Preset inicial y predeterminado para vista Lista de Reuniones 2 (Componente 1° + contenido de reuniones)
+const LISTA_PRESET_COLS: ColKey[] = ['name', 'code', 'start', 'region', 'gestor', 'status', 'actualEnd', 'actions'];
 const DEFAULT_VISIBLE_COLS: ColKey[] = GANTT_PRESET_COLS;
 const LISTA_VISIBLE_COLS: ColKey[] = LISTA_PRESET_COLS;
 const getDays = (a?: string, b?: string) => {
@@ -1213,221 +1216,112 @@ export default function Reuniones2View({
     hitoColor: string;
   };
 
-  const REUNIONES2_MEETINGS_SEED: MeetingAgendaSeedItem[] = [
-    {
-      id: 'reu2-101',
-      code: 'REU-101',
-      name: 'Comité Técnico de Planificación y Rutas Regionales',
-      type: 'sub',
-      parentId: null,
-      start: '2026-10-26',
-      end: '2026-10-26',
-      meetingTime: '09:00',
-      meetingEndTime: '10:30',
-      modality: 'Google Meet',
-      hitoLabel: '1. Planificación de la Distribución',
-      hitoColor: '#2563EB',
-      progress: 100,
-      status: 'Completado',
-      gestor: 'Javier Ruíz',
-      gestores: ['Javier Ruíz'],
-      region: 'Junín',
-      faseId: 'F1',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-102',
-      code: 'REU-102',
-      name: 'Mesa de Validación de Padrón de II.EE. y Almacenes',
-      type: 'sub',
-      parentId: null,
-      start: '2026-11-18',
-      end: '2026-11-18',
-      meetingTime: '11:00',
-      meetingEndTime: '12:30',
-      modality: 'Presencial',
-      hitoLabel: '2. Gestión de Almacenes',
-      hitoColor: '#0D9488',
-      progress: 80,
-      status: 'En proceso',
-      gestor: 'María Jiménez',
-      gestores: ['María Jiménez'],
-      region: 'Lima Metropolitana',
-      faseId: 'F2',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-103',
-      code: 'REU-103',
-      name: 'Revisión de Actas PECOSA y Recepción en DRE / UGEL',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-07',
-      end: '2026-12-07',
-      meetingTime: '09:00',
-      meetingEndTime: '10:30',
-      modality: 'Google Meet',
-      hitoLabel: '3. Recepción DRE / UGEL',
-      hitoColor: '#D97706',
-      progress: 60,
-      status: 'En proceso',
-      gestor: 'Lucía Flores',
-      gestores: ['Lucía Flores'],
-      region: 'Cusco',
-      faseId: 'F2',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-104',
-      code: 'REU-104',
-      name: 'Seguimiento Contractual de Transportistas y Rutas',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-08',
-      end: '2026-12-08',
-      meetingTime: '10:00',
-      meetingEndTime: '11:30',
-      modality: 'Google Meet',
-      hitoLabel: '4. Gestión de Contratos',
-      hitoColor: '#7C3AED',
-      progress: 45,
-      status: 'En proceso',
-      gestor: 'Juan Pérez',
-      gestores: ['Juan Pérez'],
-      region: 'Arequipa',
-      faseId: 'F2',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-105',
-      code: 'REU-105',
-      name: 'Taller de Acreditación de Personal y Gestores Territoriales',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-09',
-      end: '2026-12-09',
-      meetingTime: '09:30',
-      meetingEndTime: '11:00',
-      modality: 'Presencial',
-      hitoLabel: '5. Registro de Personal',
-      hitoColor: '#E11D48',
-      progress: 50,
-      status: 'En proceso',
-      gestor: 'Carlos Sandoval',
-      gestores: ['Carlos Sandoval'],
-      region: 'Todas las Regiones',
-      faseId: 'F2',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-106',
-      code: 'REU-106',
-      name: 'Comité de Calibración de Cronograma y Entregables Hito 1',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-09',
-      end: '2026-12-09',
-      meetingTime: '15:00',
-      meetingEndTime: '16:30',
-      modality: 'Google Meet',
-      hitoLabel: '1. Planificación de la Distribución',
-      hitoColor: '#2563EB',
-      progress: 30,
-      status: 'Pendiente',
-      gestor: 'Javier Ruíz',
-      gestores: ['Javier Ruíz'],
-      region: 'Todas las Regiones',
-      faseId: 'F1',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-107',
-      code: 'REU-107',
-      name: 'Coordinación SIAGIE y Registro de Recepción en II.EE.',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-10',
-      end: '2026-12-10',
-      meetingTime: '11:00',
-      meetingEndTime: '12:30',
-      modality: 'Google Meet',
-      hitoLabel: '9. Entrega a Beneficiarios',
-      hitoColor: '#059669',
-      progress: 20,
-      status: 'Pendiente',
-      gestor: 'María Jiménez',
-      gestores: ['María Jiménez'],
-      region: 'Piura',
-      faseId: 'F3',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-108',
-      code: 'REU-108',
-      name: 'Auditoría Preventiva de Guías de Remisión y Almacén',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-11',
-      end: '2026-12-11',
-      meetingTime: '14:00',
-      meetingEndTime: '15:30',
-      modality: 'Presencial',
-      hitoLabel: '2. Gestión de Almacenes',
-      hitoColor: '#0D9488',
-      progress: 0,
-      status: 'Pendiente',
-      gestor: 'Lucía Flores',
-      gestores: ['Lucía Flores'],
-      region: 'La Libertad',
-      faseId: 'F2',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-109',
-      code: 'REU-109',
-      name: 'Cierre Mensual de Conformidades y Liquidación de Rutas',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-15',
-      end: '2026-12-15',
-      meetingTime: '10:00',
-      meetingEndTime: '11:30',
-      modality: 'Google Meet',
-      hitoLabel: '4. Gestión de Contratos',
-      hitoColor: '#7C3AED',
-      progress: 0,
-      status: 'Pendiente',
-      gestor: 'Juan Pérez',
-      gestores: ['Juan Pérez'],
-      region: 'Todas las Regiones',
-      faseId: 'F3',
-      dependencies: [],
-    },
-    {
-      id: 'reu2-110',
-      code: 'REU-110',
-      name: 'Sesión Macroregional de Preparación BIAE 2027',
-      type: 'sub',
-      parentId: null,
-      start: '2026-12-22',
-      end: '2026-12-22',
-      meetingTime: '16:00',
-      meetingEndTime: '17:30',
-      modality: 'Google Meet',
-      hitoLabel: '9. Entrega a Beneficiarios',
-      hitoColor: '#059669',
-      progress: 0,
-      status: 'Pendiente',
-      gestor: 'Carlos Sandoval',
-      gestores: ['Carlos Sandoval'],
-      region: 'Todas las Regiones',
-      faseId: 'F3',
-      dependencies: [],
-    },
+  const HITO_PALETTE = [
+    { hitoLabel: '1. Planificación de la Distribución', hitoColor: '#2563EB' },
+    { hitoLabel: '2. Gestión de Almacenes', hitoColor: '#0D9488' },
+    { hitoLabel: '3. Recepción DRE / UGEL', hitoColor: '#D97706' },
+    { hitoLabel: '4. Gestión de Contratos', hitoColor: '#7C3AED' },
+    { hitoLabel: '5. Registro de Personal', hitoColor: '#E11D48' },
+    { hitoLabel: '6. Distribución Primaria', hitoColor: '#0284C7' },
+    { hitoLabel: '7. Distribución Secundaria', hitoColor: '#EA580C' },
+    { hitoLabel: '8. Monitoreo en Campo', hitoColor: '#4F46E5' },
+    { hitoLabel: '9. Entrega a Beneficiarios', hitoColor: '#059669' },
   ];
 
+  const RAW_REUNIONES2_SEED: Array<{
+    code: string;
+    name: string;
+    date: string;
+    meetingTime: string;
+    meetingEndTime: string;
+    modality: 'Google Meet' | 'Presencial';
+    hitoIdx: number;
+    status: 'Completado' | 'En proceso' | 'Con retraso' | 'Pendiente';
+    progress: number;
+    gestor: string;
+    region: string;
+    faseId: string;
+  }> = [
+    // ── SEPTIEMBRE 2026 (11 reuniones, varios días con 2-3 reuniones) ──
+    { code: 'REU-001', name: 'Instalación del Comité Nacional de Dotación 2027', date: '2026-09-04', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Presencial', hitoIdx: 0, status: 'Completado', progress: 100, gestor: 'Javier Ruíz', region: 'Todas las Regiones', faseId: 'F1' },
+    { code: 'REU-002', name: 'Alineamiento de Bases Técnicas con DRE/UGEL', date: '2026-09-04', meetingTime: '11:30', meetingEndTime: '13:00', modality: 'Google Meet', hitoIdx: 0, status: 'Completado', progress: 100, gestor: 'Carlos Sandoval', region: 'Junín', faseId: 'F1' },
+    { code: 'REU-003', name: 'Inspección Inicial de Capacidad en Almacén Central', date: '2026-09-08', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Presencial', hitoIdx: 1, status: 'Completado', progress: 100, gestor: 'María Jiménez', region: 'Lima Metropolitana', faseId: 'F1' },
+    { code: 'REU-004', name: 'Mesa de Términos de Referencia para Transporte', date: '2026-09-10', meetingTime: '10:00', meetingEndTime: '11:30', modality: 'Google Meet', hitoIdx: 3, status: 'Completado', progress: 100, gestor: 'Juan Pérez', region: 'Arequipa', faseId: 'F1' },
+    { code: 'REU-005', name: 'Validación de Padrón Preliminar de II.EE. Zona Sur', date: '2026-09-15', meetingTime: '08:30', meetingEndTime: '10:00', modality: 'Google Meet', hitoIdx: 0, status: 'Completado', progress: 100, gestor: 'Lucía Flores', region: 'Cusco', faseId: 'F1' },
+    { code: 'REU-006', name: 'Coordinación de Personal Técnico de Recepción', date: '2026-09-15', meetingTime: '10:30', meetingEndTime: '12:00', modality: 'Google Meet', hitoIdx: 4, status: 'Completado', progress: 100, gestor: 'Carlos Sandoval', region: 'Piura', faseId: 'F1' },
+    { code: 'REU-007', name: 'Taller de Protocolos SIGA-PECOSA para UGEL', date: '2026-09-15', meetingTime: '15:00', meetingEndTime: '16:30', modality: 'Presencial', hitoIdx: 2, status: 'Completado', progress: 100, gestor: 'Javier Ruíz', region: 'La Libertad', faseId: 'F1' },
+    { code: 'REU-008', name: 'Revisión de Rutas Fluviales y Acceso Rural', date: '2026-09-21', meetingTime: '09:30', meetingEndTime: '11:00', modality: 'Google Meet', hitoIdx: 5, status: 'Completado', progress: 100, gestor: 'María Jiménez', region: 'Loreto', faseId: 'F1' },
+    { code: 'REU-009', name: 'Comité de Seguridad y Embalaje de Material Educativo', date: '2026-09-24', meetingTime: '14:00', meetingEndTime: '15:30', modality: 'Presencial', hitoIdx: 1, status: 'Completado', progress: 100, gestor: 'Juan Pérez', region: 'Lima Metropolitana', faseId: 'F1' },
+    { code: 'REU-010', name: 'Cierre de Planificación Macroregional Norte', date: '2026-09-28', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Google Meet', hitoIdx: 0, status: 'Completado', progress: 100, gestor: 'Lucía Flores', region: 'Lambayeque', faseId: 'F1' },
+    { code: 'REU-011', name: 'Evaluación de Riesgos Logísticos Trimestre I', date: '2026-09-28', meetingTime: '11:00', meetingEndTime: '12:30', modality: 'Google Meet', hitoIdx: 7, status: 'Completado', progress: 100, gestor: 'Javier Ruíz', region: 'Todas las Regiones', faseId: 'F1' },
+
+    // ── OCTUBRE 2026 (11 reuniones, varios días con 2-3 reuniones) ──
+    { code: 'REU-101', name: 'Comité Técnico de Planificación y Rutas Regionales', date: '2026-10-05', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Google Meet', hitoIdx: 0, status: 'Completado', progress: 100, gestor: 'Javier Ruíz', region: 'Junín', faseId: 'F1' },
+    { code: 'REU-102', name: 'Aprobación de Cronograma de Despachos Primaria', date: '2026-10-05', meetingTime: '11:00', meetingEndTime: '12:30', modality: 'Presencial', hitoIdx: 5, status: 'Completado', progress: 100, gestor: 'María Jiménez', region: 'Lima Metropolitana', faseId: 'F2' },
+    { code: 'REU-103', name: 'Auditoría de Stock y Lotes en Almacén Lurín', date: '2026-10-09', meetingTime: '08:30', meetingEndTime: '10:00', modality: 'Presencial', hitoIdx: 1, status: 'Completado', progress: 100, gestor: 'Juan Pérez', region: 'Lima Metropolitana', faseId: 'F2' },
+    { code: 'REU-104', name: 'Mesa de Contratos: Adendas de Flota Pesada', date: '2026-10-14', meetingTime: '09:30', meetingEndTime: '11:00', modality: 'Google Meet', hitoIdx: 3, status: 'Completado', progress: 100, gestor: 'Carlos Sandoval', region: 'Arequipa', faseId: 'F2' },
+    { code: 'REU-105', name: 'Capacitación de Gestores en Registro SIAGIE', date: '2026-10-14', meetingTime: '14:00', meetingEndTime: '15:30', modality: 'Google Meet', hitoIdx: 8, status: 'Completado', progress: 100, gestor: 'Lucía Flores', region: 'Cusco', faseId: 'F2' },
+    { code: 'REU-106', name: 'Jornada de Validación de Guías de Remisión', date: '2026-10-14', meetingTime: '16:00', meetingEndTime: '17:30', modality: 'Google Meet', hitoIdx: 2, status: 'Completado', progress: 100, gestor: 'Javier Ruíz', region: 'Puno', faseId: 'F2' },
+    { code: 'REU-107', name: 'Revisión de Indicadores de Monitoreo en Campo', date: '2026-10-20', meetingTime: '10:00', meetingEndTime: '11:30', modality: 'Google Meet', hitoIdx: 7, status: 'Completado', progress: 100, gestor: 'María Jiménez', region: 'Áncash', faseId: 'F2' },
+    { code: 'REU-108', name: 'Comité de Acreditación de Personal Temporal UGEL', date: '2026-10-23', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Presencial', hitoIdx: 4, status: 'Completado', progress: 100, gestor: 'Carlos Sandoval', region: 'Junín', faseId: 'F2' },
+    { code: 'REU-109', name: 'Seguimiento de Despacho Secundaria Zona Centro', date: '2026-10-26', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Google Meet', hitoIdx: 6, status: 'Completado', progress: 100, gestor: 'Juan Pérez', region: 'Huánuco', faseId: 'F2' },
+    { code: 'REU-110', name: 'Mesa Técnica de Contingencias Climáticas', date: '2026-10-26', meetingTime: '15:00', meetingEndTime: '16:30', modality: 'Google Meet', hitoIdx: 7, status: 'Completado', progress: 100, gestor: 'Lucía Flores', region: 'San Martín', faseId: 'F2' },
+    { code: 'REU-111', name: 'Balance Mensual de Recepción DRE / UGEL Octubre', date: '2026-10-30', meetingTime: '11:00', meetingEndTime: '12:30', modality: 'Presencial', hitoIdx: 2, status: 'Completado', progress: 100, gestor: 'Javier Ruíz', region: 'Todas las Regiones', faseId: 'F2' },
+
+    // ── NOVIEMBRE 2026 (11 reuniones, varios días con 2-4 reuniones) ──
+    { code: 'REU-201', name: 'Arranque de Operativo de Recepción en Sedes Regionales', date: '2026-11-04', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Google Meet', hitoIdx: 2, status: 'Completado', progress: 100, gestor: 'Lucía Flores', region: 'Cusco', faseId: 'F2' },
+    { code: 'REU-202', name: 'Verificación de Pólizas y Seguros de Carga', date: '2026-11-04', meetingTime: '11:00', meetingEndTime: '12:30', modality: 'Google Meet', hitoIdx: 3, status: 'Completado', progress: 100, gestor: 'Juan Pérez', region: 'Arequipa', faseId: 'F2' },
+    { code: 'REU-203', name: 'Control de Calidad de Textos Secundaria Lote B', date: '2026-11-10', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Presencial', hitoIdx: 6, status: 'En proceso', progress: 85, gestor: 'María Jiménez', region: 'Lima Metropolitana', faseId: 'F2' },
+    { code: 'REU-204', name: 'Reunión de Supervisores de Ruta Sierra Sur', date: '2026-11-12', meetingTime: '10:00', meetingEndTime: '11:30', modality: 'Google Meet', hitoIdx: 7, status: 'En proceso', progress: 75, gestor: 'Carlos Sandoval', region: 'Puno', faseId: 'F2' },
+    { code: 'REU-205', name: 'Mesa de Validación de Padrón de II.EE. y Almacenes', date: '2026-11-18', meetingTime: '08:30', meetingEndTime: '10:00', modality: 'Presencial', hitoIdx: 1, status: 'En proceso', progress: 80, gestor: 'María Jiménez', region: 'Lima Metropolitana', faseId: 'F2' },
+    { code: 'REU-206', name: 'Comité de Despacho Prioritario Zona Amazónica', date: '2026-11-18', meetingTime: '10:30', meetingEndTime: '12:00', modality: 'Google Meet', hitoIdx: 5, status: 'En proceso', progress: 70, gestor: 'Javier Ruíz', region: 'Ucayali', faseId: 'F2' },
+    { code: 'REU-207', name: 'Evaluación de Desempeño de Personal Contratado', date: '2026-11-18', meetingTime: '14:00', meetingEndTime: '15:30', modality: 'Google Meet', hitoIdx: 4, status: 'En proceso', progress: 65, gestor: 'Carlos Sandoval', region: 'Piura', faseId: 'F2' },
+    { code: 'REU-208', name: 'Simulacro de Carga Masiva de Actas en SIAGIE', date: '2026-11-18', meetingTime: '16:00', meetingEndTime: '17:30', modality: 'Google Meet', hitoIdx: 8, status: 'En proceso', progress: 60, gestor: 'Lucía Flores', region: 'Todas las Regiones', faseId: 'F2' },
+    { code: 'REU-209', name: 'Inspección de Almacén Intermedio Trujillo', date: '2026-11-24', meetingTime: '09:30', meetingEndTime: '11:00', modality: 'Presencial', hitoIdx: 1, status: 'En proceso', progress: 70, gestor: 'Juan Pérez', region: 'La Libertad', faseId: 'F2' },
+    { code: 'REU-210', name: 'Comité de Liquidación Parcial de Transportistas', date: '2026-11-26', meetingTime: '11:00', meetingEndTime: '12:30', modality: 'Google Meet', hitoIdx: 3, status: 'En proceso', progress: 55, gestor: 'Javier Ruíz', region: 'Junín', faseId: 'F2' },
+    { code: 'REU-211', name: 'Cierre de Avance Territorial Noviembre', date: '2026-11-30', meetingTime: '15:00', meetingEndTime: '16:30', modality: 'Google Meet', hitoIdx: 0, status: 'En proceso', progress: 90, gestor: 'Carlos Sandoval', region: 'Todas las Regiones', faseId: 'F2' },
+
+    // ── DICIEMBRE 2026 (11 reuniones, varios días con 2-4 reuniones) ──
+    { code: 'REU-301', name: 'Revisión de Actas PECOSA y Recepción en DRE / UGEL', date: '2026-12-07', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Google Meet', hitoIdx: 2, status: 'En proceso', progress: 60, gestor: 'Lucía Flores', region: 'Cusco', faseId: 'F2' },
+    { code: 'REU-302', name: 'Coordinación de Última Milla Primaria Rural', date: '2026-12-07', meetingTime: '14:00', meetingEndTime: '15:30', modality: 'Google Meet', hitoIdx: 5, status: 'En proceso', progress: 50, gestor: 'María Jiménez', region: 'Cajamarca', faseId: 'F2' },
+    { code: 'REU-303', name: 'Seguimiento Contractual de Transportistas y Rutas', date: '2026-12-08', meetingTime: '10:00', meetingEndTime: '11:30', modality: 'Google Meet', hitoIdx: 3, status: 'En proceso', progress: 45, gestor: 'Juan Pérez', region: 'Arequipa', faseId: 'F2' },
+    { code: 'REU-304', name: 'Taller de Acreditación de Personal y Gestores Territoriales', date: '2026-12-09', meetingTime: '09:00', meetingEndTime: '10:30', modality: 'Presencial', hitoIdx: 4, status: 'En proceso', progress: 50, gestor: 'Carlos Sandoval', region: 'Todas las Regiones', faseId: 'F2' },
+    { code: 'REU-305', name: 'Comité de Calibración de Cronograma Hito 1', date: '2026-12-09', meetingTime: '11:30', meetingEndTime: '13:00', modality: 'Google Meet', hitoIdx: 0, status: 'Pendiente', progress: 30, gestor: 'Javier Ruíz', region: 'Todas las Regiones', faseId: 'F1' },
+    { code: 'REU-306', name: 'Mesa de Monitoreo de Incidencias en Ruta', date: '2026-12-09', meetingTime: '15:00', meetingEndTime: '16:30', modality: 'Google Meet', hitoIdx: 7, status: 'Pendiente', progress: 25, gestor: 'Lucía Flores', region: 'Junín', faseId: 'F3' },
+    { code: 'REU-307', name: 'Coordinación SIAGIE y Registro de Recepción en II.EE.', date: '2026-12-10', meetingTime: '11:00', meetingEndTime: '12:30', modality: 'Google Meet', hitoIdx: 8, status: 'Pendiente', progress: 20, gestor: 'María Jiménez', region: 'Piura', faseId: 'F3' },
+    { code: 'REU-308', name: 'Auditoría Preventiva de Guías de Remisión y Almacén', date: '2026-12-11', meetingTime: '14:00', meetingEndTime: '15:30', modality: 'Presencial', hitoIdx: 1, status: 'Pendiente', progress: 0, gestor: 'Lucía Flores', region: 'La Libertad', faseId: 'F2' },
+    { code: 'REU-309', name: 'Cierre Mensual de Conformidades y Liquidación de Rutas', date: '2026-12-15', meetingTime: '10:00', meetingEndTime: '11:30', modality: 'Google Meet', hitoIdx: 3, status: 'Pendiente', progress: 0, gestor: 'Juan Pérez', region: 'Todas las Regiones', faseId: 'F3' },
+    { code: 'REU-310', name: 'Revisión de Entrega de Textos Secundaria Costa', date: '2026-12-15', meetingTime: '15:00', meetingEndTime: '16:30', modality: 'Google Meet', hitoIdx: 6, status: 'Pendiente', progress: 0, gestor: 'Javier Ruíz', region: 'Ica', faseId: 'F3' },
+    { code: 'REU-311', name: 'Sesión Macroregional de Preparación BIAE 2027', date: '2026-12-22', meetingTime: '16:00', meetingEndTime: '17:30', modality: 'Google Meet', hitoIdx: 8, status: 'Pendiente', progress: 0, gestor: 'Carlos Sandoval', region: 'Todas las Regiones', faseId: 'F3' },
+  ];
+
+  const REUNIONES2_MEETINGS_SEED: MeetingAgendaSeedItem[] = RAW_REUNIONES2_SEED.map((m, idx) => {
+    const hito = HITO_PALETTE[m.hitoIdx % HITO_PALETTE.length];
+    return {
+      id: `reu2-${idx + 1}`,
+      code: m.code,
+      name: m.name,
+      type: 'sub',
+      parentId: null,
+      start: m.date,
+      end: m.date,
+      meetingTime: m.meetingTime,
+      meetingEndTime: m.meetingEndTime,
+      modality: m.modality,
+      hitoLabel: hito.hitoLabel,
+      hitoColor: hito.hitoColor,
+      progress: m.progress,
+      status: m.status,
+      gestor: m.gestor,
+      gestores: [m.gestor],
+      region: m.region,
+      faseId: m.faseId,
+      dependencies: [],
+    };
+  });
+
   const loadReuniones2Items = (pid: string): Item[] => {
-    const r2Key = `qaway-reuniones2-meetings-v1:${pid || 'default'}`;
+    const r2Key = `qaway-reuniones2-meetings-v2:${pid || 'default'}`;
     try {
       const saved = localStorage.getItem(r2Key);
       if (saved) {
@@ -1554,7 +1448,7 @@ export default function Reuniones2View({
   useEffect(() => {
     if (!isActive) return;
     if (currentPidRef.current === projectId) {
-      const r2Key = `qaway-reuniones2-meetings-v1:${projectId || 'default'}`;
+      const r2Key = `qaway-reuniones2-meetings-v2:${projectId || 'default'}`;
       try {
         localStorage.setItem(r2Key, JSON.stringify(items));
       } catch {
@@ -2097,7 +1991,7 @@ export default function Reuniones2View({
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [isDocked] = useState(false);
   const [viewMode, setViewMode] = useState<
-    'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
+    'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'itinerario' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga'
   >(() => (perspective === 'equipo' ? 'directorio' : 'calendario'));
 
   // Estado dedicado para perspectiva equipo (100% Supabase directo, cero datos locales estáticos)
@@ -2734,7 +2628,7 @@ export default function Reuniones2View({
 
   // Al conmutar entre vistas, se carga el preset o configuración guardada de ESA vista específica
   const prevViewModeRef = useRef<string>(viewMode);
-  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
+  const handleViewModeChange = (newMode: 'gantt' | 'lista' | 'kanban' | 'calendario' | 'mapa' | 'itinerario' | 'arbol' | 'organigrama' | 'directorio' | 'sedes' | 'carga') => {
     if (newMode === viewMode) return;
     try {
       if (viewMode === 'lista' && visibleCols.includes('code')) {
@@ -5163,7 +5057,15 @@ export default function Reuniones2View({
               onBlur={closeEdit}
             />
           ) : (
-            <span className="cell-text">{formatDatePE(x.start)}</span>
+            <span className="cell-text">
+              {formatDatePE(x.start)}
+              {(x as any).meetingTime && (
+                <span style={{ marginLeft: 6, color: '#64748b', fontSize: '11px' }}>
+                  {(x as any).meetingTime}
+                  {(x as any).meetingEndTime ? `–${(x as any).meetingEndTime}` : ''}
+                </span>
+              )}
+            </span>
           )}
         </div>
       );
@@ -5596,7 +5498,10 @@ export default function Reuniones2View({
               <option value="Ucayali">Ucayali</option>
             </select>
           ) : (
-            <span className="cell-text">{x.region || 'Todas las Regiones'}</span>
+            <span className="cell-text">
+              {(x as any).modality ? `${(x as any).modality} · ` : ''}
+              {x.region || 'Todas las Regiones'}
+            </span>
           )}
         </div>
       );
@@ -5621,6 +5526,13 @@ export default function Reuniones2View({
     }
 
     if (colKey === 'actualEnd') {
+      const actStatus = ((x as any).actStatus as string) || 'Pendiente';
+      const actCls =
+        actStatus === 'Cumple'
+          ? 'is-complete'
+          : actStatus === 'En proceso'
+          ? 'is-progress'
+          : 'is-pending';
       return (
         <div
           key="actualEnd"
@@ -5631,20 +5543,26 @@ export default function Reuniones2View({
           }}
         >
           {isEditing(x, 'actualEnd') ? (
-            <input
-              className="cell-editor cell-input date-edit"
-              type="date"
+            <select
+              className="cell-editor cell-select"
               autoFocus
-              defaultValue={x.actualEnd || ''}
+              defaultValue={actStatus}
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => {
-                update(x.id, { actualEnd: e.target.value || undefined });
+                update(x.id, { actStatus: e.target.value } as any);
                 closeEdit();
               }}
               onBlur={closeEdit}
-            />
+            >
+              <option value="Pendiente">Pendiente</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Cumple">Cumple</option>
+            </select>
           ) : (
-            <span className="cell-text">{x.actualEnd ? formatDate(x.actualEnd) : '—'}</span>
+            <span className={`status-item ${actCls}`}>
+              <span className="status-dot" />
+              <span className="status-label">{actStatus}</span>
+            </span>
           )}
         </div>
       );
@@ -6660,6 +6578,15 @@ export default function Reuniones2View({
                   >
                     <LayoutDashboard size={14} />
                     <span>Kanban</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'itinerario' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('itinerario')}
+                    title="Plan de visitas presenciales e itinerario"
+                  >
+                    <Route size={14} />
+                    <span>Itinerario</span>
                   </button>
                   {false && (
                   <button
@@ -7804,6 +7731,7 @@ export default function Reuniones2View({
           {/* Presentación Oficial Aprobada: Gantt y Lista comparten 100% el mismo tablero unificado */}
           {(viewMode === 'gantt' || viewMode === 'lista' || (perspective === 'equipo' && !['organigrama', 'sedes', 'carga'].includes(viewMode))) && (
             <div className={`gantt-master-view-wrap ${viewMode === 'lista' || perspective === 'equipo' ? 'view-lista-fullwidth' : ''}`}>
+              <div className="gantt-table-card">
           {/* Cabecera Fija Inmutable (Desacoplada del scroll horizontal para evitar desalineamiento) */}
           <div className="table-head" ref={tableHeadRef}>
             <div
@@ -8431,6 +8359,7 @@ export default function Reuniones2View({
             </div>
           )}
 
+              </div>
             </div>
           )}
 
@@ -8509,7 +8438,6 @@ export default function Reuniones2View({
                   setCalYear(y);
                   setCalMonth(m - 1);
                   setCalDay(d);
-                  setCalSubView('Día');
                 }
               }}
               onNavToday={handleTodayCal}
@@ -8523,6 +8451,42 @@ export default function Reuniones2View({
               showBaseline={calShowBaseline}
               showBarAvatars={showBarAvatars}
               onNotify={notify}
+              onCreateMeeting={(draft) => {
+                const nextItem: any = {
+                  id: `reu2-${Date.now()}`,
+                  code: `REU-${Math.floor(400 + Math.random() * 500)}`,
+                  name: draft.title,
+                  kind: 'subproceso',
+                  type: 'sub',
+                  parentId: null,
+                  start: draft.date,
+                  end: draft.date,
+                  meetingTime: draft.startTime || '09:00',
+                  meetingEndTime: draft.endTime || '10:00',
+                  modality: draft.modality || 'Google Meet',
+                  meetUrl: draft.meetUrl || '',
+                  hitoLabel: draft.hitoLabel || '1. Planificación de la Distribución',
+                  hitoColor: draft.hitoColor || '#2563EB',
+                  progress: 0,
+                  status: 'Pendiente',
+                  gestor: draft.owner || 'Carlos Sandoval',
+                  gestores: [draft.owner || 'Carlos Sandoval'],
+                  region: draft.region || 'Junín',
+                  description: draft.purpose || '',
+                  faseId: 'F1',
+                  dependencies: [],
+                };
+                setItems((prev) => {
+                  const updated = [nextItem, ...prev];
+                  try {
+                    localStorage.setItem(`qaway-reuniones2-meetings-v2:${projectId || 'default'}`, JSON.stringify(updated));
+                    localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(updated));
+                    window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+                  } catch {}
+                  return updated;
+                });
+                notify(`Reunión "${draft.title}" registrada para el ${formatDatePE(draft.date)}`);
+              }}
               onRescheduleItem={(itemId, targetDateIso) => {
                 setItems((prev) => {
                   const target = prev.find((it) => it.id === itemId);
@@ -8546,6 +8510,76 @@ export default function Reuniones2View({
                   return recomputed;
                 });
                 notify(`Reprogramado al ${formatDatePE(targetDateIso)}`);
+              }}
+            />
+          )}
+
+          {/* Presentación Itinerario de Visitas Presenciales */}
+          {viewMode === 'itinerario' && (
+            <ItinerarioView
+              items={shown}
+              formatDatePE={formatDatePE}
+              onNotify={notify}
+              onSaveVisit={(draft, editingId) => {
+                setItems((prev) => {
+                  let updated: Item[];
+                  if (editingId) {
+                    updated = prev.map((it) =>
+                      it.id === editingId
+                        ? {
+                            ...it,
+                            name: draft.name,
+                            site: draft.site,
+                            region: draft.region,
+                            address: draft.address,
+                            start: draft.date,
+                            end: draft.date,
+                            meetingTime: draft.startTime,
+                            meetingEndTime: draft.endTime,
+                            travel: draft.travel,
+                            buffer: draft.buffer,
+                            status: draft.status,
+                            modality: 'Presencial',
+                          }
+                        : it
+                    );
+                  } else {
+                    const newVisit: any = {
+                      id: `reu2-vis-${Date.now()}`,
+                      code: `VIS-${Math.floor(400 + Math.random() * 500)}`,
+                      name: draft.name,
+                      kind: 'subproceso',
+                      type: 'sub',
+                      parentId: null,
+                      start: draft.date,
+                      end: draft.date,
+                      meetingTime: draft.startTime,
+                      meetingEndTime: draft.endTime,
+                      modality: 'Presencial',
+                      site: draft.site,
+                      region: draft.region,
+                      address: draft.address,
+                      travel: draft.travel,
+                      buffer: draft.buffer,
+                      hitoLabel: '8. Monitoreo en Campo',
+                      hitoColor: '#4F46E5',
+                      progress: draft.status === 'Completado' ? 100 : 0,
+                      status: draft.status,
+                      gestor: 'Carlos Sandoval',
+                      gestores: ['Carlos Sandoval'],
+                      faseId: 'F2',
+                      dependencies: [],
+                    };
+                    updated = [newVisit, ...prev];
+                  }
+                  try {
+                    localStorage.setItem(`qaway-reuniones2-meetings-v2:${projectId || 'default'}`, JSON.stringify(updated));
+                    localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(updated));
+                    window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+                  } catch {}
+                  return updated;
+                });
+                notify(editingId ? 'Visita presencial actualizada' : 'Nueva visita agregada al itinerario');
               }}
             />
           )}

@@ -12,7 +12,9 @@ import {
   Check,
   AlertTriangle,
   MapPin,
+  Plus,
   Users,
+  Video,
   X,
 } from 'lucide-react';
 import './reuniones2Calendar.css';
@@ -77,7 +79,32 @@ interface CronogramaCalendarioViewProps {
   showBarAvatars?: boolean;
   onRescheduleItem?: (itemId: string, targetDateIso: string) => void;
   onNotify?: (msg: string) => void;
+  onCreateMeeting?: (draft: {
+    title: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    modality: 'Google Meet' | 'Presencial';
+    meetUrl: string;
+    region: string;
+    owner: string;
+    purpose: string;
+    hitoLabel: string;
+    hitoColor: string;
+  }) => void;
 }
+
+const HITO_OPTIONS = [
+  { hitoLabel: '1. Planificación de la Distribución', hitoColor: '#2563EB' },
+  { hitoLabel: '2. Gestión de Almacenes', hitoColor: '#0D9488' },
+  { hitoLabel: '3. Recepción DRE / UGEL', hitoColor: '#D97706' },
+  { hitoLabel: '4. Gestión de Contratos', hitoColor: '#7C3AED' },
+  { hitoLabel: '5. Registro de Personal', hitoColor: '#E11D48' },
+  { hitoLabel: '6. Distribución Primaria', hitoColor: '#0284C7' },
+  { hitoLabel: '7. Distribución Secundaria', hitoColor: '#EA580C' },
+  { hitoLabel: '8. Monitoreo en Campo', hitoColor: '#4F46E5' },
+  { hitoLabel: '9. Entrega a Beneficiarios', hitoColor: '#059669' },
+];
 
 const WEEK_DAY_LABELS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const CAL_MONTH_NAMES = [
@@ -132,9 +159,58 @@ export default function CronogramaCalendarioView({
   showBarAvatars = false,
   onRescheduleItem,
   onNotify,
+  onCreateMeeting,
 }: CronogramaCalendarioViewProps) {
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [dayModalDate, setDayModalDate] = useState<string | null>(null);
+  const [dayModalTab, setDayModalTab] = useState<'agenda' | 'crear'>('agenda');
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [quickForm, setQuickForm] = useState({
+    title: '',
+    startTime: '09:00',
+    endTime: '10:00',
+    modality: 'Google Meet' as 'Google Meet' | 'Presencial',
+    meetUrl: '',
+    region: 'Junín',
+    owner: 'Carlos Sandoval',
+    purpose: '',
+    hitoIdx: 0,
+  });
+
+  const openDayModal = (iso: string) => {
+    const dayHasItems = items.some((it) => {
+      const s = (it.start || '').slice(0, 10);
+      const e = (it.end || it.start || '').slice(0, 10);
+      return s && s <= iso && iso <= e;
+    });
+    setDayModalDate(iso);
+    setDayModalTab(dayHasItems ? 'agenda' : 'crear');
+    setShowMoreOptions(false);
+    setQuickForm({
+      title: '',
+      startTime: '09:00',
+      endTime: '10:00',
+      modality: 'Google Meet',
+      meetUrl: '',
+      region: 'Junín',
+      owner: 'Carlos Sandoval',
+      purpose: '',
+      hitoIdx: 0,
+    });
+  };
+  const [showWeekends, setShowWeekends] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('qaway-reuniones2-show-weekends') === 'true';
+    } catch {
+      return false; // L-V por defecto
+    }
+  });
+  const setWorkweekMode = (includeWeekends: boolean) => {
+    setShowWeekends(includeWeekends);
+    try {
+      localStorage.setItem('qaway-reuniones2-show-weekends', String(includeWeekends));
+    } catch {}
+  };
 
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     try {
@@ -309,136 +385,54 @@ export default function CronogramaCalendarioView({
     const monthStartIso = monthWeeks[0]?.startDateIso ?? '';
     const monthEndIso = monthWeeks[monthWeeks.length - 1]?.endDateIso ?? '';
 
-    // 1. Priorizar paquetes cuya fecha de entrega (end) o inicio (start) cae dentro de las semanas visibles del mes
-    const inMonthCutoffs = matchingItems.filter(
-      (it) =>
-        (it.end >= monthStartIso && it.end <= monthEndIso) ||
-        (it.start >= monthStartIso && it.start <= monthEndIso)
-    );
+    // Filtrar reuniones cuya fecha cae dentro de las semanas visibles del mes
+    const inMonthMeetings = matchingItems
+      .filter((it) => {
+        const dateIso = it.start || it.end;
+        return dateIso >= monthStartIso && dateIso <= monthEndIso;
+      })
+      .sort((a, b) => {
+        const dA = a.start || a.end;
+        const dB = b.start || b.end;
+        if (dA !== dB) return dA.localeCompare(dB);
+        return ((a as any).meetingTime || '09:00').localeCompare((b as any).meetingTime || '09:00');
+      });
 
-    // 2. Si hay pocos cortes puntuales en este mes, completar con los paquetes activos en el mes (sin repetir el mismo paquete en múltiples semanas)
-    const activeFallback = matchingItems.filter(
-      (it) =>
-        it.start <= monthEndIso &&
-        it.end >= monthStartIso &&
-        !inMonthCutoffs.some((c) => c.id === it.id)
-    );
-
-    const candidates = [...inMonthCutoffs, ...activeFallback].slice(0, 9);
-
-    // Plantillas de ventanas limpias estilo Calendario (colStart 1..7, colSpan 2..4, row 1..2) por semana
-    const weekSlots: Record<number, { colStart: number; colSpan: number; row: number }[]> = {
-      0: [
-        { colStart: 4, colSpan: 3, row: 1 },
-        { colStart: 1, colSpan: 3, row: 2 },
-      ],
-      1: [
-        { colStart: 2, colSpan: 2, row: 1 },
-        { colStart: 5, colSpan: 2, row: 1 },
-        { colStart: 1, colSpan: 5, row: 2 },
-      ],
-      2: [
-        { colStart: 3, colSpan: 3, row: 1 },
-        { colStart: 5, colSpan: 3, row: 2 },
-      ],
-      3: [
-        { colStart: 3, colSpan: 3, row: 1 },
-        { colStart: 6, colSpan: 2, row: 2 },
-      ],
-      4: [
-        { colStart: 2, colSpan: 2, row: 1 },
-        { colStart: 5, colSpan: 2, row: 1 },
-        { colStart: 6, colSpan: 2, row: 2 },
-      ],
-      5: [
-        { colStart: 2, colSpan: 3, row: 1 },
-      ],
-    };
-
-    const weekCursor: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-
-    candidates.forEach((it, idx) => {
-      // Determinar en qué semana cae su fecha de corte (end) o inicio (start)
-      let targetWeekIdx = monthWeeks.findIndex(
-        (w) => it.end >= w.startDateIso && it.end <= w.endDateIso
+    inMonthMeetings.forEach((it) => {
+      const dateIso = it.start || it.end;
+      const weekIdx = monthWeeks.findIndex(
+        (w) => dateIso >= w.startDateIso && dateIso <= w.endDateIso
       );
-      if (targetWeekIdx === -1) {
-        targetWeekIdx = monthWeeks.findIndex(
-          (w) => it.start >= w.startDateIso && it.start <= w.endDateIso
-        );
-      }
-      if (targetWeekIdx === -1) {
-        targetWeekIdx = idx % monthWeeks.length;
-      }
+      if (weekIdx === -1) return;
 
-      // Si la semana elegida ya llenó sus slots, buscar la siguiente semana con espacio libre
-      let finalWeekIdx = targetWeekIdx;
-      for (let step = 0; step < monthWeeks.length; step++) {
-        const tryIdx = (targetWeekIdx + step) % monthWeeks.length;
-        const slots = weekSlots[tryIdx] || weekSlots[0] || [];
-        if ((weekCursor[tryIdx] || 0) < slots.length) {
-          finalWeekIdx = tryIdx;
-          break;
-        }
-      }
+      const weekObj = monthWeeks[weekIdx];
+      const dayIdx = weekObj.days.findIndex((d) => d.iso === dateIso);
+      if (dayIdx === -1) return;
 
-      const slots = weekSlots[finalWeekIdx] || weekSlots[0] || [];
-      const slotIdx = weekCursor[finalWeekIdx] || 0;
-      if (slotIdx >= slots.length) return;
-      weekCursor[finalWeekIdx] = slotIdx + 1;
+      const colStart = dayIdx + 1;
+      const colSpan = 1; // Las reuniones son puntuales: nunca cruzan días
+      const weekEventsList = map[weekIdx];
+      if (!weekEventsList) return;
 
-      const slot = slots[slotIdx];
-      const weekEventsList = map[finalWeekIdx];
-      if (!slot || !weekEventsList) return;
-      let colStart = slot.colStart;
-      let colSpan = slot.colSpan;
-      let targetRow = slot.row;
-
-      // Si la fecha de fin del paquete cae exactamente en esta semana, anclar la barra a su día real con máximo 3-4 días de ancho
-      const weekObj = monthWeeks[finalWeekIdx];
-      if (weekObj && it.end >= weekObj.startDateIso && it.end <= weekObj.endDateIso) {
-        const endDayIdx = Math.max(
-          0,
-          Math.min(
-            6,
-            Math.round(
-              (new Date(it.end + 'T12:00:00').getTime() -
-                new Date(weekObj.startDateIso + 'T12:00:00').getTime()) /
-                86400000
-            )
-          )
-        );
-        const span = Math.min(3, endDayIdx + 1);
-        const computedStart = Math.max(1, endDayIdx + 2 - span);
-        const existingInRow = weekEventsList.filter((e) => e.row === targetRow);
-        const collides = existingInRow.some(
-          (e) => !(computedStart + span - 1 < e.colStart || computedStart > e.colStart + e.colSpan - 1)
-        );
-        if (!collides && span >= 2) {
-          colStart = computedStart;
-          colSpan = span;
-        }
-      }
-
-      // Garantizar cero colisión horizontal en la fila asignada (si el slot por defecto choca con una barra previa movida, bajar a la siguiente fila libre)
+      let targetRow = 1;
       while (
         weekEventsList
           .filter((e) => e.row === targetRow)
-          .some((e) => !(colStart + colSpan - 1 < e.colStart || colStart > e.colStart + e.colSpan - 1))
+          .some((e) => e.colStart === colStart)
       ) {
         targetRow += 1;
       }
 
       weekEventsList.push({
-        id: `${it.id}-w${finalWeekIdx}`,
+        id: `${it.id}-w${weekIdx}`,
         code: it.code,
         name: it.name,
         kind: it.kind,
         status: it.status,
         progress: it.progress,
-        start: it.start,
-        end: it.end,
-        weekIndex: finalWeekIdx,
+        start: dateIso,
+        end: dateIso,
+        weekIndex: weekIdx,
         colStart,
         colSpan,
         row: targetRow,
@@ -517,7 +511,7 @@ export default function CronogramaCalendarioView({
     <div className="cronograma-cal-container cal-master-layout">
       {/* Área Principal de Calendario */}
       <div className="cal-main-area">
-        {/* Cabecera Dinámica Limpia: Icono + Mes y Año Real (Punto 5 Homologado) */}
+        {/* Cabecera Dinámica Limpia: Icono + Mes y Año Real + Toggle L-V / L-D */}
         <div className="cal-title-header-clean">
           <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
             <CalendarDays size={18} color="#0066ff" />
@@ -525,17 +519,40 @@ export default function CronogramaCalendarioView({
               {CAL_MONTH_NAMES[calMonth]} {calYear}
             </h2>
           </div>
-          <span className="cal-total-count-badge">
-            {totalMonthActivities} {totalMonthActivities === 1 ? 'actividad programada' : 'actividades programadas'}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="r2-workweek-toggle" role="group" aria-label="Días visibles">
+              <button
+                type="button"
+                className={`r2-workweek-btn ${!showWeekends ? 'active' : ''}`}
+                onClick={() => setWorkweekMode(false)}
+                title="Mostrar solo días hábiles (Lunes a Viernes)"
+              >
+                L–V
+              </button>
+              <button
+                type="button"
+                className={`r2-workweek-btn ${showWeekends ? 'active' : ''}`}
+                onClick={() => setWorkweekMode(true)}
+                title="Mostrar semana completa (Lunes a Domingo)"
+              >
+                L–D
+              </button>
+            </div>
+            <span className="cal-total-count-badge">
+              {totalMonthActivities} {totalMonthActivities === 1 ? 'actividad programada' : 'actividades programadas'}
+            </span>
+          </div>
         </div>
 
-        {/* 1. SUB-VISTA: MES (Cuadrícula Dinámica con Barras de Gantt) */}
+        {/* 1. SUB-VISTA: MES (Cuadrícula Dinámica con Selección de Día y Tarjetas Sólidas) */}
         {calSubView === 'Mes' && (
           <div className="cal-month-canvas">
-            {/* Cabecera de Días de la Semana: Lunes a Domingo */}
-            <div className="cal-weekdays-header">
-              {WEEK_DAY_LABELS.map((dayLabel) => (
+            {/* Cabecera de Días de la Semana: L–V o L–D */}
+            <div
+              className="cal-weekdays-header"
+              style={{ gridTemplateColumns: showWeekends ? 'repeat(7, 1fr)' : 'repeat(5, 1fr)' }}
+            >
+              {(showWeekends ? WEEK_DAY_LABELS : WEEK_DAY_LABELS.slice(0, 5)).map((dayLabel) => (
                 <div key={dayLabel} className="cal-weekday-col">
                   {dayLabel}
                 </div>
@@ -545,22 +562,30 @@ export default function CronogramaCalendarioView({
             {/* Rejilla de Semanas calculadas dinámicamente */}
             <div className="cal-grid-body">
               {monthWeeks.map((week) => {
-                const evs = weekEvents[week.weekIndex] || [];
+                const rawEvs = weekEvents[week.weekIndex] || [];
+                const evs = showWeekends ? rawEvs : rawEvs.filter((e) => e.colStart <= 5);
+                const visibleDays = showWeekends ? week.days : week.days.slice(0, 5);
                 const maxRow = evs.reduce((acc, e) => Math.max(acc, e.row), 0);
                 const dynamicMinHeight = Math.max(126, 42 + maxRow * 32);
+                const colsStyle = { gridTemplateColumns: showWeekends ? 'repeat(7, 1fr)' : 'repeat(5, 1fr)' };
+
                 return (
                 <div
                   key={week.weekIndex}
                   className="cal-week-row-grid"
-                  style={{ minHeight: `${dynamicMinHeight}px` }}
+                  style={{ ...colsStyle, minHeight: `${dynamicMinHeight}px` }}
                 >
-                  {/* Celdas de fondo con número de día (Soporta Drag & Drop y clic para ver Agenda del Día) */}
-                  {week.days.map((day, idx) => (
+                  {/* Celdas de fondo clicables con selección de día y Drag & Drop */}
+                  {visibleDays.map((day, idx) => (
                     <div
                       key={idx}
-                      className={`cal-day-bg-cell ${!day.isCurrentMonth ? 'outside' : ''} ${
-                        dragOverDate === day.iso ? 'r2-drag-over' : ''
-                      }`}
+                      className={`cal-day-bg-cell r2-day-cell ${!day.isCurrentMonth ? 'outside' : ''} ${
+                        day.iso === activeDateIso ? 'is-selected' : ''
+                      } ${dragOverDate === day.iso ? 'r2-drag-over' : ''}`}
+                      onClick={() => {
+                        onSelectDate?.(day.iso);
+                        openDayModal(day.iso);
+                      }}
                       onDragOver={(e) => {
                         if (!onRescheduleItem) return;
                         e.preventDefault();
@@ -576,36 +601,21 @@ export default function CronogramaCalendarioView({
                         const itemId = e.dataTransfer.getData('text/plain');
                         if (itemId) onRescheduleItem(itemId, day.iso);
                       }}
+                      title={`Clic para ver/seleccionar el ${formatDatePE(day.iso)}`}
                     >
-                      <span
-                        className="cal-num r2-clickable-num"
-                        onClick={() => setDayModalDate(day.iso)}
-                        title={`Ver agenda del ${formatDatePE(day.iso)}`}
-                      >
+                      <span className="cal-num r2-clickable-num">
                         {day.dayNumber}
                       </span>
                     </div>
                   ))}
 
-                  {/* Capa de Barras de Calendario con colores oficiales Gantt, Drag & Drop y detección de cruces */}
-                  <div className="cal-week-events-overlay">
+                  {/* Capa de Tarjetas Sólidas por Color de Componente (sin % ni sombras) */}
+                  <div className="cal-week-events-overlay" style={colsStyle}>
                     {evs.map((ev) => {
                       const isMajor = ev.kind === 'hito';
                       const isComplete = ev.status === 'Completado' || ev.status === 'Cumple';
-                      const isProgress = ev.status === 'En proceso' || ev.status === 'En curso';
-                      const isLate = ev.status === 'Con retraso';
                       const conflict = findItemConflict(ev.item, matchingItems);
-
-                      const barColorClass = isMajor
-                        ? 'bar-major'
-                        : isComplete
-                        ? 'bar-complete'
-                        : isProgress
-                        ? 'bar-progress'
-                        : isLate
-                        ? 'bar-late'
-                        : 'bar-pending';
-
+                      const solidColor = (ev.item as any).hitoColor || '#2563eb';
                       const bStart = ev.item.baselineStart || ev.start;
                       const bEnd = ev.item.baselineEnd || ev.end;
 
@@ -623,33 +633,23 @@ export default function CronogramaCalendarioView({
                             onDragStart={(e) => {
                               e.dataTransfer.setData('text/plain', ev.item.id);
                             }}
-                            className={`cal-gantt-bar ${barColorClass}`}
-                            style={
-                              (ev.item as any).hitoColor
-                                ? {
-                                    borderLeft: `3.5px solid ${(ev.item as any).hitoColor}`,
-                                    borderColor: `${(ev.item as any).hitoColor}44`,
-                                    background: `${(ev.item as any).hitoColor}18`,
-                                    color: '#0f172a',
-                                  }
-                                : undefined
-                            }
-                            onClick={() => onSelectItem(ev.item)}
+                            className="cal-gantt-bar r2-solid-bar"
+                            style={{
+                              background: solidColor,
+                              color: '#ffffff',
+                              boxShadow: 'none',
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectItem(ev.item);
+                            }}
                             title={
                               conflict
                                 ? `⚠️ Cruce de agenda con: ${conflict.code} · ${conflict.name} (${conflict.gestor}) | Arrastra para reprogramar`
                                 : `${(ev.item as any).meetingTime ? `${(ev.item as any).meetingTime} · ` : ''}${ev.name}${(ev.item as any).hitoLabel ? ` (${(ev.item as any).hitoLabel})` : ''}`
                             }
                           >
-                            {/* Barra de avance interior con física y color Gantt */}
-                            <div
-                              className="cal-gantt-progress-fill"
-                              style={{
-                                width: `${Math.min(100, Math.max(0, ev.progress))}%`,
-                              }}
-                            />
-
-                            {/* Contenido legible del entregable con alto contraste */}
+                            {/* Contenido limpio: icono + hora/código + nombre en blanco */}
                             <div className="cal-gantt-content">
                               {isMajor ? (
                                 <span className="cal-gantt-diamond-badge" title="Hito Principal">
@@ -660,7 +660,9 @@ export default function CronogramaCalendarioView({
                               ) : (
                                 <FileText size={11} className="cal-gantt-check-icon" />
                               )}
-                              <strong className="cal-gantt-code">{ev.code}</strong>
+                              <strong className="cal-gantt-code">
+                                {(ev.item as any).meetingTime || ev.code}
+                              </strong>
                               <span className="cal-gantt-name">{ev.name}</span>
                               {conflict && (
                                 <span
@@ -674,8 +676,8 @@ export default function CronogramaCalendarioView({
                                 <span
                                   className="cal-gantt-pct"
                                   style={{
-                                    background: getGestorBadge(ev.gestor).bg,
-                                    color: getGestorBadge(ev.gestor).color,
+                                    background: 'rgba(255,255,255,0.22)',
+                                    color: '#ffffff',
                                     borderRadius: '999px',
                                     padding: '1px 5px',
                                     fontSize: '9.5px',
@@ -686,12 +688,9 @@ export default function CronogramaCalendarioView({
                                   {getGestorBadge(ev.gestor).initials}
                                 </span>
                               )}
-                              {showBarLabels && (
-                                <span className="cal-gantt-pct">{ev.progress}%</span>
-                              )}
                             </div>
                           </div>
-                          {/* Sombra de Línea Base idéntica a la vista Gantt */}
+                          {/* Sombra de Línea Base cuando esté habilitada */}
                           {showBaseline && (
                             <div
                               className="cal-baseline-shadow-bar"
@@ -709,130 +708,143 @@ export default function CronogramaCalendarioView({
           </div>
         )}
 
-        {/* 2. SUB-VISTA: SEMANA (TimeGrid Semanal Real Lunes–Domingo) */}
-        {calSubView === 'Semana' && (
-          <div className="r2-week-wrap">
-            <div className="r2-week-header">
-              <div className="r2-week-head-time">HORA</div>
-              {activeWeekDays.map((d) => (
-                <div
-                  key={d.iso}
-                  className={`r2-week-head-day ${d.isToday ? 'is-today' : ''}`}
-                  onClick={() => setDayModalDate(d.iso)}
-                  title={`Ver agenda del ${formatDatePE(d.iso)}`}
-                >
-                  <span>{d.label}</span>
-                  <b>{d.dayNumber}</b>
-                </div>
-              ))}
-            </div>
+        {/* 2. SUB-VISTA: SEMANA (TimeGrid Semanal Real L–V o L–D con cabecera sticky alineada 1:1) */}
+        {calSubView === 'Semana' && (() => {
+          const visibleWeekDays = showWeekends ? activeWeekDays : activeWeekDays.slice(0, 5);
+          const weekColsStyle = {
+            gridTemplateColumns: showWeekends ? '56px repeat(7, minmax(0, 1fr))' : '56px repeat(5, minmax(0, 1fr))',
+          };
 
-            <div className="r2-week-body">
-              <div className="r2-week-grid">
-                <div className="r2-time-col">
-                  {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
-                    <div key={h} className="r2-time-slot-label">
-                      {h}
+          return (
+            <div className="r2-week-wrap">
+              <div className="r2-week-body">
+                <div className="r2-week-header" style={weekColsStyle}>
+                  <div className="r2-week-head-time">HORA</div>
+                  {visibleWeekDays.map((d) => (
+                    <div
+                      key={d.iso}
+                      className={`r2-week-head-day ${d.isToday ? 'is-today' : ''}`}
+                      onClick={() => {
+                        onSelectDate?.(d.iso);
+                        openDayModal(d.iso);
+                      }}
+                      title={`Ver agenda del ${formatDatePE(d.iso)}`}
+                    >
+                      <span>{d.label}</span>
+                      <b>{d.dayNumber}</b>
                     </div>
                   ))}
                 </div>
 
-                {activeWeekDays.map((col) => {
-                  const dayItems = matchingItems.filter((it) => {
-                    const s = (it.start || '').slice(0, 10);
-                    const e = (it.end || it.start || '').slice(0, 10);
-                    return s && s <= col.iso && col.iso <= e;
-                  });
-
-                  return (
-                    <div
-                      key={col.iso}
-                      className={`r2-week-day-col ${dragOverDate === col.iso ? 'r2-drag-over' : ''}`}
-                      onDragOver={(e) => {
-                        if (!onRescheduleItem) return;
-                        e.preventDefault();
-                        if (dragOverDate !== col.iso) setDragOverDate(col.iso);
-                      }}
-                      onDragLeave={() => {
-                        if (dragOverDate === col.iso) setDragOverDate(null);
-                      }}
-                      onDrop={(e) => {
-                        if (!onRescheduleItem) return;
-                        e.preventDefault();
-                        setDragOverDate(null);
-                        const itemId = e.dataTransfer.getData('text/plain');
-                        if (itemId) onRescheduleItem(itemId, col.iso);
-                      }}
-                    >
-                      {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
-                        <div key={h} className="r2-week-hour-cell" />
-                      ))}
-
-                      <div className="r2-week-events-stack">
-                        {dayItems.map((it) => {
-                          const isMajor = it.kind === 'hito';
-                          const isComplete = it.status === 'Completado' || it.status === 'Cumple';
-                          const conflict = findItemConflict(it, matchingItems);
-                          const mTime = (it as any).meetingTime as string | undefined;
-                          const mEndTime = (it as any).meetingEndTime as string | undefined;
-                          const hitoColor = (it as any).hitoColor as string | undefined;
-                          const hitoLabel = (it as any).hitoLabel as string | undefined;
-                          const startMin = toMinutes(mTime, 540);
-                          const endMin = toMinutes(mEndTime, startMin + 60);
-                          const topPx = Math.max(0, ((startMin - 480) / 60) * 54) + 2;
-                          const heightPx = Math.max(42, ((endMin - startMin) / 60) * 54 - 4);
-
-                          return (
-                            <div
-                              key={it.id}
-                              draggable={Boolean(onRescheduleItem)}
-                              onDragStart={(e) => e.dataTransfer.setData('text/plain', it.id)}
-                              className={`r2-week-event-card ${
-                                isMajor ? 'is-hito' : isComplete ? 'is-complete' : ''
-                              }`}
-                              style={{
-                                top: `${topPx}px`,
-                                height: `${heightPx}px`,
-                                ...(hitoColor
-                                  ? {
-                                      borderLeftColor: hitoColor,
-                                      borderColor: `${hitoColor}33`,
-                                      background: `${hitoColor}14`,
-                                      color: '#0f172a',
-                                    }
-                                  : {}),
-                              }}
-                              onClick={() => onSelectItem(it)}
-                              title={`${it.code} · ${it.name}${mTime ? ` (${mTime}–${mEndTime || ''})` : ''} · ${hitoLabel || it.gestor || 'Sin asignar'}`}
-                            >
-                              <strong>{mTime ? `${mTime} ` : ''}{it.name}</strong>
-                              <div className="r2-week-event-meta">
-                                <span>{hitoLabel || `${it.region || 'General'}`}</span>
-                                {conflict && (
-                                  <span className="r2-conflict-pill" title={`Cruce con ${conflict.code}`}>
-                                    <AlertTriangle size={9} /> Cruce
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
+                <div className="r2-week-grid" style={weekColsStyle}>
+                  <div className="r2-time-col">
+                    {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
+                      <div key={h} className="r2-time-slot-label">
+                        {h}
                       </div>
-                    </div>
-                  );
-                })}
+                    ))}
+                  </div>
+
+                  {visibleWeekDays.map((col) => {
+                    const dayItems = matchingItems.filter((it) => {
+                      const s = (it.start || '').slice(0, 10);
+                      const e = (it.end || it.start || '').slice(0, 10);
+                      return s && s <= col.iso && col.iso <= e;
+                    });
+
+                    return (
+                      <div
+                        key={col.iso}
+                        className={`r2-week-day-col ${dragOverDate === col.iso ? 'r2-drag-over' : ''}`}
+                        onClick={() => {
+                          onSelectDate?.(col.iso);
+                          openDayModal(col.iso);
+                        }}
+                        onDragOver={(e) => {
+                          if (!onRescheduleItem) return;
+                          e.preventDefault();
+                          if (dragOverDate !== col.iso) setDragOverDate(col.iso);
+                        }}
+                        onDragLeave={() => {
+                          if (dragOverDate === col.iso) setDragOverDate(null);
+                        }}
+                        onDrop={(e) => {
+                          if (!onRescheduleItem) return;
+                          e.preventDefault();
+                          setDragOverDate(null);
+                          const itemId = e.dataTransfer.getData('text/plain');
+                          if (itemId) onRescheduleItem(itemId, col.iso);
+                        }}
+                      >
+                        {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map((h) => (
+                          <div key={h} className="r2-week-hour-cell" />
+                        ))}
+
+                        <div className="r2-week-events-stack">
+                          {dayItems.map((it) => {
+                            const conflict = findItemConflict(it, matchingItems);
+                            const mTime = (it as any).meetingTime as string | undefined;
+                            const mEndTime = (it as any).meetingEndTime as string | undefined;
+                            const hitoColor = ((it as any).hitoColor as string | undefined) || '#2563eb';
+                            const hitoLabel = (it as any).hitoLabel as string | undefined;
+                            const startMin = toMinutes(mTime, 540);
+                            const endMin = toMinutes(mEndTime, startMin + 60);
+                            const topPx = Math.max(0, ((startMin - 480) / 60) * 54) + 2;
+                            const heightPx = Math.max(42, ((endMin - startMin) / 60) * 54 - 4);
+
+                            return (
+                              <div
+                                key={it.id}
+                                draggable={Boolean(onRescheduleItem)}
+                                onDragStart={(e) => e.dataTransfer.setData('text/plain', it.id)}
+                                className="r2-week-event-card"
+                                style={{
+                                  top: `${topPx}px`,
+                                  height: `${heightPx}px`,
+                                  background: hitoColor,
+                                  color: '#ffffff',
+                                  border: 0,
+                                  boxShadow: 'none',
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSelectItem(it);
+                                }}
+                                title={`${it.code} · ${it.name}${mTime ? ` (${mTime}–${mEndTime || ''})` : ''} · ${hitoLabel || it.gestor || 'Sin asignar'}`}
+                              >
+                                <strong style={{ color: '#ffffff' }}>{mTime ? `${mTime} ` : ''}{it.name}</strong>
+                                <div className="r2-week-event-meta" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                                  <span>{hitoLabel || `${it.region || 'General'}`}</span>
+                                  {conflict && (
+                                    <span className="r2-conflict-pill" title={`Cruce con ${conflict.code}`}>
+                                      <AlertTriangle size={9} /> Cruce
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* 3. SUB-VISTA: DÍA (Timeline Real de la Fecha Seleccionada) */}
         {calSubView === 'Día' && (() => {
-          const dayItems = matchingItems.filter((it) => {
-            const s = (it.start || '').slice(0, 10);
-            const e = (it.end || it.start || '').slice(0, 10);
-            return s && s <= activeDateIso && activeDateIso <= e;
-          });
+          const dayItems = matchingItems
+            .filter((it) => {
+              const s = (it.start || '').slice(0, 10);
+              const e = (it.end || it.start || '').slice(0, 10);
+              return s && s <= activeDateIso && activeDateIso <= e;
+            })
+            .sort((a, b) =>
+              ((a as any).meetingTime || '09:00').localeCompare((b as any).meetingTime || '09:00')
+            );
 
           return (
             <div className="r2-day-wrap">
@@ -841,7 +853,7 @@ export default function CronogramaCalendarioView({
                   <h3>
                     {WEEK_DAY_LABELS[(new Date(calYear, calMonth, calDay).getDay() + 6) % 7]} {calDay} de {CAL_MONTH_NAMES[calMonth]}, {calYear}
                   </h3>
-                  <p>{dayItems.length} reuniones / entregables activos en esta jornada</p>
+                  <p>{dayItems.length} {dayItems.length === 1 ? 'reunión agendada en esta jornada' : 'reuniones agendadas en esta jornada'}</p>
                 </div>
                 <span className="cal-dia-tag">Agenda de la Jornada</span>
               </div>
@@ -854,10 +866,20 @@ export default function CronogramaCalendarioView({
                 <div className="r2-day-list">
                   {dayItems.map((it) => {
                     const conflict = findItemConflict(it, matchingItems);
+                    const hitoColor = (it as any).hitoColor as string | undefined;
+                    const hitoLabel = (it as any).hitoLabel as string | undefined;
+                    const mStart = (it as any).meetingTime as string | undefined;
+                    const mEnd = (it as any).meetingEndTime as string | undefined;
+                    const modality = (it as any).modality as string | undefined;
                     return (
                       <div
                         key={it.id}
                         className={`r2-day-card ${conflict ? 'has-conflict' : ''}`}
+                        style={
+                          hitoColor && !conflict
+                            ? { borderLeft: `4px solid ${hitoColor}` }
+                            : undefined
+                        }
                         onClick={() => onSelectItem(it)}
                       >
                         <div className="r2-day-card-top">
@@ -916,9 +938,32 @@ export default function CronogramaCalendarioView({
                         </div>
 
                         <div className="r2-day-card-meta">
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <Clock size={11} /> {formatDatePE(it.start)} – {formatDatePE(it.end || it.start)}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600, color: '#0f172a' }}>
+                            <Clock size={11} /> {mStart ? `${mStart}${mEnd ? ` – ${mEnd}` : ''}` : formatDatePE(it.start)}
                           </span>
+                          {hitoLabel && (
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '1px 7px',
+                                borderRadius: '999px',
+                                fontSize: '10px',
+                                fontWeight: 650,
+                                background: hitoColor ? `${hitoColor}18` : '#f1f5f9',
+                                color: hitoColor || '#334155',
+                                border: `1px solid ${hitoColor ? `${hitoColor}35` : '#e2e8f0'}`,
+                              }}
+                            >
+                              {hitoLabel}
+                            </span>
+                          )}
+                          {modality && (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#475569' }}>
+                              {modality}
+                            </span>
+                          )}
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                             <Users size={11} /> {it.gestor || 'Sin asignar'}
                           </span>
@@ -1016,8 +1061,19 @@ export default function CronogramaCalendarioView({
                   </div>
 
                   <div className="cal-upcoming-cat-line">
-                    <FileText size={11} className="cat-icon-sub" />
-                    <span>{ev.code} · {ev.kind === 'hito' ? 'Componente' : 'Paquete de Trabajo'}</span>
+                    <span
+                      style={{
+                        width: '7px',
+                        height: '7px',
+                        borderRadius: '999px',
+                        background: (ev.rawItem as any).hitoColor || '#2563eb',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {(ev.rawItem as any).meetingTime ? `${(ev.rawItem as any).meetingTime} · ` : ''}
+                      {(ev.rawItem as any).hitoLabel || ev.code}
+                    </span>
                   </div>
 
                   {/* Barra de progreso estilo Gantt */}
@@ -1088,7 +1144,7 @@ export default function CronogramaCalendarioView({
         </div>
       </aside>
 
-      {/* Modal de Agenda del Día al hacer clic en cualquier fecha */}
+      {/* Modal Google Calendar + Reuniones 1 (sin salir de Mes) */}
       {dayModalDate && (() => {
         const modalItems = matchingItems.filter((it) => {
           const s = (it.start || '').slice(0, 10);
@@ -1096,13 +1152,36 @@ export default function CronogramaCalendarioView({
           return s && s <= dayModalDate && dayModalDate <= e;
         });
 
+        const handleSaveQuickMeeting = (e: React.FormEvent) => {
+          e.preventDefault();
+          if (!quickForm.title.trim()) {
+            onNotify?.('Ingresa un título para la reunión');
+            return;
+          }
+          const hito = HITO_OPTIONS[quickForm.hitoIdx] || HITO_OPTIONS[0]!;
+          onCreateMeeting?.({
+            title: quickForm.title.trim(),
+            date: dayModalDate,
+            startTime: quickForm.startTime,
+            endTime: quickForm.endTime,
+            modality: quickForm.modality,
+            meetUrl: quickForm.meetUrl.trim(),
+            region: quickForm.region,
+            owner: quickForm.owner,
+            purpose: quickForm.purpose.trim(),
+            hitoLabel: hito.hitoLabel,
+            hitoColor: hito.hitoColor,
+          });
+          setDayModalDate(null);
+        };
+
         return (
           <div className="r2-modal-overlay" onMouseDown={() => setDayModalDate(null)}>
             <div className="r2-day-modal" onMouseDown={(e) => e.stopPropagation()}>
               <div className="r2-day-modal-head">
                 <div>
                   <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', letterSpacing: '0.06em' }}>
-                    AGENDA DEL DÍA
+                    {dayModalTab === 'crear' ? 'REGISTRO RÁPIDO DE REUNIÓN' : 'AGENDA DEL DÍA'}
                   </span>
                   <h3>{formatDatePE(dayModalDate)}</h3>
                 </div>
@@ -1115,10 +1194,168 @@ export default function CronogramaCalendarioView({
                   <X size={16} />
                 </button>
               </div>
+
               <div className="r2-day-modal-body">
-                {modalItems.length === 0 ? (
+                {/* Tabs: Nueva reunión vs Reuniones del día */}
+                <div className="r2-modal-tabs">
+                  <button
+                    type="button"
+                    className={`r2-modal-tab ${dayModalTab === 'crear' ? 'active' : ''}`}
+                    onClick={() => setDayModalTab('crear')}
+                  >
+                    + Nueva reunión
+                  </button>
+                  <button
+                    type="button"
+                    className={`r2-modal-tab ${dayModalTab === 'agenda' ? 'active' : ''}`}
+                    onClick={() => setDayModalTab('agenda')}
+                  >
+                    Reuniones del día ({modalItems.length})
+                  </button>
+                </div>
+
+                {dayModalTab === 'crear' ? (
+                  <form className="r2-quick-form" onSubmit={handleSaveQuickMeeting}>
+                    <input
+                      type="text"
+                      className="r2-quick-title-input"
+                      placeholder="Añade un título de reunión *"
+                      value={quickForm.title}
+                      onChange={(e) => setQuickForm((p) => ({ ...p, title: e.target.value }))}
+                      autoFocus
+                    />
+
+                    <div className="r2-quick-grid-2">
+                      <div className="r2-quick-field">
+                        <label>Hora de inicio</label>
+                        <input
+                          type="time"
+                          value={quickForm.startTime}
+                          onChange={(e) => setQuickForm((p) => ({ ...p, startTime: e.target.value }))}
+                        />
+                      </div>
+                      <div className="r2-quick-field">
+                        <label>Hora de fin</label>
+                        <input
+                          type="time"
+                          value={quickForm.endTime}
+                          onChange={(e) => setQuickForm((p) => ({ ...p, endTime: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="r2-quick-field">
+                      <label>Modalidad</label>
+                      <div className="r2-modality-grid">
+                        <button
+                          type="button"
+                          className={`r2-modality-card ${quickForm.modality === 'Google Meet' ? 'selected' : ''}`}
+                          onClick={() => setQuickForm((p) => ({ ...p, modality: 'Google Meet' }))}
+                        >
+                          <Video size={16} color="#4f46e5" />
+                          <div>
+                            <strong>Google Meet</strong>
+                            <small>Reunión virtual</small>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          className={`r2-modality-card ${quickForm.modality === 'Presencial' ? 'selected' : ''}`}
+                          onClick={() => setQuickForm((p) => ({ ...p, modality: 'Presencial' }))}
+                        >
+                          <MapPin size={16} color="#d97706" />
+                          <div>
+                            <strong>Presencial</strong>
+                            <small>Sede o visita territorial</small>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {quickForm.modality === 'Google Meet' ? (
+                      <div className="r2-quick-field">
+                        <label>Enlace de Google Meet (opcional)</label>
+                        <input
+                          type="url"
+                          placeholder="https://meet.google.com/..."
+                          value={quickForm.meetUrl}
+                          onChange={(e) => setQuickForm((p) => ({ ...p, meetUrl: e.target.value }))}
+                        />
+                      </div>
+                    ) : (
+                      <div className="r2-quick-field">
+                        <label>Región / Sede</label>
+                        <select
+                          value={quickForm.region}
+                          onChange={(e) => setQuickForm((p) => ({ ...p, region: e.target.value }))}
+                        >
+                          <option value="Junín">Junín</option>
+                          <option value="Pasco">Pasco</option>
+                          <option value="Huancavelica">Huancavelica</option>
+                          <option value="Ayacucho">Ayacucho</option>
+                          <option value="Todas las Regiones">Todas las Regiones (Nacional)</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {showMoreOptions && (
+                      <>
+                        <div className="r2-quick-grid-2">
+                          <div className="r2-quick-field">
+                            <label>Componente / Color</label>
+                            <select
+                              value={quickForm.hitoIdx}
+                              onChange={(e) => setQuickForm((p) => ({ ...p, hitoIdx: Number(e.target.value) }))}
+                            >
+                              {HITO_OPTIONS.map((h, i) => (
+                                <option key={h.hitoLabel} value={i}>
+                                  {h.hitoLabel}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="r2-quick-field">
+                            <label>Responsable</label>
+                            <input
+                              type="text"
+                              value={quickForm.owner}
+                              onChange={(e) => setQuickForm((p) => ({ ...p, owner: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="r2-quick-field">
+                          <label>Objetivo / motivo</label>
+                          <textarea
+                            rows={2}
+                            placeholder="¿Qué se busca lograr con la reunión?"
+                            value={quickForm.purpose}
+                            onChange={(e) => setQuickForm((p) => ({ ...p, purpose: e.target.value }))}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    <div className="r2-quick-footer">
+                      <button
+                        type="button"
+                        className="r2-btn-cancel"
+                        style={{ marginRight: 'auto', border: 0, color: '#2563eb' }}
+                        onClick={() => setShowMoreOptions((v) => !v)}
+                      >
+                        {showMoreOptions ? 'Menos opciones' : 'Más opciones'}
+                      </button>
+                      <button type="button" className="r2-btn-cancel" onClick={() => setDayModalDate(null)}>
+                        Cancelar
+                      </button>
+                      <button type="submit" className="r2-btn-save">
+                        <Plus size={14} /> Guardar reunión
+                      </button>
+                    </div>
+                  </form>
+                ) : modalItems.length === 0 ? (
                   <div style={{ padding: '24px 12px', textAlign: 'center', color: '#64748b', fontSize: '12.5px' }}>
-                    No hay reuniones o actividades activas para el {formatDatePE(dayModalDate)}.
+                    No hay reuniones programadas para el {formatDatePE(dayModalDate)}.
                   </div>
                 ) : (
                   modalItems.map((it) => {
@@ -1134,7 +1371,15 @@ export default function CronogramaCalendarioView({
                       >
                         <div className="r2-day-card-top">
                           <div className="r2-day-card-title">
-                            <span className="cal-gantt-code">{it.code}</span>
+                            <span
+                              className="cal-gantt-code"
+                              style={{
+                                background: (it as any).hitoColor || '#2563eb',
+                                color: '#ffffff',
+                              }}
+                            >
+                              {(it as any).meetingTime || it.code}
+                            </span>
                             <strong>{it.name}</strong>
                           </div>
                           {conflict && (
@@ -1156,7 +1401,7 @@ export default function CronogramaCalendarioView({
                               const url = generateGoogleCalendarUrl({
                                 id: it.id,
                                 title: `${it.code} · ${it.name}`,
-                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status}`,
                                 location: it.region || 'Qaway Lab',
                                 startDate: it.start,
                                 endDate: it.end || it.start,
@@ -1174,7 +1419,7 @@ export default function CronogramaCalendarioView({
                               downloadIcsFile({
                                 id: it.id,
                                 title: `${it.code} · ${it.name}`,
-                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status} (${it.progress}%)`,
+                                description: `Responsable: ${it.gestor || 'Sin asignar'}\nEstado: ${it.status}`,
                                 location: it.region || 'Qaway Lab',
                                 startDate: it.start,
                                 endDate: it.end || it.start,

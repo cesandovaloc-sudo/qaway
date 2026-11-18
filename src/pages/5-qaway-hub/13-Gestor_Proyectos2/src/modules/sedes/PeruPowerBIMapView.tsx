@@ -41,6 +41,7 @@ export interface PeruPowerBIMapViewProps {
   selectedRegion?: string;
   selectedUgelId?: string | null;
   onUgelSelect?: (ugel: any) => void;
+  compact?: boolean;
 }
 
 export default function PeruPowerBIMapView({
@@ -48,6 +49,7 @@ export default function PeruPowerBIMapView({
   selectedRegion,
   selectedUgelId,
   onUgelSelect,
+  compact = false,
 }: PeruPowerBIMapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
@@ -196,6 +198,14 @@ export default function PeruPowerBIMapView({
       }
     };
   }, [regionData, selectedRegion]);
+
+  if (compact) {
+    return (
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      </div>
+    );
+  }
 
   return (
     <div className="powerbi-grid-container" style={{
