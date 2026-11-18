@@ -3,7 +3,7 @@
 **Este es el archivo que se abre primero.** Dice qué es cada documento, en qué orden se leen,
 en qué etapa estamos y cuál es el siguiente archivo a crear.
 
-Última actualización: **17-11-2026**
+Última actualización: **18-11-2026**
 
 ---
 
@@ -71,6 +71,8 @@ doc2/
 | **ETAPA 6** | **Vinculación de catálogos GP con la app** (`doc2/6.1`) | 🟡 6.1 entregada (selector de prioridad ← `gp_prioridades_c`, pendiente de verificación viva); **6.2 arquitectura APROBADA** y **6.3 IMPLEMENTADA** (`doc2/6.3`: clasificación + ciclo de vida + permisos reales, 44/44 pruebas del núcleo, SQL pendiente de aplicación manual); **6.4 AUDITADA Y EMPAQUETADA** (`doc2/6.4`: paquete único con las 12 migraciones en orden definitivo FASE 0-4, diagnósticos D, verificaciones V, riesgos R-1..R-10, recuperación y checklist — cero correcciones de contenido, `0011` opcional); **6-A conectado (17-nov):** selector Tipo de reunión ← `gp_tipos_reunion_c` (emite códigos del catálogo al form/localStorage; cutover Etapa 7; evidencia `7-Bitacoras/20261117-etapa6-a-tipo-reunion-conectado.md`); **6-B aplicado (17-nov):** permisos granulares en UI SIN DDL — `gpPermisosService` (matriz pura del modelo + perfil vía RLS `uar_own_read`) + 14/14 tests + gating en App/Configuración/Gantt (solo con sesión real; modo local conserva demo) + pestaña "Permisos del Equipo" admin-only (roles 4 + llaves jsonb curables vía `uar_tenant_admin_manage`); evidencia `7-Bitacoras/20261117-etapa6-b-permisos-granulares-ui.md` |
 
 ### Siguiente acción concreta
+
+> **INCIDENTE RESUELTO 18-NOV-2026 (fuera del plan `gp_*`):** el checkout guest de commerce fallaba desde el 19-sep (`REVOKE SELECT ON orders FROM anon` sin ajustar la política de INSERT de `order_items`). Aplicada migración `20261118152905` (`can_insert_order_item` `SECURITY DEFINER` + política reescrita), verificada con tres escenarios en vivo (guest ✅ / ajeno bloqueado ✅ / propio autenticado ✅) y `rollback`. Evidencia: `7-Bitacoras/20261118-fix-order-items-insert-anon-guest.md`. **Etapa 6 y 6-E conservan su estado; el 6-E sigue pendiente de orden "aplica".**
 
 > **ESTADO REAL MEDIDO EL 17-NOV-2026 (vía MCP de Supabase, verificación viva):**
 > **BLOQUE A COMPLETO — 12/12 catálogos** con el patrón del Hub (RLS true · 4 políticas por
@@ -180,7 +182,7 @@ doc2/
 | `4-Creacion-guiada-en-Supabase/` | **EN USO:** las 34 tablas, una por una, ejecutadas por el responsable en el SQL Editor. Arranca en `4.1-Paso-0-Verificar-terreno.md`. | 🟡 en curso |
 | `5-Implementacion-y-cutover/` | Plan de cutover: doble escritura, verificación de conteos, retiro de `localStorage`. | ⬜ reservado |
 | `6-Integracion-con-el-Hub/` | ETAPA 2D: sesión compartida con el Hub, slug `gestor-proyectos` en `app_catalog`, activación de RLS, resolución de usuario en el Gestor 2. | ⬜ reservado |
-| `7-Bitacoras/` | Registro de ejecuciones reales en Supabase (fecha, migración, resultado, rollback). | 🟡 en uso — primer registro: `20261116-auditoria-4-catalogos-gp.md` |
+| `7-Bitacoras/` | Registro de ejecuciones reales en Supabase (fecha, migración, resultado, rollback). | 🟡 en uso — primer registro: `20261116-auditoria-4-catalogos-gp.md`; último: `20261118-fix-order-items-insert-anon-guest.md` |
 
 **Nada se crea fuera de estos bloques.** Si aparece un tema nuevo, se crea `N-<Nombre>/` con su `N.1`.
 
