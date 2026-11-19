@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   AlertTriangle,
@@ -43,6 +43,37 @@ export const DEFAULT_KANBAN_BOARD_PREFS: KanbanBoardPrefs = {
   showKeyProps: true,
   collapseAllCols: false,
 };
+
+const KANBAN_KEEP_UPPER = new Set([
+  'DRE', 'UGEL', 'MINEDU', 'IIEE', 'II.EE.', 'IE', 'DNI', 'TIC', 'SIGA', 'SIAF',
+  'PECOSA', 'PDF', 'PMO', 'EDT', 'OTI', 'DIGERE', 'OGRH', 'INEI', 'WIP', 'QA',
+]);
+
+/** Convierte títulos en mayúsculas sostenidas a formato oración amigable conservando siglas. */
+function formatFriendlyCardTitle(raw: string): string {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return '';
+  // Solo transforma si el texto viene íntegramente en mayúsculas
+  if (trimmed !== trimmed.toLocaleUpperCase('es-PE')) return trimmed;
+  const lowered = trimmed.toLocaleLowerCase('es-PE');
+  const words = lowered.split(/(\s+)/);
+  let seenFirstWord = false;
+  return words
+    .map((part) => {
+      if (!part || /^\s+$/.test(part)) return part;
+      const upper = part.toLocaleUpperCase('es-PE');
+      const cleanUpper = upper.replace(/^[(\[{"']+|[)\]}"',.;:!?]+$/g, '');
+      if (KANBAN_KEEP_UPPER.has(cleanUpper)) {
+        return upper;
+      }
+      if (!seenFirstWord) {
+        seenFirstWord = true;
+        return part.charAt(0).toLocaleUpperCase('es-PE') + part.slice(1);
+      }
+      return part;
+    })
+    .join('');
+}
 
 interface CronogramaKanbanViewProps {
   items: Item[];
@@ -289,6 +320,8 @@ export default function CronogramaKanbanView({
 
   const [openStatusMenu, setOpenStatusMenu] = useState<{ item: Item; x: number; y: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<{ item: Item; x: number; y: number } | null>(null);
+  const statusMenuRef = useRef<HTMLDivElement | null>(null);
+  const contextMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Creación inline dentro de columna Kanban
   const [addingInColId, setAddingInColId] = useState<string | null>(null);
@@ -346,18 +379,28 @@ export default function CronogramaKanbanView({
 
   useEffect(() => {
     if (!contextMenu && !openStatusMenu && !editingWipColId) return;
-    const onClose = () => {
+    const onOutside = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (target) {
+        if (statusMenuRef.current && statusMenuRef.current.contains(target)) return;
+        if (contextMenuRef.current && contextMenuRef.current.contains(target)) return;
+        if (target instanceof Element && target.closest('[data-kanban-menu-trigger="true"]')) return;
+      }
       setContextMenu(null);
       setOpenStatusMenu(null);
       setEditingWipColId(null);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        setContextMenu(null);
+        setOpenStatusMenu(null);
+        setEditingWipColId(null);
+      }
     };
-    window.addEventListener('click', onClose);
+    document.addEventListener('mousedown', onOutside);
     window.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('click', onClose);
+      document.removeEventListener('mousedown', onOutside);
       window.removeEventListener('keydown', onKey);
     };
   }, [contextMenu, openStatusMenu, editingWipColId]);
@@ -695,7 +738,6 @@ export default function CronogramaKanbanView({
                 type="button"
                 onClick={() => {
                   handleSetCardColor(item.id, '');
-                  closeFn();
                 }}
                 style={{ border: 0, background: 'transparent', color: '#0066ff', fontSize: '11px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
               >
@@ -713,7 +755,6 @@ export default function CronogramaKanbanView({
                   title={sw.label}
                   onClick={() => {
                     handleSetCardColor(item.id, sw.hex);
-                    closeFn();
                   }}
                   style={{
                     width: 18,
@@ -905,7 +946,8 @@ export default function CronogramaKanbanView({
 
                   {editingWipColId === col.id && (
                     <div
-                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
                       style={{
                         position: 'absolute',
                         top: '100%',
@@ -1080,14 +1122,9 @@ export default function CronogramaKanbanView({
                             y: Math.min(e.clientY, window.innerHeight - 280),
                           });
                         }}
-                        className={`kanban-card ${isDragging ? 'is-dragging' : ''} ${dropPosClass}`}
+                        className={`kanban-card is-size-${boardPrefs.cardSize} ${isDragging ? 'is-dragging' : ''} ${dropPosClass}`}
                         style={{
-                          ...(boardPrefs.cardSize === 'compact'
-                            ? { padding: '9px 11px', gap: 6 }
-                            : boardPrefs.cardSize === 'wide'
-                            ? { padding: '16px 18px', gap: 10 }
-                            : {}),
-                          ...(cardTheme === 'simple' || !accentColor
+                          ...(!accentColor || (cardTheme === 'simple' && !cardColors[item.id])
                             ? {}
                             : cardTheme === 'tinted'
                             ? (() => {
@@ -1110,41 +1147,35 @@ export default function CronogramaKanbanView({
                           }
                         }}
                       >
-                        {/* Cabecera de tarjeta: Código EDT, Título y Menú */}
+                        {/* Cabecera de tarjeta: Kicker encapsulado + Menú */}
                         <div className="kanban-card-top">
-                          <div className="kanban-card-title-wrap">
-                            <span className="kanban-card-code" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <div className="kanban-card-kicker-row">
+                            <span className="kanban-card-code">
                               {renderEdtIcon(item)}
                               <span>{item.code || getEdtNodeDisplayLabel(item, allItems)}</span>
                             </span>
-                            <span
-                              className="kanban-card-name"
-                              title={item.name}
-                              style={
-                                boardPrefs.cardSize === 'compact'
-                                  ? {
-                                      display: '-webkit-box',
-                                      WebkitLineClamp: 2,
-                                      WebkitBoxOrient: 'vertical',
-                                      overflow: 'hidden',
-                                    }
-                                  : undefined
-                              }
-                            >
-                              {item.name}
-                            </span>
+                            {item.code && (
+                              <span className="kanban-card-type-pill">
+                                {getEdtNodeDisplayLabel(item, allItems)}
+                              </span>
+                            )}
                           </div>
-                          <div style={{ position: 'relative' }}>
+                          <div style={{ position: 'relative', flexShrink: 0 }}>
                             <button
                               type="button"
                               className="kanban-card-menu-btn"
+                              data-kanban-menu-trigger="true"
+                              aria-label={`Opciones de tarjeta ${item.name}`}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setContextMenu(null);
                                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                const menuW = 254;
+                                const menuW = 250;
+                                const menuH = 275;
                                 const x = Math.max(12, Math.min(rect.right - menuW, window.innerWidth - menuW - 12));
-                                const y = Math.max(12, Math.min(rect.bottom + 6, window.innerHeight - 300));
+                                const y = rect.bottom + 6 + menuH > window.innerHeight
+                                  ? Math.max(12, rect.top - menuH - 6)
+                                  : rect.bottom + 6;
                                 setOpenStatusMenu((prev) => (prev?.item.id === item.id ? null : { item, x, y }));
                               }}
                               title="Opciones de tarjeta"
@@ -1154,13 +1185,33 @@ export default function CronogramaKanbanView({
                           </div>
                         </div>
 
+                        {/* Título de tarjeta */}
+                        <div className="kanban-card-title-wrap">
+                          <span
+                            className="kanban-card-name"
+                            title={item.name}
+                            style={
+                              boardPrefs.cardSize === 'compact'
+                                ? {
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                  }
+                                : undefined
+                            }
+                          >
+                            {formatFriendlyCardTitle(item.name)}
+                          </span>
+                        </div>
+
                         {boardPrefs.cardSize !== 'compact' && (
                           <>
                             {boardPrefs.showKeyProps && (parentHito ? (
                               <div className="kanban-card-parent" title={`Padre: ${parentHito.name}`}>
                                 <Target size={12} className="kanban-card-icon" />
                                 <span>
-                                  {parentHito.code ? `${parentHito.code} ` : ''}{parentHito.name}
+                                  {parentHito.code ? `${parentHito.code} ` : ''}{formatFriendlyCardTitle(parentHito.name)}
                                 </span>
                               </div>
                             ) : (
@@ -1171,144 +1222,111 @@ export default function CronogramaKanbanView({
                             ))}
 
                             {boardPrefs.showDates && (
-                            <div className="kanban-card-dates" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0, overflow: 'hidden' }}>
-                                <CalendarDays size={12} className="kanban-card-icon" style={{ flexShrink: 0 }} />
-                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {formatDatePE(item.start)} – {formatDatePE(item.end)}
-                                </span>
-                              </div>
-                              {(() => {
-                                const dev = getDeviationDays(item, todayIso || new Date().toISOString().slice(0, 10));
-                                if (dev === undefined) return null;
-                                const tone = getDeviationTone(dev);
-                                return (
-                                  <span
-                                    className={`dev-pill ${tone}`}
-                                    style={{ fontSize: '10.5px', padding: '1px 5px', lineHeight: '1.2', flexShrink: 0 }}
-                                    title={`Desviación respecto a línea base: ${formatDeviation(dev)}`}
-                                  >
-                                    {formatDeviation(dev)}
+                              <div className="kanban-card-dates" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 0, overflow: 'hidden' }}>
+                                  <CalendarDays size={12} className="kanban-card-icon" style={{ flexShrink: 0 }} />
+                                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {formatDatePE(item.start)} – {formatDatePE(item.end)}
                                   </span>
-                                );
-                              })()}
-                            </div>
+                                </div>
+                                {(() => {
+                                  const dev = getDeviationDays(item, todayIso || new Date().toISOString().slice(0, 10));
+                                  if (dev === undefined) return null;
+                                  const tone = getDeviationTone(dev);
+                                  return (
+                                    <span
+                                      className={`dev-pill ${tone}`}
+                                      style={{ fontSize: '10.5px', padding: '2px 6px', lineHeight: '1.2', flexShrink: 0 }}
+                                      title={`Desviación respecto a línea base: ${formatDeviation(dev)}`}
+                                    >
+                                      {formatDeviation(dev)}
+                                    </span>
+                                  );
+                                })()}
+                              </div>
                             )}
+
+                            {/* Progreso limpio directo sobre la tarjeta (Estándar y Amplia, sin caja blanca ni texto Baseline) */}
+                            {boardPrefs.showProgress && (() => {
+                              const refToday = todayIso || new Date().toISOString().slice(0, 10);
+                              const bStart = item.baselineStart || item.start;
+                              const bEnd = item.baselineEnd || item.end;
+                              const totalDays = Math.max(1, daysBetween(bStart, bEnd));
+                              const elapsedDays = daysBetween(bStart, refToday);
+                              const baselinePct = refToday < bStart ? 0 : refToday >= bEnd ? 100 : Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)));
+                              const actualPct = Math.min(100, Math.max(0, item.progress));
+                              const behind = !isCompleted && actualPct < baselinePct;
+                              const barColor = isCompleted ? '#16a34a' : behind ? '#ef4444' : '#0066ff';
+                              return (
+                                <div className="kanban-card-progress-block">
+                                  <div className="kanban-card-progress-header">
+                                    <span className="kanban-card-progress-label">Progreso</span>
+                                    <span className={`kanban-card-progress-value ${isCompleted ? 'is-complete' : behind ? 'is-behind' : ''}`}>
+                                      {actualPct}%
+                                    </span>
+                                  </div>
+                                  <div className="kanban-card-progress-track">
+                                    <div
+                                      className="kanban-card-progress-fill"
+                                      style={{
+                                        width: `${actualPct}%`,
+                                        backgroundColor: barColor,
+                                      }}
+                                    />
+                                    {baselinePct > 0 && baselinePct < 100 && (
+                                      <span
+                                        className="kanban-card-baseline-tick"
+                                        style={{ left: `${baselinePct}%` }}
+                                        title={`Avance esperado hoy: ${baselinePct}%`}
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </>
                         )}
 
-                        {/* Bloque ejecutivo en modo Amplia: Avance Real vs. Baseline */}
-                        {boardPrefs.cardSize === 'wide' && boardPrefs.showProgress && (() => {
-                          const refToday = todayIso || new Date().toISOString().slice(0, 10);
-                          const bStart = item.baselineStart || item.start;
-                          const bEnd = item.baselineEnd || item.end;
-                          const totalDays = Math.max(1, daysBetween(bStart, bEnd));
-                          const elapsedDays = daysBetween(bStart, refToday);
-                          const baselinePct = refToday < bStart ? 0 : refToday >= bEnd ? 100 : Math.min(100, Math.max(0, Math.round((elapsedDays / totalDays) * 100)));
-                          const actualPct = Math.min(100, Math.max(0, item.progress));
-                          const behind = !isCompleted && actualPct < baselinePct;
+                        {/* Pie de Tarjeta: Avatar a la izquierda + píldoras limpias a la derecha */}
+                        {(boardPrefs.showOwner || boardPrefs.showRegion || (boardPrefs.showProgress && boardPrefs.cardSize === 'compact')) && (() => {
+                          const regionLabel = boardPrefs.showRegion && item.region
+                            ? (typeof item.region === 'string'
+                                ? item.region
+                                : (item.region as any)?.name || (item.region as any)?.dre || '')
+                            : '';
+                          const isCompact = boardPrefs.cardSize === 'compact';
                           return (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, padding: '8px 10px', borderRadius: 8, background: '#ffffff', border: '1px solid #e2e8f0' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11.5, fontWeight: 650 }}>
-                                <span style={{ color: '#0f172a' }}>
-                                  Avance: <strong style={{ color: isCompleted ? '#16a34a' : behind ? '#dc2626' : '#0066ff' }}>{actualPct}%</strong>
-                                </span>
-                                <span style={{ color: '#64748b' }}>
-                                  Baseline: <strong style={{ color: '#334155' }}>{baselinePct}%</strong>
-                                </span>
+                            <div className="kanban-card-footer">
+                              <div className="kanban-card-meta-left">
+                                {boardPrefs.showOwner && (
+                                  <div
+                                    className="kanban-card-avatar"
+                                    style={{ backgroundColor: avatar.bg }}
+                                    title={`Responsable: ${item.gestor || 'Sin asignar'}`}
+                                  >
+                                    {avatar.initials}
+                                  </div>
+                                )}
                               </div>
-                              <div style={{ position: 'relative', height: 10, borderRadius: 99, background: '#e2e8f0', overflow: 'visible' }}>
-                                <div
-                                  style={{
-                                    position: 'absolute',
-                                    left: 0,
-                                    top: 0,
-                                    bottom: 0,
-                                    width: `${baselinePct}%`,
-                                    background: '#cbd5e1',
-                                    borderRadius: 99,
-                                  }}
-                                />
-                                <div
-                                  style={{
-                                    position: 'relative',
-                                    height: '100%',
-                                    width: `${actualPct}%`,
-                                    background: isCompleted ? '#16a34a' : behind ? '#ef4444' : '#0066ff',
-                                    borderRadius: 99,
-                                    transition: 'width 0.2s ease',
-                                    zIndex: 2,
-                                  }}
-                                />
-                                {baselinePct > 0 && baselinePct < 100 && (
+
+                              <div className="kanban-card-compact-pills">
+                                {regionLabel && (
+                                  <span className="kanban-card-stat-pill is-region" title={`Ámbito: ${regionLabel}`}>
+                                    {regionLabel}
+                                  </span>
+                                )}
+                                {isCompact && boardPrefs.showProgress && (
                                   <span
-                                    title={`Línea base esperada hoy: ${baselinePct}%`}
-                                    style={{
-                                      position: 'absolute',
-                                      left: `${baselinePct}%`,
-                                      top: -2,
-                                      width: 3,
-                                      height: 14,
-                                      borderRadius: 2,
-                                      background: '#334155',
-                                      transform: 'translateX(-50%)',
-                                      zIndex: 3,
-                                    }}
-                                  />
+                                    className={`kanban-card-stat-pill is-pct ${isCompleted ? 'is-complete' : ''}`}
+                                    title={`Avance: ${item.progress}%`}
+                                  >
+                                    {item.progress}%
+                                  </span>
                                 )}
                               </div>
                             </div>
                           );
                         })()}
-
-                        {/* Pie de Tarjeta: Avatar + Región + Barra de Avance */}
-                        {(boardPrefs.showOwner || boardPrefs.showRegion || (boardPrefs.showProgress && boardPrefs.cardSize !== 'wide')) && (
-                        <div className="kanban-card-footer">
-                          <div className="kanban-card-meta-left">
-                            {boardPrefs.showOwner && (
-                            <div
-                              className="kanban-card-avatar"
-                              style={{ backgroundColor: avatar.bg }}
-                              title={`Responsable: ${item.gestor || 'Sin asignar'}`}
-                            >
-                              {avatar.initials}
-                            </div>
-                            )}
-                            {boardPrefs.showRegion && item.region && (() => {
-                              const regionLabel =
-                                typeof item.region === 'string'
-                                  ? item.region
-                                  : (item.region as any)?.name || (item.region as any)?.dre || '';
-                              if (!regionLabel) return null;
-                              return (
-                                <span className="kanban-card-region-pill" title={`Ámbito: ${regionLabel}`}>
-                                  {regionLabel}
-                                </span>
-                              );
-                            })()}
-                          </div>
-
-                          {boardPrefs.showProgress && boardPrefs.cardSize !== 'wide' && (
-                          <div className="kanban-card-progress-wrap">
-                            {item.progress > 0 && (
-                              <div className="kanban-progress-track" style={{ height: 6, borderRadius: 99 }}>
-                                <div
-                                  className="kanban-progress-bar"
-                                  style={{
-                                    width: `${Math.min(100, Math.max(0, item.progress))}%`,
-                                    backgroundColor: isCompleted ? '#16a34a' : '#0066ff',
-                                    borderRadius: 99,
-                                  }}
-                                />
-                              </div>
-                            )}
-                            <span className={`kanban-card-pct ${isCompleted ? 'is-complete' : ''}`}>
-                              {item.progress}%
-                            </span>
-                          </div>
-                          )}
-                        </div>
-                        )}
                       </div>
                     );
                   })
@@ -1323,17 +1341,21 @@ export default function CronogramaKanbanView({
       {openStatusMenu &&
         createPortal(
           <div
+            ref={statusMenuRef}
             className="kanban-context-menu"
             style={{
               top: openStatusMenu.y,
               left: openStatusMenu.x,
-              minWidth: 248,
+              minWidth: 250,
               maxWidth: 264,
               padding: 0,
               borderRadius: 12,
+              border: '1px solid #cbd5e1',
+              boxShadow: '0 14px 36px -4px rgba(15, 23, 42, 0.22), 0 4px 12px rgba(15, 23, 42, 0.08)',
               overflow: 'hidden',
               gap: 0,
             }}
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
             {renderCardMenuContent(openStatusMenu.item, () => setOpenStatusMenu(null))}
@@ -1345,8 +1367,10 @@ export default function CronogramaKanbanView({
       {contextMenu &&
         createPortal(
           <div
+            ref={contextMenuRef}
             className="kanban-context-menu"
             style={{ top: contextMenu.y, left: contextMenu.x }}
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
             {renderCardMenuContent(contextMenu.item, () => setContextMenu(null))}
