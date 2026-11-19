@@ -61,11 +61,13 @@ import {
   normalizeRegionKey,
 } from './regionalCoordinationModel';
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
-import { MINEDU_UNIDADES } from '../../../Bases de Datos/geocoding/New/mineduUnidades';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
+import { usePerfilGp } from '../../services/gpPermisosService';
 
-/** Cache a nivel de módulo: un solo fetch de gestor_unidades para todas las instancias montadas. */
-let UNIDADES_REMOTAS: { name: string; region: string; unitType: string; status: string }[] | null = null;
+type UnidadRemota = { name: string; region: string; unitType: string; status: string };
+
+/** Cache a nivel de módulo, aislada por tenant: un solo fetch por empresa autenticada. */
+const UNIDADES_REMOTAS_POR_TENANT = new Map<string, UnidadRemota[]>();
 
 export {
   type EdtNodeType,
@@ -1197,6 +1199,8 @@ export default function Reportes2View({
 }) {
   const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
+  const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
 
   // Estado reactivo de tareas operativas sincronizadas desde /tareas
   const [rawTasks, setRawTasks] = useState<any[]>(() => {
@@ -2231,22 +2235,23 @@ export default function Reportes2View({
     []
   );
 
-  // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
-  // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
-  const [unidades, setUnidades] = useState<any[]>(() =>
-    MINEDU_UNIDADES.map((u) => ({ name: u.name, region: u.region, unitType: u.unitType, status: u.status }))
-  );
+  // Unidades operativas (DRE / UGEL) del filtro territorial: SOLO las del tenant
+  // autenticado, leídas desde Supabase. Sin catálogo local de respaldo: un tenant
+  // nuevo debe ver el filtro vacío, nunca las sedes de DIGERE/MINEDU.
+  const [unidades, setUnidades] = useState<UnidadRemota[]>([]);
 
   useEffect(() => {
-    if (UNIDADES_REMOTAS) {
-      setUnidades(UNIDADES_REMOTAS);
+    if (cargandoPerfilGp) return;
+    const cached = UNIDADES_REMOTAS_POR_TENANT.get(tenantKey);
+    if (cached) {
+      setUnidades(cached);
       return;
     }
     let alive = true;
     listGestorUnits()
       .then((rows) => {
-        if (!alive || !rows || rows.length === 0) return;
-        const mapped = rows
+        if (!alive) return;
+        const mapped = (rows ?? [])
           .filter((u) => u.status !== 'archived')
           .map((u) => ({
             name: u.name,
@@ -2254,16 +2259,18 @@ export default function Reportes2View({
             unitType: u.unitType ?? 'ugel',
             status: u.status ?? 'active',
           }));
-        if (mapped.length > 0) {
-          UNIDADES_REMOTAS = mapped;
-          setUnidades(mapped);
-        }
+        UNIDADES_REMOTAS_POR_TENANT.set(tenantKey, mapped);
+        setUnidades(mapped);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!alive) return;
+        UNIDADES_REMOTAS_POR_TENANT.set(tenantKey, []);
+        setUnidades([]);
+      });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [tenantKey, cargandoPerfilGp]);
 
   const availableSedes = useMemo(() => {
     const set = new Set<string>();

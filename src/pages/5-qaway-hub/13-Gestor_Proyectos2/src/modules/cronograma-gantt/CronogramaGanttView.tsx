@@ -77,9 +77,12 @@ import {
 } from './regionalCoordinationModel';
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
+import { usePerfilGp } from '../../services/gpPermisosService';
 
-/** Cache a nivel de módulo: un solo fetch de gestor_unidades para todas las instancias montadas. */
-let UNIDADES_REMOTAS: { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number }[] | null = null;
+type UnidadRemotaGantt = { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number };
+
+/** Cache a nivel de módulo, aislada por tenant: un solo fetch por empresa autenticada. */
+const UNIDADES_REMOTAS_POR_TENANT = new Map<string, UnidadRemotaGantt[]>();
 
 export {
   type EdtNodeType,
@@ -1250,6 +1253,8 @@ export default function CronogramaGanttView({
 }) {
   const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
+  const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
 
   /* FASE 1 — Aislamiento de UI: claves de configuración de columnas/anchos por módulo+perspectiva
      (qaway-cronograma-{maestro|territorial|equipo}-*) para que la config de un módulo no pise la de otro. */
@@ -2144,7 +2149,7 @@ export default function CronogramaGanttView({
       status: nueva.status || 'active',
       gestor: nueva.gestor || 'Gestor Territorial',
     };
-    UNIDADES_REMOTAS = null;
+    UNIDADES_REMOTAS_POR_TENANT.delete(tenantKey);
     setUnidades((prev) => [formatted, ...prev]);
 
     if (perspective === 'territorial') {
@@ -2358,20 +2363,22 @@ export default function CronogramaGanttView({
 
 
 
-  // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
-  // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
-  const [unidades, setUnidades] = useState<any[]>(() => UNIDADES_REMOTAS ?? []);
+  // Unidades operativas (DRE / UGEL) del filtro territorial: SOLO las del tenant
+  // autenticado, leídas desde Supabase. Sin catálogo local de respaldo.
+  const [unidades, setUnidades] = useState<UnidadRemotaGantt[]>([]);
 
   useEffect(() => {
-    if (UNIDADES_REMOTAS) {
-      setUnidades(UNIDADES_REMOTAS);
+    if (cargandoPerfilGp) return;
+    const cached = UNIDADES_REMOTAS_POR_TENANT.get(tenantKey);
+    if (cached) {
+      setUnidades(cached);
       return;
     }
     let alive = true;
     listGestorUnits()
       .then((rows) => {
-        if (!alive || !rows || rows.length === 0) return;
-        const mapped = rows
+        if (!alive) return;
+        const mapped = (rows ?? [])
           .filter((u) => u.status !== 'archived')
           .map((u) => ({
             id: u.id,
@@ -2382,16 +2389,18 @@ export default function CronogramaGanttView({
             status: u.status ?? 'active',
             progress: typeof (u as any).progress === 'number' ? (u as any).progress : undefined,
           }));
-        if (mapped.length > 0) {
-          UNIDADES_REMOTAS = mapped;
-          setUnidades(mapped);
-        }
+        UNIDADES_REMOTAS_POR_TENANT.set(tenantKey, mapped);
+        setUnidades(mapped);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!alive) return;
+        UNIDADES_REMOTAS_POR_TENANT.set(tenantKey, []);
+        setUnidades([]);
+      });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [tenantKey, cargandoPerfilGp]);
 
   const availableSedes = useMemo(() => {
     const set = new Set<string>();
