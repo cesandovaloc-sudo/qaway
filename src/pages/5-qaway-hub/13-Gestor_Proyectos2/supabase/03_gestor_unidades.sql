@@ -26,18 +26,68 @@ create index if not exists idx_gestor_unidades_region on public.gestor_unidades(
 create index if not exists idx_gestor_unidades_type on public.gestor_unidades(unit_type);
 create index if not exists idx_gestor_unidades_tenant on public.gestor_unidades(tenant_id);
 
--- RLS permisiva, misma convencion de 01_gestor_cronograma.sql
+-- RLS tenant-scoped. Antes existia "(tenant_id IS NULL)" como escape legacy:
+-- eso permitia que cualquier tenant viera el catalogo DRE/UGEL de DIGERE.
 alter table public.gestor_unidades enable row level security;
-drop policy if exists "Permitir todo en gestor_unidades" on public.gestor_unidades;
-create policy "Permitir todo en gestor_unidades"
-  on public.gestor_unidades
-  for all
-  using (true)
-  with check (true);
+alter table public.gestor_unidades
+  add column if not exists tenant_id text default (public.get_auth_tenant_id())::text;
 
--- Semilla del catalogo DRE/UGEL (23 DRE · 228 UGEL = 251 unidades, 26 regiones)
-insert into public.gestor_unidades (id, name, code, unit_type, region, status, metadata)
-values
+drop policy if exists "Permitir todo en gestor_unidades" on public.gestor_unidades;
+drop policy if exists "gestor_unidades_select_empresa" on public.gestor_unidades;
+drop policy if exists "gestor_unidades_insert_empresa" on public.gestor_unidades;
+drop policy if exists "gestor_unidades_update_empresa" on public.gestor_unidades;
+drop policy if exists "gestor_unidades_delete_empresa" on public.gestor_unidades;
+drop policy if exists "gestor_unidades_plataforma_all" on public.gestor_unidades;
+
+create policy "gestor_unidades_plataforma_all" on public.gestor_unidades
+  for all to authenticated
+  using (public.is_platform_admin())
+  with check (public.is_platform_admin());
+
+create policy "gestor_unidades_select_empresa" on public.gestor_unidades
+  for select to authenticated
+  using (
+    public.user_can_use_app('gestor-proyectos')
+    and tenant_id = public.get_auth_tenant_id()::text
+    and tenant_id ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+  );
+
+create policy "gestor_unidades_insert_empresa" on public.gestor_unidades
+  for insert to authenticated
+  with check (
+    public.user_can_use_app('gestor-proyectos')
+    and public.user_app_role('gestor-proyectos') in ('admin', 'editor')
+    and tenant_id = public.get_auth_tenant_id()::text
+    and tenant_id ~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+  );
+
+create policy "gestor_unidades_update_empresa" on public.gestor_unidades
+  for update to authenticated
+  using (
+    tenant_id = public.get_auth_tenant_id()::text
+    and public.user_can_use_app('gestor-proyectos')
+    and public.user_app_role('gestor-proyectos') in ('admin', 'editor')
+  )
+  with check (
+    tenant_id = public.get_auth_tenant_id()::text
+    and public.user_can_use_app('gestor-proyectos')
+    and public.user_app_role('gestor-proyectos') in ('admin', 'editor')
+  );
+
+create policy "gestor_unidades_delete_empresa" on public.gestor_unidades
+  for delete to authenticated
+  using (
+    tenant_id = public.get_auth_tenant_id()::text
+    and public.user_can_use_app('gestor-proyectos')
+    and public.user_app_role('gestor-proyectos') in ('admin', 'editor')
+  );
+
+-- Semilla historica: SOLO para DIGERE MINEDU. Nunca se inserta sin tenant.
+-- Un tenant nuevo no puede ver estas filas aunque se re-ejecute este script.
+insert into public.gestor_unidades (id, tenant_id, name, code, unit_type, region, status, metadata)
+select v.id, '8bbc04cb-f030-48cc-904e-954c5b5af813'::text,
+       v.name, v.code, v.unit_type, v.region, v.status, v.metadata
+from (values
   ('unit-001', 'DRE AMAZONAS', 'DRE-AMAZONAS', 'dre', 'AMAZONAS', 'active', '{"source":"REGION_UGEL.xlsx"}'::jsonb),
   ('unit-002', 'UGEL BAGUA', 'UGEL-BAGUA', 'ugel', 'AMAZONAS', 'active', '{"source":"REGION_UGEL.xlsx"}'::jsonb),
   ('unit-003', 'UGEL BONGARÁ', 'UGEL-BONGARA', 'ugel', 'AMAZONAS', 'active', '{"source":"REGION_UGEL.xlsx"}'::jsonb),
@@ -289,6 +339,7 @@ values
   ('unit-249', 'UGEL CORONEL PORTILLO', 'UGEL-CORONEL-PORTILLO', 'ugel', 'UCAYALI', 'active', '{"source":"REGION_UGEL.xlsx"}'::jsonb),
   ('unit-250', 'UGEL PADRE ABAD', 'UGEL-PADRE-ABAD', 'ugel', 'UCAYALI', 'active', '{"source":"REGION_UGEL.xlsx"}'::jsonb),
   ('unit-251', 'UGEL PURUS', 'UGEL-PURUS', 'ugel', 'UCAYALI', 'active', '{"source":"REGION_UGEL.xlsx"}'::jsonb)
+) as v(id, name, code, unit_type, region, status, metadata)
 on conflict (id) do update
   set name = excluded.name,
       code = excluded.code,

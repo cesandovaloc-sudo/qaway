@@ -28,7 +28,16 @@ export default function LoginPage() {
     : '/hub/panel'
   // Las invitaciones o enlaces directos de una aplicación conservan su destino
   // y no pasan por el flujo comercial/onboarding del Hub.
-  const isGestorDirectEntry = redirectTarget === '/hub/gestor_proyectos' || redirectTarget.startsWith('/hub/gestor_proyectos/') || redirectTarget === '/hub/gestor_proyecto' || redirectTarget.startsWith('/hub/gestor_proyecto/')
+  const isGestorDirectEntry = [
+    '/hub/gestor_proyectos',
+    '/hub/gestor_proyecto',
+    '/gestor_proyectos',
+    '/hub/inventario',
+    '/hub/crm',
+    '/hub/agenda',
+    '/hub/blog-editor',
+    '/hub/marketing',
+  ].some((prefix) => redirectTarget === prefix || redirectTarget.startsWith(`${prefix}/`))
   const regEmail = searchParams.get('email') || ''
   const linkError = searchParams.get('linkError') || ''
   const linkErrorDesc = searchParams.get('linkErrorDesc') || ''

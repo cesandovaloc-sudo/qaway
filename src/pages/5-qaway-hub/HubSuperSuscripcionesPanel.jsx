@@ -385,6 +385,7 @@ export default function SuscripcionesPanel({
   const [ntName, setNtName] = useState("");
   const [ntSlug, setNtSlug] = useState("");
   const [ntSlugEdited, setNtSlugEdited] = useState(false);
+  const ntNameRef = useRef("");
   const [ntPlan, setNtPlan] = useState("basico");
   const [ntApps, setNtApps] = useState(["gestor-proyectos"]);
   const [ntWithPassword, setNtWithPassword] = useState(true);
@@ -397,17 +398,38 @@ export default function SuscripcionesPanel({
   const [ntCopied, setNtCopied] = useState(false);
 
   const APP_OPTIONS = [
-    { slug: "gestor-proyectos", label: "Gestor de Proyectos" },
-    { slug: "inventario", label: "Inventario" },
-    { slug: "crm", label: "CRM" },
-    { slug: "agenda", label: "Agenda" },
-    { slug: "blog", label: "Blog" },
+    { slug: "gestor-proyectos", label: "Gestor de Proyectos", route: "/hub/gestor_proyectos" },
+    { slug: "inventario", label: "Inventario", route: "/hub/inventario" },
+    { slug: "crm", label: "CRM", route: "/hub/crm" },
+    { slug: "agenda", label: "Agenda", route: "/hub/agenda" },
+    { slug: "blog", label: "Blog", route: "/hub/blog-editor" },
   ];
 
+  const resolvePrimaryAppRoute = (appsOrSlugs) => {
+    const list = Array.isArray(appsOrSlugs) ? appsOrSlugs : [];
+    for (const item of list) {
+      const raw = String(item || "").trim().toLowerCase();
+      if (!raw) continue;
+      const match = APP_OPTIONS.find((o) => o.slug === raw || o.label.toLowerCase() === raw);
+      if (match) return match.route;
+      if (raw.includes("gestor")) return "/hub/gestor_proyectos";
+      if (raw.includes("inventario")) return "/hub/inventario";
+      if (raw.includes("crm")) return "/hub/crm";
+      if (raw.includes("agenda")) return "/hub/agenda";
+      if (raw.includes("blog")) return "/hub/blog-editor";
+    }
+    return "/hub/gestor_proyectos";
+  };
+
   const handleNtNameChange = (val) => {
+    // Actualizar state inmediatamente para que el formulario funcione al submit
     setNtName(val);
+  };
+
+  // Computar auto-slug cuando el usuario sale del campo (no en cada tecla)
+  const handleNtNameBlur = () => {
     if (!ntSlugEdited) {
-      const autoSlug = val
+      const autoSlug = ntName
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -538,6 +560,7 @@ export default function SuscripcionesPanel({
         dni: ntWithPassword ? cleanDni : null,
         email: ntWithPassword ? effectiveEmail : null,
         password: provisionedPassword,
+        appRoute: resolvePrimaryAppRoute(ntApps),
         accessUrl: `${window.location.origin}/login`,
       });
 
@@ -570,20 +593,21 @@ export default function SuscripcionesPanel({
   // Optimización: usar refs para evitar re-fetch innecesario cuándo solo cambian filtros/queries
   const fetchRef = useRef(false);
   const aliveRef = useRef(true);
+  const initialFetchDoneRef = useRef(false);
 
   useEffect(() => {
     let alive = true;
-    // Solo hacer fetch inicial cuando rawTenants/rawSubs/rawApps son nulos (primera carga)
-    // Evitar re-fetch cuando solo cambian query/filters del usuario
+    // Marcar que ya realizamos el fetch inicial en la primera carga
     const needsInitialFetch = rawTenants === null && rawSubs === null && rawApps === null;
-    if (needsInitialFetch) {
+    if (needsInitialFetch && !initialFetchDoneRef.current) {
+      initialFetchDoneRef.current = true;
       fetchRef.current = true;
     }
     aliveRef.current = true;
 
     async function fetchRealSubscriptions() {
-      // Si ya se hizo fetch y no hay cambios en datos brutos, salir temprano
-      if (!fetchRef.current && !needsInitialFetch) {
+      // Si ya realizamos el fetch inicial, salir temprano cuando solo cambian filtros/queries
+      if (initialFetchDoneRef.current) {
         aliveRef.current = false;
         return;
       }
@@ -1622,7 +1646,8 @@ export default function SuscripcionesPanel({
                   <button
                     type="button"
                     onClick={() => {
-                      const url = `${window.location.origin}/login?redirect=/gestor_proyectos`;
+                      const appRoute = resolvePrimaryAppRoute(selectedSub?.apps);
+                      const url = `${window.location.origin}/login?redirect=${appRoute}`;
                       navigator.clipboard?.writeText(url);
                       setActionFeedback({ type: "success", text: `Link App copiado: ${url}` });
                     }}
@@ -1743,7 +1768,8 @@ export default function SuscripcionesPanel({
                         <button
                           type="button"
                           onClick={() => {
-                            const appUrl = `${window.location.origin}/login?redirect=/gestor_proyectos`;
+                            const appRoute = ntSuccess.appRoute || "/hub/gestor_proyectos";
+                            const appUrl = `${window.location.origin}/login?redirect=${appRoute}`;
                             const msg = ntSuccess.email
                               ? `Acceso directo a tu App (${ntSuccess.tenantName}):\nLink: ${appUrl}\nUsuario: ${ntSuccess.email}\nContraseña inicial: ${ntSuccess.password} (te pedirá cambiarla al entrar)`
                               : `Acceso directo a tu App (${ntSuccess.tenantName}):\n${appUrl}`;
@@ -1797,6 +1823,7 @@ export default function SuscripcionesPanel({
                         type="text"
                         value={ntName}
                         onChange={(e) => handleNtNameChange(e.target.value)}
+                        onBlur={handleNtNameBlur}
                         placeholder="Ej. Mi Empresa S.A.C."
                         className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#ff4b0b]"
                         required
@@ -1808,8 +1835,7 @@ export default function SuscripcionesPanel({
                       </label>
                       <input
                         type="text"
-                        value={ntSlug}
-                        onChange={(e) => {
+                        value={ntSlug}onChange={(e) => {
                           setNtSlugEdited(true);
                           setNtSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
                         }}

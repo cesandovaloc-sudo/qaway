@@ -9,6 +9,8 @@ import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, TAREAS_SEED_COUNT, US
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
+import CambiarContrasenaModal from './components/CambiarContrasenaModal';
+import { supabase } from './services/supabaseClient';
 import { usePerfilGp, capacidadesDe } from './services/gpPermisosService';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
@@ -177,6 +179,30 @@ function GestorProyectosApp() {
   // sigue siendo el mando real; esto es UX.
   const { perfil: perfilGp, capacidades: capGp, cargando: cargandoPerfilGp } = usePerfilGp();
   const sesionReal = !cargandoPerfilGp && perfilGp !== null;
+  const [mustChangePassword, setMustChangePassword] = useState(false);
+
+  useEffect(() => {
+    if (!supabase) return;
+    const checkUser = (u: any) => {
+      const meta = u?.user_metadata || {};
+      return Boolean(
+        meta.must_change_password ||
+        meta.requiere_cambio_clave ||
+        meta.force_password_change ||
+        meta.primer_ingreso ||
+        meta.needs_password_change
+      );
+    };
+    supabase.auth.getUser().then(({ data }) => {
+      if (checkUser(data?.user)) {
+        setMustChangePassword(true);
+      }
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setMustChangePassword(checkUser(session?.user));
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   // Etapa 6-D: perspectiva UI desde sesión real (Hub); fallback demo sin sesión.
   useEffect(() => {
@@ -748,6 +774,10 @@ function GestorProyectosApp() {
         userRole={userRole}
         onNavigateModule={handleSelectModule}
         notify={notifyActive}
+      />
+      <CambiarContrasenaModal
+        open={mustChangePassword}
+        onSuccess={() => setMustChangePassword(false)}
       />
     </div>
   );
