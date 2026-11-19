@@ -166,7 +166,7 @@ export default function SedesCaratulaView({
       return unidades.map((u: any, idx: number) => {
         const uType = (u.unitType || '').toLowerCase();
         const isDre = uType === 'dre' || uType === 'central' || uType === 'regional' || u.name?.startsWith('DRE') || u.name?.startsWith('GRE');
-        const reg = u.region || 'JUNÍN';
+        const reg = u.region || '';
         const rNorm = normRegKey(reg);
         let macro = 'centro';
         if (['TUMBES', 'PIURA', 'LAMBAYEQUE', 'LA LIBERTAD', 'CAJAMARCA', 'AMAZONAS', 'SAN MARTIN', 'LORETO'].includes(rNorm)) {
@@ -178,7 +178,7 @@ export default function SedesCaratulaView({
         const matchedPct = itemsProgressByName.get(normRegKey(u.name));
         const fallbackPct = typeof u.progress === 'number'
           ? u.progress
-          : [85, 75, 50, 33, 20, 65, 90, 45][idx % 8];
+          : 0;
         const progress = matchedPct !== undefined ? matchedPct : fallbackPct;
         const estadoAvance = progress >= 80 ? 'Cumple' : progress > 0 ? 'En proceso' : 'Pendiente';
 
@@ -197,15 +197,8 @@ export default function SedesCaratulaView({
       });
     }
 
-    return [
-      { id: 'u-1', name: 'DRE JUNÍN', code: 'DRE-JUN', type: 'DRE', unitType: 'dre', region: 'JUNÍN', macro: 'centro', progress: 75, estadoAvance: 'En proceso', estado: 'Activa' },
-      { id: 'u-2', name: 'UGEL HUANCAYO', code: 'UGEL-HYO', type: 'UGEL', unitType: 'ugel', region: 'JUNÍN', macro: 'centro', progress: 85, estadoAvance: 'Cumple', estado: 'Activa' },
-      { id: 'u-3', name: 'UGEL TARMA', code: 'UGEL-TAR', type: 'UGEL', unitType: 'ugel', region: 'JUNÍN', macro: 'centro', progress: 50, estadoAvance: 'En proceso', estado: 'En proceso' },
-      { id: 'u-4', name: 'DRE AMAZONAS', code: 'DRE-AMA', type: 'DRE', unitType: 'dre', region: 'AMAZONAS', macro: 'norte', progress: 75, estadoAvance: 'En proceso', estado: 'Activa' },
-      { id: 'u-5', name: 'UGEL BAGUA', code: 'UGEL-BAG', type: 'UGEL', unitType: 'ugel', region: 'AMAZONAS', macro: 'norte', progress: 80, estadoAvance: 'Cumple', estado: 'Activa' },
-      { id: 'u-6', name: 'DRE AREQUIPA', code: 'DRE-ARE', type: 'DRE', unitType: 'dre', region: 'AREQUIPA', macro: 'sur', progress: 85, estadoAvance: 'Cumple', estado: 'Activa' },
-      { id: 'u-7', name: 'UGEL AREQUIPA NORTE', code: 'UGEL-ARN', type: 'UGEL', unitType: 'ugel', region: 'AREQUIPA', macro: 'sur', progress: 85, estadoAvance: 'Cumple', estado: 'Activa' },
-    ];
+    // Sin unidades del tenant: carátula vacía, nunca sedes MINEDU de otro tenant.
+    return [];
   }, [unidades, itemsProgressByName]);
 
   // 2. Conteos por macrorregión y resumen compacto SOLO sobre DREs / Sedes Matrices

@@ -586,22 +586,9 @@ function GestorProyectosApp() {
           activeProject={activeProject}
         />
         <main ref={canvasRef} className="qm-canvas">
-          {/* Sin proyecto del tenant NO se monta ningún módulo: evita que los
-              fallbacks internos ('p1', semillas MINEDU) puedan mostrar datos
-              ajenos aunque se navegue por cualquier ruta. */}
-          {!activeProject && (
-            <div className="qm-module-loading" role="status" aria-live="polite">
-              <p className="qm-loading-caption">
-                {cargandoPerfilGp
-                  ? 'Cargando…'
-                  : sesionReal
-                    ? 'No hay proyectos en esta empresa.'
-                    : 'Sin sesión activa.'}
-              </p>
-            </div>
-          )}
-          {activeProject && (
-          <>
+          {/* La maqueta se monta siempre, incluso sin proyecto del tenant.
+              Los módulos consultan el tenant real y muestran sus tablas/Gantt
+              vacíos: sin datos ajenos, pero con la interfaz completa. */}
            {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <ResumenProyectoView userRole={userRole} canCreateProject={puedeCrearProyectoUi} sesionReal={sesionReal} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={handleOpenCreateProject} onActions={(h) => { binds.current['resumen'] = h; }} />
            </div>}
@@ -650,6 +637,7 @@ function GestorProyectosApp() {
                  }
                >
                  <CronogramaView
+                   activeProject={activeProject}
                    onSwitchPerspective={setCronogramaPerspective}
                    onActions={(h) => { binds.current['cronograma'] = h; }}
                  />
@@ -690,8 +678,6 @@ function GestorProyectosApp() {
               onActions={(h) => { binds.current['configuracion'] = h; }}
             />
            </div></Suspense>}
-          </>
-          )}
         </main>
       </div>
 

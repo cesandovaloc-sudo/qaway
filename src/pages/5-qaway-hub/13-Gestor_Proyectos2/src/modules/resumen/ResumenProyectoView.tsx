@@ -30,33 +30,25 @@ import {
   Clock3,
 } from 'lucide-react';
 
-const DEMO_UGEL = [
-  { nombre: 'Sede Chupaca', estado: 'cumple', avance: 100, fase1: true, fase2: true, dei: true, hito: 'CDL validado', fecha: '15 oct.' },
-  { nombre: 'Sede Concepción', estado: 'cumple', avance: 100, fase1: true, fase2: true, dei: true, hito: 'CDL validado', fecha: '14 oct.' },
-  { nombre: 'Sede Huancayo', estado: 'proceso', avance: 75, fase1: true, fase2: false, dei: true, hito: 'Registro en sistema', fecha: '20 oct.' },
-  { nombre: 'Sede Jauja', estado: 'proceso', avance: 50, fase1: true, fase2: false, dei: false, hito: 'Validación DEI', fecha: '21 oct.' },
-  { nombre: 'Sede Junín', estado: 'proceso', avance: 50, fase1: true, fase2: false, dei: false, hito: 'Registro en sistema', fecha: '21 oct.' },
-  { nombre: 'Sede Satipo', estado: 'incumple', avance: 33, fase1: true, fase2: false, dei: false, hito: 'Registro de NEA', fecha: '20 oct.' },
-  { nombre: 'Sede Tarma', estado: 'incumple', avance: 20, fase1: true, fase2: false, dei: false, hito: 'Carga RAR', fecha: '22 oct.' },
-  { nombre: 'Sede Chanchamayo', estado: 'incumple', avance: 20, fase1: false, fase2: false, dei: false, hito: 'Validación territorial', fecha: '24 oct.' },
-  { nombre: 'Sede Yauli', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Registro en sistema', fecha: '28 oct.' },
-  { nombre: 'Sede Pichanaki', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Carga RAR', fecha: '30 oct.' },
-  { nombre: 'Sede Río Tambo', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Acta de recepción', fecha: '30 oct.' },
-  { nombre: 'Sede Pangoa', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Validación CDT', fecha: '31 oct.' },
-  { nombre: 'Sede Perené', estado: 'incumple', avance: 0, fase1: false, fase2: false, dei: false, hito: 'Registro en sistema', fecha: '31 oct.' },
-];
+/** Forma de una fila del resumen. La maqueta se conserva; las filas llegan
+ *  del tenant activo y arrancan vacías para un proyecto nuevo. */
+type ResumenRow = {
+  nombre: string;
+  estado: string;
+  avance: number;
+  fase1: boolean;
+  fase2: boolean;
+  dei: boolean;
+  hito: string;
+  fecha: string;
+};
 
-const DEMO_HITOS = [
-  { dia: '20', mes: 'OCT', titulo: 'Carga de archivo RAR en plataforma', unidad: 'Sede Junín', estado: 'Retrasado', tipo: 'rojo' },
-  { dia: '24', mes: 'OCT', titulo: 'Registro de NEA en plataforma', unidad: 'Sede Tarma', estado: 'Retrasado', tipo: 'rojo' },
-  { dia: '28', mes: 'OCT', titulo: 'Validación de inconsistencias CDT', unidad: 'Sede Yauli', estado: 'En riesgo', tipo: 'amarillo' },
-  { dia: '30', mes: 'OCT', titulo: 'Envío de acta de comité y padrón', unidad: 'Sede Chupaca', estado: 'Pendiente', tipo: 'gris' },
-];
+const RESUMEN_ROWS: ResumenRow[] = [];
 
 const PHASES = [
-  { nombre: 'Fase 1 — Planificación y CDT', avance: 69, inicio: 3, fin: 34, estado: 'green' },
-  { nombre: 'Fase 2 — Registro en Plataforma (RAR / NEA)', avance: 38, inicio: 17, fin: 47, estado: 'amber' },
-  { nombre: 'Fase 3 — Validación DEI Nivel Inicial', avance: 23, inicio: 34, fin: 66, estado: 'red' },
+  { nombre: 'Fase 1 — Planificación y CDT', avance: 0, inicio: 3, fin: 34, estado: 'green' },
+  { nombre: 'Fase 2 — Registro en Plataforma (RAR / NEA)', avance: 0, inicio: 17, fin: 47, estado: 'amber' },
+  { nombre: 'Fase 3 — Validación DEI Nivel Inicial', avance: 0, inicio: 34, fin: 66, estado: 'red' },
 ];
 
 const RESUMEN_ESTADOS = [
@@ -65,7 +57,7 @@ const RESUMEN_ESTADOS = [
   { value: 'cumple', label: 'Cumple' },
 ];
 
-const RESUMEN_COLUMNS: ColumnDef<(typeof DEMO_UGEL)[0]>[] = [
+const RESUMEN_COLUMNS: ColumnDef<ResumenRow>[] = [
   { id: 'nombre', label: 'Sede Territorial', type: 'select', accessor: (r) => r.nombre },
   { id: 'estado', label: 'Estado', type: 'processState', accessor: (r) => r.estado, options: RESUMEN_ESTADOS },
   { id: 'avance', label: 'Avance Físico', type: 'percent', accessor: (r) => r.avance },
@@ -93,6 +85,7 @@ export default function ResumenProyectoView({
     id: string;
     name?: string;
     code?: string;
+    region?: string;
     estadoCodigo?: string | null | undefined;
     tipoProyectoCodigo?: string | null | undefined;
   } | undefined;
@@ -101,43 +94,41 @@ export default function ResumenProyectoView({
 }) {
   const puedeCrearProyecto = canCreateProject ?? userRole === 'coordinador';
   const mostrarBannerDemoCoordinador = !sesionReal && userRole === 'coordinador';
-  const engine = useTableEngine<(typeof DEMO_UGEL)[0]>({ tableId: 'resumen-ugel', columns: RESUMEN_COLUMNS, rows: DEMO_UGEL });
+  const engine = useTableEngine<ResumenRow>({ tableId: 'resumen-ugel', columns: RESUMEN_COLUMNS, rows: RESUMEN_ROWS });
 
   const [selectedTab, setSelectedTab] = useState<string>('Todas');
   const [viewMode, setViewMode] = useState<'semaforo' | 'fases'>('semaforo');
 
-  // Cargar datos en vivo del cronograma maestro
-  const [ganttItems, setGanttItems] = useState<any[]>(() => {
-    try {
-      const raw = localStorage.getItem('qaway-gantt-items-p1');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return [];
-  });
+  // Datos en vivo del cronograma maestro, SIEMPRE del proyecto del tenant.
+  // Sin proyecto activo no se lee ninguna clave: la maqueta se muestra vacía.
+  const proyectoId = proyecto?.id;
+  const [ganttItems, setGanttItems] = useState<any[]>([]);
 
   useEffect(() => {
-    const handleSync = () => {
+    setGanttItems([]);
+    if (!proyectoId) return;
+    const read = () => {
       try {
-        const raw = localStorage.getItem('qaway-gantt-items-p1');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) setGanttItems(parsed);
-        }
-      } catch {}
+        const raw =
+          localStorage.getItem(`qaway-gantt-items-${proyectoId}-maestro`) ||
+          localStorage.getItem(`qaway-gantt-items-${proyectoId}`);
+        const parsed = raw ? JSON.parse(raw) : [];
+        setGanttItems(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        setGanttItems([]);
+      }
     };
-    window.addEventListener('qaway-gantt-items-updated', handleSync);
-    window.addEventListener('storage', handleSync);
+    read();
+    window.addEventListener('qaway-gantt-items-updated', read);
+    window.addEventListener('storage', read);
     return () => {
-      window.removeEventListener('qaway-gantt-items-updated', handleSync);
-      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('qaway-gantt-items-updated', read);
+      window.removeEventListener('storage', read);
     };
-  }, []);
+  }, [proyectoId]);
 
   const liveHitos = useMemo(() => {
-    if (ganttItems.length === 0) return DEMO_HITOS;
+    if (ganttItems.length === 0) return [];
     const candidates = ganttItems
       .filter((it) => it.kind === 'subproceso' || it.kind === 'hito')
       .sort((a, b) => (a.end || '').localeCompare(b.end || ''));
@@ -148,7 +139,7 @@ export default function ResumenProyectoView({
       ...candidates.filter((it) => it.status === 'Pendiente'),
     ].slice(0, 4);
 
-    if (priorityItems.length === 0) return DEMO_HITOS;
+    if (priorityItems.length === 0) return [];
 
     const MONTHS_SHORT = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
 
@@ -197,11 +188,7 @@ export default function ResumenProyectoView({
       const avg =
         inPhase.length > 0
           ? Math.round(inPhase.reduce((acc, it) => acc + (it.progress || 0), 0) / inPhase.length)
-          : idx === 0
-          ? 69
-          : idx === 1
-          ? 38
-          : 23;
+          : 0;
 
       const st = avg >= 80 ? 'green' : avg >= 40 ? 'amber' : 'red';
       return {
@@ -220,7 +207,7 @@ export default function ResumenProyectoView({
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [openDropdown, setOpenDropdown] = useState<'fase' | 'estado' | 'sede' | null>(null);
 
-  const [actualizado, setActualizado] = useState('26 oct. 2026 · 10:30');
+  const [actualizado, setActualizado] = useState('sin fecha de corte');
   const [notice, setNotice] = useState('');
 
   const notify = (m: string) => {
@@ -242,10 +229,10 @@ export default function ResumenProyectoView({
     return () => window.removeEventListener('click', handleWindowClick);
   }, []);
 
-  const total = DEMO_UGEL.length;
-  const cumple = DEMO_UGEL.filter((x) => x.estado === 'cumple').length;
-  const proceso = DEMO_UGEL.filter((x) => x.estado === 'proceso').length;
-  const incumple = DEMO_UGEL.filter((x) => x.estado === 'incumple').length;
+  const total = RESUMEN_ROWS.length;
+  const cumple = RESUMEN_ROWS.filter((x) => x.estado === 'cumple').length;
+  const proceso = RESUMEN_ROWS.filter((x) => x.estado === 'proceso').length;
+  const incumple = RESUMEN_ROWS.filter((x) => x.estado === 'incumple').length;
 
   const tabPills = [
     { id: 'Todas', label: 'Todas las sedes', count: total },
@@ -255,7 +242,7 @@ export default function ResumenProyectoView({
   ];
 
   const rows = useMemo(() => {
-    const base = DEMO_UGEL.filter((row) => {
+    const base = RESUMEN_ROWS.filter((row) => {
       const matchesUgel = ugel === 'Todas' || row.nombre === ugel;
       const matchesSearch = row.nombre.toLowerCase().includes(busqueda.toLowerCase()) || row.hito.toLowerCase().includes(busqueda.toLowerCase());
 
@@ -310,7 +297,9 @@ export default function ResumenProyectoView({
               <Activity size={26} />
             </span>
             <div>
-              <span className="super">SALA DE SITUACIÓN OPERATIVA · REGIÓN JUNÍN</span>
+              <span className="super">
+                SALA DE SITUACIÓN OPERATIVA{proyecto?.region ? ` · ${proyecto.region.toUpperCase()}` : ''}
+              </span>
               <h1>Resumen Ejecutivo del Proyecto</h1>
               <p>
                 Monitoreo ejecutivo del avance físico de sedes, semáforo de cumplimiento territorial y control de fases.
@@ -660,7 +649,7 @@ export default function ResumenProyectoView({
                 <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ minWidth: 220 }}>
                   <div className="filter-popover-title">Filtrar por Sede</div>
                   <div className="filter-popover-list" style={{ maxHeight: '220px', overflowY: 'auto' }}>
-                    {['Todas', ...DEMO_UGEL.map((x) => x.nombre)].map((u) => (
+                    {['Todas', ...RESUMEN_ROWS.map((x) => x.nombre)].map((u) => (
                       <button
                         key={u}
                         type="button"
@@ -725,6 +714,13 @@ export default function ResumenProyectoView({
                     </tr>
                   </thead>
                   <tbody>
+                    {rows.length === 0 && (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '28px 16px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                          Sin sedes registradas para este proyecto.
+                        </td>
+                      </tr>
+                    )}
                     {rows.map((r) => (
                       <tr key={r.nombre}>
                         <td style={{ padding: '12px 16px', fontWeight: 650, color: '#0f172a' }}>

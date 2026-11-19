@@ -15,7 +15,6 @@ import {
   TrendingUp,
   AlertTriangle,
 } from 'lucide-react';
-import { MINEDU_UNIDADES } from '../../../Bases de Datos/geocoding/New/mineduUnidades';
 import { UGEL_COORDINATES } from '../../../Bases de Datos/geocoding/New/ugel-coordinates';
 import PeruChoroplethView from './PeruChoroplethView';
 import PeruPowerBIMapView from './PeruPowerBIMapView';
@@ -248,12 +247,13 @@ export default function MapaTerritorialView({
         id: u.id || `unit-${idx}`,
         name: u.name,
         code: u.code || '',
-        region: u.region || 'JUNÍN',
+        region: u.region || '',
         unitType: u.unitType || 'ugel',
         address: u.address || '',
       }));
     }
-    return MINEDU_UNIDADES;
+    // Sin unidades del tenant: mapa vacío, nunca el catálogo MINEDU de otro tenant.
+    return [];
   }, [unidades]);
 
   const allRows = useMemo(() => {
