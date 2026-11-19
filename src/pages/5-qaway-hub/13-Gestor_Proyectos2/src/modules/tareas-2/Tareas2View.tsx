@@ -1,3 +1,4 @@
+import { claveTareasLocal } from '../../services/gestorTareasLocalService';
 import { GanttEditorDrawer } from './GanttEditorDrawer';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
@@ -1311,12 +1312,23 @@ export default function Tareas2View({
   // Estado reactivo de tareas operativas sincronizadas desde /tareas
   const [rawTasks, setRawTasks] = useState<any[]>(() => {
     try {
-      const saved = localStorage.getItem('qaway-tasks-v1');
+      const saved = localStorage.getItem(claveTareasLocal());
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
+
+  // La clave de tareas depende del tenant: al resolverse/cambiar la sesión se
+  // recarga desde SU clave (un tenant nuevo nunca hereda qaway-tasks-v1).
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(claveTareasLocal());
+      setRawTasks(saved ? JSON.parse(saved) : []);
+    } catch {
+      setRawTasks([]);
+    }
+  }, [tenantKey]);
 
   const loadProjectItems = (pid: string, tasksOverride?: any[]): Item[] => {
     const isMaestro = perspective === 'maestro';
@@ -1505,7 +1517,7 @@ export default function Tareas2View({
     if (!isActive) return;
     const handleTasksUpdated = () => {
       try {
-        const saved = localStorage.getItem('qaway-tasks-v1');
+        const saved = localStorage.getItem(claveTareasLocal());
         const parsed = saved ? JSON.parse(saved) : [];
         setRawTasks(parsed);
         setItems((prevItems) => {
@@ -1797,7 +1809,7 @@ export default function Tareas2View({
   const getLinkedTasks = (milestoneName?: string) => {
     if (!milestoneName) return [];
     try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
       if (Array.isArray(raw)) {
         return raw.filter((t: any) => t.milestone === milestoneName);
       }
@@ -1827,7 +1839,7 @@ export default function Tareas2View({
       return;
     }
     try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
       const list = Array.isArray(raw) ? raw : [];
       const newTask = {
         id: Math.max(0, ...list.map((x: any) => x.id || 0)) + 1,
@@ -1847,7 +1859,7 @@ export default function Tareas2View({
         history: [{ text: 'Tarea creada desde el cronograma maestro', date: new Date().toLocaleString('es-PE') }],
       };
       const nextList = [newTask, ...list];
-      localStorage.setItem('qaway-tasks-v1', JSON.stringify(nextList));
+      localStorage.setItem(claveTareasLocal(), JSON.stringify(nextList));
       setForceTasksNonce((n) => n + 1);
       setCreateTaskModalOpen(false);
       notify(`Tarea "${newTaskForm.title.trim()}" vinculada y agregada al módulo Tareas`);
@@ -1859,7 +1871,7 @@ export default function Tareas2View({
 
   const handleToggleTask = (taskId: number) => {
     try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
       if (Array.isArray(raw)) {
         const nextList = raw.map((t: any) => {
           if (t.id === taskId) {
@@ -1868,7 +1880,7 @@ export default function Tareas2View({
           }
           return t;
         });
-        localStorage.setItem('qaway-tasks-v1', JSON.stringify(nextList));
+        localStorage.setItem(claveTareasLocal(), JSON.stringify(nextList));
         window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
         setForceTasksNonce((n) => n + 1);
         notify('Estado de tarea operativa actualizado');
@@ -9918,7 +9930,7 @@ export default function Tareas2View({
             const updatedTasks = [newTask, ...rawTasks];
             setRawTasks(updatedTasks);
             try {
-              localStorage.setItem('qaway-tasks-v1', JSON.stringify(updatedTasks));
+              localStorage.setItem(claveTareasLocal(), JSON.stringify(updatedTasks));
             } catch {}
             notify(`Tarea "${newTask.title}" asignada con éxito a ${newTask.owner}`);
           }}

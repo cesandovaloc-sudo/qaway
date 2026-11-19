@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { claveTareasLocal } from '../../services/gestorTareasLocalService';
 import {
   ArrowLeft,
   CalendarDays,
@@ -119,7 +120,7 @@ export default function GanttElementDetailView() {
   const linkedTasks = useMemo(() => {
     if (!item) return [];
     try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
       return Array.isArray(raw) ? linkTasks(item, raw) : [];
     } catch {
       return [];

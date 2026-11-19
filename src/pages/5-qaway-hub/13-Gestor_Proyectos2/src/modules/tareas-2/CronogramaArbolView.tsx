@@ -1,3 +1,4 @@
+import { claveTareasLocal } from '../../services/gestorTareasLocalService';
 import React, { useState, useMemo } from 'react';
 import {
   ChevronDown,
@@ -66,7 +67,7 @@ export const CronogramaArbolView: React.FC<CronogramaArbolViewProps> = ({
 
   const rawTasks = useMemo(() => {
     try {
-      const saved = localStorage.getItem('qaway-tasks-v1');
+      const saved = localStorage.getItem(claveTareasLocal());
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];

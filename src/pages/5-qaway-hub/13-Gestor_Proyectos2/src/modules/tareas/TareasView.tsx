@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { claveTareasLocal } from '../../services/gestorTareasLocalService';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../cronograma-gantt/gantt.css';
 import './tareas.css';
@@ -266,7 +267,7 @@ export default function TareasView({ activeProject, onTasksCount, onActions }: T
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || 'null');
+      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || 'null');
       const list = Array.isArray(raw) && raw.length > 0 ? raw : INITIAL_TASKS;
       return list.map((t: any, idx: number) => ({
         ...t,
@@ -284,7 +285,7 @@ export default function TareasView({ activeProject, onTasksCount, onActions }: T
   useEffect(() => {
     const reloadTasks = () => {
       try {
-        const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || 'null');
+        const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || 'null');
         if (Array.isArray(raw)) {
           setTasks(
             raw.map((t: any, idx: number) => ({
@@ -383,7 +384,7 @@ export default function TareasView({ activeProject, onTasksCount, onActions }: T
   const save = (next: Task[]) => {
     setTasks(next);
     try {
-      localStorage.setItem('qaway-tasks-v1', JSON.stringify(next));
+      localStorage.setItem(claveTareasLocal(), JSON.stringify(next));
       window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
     } catch {}
   };

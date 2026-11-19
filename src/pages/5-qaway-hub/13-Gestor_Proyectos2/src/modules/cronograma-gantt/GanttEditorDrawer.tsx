@@ -1,4 +1,5 @@
 // Verificación de tipado activada: este archivo será validado por tsc -b
+import { claveTareasLocal } from '../../services/gestorTareasLocalService';
 import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
 import {
   ChevronLeft,
@@ -405,7 +406,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [forceTasksNonce, setForceTasksNonce] = useState(0);
   const rawTasks = useMemo(() => {
     try {
-      const parsed = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const parsed = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
@@ -628,7 +629,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
       return;
     }
     try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
       const list = Array.isArray(raw) ? raw : [];
       const newTask = {
         id: Math.max(0, ...list.map((x: any) => x.id || 0)) + 1,
@@ -648,7 +649,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
         history: [{ text: 'Tarea creada desde el cronograma maestro', date: new Date().toLocaleString('es-PE') }],
       };
       const nextList = [newTask, ...list];
-      localStorage.setItem('qaway-tasks-v1', JSON.stringify(nextList));
+      localStorage.setItem(claveTareasLocal(), JSON.stringify(nextList));
       setForceTasksNonce((n) => n + 1);
       setCreateTaskModalOpen(false);
       notify(`Tarea "${newTaskForm.title.trim()}" vinculada y agregada al módulo Tareas`);
@@ -660,7 +661,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
 
   const handleToggleTask = (taskId: number) => {
     try {
-      const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
       if (Array.isArray(raw)) {
         const nextList = raw.map((t: any) => {
           if (t.id === taskId) {
@@ -669,7 +670,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
           }
           return t;
         });
-        localStorage.setItem('qaway-tasks-v1', JSON.stringify(nextList));
+        localStorage.setItem(claveTareasLocal(), JSON.stringify(nextList));
         window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
         setForceTasksNonce((n) => n + 1);
         notify('Estado de tarea operativa actualizado');

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { claveTareasLocal } from '../../services/gestorTareasLocalService';
 import React, { useMemo, useState, useEffect } from 'react';
 import '../cronograma-gantt/gantt.css';
 import './hitos.css';
@@ -128,7 +129,7 @@ const getLiveWbsComponents = (): ComponenteWbs[] => {
 
 const getLiveTasksForComponent = (component: ComponenteWbs): OperationalTask[] => {
   try {
-    const raw = JSON.parse(localStorage.getItem('qaway-tasks-v1') || '[]');
+    const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
     if (!Array.isArray(raw)) return [];
 
     const cleanTitle = component.title.toLowerCase();

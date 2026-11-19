@@ -211,6 +211,21 @@ export function invalidarPerfilGp(): void {
   enVueloPerfil = null;
 }
 
+/** Tenant ya resuelto en caché, sin esperar la promesa (para claves de storage local). */
+export function tenantIdGpEnCache(): string | null {
+  return cachePerfil?.tenantId ?? null;
+}
+
+// La caché del perfil depende de la sesión del Hub: al cambiar de cuenta debe
+// re-resolverse, o un tenant nuevo heredaría el tenant del perfil anterior.
+if (supabase) {
+  try {
+    supabase.auth.onAuthStateChange(() => {
+      invalidarPerfilGp();
+    });
+  } catch {}
+}
+
 /** Hook de lectura para pantallas: perfil + capacidades derivadas. */
 export function usePerfilGp(): { perfil: PerfilGp | null; cargando: boolean; capacidades: CapacidadesGp } {
   const [perfil, setPerfil] = useState<PerfilGp | null | undefined>(undefined);
