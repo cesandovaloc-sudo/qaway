@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Building2,
   CalendarClock,
@@ -567,10 +567,28 @@ export default function SuscripcionesPanel({
   const pageSize = 8;
 
   // Carga reactiva de empresas y suscripciones reales desde Supabase
+  // Optimización: usar refs para evitar re-fetch innecesario cuándo solo cambian filtros/queries
+  const fetchRef = useRef(false);
+  const aliveRef = useRef(true);
+
   useEffect(() => {
     let alive = true;
+    // Solo hacer fetch inicial cuando rawTenants/rawSubs/rawApps son nulos (primera carga)
+    // Evitar re-fetch cuando solo cambian query/filters del usuario
+    const needsInitialFetch = rawTenants === null && rawSubs === null && rawApps === null;
+    if (needsInitialFetch) {
+      fetchRef.current = true;
+    }
+    aliveRef.current = true;
 
     async function fetchRealSubscriptions() {
+      // Si ya se hizo fetch y no hay cambios en datos brutos, salir temprano
+      if (!fetchRef.current && !needsInitialFetch) {
+        aliveRef.current = false;
+        return;
+      }
+      fetchRef.current = false;
+
       try {
         setLoading(true);
         let realTenants = rawTenants && rawTenants.length > 0 ? rawTenants : null;
@@ -591,7 +609,7 @@ export default function SuscripcionesPanel({
               .select("id, name, slug"),
           ]);
 
-          if (!alive) return;
+          if (!aliveRef.current) return;
           realTenants = (tenantsRes.data || []).filter((t) => !t.deleted_at);
           realSubs = subsRes.data || [];
           realApps = appsRes.data || [];

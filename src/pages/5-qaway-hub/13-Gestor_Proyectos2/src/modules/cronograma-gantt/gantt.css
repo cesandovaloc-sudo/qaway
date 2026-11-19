@@ -1629,21 +1629,29 @@
 .gantt-v2 .af-grid-5 {
   display: grid;
   grid-template-columns: 1.3fr 1.15fr 0.9fr 1.15fr 1.15fr;
-  gap: 0;
-  align-items: start;
+  gap: 12px;
+  align-items: stretch;
 }
 
 .gantt-v2 .af-col {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 2px 16px 4px 0;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   min-width: 0;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.gantt-v2 .af-col:focus-within {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
 .gantt-v2 .af-col-bordered {
-  border-left: 1px solid #f1f5f9;
-  padding-left: 16px;
+  /* Mantenido por compatibilidad; ahora todas las columnas viven encapsuladas */
 }
 
 .gantt-v2 .af-col-title {
@@ -1653,8 +1661,9 @@
   font-size: 13px;
   font-weight: 700;
   color: #1e293b;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
 }
-
 .gantt-v2 .af-col-icon {
   color: #0066ff;
   flex-shrink: 0;
@@ -1684,6 +1693,147 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.gantt-v2 .af-dropdown-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.gantt-v2 .af-dropdown-trigger {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.gantt-v2 .af-dropdown-trigger:hover {
+  border-color: #cbd5e1;
+}
+
+.gantt-v2 .af-dropdown-trigger.is-open,
+.gantt-v2 .af-dropdown-trigger:focus-visible {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  outline: none;
+}
+
+.gantt-v2 .af-dropdown-val {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.gantt-v2 .af-dropdown-chevron {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.gantt-v2 .af-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: 300px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.14);
+  z-index: 200;
+}
+
+.gantt-v2 .af-popover-right {
+  left: auto;
+  right: 0;
+}
+
+.gantt-v2 .af-popover-scroll {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.gantt-v2 .af-popover-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.gantt-v2 .af-popover-search input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  font-size: 12px;
+  color: #1e293b;
+  outline: none;
+}
+
+.gantt-v2 .af-cascade-hint {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #64748b;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+}
+
+.gantt-v2 .af-date-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.gantt-v2 .af-date-btn {
+  width: 100%;
+  height: 34px;
+  padding: 0 9px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.gantt-v2 .af-date-btn:hover {
+  border-color: #cbd5e1;
+}
+
+.gantt-v2 .af-date-btn.is-open,
+.gantt-v2 .af-date-btn:focus-visible {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  outline: none;
+}
+
+.gantt-v2 .af-date-btn-icon {
+  color: #64748b;
+  flex-shrink: 0;
 }
 
 .gantt-v2 .af-date-input {
@@ -1718,8 +1868,8 @@
   padding: 0 9px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  background: #f8fafc;
-  transition: border-color 0.14s ease, background 0.14s ease;
+  background: #ffffff;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
 }
 
 .gantt-v2 .af-search-box:focus-within {
@@ -1755,11 +1905,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
   font-size: 13px;
   color: #334155;
   cursor: pointer;
   user-select: none;
-  padding: 2px 0;
+  padding: 3px 4px;
+  border-radius: 6px;
+  transition: background-color 0.12s ease;
+}
+
+.gantt-v2 .af-check-row:hover {
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .gantt-v2 .af-check-row input[type="checkbox"] {
@@ -1918,8 +2078,7 @@
   }
   .gantt-v2 .af-col,
   .gantt-v2 .af-col-bordered {
-    border-left: 0;
-    padding: 0;
+    padding: 12px 14px;
   }
 }
 
@@ -1952,6 +2111,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .gantt-v2 .advanced-filter-title {
@@ -6740,30 +6901,115 @@ body.gantt-resizing {
   color: #dc2626;
 }
 
+.kanban-card-progress-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kanban-card-baseline-pct {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
 .kanban-card-progress-track {
   position: relative;
   width: 100%;
-  height: 7px;
+  height: 11px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.22);
-  overflow: visible;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.kanban-card-baseline-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: rgba(71, 85, 105, 0.3);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .kanban-card-progress-fill {
+  position: relative;
+  z-index: 1;
   height: 100%;
   border-radius: 999px;
   transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.kanban-card-baseline-tick {
-  position: absolute;
-  top: -2px;
-  width: 2.5px;
-  height: 11px;
-  border-radius: 2px;
-  background: #334155;
-  transform: translateX(-50%);
-  pointer-events: none;
+.kanban-card-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.kanban-card-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #1e293b;
+  min-width: 0;
+}
+
+.kanban-card-check-item.is-done {
+  color: #64748b;
+}
+
+.kanban-card-check-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1.5px solid #cbd5e1;
+  background: rgba(255, 255, 255, 0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.kanban-card-check-dot.is-done {
+  background: #0066ff;
+  border-color: #0066ff;
+}
+
+.kanban-card-check-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kanban-card-check-more {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  padding-left: 24px;
+}
+
+.kanban-card-note {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #475569;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kanban-card-note strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.kanban-card-stat-pill.is-counter {
+  gap: 4px;
+  color: #334155;
 }
 
 .kanban-card-meta-left {

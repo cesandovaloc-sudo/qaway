@@ -46,6 +46,7 @@ import TipoProyectoCatalogoSelect from '../../components/TipoProyectoCatalogoSel
 import CicloVidaEstadoChip from '../../components/CicloVidaEstadoChip';
 import { capacidadesDeProyecto, historialEstado } from '../../services/gpCicloVidaService';
 import PermisosTab from './PermisosTab';
+import OrganizacionTab from './OrganizacionTab';
 import { usePerfilGp } from '../../services/gpPermisosService';
 
 export type ConfigBinds = { notify: (m: string) => void };
@@ -93,7 +94,8 @@ export default function ConfiguracionView({
   onDeleteProject,
   onIrAFicha,
 }: ConfiguracionViewProps) {
-  const [activeTab, setActiveTab] = useState<'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente' | 'permisos'>('general');
+  const [activeTab, setActiveTab] = useState<'organizacion' | 'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente' | 'permisos'>('organizacion');
+  const [searchQuery, setSearchQuery] = useState('');
   // Etapa 6-B: perfil GP real. El gating de guardado SOLO aplica con sesión
   // real (perfilGp no nulo); en modo local se conserva el comportamiento actual.
   const { perfil: perfilGp, capacidades: capGp } = usePerfilGp();
@@ -356,10 +358,6 @@ export default function ConfiguracionView({
 
         <header className="page-heading">
           <div className="heading-copy">
-            <div className="eyebrow">
-              <Sliders size={13} />
-              <span>Gobernanza Territorial · Qaway Lab</span>
-            </div>
             <h1>Configuración y Parámetros del Sistema</h1>
             <p>
               Ajuste de zona horaria oficial, calibración de fecha operativa para seguimiento territorial y parámetros de tolerancia.
@@ -373,56 +371,100 @@ export default function ConfiguracionView({
           </div>
         </header>
 
-        <nav className="tabs-bar">
-          <button
-            type="button"
-            className={`tab-item ${activeTab === 'general' ? 'active' : ''}`}
-            onClick={() => setActiveTab('general')}
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', width: '100%', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <aside
+            style={{
+              width: '240px',
+              flexShrink: 0,
+              maxHeight: '100%',
+              overflowY: 'auto',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+            }}
           >
-            <Clock3 size={15} />
-            <span>Zona Horaria y Fecha Operativa</span>
-          </button>
-          <button
-            type="button"
-            className={`tab-item ${activeTab === 'proyectos' ? 'active' : ''}`}
-            onClick={() => setActiveTab('proyectos')}
-          >
-            <FolderKanban size={15} />
-            <span>Gestión del Proyecto Activo</span>
-          </button>
-          <button
-            type="button"
-            className={`tab-item ${activeTab === 'cronograma' ? 'active' : ''}`}
-            onClick={() => setActiveTab('cronograma')}
-          >
-            <Layers size={15} />
-            <span>Tolerancias y Reglas de Cronograma</span>
-          </button>
-          <button
-            type="button"
-            className={`tab-item ${activeTab === 'auditoria' ? 'active' : ''}`}
-            onClick={() => setActiveTab('auditoria')}
-          >
-            <ShieldCheck size={15} />
-            <span>Seguridad y Auditoría Institucional</span>
-          </button>
-          <button
-            type="button"
-            className={`tab-item ${activeTab === 'permisos' ? 'active' : ''}`}
-            onClick={() => setActiveTab('permisos')}
-          >
-            <Users size={15} />
-            <span>Permisos del Equipo</span>
-          </button>
-          <button
-            type="button"
-            className={`tab-item ${activeTab === 'asistente' ? 'active' : ''}`}
-            onClick={() => setActiveTab('asistente')}
-          >
-            <Bot size={15} />
-            <span>Asistente IA (Qaway Copilot)</span>
-          </button>
-        </nav>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar ajuste..."
+              style={{
+                width: '100%',
+                padding: '8px 10px',
+                fontSize: '13.5px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#f8fafc',
+              }}
+            />
+
+            {[
+              {
+                group: 'Organización',
+                items: [
+                  { id: 'organizacion', label: 'Organización y Sedes', icon: <Building2 size={15} /> },
+                  { id: 'permisos', label: 'Permisos del Equipo', icon: <Users size={15} /> },
+                ],
+              },
+              {
+                group: 'Proyecto y Operación',
+                items: [
+                  { id: 'general', label: 'Zona Horaria y Fecha', icon: <Clock3 size={15} /> },
+                  { id: 'proyectos', label: 'Gestión del Proyecto', icon: <FolderKanban size={15} /> },
+                  { id: 'cronograma', label: 'Tolerancias Cronograma', icon: <Layers size={15} /> },
+                ],
+              },
+              {
+                group: 'Sistema e IA',
+                items: [
+                  { id: 'auditoria', label: 'Seguridad y Auditoría', icon: <ShieldCheck size={15} /> },
+                  { id: 'asistente', label: 'Asistente IA (Copilot)', icon: <Bot size={15} /> },
+                ],
+              },
+            ].map((section) => {
+              const q = searchQuery.trim().toLowerCase();
+              const filtered = section.items.filter((i) => !q || i.label.toLowerCase().includes(q));
+              if (filtered.length === 0) return null;
+              return (
+                <div key={section.group} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', padding: '0 8px' }}>
+                    {section.group}
+                  </div>
+                  {filtered.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveTab(item.id as any)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        background: activeTab === item.id ? '#f1f5f9' : 'transparent',
+                        color: activeTab === item.id ? '#0f172a' : '#475569',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {item.icon}
+                      <span style={{ fontSize: '13.5px' }}>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
+          </aside>
+
+          <div style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', paddingRight: '4px' }}>
+            {activeTab === 'organizacion' && <OrganizacionTab />}
 
         {activeTab === 'general' && (
           <div className="cards-grid">
@@ -1656,6 +1698,8 @@ export default function ConfiguracionView({
           )}
         </div>
       )}
+          </div>
+        </div>
     </div>
   );
 }

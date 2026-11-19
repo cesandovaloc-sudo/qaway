@@ -1,7 +1,10 @@
 /* Scoped styles para el módulo Configuración (.cfg-v1) */
 .cfg-v1 {
   width: 100%;
-  min-height: 100%;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   color: #1e293b;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-sizing: border-box;
@@ -13,7 +16,12 @@
 }
 
 .cfg-v1 .page {
-  max-width: 1400px;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   margin: 0 auto;
   padding: 24px 28px;
 }

@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   Package,
   Palette,
+  Paperclip,
   Plus,
   Settings2,
   Target,
@@ -30,6 +31,9 @@ export interface KanbanBoardPrefs {
   showRegion: boolean;
   showEmptyCols: boolean;
   showKeyProps: boolean;
+  showSubtasks: boolean;
+  showNotes: boolean;
+  showCounters: boolean;
   collapseAllCols: boolean;
 }
 
@@ -41,6 +45,9 @@ export const DEFAULT_KANBAN_BOARD_PREFS: KanbanBoardPrefs = {
   showRegion: true,
   showEmptyCols: true,
   showKeyProps: true,
+  showSubtasks: true,
+  showNotes: true,
+  showCounters: true,
   collapseAllCols: false,
 };
 
@@ -488,6 +495,17 @@ export default function CronogramaKanbanView({
       return next;
     });
   };
+
+  const childrenByParentId = useMemo(() => {
+    const map = new Map<string, Item[]>();
+    for (const node of allItems) {
+      if (!node.parentId) continue;
+      const arr = map.get(node.parentId);
+      if (arr) arr.push(node);
+      else map.set(node.parentId, [node]);
+    }
+    return map;
+  }, [allItems]);
 
   const getParentHito = (parentId?: string) => {
     if (!parentId) return null;
@@ -1072,6 +1090,15 @@ export default function CronogramaKanbanView({
                 ) : (
                   colItems.map((item) => {
                     const parentHito = getParentHito(item.parentId);
+                    const childItems = childrenByParentId.get(item.id) || [];
+                    const completedChildCount = childItems.filter(
+                      (c) => c.status === 'Completado' || c.status === 'Cumple' || c.progress >= 100
+                    ).length;
+                    const noteText = (item.description || item.deliverable || '').trim();
+                    const noteLabel = item.description?.trim() ? 'Nota' : 'Entregable';
+                    const docsCount =
+                      (item.deliverables?.length || (item.deliverable?.trim() ? 1 : 0)) +
+                      (item.attachments?.length || 0);
                     const avatar = getAvatarMeta(item.gestor);
                     const isCompleted = item.status === 'Completado' || item.status === 'Cumple';
                     const isDragging = draggedId === item.id;
@@ -1124,7 +1151,7 @@ export default function CronogramaKanbanView({
                         }}
                         className={`kanban-card is-size-${boardPrefs.cardSize} ${isDragging ? 'is-dragging' : ''} ${dropPosClass}`}
                         style={{
-                          ...(!accentColor || (cardTheme === 'simple' && !cardColors[item.id])
+                          ...(cardTheme === 'simple' || !accentColor
                             ? {}
                             : cardTheme === 'tinted'
                             ? (() => {
@@ -1246,6 +1273,37 @@ export default function CronogramaKanbanView({
                               </div>
                             )}
 
+                            {/* Checklist de sub-actividades en modo Amplia */}
+                            {boardPrefs.cardSize === 'wide' && boardPrefs.showSubtasks && childItems.length > 0 && (
+                              <div className="kanban-card-checklist" aria-label="Sub-actividades">
+                                {childItems.slice(0, 4).map((sub) => {
+                                  const subDone = sub.status === 'Completado' || sub.status === 'Cumple' || sub.progress >= 100;
+                                  return (
+                                    <div key={sub.id} className={`kanban-card-check-item ${subDone ? 'is-done' : ''}`}>
+                                      <span className={`kanban-card-check-dot ${subDone ? 'is-done' : ''}`} aria-hidden="true">
+                                        {subDone && <Check size={10} strokeWidth={3} />}
+                                      </span>
+                                      <span className="kanban-card-check-text" title={sub.name}>
+                                        {formatFriendlyCardTitle(sub.name)}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                                {childItems.length > 4 && (
+                                  <div className="kanban-card-check-more">
+                                    +{childItems.length - 4} sub-actividades más
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Nota / Entregable clave en modo Amplia */}
+                            {boardPrefs.cardSize === 'wide' && boardPrefs.showNotes && noteText && (
+                              <div className="kanban-card-note" title={noteText}>
+                                <strong>{noteLabel}:</strong> {noteText}
+                              </div>
+                            )}
+
                             {/* Progreso limpio directo sobre la tarjeta (Estándar y Amplia, sin caja blanca ni texto Baseline) */}
                             {boardPrefs.showProgress && (() => {
                               const refToday = todayIso || new Date().toISOString().slice(0, 10);
@@ -1261,11 +1319,27 @@ export default function CronogramaKanbanView({
                                 <div className="kanban-card-progress-block">
                                   <div className="kanban-card-progress-header">
                                     <span className="kanban-card-progress-label">Progreso</span>
-                                    <span className={`kanban-card-progress-value ${isCompleted ? 'is-complete' : behind ? 'is-behind' : ''}`}>
-                                      {actualPct}%
+                                    <span className="kanban-card-progress-meta">
+                                      {baselinePct > 0 && (
+                                        <span className="kanban-card-baseline-pct" title={`Línea base esperada hoy: ${baselinePct}%`}>
+                                          Esp. {baselinePct}%
+                                        </span>
+                                      )}
+                                      <span className={`kanban-card-progress-value ${isCompleted ? 'is-complete' : behind ? 'is-behind' : ''}`}>
+                                        {actualPct}%
+                                      </span>
                                     </span>
                                   </div>
-                                  <div className="kanban-card-progress-track">
+                                  <div
+                                    className="kanban-card-progress-track"
+                                    title={`Avance real: ${actualPct}% · Esperado hoy (línea base): ${baselinePct}%`}
+                                  >
+                                    {baselinePct > 0 && (
+                                      <div
+                                        className="kanban-card-baseline-bar"
+                                        style={{ width: `${baselinePct}%` }}
+                                      />
+                                    )}
                                     <div
                                       className="kanban-card-progress-fill"
                                       style={{
@@ -1273,13 +1347,6 @@ export default function CronogramaKanbanView({
                                         backgroundColor: barColor,
                                       }}
                                     />
-                                    {baselinePct > 0 && baselinePct < 100 && (
-                                      <span
-                                        className="kanban-card-baseline-tick"
-                                        style={{ left: `${baselinePct}%` }}
-                                        title={`Avance esperado hoy: ${baselinePct}%`}
-                                      />
-                                    )}
                                   </div>
                                 </div>
                               );
@@ -1288,7 +1355,7 @@ export default function CronogramaKanbanView({
                         )}
 
                         {/* Pie de Tarjeta: Avatar a la izquierda + píldoras limpias a la derecha */}
-                        {(boardPrefs.showOwner || boardPrefs.showRegion || (boardPrefs.showProgress && boardPrefs.cardSize === 'compact')) && (() => {
+                        {(boardPrefs.showOwner || boardPrefs.showRegion || (boardPrefs.showProgress && boardPrefs.cardSize === 'compact') || (boardPrefs.cardSize === 'wide' && boardPrefs.showCounters && (childItems.length > 0 || docsCount > 0))) && (() => {
                           const regionLabel = boardPrefs.showRegion && item.region
                             ? (typeof item.region === 'string'
                                 ? item.region
@@ -1321,6 +1388,24 @@ export default function CronogramaKanbanView({
                                     title={`Avance: ${item.progress}%`}
                                   >
                                     {item.progress}%
+                                  </span>
+                                )}
+                                {boardPrefs.cardSize === 'wide' && boardPrefs.showCounters && childItems.length > 0 && (
+                                  <span
+                                    className="kanban-card-stat-pill is-counter"
+                                    title={`Sub-actividades completadas: ${completedChildCount} de ${childItems.length}`}
+                                  >
+                                    <ListChecks size={12} />
+                                    <span>{completedChildCount}/{childItems.length}</span>
+                                  </span>
+                                )}
+                                {boardPrefs.cardSize === 'wide' && boardPrefs.showCounters && docsCount > 0 && (
+                                  <span
+                                    className="kanban-card-stat-pill is-counter"
+                                    title={`Entregables y adjuntos: ${docsCount}`}
+                                  >
+                                    <Paperclip size={12} />
+                                    <span>{docsCount}</span>
                                   </span>
                                 )}
                               </div>

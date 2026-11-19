@@ -66,6 +66,33 @@ const mapUnit = (row: any): GestorUnit => ({
   endDate: row.metadata?.end_date,
 });
 
+const mapGpSedeToUnit = (row: any): GestorUnit => {
+  const meta = row.metadata ?? {};
+  const estado = row.estado ?? (row.activo === false ? 'inactivo' : 'activo');
+  const status: GestorUnit['status'] =
+    estado === 'archived' || estado === 'archivado' ? 'archived' :
+    (row.activo === false || estado === 'inactive' || estado === 'inactivo') ? 'inactive' : 'active';
+  const unitType = (meta.origen_unit_type || row.tipo_codigo || 'other') as GestorUnitType;
+  return {
+    id: row.id,
+    tenantId: row.empresa_id ?? null,
+    parentUnitId: null,
+    name: row.nombre,
+    code: row.codigo ?? null,
+    unitType,
+    region: row.departamento ?? row.region ?? null,
+    macroregion: null,
+    address: row.direccion ?? null,
+    status,
+    metadata: meta,
+    progress: typeof meta.progress === 'number' ? meta.progress : undefined,
+    complianceStatus: meta.compliance_status,
+    gestor: meta.gestor,
+    startDate: meta.start_date,
+    endDate: meta.end_date,
+  };
+};
+
 const mapMember = (row: any): GestorUnitMember => ({
   id: row.id,
   tenantId: row.tenant_id ?? null,
@@ -111,6 +138,22 @@ export async function listGestorUnits(tenantId?: string | null): Promise<GestorU
   const existing = inFlightUnits.get(key);
   if (existing) return existing;
   const run = (async (): Promise<GestorUnit[]> => {
+    // Nuevo modelo (gp_sedes): priorizar sedes operativas por tenant cuando existan.
+    // Mantiene compatibilidad de lectura con gestor_unidades como fallback.
+    const gpTenantId = !ctx.esPlataforma ? ctx.tenantId : pedido;
+    if (gpTenantId) {
+      const { data: gpData, error: gpError } = await db
+        .from('gp_sedes')
+        .select('id,empresa_id,tipo_codigo,codigo,nombre,departamento,direccion,activo,estado,is_deleted,metadata')
+        .eq('empresa_id', gpTenantId)
+        .eq('is_deleted', false)
+        .order('nombre');
+      if (!gpError && gpData && gpData.length > 0) {
+        return gpData.map(mapGpSedeToUnit);
+      }
+      // si falla por RLS/ausencia o no hay filas, continuar con fallback legado
+    }
+
     // P2 (gstack 08): columnas explícitas (superset de los campos que mapea mapUnit) en lugar de select=*
     let query = db
       .from('gestor_unidades')

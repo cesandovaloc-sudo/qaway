@@ -79,7 +79,7 @@ import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 
 /** Cache a nivel de módulo: un solo fetch de gestor_unidades para todas las instancias montadas. */
-let UNIDADES_REMOTAS: { name: string; region: string; unitType: string; status: string }[] | null = null;
+let UNIDADES_REMOTAS: { id?: string; name: string; code?: string | null; region: string; unitType: string; status: string; progress?: number }[] | null = null;
 
 export {
   type EdtNodeType,
@@ -2383,10 +2383,13 @@ export default function CronogramaGanttView({
         const mapped = rows
           .filter((u) => u.status !== 'archived')
           .map((u) => ({
+            id: u.id,
             name: u.name,
+            code: u.code ?? null,
             region: u.region ?? '',
-            unitType: u.unitType ?? 'ugel',
+            unitType: (u as any).unitType ?? 'ugel',
             status: u.status ?? 'active',
+            progress: typeof (u as any).progress === 'number' ? (u as any).progress : undefined,
           }));
         if (mapped.length > 0) {
           UNIDADES_REMOTAS = mapped;
@@ -2824,6 +2827,25 @@ export default function CronogramaGanttView({
   const [afShowAllPersons, setAfShowAllPersons] = useState(false);
   const [afTagSearch, setAfTagSearch] = useState('');
   const [afShowAllPhases, setAfShowAllPhases] = useState(false);
+  const [afCalOpen, setAfCalOpen] = useState<'from' | 'to' | null>(null);
+  const [afOpenMenu, setAfOpenMenu] = useState<'preset' | 'sede' | 'region' | 'component' | null>(null);
+  const [afSedeSearch, setAfSedeSearch] = useState('');
+
+  useEffect(() => {
+    if (!afCalOpen && !afOpenMenu) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (afCalOpen && !target.closest('.af-date-field')) {
+        setAfCalOpen(null);
+      }
+      if (afOpenMenu && !target.closest('.af-dropdown-wrap')) {
+        setAfOpenMenu(null);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [afCalOpen, afOpenMenu]);
 
   // Columnas dinámicas estilo Notion (matriz de base de datos extendible)
   interface CustomColOption {
@@ -7654,6 +7676,8 @@ export default function CronogramaGanttView({
                   setStateFilter('Todos');
                   setTypeFilter('Todos');
                   setSelectedRegions([]);
+              setSelectedSedes([]);
+              setAfCalOpen(null);
                   setPhaseFilter('Todas');
                   setGestorFilter('Todos');
                   setMacroFilter('Todos');
@@ -8828,6 +8852,37 @@ export default function CronogramaGanttView({
                         })}
 
                         <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                          <span>En vista Amplia</span>
+                        </div>
+                        {([
+                          { key: 'showSubtasks', label: 'Checklist de sub-actividades' },
+                          { key: 'showNotes', label: 'Nota / entregable clave' },
+                          { key: 'showCounters', label: 'Contadores (hijos y adjuntos)' },
+                        ] as const).map((wf) => {
+                          const checked = kanbanBoardPrefs[wf.key];
+                          return (
+                            <button
+                              key={wf.key}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${checked ? 'selected' : ''}`}
+                              onClick={() => updateKanbanPref(wf.key, !checked)}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', borderRadius: '6px', cursor: 'pointer', background: 'transparent', border: 'none', width: '100%' }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                                  {checked && <Check size={10} strokeWidth={3} />}
+                                </span>
+                                <span className="filter-item-text">
+                                  <strong style={{ fontSize: '13px', fontWeight: 500, color: '#1e293b' }}>
+                                    {wf.label}
+                                  </strong>
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+
+                        <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
                           <span>Opciones del tablero</span>
                         </div>
                         {([
@@ -9079,113 +9134,268 @@ export default function CronogramaGanttView({
                 </div>
 
                 <div className="af-grid-5">
-                  {/* Columna 1: Por fechas */}
+                  {/* Columna 1: Por fechas (desplegable redondeado + MiniCalendar) */}
                   <div className="af-col">
                     <div className="af-col-title">
                       <CalendarDays size={14} className="af-col-icon" />
                       <span>Por fechas</span>
                     </div>
-                    <select
-                      className="af-select-clean"
-                      aria-label="Preajuste de fechas"
-                      value={afDatePreset}
-                      onChange={(e) => applyPresetDates(e.target.value as 'all' | 'month' | '30d' | 'custom')}
-                    >
-                      <option value="custom">Rango personalizado</option>
-                      <option value="all">Todo el proyecto</option>
-                      <option value="month">Este mes</option>
-                      <option value="30d">Próximos 30 días</option>
-                    </select>
-                    <div className="af-date-pair">
-                      <input
-                        type="date"
-                        className="af-date-input"
-                        aria-label="Fecha desde"
-                        value={rangeFrom}
-                        min={RANGE_MIN}
-                        max={rangeTo}
-                        onChange={(e) => {
-                          setAfDatePreset('custom');
-                          setRangeFrom(e.target.value);
+                    <div className="af-dropdown-wrap">
+                      <button
+                        type="button"
+                        className={`af-dropdown-trigger ${afOpenMenu === 'preset' ? 'is-open' : ''}`}
+                        aria-label="Preajuste de fechas"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAfCalOpen(null);
+                          setAfOpenMenu((p) => (p === 'preset' ? null : 'preset'));
                         }}
-                      />
-                      <span className="af-date-sep">a</span>
-                      <input
-                        type="date"
-                        className="af-date-input"
-                        aria-label="Fecha hasta"
-                        value={rangeTo}
-                        min={rangeFrom}
-                        max={RANGE_MAX}
-                        onChange={(e) => {
-                          setAfDatePreset('custom');
-                          setRangeTo(e.target.value);
-                        }}
-                      />
+                      >
+                        <span className="af-dropdown-val">{afDatePreset === 'custom' ? 'Rango personalizado' : afDatePreset === 'all' ? 'Todo el proyecto' : afDatePreset === 'month' ? 'Este mes' : 'Próximos 30 días'}</span>
+                        <ChevronDown size={14} className="af-dropdown-chevron" />
+                      </button>
+                      {afOpenMenu === 'preset' && (
+                        <div className="filter-popover af-popover">
+                          {([
+                            { id: 'custom', label: 'Rango personalizado' },
+                            { id: 'all', label: 'Todo el proyecto' },
+                            { id: 'month', label: 'Este mes' },
+                            { id: '30d', label: 'Próximos 30 días' },
+                          ] as const).map((opt) => {
+                            const active = afDatePreset === opt.id;
+                            return (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                className={`filter-item-btn ${active ? 'selected' : ''}`}
+                                onClick={() => {
+                                  applyPresetDates(opt.id);
+                                  setAfOpenMenu(null);
+                                }}
+                              >
+                                <span className="filter-item-main">
+                                  <span className={`filter-radio ${active ? 'checked' : ''}`}>
+                                    {active && <span className="filter-radio-dot" />}
+                                  </span>
+                                  <span className="filter-item-text"><strong>{opt.label}</strong></span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                    <label className="af-check-row af-check-subtle">
-                      <input
-                        type="checkbox"
-                        checked={afOnlyDeadlines}
-                        onChange={(e) => setAfOnlyDeadlines(e.target.checked)}
-                      />
+                    <div className="af-date-pair">
+                      <div className="af-date-field">
+                        <button
+                          type="button"
+                          className={`af-date-btn ${afCalOpen === 'from' ? 'is-open' : ''}`}
+                          aria-label="Fecha desde"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAfOpenMenu(null);
+                            setAfCalOpen((prev) => (prev === 'from' ? null : 'from'));
+                          }}
+                        >
+                          <span>{formatDatePE(rangeFrom)}</span>
+                          <CalendarDays size={13} className="af-date-btn-icon" />
+                        </button>
+                        {afCalOpen === 'from' && (
+                          <MiniCalendar
+                            value={rangeFrom}
+                            min={RANGE_MIN}
+                            max={rangeTo}
+                            onChange={(val) => {
+                              setAfDatePreset('custom');
+                              setRangeFrom(val);
+                              setAfCalOpen(null);
+                            }}
+                            onClose={() => setAfCalOpen(null)}
+                            align="left"
+                          />
+                        )}
+                      </div>
+                      <span className="af-date-sep">a</span>
+                      <div className="af-date-field">
+                        <button
+                          type="button"
+                          className={`af-date-btn ${afCalOpen === 'to' ? 'is-open' : ''}`}
+                          aria-label="Fecha hasta"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAfOpenMenu(null);
+                            setAfCalOpen((prev) => (prev === 'to' ? null : 'to'));
+                          }}
+                        >
+                          <span>{formatDatePE(rangeTo)}</span>
+                          <CalendarDays size={13} className="af-date-btn-icon" />
+                        </button>
+                        {afCalOpen === 'to' && (
+                          <MiniCalendar
+                            value={rangeTo}
+                            min={rangeFrom}
+                            max={RANGE_MAX}
+                            onChange={(val) => {
+                              setAfDatePreset('custom');
+                              setRangeTo(val);
+                              setAfCalOpen(null);
+                            }}
+                            onClose={() => setAfCalOpen(null)}
+                            align="right"
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="af-check-row af-check-subtle"
+                      onClick={() => setAfOnlyDeadlines((v) => !v)}
+                    >
+                      <span className={`filter-checkbox ${afOnlyDeadlines ? 'checked' : ''}`}>
+                        {afOnlyDeadlines && <Check size={10} strokeWidth={3} />}
+                      </span>
                       <span>Solo fechas límite</span>
-                    </label>
+                    </button>
                   </div>
-
-                  {/* Columna 2: Por responsable */}
+                  {/* Columna 2: Doble filtro en cascada (Región -> Sede -> Responsable) */}
                   <div className="af-col af-col-bordered">
                     <div className="af-col-title">
                       <Users size={14} className="af-col-icon" />
-                      <span>Por responsable</span>
+                      <span>Sede y responsable</span>
+                    </div>
+                    <div className="af-dropdown-wrap">
+                      <button
+                        type="button"
+                        className={`af-dropdown-trigger ${afOpenMenu === 'sede' ? 'is-open' : ''}`}
+                        aria-label="Filtrar por sede"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAfCalOpen(null);
+                          setAfOpenMenu((p) => (p === 'sede' ? null : 'sede'));
+                        }}
+                      >
+                        <span className="af-dropdown-val">
+                          {selectedSedes.length === 1
+                            ? selectedSedes[0]
+                            : selectedSedes.length > 1
+                            ? `${selectedSedes.length} sedes`
+                            : `Todas las sedes (${availableSedesCascaded.length})`}
+                        </span>
+                        <ChevronDown size={14} className="af-dropdown-chevron" />
+                      </button>
+                      {afOpenMenu === 'sede' && (() => {
+                        const filteredSedes = availableSedesCascaded.filter((s) =>
+                          !afSedeSearch.trim() || s.toLowerCase().includes(afSedeSearch.trim().toLowerCase())
+                        );
+                        return (
+                          <div className="filter-popover af-popover af-popover-scroll">
+                            <div className="af-popover-search">
+                              <Search size={12} className="af-search-icon" />
+                              <input
+                                type="text"
+                                placeholder="Buscar sede..."
+                                value={afSedeSearch}
+                                autoFocus
+                                onChange={(e) => setAfSedeSearch(e.target.value)}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              className={`filter-item-btn ${selectedSedes.length === 0 ? 'selected' : ''}`}
+                              onClick={() => {
+                                setSelectedSedes([]);
+                                setAfOpenMenu(null);
+                              }}
+                            >
+                              <span className="filter-item-main">
+                                <span className={`filter-checkbox ${selectedSedes.length === 0 ? 'checked' : ''}`}>
+                                  {selectedSedes.length === 0 && <Check size={10} strokeWidth={3} />}
+                                </span>
+                                <span className="filter-item-text"><strong>Todas las sedes</strong></span>
+                              </span>
+                            </button>
+                            {filteredSedes.slice(0, 60).map((sede) => {
+                              const checked = selectedSedes.includes(sede);
+                              return (
+                                <button
+                                  key={sede}
+                                  type="button"
+                                  className={`filter-item-btn ${checked ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    setSelectedSedes(checked ? [] : [sede]);
+                                    setAfOpenMenu(null);
+                                  }}
+                                >
+                                  <span className="filter-item-main">
+                                    <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                                      {checked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span className="filter-item-text"><strong>{sede}</strong></span>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="af-search-box">
                       <Search size={13} className="af-search-icon" />
                       <input
                         type="text"
-                        placeholder="Buscar persona..."
+                        placeholder="Buscar responsable..."
                         value={afPersonSearch}
                         onChange={(e) => setAfPersonSearch(e.target.value)}
                       />
                     </div>
-                    <div className="af-check-list">
-                      <label className="af-check-row">
-                        <input
-                          type="checkbox"
-                          checked={gestorFilter === 'Todos'}
-                          onChange={() => setGestorFilter('Todos')}
-                        />
-                        <span className="af-avatar-mini af-avatar-all">
-                          <Users size={11} />
-                        </span>
-                        <span>Todos</span>
-                      </label>
-                      {visiblePersons.map((gName) => {
-                        const checked = gestorFilter === gName;
-                        return (
-                          <label key={gName} className="af-check-row">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => setGestorFilter(checked ? 'Todos' : gName)}
-                            />
-                            <span className="af-avatar-mini">{getGestorInitials(gName)}</span>
-                            <span className="af-check-label">{gName}</span>
-                          </label>
-                        );
-                      })}
-                      {!afPersonSearch.trim() && filteredPersons.length > 3 && (
+                    {selectedRegions.length === 0 && selectedSedes.length === 0 && !afPersonSearch.trim() ? (
+                      <div className="af-cascade-hint">
+                        Elige una región o sede para listar sus responsables, o busca por nombre.
+                      </div>
+                    ) : (
+                      <div className="af-check-list">
                         <button
                           type="button"
-                          className="af-more-btn"
-                          onClick={() => setAfShowAllPersons((v) => !v)}
+                          className="af-check-row"
+                          onClick={() => setGestorFilter('Todos')}
                         >
-                          {afShowAllPersons ? 'Ver menos' : `+ Ver más (${filteredPersons.length - 3})`}
+                          <span className={`filter-checkbox ${gestorFilter === 'Todos' ? 'checked' : ''}`}>
+                            {gestorFilter === 'Todos' && <Check size={10} strokeWidth={3} />}
+                          </span>
+                          <span className="af-avatar-mini af-avatar-all">
+                            <Users size={11} />
+                          </span>
+                          <span>Todos</span>
                         </button>
-                      )}
-                    </div>
+                        {visiblePersons.map((gName) => {
+                          const checked = gestorFilter === gName;
+                          return (
+                            <button
+                              key={gName}
+                              type="button"
+                              className="af-check-row"
+                              onClick={() => setGestorFilter(checked ? 'Todos' : gName)}
+                            >
+                              <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                                {checked && <Check size={10} strokeWidth={3} />}
+                              </span>
+                              <span className="af-avatar-mini">{getGestorInitials(gName)}</span>
+                              <span className="af-check-label">{gName}</span>
+                            </button>
+                          );
+                        })}
+                        {!afPersonSearch.trim() && filteredPersons.length > 3 && (
+                          <button
+                            type="button"
+                            className="af-more-btn"
+                            onClick={() => setAfShowAllPersons((v) => !v)}
+                          >
+                            {afShowAllPersons ? 'Ver menos' : `+ Ver más (${filteredPersons.length - 3})`}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-
                   {/* Columna 3: Por estado */}
                   <div className="af-col af-col-bordered">
                     <div className="af-col-title">
@@ -9193,32 +9403,37 @@ export default function CronogramaGanttView({
                       <span>Por estado</span>
                     </div>
                     <div className="af-check-list">
-                      <label className="af-check-row">
-                        <input
-                          type="checkbox"
-                          checked={selectedStates.length === 0}
-                          onChange={() => setSelectedStates([])}
-                        />
+                      <button
+                        type="button"
+                        className="af-check-row"
+                        onClick={() => setSelectedStates([])}
+                      >
+                        <span className={`filter-checkbox ${selectedStates.length === 0 ? 'checked' : ''}`}>
+                          {selectedStates.length === 0 && <Check size={10} strokeWidth={3} />}
+                        </span>
                         <span>Todos</span>
-                      </label>
+                      </button>
                       {stateChoices.map((st) => {
                         const checked = selectedStates.includes(st.id);
                         return (
-                          <label key={st.id} className="af-check-row">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleStateFilter(st.id)}
-                            />
+                          <button
+                            key={st.id}
+                            type="button"
+                            className="af-check-row"
+                            onClick={() => toggleStateFilter(st.id)}
+                          >
+                            <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                              {checked && <Check size={10} strokeWidth={3} />}
+                            </span>
                             <span className="af-dot" style={{ background: st.dot }} />
                             <span>{st.label}</span>
-                          </label>
+                          </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Columna 4: Por fase / etiquetas */}
+                  {/* Columna 4: Por fase (texto limpio sin cápsulas pastel) */}
                   <div className="af-col af-col-bordered">
                     <div className="af-col-title">
                       <Tag size={14} className="af-col-icon" />
@@ -9234,26 +9449,30 @@ export default function CronogramaGanttView({
                       />
                     </div>
                     <div className="af-check-list">
-                      <label className="af-check-row">
-                        <input
-                          type="checkbox"
-                          checked={phaseFilter === 'Todas'}
-                          onChange={() => setPhaseFilter('Todas')}
-                        />
+                      <button
+                        type="button"
+                        className="af-check-row"
+                        onClick={() => setPhaseFilter('Todas')}
+                      >
+                        <span className={`filter-checkbox ${phaseFilter === 'Todas' ? 'checked' : ''}`}>
+                          {phaseFilter === 'Todas' && <Check size={10} strokeWidth={3} />}
+                        </span>
                         <span>Todas</span>
-                      </label>
-                      {visiblePhases.map((fase, idx) => {
+                      </button>
+                      {visiblePhases.map((fase) => {
                         const checked = phaseFilter === fase.id || phaseFilter === fase.name;
-                        const tone = phaseTones[idx % phaseTones.length];
                         return (
-                          <label key={fase.id} className="af-check-row">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => setPhaseFilter(checked ? 'Todas' : fase.id)}
-                            />
-                            <span className={`af-phase-pill tone-${tone}`}>{fase.name}</span>
-                          </label>
+                          <button
+                            key={fase.id}
+                            type="button"
+                            className="af-check-row"
+                            onClick={() => setPhaseFilter(checked ? 'Todas' : fase.id)}
+                          >
+                            <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                              {checked && <Check size={10} strokeWidth={3} />}
+                            </span>
+                            <span className="af-check-label">{fase.code} · {fase.name}</span>
+                          </button>
                         );
                       })}
                       {!afTagSearch.trim() && filteredPhases.length > 3 && (
@@ -9267,50 +9486,147 @@ export default function CronogramaGanttView({
                       )}
                     </div>
                   </div>
-
-                  {/* Columna 5: Por ubicación y componente */}
+                  {/* Columna 5: Por ubicación y componente (desplegables redondeados) */}
                   <div className="af-col af-col-bordered">
                     <div className="af-col-title">
                       <MapPin size={14} className="af-col-icon" />
                       <span>Por ubicación</span>
                     </div>
-                    <select
-                      className="af-select-clean"
-                      aria-label="Filtrar por ubicación o región"
-                      value={selectedRegions.length === 1 ? selectedRegions[0] : ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setSelectedRegions(val ? [val] : []);
-                      }}
-                    >
-                      <option value="">Todas las regiones</option>
-                      {REGIONES_PROYECTO.map((reg) => (
-                        <option key={reg.name} value={reg.name}>
-                          {reg.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="af-dropdown-wrap">
+                      <button
+                        type="button"
+                        className={`af-dropdown-trigger ${afOpenMenu === 'region' ? 'is-open' : ''}`}
+                        aria-label="Filtrar por ubicación o región"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAfCalOpen(null);
+                          setAfOpenMenu((p) => (p === 'region' ? null : 'region'));
+                        }}
+                      >
+                        <span className="af-dropdown-val">
+                          {selectedRegions.length === 1
+                            ? selectedRegions[0]
+                            : selectedRegions.length > 1
+                            ? `${selectedRegions.length} regiones`
+                            : 'Todas las regiones'}
+                        </span>
+                        <ChevronDown size={14} className="af-dropdown-chevron" />
+                      </button>
+                      {afOpenMenu === 'region' && (
+                        <div className="filter-popover af-popover af-popover-scroll af-popover-right">
+                          <button
+                            type="button"
+                            className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
+                            onClick={() => {
+                              setSelectedRegions([]);
+                              setSelectedSedes([]);
+                              setAfOpenMenu(null);
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-checkbox ${selectedRegions.length === 0 ? 'checked' : ''}`}>
+                                {selectedRegions.length === 0 && <Check size={10} strokeWidth={3} />}
+                              </span>
+                              <span className="filter-item-text"><strong>Todas las regiones</strong></span>
+                            </span>
+                          </button>
+                          {REGIONES_PROYECTO.map((reg) => {
+                            const checked = selectedRegions.includes(reg.name);
+                            return (
+                              <button
+                                key={reg.name}
+                                type="button"
+                                className={`filter-item-btn ${checked ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setSelectedRegions(checked ? [] : [reg.name]);
+                                  setSelectedSedes([]);
+                                  setAfOpenMenu(null);
+                                }}
+                              >
+                                <span className="filter-item-main">
+                                  <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                                    {checked && <Check size={10} strokeWidth={3} />}
+                                  </span>
+                                  <span className="filter-item-text"><strong>{reg.name}</strong></span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
 
-                    <div className="af-col-title" style={{ marginTop: 10 }}>
+                    <div className="af-col-title" style={{ marginTop: 4 }}>
                       <Layers size={14} className="af-col-icon" />
                       <span>Por componente</span>
                     </div>
-                    <select
-                      className="af-select-clean"
-                      aria-label="Filtrar por componente"
-                      value={selectedEdtCodes.length === 1 ? selectedEdtCodes[0] : ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setSelectedEdtCodes(val ? [val] : []);
-                      }}
-                    >
-                      <option value="">Todos los componentes</option>
-                      {rootComps.map((comp) => (
-                        <option key={comp.id} value={comp.code || comp.id}>
-                          {comp.code ? `${comp.code} · ${comp.name}` : comp.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="af-dropdown-wrap">
+                      <button
+                        type="button"
+                        className={`af-dropdown-trigger ${afOpenMenu === 'component' ? 'is-open' : ''}`}
+                        aria-label="Filtrar por componente"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAfCalOpen(null);
+                          setAfOpenMenu((p) => (p === 'component' ? null : 'component'));
+                        }}
+                      >
+                        <span className="af-dropdown-val">
+                          {selectedEdtCodes.length === 1
+                            ? (() => {
+                                const found = rootComps.find((c) => (c.code || c.id) === selectedEdtCodes[0]);
+                                return found ? (found.code ? `${found.code} · ${found.name}` : found.name) : selectedEdtCodes[0];
+                              })()
+                            : selectedEdtCodes.length > 1
+                            ? `${selectedEdtCodes.length} componentes`
+                            : 'Todos los componentes'}
+                        </span>
+                        <ChevronDown size={14} className="af-dropdown-chevron" />
+                      </button>
+                      {afOpenMenu === 'component' && (
+                        <div className="filter-popover af-popover af-popover-scroll af-popover-right">
+                          <button
+                            type="button"
+                            className={`filter-item-btn ${selectedEdtCodes.length === 0 ? 'selected' : ''}`}
+                            onClick={() => {
+                              setSelectedEdtCodes([]);
+                              setAfOpenMenu(null);
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-checkbox ${selectedEdtCodes.length === 0 ? 'checked' : ''}`}>
+                                {selectedEdtCodes.length === 0 && <Check size={10} strokeWidth={3} />}
+                              </span>
+                              <span className="filter-item-text"><strong>Todos los componentes</strong></span>
+                            </span>
+                          </button>
+                          {rootComps.map((comp) => {
+                            const codeVal = comp.code || comp.id;
+                            const checked = selectedEdtCodes.includes(codeVal);
+                            return (
+                              <button
+                                key={comp.id}
+                                type="button"
+                                className={`filter-item-btn ${checked ? 'selected' : ''}`}
+                                onClick={() => {
+                                  setSelectedEdtCodes(checked ? [] : [codeVal]);
+                                  setAfOpenMenu(null);
+                                }}
+                              >
+                                <span className="filter-item-main">
+                                  <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                                    {checked && <Check size={10} strokeWidth={3} />}
+                                  </span>
+                                  <span className="filter-item-text">
+                                    <strong>{comp.code ? `${comp.code} · ${comp.name}` : comp.name}</strong>
+                                  </span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
