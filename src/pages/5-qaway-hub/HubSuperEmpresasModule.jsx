@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Building2,
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -12,9 +13,11 @@ import {
   FileSpreadsheet,
   Filter,
   HelpCircle,
+  KeyRound,
   MoreHorizontal,
   Search,
   ShieldAlert,
+  Sparkles,
   TrendingDown,
   TrendingUp,
   Upload,
@@ -25,6 +28,7 @@ import {
 import * as XLSX from "xlsx";
 import { supabase } from "@/config/supabase";
 import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
+import NewTenantModal from "./components/NewTenantModal";
 
 /**
  * Qaway Hub — EmpresasModule
@@ -224,8 +228,12 @@ export default function EmpresasModule({
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [openMenu, setOpenMenu] = useState(null);
+  const [showNewMenu, setShowNewMenu] = useState(false);
+  const [showDirectTenantModal, setShowDirectTenantModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [notice, setNotice] = useState("");
+
+  useDismissOnEscapeOrOutside(showNewMenu, () => setShowNewMenu(false));
 
   // Estados para modales in-app (Ficha de Empresa, Edición Rápida y Confirmación de Eliminación)
   const [viewModal, setViewModal] = useState({ isOpen: false, company: null });
@@ -598,7 +606,7 @@ export default function EmpresasModule({
         console.warn("No se pudo mapear usuarios por tenant:", e);
       }
 
-      const normalized = (tenantsData || []).map((row) => {
+      const normalized = (tenantsData || []).filter((row) => !row.deleted_at).map((row) => {
         const name = getCompanyName(row);
         const status = normalizeStatus(row.status || row.state);
         const tenantUsers = usersByTenant[row.id] || [];
@@ -764,14 +772,81 @@ export default function EmpresasModule({
             Subir Excel
           </button>
 
-          <button
-            type="button"
-            onClick={onCreateCompany}
-            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#e03f06] focus:outline-none focus:ring-4 focus:ring-orange-100"
-          >
-            <span className="text-base leading-none">+</span>
-            Nueva empresa
-          </button>
+          <div className="relative" data-dismissable>
+            <button
+              type="button"
+              onClick={() => setShowNewMenu((prev) => !prev)}
+              aria-expanded={showNewMenu}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#e03f06] focus:outline-none focus:ring-4 focus:ring-orange-100 cursor-pointer"
+            >
+              <span className="text-base leading-none">+</span>
+              Nueva empresa
+              <ChevronDown size={14} className={`transition-transform ${showNewMenu ? "rotate-180" : ""}`} />
+            </button>
+
+            {showNewMenu && (
+              <div className="absolute right-0 top-[calc(100%+8px)] z-40 w-72 rounded-2xl border border-zinc-200 bg-white p-1.5 shadow-xl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewMenu(false);
+                    setShowDirectTenantModal(true);
+                  }}
+                  className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-orange-50/70 transition cursor-pointer"
+                >
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-[#ff4b0b]">
+                    <KeyRound size={15} />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-zinc-900">Creación directa (Tenant)</p>
+                    <p className="mt-0.5 text-[11px] leading-snug text-zinc-500">
+                      Crea la empresa, activa sus apps y genera acceso al instante.
+                    </p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewMenu(false);
+                    onCreateCompany?.();
+                  }}
+                  className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-zinc-50 transition cursor-pointer"
+                >
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700">
+                    <Sparkles size={15} />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-zinc-900">Onboarding guiado</p>
+                    <p className="mt-0.5 text-[11px] leading-snug text-zinc-500">
+                      Abre el asistente paso a paso de bienvenida y selección de plan.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <NewTenantModal
+            isOpen={showDirectTenantModal}
+            onClose={() => setShowDirectTenantModal(false)}
+            title="Nueva empresa (Tenant)"
+            subtitle="Alta directa activa, sin pago ni onboarding"
+            submitLabel="Crear empresa"
+            onCreated={({ tenant, plan, appSlugs, ownerName, ownerEmail }) => {
+              const planLabel = plan === "premium" ? "Premium" : plan === "intermedio" ? "Intermedio" : "Básico";
+              const createdItem = {
+                ...tenant,
+                name: tenant.name,
+                subtitle: ownerName || ownerEmail ? `Titular: ${ownerName || ownerEmail}` : tenant.slug,
+                status: normalizeStatus("active"),
+                createdAt: tenant.created_at || new Date().toISOString(),
+                plan: planLabel,
+                userCount: ownerEmail ? 1 : 0,
+                applicationCount: appSlugs?.length || 1,
+              };
+              setCompanies((prev) => [createdItem, ...prev]);
+            }}
+          />
         </div>
       </div>
 

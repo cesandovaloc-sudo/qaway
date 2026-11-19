@@ -553,7 +553,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         ])
         if (!alive) return
         setRawData({
-          tenants: t.data || [],
+          tenants: (t.data || []).filter((row) => !row.deleted_at),
           users: u.data || [],
           subs: s.data || [],
           apps: a.data || [],
@@ -2405,9 +2405,10 @@ function HubPanelContent({ canvasOnly = false }) {
       // distingue bucket inexistente vs permisos RLS vs proyecto equivocado. Jamás lo tragar.
       if (upErr) throw new Error(`No se pudo subir la foto a Supabase Storage. Detalle real: ${upErr.message}`)
       const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path)
-      await updateSelf({ avatar_url: pub.publicUrl })
-      setPanelAuth((p) => (p ? { ...p, avatarUrl: pub.publicUrl } : p))
-      return pub.publicUrl
+      const versionedUrl = `${pub.publicUrl}?v=${Date.now()}`
+      await updateSelf({ avatar_url: versionedUrl })
+      setPanelAuth((p) => (p ? { ...p, avatarUrl: versionedUrl } : p))
+      return versionedUrl
     } catch (e) {
       console.error('Mi cuenta · subir foto:', e)
       window.alert(e?.message || 'No se pudo subir la foto. Inténtalo de nuevo.')

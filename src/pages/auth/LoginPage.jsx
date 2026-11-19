@@ -41,25 +41,45 @@ export default function LoginPage() {
   const regEmail = searchParams.get('email') || ''
   const linkError = searchParams.get('linkError') || ''
   const linkErrorDesc = searchParams.get('linkErrorDesc') || ''
-  // Ruta canónica post-login (aprobado 2026-09-23):
+  // Ruta canónica post-login:
   //   ?redirect= explícito     → gana (prioridad).
-  //   sin marca (tenant_id NULL y NO es plataforma) → /onboarding (continuar empresa).
-  //   con marca / plataforma   → /hub/panel.
-  // Solo DECIDE la ruta de onboarding; la autorización sigue en Supabase/RLS.
+  //   platform_admin           → /hub/panel.
+  //   sin marca (tenant_id NULL) → /onboarding (continuar empresa).
+  //   tenant con app activa    → directo a su app contratada (sin pasar por /hub/panel).
+  const APP_ROUTE_BY_SLUG = {
+    'gestor-proyectos': '/hub/gestor_proyectos',
+    inventario: '/hub/inventario',
+    crm: '/hub/crm',
+    agenda: '/hub/agenda',
+    blog: '/hub/blog-editor',
+    marketing: '/hub/marketing',
+  }
+
   const resolvePostLoginTarget = async (supabase, userId) => {
     if (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')) return rawRedirect
     try {
       const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
-        if (me && !me.is_platform_admin && !isGestorDirectEntry) {
+      if (me?.is_platform_admin) return '/hub/panel'
+      if (me && !me.is_platform_admin && !isGestorDirectEntry) {
         if (!me.tenant_id) return '/onboarding'
-        // El wizard determina el paso correcto según el estado persistido.
         const { data: t } = await supabase.from('tenants').select('status, features').eq('id', me.tenant_id).maybeSingle()
         const isLocallyDone = localStorage.getItem(`qaway.onboarding_completed.${me.tenant_id}`) === 'true'
         const isDone = t?.features?.onboarding_completed === true || isLocallyDone
         if (t && (t.status === 'draft' || (!isDone && t.features?.onboarding_completed !== true))) return '/onboarding'
+
+        const [{ data: subs }, { data: catalog }] = await Promise.all([
+          supabase.from('tenant_app_subscriptions').select('app_id, status').eq('tenant_id', me.tenant_id).in('status', ['active', 'trialing']),
+          supabase.from('app_catalog').select('id, slug'),
+        ])
+        const slugById = Object.fromEntries((catalog || []).map((a) => [a.id, a.slug]))
+        for (const sub of subs || []) {
+          const slug = slugById[sub.app_id]
+          if (slug && APP_ROUTE_BY_SLUG[slug]) return APP_ROUTE_BY_SLUG[slug]
+        }
+        return '/hub/gestor_proyectos'
       }
-    } catch (_) { /* error de lectura: cae al destino normal */ }
-    return '/hub/panel'
+    } catch (_) { /* error de lectura: cae al destino seguro */ }
+    return '/hub/gestor_proyectos'
   }
   const mailHref = (() => {
     const e = regEmail.trim().toLowerCase()

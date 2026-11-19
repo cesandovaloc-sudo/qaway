@@ -67,11 +67,13 @@ export default function Topbar({
     email: string;
     roleLabel: string;
     initials: string;
+    avatarUrl: string | null;
   }>({
     name: 'Cargando...',
     email: '',
     roleLabel: 'Sesión activa',
     initials: '..',
+    avatarUrl: null,
   });
 
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function Topbar({
         }
         const { data: uRow } = await supabase
           .from('users')
-          .select('full_name, last_name, email, role, is_platform_admin, tenant_id')
+          .select('full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -119,7 +121,13 @@ export default function Topbar({
           : fullName.slice(0, 2)
         ).toUpperCase();
 
-        setAuthProfile({ name: fullName, email, roleLabel, initials });
+        setAuthProfile({
+          name: fullName,
+          email,
+          roleLabel,
+          initials,
+          avatarUrl: uRow?.avatar_url || null,
+        });
       } catch {
         // Silencioso en caso de error transitorio
       }
@@ -219,9 +227,19 @@ export default function Topbar({
               background: 'linear-gradient(135deg, #0066ff 0%, #0052cc 100%)',
               color: '#ffffff',
               boxShadow: '0 2px 6px rgba(0, 102, 255, 0.28)',
+              overflow: 'hidden',
             }}
           >
-            {authProfile.initials}
+            {authProfile.avatarUrl ? (
+              <img
+                src={authProfile.avatarUrl}
+                alt={authProfile.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                onError={() => setAuthProfile((prev) => ({ ...prev, avatarUrl: null }))}
+              />
+            ) : (
+              authProfile.initials
+            )}
           </div>
           <div className="qm-topbar-profile-info">
             <b>{authProfile.name}</b>
@@ -272,9 +290,19 @@ export default function Topbar({
                   color: '#ffffff',
                   boxShadow: '0 3px 8px rgba(0, 102, 255, 0.3)',
                   flexShrink: 0,
+                  overflow: 'hidden',
                 }}
               >
-                {authProfile.initials}
+                {authProfile.avatarUrl ? (
+                  <img
+                    src={authProfile.avatarUrl}
+                    alt={authProfile.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    onError={() => setAuthProfile((prev) => ({ ...prev, avatarUrl: null }))}
+                  />
+                ) : (
+                  authProfile.initials
+                )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <b style={{ fontSize: '14px', color: '#0f172a', display: 'block', fontWeight: 700, lineHeight: 1.3 }}>

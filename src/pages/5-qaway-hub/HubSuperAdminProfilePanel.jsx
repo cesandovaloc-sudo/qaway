@@ -160,8 +160,14 @@ export default function HubProfilePanel({
   const [timezone, setTimezone] = useState(data.timezone);
   const [language, setLanguage] = useState(data.language);
   const [avatarUrl, setAvatarUrl] = useState(data.avatarUrl || "");
+  const MAX_AVATAR_MB = 5;
+  const MAX_AVATAR_BYTES = MAX_AVATAR_MB * 1024 * 1024;
+  const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
   const [section, setSection] = useState("cuenta");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [avatarError, setAvatarError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   const [savingAll, setSavingAll] = useState(false);
   const [savedAll, setSavedAll] = useState(false);
 
@@ -182,18 +188,16 @@ export default function HubProfilePanel({
     setAvatarUrl(data.avatarUrl || "");
   }, [data.avatarUrl]);
 
-  // La foto SOLO previsualiza al seleccionarla (dataURL local). Se persiste al pulsar
-  // "Guardar cambios" junto con el resto de la página — nunca se sube por su cuenta.
-  const selectAvatar = (event) => {
-    const file = event.target.files?.[0];
+  const processAvatarFile = (file) => {
     if (!file) return;
+    setAvatarError("");
 
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      window.alert("Selecciona una imagen JPG, PNG o WebP.");
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      setAvatarError("Formato no permitido. Usa una imagen JPG, PNG o WebP.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      window.alert("La imagen no debe superar los 5 MB.");
+    if (file.size > MAX_AVATAR_BYTES) {
+      setAvatarError(`La imagen supera el límite permitido de ${MAX_AVATAR_MB} MB.`);
       return;
     }
 
@@ -203,12 +207,32 @@ export default function HubProfilePanel({
     reader.readAsDataURL(file);
   };
 
+  // La foto SOLO previsualiza al seleccionarla (dataURL local). Se persiste al pulsar
+  // "Guardar cambios" junto con el resto de la página — nunca se sube por su cuenta.
+  const selectAvatar = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    processAvatarFile(file);
+  };
+
+  const handleDropAvatar = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+    const file = event.dataTransfer?.files?.[0];
+    processAvatarFile(file);
+  };
+
   // Guardado unificado: identidad + preferencias + foto pendiente en UNA sola acción.
   // Modelo Gmail/Notion: la página se configura y se guarda completa, sin botones por bloque.
   const saveAll = async () => {
     setSavingAll(true);
+    setAvatarError("");
     try {
-      if (selectedFile && onUploadAvatar) await onUploadAvatar(selectedFile);
+      if (selectedFile && onUploadAvatar) {
+        const uploadedUrl = await onUploadAvatar(selectedFile);
+        if (!uploadedUrl) return;
+      }
       if (onSaveProfile) await onSaveProfile({ fullName: fullName.trim(), roleLabel, timezone, language });
       setSelectedFile(null);
       setSavedAll(true);
@@ -219,6 +243,8 @@ export default function HubProfilePanel({
   };
 
   const deleteAvatar = async () => {
+    setAvatarError("");
+    setSelectedFile(null);
     setAvatarUrl("");
     if (onDeleteAvatar) await onDeleteAvatar();
   };
@@ -278,14 +304,28 @@ export default function HubProfilePanel({
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <button type="button" onClick={() => fileInputRef.current?.click()}
-                      className="flex h-[102px] w-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/60 text-center hover:border-[#ff4b0b] hover:bg-orange-50/30">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+                      onDrop={handleDropAvatar}
+                      className={`flex h-[102px] w-full flex-col items-center justify-center rounded-lg border border-dashed text-center transition-colors ${
+                        isDragging
+                          ? "border-[#ff4b0b] bg-orange-50/60"
+                          : "border-gray-300 bg-gray-50/60 hover:border-[#ff4b0b] hover:bg-orange-50/30"
+                      }`}
+                    >
                       <Upload size={19} className="mb-2 text-gray-500" />
                       <span className="text-[11px] font-semibold text-gray-700">Arrastra una imagen aquí</span>
                       <span className="mt-1 text-[10px] text-gray-400">o haz clic para seleccionar</span>
-                      <span className="mt-0.5 text-[9px] text-gray-400">JPG, PNG o WebP</span>
+                      <span className="mt-0.5 text-[9px] text-gray-400">JPG, PNG o WebP · Máx. {MAX_AVATAR_MB} MB</span>
                     </button>
                     <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={selectAvatar} className="hidden" />
+
+                    {avatarError && (
+                      <p className="mt-2 text-[11px] font-semibold text-red-600">{avatarError}</p>
+                    )}
 
                     <div className="mt-3 flex gap-2">
                       <button type="button" onClick={() => fileInputRef.current?.click()}

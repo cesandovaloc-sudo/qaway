@@ -166,7 +166,50 @@ function CRMContent() {
     marketing: { name: 'Sofía Castillo', title: 'Líder Marketing', avatar: 'https://i.pravatar.cc/150?img=47' },
     sales: { name: 'Martín Rojas', title: 'Ejecutivo Ventas', avatar: 'https://i.pravatar.cc/150?img=60' }
   }
-  const currentProfile = ROLE_PROFILES[currentRole] || ROLE_PROFILES.management;
+  const [authUser, setAuthUser] = useState(null)
+
+  useEffect(() => {
+    const supabase = getSupabaseClient()
+    if (!supabase) return
+    let alive = true
+    const loadAuthProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!alive || !user) return
+        const { data: uRow } = await supabase
+          .from('users')
+          .select('full_name, last_name, email, avatar_url')
+          .eq('id', user.id)
+          .maybeSingle()
+        if (!alive) return
+        const name = [uRow?.full_name, uRow?.last_name].filter(Boolean).join(' ').trim()
+          || user.user_metadata?.full_name
+          || user.email?.split('@')[0]
+          || null
+        setAuthUser({
+          name,
+          email: uRow?.email || user.email || null,
+          avatar: uRow?.avatar_url || null,
+        })
+      } catch (_) {}
+    }
+    loadAuthProfile()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') loadAuthProfile()
+    })
+    return () => {
+      alive = false
+      subscription?.unsubscribe()
+    }
+  }, [])
+
+  const roleFallback = ROLE_PROFILES[currentRole] || ROLE_PROFILES.management
+  const currentProfile = {
+    name: authUser?.name || roleFallback.name,
+    title: roleFallback.title,
+    email: authUser?.email || 'admin@qaway.pe',
+    avatar: authUser?.avatar || roleFallback.avatar,
+  }
 
   useEffect(() => {
     if (!tabs.some(t => t.id === activeTab)) setActiveTab(tabs[0]?.id)
@@ -638,7 +681,7 @@ function CRMContent() {
                         <img src={currentProfile.avatar} alt={currentProfile.name} className={`w-10 h-10 rounded-full border object-cover shrink-0 ${isDark ? 'border-white/10' : 'border-zinc-200'}`} />
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-bold truncate ${isDark ? 'text-white' : 'text-zinc-900'}`}>{currentProfile.name}</p>
-                          <p className={`text-xs truncate mt-0.5 ${isDark ? 'text-white/50' : 'text-zinc-500'}`}>admin@qaway.pe</p>
+                          <p className={`text-xs truncate mt-0.5 ${isDark ? 'text-white/50' : 'text-zinc-500'}`}>{currentProfile.email}</p>
                         </div>
                       </div>
                       

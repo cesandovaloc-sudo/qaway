@@ -6,7 +6,8 @@
 //  - reset_password: fija una nueva contraseña provisional, marca el cambio
 //                    obligatorio y cierra las sesiones activas del usuario.
 // Compuerta: solo users.role='admin' AND is_platform_admin. Fail-closed.
-// 2026-11-16.
+// 2026-11-16. El flag también se escribe en auth.user_metadata: es lo que lee
+// la app para mostrar CambiarContrasenaModal en el primer ingreso.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -76,7 +77,10 @@ serve(async (req: Request) => {
       full_name,
       last_name,
       password,
+      must_change_password = true,
     } = await req.json()
+
+    const requiereCambioClave = must_change_password !== false
 
     // ─── Acción: crear cuenta con contraseña provisional ───
     if (action === 'create') {
@@ -122,7 +126,11 @@ serve(async (req: Request) => {
         email: inviteEmail,
         password: finalPassword,
         email_confirm: true,
-        user_metadata: { full_name: fullName, last_name: lastName },
+        user_metadata: {
+          full_name: fullName,
+          last_name: lastName,
+          ...(requiereCambioClave ? { must_change_password: true } : {}),
+        },
       })
 
       if (createErr || !created?.user) {
@@ -138,8 +146,10 @@ serve(async (req: Request) => {
       }
 
       // El trigger ya creó el perfil (service role bypass de RLS): marcar el
-      // cambio obligatorio de contraseña en el primer ingreso.
-      await admin.from('users').update({ must_change_password: true }).eq('id', created.user.id)
+      // cambio obligatorio de contraseña en el primer ingreso (BD + metadata).
+      if (requiereCambioClave) {
+        await admin.from('users').update({ must_change_password: true }).eq('id', created.user.id)
+      }
 
       return json({ ok: true, user_id: created.user.id, email: inviteEmail, provisional_password: finalPassword })
     }
@@ -160,7 +170,15 @@ serve(async (req: Request) => {
         ? password
         : provisionalPassword()
 
-      const { error: updErr } = await admin.auth.admin.updateUserById(uid, { password: finalPassword })
+      let metadataUpdate: Record<string, unknown> | undefined
+      if (requiereCambioClave) {
+        const { data: objetivo } = await admin.auth.admin.getUserById(uid)
+        metadataUpdate = { ...(objetivo?.user?.user_metadata || {}), must_change_password: true }
+      }
+      const { error: updErr } = await admin.auth.admin.updateUserById(uid, {
+        password: finalPassword,
+        ...(metadataUpdate ? { user_metadata: metadataUpdate } : {}),
+      })
       if (updErr) {
         console.error('[admin-provision-user] reset_error', JSON.stringify({
           user_id: uid, code: updErr.code || null, status: updErr.status ?? null, message: updErr.message || null,
@@ -168,7 +186,9 @@ serve(async (req: Request) => {
         return json({ error: 'No se pudo restablecer la contraseña. Intenta nuevamente.' })
       }
 
-      await admin.from('users').update({ must_change_password: true }).eq('id', uid)
+      if (requiereCambioClave) {
+        await admin.from('users').update({ must_change_password: true }).eq('id', uid)
+      }
 
       // Cerrar sesiones activas (best-effort): obliga a reingresar con la nueva.
       try {

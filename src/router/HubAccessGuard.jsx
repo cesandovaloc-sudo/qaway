@@ -2,25 +2,42 @@ import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { logoutUser } from '@/config/auth'
-import NotFoundPage from '@/pages/NotFoundPage'
+import AppAccessLockedView from '@/components/ui/AppAccessLockedView'
 import { RouteLoading } from './RouteSuspense'
 
-function resolveAppSlugFromPath(pathname) {
+function resolveHubAccessRule(pathname) {
   const path = String(pathname || '').toLowerCase()
   if (
-    path === '/hub/gestor_proyectos' || path.startsWith('/hub/gestor_proyectos/') ||
-    path === '/hub/gestor_proyecto' || path.startsWith('/hub/gestor_proyecto/') ||
-    path === '/hub/gestor-proyectos-app' || path.startsWith('/hub/gestor-proyectos-app/') ||
-    path === '/hub/proyectos' || path.startsWith('/hub/proyectos/')
+    path === '/hub/panel' || path.startsWith('/hub/panel/') ||
+    path === '/hub/gestor_proyecto_eliminar' || path.startsWith('/hub/gestor_proyecto_eliminar/') ||
+    path === '/hub/analytics' || path.startsWith('/hub/analytics/') ||
+    path === '/hub/dashboards' || path.startsWith('/hub/dashboards/') ||
+    path === '/hub/descargador-ig' || path.startsWith('/hub/descargador-ig/')
   ) {
-    return 'gestor-proyectos'
+    return { type: 'platform_only', moduleKey: path.includes('/hub/panel') ? 'panel' : null }
   }
-  if (path === '/hub/inventario' || path.startsWith('/hub/inventario/')) return 'inventario'
-  if (path === '/hub/crm' || path.startsWith('/hub/crm/') || path === '/hub/waba-crm' || path.startsWith('/hub/waba-crm/')) return 'crm'
-  if (path === '/hub/agenda' || path.startsWith('/hub/agenda/')) return 'agenda'
-  if (path === '/hub/blog-editor' || path.startsWith('/hub/blog-editor/')) return 'blog'
-  if (path === '/hub/marketing' || path.startsWith('/hub/marketing/')) return 'marketing'
-  return null
+  if (
+    path === '/hub/gestor_proyectos' || path.startsWith('/hub/gestor_proyectos/') ||
+    path === '/hub/gestor_proyecto' || path.startsWith('/hub/gestor_proyecto/')
+  ) {
+    return { type: 'app', appSlug: 'gestor-proyectos', moduleKey: 'gestor-proyectos' }
+  }
+  if (path === '/hub/inventario' || path.startsWith('/hub/inventario/')) {
+    return { type: 'app', appSlug: 'inventario', moduleKey: 'inventario' }
+  }
+  if (path === '/hub/crm' || path.startsWith('/hub/crm/') || path === '/hub/waba-crm' || path.startsWith('/hub/waba-crm/')) {
+    return { type: 'app', appSlug: 'crm', moduleKey: 'crm' }
+  }
+  if (path === '/hub/agenda' || path.startsWith('/hub/agenda/')) {
+    return { type: 'app', appSlug: 'agenda', moduleKey: 'agenda' }
+  }
+  if (path === '/hub/blog-editor' || path.startsWith('/hub/blog-editor/')) {
+    return { type: 'app', appSlug: 'blog', moduleKey: 'blog' }
+  }
+  if (path === '/hub/marketing' || path.startsWith('/hub/marketing/')) {
+    return { type: 'app', appSlug: 'marketing', moduleKey: 'marketing' }
+  }
+  return { type: 'platform_only', moduleKey: null }
 }
 
 /**
@@ -43,30 +60,22 @@ function hasLocalSupabaseSession() {
 
 export default function HubAccessGuard({ children }) {
   const location = useLocation()
-  const [state, setState] = useState({ checking: true, redirect: null, notFound: false })
+  const [state, setState] = useState({ checking: true, redirect: null, locked: false, moduleKey: null })
 
   useEffect(() => {
     let alive = true
-    const requiredAppSlug = resolveAppSlugFromPath(location.pathname)
+    const rule = resolveHubAccessRule(location.pathname)
 
-    // Destino de vuelta al login CON la ruta actual. Sin esto, cualquier fallo de la
-    // verificación perdía la ruta pedida (p. ej. /hub/gestor_proyectos) y el usuario
-    // acababa en el destino por defecto del login: /hub/panel.
     const loginHref = `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`
 
-    const resolve = (next, notFound = false) => {
+    const resolve = (next, locked = false, moduleKey = rule.moduleKey ?? null) => {
       clearTimeout(timeoutId)
-      if (alive) setState({ checking: false, redirect: next, notFound })
+      if (alive) setState({ checking: false, redirect: next, locked, moduleKey })
     }
 
-    // La verificación encadena llamadas a Supabase (getSession → users → tenants → suscripción) y
-    // en frío cada una ronda los 2-3 s. Con 3.5 s el guard se rendía en cada arranque
-    // y expulsaba al login a usuarios con sesión válida.
     const timeoutId = setTimeout(() => {
       if (!alive) return
       if (hasLocalSupabaseSession()) {
-        // Sesión local presente: no expulsar ni rebotar en bucle; se renderiza y RLS
-        // sigue siendo la autoridad sobre los datos.
         console.warn('[HubAccessGuard] Verificación lenta; se renderiza con la sesión local.')
         resolve(null)
         return
@@ -95,8 +104,6 @@ export default function HubAccessGuard({ children }) {
         .maybeSingle()
 
       if (userError || !user) {
-        // La sesión local apunta a un usuario que ya no existe en la base de datos (eliminado o revocado).
-        // Limpiamos la sesión huérfana localmente para evitar bucles de rebote infinitos con /login.
         try {
           await supabase.auth.signOut({ scope: 'local' })
         } catch (_) {}
@@ -122,12 +129,15 @@ export default function HubAccessGuard({ children }) {
         return
       }
 
+      // Mientras Hub Panel esté en construcción y rutas legacy estén marcadas para eliminar,
+      // ningún tenant puede ingresar: se muestra pantalla de acceso restringido (candado).
+      if (rule.type === 'platform_only') {
+        resolve(null, true, rule.moduleKey)
+        return
+      }
+
       if (!user.tenant_id) {
-        if (requiredAppSlug) {
-          resolve(null, true)
-          return
-        }
-        resolve('/onboarding/tu-plan')
+        resolve(null, true, rule.moduleKey)
         return
       }
 
@@ -138,11 +148,7 @@ export default function HubAccessGuard({ children }) {
         .maybeSingle()
 
       if (tenantError || !tenant) {
-        if (requiredAppSlug) {
-          resolve(null, true)
-          return
-        }
-        resolve('/onboarding/tu-plan')
+        resolve(null, true, rule.moduleKey)
         return
       }
 
@@ -150,41 +156,36 @@ export default function HubAccessGuard({ children }) {
       const onboardingCompleted = tenant.features?.onboarding_completed === true || locallyCompleted
       const needsOnboarding = tenant.status !== 'active' && (tenant.status === 'draft' || !onboardingCompleted)
 
-      if (requiredAppSlug) {
-        if (needsOnboarding) {
-          resolve(null, true)
-          return
-        }
-
-        const { data: appRow, error: appErr } = await supabase
-          .from('app_catalog')
-          .select('id')
-          .eq('slug', requiredAppSlug)
-          .maybeSingle()
-
-        if (appErr || !appRow?.id) {
-          resolve(null, true)
-          return
-        }
-
-        const { data: subRows, error: subErr } = await supabase
-          .from('tenant_app_subscriptions')
-          .select('id, status')
-          .eq('tenant_id', user.tenant_id)
-          .eq('app_id', appRow.id)
-          .in('status', ['active', 'trialing'])
-          .limit(1)
-
-        if (subErr || !Array.isArray(subRows) || subRows.length === 0) {
-          resolve(null, true)
-          return
-        }
-
-        resolve(null)
+      if (needsOnboarding) {
+        resolve(null, true, rule.moduleKey)
         return
       }
 
-      resolve(needsOnboarding ? '/onboarding/tu-plan' : null)
+      const { data: appRow, error: appErr } = await supabase
+        .from('app_catalog')
+        .select('id')
+        .eq('slug', rule.appSlug)
+        .maybeSingle()
+
+      if (appErr || !appRow?.id) {
+        resolve(null, true, rule.moduleKey)
+        return
+      }
+
+      const { data: subRows, error: subErr } = await supabase
+        .from('tenant_app_subscriptions')
+        .select('id, status')
+        .eq('tenant_id', user.tenant_id)
+        .eq('app_id', appRow.id)
+        .in('status', ['active', 'trialing'])
+        .limit(1)
+
+      if (subErr || !Array.isArray(subRows) || subRows.length === 0) {
+        resolve(null, true, rule.moduleKey)
+        return
+      }
+
+      resolve(null)
     }
 
     checkAccess().catch(() => resolve(loginHref))
@@ -192,7 +193,7 @@ export default function HubAccessGuard({ children }) {
   }, [location.pathname, location.search])
 
   if (state.checking) return <RouteLoading />
-  if (state.notFound) return <NotFoundPage />
+  if (state.locked) return <AppAccessLockedView moduleKey={state.moduleKey} />
   if (state.redirect) return <Navigate to={state.redirect} replace />
   return children
 }

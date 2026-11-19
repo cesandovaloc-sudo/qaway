@@ -55,9 +55,10 @@ const TutorialOnboardingPage = lazy(() => import('@/pages/5-qaway-hub/0-Estructu
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 // PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
-const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
-// Gestor de Proyectos 2 (app consolidada)
-const GestorProyectos2AppPage = lazy(() => import('@/pages/5-qaway-hub/13-Gestor_Proyectos2/GestorProyectos2AppPage'))
+// Gestor de Proyectos v1 (versión inicial, marcada para eliminar)
+const GestorProyectoEliminarPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
+// Gestor de Proyectos (app consolidada y oficial)
+const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/13-Gestor_Proyectos2/GestorProyectos2AppPage'))
 const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
 const PreguntasFrecuentesAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAppPage'))
 const PreguntasFrecuentesAdminAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAdminAppPage'))
@@ -350,19 +351,19 @@ export default function AppRouter() {
         />
         <Route
           path="/hub/blog-editor"
-          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
+          element={renderRoute('hub', <HubAccessGuard><BlogEditorPage /></HubAccessGuard>)}
         />
         <Route
           path="/hub/blog-editor/editor/:id"
-          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
+          element={renderRoute('hub', <HubAccessGuard><BlogEditorPage /></HubAccessGuard>)}
         />
         <Route
           path="/editor/:id"
-          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
+          element={renderRoute('hub', <HubAccessGuard><BlogEditorPage /></HubAccessGuard>)}
         />
         <Route
           path="/editor/new"
-          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
+          element={renderRoute('hub', <HubAccessGuard><BlogEditorPage /></HubAccessGuard>)}
         />
         <Route
           path="/hub/marketing"
@@ -412,53 +413,45 @@ export default function AppRouter() {
           path="inventario"
           element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
-        {/* Gestor de Proyectos Suite (11-gestor-de-proyectos): standalone con shell oficial Hub */}
+        {/* Gestor de Proyectos v1 (versión inicial, solo platform_admin) */}
         <Route
-          path="/hub/proyectos/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          path="/hub/gestor_proyecto_eliminar/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
         />
         <Route
-          path="/hub/proyectos"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          path="/hub/gestor_proyecto_eliminar"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
         />
         <Route
-          path="hub/proyectos/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          path="hub/gestor_proyecto_eliminar/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
         />
         <Route
-          path="hub/proyectos"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          path="hub/gestor_proyecto_eliminar"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
         />
-        <Route
-          path="/hub/gestor-proyectos-app/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
-        />
-        <Route
-          path="hub/gestor-proyectos-app/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
-        />
-        {/* Compatibilidad: /hub/tareas redirige al módulo Tareas dentro de Gestor de Proyectos 2 */}
+        {/* Compatibilidad: /hub/tareas redirige al módulo Tareas dentro de Gestor de Proyectos */}
         <Route path="/hub/tareas/*" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
         <Route path="/hub/tareas" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
         <Route path="hub/tareas/*" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
         <Route path="hub/tareas" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
-        {/* Gestor de Proyectos 2: acceso directo para usuarios autorizados del proyecto. */}
+        {/* Gestor de Proyectos: acceso directo para usuarios autorizados del proyecto. */}
         <Route
           path="/hub/gestor_proyecto/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
         />
         <Route
           path="/hub/gestor_proyecto"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
         />
         {/* Ruta canónica pública: Gestor de Proyectos. */}
         <Route
           path="/hub/gestor_proyectos/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
         />
         <Route
           path="/hub/gestor_proyectos"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectos2AppPage /></HubAccessGuard>)}
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
         />
         {/* Compatibilidad: URLs antiguas del Gestor sin el prefijo /hub. */}
         <Route path="/gestor_proyectos/*" element={<LegacyGestorProyectosRedirect />} />
@@ -639,15 +632,15 @@ export default function AppRouter() {
           />
           <Route
             path="hub/waba-crm"
-            element={renderRoute('hub', <ProtectedRoute><WabaCrmConsolePage /></ProtectedRoute>)}
+            element={renderRoute('hub', <HubAccessGuard><WabaCrmConsolePage /></HubAccessGuard>)}
           />
           <Route
             path="hub/gestor-proyectos"
-            element={<Navigate to="/hub/proyectos" replace />}
+            element={<Navigate to="/hub/gestor_proyectos" replace />}
           />
           <Route
             path="/hub/gestor-proyectos"
-            element={<Navigate to="/hub/proyectos" replace />}
+            element={<Navigate to="/hub/gestor_proyectos" replace />}
           />
           <Route
             path="hub/gestor-proyectos/:serviceType/:projectSlug"
@@ -655,7 +648,7 @@ export default function AppRouter() {
           />
           <Route
             path="hub/analytics"
-            element={renderRoute('hub', <ProtectedRoute><AnalyticsStudioPage /></ProtectedRoute>)}
+            element={renderRoute('hub', <HubAccessGuard><AnalyticsStudioPage /></HubAccessGuard>)}
           />
           <Route
             path="hub/optimizador-webp"
@@ -663,11 +656,11 @@ export default function AppRouter() {
           />
         <Route
           path="hub/descargador-ig"
-          element={renderRoute('hub', <ProtectedRoute><InstagramExtractorPage /></ProtectedRoute>)}
+          element={renderRoute('hub', <HubAccessGuard><InstagramExtractorPage /></HubAccessGuard>)}
         />
           <Route
             path="hub/dashboards"
-            element={renderRoute('hub', <ProtectedRoute><AnalyticsStudioPage /></ProtectedRoute>)}
+            element={renderRoute('hub', <HubAccessGuard><AnalyticsStudioPage /></HubAccessGuard>)}
           />
           <Route
             path="portal/:slug"
