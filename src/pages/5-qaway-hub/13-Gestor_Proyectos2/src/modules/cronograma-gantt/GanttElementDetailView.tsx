@@ -20,7 +20,7 @@ import { useNavigate, useLocation } from 'react-router';
 import { useEffect, useMemo, useState } from 'react';
 import type { AttachmentItem, DeliverableItem, Item, Status } from './CronogramaGanttView';
 import { OFFICIAL_WBS_DEPENDENCIES } from './CronogramaGanttView';
-import { DRE_JUNIN_DOTACION_2027_EDT, PROJECT_PHASES_CATALOG } from './edtPmbokModel';
+import { PROJECT_PHASES_CATALOG } from './edtPmbokModel';
 import { listarTiposDependenciaGestor, listarEstadosEntregableGestor } from '../../services/gpCatalogosService';
 import './gantt.css';
 
@@ -93,16 +93,14 @@ export default function GanttElementDetailView() {
   }, [location.pathname]);
 
   const { item, allEntries, projectId } = useMemo(() => {
-    const fallbackCatalog = DRE_JUNIN_DOTACION_2027_EDT;
-    let pid = 'p1';
+    // Sin proyecto del tenant no hay catálogo: NUNCA se cae al EDT de DIGERE.
+    const fallbackCatalog: Item[] = [];
+    let pid = '';
     const flatten = (entries: Item[]): Item[] => entries.flatMap((entry) => [entry, ...(entry.children ? flatten(entry.children) : [])]);
     try {
-      pid = localStorage.getItem('qaway-gp-active-project-id') || 'p1';
       const candidateKeys = [
         `qaway-gantt-items-${pid}-maestro`,
         `qaway-gantt-items-${pid}`,
-        'qaway-gantt-items-p1-maestro',
-        'qaway-gantt-items-p1',
       ];
       for (const key of candidateKeys) {
         const raw = localStorage.getItem(key);
@@ -226,9 +224,9 @@ export default function GanttElementDetailView() {
 
   const persistItems = (mutate: (list: Item[]) => Item[]) => {
     try {
-      const pid = localStorage.getItem('qaway-gp-active-project-id') || projectId || 'p1';
-      const raw = localStorage.getItem(`qaway-gantt-items-${pid}`) || localStorage.getItem('qaway-gantt-items-p1');
-      const current = raw && Array.isArray(JSON.parse(raw)) && JSON.parse(raw).length > 0 ? (JSON.parse(raw) as Item[]) : (DRE_JUNIN_DOTACION_2027_EDT as Item[]);
+      const pid = projectId;
+      const raw = localStorage.getItem(`qaway-gantt-items-${pid}`);
+      const current = raw && Array.isArray(JSON.parse(raw)) && JSON.parse(raw).length > 0 ? (JSON.parse(raw) as Item[]) : [];
       const next = mutate(current.map((x) => ({ ...x })));
       localStorage.setItem(`qaway-gantt-items-${pid}`, JSON.stringify(next));
       window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
@@ -299,7 +297,7 @@ export default function GanttElementDetailView() {
       <nav className="gantt-element-crumb" aria-label="Ruta">
         <span onClick={() => navigate('/hub/gestor_proyectos/proyecto/gantt')}>Seguimiento de operaciones</span>
         <i>/</i>
-        <b>MINEDU · Dotación 2027</b>
+        <b>Cronograma</b>
         <i>/</i>
         <b>{codeLabel(item.code, kindLabel)}</b>
       </nav>

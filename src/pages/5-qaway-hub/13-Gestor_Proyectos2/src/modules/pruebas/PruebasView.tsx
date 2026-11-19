@@ -28,7 +28,7 @@ export default function PruebasView({ activeProject }: { activeProject?: { name?
     const timeout = window.setTimeout(() => {
       if (!cancelled) setDataState('empty');
     }, 8000);
-    fetchCronogramaFromSupabase(activeProject?.id || 'p1').then((rows) => {
+    fetchCronogramaFromSupabase(activeProject?.id || '').then((rows) => {
       if (!cancelled) {
         window.clearTimeout(timeout);
         setItems(rows || []);

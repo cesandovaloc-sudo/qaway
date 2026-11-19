@@ -5,7 +5,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { ModuleKey, UserRole } from './types';
-import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, TAREAS_SEED_COUNT, USER_ROLE_STORAGE_KEY } from './types';
+import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, USER_ROLE_STORAGE_KEY } from './types';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
@@ -51,21 +51,8 @@ export interface ProjectItem {
   tipoProyectoCodigo?: string | undefined;
 }
 
-const DEFAULT_PROJECTS: ProjectItem[] = [
-  {
-    id: 'p1',
-    code: 'PRJ-QAW-2026',
-    name: 'Proyecto Maestro · Operaciones Regionales',
-    region: 'Nacional',
-    subtext: 'Seguimiento de operaciones',
-    descProyecto: 'Línea de tiempo oficial y calibración de entregables.',
-    descSedes: 'Seguimiento territorial de sedes y unidades en tiempo real.',
-    budget: 'S/ 850,000',
-    sponsor: 'Comité Directivo',
-    riskLevel: 'Medio',
-    metodologia: '',
-  },
-];
+// NO existen proyectos por defecto. Un tenant nuevo debe arrancar totalmente
+// vacío: cualquier semilla global (p1 / MINEDU) se filtraba a todos los tenants.
 
 const readStoredModule = (): ModuleKey => {
   try {
@@ -91,15 +78,6 @@ const resolveModuleFromPath = (path: string): ModuleKey => {
     /* fallback */
   }
   return readStoredModule();
-};
-
-const seedTasksCount = (): number => {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem('qaway-tasks-v1') || 'null');
-    return Array.isArray(parsed) && parsed.every((x) => typeof x === 'object') ? parsed.length : TAREAS_SEED_COUNT;
-  } catch {
-    return TAREAS_SEED_COUNT;
-  }
 };
 
 const readStoredRole = (): UserRole => {
@@ -132,7 +110,7 @@ function GestorProyectosApp() {
   // Módulo activo unificado: la URL canónica es la fuente única de verdad (cero rebotes)
   const active: ModuleKey = resolveModuleFromPath(location.pathname);
   const [visitedModules, setVisitedModules] = useState<Set<ModuleKey>>(() => new Set([active]));
-  const [tasksCount, setTasksCount] = useState<number>(seedTasksCount);
+  const [tasksCount] = useState<number>(0);
   const [userRole, setUserRole] = useState<UserRole>(readStoredRole);
   const [cronogramaPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial'>(() =>
     readStoredRole() === 'coordinador' ? 'maestro' : 'territorial'
@@ -147,38 +125,21 @@ function GestorProyectosApp() {
     });
   }, [active]);
 
-  const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    try {
-      const stored = localStorage.getItem('qaway-gp-projects-v1');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch {
-      /* fallback */
-    }
-    return DEFAULT_PROJECTS;
-  });
-  const [activeProjectId, setActiveProjectId] = useState<string>(() => {
-    try {
-      const saved = localStorage.getItem('qaway-gp-active-project-id');
-      if (saved) return saved;
-    } catch {
-      /* fallback */
-    }
-    return 'p1';
-  });
+  // Arranque SIEMPRE vacío. La única fuente de proyectos es Supabase, filtrada
+  // por el tenant real de la sesión. localStorage NO se usa como fuente: no está
+  // separado por tenant y era la vía por la que un tenant nuevo veía el proyecto
+  // MINEDU de DIGERE (y cualquier otro dato persistido por otro usuario).
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [activeProjectId, setActiveProjectId] = useState<string>('');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
-  // Fase previa al login: se mantiene explícito y vacío hasta conectar el Hub.
-  const gestorTenantId: string | null = null;
   // Etapa 6-B: permisos granulares del modelo GP. El gating SOLO aplica con
-  // sesión real (perfilGp no nulo); en modo local (sin sesión) se conserva el
-  // comportamiento demo actual (documentado en bitácora 6-B). La DB (RLS)
-  // sigue siendo el mando real; esto es UX.
+  // sesión real (perfilGp no nulo); sin sesión el estado permanece vacío.
+  // La DB (RLS) sigue siendo el mando real; esto es UX.
   const { perfil: perfilGp, capacidades: capGp, cargando: cargandoPerfilGp } = usePerfilGp();
   const sesionReal = !cargandoPerfilGp && perfilGp !== null;
+  // Tenant REAL de la sesión compartida del Hub (public.users.tenant_id =
+  // get_auth_tenant_id()). Nunca se infiere de localStorage ni se fuerza a null.
+  const gestorTenantId: string | null = perfilGp?.tenantId ?? null;
   const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
@@ -263,14 +224,6 @@ function GestorProyectosApp() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [sidebarCollapsed]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('qaway-gp-active-project-id', activeProjectId);
-    } catch {
-      /* fallback */
-    }
-  }, [activeProjectId]);
 
   const binds = useRef<Partial<Record<ModuleKey, Binds>>>({});
   const canvasRef = useRef<HTMLElement | null>(null);
@@ -450,41 +403,37 @@ function GestorProyectosApp() {
     }
   }, [userRole, sesionReal]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(projects));
-    } catch {
-      /* almacenamiento no disponible */
-    }
-  }, [projects]);
-
-  // Sincronización tolerante: si Supabase aún no tiene la migración aplicada,
-  // el Gestor conserva el estado local y no bloquea la interfaz.
+  // Carga ÚNICA de proyectos: solo desde Supabase y solo del tenant de la sesión.
+  // Si la BD devuelve 0 filas el estado permanece vacío: no se fusiona con nada
+  // local, porque localStorage no distingue tenants.
   useEffect(() => {
     let cancelled = false;
+    if (cargandoPerfilGp) return () => { cancelled = true; };
+    if (!sesionReal || (!gestorTenantId && !perfilGp?.esPlataforma)) {
+      // Sin sesión o sin empresa asignada: vacío, nunca datos de otro tenant.
+      setProjects([]);
+      setActiveProjectId('');
+      return () => { cancelled = true; };
+    }
     listGestorProjects(gestorTenantId)
       .then((remoteProjects) => {
-        if (cancelled || remoteProjects.length === 0) return;
-        setProjects((current) => {
-          const localOnly = current.filter(
-            (project) => project.id !== 'p1' && !remoteProjects.some((remote) => remote.id === project.id)
-          );
-          const merged = [...remoteProjects, ...localOnly];
-          try {
-            localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(merged));
-          } catch {}
-          return merged;
-        });
-        setActiveProjectId((curr) => {
-          if (remoteProjects.some((r) => r.id === curr)) return curr;
-          return remoteProjects[0]?.id || curr;
-        });
+        if (cancelled) return;
+        const delTenant = Array.isArray(remoteProjects) ? remoteProjects : [];
+        setProjects(delTenant);
+        setActiveProjectId((curr) =>
+          delTenant.some((r) => r.id === curr) ? curr : (delTenant[0]?.id ?? '')
+        );
       })
-      .catch((error) => console.warn('[Gestor Projects] modo local:', error?.message || error));
+      .catch((error) => {
+        if (cancelled) return;
+        console.warn('[Gestor Projects] no se pudieron cargar los proyectos:', error?.message || error);
+        setProjects([]);
+        setActiveProjectId('');
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [cargandoPerfilGp, sesionReal, gestorTenantId, perfilGp?.esPlataforma]);
 
   const handleSelectModule = (next: ModuleKey) => {
     try {
@@ -566,45 +515,20 @@ function GestorProyectosApp() {
     }
     setProjects((prev) => {
       const next = prev.filter((p) => p.id !== id);
-      const finalProjects =
-        next.length > 0
-          ? next
-          : [
-              {
-                id: 'p-' + Date.now().toString(36),
-                code: 'PRJ-01',
-                name: 'Nuevo Proyecto',
-                region: 'General',
-                subtext: 'Seguimiento de operaciones',
-                budget: 'S/ 0',
-                sponsor: 'Comité Directivo',
-                riskLevel: 'Bajo',
-                metodologia: 'Híbrido: Hitos Clave + Tareas de Campo',
-              },
-            ];
-      try {
-        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(finalProjects));
-      } catch {
-        /* fallback */
-      }
-      const nextActiveId = finalProjects[0]?.id ?? '';
-      setActiveProjectId(nextActiveId);
-      navigate(MODULE_SLUGS['cronograma']);
-      return finalProjects;
+      // Sin proyecto sustituto inventado: si era el último, queda vacío.
+      setActiveProjectId(next[0]?.id ?? '');
+      return next;
     });
-    notifyActive('Proyecto eliminado definitivamente. Se abrió el cronograma del proyecto activo.');
+    if (projects.length > 1) navigate(MODULE_SLUGS['cronograma']);
+    notifyActive(
+      projects.length > 1
+        ? 'Proyecto eliminado definitivamente. Se abrió el cronograma del proyecto activo.'
+        : 'Proyecto eliminado definitivamente. No quedan proyectos en esta empresa.'
+    );
   };
 
   const handleUpdateProject = (updated: ProjectItem) => {
-    setProjects((prev) => {
-      const next = prev.map((p) => (p.id === updated.id ? updated : p));
-      try {
-        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(next));
-      } catch {
-        /* fallback */
-      }
-      return next;
-    });
+    setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     void upsertGestorProject(updated, gestorTenantId).catch((error) => {
       console.warn('[Gestor Projects] no se pudo actualizar el proyecto:', error?.message || error);
     });
@@ -619,15 +543,7 @@ function GestorProyectosApp() {
    * transicional (mismo patrón que el resto de campos de ProjectItem).
    */
   const handleEstadoCambiado = (proyectoId: string, estadoNuevo: string) => {
-    setProjects((prev) => {
-      const next = prev.map((p) => (p.id === proyectoId ? { ...p, estadoCodigo: estadoNuevo } : p));
-      try {
-        localStorage.setItem('qaway-gp-projects-v1', JSON.stringify(next));
-      } catch {
-        /* fallback */
-      }
-      return next;
-    });
+    setProjects((prev) => prev.map((p) => (p.id === proyectoId ? { ...p, estadoCodigo: estadoNuevo } : p)));
   };
 
   const activeProject = projects.find((p) => p.id === activeProjectId) || projects[0];
@@ -670,6 +586,22 @@ function GestorProyectosApp() {
           activeProject={activeProject}
         />
         <main ref={canvasRef} className="qm-canvas">
+          {/* Sin proyecto del tenant NO se monta ningún módulo: evita que los
+              fallbacks internos ('p1', semillas MINEDU) puedan mostrar datos
+              ajenos aunque se navegue por cualquier ruta. */}
+          {!activeProject && (
+            <div className="qm-module-loading" role="status" aria-live="polite">
+              <p className="qm-loading-caption">
+                {cargandoPerfilGp
+                  ? 'Cargando…'
+                  : sesionReal
+                    ? 'No hay proyectos en esta empresa.'
+                    : 'Sin sesión activa.'}
+              </p>
+            </div>
+          )}
+          {activeProject && (
+          <>
            {visitedModules.has('resumen') && <div className={active === 'resumen' ? 'gantt-v2 qm-pane-active' : 'gantt-v2 qm-pane'}>
              <ResumenProyectoView userRole={userRole} canCreateProject={puedeCrearProyectoUi} sesionReal={sesionReal} proyecto={activeProject} onEstadoCambiado={handleEstadoCambiado} onOpenCreateProject={handleOpenCreateProject} onActions={(h) => { binds.current['resumen'] = h; }} />
            </div>}
@@ -758,6 +690,8 @@ function GestorProyectosApp() {
               onActions={(h) => { binds.current['configuracion'] = h; }}
             />
            </div></Suspense>}
+          </>
+          )}
         </main>
       </div>
 

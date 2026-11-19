@@ -2,7 +2,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import '../cronograma-gantt/gantt.css';
 import './hitos.css';
-import { DRE_JUNIN_DOTACION_2027_EDT } from '../cronograma-gantt/edtPmbokModel';
 import {
   AlertTriangle,
   ArrowRight,
@@ -75,30 +74,9 @@ const formatDatePE = (d?: string) => {
 
 const getLiveWbsComponents = (): ComponenteWbs[] => {
   try {
-    let items: any[] = [];
-    const rawGantt = localStorage.getItem('qaway-gantt-items-p1');
-    if (rawGantt) {
-      try {
-        const parsed = JSON.parse(rawGantt);
-        if (Array.isArray(parsed) && parsed.length > 0) items = parsed;
-      } catch {}
-    }
-
-    if (items.length === 0) {
-      items = DRE_JUNIN_DOTACION_2027_EDT.map((r) => ({
-        id: r.id,
-        code: r.code,
-        name: r.name,
-        kind: r.kind,
-        parentId: r.parentId,
-        start: r.start,
-        end: r.end,
-        progress: r.progress,
-        status: r.status,
-        deliverable: r.deliverable,
-        phase: r.phase,
-      }));
-    }
+    // Sin proyecto del tenant no hay componentes: NUNCA se lee la clave global
+    // 'p1' ni se cae al EDT histórico de DIGERE.
+    const items: any[] = [];
 
     // Identificar los 11 Componentes principales (WBS Nivel 1)
     const rootComponents = items.filter(

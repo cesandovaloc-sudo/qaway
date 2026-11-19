@@ -527,7 +527,7 @@ const REGION_OPTIONS = [
 
 const GESTOR_OPTIONS = [
   { value: 'Todos', label: 'Todos los Responsables' },
-  { value: 'Carlos Sandoval', label: 'Carlos Sandoval (Coordinador General)' },
+  { value: 'Sin asignar', label: 'Sin asignar' },
   { value: 'María Jara', label: 'María Jara (Directora de Operaciones)' },
   { value: 'Lucía Flores', label: 'Lucía Flores (Especialista SIGA)' },
   { value: 'Javier Ruiz', label: 'Javier Ruiz (Logística y Almacenes)' },
@@ -537,7 +537,7 @@ const GESTOR_OPTIONS = [
 ];
 
 const GESTOR_COLORS: Record<string, string> = {
-  'Carlos Sandoval': '#0284c7',
+  'Sin asignar': '#0284c7',
   'María Jara': '#2563eb',
   'Lucía Flores': '#7c3aed',
   'Javier Ruiz': '#059669',
@@ -568,8 +568,8 @@ const getGestorColor = (name: string): string => {
 export const getPersonInstitutionalRole = (name: string): string => {
   switch (name) {
     case 'Carlos Mendoza':
-    case 'Carlos Sandoval':
-      return 'Coordinador General (MINEDU)';
+    case 'Sin asignar':
+      return 'Sin asignar';
     case 'María Salazar':
       return 'Coordinadora Regional Junín';
     case 'Javier Ruiz':
@@ -1301,7 +1301,7 @@ export default function Tareas2View({
   perspective?: 'maestro' | 'territorial' | 'equipo';
   isActive?: boolean;
 }) {
-  const projectId = activeProject?.id || 'p1';
+  const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
 
   // Estado reactivo de tareas operativas sincronizadas desde /tareas
@@ -1331,9 +1331,9 @@ export default function Tareas2View({
             );
             if (!hasAllComponents || parsed.length < 50) {
               try {
-                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
-              return MASTER_INITIAL_ITEMS;
+              return [];
             }
           }
           if (pid !== 'p1') {
@@ -1354,16 +1354,16 @@ export default function Tareas2View({
             if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
-                localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
                 localStorage.removeItem(LS_COLLAPSED_BY_MODE);
               } catch {}
-              return TERRITORIAL_INITIAL_ITEMS;
+              return [];
             }
             if (isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
               try {
-                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
-              return MASTER_INITIAL_ITEMS;
+              return [];
             }
           }
           // Sincronizar dependencias maestras para ítems persistidos sin campo dependencies
@@ -1391,18 +1391,9 @@ export default function Tareas2View({
           return computeWbsHierarchy(sortWbsHierarchy(upgraded), tasksOverride || rawTasks);
         }
       }
-      if (pid === 'p1') {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(targetInitialItems));
-          localStorage.removeItem(LS_COLLAPSED_BY_MODE);
-        } catch {
-          /* fallback */
-        }
-        return targetInitialItems;
-      }
-      return []; // Nuevo proyecto siempre inicia completamente vacío / calato
+      return []; // Sin proyecto del tenant: vacío, nunca semillas de DIGERE
     } catch {
-      return pid === 'p1' ? targetInitialItems : [];
+      return [];
     }
   };
 
@@ -1650,7 +1641,7 @@ export default function Tareas2View({
   const [newTaskCalOpen, setNewTaskCalOpen] = useState(false);
   const [newTaskForm, setNewTaskForm] = useState({
     title: '',
-    owner: 'Carlos Sandoval',
+    owner: 'Sin asignar',
     due: '2026-11-30',
     priority: 'Media' as 'Alta' | 'Media' | 'Baja',
   });
@@ -1819,7 +1810,7 @@ export default function Tareas2View({
     setNewTaskCalOpen(false);
     setNewTaskForm({
       title: '',
-      owner: activeItem?.gestor || 'Carlos Sandoval',
+      owner: activeItem?.gestor || 'Sin asignar',
       due: activeItem?.end || '2026-11-30',
       priority: 'Media',
     });
@@ -5985,9 +5976,9 @@ export default function Tareas2View({
       const defaultGestores = resolveDefaultGestores(x.code, x.name);
       const gestoresList: string[] = (x.gestores && x.gestores.length > 0)
         ? x.gestores
-        : (defaultGestores.length > 0 ? defaultGestores : (x.gestor ? [x.gestor] : ['Carlos Sandoval']));
+        : (defaultGestores.length > 0 ? defaultGestores : (x.gestor ? [x.gestor] : ['Sin asignar']));
       const isMultiple = gestoresList.length > 1;
-      const primaryGestor = x.gestor || gestoresList[0] || 'Carlos Sandoval';
+      const primaryGestor = x.gestor || gestoresList[0] || 'Sin asignar';
 
       return (
         <div
@@ -6017,7 +6008,7 @@ export default function Tareas2View({
               <option value="Javier Ruiz">Javier Ruiz (Logística y Almacenes)</option>
               <option value="Lucía Flores">Lucía Flores (Especialista SIGA)</option>
               <option value="Juan Pérez">Juan Pérez (Transporte)</option>
-              <option value="Carlos Sandoval">Carlos Sandoval (Coordinador General)</option>
+              <option value="Sin asignar">Sin asignar</option>
             </select>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
@@ -6451,7 +6442,7 @@ export default function Tareas2View({
           perspective={perspective}
           title={
             perspective === 'equipo'
-              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2026'}`
+              ? `Equipo del Proyecto · ${activeProject?.name || 'Proyecto'}`
               : perspective === 'territorial'
               ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
               : `Cronograma · ${activeProject?.name || 'Gestión del Proyecto'}`

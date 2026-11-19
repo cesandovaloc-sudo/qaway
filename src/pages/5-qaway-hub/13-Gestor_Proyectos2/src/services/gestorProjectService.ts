@@ -62,18 +62,23 @@ export async function listGestorProjects(tenantId?: string | null): Promise<Proj
   const run = (async (): Promise<ProjectItem[]> => {
     // P2 (gstack 08): columnas explícitas (superset de todo campo que mapea fromRow) en lugar de select=*
     // Tolerante al esquema: si alguna columna aún no existe en la BD, relee con select=* (siempre válido).
-    let respuesta = await db
+    let query = db
       .from('gestor_proyectos')
       .select('id,code,name,region,subtext,budget,sponsor,risk_level,metodologia,created_at,updated_at')
       .order('created_at', { ascending: true });
+    // Defensa en profundidad: el filtro va a la BD, no solo al array en memoria.
+    if (tenantId) query = query.eq('tenant_id', tenantId);
+    let respuesta = await query;
     if (respuesta.error) {
-      respuesta = await db
+      let fallbackQuery = db
         .from('gestor_proyectos')
         .select('*')
         .order('created_at', { ascending: true });
+      if (tenantId) fallbackQuery = fallbackQuery.eq('tenant_id', tenantId);
+      respuesta = await fallbackQuery;
     }
     if (tenantId) {
-      respuesta.data = (respuesta.data ?? []).filter((row: any) => !tenantId || row.tenant_id === tenantId);
+      respuesta.data = (respuesta.data ?? []).filter((row: any) => row.tenant_id === tenantId);
     }
     if (respuesta.error) throw respuesta.error;
     return (respuesta.data ?? []).map((row) => fromRow(row as ProjectRow));

@@ -492,7 +492,7 @@ const REGION_OPTIONS = [
 
 const GESTOR_OPTIONS = [
   { value: 'Todos', label: 'Todos los Responsables' },
-  { value: 'Carlos Sandoval', label: 'Carlos Sandoval (Coordinador General)' },
+  { value: 'Sin asignar', label: 'Sin asignar' },
   { value: 'María Jara', label: 'María Jara (Directora de Operaciones)' },
   { value: 'Lucía Flores', label: 'Lucía Flores (Especialista SIGA)' },
   { value: 'Javier Ruiz', label: 'Javier Ruiz (Logística y Almacenes)' },
@@ -502,7 +502,7 @@ const GESTOR_OPTIONS = [
 ];
 
 const GESTOR_COLORS: Record<string, string> = {
-  'Carlos Sandoval': '#0284c7',
+  'Sin asignar': '#0284c7',
   'María Jara': '#2563eb',
   'Lucía Flores': '#7c3aed',
   'Javier Ruiz': '#059669',
@@ -533,8 +533,8 @@ const getGestorColor = (name: string): string => {
 export const getPersonInstitutionalRole = (name: string): string => {
   switch (name) {
     case 'Carlos Mendoza':
-    case 'Carlos Sandoval':
-      return 'Coordinador General (MINEDU)';
+    case 'Sin asignar':
+      return 'Sin asignar';
     case 'María Salazar':
       return 'Coordinadora Regional Junín';
     case 'Javier Ruiz':
@@ -1248,7 +1248,7 @@ export default function CronogramaGanttView({
   perspective?: 'maestro' | 'territorial' | 'equipo';
   isActive?: boolean;
 }) {
-  const projectId = activeProject?.id || 'p1';
+  const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
 
   /* FASE 1 — Aislamiento de UI: claves de configuración de columnas/anchos por módulo+perspectiva
@@ -1283,9 +1283,9 @@ export default function CronogramaGanttView({
             const hasLegacy17 = parsed.some((it: Item) => it.id === 'pt-1.7a' || it.code === '1.7a');
             if (!hasAllComponents || parsed.length < 50 || hasLegacy17) {
               try {
-                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
-              return MASTER_INITIAL_ITEMS;
+              return [];
             }
           }
           if (pid !== 'p1') {
@@ -1306,16 +1306,16 @@ export default function CronogramaGanttView({
             if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
-                localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
                 localStorage.removeItem(uiKey('collapsed-by-mode-v1'));
               } catch {}
-              return TERRITORIAL_INITIAL_ITEMS;
+              return [];
             }
             if (isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
               try {
-                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
-              return MASTER_INITIAL_ITEMS;
+              return [];
             }
           }
           // Sincronizar dependencias maestras para ítems persistidos sin campo dependencies
@@ -1340,18 +1340,9 @@ export default function CronogramaGanttView({
           return computeWbsHierarchy(sortWbsHierarchy(upgraded), tasksOverride || rawTasks);
         }
       }
-      if (pid === 'p1') {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(targetInitialItems));
-          localStorage.removeItem(uiKey('collapsed-by-mode-v1'));
-        } catch {
-          /* fallback */
-        }
-        return targetInitialItems;
-      }
-      return []; // Nuevo proyecto siempre inicia completamente vacío / calato
+      return []; // Sin proyecto del tenant: vacío, nunca semillas de DIGERE
     } catch {
-      return pid === 'p1' ? targetInitialItems : [];
+      return [];
     }
   };
 
@@ -1597,7 +1588,7 @@ export default function CronogramaGanttView({
   const [newTaskCalOpen, setNewTaskCalOpen] = useState(false);
   const [newTaskForm, setNewTaskForm] = useState({
     title: '',
-    owner: 'Carlos Sandoval',
+    owner: 'Sin asignar',
     due: '2026-11-30',
     priority: 'Media' as 'Alta' | 'Media' | 'Baja',
   });
@@ -1769,7 +1760,7 @@ export default function CronogramaGanttView({
     setNewTaskCalOpen(false);
     setNewTaskForm({
       title: '',
-      owner: activeItem?.gestor || 'Carlos Sandoval',
+      owner: activeItem?.gestor || 'Sin asignar',
       due: activeItem?.end || '2026-11-30',
       priority: 'Media',
     });
@@ -6224,7 +6215,7 @@ export default function CronogramaGanttView({
             <select
               className="cell-editor cell-select"
               autoFocus
-              defaultValue={x.gestor || 'Carlos Sandoval'}
+              defaultValue={x.gestor || 'Sin asignar'}
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => {
                 update(x.id, { gestor: e.target.value });
@@ -6232,14 +6223,14 @@ export default function CronogramaGanttView({
               }}
               onBlur={closeEdit}
             >
-              <option value="Carlos Sandoval">Carlos Sandoval</option>
+              <option value="Sin asignar">Sin asignar</option>
               <option value="Lucía Flores">Lucía Flores</option>
               <option value="María Salazar">María Salazar</option>
               <option value="Juan Pérez">Juan Pérez</option>
             </select>
           ) : (
             (() => {
-              const primaryName = x.gestor || 'Carlos Sandoval';
+              const primaryName = x.gestor || 'Sin asignar';
               const avatarUrl = PERSON_AVATARS[primaryName];
               const initials = primaryName
                 .split(' ')
@@ -6613,7 +6604,7 @@ export default function CronogramaGanttView({
           perspective={perspective}
           title={
             perspective === 'equipo'
-              ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2026'}`
+              ? `Equipo del Proyecto · ${activeProject?.name || 'Proyecto'}`
               : perspective === 'territorial'
               ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
               : `Cronograma · ${activeProject?.name || 'Gestión del Proyecto'}`
@@ -10580,7 +10571,7 @@ export default function CronogramaGanttView({
               items={shown}
               allItems={items}
               selectedId={selectedId}
-              projectName={activeProject?.name || 'Distribución de Materiales DOT 2027'}
+              projectName={activeProject?.name || 'Proyecto'}
               zoomLevel={organigramaZoom}
               onZoomChange={setOrganigramaZoom}
               fitViewTrigger={organigramaFitTrigger}

@@ -1195,7 +1195,7 @@ export default function Reportes2View({
   perspective?: 'maestro' | 'territorial' | 'equipo';
   isActive?: boolean;
 }) {
-  const projectId = activeProject?.id || 'p1';
+  const projectId = activeProject?.id || '';
   const currentPidRef = useRef(projectId);
 
   // Estado reactivo de tareas operativas sincronizadas desde /tareas
@@ -1225,9 +1225,9 @@ export default function Reportes2View({
             );
             if (!hasAllComponents || parsed.length < 50) {
               try {
-                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
-              return MASTER_INITIAL_ITEMS;
+              return [];
             }
           }
           if (pid !== 'p1') {
@@ -1248,16 +1248,16 @@ export default function Reportes2View({
             if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
-                localStorage.setItem(storageKey, JSON.stringify(TERRITORIAL_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
                 localStorage.removeItem(LS_COLLAPSED_BY_MODE);
               } catch {}
-              return TERRITORIAL_INITIAL_ITEMS;
+              return [];
             }
             if (isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
               try {
-                localStorage.setItem(storageKey, JSON.stringify(MASTER_INITIAL_ITEMS));
+                localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
-              return MASTER_INITIAL_ITEMS;
+              return [];
             }
           }
           // Sincronizar dependencias maestras para ítems persistidos sin campo dependencies
@@ -1282,18 +1282,9 @@ export default function Reportes2View({
           return computeWbsHierarchy(sortWbsHierarchy(upgraded), tasksOverride || rawTasks);
         }
       }
-      if (pid === 'p1') {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(targetInitialItems));
-          localStorage.removeItem(LS_COLLAPSED_BY_MODE);
-        } catch {
-          /* fallback */
-        }
-        return targetInitialItems;
-      }
-      return []; // Nuevo proyecto siempre inicia completamente vacío / calato
+      return []; // Sin proyecto del tenant: vacío, nunca semillas de DIGERE
     } catch {
-      return pid === 'p1' ? targetInitialItems : [];
+      return [];
     }
   };
 

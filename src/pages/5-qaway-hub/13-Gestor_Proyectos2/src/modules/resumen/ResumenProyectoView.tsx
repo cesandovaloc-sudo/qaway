@@ -382,7 +382,7 @@ export default function ResumenProyectoView({
                 >
                   VISTA DE COORDINACIÓN GENERAL
                 </span>
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Carlos Sandoval</span>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>Coordinación General</span>
               </div>
               <p style={{ margin: 0, fontSize: '12.5px', color: '#cbd5e1' }}>
                 Como Coordinador General puedes supervisar múltiples regiones y crear proyectos adicionales desde cero.

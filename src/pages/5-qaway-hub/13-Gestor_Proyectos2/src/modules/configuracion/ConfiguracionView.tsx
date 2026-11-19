@@ -88,7 +88,7 @@ const TIMEZONES = [
 export default function ConfiguracionView({
   onActions,
   projects = [],
-  activeProjectId = 'p1',
+  activeProjectId = '',
   onSelectProject,
   onUpdateProject,
   onDeleteProject,
@@ -117,12 +117,13 @@ export default function ConfiguracionView({
 
   // Proyecto activo en configuración
   const currentProj = useMemo(() => {
+    // Sin proyectos del tenant: vacío. Nunca un proyecto MINEDU/DIGERE.
     return projects.find((p) => p.id === activeProjectId) || projects[0] || {
-      id: 'p1',
-      code: 'PRJ-MIN-2027-01',
-      name: 'Distribución de Materiales DOT 2027',
-      region: 'Junín',
-      subtext: 'Seguimiento de operaciones',
+      id: '',
+      code: '',
+      name: '',
+      region: '',
+      subtext: '',
     };
   }, [projects, activeProjectId]);
 

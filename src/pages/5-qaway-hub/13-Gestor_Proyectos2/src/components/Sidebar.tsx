@@ -54,10 +54,8 @@ export default function Sidebar({
   canCreateProject,
   collapsed = false,
   onToggleCollapse,
-  projects = [
-    { id: 'p1', code: 'PRJ-MIN-2027-01', name: 'Distribución de Materiales DOT 2027', region: 'Junín', subtext: 'Seguimiento de operaciones' },
-  ],
-  activeProjectId = 'p1',
+  projects = [],
+  activeProjectId = '',
   onSelectProject,
   onOpenCreateProject,
 }: SidebarProps) {
@@ -127,7 +125,7 @@ export default function Sidebar({
         >
           <i style={{ background: userRole === 'coordinador' ? '#60a5fa' : '#7388e2' }} />
           <div>
-            <b>{activeProject?.name || 'Distribución de Materiales DOT 2027'}</b>
+            <b>{activeProject?.name || 'Sin proyectos'}</b>
             {activeProject?.code && <small>{activeProject.code}</small>}
           </div>
           <ChevronDown
