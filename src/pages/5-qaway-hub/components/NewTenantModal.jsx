@@ -75,9 +75,10 @@ export default function NewTenantModal({
 
   if (!isOpen) return null;
 
-  const handleNtNameBlur = () => {
+  const handleNtNameChange = (val) => {
+    setNtName(val);
     if (!ntSlugEdited) {
-      const autoSlug = ntName
+      const autoSlug = val
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -123,19 +124,36 @@ export default function NewTenantModal({
 
     setNtCreating(true);
     try {
-      const { data: tenantData, error: tErr } = await supabase
+      let finalSlug = cleanSlug;
+      let { data: tenantData, error: tErr } = await supabase
         .from("tenants")
         .insert({
           name: cleanName.slice(0, 120),
-          slug: cleanSlug,
+          slug: finalSlug,
           status: "active",
           features: { onboarding_completed: true },
         })
         .select("id, name, slug, status, created_at")
         .single();
 
+      if (tErr && (tErr.code === "23505" || String(tErr.message || "").includes("tenants_slug_key"))) {
+        finalSlug = `${cleanSlug}-${Math.random().toString(36).slice(2, 6)}`;
+        const retry = await supabase
+          .from("tenants")
+          .insert({
+            name: cleanName.slice(0, 120),
+            slug: finalSlug,
+            status: "active",
+            features: { onboarding_completed: true },
+          })
+          .select("id, name, slug, status, created_at")
+          .single();
+        tenantData = retry.data;
+        tErr = retry.error;
+      }
+
       if (tErr || !tenantData) {
-        throw new Error(tErr?.message || "No se pudo crear el tenant (verifica que el slug no esté en uso).");
+        throw new Error(tErr?.message || "No se pudo crear el tenant.");
       }
 
       const { data: catalogApps } = await supabase
@@ -163,7 +181,7 @@ export default function NewTenantModal({
       const cleanDni = ntDni.trim();
       const effectiveEmail = ntEmail.trim()
         ? ntEmail.trim().toLowerCase()
-        : `${cleanDni}@${cleanSlug}.qaway.local`;
+        : `${cleanDni}@${finalSlug}.qaway.local`;
 
       if (ntWithPassword) {
         const { data: provData, error: provErr } = await supabase.functions.invoke("admin-provision-user", {
@@ -211,7 +229,7 @@ export default function NewTenantModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/50 p-4 backdrop-blur-[2px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/55 p-4">
       <div data-dismissable className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white shadow-2xl overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 bg-zinc-50/70 px-6 py-4">
           <div className="flex items-center gap-2.5">
@@ -350,8 +368,7 @@ export default function NewTenantModal({
                 <input
                   type="text"
                   value={ntName}
-                  onChange={(e) => setNtName(e.target.value)}
-                  onBlur={handleNtNameBlur}
+                  onChange={(e) => handleNtNameChange(e.target.value)}
                   placeholder="Ej. Mi Empresa S.A.C."
                   className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-[#ff4b0b]"
                   required

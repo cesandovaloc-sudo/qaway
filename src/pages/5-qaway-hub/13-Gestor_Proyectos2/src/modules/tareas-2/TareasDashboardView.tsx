@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { usePerfilGp } from "../../services/gpPermisosService";
+import { esTenantMineduPrincipal } from "../../services/gestorTareasLocalService";
 import {
   House,
   CalendarDays,
@@ -289,12 +291,44 @@ export default function TareasDashboardView({
     [visible]
   );
 
+  const { perfil, cargando: cargandoPerfilGp } = usePerfilGp();
+  const esDigerePrincipal = esTenantMineduPrincipal(perfil?.tenantId);
+
   const tabs = [
     { id: "general", label: "Vista general", icon: LayoutDashboard },
     { id: "kanban", label: "Kanban", icon: Columns3 },
     { id: "lista", label: "Lista", icon: List },
     { id: "equipo", label: "Por equipo", icon: UsersRound },
   ] as const;
+
+  if (cargandoPerfilGp) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500">
+        Cargando tareas...
+      </div>
+    );
+  }
+
+  if (!esDigerePrincipal && (!items || items.length === 0)) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
+        <h3 className="text-base font-semibold text-slate-900">Sin tareas registradas</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Este espacio inicia limpio. Crea un proyecto o asigna tu primera tarea para comenzar.
+        </p>
+        {onOpenAsignar && (
+          <button
+            type="button"
+            onClick={onOpenAsignar}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            <Plus size={15} />
+            <span>Asignar tarea</span>
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex-1 overflow-y-auto bg-[#f2f6fc] text-[#14213d]">

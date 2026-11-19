@@ -1,3 +1,7 @@
+-- [SUPERADO por 20261119_password_change_hardening.sql] Nunca se aplicó en remoto:
+-- no aparece en list_migrations y public.users.must_change_password no existía.
+-- Se conserva como historia; no ejecutar. Motivo y evidencia en
+-- doc2/9-Credenciales-y-auditoria/9.1 §2 y 9.2.
 -- ============================================================
 -- Alta asistida de usuarios (modalidad EXTRA a la invitación)
 -- Objetivo: que el administrador de la plataforma cree cuentas listas

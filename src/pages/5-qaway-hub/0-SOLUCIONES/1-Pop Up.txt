@@ -1,0 +1,19 @@
+### 1. Lentitud al escribir en el modal `Nueva empresa (Tenant)` y parche `onBlur` en el slug
+- **Problema:** Cada letra escrita en los inputs del modal tardaba en responder; además, el `slug` solo se generaba al salir del campo (`onBlur`).
+- **Causa:** El overlay del modal en `NewTenantModal.jsx` tenía `backdrop-blur-[2px]` sobre toda la pantalla de Empresas (tabla, gráficos SVG y sombras), obligando al navegador a recalcular el desenfoque en cada pulsación de tecla.
+- **Solución:** Se quitó `backdrop-blur-[2px]` (dejando `bg-zinc-950/55`) y se restauró la generación en tiempo real del `slug` dentro de `onChange` (`handleNtNameChange`).
+
+### 2. Error `tenants_slug_key` al crear una empresa con nombre repetido
+- **Problema:** Al crear una empresa cuyo `slug` ya existía en `tenants`, la inserción fallaba (`duplicate key value violates unique constraint "tenants_slug_key"`) y bloqueaba la creación del usuario administrador.
+- **Causa:** La columna `slug` tiene restricción `UNIQUE` en BD y el formulario no resolvía colisiones.
+- **Solución:** En `NewTenantModal.jsx`, ante error `23505` / `tenants_slug_key`, se agrega automáticamente un sufijo único interno (`${cleanSlug}-xxxx`) manteniendo intacto el `name` visible de la empresa y continuando con el alta del usuario.
+
+### 3. Popup obligatorio de cambio de contraseña al primer ingreso
+- **Problema:** Al ingresar por primera vez con un tenant nuevo creado con contraseña inicial, no aparecía el popup para cambiar la contraseña.
+- **Causa:** Faltaba el modal bloqueante en `13-Gestor_Proyectos2` y el envío de `must_change_password: true` en el alta del Hub.
+- **Solución:** Se creó `CambiarContrasenaModal.tsx` montado en `App.tsx` (actualiza clave y limpia la bandera en `user_metadata` vía `supabase.auth.updateUser`) y se envió `must_change_password: true` hacia `admin-provision-user` desde `HubSuperSuscripcionesPanel.jsx` y `NewTenantModal.jsx`.
+
+### 4. DIGERE MINEDU mostraba 0 proyectos y doble carga visual ("Sin datos" → datos)
+- **Problema:** El tenant `DIGERE MINEDU` aparecía sin proyectos y el cronograma mostraba brevemente `"Cronograma nuevo · Listo para estructurar"` antes de cargar los datos.
+- **Causa:** `listGestorProjects(tenantId)` en `gestorProjectService.ts` no incluía `tenant_id` en el `.select(...)` y luego filtraba `row.tenant_id === tenantId`, descartando todos los proyectos. Además, `CronogramaGanttView.tsx` evaluaba `items.length === 0` mientras la sesión y la BD aún estaban cargando.
+- **Solución:** Se agregó `tenant_id` al `.select(...)` de `gestorProjectService.ts` y se añadió el estado `cargandoNube` en `CronogramaGanttView.tsx` para mostrar `"Cargando cronograma..."` hasta terminar la carga real.

@@ -8,6 +8,14 @@ import { OrganigramaControls } from './organigrama/OrganigramaControls';
 import { OrganigramaCanvas, type OrganigramaCanvasActions } from './organigrama/OrganigramaCanvas';
 import { OrganigramaDetailPanel } from './organigrama/OrganigramaDetailPanel';
 import EquipoExpedienteModal from './EquipoExpedienteModal';
+import { usePerfilGp } from '../../services/gpPermisosService';
+import { esTenantMineduPrincipal } from '../../services/gestorTareasLocalService';
+
+const EMPTY_ORGANIGRAMA_DATASET: OrganigramaDataset = {
+  nodes: [],
+  edges: [],
+  sourceLabel: 'Sin datos registrados',
+};
 
 export interface EquipoOrganigramaFlowViewProps {
   /** Dataset opcional para futura conexión con servicios Supabase; por defecto usa datos de demostración */
@@ -20,6 +28,11 @@ export default function EquipoOrganigramaFlowView({
   dataset: externalDataset,
   onOpenIntegrante,
 }: EquipoOrganigramaFlowViewProps) {
+  const { perfil, cargando: cargandoPerfilGp } = usePerfilGp();
+  const esDigerePrincipal = esTenantMineduPrincipal(perfil?.tenantId);
+  const effectiveDataset =
+    externalDataset ?? (esDigerePrincipal ? undefined : EMPTY_ORGANIGRAMA_DATASET);
+
   const {
     dataset,
     integrity,
@@ -46,7 +59,7 @@ export default function EquipoOrganigramaFlowView({
     revealAndSelectNode,
     visibleCount,
     totalCount,
-  } = useOrganigrama(externalDataset);
+  } = useOrganigrama(effectiveDataset);
 
   const [zoomPercent, setZoomPercent] = useState<number>(100);
   const [pendingFocusNodeId, setPendingFocusNodeId] = useState<string | null>(null);
@@ -86,6 +99,25 @@ export default function EquipoOrganigramaFlowView({
     },
     [onOpenIntegrante]
   );
+
+  if (!externalDataset && cargandoPerfilGp) {
+    return (
+      <div style={{ padding: '70px 24px', textAlign: 'center', color: '#64748b', fontSize: '14px', background: '#ffffff', width: '100%' }}>
+        Cargando equipo...
+      </div>
+    );
+  }
+
+  if (!externalDataset && !esDigerePrincipal && totalCount === 0) {
+    return (
+      <div style={{ padding: '70px 24px', textAlign: 'center', color: '#64748b', fontSize: '14px', background: '#ffffff', width: '100%' }}>
+        <strong style={{ display: 'block', color: '#0f172a', fontSize: '15px', marginBottom: '4px' }}>
+          Sin estructura organizacional ni integrantes registrados
+        </strong>
+        Configura tus unidades organizacionales en Configuración o agrega integrantes para visualizar el organigrama.
+      </div>
+    );
+  }
 
   return (
     <ReactFlowProvider>

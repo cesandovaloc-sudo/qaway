@@ -64,7 +64,7 @@ export async function listGestorProjects(tenantId?: string | null): Promise<Proj
     // Tolerante al esquema: si alguna columna aún no existe en la BD, relee con select=* (siempre válido).
     let query = db
       .from('gestor_proyectos')
-      .select('id,code,name,region,subtext,budget,sponsor,risk_level,metodologia,created_at,updated_at')
+      .select('id,tenant_id,code,name,region,subtext,budget,sponsor,risk_level,metodologia,created_at,updated_at')
       .order('created_at', { ascending: true });
     // Defensa en profundidad: el filtro va a la BD, no solo al array en memoria.
     if (tenantId) query = query.eq('tenant_id', tenantId);

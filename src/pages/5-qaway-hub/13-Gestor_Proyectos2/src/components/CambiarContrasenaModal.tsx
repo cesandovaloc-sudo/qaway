@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Check } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
 interface CambiarContrasenaModalProps {
@@ -14,14 +14,38 @@ export const CambiarContrasenaModal: React.FC<CambiarContrasenaModalProps> = ({ 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const rules = useMemo(() => {
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSymbol = /[^A-Za-z0-9]/.test(password);
+    const notRepeated = password.length > 0 && !/^(.)\1+$/.test(password);
+    return { hasLength, hasUpper, hasLower, hasNumber, hasSymbol, notRepeated };
+  }, [password]);
+
+  const strength = useMemo(() => {
+    if (!password) return { score: 0, label: '', color: '#e2e8f0', pct: 0 };
+    if (!rules.notRepeated) return { score: 1, label: 'Muy débil (caracteres repetidos)', color: '#ef4444', pct: 20 };
+
+    const score = [rules.hasLength, rules.hasUpper, rules.hasLower, rules.hasNumber, rules.hasSymbol].filter(Boolean).length;
+    if (score <= 2) return { score, label: 'Débil', color: '#ef4444', pct: 33 };
+    if (score <= 4) return { score, label: 'Media', color: '#f59e0b', pct: 66 };
+    return { score, label: 'Segura', color: '#10b981', pct: 100 };
+  }, [password, rules]);
+
+  const isValidPassword =
+    rules.hasLength && rules.hasUpper && rules.hasLower && rules.hasNumber && rules.notRepeated;
+  const passwordsMatch = confirm.length > 0 && password === confirm;
+
   if (!open) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (password.length < 8) {
-      setError('La nueva contraseña debe tener al menos 8 caracteres.');
+    if (!isValidPassword) {
+      setError('La contraseña debe tener al menos 8 caracteres, mayúscula, minúscula y número (sin repetir el mismo carácter).');
       return;
     }
     if (password !== confirm) {
@@ -64,7 +88,6 @@ export const CambiarContrasenaModal: React.FC<CambiarContrasenaModalProps> = ({ 
         inset: 0,
         zIndex: 9999,
         backgroundColor: 'rgba(15, 23, 42, 0.55)',
-        backdropFilter: 'blur(3px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -131,7 +154,7 @@ export const CambiarContrasenaModal: React.FC<CambiarContrasenaModalProps> = ({ 
                 fontSize: '13px',
               }}
             >
-              <AlertCircle size={16} />
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
               <span>{error}</span>
             </div>
           )}
@@ -152,7 +175,7 @@ export const CambiarContrasenaModal: React.FC<CambiarContrasenaModalProps> = ({ 
                   padding: '9px 38px 9px 12px',
                   fontSize: '14px',
                   borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
+                  border: `1px solid ${password ? strength.color : '#cbd5e1'}`,
                   outline: 'none',
                 }}
               />
@@ -174,6 +197,38 @@ export const CambiarContrasenaModal: React.FC<CambiarContrasenaModalProps> = ({ 
                 {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+
+            {password.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
+                  <span style={{ color: '#64748b' }}>Nivel de seguridad</span>
+                  <span style={{ color: strength.color, fontWeight: 600 }}>{strength.label}</span>
+                </div>
+                <div style={{ height: '5px', width: '100%', backgroundColor: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${strength.pct}%`,
+                      backgroundColor: strength.color,
+                      transition: 'width 0.2s ease, background-color 0.2s ease',
+                    }}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 8px', marginTop: '2px', fontSize: '11.5px' }}>
+                  {[
+                    { ok: rules.hasLength, text: 'Mín. 8 caracteres' },
+                    { ok: rules.hasUpper, text: 'Una mayúscula' },
+                    { ok: rules.hasLower, text: 'Una minúscula' },
+                    { ok: rules.hasNumber, text: 'Un número' },
+                  ].map((r) => (
+                    <div key={r.text} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: r.ok ? '#059669' : '#64748b' }}>
+                      <Check size={12} />
+                      <span>{r.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -191,15 +246,20 @@ export const CambiarContrasenaModal: React.FC<CambiarContrasenaModalProps> = ({ 
                 padding: '9px 12px',
                 fontSize: '14px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
+                border: `1px solid ${confirm ? (passwordsMatch ? '#10b981' : '#ef4444') : '#cbd5e1'}`,
                 outline: 'none',
               }}
             />
+            {confirm.length > 0 && (
+              <span style={{ fontSize: '11.5px', color: passwordsMatch ? '#059669' : '#ef4444' }}>
+                {passwordsMatch ? 'Las contraseñas coinciden' : 'Las contraseñas no coinciden'}
+              </span>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !isValidPassword || !passwordsMatch}
             style={{
               marginTop: '6px',
               width: '100%',
@@ -210,12 +270,12 @@ export const CambiarContrasenaModal: React.FC<CambiarContrasenaModalProps> = ({ 
               color: '#ffffff',
               fontSize: '14px',
               fontWeight: 500,
-              cursor: loading ? 'not-allowed' : 'pointer',
+              cursor: loading || !isValidPassword || !passwordsMatch ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              opacity: loading ? 0.7 : 1,
+              opacity: loading || !isValidPassword || !passwordsMatch ? 0.55 : 1,
             }}
           >
             <CheckCircle2 size={16} />

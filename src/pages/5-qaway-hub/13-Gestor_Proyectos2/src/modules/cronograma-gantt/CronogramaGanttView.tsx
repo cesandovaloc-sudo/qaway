@@ -1256,6 +1256,7 @@ export default function CronogramaGanttView({
   const currentPidRef = useRef(projectId);
   const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
   const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
+  const [cargandoNube, setCargandoNube] = useState<boolean>(false);
 
   /* FASE 1 — Aislamiento de UI: claves de configuración de columnas/anchos por módulo+perspectiva
      (qaway-cronograma-{maestro|territorial|equipo}-*) para que la config de un módulo no pise la de otro. */
@@ -1420,7 +1421,10 @@ export default function CronogramaGanttView({
   useEffect(() => {
     if (!isActive || perspective !== 'maestro') return;
     let isCancelled = false;
+    if (!projectId) return;
+    setCargandoNube(true);
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
+      if (!isCancelled) setCargandoNube(false);
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
         const isMaestro = perspective === 'maestro';
         const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
@@ -9889,7 +9893,11 @@ export default function CronogramaGanttView({
 
           {/* Tabla Gantt con Timeline (Filas operativas con scroll 2D) */}
           <div className="gantt-scroll" ref={scrollRef} onScroll={handleScroll}>
-            {items.length === 0 ? (
+            {(cargandoPerfilGp || cargandoNube) && items.length === 0 ? (
+              <div style={{ padding: '70px 24px', textAlign: 'center', color: '#64748b', fontSize: '14px', background: '#ffffff', width: '100%' }}>
+                Cargando cronograma...
+              </div>
+            ) : items.length === 0 ? (
               <div
                 style={{
                   padding: '70px 24px',
