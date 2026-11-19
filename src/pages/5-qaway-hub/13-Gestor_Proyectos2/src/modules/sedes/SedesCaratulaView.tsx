@@ -13,7 +13,7 @@ import {
   ChevronRight,
   ChevronDown,
 } from 'lucide-react';
-import PERU_GEOJSON from '../../data/peru_departamental_simple.json';
+import PERU_GEOJSON from '../../../Bases de Datos/geocoding/New/peru_departamental_simple.json';
 import 'leaflet/dist/leaflet.css';
 import PeruChoroplethView from './PeruChoroplethView';
 import PeruPowerBIMapView from './PeruPowerBIMapView';

@@ -1,0 +1,121 @@
+# Sedes, organización y gobierno de la gestión de proyectos
+
+Este documento define el **modelo de responsabilidad, coordinación y facultades** para la gestión de proyectos dentro de una organización (tenant), y cómo se relaciona con sus sedes y dependencias.
+
+Es una capa de **gobernanza y coordinación organizacional**, no un mecanismo de control rígido:
+- Se configura según la realidad de cada organización y **puede modificarse** cuando la estructura o las funciones cambien.
+- No define, por sí sola, la forma de trabajar del día a día: una organización puede usarla en un esquema más tradicional (en cascada), de forma ágil o de manera **híbrida** (gobernanza/claridad entre áreas y, dentro de los equipos, autonomía y adaptación).
+- **No debe confundirse** con los roles de acceso al sistema (Hub) ni con los roles dentro de un proyecto. Son cosas distintas.
+- La autoridad y las facultades **se declaran explícitamente**; no se deducen automáticamente del nombre de un área ni de su posición.
+
+---
+
+## 1. Unidad responsable de la gestión de proyectos
+
+Al configurar la organización, se define qué unidad, área o dependencia asume la **coordinación y gestión** de los proyectos.
+
+No se asume que siempre sea la máxima autoridad. Puede ser, por ejemplo:
+- Gerencia General o Dirección General.
+- Oficina de Proyectos (PMO) o Gerencia de Gestión de Proyectos.
+- Una gerencia o dirección de línea (p. ej. Marketing, Operaciones).
+- Oficina de Planeamiento u otra unidad designada.
+
+**Configuración (ejemplo):**
+- **Unidad responsable:** (seleccionada de la estructura organizacional; puede estar en la sede central u otra dependencia).
+- **Responsabilidades que asume (según se habiliten):** coordinar la ejecución de proyectos, dar seguimiento a avances, programar reuniones, gestionar participantes y equipos, solicitar información y elaborar reportes.
+
+---
+
+## 2. Facultades de la unidad responsable
+
+Tener responsabilidad sobre un proyecto **no implica automáticamente** autoridad para ordenar el trabajo de otras dependencias. Las facultades se declaran y se pueden ajustar.
+
+**Alcance para asignar o encargar tareas a otras dependencias** (facultad opcional, según corresponda):
+- No puede asignar tareas a otras dependencias (solo coordina).
+- Puede asignar/encargar tareas únicamente a dependencias autorizadas.
+- Puede asignar/encargar tareas a otras dependencias dentro del alcance definido.
+
+> Recomendación: priorizar la coordinación y los acuerdos entre áreas. Reservar la asignación directa entre dependencias para los casos en que la organización realmente lo requiera.
+
+**Otras facultades de coordinación y gestión** (habilitables según necesidad):
+- Dar seguimiento a avances y resultados.
+- Crear y programar reuniones.
+- Coordinar equipos de trabajo.
+- Invitar participantes y colaboradores.
+- Solicitar información y reportes.
+
+Coordinar, convocar, dar seguimiento y gestionar equipos no exige autoridad jerárquica sobre todas las demás áreas; puede funcionar como un esquema colaborativo entre dependencias.
+
+---
+
+## 3. La máxima autoridad y la unidad gestora no son lo mismo
+
+Se contemplan, al menos, dos situaciones:
+
+**Caso A. Unidad con autoridad amplia sobre las dependencias** (p. ej. Gerencia General, según la organización).
+- Puede, si así se configura: dirigir dependencias, asignar/encargar trabajo, establecer prioridades, dar seguimiento a resultados y solicitar cumplimiento dentro de su ámbito.
+
+**Caso B. Unidad que gestiona o coordina un proyecto sin autoridad jerárquica general** (p. ej. una gerencia u oficina que coordina un proyecto transversal).
+- Puede: crear y organizar el proyecto, convocar a las áreas participantes, coordinar reuniones, dar seguimiento a avances, solicitar información y gestionar entregables y cronogramas.
+- No necesariamente puede ordenar directamente el trabajo de otras gerencias o dependencias.
+
+La autoridad y las facultades se configuran de forma explícita. No se confunden con los roles de usuario del sistema.
+
+---
+
+## 4. Estructura organizacional y sedes (conceptos separados)
+
+**A. Estructura organizacional:** quién depende de quién y cómo se organiza la institución (dependencias, áreas, jerarquía).  
+Ejemplo: Dirección/Gerencia General → Gerencias/Direcciones/Oficinas.
+
+**B. Sedes y establecimientos:** dónde opera la organización (lugares físicos u operativos).  
+Ejemplo: Sede central → Sede Lima, Sede Arequipa (con sus operaciones).
+
+- En una entidad pública pueden existir pliegos, unidades ejecutoras, direcciones y otras dependencias; en una empresa privada, gerencias, sucursales, locales, plantas, etc.
+- La estructura organizacional y la de sedes **se relacionan, pero no son lo mismo** y deben mantenerse separadas.
+
+---
+
+## 5. Modalidades de intervención de las dependencias (y, cuando aplique, por sede)
+
+No todas las dependencias cumplen la misma función en los proyectos. Una puede dirigir o coordinar, otra ejecutar, otra dar seguimiento, otra solo participar. Las modalidades se declaran y pueden combinarse cuando corresponda.
+
+| Modalidad | Descripción |
+| --- | --- |
+| Dirección | Lidera y coordina el trabajo y, si está facultada, encarga tareas dentro de su alcance. |
+| Gestión | Coordina la gestión del proyecto, articula equipos y realiza seguimiento. |
+| Ejecución | Desarrolla las tareas y entrega resultados. |
+| Seguimiento y supervisión | Da seguimiento a avances, verifica cumplimiento y emite observaciones según corresponda. |
+| Asistencia técnica | Orienta, apoya y brinda acompañamiento especializado. |
+| Participación | Interviene como colaborador o integrante de un equipo. |
+
+Una misma dependencia puede combinar modalidades, siempre que se habiliten de forma expresa. Estas modalidades describen la forma de intervención y no sustituyen los roles de acceso ni los roles dentro de un proyecto.
+
+---
+
+## 6. Configuración inicial de la organización (guía)
+
+La aplicación debe guiar con preguntas organizacionales y traducirlas a configuración, sin exigir conocimientos técnicos. La configuración es editable y puede completarse de forma progresiva.
+
+1. **Tipo de organización:** pública o privada.
+2. **Estructura organizacional:** cargar una plantilla de referencia y permitir reorganizarla y personalizarla.
+3. **Unidad responsable de proyectos:** seleccionar la dependencia que asumirá la gestión/coordinación.
+4. **Facultades de la unidad responsable:** definir su alcance de coordinación y, solo si corresponde, su facultad para encargar tareas (a ninguna, a algunas autorizadas o dentro de un alcance definido), además de seguimiento, reuniones y gestión de participantes.
+5. **Sedes y establecimientos:** declarar la sede central, las demás sedes y sus relaciones.
+6. **Modalidades de intervención:** definir cómo intervienen las dependencias (y, cuando aplique, por sede): dirección, gestión, ejecución, seguimiento y supervisión, asistencia técnica o participación.
+
+---
+
+## 7. Precisión de modelo (separación de responsabilidades)
+
+Estas decisiones no deben concentrarse en un solo lugar (por ejemplo, no todo en la tabla de sedes). Conviene separar:
+
+- **Estructura organizacional:** dependencias/unidades y su jerarquía.
+- **Sedes:** establecimientos y ubicaciones operativas.
+- **Relación unidades–sedes:** vínculo entre dependencias y los lugares donde operan.
+- **Configuración de gestión de proyectos:** unidad responsable y sus facultades por organización.
+- **Modalidades de intervención:** forma en que participan las dependencias (y, si aplica, por sede).
+- **Relaciones de personal** con sus dependencias y sedes.
+- **Roles y permisos efectivos de usuarios**, diferenciados de lo anterior.
+
+Mantener esta separación permite que el gestor funcione tanto para una organización con autoridad jerárquica amplia como para una oficina o equipo que solo coordina y da seguimiento, y que pueda operar en esquemas tradicionales, ágiles o híbridos según cómo se configure.

@@ -1,0 +1,50 @@
+Separación de conceptos (por qué el modelo no se rompe)
+Concepto	Tabla / dónde vive	Qué representa	No debe usarse para
+Organización (tenant)	tenants (empresa_id en las tablas gp_*)	La entidad dueña de la configuración (p. ej. un pliego/ministerio, una empresa).	No es una sede ni un nivel interno.
+Unidad organizacional	gp_unidades_organizacionales (árbol por unidad_padre_id, plantilla/alias)	La estructura de “quién/qué área”: pliego como entidad interna, direcciones, gerencias, oficinas, equipos, etc. Jerarquía ilimitada y reordenable (COALESCE(alias,nombre_estandar)).	No es un lugar físico ni un puesto/cargo/persona.
+Sede / establecimiento	gp_sedes	Un lugar físico u operativo (dónde se opera). Tiene ubicación (pais/departamento/provincia/distrito/ubigeo, dirección, coords) y puede marcarse es_principal.	No es una gerencia/área ni un nivel jerárquico.
+Tipo de sede	gp_tipos_sede_c → gp_sedes.tipo_codigo	La naturaleza/función del establecimiento (oficina, planta, sucursal…). Es un catálogo genérico y editable.	No debe codificar niveles político-administrativos obligatorios (región/provincia/distrito) ni la estructura orgánica.
+Presencia de una unidad en una sede	gp_sede_unidades_r (M:N)	Qué unidad organizacional opera en qué sede (es_principal por vínculo). Una unidad puede estar en varias sedes y una sede albergar varias unidades.	No crea jerarquía entre sedes y unidades.
+Modalidades / gobierno	gp_config_gestion_proyectos, gp_config_gestion_alcance_r, gp_dependencia_modalidades_r	Quién gestiona, con qué facultades/alcance y con qué modalidad interviene cada dependencia (y opcionalmente por sede).	No define sedes ni la estructura organizacional.
+Clave: la jerarquía organizacional (niveles, dependencias) y el alcance/ubicación territorial (distrito, provincia, departamento/región, país) son ejes distintos. Ninguno se fuerza mediante el “tipo de sede”.
+Caso 1 — “Si es un pliego de un ministerio, ¿dónde encaja?”
+Elemento	Dónde encaja	Cómo se modela
+Pliego (entidad presupuestal: ministerio, organismo, gobierno regional, etc.)	Organización/Tenant y/o Unidad organizacional	Si el sistema administra ese pliego, el pliego es el tenant (empresa_id). Su estructura interna (órganos/áreas) se instancia en gp_unidades_organizacionales a partir de la plantilla (pública), con alias y reorganización libre. Si, en cambio, se gestiona un conjunto mayor y el pliego es una parte, se representa como una unidad organizacional de alto nivel (p. ej. raíz o nodo superior) dentro de ese tenant.
+Condición de “pliego” / naturaleza presupuestal	Atributo de la unidad/organización, no una sede	Se expresa en el nombre/alias, código, o metadata de la unidad organizacional (o del tenant), y en la plantilla elegida (naturaleza pública). No se crea un tipo de sede “pliego”.
+Locales donde funciona el pliego	Sedes (gp_sedes)	Sede central, sedes desconcentradas/de campo, etc., cada una con su ubicación real y su tipo_codigo; se vinculan a las unidades que operan allí mediante gp_sede_unidades_r.
+Ejemplo (pliego = ministerio, administrado como tenant):
+- Tenant: “Ministerio X” (pliego). 
+- gp_unidades_organizacionales: “Alta Dirección” (1) → “Órgano de Línea A” (1.1) → “Unidad/Oficina operativa” (1.1.1)… (nodos instanciados desde plantilla pública, renombrables/reubicables).
+- gp_sedes: “Sede central Lima” (tipo_codigo p. ej. sede_principal, es_principal=true, distrito/provincia/departamento en Lima), “Oficina desconcentrada Y” (sede_operativa, ubicada donde corresponda).
+- gp_sede_unidades_r: vincula qué unidades operan en cada sede.
+Resumen: el pliego encaja en la estructura organizacional (y/o como tenant); sus inmuebles/locales encajan como sedes. Nunca como tipo de sede.
+Caso 2 — “La empresa no maneja nivel región, solo opera en un distrito. ¿Cómo encaja?”
+Necesidad	Cómo encaja sin romper el modelo
+No existe nivel “región” en su gestión	No se instancia. La jerarquía es por tenant, ilimitada pero no obligatoria en niveles: se crean solo los nodos que la organización usa (p. ej. 1 Empresa → 1.1 Operación/Área → 1.1.1 Equipo, o incluso una estructura plana). No hay niveles forzados en el esquema.
+Opera solo en un distrito	Se registra su(s) sede(s) en gp_sedes con la ubicación real (distrito, provincia, departamento, ubigeo, dirección, coords). El hecho de operar en un distrito es un dato de ubicación de la sede/operación, no un nivel que deba existir en la jerarquía organizacional.
+Tiene una sola sede	Una fila en gp_sedes marcada es_principal=true (y el tipo que corresponda, p. ej. sede_principal). El modelo no obliga a crear varias sedes ni niveles intermedios.
+Crece después (otra sede, otra zona o “nivel región”)	Se agregan nuevas sedes y/o nuevos nodos organizacionales y se reubican (unidad_padre_id) sin cambiar el esquema ni migrar el modelo: la estructura es extensible y reparentable.
+Ejemplo (una sola operación en un distrito):
+- gp_unidades_organizacionales: 1 “Mi Empresa” (raíz) → 1.1 “Operaciones” (o los nombres/alias que use). No se crean nodos “Región” ni “Provincia”.
+- gp_sedes: Sede Miraflores (tipo_codigo sede_principal, es_principal=true, departamento=Lima, provincia=Lima, distrito=Miraflores, ubigeo correspondiente).
+- gp_sede_unidades_r: vincula 1.1 Operaciones (y/o la raíz) con esa sede.
+Así, la ubicación territorial queda capturada donde corresponde (la sede) y la estructura organizacional refleja solo lo que la empresa realmente gestiona.
+Planteamiento para que esto no se destruya (robustez)
+1. Separar ejes (no mezclar): estructura orgánica = gp_unidades_organizacionales (árbol flexible); lugares = gp_sedes; vínculo = gp_sede_unidades_r; naturaleza del local = gp_tipos_sede_c. La ubicación político-administrativa es dato de la sede (distrito/provincia/departamento/ubigeo), no un peldaño obligatorio de la jerarquía.
+2. Jerarquía instanciada, no impuesta: la plantilla (gp_plantilla_estructura_org_c) es ayuda/orden de referencia; el tenant instancia solo los nodos que aplican, con alias, y puede agregar, quitar, reordenar y reparentar (árbol ilimitado). No se “exige” región/provincia si no opera así.
+3. Tipos de sede por función, no por nivel territorial: gp_tipos_sede_c debe clasificar la naturaleza del establecimiento, no “región/distrito” como escalón obligatorio. El alcance territorial se deduce de la ubicación y de la configuración, no de un tipo rígido.
+4. Catálogo genérico y extensible: tipos sembrados como base editable (se pueden agregar/desactivar según el tenant/caso, vía activo/orden/metadata), evitando literales de instancia en el esquema.
+5. Cardinalidad y crecimiento seguros: una sede ↔ muchas unidades y viceversa (M:N), una o muchas sedes por organización, es_principal para el caso de sede única, y posibilidad de añadir sedes/nodos después sin reestructurar el modelo.
+Ajuste propuesto a gp_tipos_sede_c (semilla base, paso más sencillo)
+Para que no rompa en casos como “solo un distrito” o sedes desconcentradas de un pliego, propongo tipos por naturaleza/función (el alcance territorial va en la ubicación de la sede, no en el tipo):
+codigo	nombre	descripcion (orientativa)	orden
+sede_principal	Sede principal	Sede principal o matriz de la organización (independiente de su ubicación/ámbito).	1
+sede_operativa	Sede operativa / externa	Sede u oficina operativa distinta de la principal (incluye sedes desconcentradas, de campo o no centrales).	2
+sucursal	Sucursal / local	Sucursal, local o punto de atención/servicio.	3
+oficina	Oficina	Oficina administrativa o técnica.	4
+planta	Planta / centro de operación	Planta, centro de producción u operación.	5
+almacen	Almacén / depósito	Almacén, depósito o centro logístico.	6
+otra	Otra	Otro tipo de establecimiento.	7
+- Cubre “sede central” y “sede externa/no central” (como ya conversamos) sin atar el tipo a un nivel territorial (regional/distrital). Una sede operativa en un solo distrito, o una sede desconcentrada de un pliego, encaja directamente.
+- Si más adelante hace falta matizar alcance (p. ej. “regional”), puede añadirse como otro tipo del catálogo o registrarse en metadata/ubicación, sin cambiar el modelo.
+Siguiente paso (solo si me indicas “aplica/procede”): siembra de estos tipos en gp_tipos_sede_c (o la versión que ajustes de esta tabla). No haré ningún cambio en la base ni cargaré sedes/unidades hasta tu confirmación explícita.

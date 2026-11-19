@@ -15,7 +15,8 @@ import {
   TrendingUp,
   AlertTriangle,
 } from 'lucide-react';
-import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
+import { MINEDU_UNIDADES } from '../../../Bases de Datos/geocoding/New/mineduUnidades';
+import { UGEL_COORDINATES } from '../../../Bases de Datos/geocoding/New/ugel-coordinates';
 import PeruChoroplethView from './PeruChoroplethView';
 import PeruPowerBIMapView from './PeruPowerBIMapView';
 import PeruEChartsPowerBI from './PeruEChartsPowerBI';
@@ -285,10 +286,12 @@ export default function MapaTerritorialView({
 
       const regKey = key(unit.region);
       const regConf = REGION_CONFIG[regKey] || { center: [-9.2, -75.0], zoom: 7 };
-      const seed = (unit.id?.charCodeAt(unit.id.length - 1) || idx) % 17 - 8;
-      const seed2 = (unit.id?.charCodeAt(0) || idx) % 17 - 8;
-      const lat = regConf.center[0] + seed * 0.08;
-      const lng = regConf.center[1] + seed2 * 0.08;
+
+      // Buscar coordenadas exactas en el mapeo de UGELs del CSV (OpenStreetMap)
+      const ugelsKey = key(unit.name);
+      const exactCoords = UGEL_COORDINATES[ugelsKey];
+      const lat = exactCoords?.lat || regConf.center[0] + ((unit.id?.charCodeAt(unit.id.length - 1) || idx) % 17 - 8) * 0.08;
+      const lng = exactCoords?.lng || regConf.center[1] + ((unit.id?.charCodeAt(0) || idx) % 17 - 8) * 0.08;
 
       return {
         ...unit,

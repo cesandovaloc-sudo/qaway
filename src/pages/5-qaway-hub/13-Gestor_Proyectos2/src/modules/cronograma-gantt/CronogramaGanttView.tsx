@@ -1,7 +1,7 @@
 import { GanttEditorDrawer } from './GanttEditorDrawer';
 import DeliverableCellPopover from '../../components/DeliverableCellPopover';
 // @ts-nocheck
-import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router';
 import { useTableEngine, ColumnHeaderMenu, type ColumnDef, type Hierarchy } from '../../shared/table-engine';
 import {
@@ -14,12 +14,22 @@ import {
 } from './scheduleMetrics';
 import './gantt.css';
 import { ProjectShellHeader, ProjectShellWorkspace, ProjectShellFilters } from '../../shared/project-shell';
-import CronogramaKanbanView from './CronogramaKanbanView';
+import CronogramaKanbanView, {
+  STATUS_COLUMNS,
+  KANBAN_DEFAULT_WIP_LIMITS,
+  DEFAULT_KANBAN_BOARD_PREFS,
+  type KanbanBoardPrefs,
+  type ColumnConfig as KanbanColumnConfig,
+  type CardTheme as KanbanCardTheme,
+  type ColorByMode as KanbanColorByMode,
+  type CardDensity as KanbanCardDensity,
+} from './CronogramaKanbanView';
 import CronogramaListaView from './CronogramaListaView';
 import { PERSON_AVATARS } from '../tareas-2/TareasSideCards';
 import CronogramaCalendarioView from './CronogramaCalendarioView';
-import MapaTerritorialView, { type TerritorialSubView } from '../sedes/MapaTerritorialView';
-import SedesCaratulaView from '../sedes/SedesCaratulaView';
+import type { TerritorialSubView } from '../sedes/MapaTerritorialView';
+const MapaTerritorialView = lazy(() => import('../sedes/MapaTerritorialView'));
+const SedesCaratulaView = lazy(() => import('../sedes/SedesCaratulaView'));
 import { CronogramaArbolView } from './CronogramaArbolView';
 import { CronogramaOrganigramaView } from './CronogramaOrganigramaView';
 import EquipoOrganigramaFlowView from '../equipo/EquipoOrganigramaFlowView';
@@ -66,7 +76,6 @@ import {
   normalizeRegionKey,
 } from './regionalCoordinationModel';
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
-import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 
 /** Cache a nivel de módulo: un solo fetch de gestor_unidades para todas las instancias montadas. */
@@ -97,9 +106,11 @@ import {
   CalendarRange,
   ChartNoAxesColumnIncreasing,
   Check,
+  Minus,
   CheckCircle2,
   CheckSquare,
   ChevronDown,
+  ChevronUp,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
@@ -125,6 +136,7 @@ import {
   Globe,
   Hash,
   HelpCircle,
+  Info,
   Layers,
   Layers3,
   LayoutDashboard,
@@ -157,6 +169,9 @@ import {
   Tag,
   Target,
   Trash2,
+  Palette,
+  LayoutGrid,
+  Settings2,
   TrendingUp,
   Undo2,
   Redo2,
@@ -1647,7 +1662,7 @@ export default function CronogramaGanttView({
       setPendingCloseAction(() => action || (() => {
         setPanelOpen(false);
         setDrawerDraft(null);
-        setIsNewDraft(false);
+        setIsNewDraft(true);
         setEditorInitialSnapshot('');
       }));
       setUnsavedAlertOpen(true);
@@ -1715,11 +1730,14 @@ export default function CronogramaGanttView({
       return;
     }
     if (isNewDraft) {
-      commitChange((old) =>
-        drawerDraft.kind === 'subproceso' && drawerDraft.parentId
+      commitChange((old) => {
+        if (old.some((x) => x.id === drawerDraft.id)) {
+          return old.map((x) => (x.id === drawerDraft.id ? applyActuals(x, drawerDraft, currentTodayIso) : x));
+        }
+        return drawerDraft.kind === 'subproceso' && drawerDraft.parentId
           ? old.flatMap((x) => (x.id === drawerDraft.parentId ? [x, drawerDraft] : [x]))
-          : [...old, drawerDraft]
-      );
+          : [...old, drawerDraft];
+      });
       notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'componente' : 'subcomponente'} guardado con éxito en el cronograma maestro`);
     } else {
       commitChange((old) => old.map((x) => (x.id === drawerDraft.id ? applyActuals(x, drawerDraft, currentTodayIso) : x)));
@@ -2205,13 +2223,34 @@ export default function CronogramaGanttView({
   const [typeFilter, setTypeFilter] = useState('Todos');
   // Multiselección de estados operativos
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const ALL_FILTER_STATES = ['Completados', 'En proceso', 'Con retraso', 'Pendiente'];
   const toggleState = (st: string) => {
-    setSelectedStates((prev) =>
-      prev.includes(st) ? prev.filter((x) => x !== st) : [...prev, st]
-    );
+    setSelectedStates((prev) => {
+      if (prev.length === 0) {
+        return ALL_FILTER_STATES.filter((x) => x !== st);
+      }
+      const cleanPrev = prev.filter((x) => x !== '__NONE__');
+      const next = cleanPrev.includes(st) ? cleanPrev.filter((x) => x !== st) : [...cleanPrev, st];
+      if (next.length === 0) return ['__NONE__'];
+      return next.length === ALL_FILTER_STATES.length ? [] : next;
+    });
   };
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
+  const [expandedMacroIds, setExpandedMacroIds] = useState<Record<string, boolean>>({});
+  // Formateador de títulos de macro-regiones a minúsculas con mayúscula inicial (ej. Macro Norte, Macro Centro)
+  const formatMacroName = useCallback((name: string): string => {
+    if (!name) return '';
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map((w) => (w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
+      .join(' ');
+  }, []);
+
+  // Límite uniforme y calibrado de caracteres con puntos suspensivos para padres e hijos.
+  // Al estirar el desplegable, el límite se amplía dinámicamente permitiendo ver el título completo.
+
 
   const toggleRegion = (regionName: string) => {
     setSelectedRegions((prev) => {
@@ -2226,9 +2265,17 @@ export default function CronogramaGanttView({
   // Selecciona / quita todas las regiones de una macro-region (preserva las demas).
   const toggleMacroRegions = (regiones: string[]) => {
     setSelectedRegions((prev) => {
-      const todasMarcadas = regiones.every((r) => prev.includes(r));
-      if (todasMarcadas) return prev.filter((r) => !regiones.includes(r));
-      const next = [...prev];
+      if (prev.length === 0) {
+        const allRegs = MACROREGIONES_NACIONAL.flatMap((m) => m.regiones);
+        return allRegs.filter((r) => !regiones.includes(r));
+      }
+      const cleanPrev = prev.filter((r) => r !== '__NONE__');
+      const todasMarcadas = regiones.every((r) => cleanPrev.includes(r));
+      if (todasMarcadas) {
+        const rest = cleanPrev.filter((r) => !regiones.includes(r));
+        return rest.length === 0 ? ['__NONE__'] : rest;
+      }
+      const next = [...cleanPrev];
       regiones.forEach((r) => {
         if (!next.includes(r)) next.push(r);
       });
@@ -2273,12 +2320,56 @@ export default function CronogramaGanttView({
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [selectedSedes, setSelectedSedes] = useState<string[]>([]);
   const [selectedEdtCodes, setSelectedEdtCodes] = useState<string[]>([]);
+  const [expandedCompIds, setExpandedCompIds] = useState<Record<string, boolean>>({});
+  const [compPopoverWidth, setCompPopoverWidth] = useState<number>(330);
+  const isResizingCompPopover = useRef(false);
+  const startResizeX = useRef(0);
+  const startPopoverWidth = useRef(330);
+
+  const handlePopoverResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isResizingCompPopover.current = true;
+    startResizeX.current = e.clientX;
+    startPopoverWidth.current = compPopoverWidth;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isResizingCompPopover.current) return;
+      const delta = ev.clientX - startResizeX.current;
+      const newWidth = Math.max(320, Math.min(850, startPopoverWidth.current + delta));
+      setCompPopoverWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      isResizingCompPopover.current = false;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [compPopoverWidth]);
+
+
+  const getTruncatedLabel = useCallback(
+    (label: string, currentWidth: number = 330, isChild: boolean = false): string => {
+      if (!label) return '';
+      const extraWidth = Math.max(0, currentWidth - 330);
+      const baseChars = isChild ? 27 : 29;
+      const maxChars = baseChars + Math.floor(extraWidth / 7.2);
+      if (label.length > maxChars) {
+        return `${label.slice(0, maxChars).trim()}...`;
+      }
+      return label;
+    },
+    []
+  );
+
+
 
   // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
   // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
-  const [unidades, setUnidades] = useState<any[]>(() =>
-    MINEDU_UNIDADES.map((u) => ({ name: u.name, region: u.region, unitType: u.unitType, status: u.status }))
-  );
+  const [unidades, setUnidades] = useState<any[]>(() => UNIDADES_REMOTAS ?? []);
 
   useEffect(() => {
     if (UNIDADES_REMOTAS) {
@@ -2444,6 +2535,39 @@ export default function CronogramaGanttView({
     return `${selectedSedes.length} sedes`;
   }, [selectedSedes, gestorFilter]);
 
+  const formatEdtLabel = useCallback((code: string | undefined, name: string): string => {
+    if (!name) return '';
+    let clean = name.trim();
+    const codePrefixMatch = clean.match(/^(\d+(?:\.\d+)*\.?)\s*(.+)$/);
+    let effectiveCode = code ? code.trim() : '';
+    let rest = clean;
+    if (codePrefixMatch) {
+      if (!effectiveCode && codePrefixMatch[1]) effectiveCode = codePrefixMatch[1];
+      if (codePrefixMatch[2]) rest = codePrefixMatch[2];
+    }
+
+    const isAllCaps = rest === rest.toUpperCase() && rest !== rest.toLowerCase();
+    let sentence = rest;
+    if (isAllCaps) {
+      const lower = rest.toLowerCase();
+      sentence = lower.charAt(0).toUpperCase() + lower.slice(1);
+    }
+
+    const formatted = sentence
+      .replace(/\bdre\b/gi, 'DRE')
+      .replace(/\bugel\b/gi, 'UGEL')
+      .replace(/\bii\.ee\.\b/gi, 'II.EE.')
+      .replace(/\biiee\b/gi, 'II.EE.')
+      .replace(/\bmc siga\b/gi, 'MC SIGA')
+      .replace(/\bsiga\b/gi, 'SIGA')
+      .replace(/\bcdl\b/gi, 'CDL')
+      .replace(/\brar\b/gi, 'RAR')
+      .replace(/\bedt\b/gi, 'EDT');
+
+    const prefix = effectiveCode ? (effectiveCode.endsWith('.') ? `${effectiveCode} ` : `${effectiveCode}. `) : '';
+    return `${prefix}${formatted}`;
+  }, []);
+
   const edtComponentsWithProducts = useMemo(() => {
     const components = items.filter((x) => !x.parentId && (x.kind === 'hito' || x.edtType === 'COMPONENTE'));
     return components.map((comp) => {
@@ -2454,20 +2578,99 @@ export default function CronogramaGanttView({
     });
   }, [items]);
 
+  const getCompSelectionState = useCallback(
+    (comp: any, products: any[]): 'checked' | 'indeterminate' | 'unchecked' => {
+      if (selectedEdtCodes.length === 0) return 'checked';
+      const isCompExplicit = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
+      if (isCompExplicit) return 'checked';
+
+      if (!products || products.length === 0) return 'unchecked';
+
+      const selectedCount = products.filter(
+        (p) => selectedEdtCodes.includes(p.id) || selectedEdtCodes.includes(p.code)
+      ).length;
+
+      if (selectedCount === products.length) return 'checked';
+      if (selectedCount > 0) return 'indeterminate';
+      return 'unchecked';
+    },
+    [selectedEdtCodes]
+  );
+
+  const toggleComponentSelection = useCallback(
+    (comp: any, products: any[]) => {
+      const currentState = getCompSelectionState(comp, products);
+      const compKeys = [comp.id, comp.code].filter(Boolean);
+      const prodKeys = (products || []).flatMap((p) => [p.id, p.code].filter(Boolean));
+      const allSubKeys = new Set([...compKeys, ...prodKeys]);
+
+      setSelectedEdtCodes((prev) => {
+        if (prev.length === 0) {
+          return edtComponentsWithProducts.filter((c) => c.comp.id !== comp.id).map((c) => c.comp.id);
+        }
+        const next =
+          currentState === 'checked' || currentState === 'indeterminate'
+            ? prev.filter((k) => k !== '__NONE__' && !allSubKeys.has(k))
+            : [...prev.filter((k) => k !== '__NONE__' && !allSubKeys.has(k)), comp.id];
+        const allCompsSelected =
+          edtComponentsWithProducts.length > 0 &&
+          edtComponentsWithProducts.every((c) => next.includes(c.comp.id) || next.includes(c.comp.code));
+        return allCompsSelected ? [] : next;
+      });
+    },
+    [getCompSelectionState]
+  );
+
+  const toggleProductSelection = useCallback(
+    (comp: any, prod: any, products: any[]) => {
+      const compKeys = [comp.id, comp.code].filter(Boolean);
+      const isCompExplicit = selectedEdtCodes.some((k) => compKeys.includes(k));
+      const isProdChecked =
+        isCompExplicit || selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
+
+      setSelectedEdtCodes((prev) => {
+        if (prev.length === 0) {
+          const otherComps = edtComponentsWithProducts.filter((c) => c.comp.id !== comp.id).map((c) => c.comp.id);
+          const otherProds = (products || []).filter((p) => p.id !== prod.id && p.code !== prod.id).map((p) => p.id);
+          return [...otherComps, ...otherProds];
+        }
+        if (isCompExplicit) {
+          const otherProdIds = (products || [])
+            .filter((p) => p.id !== prod.id && p.code !== prod.id)
+            .map((p) => p.id);
+          return [...prev.filter((k) => !compKeys.includes(k)), ...otherProdIds];
+        } else if (isProdChecked) {
+          return prev.filter((k) => k !== prod.id && k !== prod.code);
+        } else {
+          const next = [...prev.filter((k) => k !== '__NONE__'), prod.id];
+          const allSelected = (products || []).every(
+            (p) => p.id === prod.id || next.includes(p.id) || next.includes(p.code)
+          );
+          if (allSelected) {
+            const prodKeys = (products || []).flatMap((p) => [p.id, p.code].filter(Boolean));
+            return [...next.filter((k) => !prodKeys.includes(k)), comp.id];
+          }
+          return next;
+        }
+      });
+    },
+    [selectedEdtCodes]
+  );
+
   const edtButtonText = useMemo(() => {
     if (selectedEdtCodes.length === 0) return 'Todos los componentes';
+    if (selectedEdtCodes.includes('__NONE__')) return 'Ninguno';
     if (selectedEdtCodes.length === 1) {
       const target = selectedEdtCodes[0];
       const it = items.find((x) => x.id === target || x.code === target);
       if (it) {
-        const prefix = it.code ? `${it.code} ` : '';
-        const namePart = it.name.length > 20 ? `${it.name.slice(0, 20)}...` : it.name;
-        return `${prefix}${namePart}`;
+        const formatted = formatEdtLabel(it.code, it.name);
+        return formatted.length > 24 ? `${formatted.slice(0, 24)}...` : formatted;
       }
       return target;
     }
-    return `${selectedEdtCodes.length} componentes/prod.`;
-  }, [selectedEdtCodes, items]);
+    return `${selectedEdtCodes.length} seleccionados`;
+  }, [selectedEdtCodes, items, formatEdtLabel]);
 
   // Filtro de cargo territorial: Coordinador Macro-regional (supervisa 2 regiones)
   const [macroFilter, setMacroFilter] = useState<string>('Todos');
@@ -2538,6 +2741,69 @@ export default function CronogramaGanttView({
     return () => window.removeEventListener('qaway-date-changed', onDateChanged);
   }, []);
   const [newMenu, setNewMenu] = useState(false);
+  const [showSecondaryFilters, setShowSecondaryFilters] = useState(false);
+  const [kanbanResetSignal, setKanbanResetSignal] = useState(0);
+  const [kanbanFitColumns, setKanbanFitColumns] = useState(false);
+  const [kanbanFitSignal, setKanbanFitSignal] = useState(0);
+  const [kanbanToolbarMenu, setKanbanToolbarMenu] = useState<'color' | 'view' | 'board' | null>(null);
+  const [kanbanCardTheme, setKanbanCardTheme] = useState<KanbanCardTheme>(() => {
+    try {
+      return (localStorage.getItem('qaway-kanban-card-theme-v1') as KanbanCardTheme | null) || 'border';
+    } catch {
+      return 'border';
+    }
+  });
+  const [kanbanColorBy, setKanbanColorBy] = useState<KanbanColorByMode>(() => {
+    try {
+      return (localStorage.getItem('qaway-kanban-color-mode-v1') as KanbanColorByMode | null) || 'status';
+    } catch {
+      return 'status';
+    }
+  });
+  const [kanbanDensity, setKanbanDensity] = useState<KanbanCardDensity>('detailed');
+  const [kanbanBoardPrefs, setKanbanBoardPrefs] = useState<KanbanBoardPrefs>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-kanban-board-prefs-v1') || 'null');
+      return saved && typeof saved === 'object' ? { ...DEFAULT_KANBAN_BOARD_PREFS, ...saved } : DEFAULT_KANBAN_BOARD_PREFS;
+    } catch {
+      return DEFAULT_KANBAN_BOARD_PREFS;
+    }
+  });
+  const updateKanbanPref = <K extends keyof KanbanBoardPrefs>(key: K, value: KanbanBoardPrefs[K]) => {
+    setKanbanBoardPrefs((prev) => {
+      const next = { ...prev, [key]: value };
+      try { localStorage.setItem('qaway-kanban-board-prefs-v1', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+  const [kanbanStatusColumns, setKanbanStatusColumns] = useState<KanbanColumnConfig[]>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-kanban-columns-v1') || 'null');
+      return Array.isArray(saved) && saved.length > 0 ? saved : STATUS_COLUMNS;
+    } catch {
+      return STATUS_COLUMNS;
+    }
+  });
+  const [kanbanWipLimits, setKanbanWipLimits] = useState<Record<string, number>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('qaway-kanban-wip-v1') || 'null');
+      return saved && typeof saved === 'object' ? { ...KANBAN_DEFAULT_WIP_LIMITS, ...saved } : KANBAN_DEFAULT_WIP_LIMITS;
+    } catch {
+      return KANBAN_DEFAULT_WIP_LIMITS;
+    }
+  });
+  const [kanbanNewColTitle, setKanbanNewColTitle] = useState('');
+
+  const handleKanbanSaveWip = (colId: string, val: number) => {
+    const clean = Math.max(0, Math.floor(Number.isFinite(val) ? val : 0));
+    setKanbanWipLimits((prev) => {
+      const next = { ...prev, [colId]: clean };
+      try {
+        localStorage.setItem('qaway-kanban-wip-v1', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
   const [importOpen, setImportOpen] = useState(false);
   const [attachment, setAttachment] = useState('');
   const [pickedFile, setPickedFile] = useState('');
@@ -2552,6 +2818,12 @@ export default function CronogramaGanttView({
   const [colFilterOpen, setColFilterOpen] = useState<ColKey | null>(null);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [customRules, setCustomRules] = useState<Array<{ id: string; field: string; op: string; val: string }>>([]);
+  const [afDatePreset, setAfDatePreset] = useState<'all' | 'month' | '30d' | 'custom'>('custom');
+  const [afOnlyDeadlines, setAfOnlyDeadlines] = useState(false);
+  const [afPersonSearch, setAfPersonSearch] = useState('');
+  const [afShowAllPersons, setAfShowAllPersons] = useState(false);
+  const [afTagSearch, setAfTagSearch] = useState('');
+  const [afShowAllPhases, setAfShowAllPhases] = useState(false);
 
   // Columnas dinámicas estilo Notion (matriz de base de datos extendible)
   interface CustomColOption {
@@ -3784,6 +4056,9 @@ export default function CronogramaGanttView({
         setActiveMenu(null);
         setCalOpen(null);
       }
+      if (!t.closest('.kanban-toolbar-menu-wrap')) {
+        setKanbanToolbarMenu(null);
+      }
       if (!t.closest('.dr-input-box')) {
         setCalOpen(null);
       }
@@ -4382,8 +4657,12 @@ export default function CronogramaGanttView({
           matchRange = selfOverlaps || anyChildOverlaps;
         } else {
           // El subproceso coincide si sus fechas se solapan con el período
-          matchRange = x.start <= rangeTo && x.end >= rangeFrom;
+          matchRange = afOnlyDeadlines
+            ? x.end >= rangeFrom && x.end <= rangeTo
+            : x.start <= rangeTo && x.end >= rangeFrom;
         }
+      } else if (afOnlyDeadlines) {
+        matchRange = x.end >= rangeFrom && x.end <= rangeTo;
       }
 
       // Ocultar si cualquiera de sus ancestros en la jerarquía (padre, abuelo, etc.) está colapsado (independiente por vista)
@@ -4842,6 +5121,7 @@ export default function CronogramaGanttView({
       return;
     };
 
+    commitChange((old) => [...old, draftItem]);
     setSelectedId(id);
     setDrawerDraft(draftItem);
     setIsNewDraft(true);
@@ -4849,7 +5129,13 @@ export default function CronogramaGanttView({
     setEditorTab('info');
     setPanelOpen(true);
     setNewMenu(false);
-    notify(`Borrador de nuevo ${kind === 'hito' ? 'componente' : 'paquete de trabajo'} abierto. Configura y pulsa "Guardar cambios".`);
+    setTimeout(() => {
+      const rowEl = document.querySelector(`[data-item-id="${id}"], [data-row-id="${id}"]`) as HTMLElement | null;
+      if (rowEl) {
+        rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 80);
+    notify(`Nuevo ${kind === 'hito' ? 'componente' : 'paquete de trabajo'} "${draftItem.code}" creado. Configúralo en el panel derecho.`);
   };
 
   const exportCSV = () => {
@@ -6308,7 +6594,7 @@ export default function CronogramaGanttView({
               ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2026'}`
               : perspective === 'territorial'
               ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
-              : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`
+              : `Cronograma · ${activeProject?.name || 'Gestión del Proyecto'}`
           }
           description={
             perspective === 'equipo'
@@ -6344,7 +6630,6 @@ export default function CronogramaGanttView({
               >
                 <Upload size={15} />
                 <span>Importar Cronograma</span>
-                <ChevronDown size={14} />
               </button>
               {perspective === 'territorial' ? (
                 <button
@@ -6626,6 +6911,896 @@ export default function CronogramaGanttView({
                 Todos <span>({perspective === 'territorial' ? countTerritorial : items.length})</span>
               </button>
 
+              {/* Filtro Universal 2: Estado de avance (Multiselección) + plazos de vencimiento */}
+              <div className="filter-dropdown-wrap estado-filter-wrap tabs-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn estado-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
+                    selectedStates.length > 0 || vencimientosFilter !== 'todos' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('state')}
+                  title="Filtrar por estado de avance y plazos de vencimiento"
+                >
+                  <div className="filter-card-copy">
+                    <small>Estado</small>
+                    <span>
+                      {(() => {
+                        const vencLabels: Record<string, string> = {
+                          hoy: 'Vencen hoy',
+                          semana: 'Vencen esta semana',
+                          mes: 'Vencen este mes',
+                          trimestre: 'Vencen este trimestre',
+                          retraso: 'Retraso crítico',
+                        };
+                        const venc = vencLabels[vencimientosFilter];
+                        if (selectedStates.length === 0) {
+                          return venc || 'Todos los estados';
+                        }
+                        if (selectedStates.includes('__NONE__')) return venc || 'Ninguno';
+                        if (selectedStates.length === 1) {
+                          return venc ? `${selectedStates[0]} · ${venc}` : selectedStates[0];
+                        }
+                        const multiStr = `${selectedStates.length} seleccionados`;
+                        return venc ? `${multiStr} · ${venc}` : multiStr;
+                      })()}
+                    </span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'state' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 300 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Estado de avance</span>
+                      {(selectedStates.length > 0 || vencimientosFilter !== 'todos') && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => {
+                            setSelectedStates([]);
+                            setTab('Todos');
+                            setVencimientosFilter('todos');
+                          }}
+                        >
+                          Restablecer
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list">
+                      {/* Opción Todos los estados: limpia la multiselección */}
+                      <button
+                        type="button"
+                        className={`filter-item-btn filter-item-check ${selectedStates.length === 0 ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedStates((prev) => (prev.length === 0 ? ['__NONE__'] : []));
+                          setTab('Todos');
+                        }}
+                      >
+                        <span className="filter-item-main">
+                          <span className={`filter-checkbox ${selectedStates.length === 0 ? 'checked' : ''}`}>{selectedStates.length === 0 && <Check size={10} strokeWidth={3} />}</span>
+                          <span className="filter-item-text">
+                            <strong>Ver todo</strong>
+                          </span>
+                        </span>
+                        <span className="wbs-level-badge">{items.length}</span>
+                      </button>
+
+                      {/* Estados con multiselección via Checkbox */}
+                      {[
+                        { id: 'Completados', label: 'Completados', count: complete, dotColor: '#16a34a', badgeClass: 'badge-cumple' },
+                        { id: 'En proceso', label: 'En proceso', count: inprog, dotColor: '#0284c7', badgeClass: 'badge-enproceso' },
+                        { id: 'Con retraso', label: 'Con retraso', count: late, dotColor: '#dc2626', badgeClass: 'badge-retraso' },
+                        { id: 'Pendiente', label: 'Pendientes', count: items.filter((x) => x.status === 'Pendiente').length, dotColor: '#94a3b8', badgeClass: 'badge-pendiente' },
+                      ].map((opt) => {
+                        const isChecked = selectedStates.length === 0 || selectedStates.includes(opt.id);
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                            onClick={() => toggleState(opt.id)}
+                            aria-pressed={isChecked}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                {isChecked && <Check size={10} strokeWidth={3} />}
+                              </span>
+                              <span className="filter-status-dot" style={{ background: opt.dotColor }} />
+                              <span className="filter-item-text">
+                                <strong>{opt.label}</strong>
+                              </span>
+                            </span>
+                            <span className={`wbs-level-badge ${opt.badgeClass}`}>{opt.count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="filter-popover-title filter-popover-subtitle">
+                      <span>Plazos de vencimiento</span>
+                    </div>
+                    <div className="filter-popover-list">
+                      {[
+                        { id: 'todos', label: 'Todos los plazos', badge: items.length, icon: CalendarDays },
+                        { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount, icon: Clock, alert: vencenHoyCount > 0 },
+                        { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount, icon: Clock3, alert: vencenSemanaCount > 0 },
+                        { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount, icon: CalendarRange, alert: false },
+                        { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount, icon: CalendarRange, alert: false },
+                        { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, icon: AlertTriangle, alert: criticalItemsCount > 0 },
+                      ].map((opt) => {
+                        const isSelected = vencimientosFilter === opt.id;
+                        const IconComponent = opt.icon;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setVencimientosFilter(opt.id as any);
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <IconComponent size={14} className={opt.alert ? 'filter-icon-alert' : 'filter-icon-muted'} />
+                              <span className="filter-item-text">
+                                <strong style={opt.alert ? { color: '#b91c1c' } : undefined}>{opt.label}</strong>
+                              </span>
+                            </span>
+                            <span className={`wbs-level-badge ${opt.alert ? 'is-late' : ''}`}>{opt.badge}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Filtro Contextual 3 (Caja Roja): Componente / Producto EDT */}
+              {/* Filtro Universal 2: Componente / Producto EDT (con grupos colapsables via Chevron) */}
+              <div className="filter-dropdown-wrap contextual-filter-wrap edt-filter-wrap tabs-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'edtComponent' ? 'active' : ''} ${
+                    selectedEdtCodes.length > 0 ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('edtComponent')}
+                  title="Filtrar por Componente o Producto EDT"
+                >
+                  <div className="filter-card-copy">
+                    <small>Componente / Producto</small>
+                    <span>{edtButtonText}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'edtComponent' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{
+                      width: compPopoverWidth ? `${compPopoverWidth}px` : 330,
+                      minWidth: 320,
+                      maxWidth: 850,
+                      position: 'relative',
+                      resize: 'horizontal',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {/* Asa interactiva en el borde derecho para estirar horizontalmente el desplegable */}
+                    <div
+                      className="popover-resize-handle-right"
+                      onMouseDown={handlePopoverResizeStart}
+                      title="Arrastrar para ajustar ancho del desplegable"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: 7,
+                        cursor: 'ew-resize',
+                        zIndex: 20,
+                        background: 'transparent',
+                        transition: 'background 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 102, 255, 0.25)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                      }}
+                    />
+
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Componentes y Productos</span>
+                      {selectedEdtCodes.length > 0 && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => setSelectedEdtCodes((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
+                        >
+                          Restablecer ({selectedEdtCodes.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list" style={{ maxHeight: 380, overflowX: 'hidden' }}>
+                      {/* Opción Todos */}
+                      {(() => {
+                        const isAll = selectedEdtCodes.length === 0;
+                        return (
+                          <button
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isAll ? 'selected' : ''}`}
+                            onClick={() => setSelectedEdtCodes((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-checkbox ${isAll ? 'checked' : ''}`}>{isAll && <Check size={10} strokeWidth={3} />}</span>
+                              <span className="filter-item-text">
+                                <strong>Ver todo</strong>
+                              </span>
+                            </span>
+                            <span className="wbs-level-badge">{items.length}</span>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Título de sección sutil idéntico a ESTADO DE AVANCE y MACRO NORTE */}
+                      <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                        <span>Componentes Rectores EDT</span>
+                      </div>
+
+                      {/* Grupos de Componentes con Chevrones para Desplegar/Colapsar (Colapsados por defecto) */}
+                      {edtComponentsWithProducts.map(({ comp, products }) => {
+                        const selectionState = getCompSelectionState(comp, products);
+                        const isCompChecked = selectionState === 'checked' || selectionState === 'indeterminate';
+                        const isExpanded = Boolean(expandedCompIds[comp.id]);
+                        const compTotalItems = items.filter(
+                          (x) => x.id === comp.id || x.parentId === comp.id || items.some((p) => p.id === x.parentId && p.parentId === comp.id)
+                        ).length;
+                        const compLabel = formatEdtLabel(comp.code, comp.name);
+
+                        return (
+                          <React.Fragment key={comp.id}>
+                            <div
+                              className={`filter-item-btn filter-item-check ${isCompChecked ? 'selected' : ''}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '7px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                background: 'transparent',
+                                transition: 'background 0.12s ease',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedCompIds((prev) => ({ ...prev, [comp.id]: !prev[comp.id] }));
+                                  }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '2px',
+                                    margin: '0',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#64748b',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                    lineHeight: 1,
+                                  }}
+                                  title={isExpanded ? 'Colapsar productos' : 'Desplegar productos'}
+                                  aria-expanded={isExpanded}
+                                >
+                                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    flex: 1,
+                                    minWidth: 0,
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => toggleComponentSelection(comp, products)}
+                                  title={compLabel}
+                                >
+                                  <span
+                                    className={`filter-checkbox ${selectionState === 'checked' ? 'checked' : selectionState === 'indeterminate' ? 'indeterminate' : ''}`}
+                                    style={{
+                                      flexShrink: 0,
+                                      ...(selectionState === 'indeterminate' ? { background: '#0066ff', borderColor: '#0066ff' } : {}),
+                                    }}
+                                  >
+                                    {selectionState === 'checked' && <Check size={10} strokeWidth={3} />}
+                                    {selectionState === 'indeterminate' && <Minus size={10} strokeWidth={3} color="#ffffff" />}
+                                  </span>
+                                  <span
+                                    className="filter-item-text"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    <strong
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        color: '#0f172a',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: 'block',
+                                      }}
+                                    >
+                                      {getTruncatedLabel(compLabel, compPopoverWidth, false)}
+                                    </strong>
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                {compTotalItems}
+                              </span>
+                            </div>
+
+                            {/* Productos hijos desplegables: sangría alineada a la derecha, color sólido y una sola fila */}
+                            {isExpanded && products.map((prod) => {
+                              const isProdChecked =
+                                selectionState === 'checked' ||
+                                selectedEdtCodes.includes(prod.id) ||
+                                selectedEdtCodes.includes(prod.code);
+                              const prodSedesCount = items.filter((x) => x.parentId === prod.id).length;
+                              const prodLabel = formatEdtLabel(prod.code, prod.name);
+                              const prodDisplayLabel = getTruncatedLabel(prodLabel, compPopoverWidth, true);
+
+                              return (
+                                <div
+                                  key={prod.id}
+                                  className={`filter-item-btn filter-item-check ${isProdChecked ? 'selected' : ''}`}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 8px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    background: 'transparent',
+                                  }}
+                                  onClick={() => toggleProductSelection(comp, prod, products)}
+                                  title={prodLabel}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                    {/* Sangría estructural que desplaza el checkbox 24px a la derecha del padre */}
+                                    <div style={{ width: 24, flexShrink: 0 }} aria-hidden="true" />
+                                    <span className={`filter-checkbox ${isProdChecked ? 'checked' : ''}`} style={{ flexShrink: 0 }}>
+                                      {isProdChecked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span
+                                      className="filter-item-text"
+                                      style={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        flex: 1,
+                                        minWidth: 0,
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontSize: '12.5px',
+                                          color: isProdChecked ? '#0066ff' : '#1e293b',
+                                          fontWeight: isProdChecked ? 600 : 500,
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          display: 'block',
+                                        }}
+                                      >
+                                        {prodDisplayLabel}
+                                      </span>
+                                    </span>
+                                  </div>
+                                  {prodSedesCount > 0 && (
+                                    <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                      {prodSedesCount}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Filtro Universal 3: Región / DRE (Subido a la Fila 1) */}
+              <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap tabs-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
+                    selectedRegions.length > 0 ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('region')}
+                  title="Filtrar por región (DRE) del proyecto"
+                >
+                  <div className="filter-card-copy">
+                    <small>Región</small>
+                    <span>{selectedRegions.length === 0 ? 'Todas las regiones' : selectedRegions.includes('__NONE__') ? 'Ninguna' : regionButtonText}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'region' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 270 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Regiones y sedes</span>
+                      {selectedRegions.length > 0 && (
+                        <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions((prev) => (prev.length === 0 ? ['__NONE__'] : []))}>
+                          Limpiar ({selectedRegions.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list" style={{ maxHeight: 320 }}>
+                      <button
+                        type="button"
+                        className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
+                        onClick={() => setSelectedRegions((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          background: 'transparent',
+                          border: 'none',
+                          width: '100%',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span className={`filter-checkbox ${selectedRegions.length === 0 ? 'checked' : ''}`}>{selectedRegions.length === 0 && <Check size={10} strokeWidth={3} />}</span>
+                          <span className="filter-item-text">
+                            <strong style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                              Todas las regiones
+                            </strong>
+                          </span>
+                        </div>
+                        <span className="wbs-level-badge">{unidades.length}</span>
+                      </button>
+
+                      {/* Título de sección sutil idéntico a Componentes y Estado */}
+                      <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                        <span>Macro-regiones y sedes</span>
+                      </div>
+
+                      {/* Grupos de Macro-regiones con Chevrones para Desplegar/Colapsar (Colapsados por defecto) */}
+                      {MACROREGIONES_NACIONAL.map((macro) => {
+                        const totalSedesMacro = macro.regiones.reduce(
+                          (acc, reg) => acc + (sedesPorRegion.get(normalizeRegionKey(reg)) || 0),
+                          0
+                        );
+                        const selectedCountInMacro = selectedRegions.length === 0 ? macro.regiones.length : macro.regiones.filter((r) => selectedRegions.includes(r)).length;
+                        const isAllMacroSelected = macro.regiones.length > 0 && selectedCountInMacro === macro.regiones.length;
+                        const isMacroIndeterminate = selectedCountInMacro > 0 && selectedCountInMacro < macro.regiones.length;
+                        const isCompChecked = isAllMacroSelected || isMacroIndeterminate;
+                        const isExpanded = Boolean(expandedMacroIds[macro.id]);
+
+                        return (
+                          <React.Fragment key={macro.id}>
+                            <div
+                              className={`filter-item-btn filter-item-check ${isCompChecked ? 'selected' : ''}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '7px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                background: 'transparent',
+                                transition: 'background 0.12s ease',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedMacroIds((prev) => ({ ...prev, [macro.id]: !prev[macro.id] }));
+                                  }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '2px',
+                                    margin: '0',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#64748b',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                    lineHeight: 1,
+                                  }}
+                                  title={isExpanded ? 'Colapsar macro-región' : 'Desplegar macro-región'}
+                                  aria-expanded={isExpanded}
+                                >
+                                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    flex: 1,
+                                    minWidth: 0,
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => toggleMacroRegions(macro.regiones)}
+                                  title={formatMacroName(macro.name)}
+                                >
+                                  <span
+                                    className={`filter-checkbox ${isAllMacroSelected ? 'checked' : isMacroIndeterminate ? 'indeterminate' : ''}`}
+                                    style={{
+                                      flexShrink: 0,
+                                      ...(isMacroIndeterminate ? { background: '#0066ff', borderColor: '#0066ff' } : {}),
+                                    }}
+                                  >
+                                    {isAllMacroSelected && <Check size={10} strokeWidth={3} />}
+                                    {isMacroIndeterminate && <Minus size={10} strokeWidth={3} color="#ffffff" />}
+                                  </span>
+                                  <span
+                                    className="filter-item-text"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    <strong
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        color: '#0f172a',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: 'block',
+                                      }}
+                                    >
+                                      {formatMacroName(macro.name)}
+                                    </strong>
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                {totalSedesMacro}
+                              </span>
+                            </div>
+
+                            {/* Regiones hijas desplegables: sangría a la derecha (26px), peso normal, una sola fila */}
+                            {isExpanded && macro.regiones.map((regName) => {
+                              const isChecked = selectedRegions.includes(regName);
+                              const numSedes = sedesPorRegion.get(normalizeRegionKey(regName)) || 0;
+                              const coordinador = getRegionCoordinador(regName);
+
+                              return (
+                                <div
+                                  key={regName}
+                                  className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 8px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    background: isChecked ? '#eff6ff' : 'transparent',
+                                  }}
+                                  onClick={() => toggleRegion(regName)}
+                                  title={`${regName} (${numSedes} sedes)${coordinador ? ` · Coord. regional: ${coordinador}` : ''}`}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                    {/* Sangría estructural que desplaza el checkbox 24px a la derecha del padre */}
+                                    <div style={{ width: 24, flexShrink: 0 }} aria-hidden="true" />
+                                    <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`} style={{ flexShrink: 0 }}>
+                                      {isChecked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span
+                                      className="filter-item-text"
+                                      style={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        flex: 1,
+                                        minWidth: 0,
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontSize: '12.5px',
+                                          color: isChecked ? '#0066ff' : '#1e293b',
+                                          fontWeight: isChecked ? 600 : 500,
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          display: 'block',
+                                        }}
+                                      >
+                                        {regName}
+                                      </span>
+                                    </span>
+                                  </div>
+                                  {numSedes > 0 && (
+                                    <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                      {numSedes}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Controles de utilidad del módulo en Fila 1 con separadores lógicos (a la izquierda de las vistas) */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: '4px', marginRight: '8px' }}>
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${showSecondaryFilters ? 'active' : ''}`}
+                onClick={() => setShowSecondaryFilters((v) => !v)}
+                title={showSecondaryFilters ? 'Ocultar segunda fila de filtros' : 'Mostrar segunda fila de filtros'}
+                aria-label="Alternar segunda fila de filtros"
+              >
+                <SlidersHorizontal size={15} />
+              </button>
+              <div className="filter-group-divider" aria-hidden="true" />
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${isFullscreen ? 'active' : ''}`}
+                onClick={toggleFullscreen}
+                title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+                aria-label="Alternar modo pantalla completa"
+              >
+                {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              </button>
+              <div className="filter-group-divider" aria-hidden="true" />
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUndo();
+                }}
+                disabled={history.length === 0}
+                title={history.length > 0 ? 'Retroceder / Deshacer (Ctrl+Z)' : 'Sin cambios para retroceder'}
+                aria-label="Retroceder o deshacer último cambio"
+              >
+                <Undo2 size={14} />
+              </button>
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRedo();
+                }}
+                disabled={redoHistory.length === 0}
+                title={redoHistory.length > 0 ? 'Adelantar / Rehacer (Ctrl+Y)' : 'Sin cambios para adelantar'}
+                aria-label="Adelantar o rehacer último cambio"
+              >
+                <Redo2 size={14} />
+              </button>
+              <div className="filter-group-divider" aria-hidden="true" />
+              <button
+                type="button"
+                className="btn secondary clear-btn qm-btn-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearch('');
+                  if (perspective === 'equipo') {
+                    setEquipoSedeFilter('todas');
+                    setEquipoEstadoOpFilter('todos');
+                    setEquipoEstadoCuentaFilter('todos');
+                    setEquipoAreaFilter('todas');
+                    setEquipoPill('Todos');
+                  }
+                  setStateFilter('Todos');
+                  setTypeFilter('Todos');
+                  setSelectedRegions([]);
+                  setPhaseFilter('Todas');
+                  setGestorFilter('Todos');
+                  setMacroFilter('Todos');
+                  setSelectedStates([]);
+                  setWbsDepthFilter('todos');
+                  setWbsRoleFilter('todos');
+                  setWbsLevelFilter('todos');
+                  setVencimientosFilter('todos');
+                  setListaTemporalFilter('Todos');
+                  setRangeFrom(DEFAULT_RANGE.from);
+                  setRangeTo(DEFAULT_RANGE.to);
+                  setTab('Todos');
+                  setCustomRules([]);
+                  setSelectedEdtCodes([]);
+                  setAdvancedFiltersOpen(false);
+                  setColFilterOpen(null);
+                  setShowBaseline(false);
+                  setCalShowBarLabels(true);
+                  setCalShowBaseline(false);
+                  setShowCriticalPath(false);
+                  engine.clearAllFilters();
+                  engine.clearSort();
+                  setKanbanResetSignal((n) => n + 1);
+                  resetColWidths();
+                  closeMenus();
+                  if (viewMode === 'calendario') {
+                    handleTodayCal();
+                  } else {
+                    scrollToDate(RANGE_MIN);
+                  }
+                  notify('Todos los filtros restablecidos');
+                }}
+                title="Restablecer todos los filtros"
+                aria-label="Restablecer todos los filtros y limpiar vista"
+              >
+                <RotateCcw size={15} />
+              </button>
+            </div>
+
+            <div className="view-mode-switcher" style={{ marginLeft: 'auto' }} role="tablist" aria-label="Modo de presentación">
+              {perspective === 'equipo' ? (
+                <>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('organigrama')}
+                    title="Organigrama Interactivo"
+                  >
+                    <Network size={14} />
+                    <span>Organigrama</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'lista' || viewMode === 'directorio' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('lista')}
+                    title="Lista y Cronograma Oficial"
+                  >
+                    <List size={14} />
+                    <span>Lista</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('sedes')}
+                    title="Frentes Territoriales y Sedes"
+                  >
+                    <Building2 size={14} />
+                    <span>Frentes Territoriales</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'carga' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('carga')}
+                    title="Carga de Trabajo Operativa"
+                  >
+                    <Activity size={14} />
+                    <span>Carga de Trabajo</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {perspective === 'territorial' && (
+                    <button
+                      type="button"
+                      className={`view-mode-btn view-mode-btn-portada ${viewMode === 'portada' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('portada')}
+                      title="Vista Carátula Territorial y Cobertura"
+                    >
+                      <CheckSquare size={14} />
+                      <span>Carátula</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('gantt')}
+                    title="Vista Cronograma Gantt"
+                  >
+                    <FolderKanban size={14} />
+                    <span>Gantt</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('lista')}
+                    title="Vista Tabla Analítica"
+                  >
+                    <List size={14} />
+                    <span>Lista</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('kanban')}
+                    title="Vista Tablero Kanban"
+                  >
+                    <LayoutDashboard size={14} />
+                    <span>Kanban</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('calendario')}
+                    title="Vista Calendario Mensual"
+                  >
+                    <CalendarDays size={14} />
+                    <span>Calendario</span>
+                  </button>
+                  {perspective !== 'maestro' && (
+                    <button
+                      type="button"
+                      className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
+                      onClick={() => handleViewModeChange('mapa')}
+                      title="Vista Mapa Territorial"
+                    >
+                      <MapPin size={14} />
+                      <span>Mapa</span>
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </nav>
+
+          {/* Filtros Contextuales y Macro (toggle desde cabecera superior) */}
+          {showSecondaryFilters && (
+          <ProjectShellFilters>
               {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
               <div className="filter-dropdown-wrap wbs-filter-wrap tabs-filter-wrap">
                 <button
@@ -6796,523 +7971,6 @@ export default function CronogramaGanttView({
                   </div>
                 )}
               </div>
-
-              {/* Filtro Universal 2: Estado de avance (Multiselección) + plazos de vencimiento */}
-              <div className="filter-dropdown-wrap estado-filter-wrap tabs-filter-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn estado-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
-                    selectedStates.length > 0 || vencimientosFilter !== 'todos' ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('state')}
-                  title="Filtrar por estado de avance y plazos de vencimiento"
-                >
-                  <div className="filter-card-copy">
-                    <small>Estado</small>
-                    <span>
-                      {(() => {
-                        const vencLabels: Record<string, string> = {
-                          hoy: 'Vencen hoy',
-                          semana: 'Vencen esta semana',
-                          mes: 'Vencen este mes',
-                          trimestre: 'Vencen este trimestre',
-                          retraso: 'Retraso crítico',
-                        };
-                        const venc = vencLabels[vencimientosFilter];
-                        if (selectedStates.length === 0) {
-                          return venc || 'Todos los estados';
-                        }
-                        if (selectedStates.length === 1) {
-                          return venc ? `${selectedStates[0]} · ${venc}` : selectedStates[0];
-                        }
-                        const multiStr = `${selectedStates.length} seleccionados`;
-                        return venc ? `${multiStr} · ${venc}` : multiStr;
-                      })()}
-                    </span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'state' && (
-                  <div
-                    className="filter-card-popover"
-                    onClick={(e) => e.stopPropagation()}
-                    onWheel={(e) => {
-                      e.stopPropagation();
-                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                      if (list && e.target !== list && !list.contains(e.target as Node)) {
-                        list.scrollTop += e.deltaY;
-                      }
-                    }}
-                    style={{ minWidth: 300 }}
-                  >
-                    <div className="filter-popover-title filter-popover-title-row">
-                      <span>Estado de avance</span>
-                      {(selectedStates.length > 0 || vencimientosFilter !== 'todos') && (
-                        <button
-                          type="button"
-                          className="filter-reset-link"
-                          onClick={() => {
-                            setSelectedStates([]);
-                            setTab('Todos');
-                            setVencimientosFilter('todos');
-                          }}
-                        >
-                          Restablecer
-                        </button>
-                      )}
-                    </div>
-                    <div className="filter-popover-list">
-                      {/* Opción Todos los estados: limpia la multiselección */}
-                      <button
-                        type="button"
-                        className={`filter-item-btn filter-item-check ${selectedStates.length === 0 ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSelectedStates([]);
-                          setTab('Todos');
-                        }}
-                      >
-                        <span className="filter-item-main">
-                          <span className={`filter-radio ${selectedStates.length === 0 ? 'checked' : ''}`}>
-                            {selectedStates.length === 0 && <span className="filter-radio-dot" />}
-                          </span>
-                          <span className="filter-item-text">
-                            <strong>Todos los estados</strong>
-                          </span>
-                        </span>
-                        <span className="wbs-level-badge">{items.length}</span>
-                      </button>
-
-                      {/* Estados con multiselección via Checkbox */}
-                      {[
-                        { id: 'Completados', label: 'Completados', count: complete, dotColor: '#16a34a', badgeClass: 'badge-cumple' },
-                        { id: 'En proceso', label: 'En proceso', count: inprog, dotColor: '#0284c7', badgeClass: 'badge-enproceso' },
-                        { id: 'Con retraso', label: 'Con retraso', count: late, dotColor: '#dc2626', badgeClass: 'badge-retraso' },
-                        { id: 'Pendiente', label: 'Pendientes', count: items.filter((x) => x.status === 'Pendiente').length, dotColor: '#94a3b8', badgeClass: 'badge-pendiente' },
-                      ].map((opt) => {
-                        const isChecked = selectedStates.includes(opt.id);
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                            onClick={() => toggleState(opt.id)}
-                            aria-pressed={isChecked}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
-                                {isChecked && <Check size={10} strokeWidth={3} />}
-                              </span>
-                              <span className="filter-status-dot" style={{ background: opt.dotColor }} />
-                              <span className="filter-item-text">
-                                <strong>{opt.label}</strong>
-                              </span>
-                            </span>
-                            <span className={`wbs-level-badge ${opt.badgeClass}`}>{opt.count}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="filter-popover-title filter-popover-subtitle">
-                      <span>Plazos de vencimiento</span>
-                    </div>
-                    <div className="filter-popover-list">
-                      {[
-                        { id: 'todos', label: 'Todos los plazos', badge: items.length, icon: CalendarDays },
-                        { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount, icon: Clock, alert: vencenHoyCount > 0 },
-                        { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount, icon: Clock3, alert: vencenSemanaCount > 0 },
-                        { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount, icon: CalendarRange, alert: false },
-                        { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount, icon: CalendarRange, alert: false },
-                        { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, icon: AlertTriangle, alert: criticalItemsCount > 0 },
-                      ].map((opt) => {
-                        const isSelected = vencimientosFilter === opt.id;
-                        const IconComponent = opt.icon;
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              setVencimientosFilter(opt.id as any);
-                            }}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
-                              </span>
-                              <IconComponent size={14} className={opt.alert ? 'filter-icon-alert' : 'filter-icon-muted'} />
-                              <span className="filter-item-text">
-                                <strong style={opt.alert ? { color: '#b91c1c' } : undefined}>{opt.label}</strong>
-                              </span>
-                            </span>
-                            <span className={`wbs-level-badge ${opt.alert ? 'is-late' : ''}`}>{opt.badge}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Filtro Contextual 3 (Caja Roja): Componente / Producto EDT */}
-              <div className="filter-dropdown-wrap contextual-filter-wrap edt-filter-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn ${activeMenu === 'edtComponent' ? 'active' : ''} ${
-                    selectedEdtCodes.length > 0 ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('edtComponent')}
-                  title="Filtrar por Componente o Producto EDT"
-                >
-                  <div className="filter-card-copy">
-                    <small>Componente / Producto</small>
-                    <span>{edtButtonText}</span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'edtComponent' && (
-                  <div
-                    className="filter-card-popover"
-                    onClick={(e) => e.stopPropagation()}
-                    onWheel={(e) => {
-                      e.stopPropagation();
-                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                      if (list && e.target !== list && !list.contains(e.target as Node)) {
-                        list.scrollTop += e.deltaY;
-                      }
-                    }}
-                    style={{ minWidth: 320 }}
-                  >
-                    <div className="filter-popover-title filter-popover-title-row">
-                      <span>Componentes y Productos EDT</span>
-                      {selectedEdtCodes.length > 0 && (
-                        <button
-                          type="button"
-                          className="filter-reset-link"
-                          onClick={() => setSelectedEdtCodes([])}
-                        >
-                          Restablecer
-                        </button>
-                      )}
-                    </div>
-                    <div className="filter-popover-list" style={{ maxHeight: 380 }}>
-                      {/* Opción Todos */}
-                      {(() => {
-                        const isAll = selectedEdtCodes.length === 0;
-                        return (
-                          <button
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isAll ? 'selected' : ''}`}
-                            onClick={() => setSelectedEdtCodes([])}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isAll ? 'checked' : ''}`}>
-                                {isAll && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-item-text">
-                                <strong>Todos los componentes</strong>
-                              </span>
-                            </span>
-                            <span className="wbs-level-badge">{items.length}</span>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Grupos de Componentes y sus Productos */}
-                      {edtComponentsWithProducts.map(({ comp, products }) => {
-                        const isCompChecked = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
-                        const compTotalItems = items.filter((x) => x.id === comp.id || x.parentId === comp.id || items.some(p => p.id === x.parentId && p.parentId === comp.id)).length;
-                        return (
-                          <React.Fragment key={comp.id}>
-                            <div
-                              className="filter-popover-group-label"
-                              style={{
-                                marginTop: 8,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                background: 'rgba(37, 99, 235, 0.05)',
-                                padding: '5px 8px',
-                                borderRadius: 4,
-                              }}
-                            >
-                              <button
-                                type="button"
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: 0,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 6,
-                                  textAlign: 'left',
-                                  font: 'inherit',
-                                  color: 'inherit',
-                                  flex: 1,
-                                }}
-                                onClick={() => {
-                                  setSelectedEdtCodes((prev) =>
-                                    prev.includes(comp.id) ? prev.filter((c) => c !== comp.id) : [...prev, comp.id]
-                                  );
-                                }}
-                              >
-                                <span className={`filter-checkbox ${isCompChecked ? 'checked' : ''}`}>
-                                  {isCompChecked && <Check size={10} strokeWidth={3} />}
-                                </span>
-                                <strong style={{ fontSize: 11, color: '#0f172a' }}>
-                                  {comp.code} {comp.name}
-                                </strong>
-                              </button>
-                              <span className="wbs-level-badge">{compTotalItems}</span>
-                            </div>
-
-                            {products.map((prod) => {
-                              const isProdChecked = selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
-                              const prodSedesCount = items.filter((x) => x.parentId === prod.id).length;
-                              return (
-                                <button
-                                  key={prod.id}
-                                  type="button"
-                                  className={`filter-item-btn filter-item-check ${isProdChecked ? 'selected' : ''}`}
-                                  style={{ paddingLeft: 18 }}
-                                  onClick={() => {
-                                    setSelectedEdtCodes((prev) =>
-                                      prev.includes(prod.id) ? prev.filter((c) => c !== prod.id) : [...prev, prod.id]
-                                    );
-                                  }}
-                                >
-                                  <span className="filter-item-main">
-                                    <span className={`filter-checkbox ${isProdChecked ? 'checked' : ''}`}>
-                                      {isProdChecked && <Check size={10} strokeWidth={3} />}
-                                    </span>
-                                    <span className="filter-item-text">
-                                      <strong>{prod.code ? `${prod.code} ` : ''}{prod.name}</strong>
-                                    </span>
-                                  </span>
-                                  {prodSedesCount > 0 && <span className="wbs-level-badge">{prodSedesCount}</span>}
-                                </button>
-                              );
-                            })}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
-              {perspective === 'equipo' ? (
-                <>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('organigrama')}
-                    title="Organigrama Interactivo"
-                  >
-                    <Network size={14} />
-                    <span>Organigrama</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'lista' || viewMode === 'directorio' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('lista')}
-                    title="Lista y Cronograma Oficial"
-                  >
-                    <List size={14} />
-                    <span>Lista</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('sedes')}
-                    title="Frentes Territoriales y Sedes"
-                  >
-                    <Building2 size={14} />
-                    <span>Frentes Territoriales</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'carga' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('carga')}
-                    title="Carga de Trabajo Operativa"
-                  >
-                    <Activity size={14} />
-                    <span>Carga de Trabajo</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  {perspective === 'territorial' && (
-                    <button
-                      type="button"
-                      className={`view-mode-btn view-mode-btn-portada ${viewMode === 'portada' ? 'active' : ''}`}
-                      onClick={() => handleViewModeChange('portada')}
-                      title="Vista Carátula Territorial y Cobertura"
-                    >
-                      <CheckSquare size={14} />
-                      <span>Carátula</span>
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('gantt')}
-                    title="Vista Cronograma Gantt"
-                  >
-                    <FolderKanban size={14} />
-                    <span>Gantt</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('lista')}
-                    title="Vista Tabla Analítica"
-                  >
-                    <List size={14} />
-                    <span>Lista</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('kanban')}
-                    title="Vista Tablero Kanban"
-                  >
-                    <LayoutDashboard size={14} />
-                    <span>Kanban</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('calendario')}
-                    title="Vista Calendario Mensual"
-                  >
-                    <CalendarDays size={14} />
-                    <span>Calendario</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('mapa')}
-                    title="Vista Mapa Territorial"
-                  >
-                    <MapPin size={14} />
-                    <span>Mapa</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </nav>
-
-          {/* Filtros Contextuales y Macro */}
-          <ProjectShellFilters>
-            {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
-            <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
-                  selectedRegions.length > 0 ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('region')}
-                title="Filtrar por región (DRE) del proyecto"
-              >
-                <div className="filter-card-copy">
-                  <small>Región</small>
-                  <span>{selectedRegions.length === 0 ? 'Todas las regiones' : regionButtonText}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'region' && (
-                <div
-                  className="filter-card-popover"
-                  onClick={(e) => e.stopPropagation()}
-                  onWheel={(e) => {
-                    e.stopPropagation();
-                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                    if (list && e.target !== list && !list.contains(e.target as Node)) {
-                      list.scrollTop += e.deltaY;
-                    }
-                  }}
-                  style={{ minWidth: 270 }}
-                >
-                  <div className="filter-popover-title filter-popover-title-row">
-                    <span>Regiones y sedes del catálogo</span>
-                    {selectedRegions.length > 0 && (
-                      <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions([])}>
-                        Limpiar ({selectedRegions.length})
-                      </button>
-                    )}
-                  </div>
-                  <div className="filter-popover-list" style={{ maxHeight: 320 }}>
-                    <button
-                      type="button"
-                      className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
-                      onClick={() => setSelectedRegions([])}
-                    >
-                      <span className="filter-item-text">
-                        <strong>Todas las regiones</strong>
-                        <small>{MACROREGIONES_NACIONAL.length} macro-regiones · {unidades.length} sedes</small>
-                      </span>
-                      <span className="wbs-level-badge">{unidades.length}</span>
-                    </button>
-                    {MACROREGIONES_NACIONAL.map((macro) => {
-                      const todasMacro = macro.regiones.every((r) => selectedRegions.includes(r));
-                      return (
-                        <React.Fragment key={macro.id}>
-                          <div className="filter-popover-group-label macro-group-row">
-                            <span>{macro.name}</span>
-                            <button
-                              type="button"
-                              className={`filter-reset-link ${todasMacro ? 'macro-all-active' : ''}`}
-                              onClick={() => toggleMacroRegions(macro.regiones)}
-                              aria-pressed={todasMacro}
-                              title={
-                                todasMacro
-                                  ? `Quitar las ${macro.regiones.length} regiones de esta macro`
-                                  : `Seleccionar las ${macro.regiones.length} regiones de esta macro`
-                              }
-                            >
-                              {todasMacro ? `Quitar (${macro.regiones.length})` : `Todas (${macro.regiones.length})`}
-                            </button>
-                          </div>
-                        {macro.regiones.map((regName) => {
-                          const isChecked = selectedRegions.includes(regName);
-                          const coordinador = getRegionCoordinador(regName);
-                          return (
-                            <button
-                              key={regName}
-                              type="button"
-                              className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                              onClick={() => toggleRegion(regName)}
-                              aria-pressed={isChecked}
-                            >
-                              <span className="filter-item-main">
-                                <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
-                                  {isChecked && <Check size={10} strokeWidth={3} />}
-                                </span>
-                                <span className="filter-item-text">
-                                  <strong>{regName}</strong>
-                                  <small>
-                                    {sedesPorRegion.get(normalizeRegionKey(regName)) || 0} sedes
-                                    {coordinador ? ` · Coord. regional: ${coordinador}` : ''}
-                                  </small>
-                                </span>
-                              </span>
-                              {(regionItemCounts[regName] || 0) > 0 && (
-                                <span className="wbs-level-badge">{regionItemCounts[regName]}</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-            </div>
 
             {/* Filtro Contextual 2 (Vista Territorial): Sede Territorial / UGEL o Gestor de Campo */}
             {perspective === 'territorial' ? (
@@ -7549,7 +8207,7 @@ export default function CronogramaGanttView({
                         list.scrollTop += e.deltaY;
                       }
                     }}
-                    style={{ minWidth: 320, maxWidth: 380 }}
+                    style={{ minWidth: 280, maxWidth: 340 }}
                   >
                     <div className="filter-popover-title filter-popover-title-row">
                       <span>Fases del Proyecto</span>
@@ -7559,7 +8217,7 @@ export default function CronogramaGanttView({
                         </button>
                       )}
                     </div>
-                    <div className="filter-popover-list">
+                    <div className="filter-popover-list" style={{ maxHeight: 320 }}>
                       <button
                         type="button"
                         className={`filter-item-btn ${phaseFilter === 'Todas' ? 'selected' : ''}`}
@@ -7567,13 +8225,35 @@ export default function CronogramaGanttView({
                           setPhaseFilter('Todas');
                           closeMenus();
                         }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          background: 'transparent',
+                          border: 'none',
+                          width: '100%',
+                        }}
                       >
-                        <span className="filter-item-text">
-                          <strong>Todas las fases</strong>
-                          <small>Ciclo de vida completo del proyecto</small>
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span className={`filter-checkbox ${phaseFilter === 'Todas' ? 'checked' : ''}`}>
+                            {phaseFilter === 'Todas' && <Check size={10} strokeWidth={3} />}
+                          </span>
+                          <span className="filter-item-text">
+                            <strong style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                              Todas las fases
+                            </strong>
+                          </span>
+                        </div>
                         <span className="wbs-level-badge">{items.length}</span>
                       </button>
+
+                      <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                        <span>Fases del ciclo de vida</span>
+                      </div>
+
                       {PROJECT_PHASES_CATALOG.map((fase) => {
                         const isSelected = phaseFilter === fase.id || phaseFilter === fase.name;
                         const count = getPhaseItemCount(fase.id);
@@ -7583,20 +8263,32 @@ export default function CronogramaGanttView({
                             type="button"
                             className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
                             onClick={() => {
-                              setPhaseFilter(fase.id);
+                              setPhaseFilter(isSelected ? 'Todas' : fase.id);
                               closeMenus();
                             }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '7px 10px',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              background: 'transparent',
+                              border: 'none',
+                              width: '100%',
+                            }}
                           >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                              <span className={`filter-checkbox ${isSelected ? 'checked' : ''}`} style={{ flexShrink: 0 }}>
+                                {isSelected && <Check size={10} strokeWidth={3} />}
                               </span>
-                              <span className="filter-item-text">
-                                <strong>{fase.code} · {fase.name}</strong>
-                                <small>{fase.description}</small>
+                              <span className="filter-item-text" style={{ textAlign: 'left' }}>
+                                <strong style={{ fontSize: '13px', fontWeight: isSelected ? 600 : 500, color: isSelected ? '#0066ff' : '#1e293b' }}>
+                                  {fase.code} · {fase.name}
+                                </strong>
                               </span>
-                            </span>
-                            {count > 0 && <span className="wbs-level-badge">{count}</span>}
+                            </div>
+                            <span className="wbs-level-badge">{count}</span>
                           </button>
                         );
                       })}
@@ -7605,23 +8297,6 @@ export default function CronogramaGanttView({
                 )}
               </div>
             )}
-
-            {/* Filtro Avanzado Compacto (Zona 1: Filtros de datos) */}
-            <button
-              type="button"
-              className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
-              onClick={() => setAdvancedFiltersOpen((v) => !v)}
-              data-tooltip="Filtros avanzados"
-              aria-label="Condiciones de filtrado avanzado"
-            >
-              <SlidersHorizontal size={15} />
-              {customRules.length > 0 && (
-                <span className="custom-filter-counter-badge">{customRules.length}</span>
-              )}
-            </button>
-
-            {/* Separador vertical: Bloque 2 (Datos del proyecto) | Bloque 3 (Navegación temporal / corte) */}
-            <div className="filter-group-divider" aria-hidden="true" />
 
             {/* Bloque 3: Navegación temporal y selector de escala para todas las vistas */}
             {viewMode === 'mapa' ? (
@@ -7740,7 +8415,7 @@ export default function CronogramaGanttView({
                   </button>
                 </div>
               </>
-            ) : (
+            ) : viewMode !== 'kanban' ? (
               /* En Modo Gantt, Calendario, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
               <>
                 <button
@@ -7804,7 +8479,7 @@ export default function CronogramaGanttView({
                   </button>
                 </div>
               </>
-            )}
+            ) : null}
 
             {/* Separador vertical: Bloque 2 (Tiempo) | Bloque 3 (Capas y Visualización de Cronograma) */}
             {(viewMode === 'gantt' || viewMode === 'calendario' || perspective === 'equipo') && (
@@ -7907,447 +8582,846 @@ export default function CronogramaGanttView({
             {/* Separador vertical: Capas y Visualización | Pantalla y Ajuste */}
             <div className="filter-group-divider" aria-hidden="true" />
 
-            {/* Bloque 5: Ajuste de Pantalla y Cuadrícula */}
-            {(viewMode === 'gantt' || viewMode === 'lista' || viewMode === 'calendario' || viewMode === 'mapa' || perspective === 'equipo') && (
-              <button
-                type="button"
-                className={`btn secondary qm-btn-icon ${isFullscreen ? "active" : ""}`}
-                onClick={toggleFullscreen}
-                data-tooltip={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-                aria-label="Alternar modo pantalla completa"
-              >
-                {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-              </button>
-            )}
+            {/* Botón directo: Filtros avanzados (junto a los demás controles) */}
+            <button
+              type="button"
+              className={`btn secondary custom-filter-trigger-btn qm-btn-icon ${advancedFiltersOpen || customRules.length > 0 ? "active" : ""}`}
+              onClick={() => setAdvancedFiltersOpen((v) => !v)}
+              data-tooltip="Filtros avanzados"
+              aria-label="Condiciones de filtrado avanzado"
+            >
+              <SlidersHorizontal size={15} />
+              {customRules.length > 0 && (
+                <span className="custom-filter-counter-badge">{customRules.length}</span>
+              )}
+            </button>
 
-            {/* Botón directo: Ajustar y ordenar anchos automáticamente */}
+            {/* Botón directo: Ajustar anchos de columnas al contenido / pantalla */}
             <button
               type="button"
               className="btn secondary qm-btn-icon"
               onClick={(e) => {
                 e.stopPropagation();
-                resetColWidths();
+                if (viewMode === 'kanban') {
+                  setKanbanFitColumns(true);
+                  setKanbanFitSignal((n) => n + 1);
+                  setKanbanBoardPrefs((p) => {
+                    const next = { ...p, collapseAllCols: false };
+                    try { localStorage.setItem('qaway-kanban-board-prefs-v1', JSON.stringify(next)); } catch {}
+                    return next;
+                  });
+                  notify('Columnas del tablero ordenadas y ajustadas a pantalla');
+                } else {
+                  resetColWidths();
+                }
               }}
-              data-tooltip="Ajustar anchos de columnas automáticamente"
-              aria-label="Ajustar anchos de columnas al contenido"
+              data-tooltip={viewMode === 'kanban' ? 'Ordenar y ajustar columnas a pantalla' : 'Ajustar anchos de columnas automáticamente'}
+              aria-label={viewMode === 'kanban' ? 'Ordenar y ajustar columnas del tablero a pantalla' : 'Ajustar anchos de columnas al contenido'}
             >
               <ArrowLeftRight size={14} />
             </button>
 
-            {/* Separador vertical: Ajustes | Historial de Deshacer */}
-            <div className="filter-group-divider" aria-hidden="true" />
+            {/* Controles exclusivos de Kanban en Fila 2 (solo ícono, estilo Filtros avanzados) */}
+            {viewMode === 'kanban' && (
+              <>
+                <div className="filter-group-divider" aria-hidden="true" />
+                <div className="filter-dropdown-wrap kanban-toolbar-menu-wrap" style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    className={`btn secondary qm-btn-icon ${kanbanToolbarMenu === 'color' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setKanbanToolbarMenu((m) => (m === 'color' ? null : 'color'));
+                    }}
+                    data-tooltip={kanbanToolbarMenu ? undefined : 'Apariencia y colores de tarjetas'}
+                    aria-label="Apariencia y colores de tarjetas Kanban"
+                  >
+                    <Palette size={15} />
+                  </button>
+                  {kanbanToolbarMenu === 'color' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ left: 0, minWidth: 260, maxWidth: 300, zIndex: 140 }}>
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Apariencia de tarjetas</span>
+                      </div>
+                      <div className="filter-popover-list" style={{ maxHeight: 380 }}>
+                        <div className="filter-popover-group-label">
+                          <span>Estilo de tarjeta</span>
+                        </div>
+                        {([
+                          { id: 'simple', label: 'Simple (sin color)' },
+                          { id: 'border', label: 'Estándar (borde de color)' },
+                          { id: 'tinted', label: 'Pintada (fondo de color)' },
+                        ] as const).map((t) => {
+                          const active = kanbanCardTheme === t.id;
+                          return (
+                            <button
+                              key={t.id}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${active ? 'selected' : ''}`}
+                              onClick={() => {
+                                setKanbanCardTheme(t.id);
+                                try { localStorage.setItem('qaway-kanban-card-theme-v1', t.id); } catch {}
+                              }}
+                            >
+                              <span className="filter-item-main">
+                                <span
+                                  style={{
+                                    width: 14,
+                                    height: 14,
+                                    borderRadius: '50%',
+                                    border: active ? '4px solid #0066ff' : '1.5px solid #cbd5e1',
+                                    background: '#ffffff',
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <span className="filter-item-text">{t.label}</span>
+                              </span>
+                            </button>
+                          );
+                        })}
 
-            {/* Bloque 6: Historial de Deshacer y Rehacer */}
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUndo();
-              }}
-              disabled={history.length === 0}
-              data-tooltip={history.length > 0 ? "Retroceder / Deshacer (Ctrl+Z)" : "Sin cambios para retroceder"}
-              aria-label="Retroceder o deshacer último cambio"
-            >
-              <Undo2 size={14} />
-            </button>
-
-            <button
-              type="button"
-              className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRedo();
-              }}
-              disabled={redoHistory.length === 0}
-              data-tooltip={redoHistory.length > 0 ? "Adelantar / Rehacer (Ctrl+Y)" : "Sin cambios para adelantar"}
-              aria-label="Adelantar o rehacer último cambio"
-            >
-              <Redo2 size={14} />
-            </button>
-
-            {/* Separador vertical: Historial | Restablecer filtros */}
-            <div className="filter-group-divider" aria-hidden="true" />
-
-            {/* Bloque 7: Restablecimiento Universal de Todos los Filtros y Orden */}
-            <button
-              type="button"
-              className="btn secondary clear-btn qm-btn-icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSearch('');
-                if (perspective === 'equipo') {
-                  setEquipoSedeFilter('todas');
-                  setEquipoEstadoOpFilter('todos');
-                  setEquipoEstadoCuentaFilter('todos');
-                  setEquipoAreaFilter('todas');
-                  setEquipoPill('Todos');
-                }
-                setStateFilter('Todos');
-                setTypeFilter('Todos');
-                setSelectedRegions([]);
-                setPhaseFilter('Todas');
-                setGestorFilter('Todos');
-                setMacroFilter('Todos');
-                setSelectedStates([]);
-                setWbsDepthFilter('todos');
-                setWbsRoleFilter('todos');
-                setWbsLevelFilter('todos');
-                setVencimientosFilter('todos');
-                setListaTemporalFilter('Todos');
-                setRangeFrom(DEFAULT_RANGE.from);
-                setRangeTo(DEFAULT_RANGE.to);
-                setTab('Todos');
-                setCustomRules([]);
-                setSelectedEdtCodes([]);
-                setAdvancedFiltersOpen(false);
-                setColFilterOpen(null);
-                setShowBaseline(false);
-                setCalShowBarLabels(true);
-                setCalShowBaseline(false);
-                setShowCriticalPath(false);
-                engine.clearAllFilters();
-                engine.clearSort();
-                resetColWidths();
-                closeMenus();
-                if (viewMode === 'calendario') {
-                  handleTodayCal();
-                } else {
-                  scrollToDate(RANGE_MIN);
-                }
-                notify('Todos los filtros restablecidos');
-              }}
-              data-tooltip="Restablecer todos los filtros"
-              aria-label="Restablecer todos los filtros y limpiar vista"
-            >
-              <RotateCcw size={15} />
-            </button>
-
-            {/* Bloque 8: Extremo Derecho · Botón de Columnas en Azul App Primario */}
-            <div className="filter-dropdown-wrap cols-dropdown-wrap cols-right-aligned">
-              <button
-                type="button"
-                className={`btn primary cols-trigger-main-btn btn-primary-blue ${colsMenuOpen ? "active" : ""}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setColsMenuOpen((v) => !v);
-                }}
-                title={viewMode === 'lista' ? "Configurar columnas de la lista" : "Configurar columnas del cronograma"}
-                data-tooltip="Configurar columnas visibles"
-                aria-label="Configurar columnas visibles de la tabla"
-              >
-                <Columns3 size={15} />
-                <span className="cols-btn-label">Columnas</span>
-              </button>
-
-              {colsMenuOpen && (
-                <div
-                  className="cols-popover"
-                  onClick={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onWheel={(e) => {
-                    e.stopPropagation();
-                    const list = e.currentTarget.querySelector('.cols-pop-list') as HTMLElement | null;
-                    if (list && e.target !== list && !list.contains(e.target as Node)) {
-                      list.scrollTop += e.deltaY;
-                    }
-                  }}
-                >
-                  <div className="cols-pop-head">
-                    <div>
-                      <strong>Columnas de la vista</strong>
-                      <span className="cols-pop-subtitle">Selecciona las columnas que deseas mostrar.</span>
+                        <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                          <span>Criterio de color</span>
+                        </div>
+                        {([
+                          { id: 'status', label: 'Por Estado' },
+                          { id: 'edt', label: 'Por Tipo EDT' },
+                          { id: 'deviation', label: 'Por Desviación' },
+                          { id: 'manual', label: 'Color Manual' },
+                        ] as const).map((c) => {
+                          const active = kanbanColorBy === c.id;
+                          return (
+                            <button
+                              key={c.id}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${active ? 'selected' : ''}`}
+                              onClick={() => {
+                                setKanbanColorBy(c.id);
+                                try { localStorage.setItem('qaway-kanban-color-mode-v1', c.id); } catch {}
+                                if (kanbanCardTheme === 'simple') {
+                                  setKanbanCardTheme('border');
+                                  try { localStorage.setItem('qaway-kanban-card-theme-v1', 'border'); } catch {}
+                                }
+                              }}
+                            >
+                              <span className="filter-item-main">
+                                <span
+                                  style={{
+                                    width: 14,
+                                    height: 14,
+                                    borderRadius: '50%',
+                                    border: active ? '4px solid #0066ff' : '1.5px solid #cbd5e1',
+                                    background: '#ffffff',
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <span className="filter-item-text">{c.label}</span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <button type="button" onClick={() => setColsMenuOpen(false)} title="Cerrar panel">
-                      <X size={14} />
-                    </button>
-                  </div>
-                  <div className="cols-pop-list">
-                    {(() => {
-                      const allMeta = [
-                        ...ALL_COL_META,
-                        ...customCols.map((c) => ({ key: c.key as ColKey, label: c.label, fixed: false })),
-                      ];
-                      const visibleOrdered = visibleCols
-                        .map((k) => allMeta.find((m) => m.key === k))
-                        .filter((m): m is typeof allMeta[number] => Boolean(m));
-                      const hiddenRemaining = allMeta.filter((m) => !visibleCols.includes(m.key));
-                      return [...visibleOrdered, ...hiddenRemaining];
-                    })().map((col) => {
-                      const isVisible = visibleCols.includes(col.key);
-                      const isLocked = col.fixed || col.key === 'code' || col.key === 'name';
-                      return (
-                        <label key={col.key} className={`col-option ${col.fixed ? 'disabled' : ''}`}>
-                          <input
-                            type="checkbox"
-                            checked={isVisible}
-                            disabled={col.fixed}
-                            onChange={() => toggleColVisibility(col.key)}
-                          />
-                          <span className="col-option-name">{col.label}</span>
-                          {col.fixed ? (
-                            <small className="fixed-pill">Fija</small>
-                          ) : isVisible && !isLocked ? (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 2, marginLeft: 'auto' }} onClick={(e) => e.preventDefault()}>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleMoveColumn(col.key, 'left');
-                                }}
-                                title="Mover columna hacia la izquierda (arriba)"
-                                style={{ border: '1px solid #e2e8f0', background: '#fff', borderRadius: 4, width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#475569' }}
-                              >
-                                <ChevronUp size={12} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleMoveColumn(col.key, 'right');
-                                }}
-                                title="Mover columna hacia la derecha (abajo)"
-                                style={{ border: '1px solid #e2e8f0', background: '#fff', borderRadius: 4, width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#475569' }}
-                              >
-                                <ChevronDown size={12} />
-                              </button>
-                            </div>
-                          ) : (
-                            <GripVertical size={13} className="col-grip-icon" />
-                          )}
-                        </label>
-                      );
-                    })}
-                  </div>
-
-                  {/* Botón Destacado: Crear campo personalizado (Abre Modal Centrado) */}
-                  <div className="cols-new-col-section">
-                    <button
-                      type="button"
-                      className="cols-new-col-toggle-btn"
-                      onClick={() => {
-                        setColsMenuOpen(false);
-                        setNewColModalOpen(true);
-                      }}
-                    >
-                      <Plus size={14} />
-                      <span>Crear campo personalizado</span>
-                    </button>
-                  </div>
-
-                  <div className="cols-pop-foot">
-                    <button
-                      type="button"
-                      className="cols-reorder-btn"
-                      onClick={() => {
-                        resetColWidths();
-                        setColsMenuOpen(false);
-                        notify('Anchos de columna auto-ajustados al contenido');
-                      }}
-                    >
-                      <ArrowLeftRight size={13} />
-                      <span>Ajustar anchos al contenido</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="cols-reset-defaults-btn"
-                      onClick={() => {
-                        const isLista = viewMode === 'lista';
-                        const defaultCols = isLista ? LISTA_PRESET_COLS : GANTT_PRESET_COLS;
-                        setVisibleCols(defaultCols);
-                        const storageKey = isLista ? uiKey('visible-cols-lista-v5') : uiKey('visible-cols-gantt-v3');
-                        try {
-                          localStorage.setItem(storageKey, JSON.stringify(defaultCols));
-                        } catch {}
-                        notify('Columnas restablecidas al orden predeterminado');
-                      }}
-                    >
-                      <RotateCcw size={12} />
-                      <span>Restablecer columnas</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </ProjectShellFilters>
-
-          {/* Fila extra expandible de Filtros Personalizados */}
-          {advancedFiltersOpen && (
-            <div className="advanced-filter-row">
-              {/* Sección Rango de Fechas Operativo */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', fontSize: '12px' }}>
-                <span style={{ fontWeight: 650, color: '#334155', display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <CalendarDays size={14} color="#0066ff" />
-                  Rango de Fechas del Proyecto:
-                </span>
-                <span style={{ color: '#64748b' }}>Desde</span>
-                <input
-                  type="date"
-                  value={rangeFrom}
-                  min={RANGE_MIN}
-                  max={rangeTo}
-                  onChange={(e) => setRangeFrom(e.target.value)}
-                  style={{ padding: '3px 8px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: '12px', background: '#fff' }}
-                />
-                <span style={{ color: '#64748b' }}>Hasta</span>
-                <input
-                  type="date"
-                  value={rangeTo}
-                  min={rangeFrom}
-                  max={RANGE_MAX}
-                  onChange={(e) => setRangeTo(e.target.value)}
-                  style={{ padding: '3px 8px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: '12px', background: '#fff' }}
-                />
-                {(rangeFrom !== RANGE_MIN || rangeTo !== RANGE_MAX) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRangeFrom(RANGE_MIN);
-                      setRangeTo(RANGE_MAX);
-                    }}
-                    style={{ background: 'none', border: 'none', color: '#0066ff', cursor: 'pointer', fontWeight: 600, fontSize: '11.5px' }}
-                  >
-                    Restablecer a todo el proyecto
-                  </button>
-                )}
-              </div>
-              <div className="advanced-filter-header">
-                <div className="advanced-filter-title">
-                  <Filter size={14} className="af-title-icon" />
-                  <span>Condiciones de filtrado personalizadas</span>
-                </div>
-                <div className="advanced-filter-actions">
-                  <button
-                    type="button"
-                    className="af-btn-add"
-                    onClick={() => {
-                      const newId = 'rule-' + Date.now();
-                      setCustomRules((prev) => [
-                        ...prev,
-                        { id: newId, field: 'name', op: 'contains', val: '' }
-                      ]);
-                    }}
-                  >
-                    <Plus size={13} />
-                    <span>Agregar condición</span>
-                  </button>
-                  {customRules.length > 0 && (
-                    <button
-                      type="button"
-                      className="af-btn-clear"
-                      onClick={() => {
-                        setCustomRules([]);
-                        notify('Condiciones personalizadas eliminadas');
-                      }}
-                    >
-                      <Trash2 size={13} />
-                      <span>Limpiar reglas</span>
-                    </button>
                   )}
+                </div>
+
+                <div className="filter-dropdown-wrap kanban-toolbar-menu-wrap" style={{ position: 'relative' }}>
                   <button
                     type="button"
-                    className="af-btn-close"
-                    onClick={() => setAdvancedFiltersOpen(false)}
+                    className={`btn secondary qm-btn-icon ${kanbanToolbarMenu === 'view' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setKanbanToolbarMenu((m) => (m === 'view' ? null : 'view'));
+                    }}
+                    data-tooltip={kanbanToolbarMenu ? undefined : 'Densidad de vista Kanban'}
+                    aria-label="Densidad de vista Kanban"
                   >
-                    <X size={14} />
+                    <LayoutGrid size={15} />
                   </button>
-                </div>
-              </div>
-
-              {customRules.length === 0 ? (
-                <div className="af-empty-state">
-                  <span>Sin reglas activas. Pulsa <b>"Agregar condición"</b> para filtrar por estado, avance, responsable o texto.</span>
-                </div>
-              ) : (
-                <div className="af-rules-list">
-                  {customRules.map((rule, idx) => (
-                    <div key={rule.id} className="af-rule-item">
-                      <span className="af-rule-badge">{idx === 0 ? 'Donde' : 'Y'}</span>
-                      <CustomSelect
-                        value={rule.field}
-                        options={[
-                          { value: 'name', label: 'Componente / Subcomponente (Nombre o Código)' },
-                          { value: 'status', label: 'Estado Oficial' },
-                          { value: 'progress', label: 'Avance (%)' },
-                          { value: 'gestor', label: 'Responsable' },
-                          { value: 'region', label: 'Ubicación / Región' },
-                        ]}
-                        onChange={(newField) => {
-                          setCustomRules((prev) =>
-                            prev.map((r) =>
-                              r.id === rule.id
-                                ? {
-                                    ...r,
-                                    field: newField,
-                                    op: newField === 'progress' ? 'gte' : newField === 'name' ? 'contains' : 'eq',
-                                    val: ''
-                                  }
-                                : r
-                            )
+                  {kanbanToolbarMenu === 'view' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ left: 0, minWidth: 280, maxWidth: 320, zIndex: 140 }}>
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Personalizar tablero</span>
+                      </div>
+                      <div className="filter-popover-list" style={{ maxHeight: 420 }}>
+                        <div className="filter-popover-group-label">
+                          <span>Tamaño de tarjeta</span>
+                        </div>
+                        {([
+                          { id: 'compact', label: 'Compacta' },
+                          { id: 'standard', label: 'Estándar' },
+                          { id: 'wide', label: 'Amplia' },
+                        ] as const).map((sz) => {
+                          const active = kanbanBoardPrefs.cardSize === sz.id;
+                          return (
+                            <button
+                              key={sz.id}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${active ? 'selected' : ''}`}
+                              onClick={() => {
+                                setKanbanBoardPrefs((prev) => {
+                                  const next: KanbanBoardPrefs =
+                                    sz.id === 'compact'
+                                      ? { ...prev, cardSize: 'compact', showDates: false, showKeyProps: false }
+                                      : { ...prev, cardSize: sz.id, showDates: true, showKeyProps: true };
+                                  try { localStorage.setItem('qaway-kanban-board-prefs-v1', JSON.stringify(next)); } catch {}
+                                  return next;
+                                });
+                              }}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', borderRadius: '6px', cursor: 'pointer', background: 'transparent', border: 'none', width: '100%' }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span className={`filter-radio ${active ? 'checked' : ''}`}>
+                                  {active && <span className="filter-radio-dot" />}
+                                </span>
+                                <span className="filter-item-text">
+                                  <strong style={{ fontSize: '13px', fontWeight: active ? 600 : 500, color: active ? '#0066ff' : '#1e293b' }}>
+                                    {sz.label}
+                                  </strong>
+                                </span>
+                              </div>
+                            </button>
                           );
+                        })}
+
+                        <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                          <span>Campos visibles en la tarjeta</span>
+                        </div>
+                        {([
+                          { key: 'showDates', label: 'Fechas' },
+                          { key: 'showOwner', label: 'Responsable' },
+                          { key: 'showProgress', label: 'Avance' },
+                          { key: 'showRegion', label: 'Región / Ámbito' },
+                        ] as const).map((fld) => {
+                          const checked = kanbanBoardPrefs[fld.key];
+                          return (
+                            <button
+                              key={fld.key}
+                              type="button"
+                              className={`filter-item-btn filter-item-check ${checked ? 'selected' : ''}`}
+                              onClick={() => {
+                                const nextVal = !checked;
+                                if (fld.key === 'showDates' && nextVal && kanbanBoardPrefs.cardSize === 'compact') {
+                                  setKanbanBoardPrefs((prev) => {
+                                    const next = { ...prev, cardSize: 'standard' as const, showDates: true };
+                                    try { localStorage.setItem('qaway-kanban-board-prefs-v1', JSON.stringify(next)); } catch {}
+                                    return next;
+                                  });
+                                } else {
+                                  updateKanbanPref(fld.key, nextVal);
+                                }
+                              }}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', borderRadius: '6px', cursor: 'pointer', background: 'transparent', border: 'none', width: '100%' }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span className={`filter-checkbox ${checked ? 'checked' : ''}`}>
+                                  {checked && <Check size={10} strokeWidth={3} />}
+                                </span>
+                                <span className="filter-item-text">
+                                  <strong style={{ fontSize: '13px', fontWeight: 500, color: '#1e293b' }}>
+                                    {fld.label}
+                                  </strong>
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+
+                        <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                          <span>Opciones del tablero</span>
+                        </div>
+                        {([
+                          { key: 'showEmptyCols', label: 'Mostrar columnas vacías' },
+                          { key: 'showKeyProps', label: 'Mostrar propiedades clave' },
+                          { key: 'collapseAllCols', label: 'Contraer todas las columnas' },
+                        ] as const).map((opt) => {
+                          const on = kanbanBoardPrefs[opt.key];
+                          return (
+                            <button
+                              key={opt.key}
+                              type="button"
+                              className="filter-item-btn"
+                              onClick={() => updateKanbanPref(opt.key, !on)}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', borderRadius: '6px', cursor: 'pointer', background: 'transparent', border: 'none', width: '100%' }}
+                            >
+                              <span style={{ fontSize: '13px', color: '#1e293b', fontWeight: 500 }}>{opt.label}</span>
+                              <span
+                                style={{
+                                  width: 32,
+                                  height: 18,
+                                  borderRadius: 999,
+                                  background: on ? '#0066ff' : '#cbd5e1',
+                                  position: 'relative',
+                                  transition: 'background 0.15s ease',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    position: 'absolute',
+                                    top: 2,
+                                    left: on ? 16 : 2,
+                                    width: 14,
+                                    height: 14,
+                                    borderRadius: '50%',
+                                    background: '#ffffff',
+                                    transition: 'left 0.15s ease',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                                  }}
+                                />
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="filter-dropdown-wrap kanban-toolbar-menu-wrap" style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    className={`btn secondary qm-btn-icon ${kanbanToolbarMenu === 'board' ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setKanbanToolbarMenu((m) => (m === 'board' ? null : 'board'));
+                    }}
+                    data-tooltip={kanbanToolbarMenu ? undefined : 'Configurar columnas y límites WIP'}
+                    aria-label="Configurar columnas y límites WIP del Kanban"
+                  >
+                    <Settings2 size={15} />
+                  </button>
+                  {kanbanToolbarMenu === 'board' && (
+                    <div className="filter-card-popover" onClick={(e) => e.stopPropagation()} style={{ left: 0, minWidth: 310, maxWidth: 350, zIndex: 140 }}>
+                      <div className="filter-popover-title filter-popover-title-row">
+                        <span>Columnas y límites WIP</span>
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => {
+                            setKanbanStatusColumns(STATUS_COLUMNS);
+                            setKanbanWipLimits(KANBAN_DEFAULT_WIP_LIMITS);
+                            try {
+                              localStorage.setItem('qaway-kanban-columns-v1', JSON.stringify(STATUS_COLUMNS));
+                              localStorage.setItem('qaway-kanban-wip-v1', JSON.stringify(KANBAN_DEFAULT_WIP_LIMITS));
+                            } catch {}
+                          }}
+                        >
+                          Restablecer
+                        </button>
+                      </div>
+                      <div className="filter-popover-list" style={{ maxHeight: 340 }}>
+                        <div className="filter-popover-group-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>Nombre de columna</span>
+                          <span>Límite WIP</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '4px 6px 8px' }}>
+                          {kanbanStatusColumns.map((c) => (
+                            <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ width: 9, height: 9, borderRadius: '50%', background: c.dotColor, flexShrink: 0 }} />
+                              <input
+                                type="text"
+                                value={c.label}
+                                onChange={(e) => {
+                                  const next = kanbanStatusColumns.map((x) => (x.id === c.id ? { ...x, label: e.target.value } : x));
+                                  setKanbanStatusColumns(next);
+                                  try { localStorage.setItem('qaway-kanban-columns-v1', JSON.stringify(next)); } catch {}
+                                }}
+                                style={{ flex: 1, minWidth: 0, height: 32, fontSize: 12.5, padding: '0 10px', border: '1px solid #e2e8f0', borderRadius: 8, background: '#f8fafc', color: '#0f172a', outline: 'none' }}
+                              />
+                              <input
+                                type="number"
+                                min={0}
+                                value={kanbanWipLimits[c.id] ?? 0}
+                                onChange={(e) => handleKanbanSaveWip(c.id, Math.max(0, Number(e.target.value) || 0))}
+                                title="Límite WIP (0 = sin límite)"
+                                style={{ width: 54, height: 32, fontSize: 12, padding: '0 6px', border: '1px solid #e2e8f0', borderRadius: 8, background: '#f8fafc', color: '#0f172a', textAlign: 'center', outline: 'none' }}
+                              />
+                              {kanbanStatusColumns.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = kanbanStatusColumns.filter((x) => x.id !== c.id);
+                                    setKanbanStatusColumns(next);
+                                    try { localStorage.setItem('qaway-kanban-columns-v1', JSON.stringify(next)); } catch {}
+                                    notify(`Columna "${c.label}" eliminada`);
+                                  }}
+                                  title="Eliminar columna"
+                                  aria-label={`Eliminar columna ${c.label}`}
+                                  style={{ border: 0, background: 'transparent', color: '#94a3b8', cursor: 'pointer', width: 28, height: 28, borderRadius: 7, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, padding: '10px 6px 4px', borderTop: '1px solid #e2e8f0' }}>
+                          <input
+                            type="text"
+                            placeholder="Nueva columna..."
+                            value={kanbanNewColTitle}
+                            onChange={(e) => setKanbanNewColTitle(e.target.value)}
+                            style={{ flex: 1, minWidth: 0, height: 32, fontSize: 12.5, padding: '0 10px', border: '1px solid #e2e8f0', borderRadius: 8, background: '#ffffff', color: '#0f172a', outline: 'none' }}
+                          />
+                          <button
+                            type="button"
+                            className="btn primary btn-primary-blue"
+                            style={{ height: 32, padding: '0 12px', fontSize: 12, borderRadius: 8 }}
+                            onClick={() => {
+                              if (!kanbanNewColTitle.trim()) return;
+                              const palette = ['#0066ff', '#16a34a', '#f59e0b', '#7c3aed', '#0891b2', '#ec4899', '#64748b'];
+                              const next = [...kanbanStatusColumns, { id: `custom-${Date.now()}`, label: kanbanNewColTitle.trim(), dotColor: palette[kanbanStatusColumns.length % palette.length], isCustom: true }];
+                              setKanbanStatusColumns(next);
+                              try { localStorage.setItem('qaway-kanban-columns-v1', JSON.stringify(next)); } catch {}
+                              setKanbanNewColTitle('');
+                            }}
+                          >
+                            Agregar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+        </ProjectShellFilters>
+          )}
+
+          {/* Panel de Filtros Avanzados (5 columnas + condiciones personalizadas) */}
+          {advancedFiltersOpen && ((content) => {
+            const rootComps = items.filter((it) => !it.parentId);
+            const filteredPersons = availableGestoresCascaded.filter((g) =>
+              !afPersonSearch.trim() || g.toLowerCase().includes(afPersonSearch.trim().toLowerCase())
+            );
+            const visiblePersons = afPersonSearch.trim() || afShowAllPersons ? filteredPersons : filteredPersons.slice(0, 3);
+            const filteredPhases = PROJECT_PHASES_CATALOG.filter((f) =>
+              !afTagSearch.trim() || `${f.code} ${f.name}`.toLowerCase().includes(afTagSearch.trim().toLowerCase())
+            );
+            const visiblePhases = afTagSearch.trim() || afShowAllPhases ? filteredPhases : filteredPhases.slice(0, 3);
+            const phaseTones = ['blue', 'violet', 'green', 'amber', 'slate'];
+            const stateChoices = [
+              { id: 'Pendiente', label: 'Pendiente', dot: '#94a3b8' },
+              { id: 'En proceso', label: 'En proceso', dot: '#3b82f6' },
+              { id: 'Con retraso', label: 'Con retraso', dot: '#ef4444' },
+              { id: 'Completados', label: 'Completado', dot: '#10b981' },
+            ];
+            const resetAllAdvanced = () => {
+              setRangeFrom(RANGE_MIN);
+              setRangeTo(RANGE_MAX);
+              setAfDatePreset('all');
+              setAfOnlyDeadlines(false);
+              setGestorFilter('Todos');
+              setAfPersonSearch('');
+              setSelectedStates([]);
+              setPhaseFilter('Todas');
+              setAfTagSearch('');
+              setSelectedRegions([]);
+              setSelectedEdtCodes([]);
+              setCustomRules([]);
+              notify('Filtros avanzados restablecidos');
+            };
+            const applyPresetDates = (preset: 'all' | 'month' | '30d' | 'custom') => {
+              setAfDatePreset(preset);
+              if (preset === 'all') {
+                setRangeFrom(RANGE_MIN);
+                setRangeTo(RANGE_MAX);
+              } else if (preset === 'month') {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+                setRangeFrom(`${y}-${m}-01`);
+                setRangeTo(`${y}-${m}-${String(lastDay).padStart(2, '0')}`);
+              } else if (preset === '30d') {
+                const now = new Date();
+                const end = new Date(now.getTime() + 30 * 86400000);
+                setRangeFrom(now.toISOString().slice(0, 10));
+                setRangeTo(end.toISOString().slice(0, 10));
+              }
+            };
+            return (
+              <div className="advanced-filter-row" role="region" aria-label="Filtros avanzados">
+                <div className="advanced-filter-header">
+                  <div className="advanced-filter-title">
+                    <Filter size={15} className="af-title-icon" />
+                    <span>Filtros avanzados</span>
+                  </div>
+                  <div className="advanced-filter-actions">
+                    <button
+                      type="button"
+                      className="af-btn-add"
+                      onClick={() => {
+                        const newId = 'rule-' + Date.now();
+                        setCustomRules((prev) => [
+                          ...prev,
+                          { id: newId, field: 'name', op: 'contains', val: '' },
+                        ]);
+                      }}
+                    >
+                      <Plus size={13} />
+                      <span>Agregar condición</span>
+                    </button>
+                    <button type="button" className="af-btn-reset-all" onClick={resetAllAdvanced}>
+                      <RotateCcw size={13} />
+                      <span>Limpiar filtros</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="af-btn-close"
+                      aria-label="Cerrar filtros avanzados"
+                      onClick={() => setAdvancedFiltersOpen(false)}
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="af-grid-5">
+                  {/* Columna 1: Por fechas */}
+                  <div className="af-col">
+                    <div className="af-col-title">
+                      <CalendarDays size={14} className="af-col-icon" />
+                      <span>Por fechas</span>
+                    </div>
+                    <select
+                      className="af-select-clean"
+                      aria-label="Preajuste de fechas"
+                      value={afDatePreset}
+                      onChange={(e) => applyPresetDates(e.target.value as 'all' | 'month' | '30d' | 'custom')}
+                    >
+                      <option value="custom">Rango personalizado</option>
+                      <option value="all">Todo el proyecto</option>
+                      <option value="month">Este mes</option>
+                      <option value="30d">Próximos 30 días</option>
+                    </select>
+                    <div className="af-date-pair">
+                      <input
+                        type="date"
+                        className="af-date-input"
+                        aria-label="Fecha desde"
+                        value={rangeFrom}
+                        min={RANGE_MIN}
+                        max={rangeTo}
+                        onChange={(e) => {
+                          setAfDatePreset('custom');
+                          setRangeFrom(e.target.value);
                         }}
                       />
-
-                      <CustomSelect
-                        className="af-select-op"
-                        value={rule.op}
-                        options={
-                          rule.field === 'name'
-                            ? [
-                                { value: 'contains', label: 'Contiene' },
-                                { value: 'not_contains', label: 'No contiene' },
-                              ]
-                            : rule.field === 'status'
-                            ? [
-                                { value: 'eq', label: 'Es igual a' },
-                                { value: 'neq', label: 'No es igual a' },
-                              ]
-                            : rule.field === 'progress'
-                            ? [
-                                { value: 'gte', label: 'Mayor o igual a (≥)' },
-                                { value: 'lte', label: 'Menor o igual a (≤)' },
-                                { value: 'eq', label: 'Exactamente igual a (=)' },
-                              ]
-                            : [
-                                { value: 'contains', label: 'Contiene / Es' },
-                                { value: 'neq', label: 'No contiene' },
-                              ]
-                        }
-                        onChange={(newOp) => {
-                          setCustomRules((prev) =>
-                            prev.map((r) => (r.id === rule.id ? { ...r, op: newOp } : r))
-                          );
+                      <span className="af-date-sep">a</span>
+                      <input
+                        type="date"
+                        className="af-date-input"
+                        aria-label="Fecha hasta"
+                        value={rangeTo}
+                        min={rangeFrom}
+                        max={RANGE_MAX}
+                        onChange={(e) => {
+                          setAfDatePreset('custom');
+                          setRangeTo(e.target.value);
                         }}
                       />
+                    </div>
+                    <label className="af-check-row af-check-subtle">
+                      <input
+                        type="checkbox"
+                        checked={afOnlyDeadlines}
+                        onChange={(e) => setAfOnlyDeadlines(e.target.checked)}
+                      />
+                      <span>Solo fechas límite</span>
+                    </label>
+                  </div>
 
-                      {rule.field === 'status' ? (
+                  {/* Columna 2: Por responsable */}
+                  <div className="af-col af-col-bordered">
+                    <div className="af-col-title">
+                      <Users size={14} className="af-col-icon" />
+                      <span>Por responsable</span>
+                    </div>
+                    <div className="af-search-box">
+                      <Search size={13} className="af-search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Buscar persona..."
+                        value={afPersonSearch}
+                        onChange={(e) => setAfPersonSearch(e.target.value)}
+                      />
+                    </div>
+                    <div className="af-check-list">
+                      <label className="af-check-row">
+                        <input
+                          type="checkbox"
+                          checked={gestorFilter === 'Todos'}
+                          onChange={() => setGestorFilter('Todos')}
+                        />
+                        <span className="af-avatar-mini af-avatar-all">
+                          <Users size={11} />
+                        </span>
+                        <span>Todos</span>
+                      </label>
+                      {visiblePersons.map((gName) => {
+                        const checked = gestorFilter === gName;
+                        return (
+                          <label key={gName} className="af-check-row">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => setGestorFilter(checked ? 'Todos' : gName)}
+                            />
+                            <span className="af-avatar-mini">{getGestorInitials(gName)}</span>
+                            <span className="af-check-label">{gName}</span>
+                          </label>
+                        );
+                      })}
+                      {!afPersonSearch.trim() && filteredPersons.length > 3 && (
+                        <button
+                          type="button"
+                          className="af-more-btn"
+                          onClick={() => setAfShowAllPersons((v) => !v)}
+                        >
+                          {afShowAllPersons ? 'Ver menos' : `+ Ver más (${filteredPersons.length - 3})`}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Columna 3: Por estado */}
+                  <div className="af-col af-col-bordered">
+                    <div className="af-col-title">
+                      <Flag size={14} className="af-col-icon" />
+                      <span>Por estado</span>
+                    </div>
+                    <div className="af-check-list">
+                      <label className="af-check-row">
+                        <input
+                          type="checkbox"
+                          checked={selectedStates.length === 0}
+                          onChange={() => setSelectedStates([])}
+                        />
+                        <span>Todos</span>
+                      </label>
+                      {stateChoices.map((st) => {
+                        const checked = selectedStates.includes(st.id);
+                        return (
+                          <label key={st.id} className="af-check-row">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleStateFilter(st.id)}
+                            />
+                            <span className="af-dot" style={{ background: st.dot }} />
+                            <span>{st.label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Columna 4: Por fase / etiquetas */}
+                  <div className="af-col af-col-bordered">
+                    <div className="af-col-title">
+                      <Tag size={14} className="af-col-icon" />
+                      <span>Por fase</span>
+                    </div>
+                    <div className="af-search-box">
+                      <Search size={13} className="af-search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Buscar fase..."
+                        value={afTagSearch}
+                        onChange={(e) => setAfTagSearch(e.target.value)}
+                      />
+                    </div>
+                    <div className="af-check-list">
+                      <label className="af-check-row">
+                        <input
+                          type="checkbox"
+                          checked={phaseFilter === 'Todas'}
+                          onChange={() => setPhaseFilter('Todas')}
+                        />
+                        <span>Todas</span>
+                      </label>
+                      {visiblePhases.map((fase, idx) => {
+                        const checked = phaseFilter === fase.id || phaseFilter === fase.name;
+                        const tone = phaseTones[idx % phaseTones.length];
+                        return (
+                          <label key={fase.id} className="af-check-row">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => setPhaseFilter(checked ? 'Todas' : fase.id)}
+                            />
+                            <span className={`af-phase-pill tone-${tone}`}>{fase.name}</span>
+                          </label>
+                        );
+                      })}
+                      {!afTagSearch.trim() && filteredPhases.length > 3 && (
+                        <button
+                          type="button"
+                          className="af-more-btn"
+                          onClick={() => setAfShowAllPhases((v) => !v)}
+                        >
+                          {afShowAllPhases ? 'Ver menos' : `+ Ver más (${filteredPhases.length - 3})`}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Columna 5: Por ubicación y componente */}
+                  <div className="af-col af-col-bordered">
+                    <div className="af-col-title">
+                      <MapPin size={14} className="af-col-icon" />
+                      <span>Por ubicación</span>
+                    </div>
+                    <select
+                      className="af-select-clean"
+                      aria-label="Filtrar por ubicación o región"
+                      value={selectedRegions.length === 1 ? selectedRegions[0] : ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSelectedRegions(val ? [val] : []);
+                      }}
+                    >
+                      <option value="">Todas las regiones</option>
+                      {REGIONES_PROYECTO.map((reg) => (
+                        <option key={reg.name} value={reg.name}>
+                          {reg.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="af-col-title" style={{ marginTop: 10 }}>
+                      <Layers size={14} className="af-col-icon" />
+                      <span>Por componente</span>
+                    </div>
+                    <select
+                      className="af-select-clean"
+                      aria-label="Filtrar por componente"
+                      value={selectedEdtCodes.length === 1 ? selectedEdtCodes[0] : ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSelectedEdtCodes(val ? [val] : []);
+                      }}
+                    >
+                      <option value="">Todos los componentes</option>
+                      {rootComps.map((comp) => (
+                        <option key={comp.id} value={comp.code || comp.id}>
+                          {comp.code ? `${comp.code} · ${comp.name}` : comp.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {customRules.length > 0 && (
+                  <div className="af-rules-list">
+                    {customRules.map((rule, idx) => (
+                      <div key={rule.id} className="af-rule-item">
+                        <span className="af-rule-badge">{idx === 0 ? 'Donde' : 'Y'}</span>
                         <CustomSelect
-                          className="af-select-val"
-                          value={rule.val}
+                          value={rule.field}
                           options={[
-                            { value: '', label: 'Seleccionar estado...' },
-                            ...STATUS_OPTIONS.map((st) => ({
-                              value: st.toLowerCase(),
-                              label: st,
-                            })),
+                            { value: 'name', label: 'Componente / Subcomponente (Nombre o Código)' },
+                            { value: 'status', label: 'Estado Oficial' },
+                            { value: 'progress', label: 'Avance (%)' },
+                            { value: 'gestor', label: 'Responsable' },
+                            { value: 'region', label: 'Ubicación / Región' },
                           ]}
-                          onChange={(v) => {
+                          onChange={(newField) => {
                             setCustomRules((prev) =>
-                              prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
+                              prev.map((r) =>
+                                r.id === rule.id
+                                  ? {
+                                      ...r,
+                                      field: newField,
+                                      op: newField === 'progress' ? 'gte' : newField === 'name' ? 'contains' : 'eq',
+                                      val: '',
+                                    }
+                                  : r
+                              )
                             );
                           }}
                         />
-                      ) : rule.field === 'progress' ? (
-                        <div className="af-input-group">
+
+                        <CustomSelect
+                          className="af-select-op"
+                          value={rule.op}
+                          options={
+                            rule.field === 'name'
+                              ? [
+                                  { value: 'contains', label: 'Contiene' },
+                                  { value: 'not_contains', label: 'No contiene' },
+                                ]
+                              : rule.field === 'status'
+                              ? [
+                                  { value: 'eq', label: 'Es igual a' },
+                                  { value: 'neq', label: 'No es igual a' },
+                                ]
+                              : rule.field === 'progress'
+                              ? [
+                                  { value: 'gte', label: 'Mayor o igual a (≥)' },
+                                  { value: 'lte', label: 'Menor o igual a (≤)' },
+                                  { value: 'eq', label: 'Exactamente igual a (=)' },
+                                ]
+                              : [
+                                  { value: 'contains', label: 'Contiene / Es' },
+                                  { value: 'neq', label: 'No contiene' },
+                                ]
+                          }
+                          onChange={(newOp) => {
+                            setCustomRules((prev) =>
+                              prev.map((r) => (r.id === rule.id ? { ...r, op: newOp } : r))
+                            );
+                          }}
+                        />
+
+                        {rule.field === 'status' ? (
+                          <CustomSelect
+                            className="af-select-val"
+                            value={rule.val}
+                            options={[
+                              { value: '', label: 'Seleccionar estado...' },
+                              ...STATUS_OPTIONS.map((st) => ({
+                                value: st.toLowerCase(),
+                                label: st,
+                              })),
+                            ]}
+                            onChange={(v) => {
+                              setCustomRules((prev) =>
+                                prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
+                              );
+                            }}
+                          />
+                        ) : rule.field === 'progress' ? (
+                          <div className="af-input-group">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              placeholder="Ej. 50"
+                              className="af-input af-input-num"
+                              value={rule.val}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                setCustomRules((prev) =>
+                                  prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
+                                );
+                              }}
+                            />
+                            <span className="af-input-affix">%</span>
+                          </div>
+                        ) : (
                           <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            placeholder="Ej. 50"
-                            className="af-input af-input-num"
+                            type="text"
+                            placeholder={
+                              rule.field === 'gestor'
+                                ? 'Escribe nombre del responsable...'
+                                : rule.field === 'region'
+                                ? 'Escribe sede o región...'
+                                : 'Término a buscar...'
+                            }
+                            className="af-input"
                             value={rule.val}
                             onChange={(e) => {
                               const v = e.target.value;
@@ -8356,44 +9430,51 @@ export default function CronogramaGanttView({
                               );
                             }}
                           />
-                          <span className="af-input-affix">%</span>
-                        </div>
-                      ) : (
-                        <input
-                          type="text"
-                          placeholder={
-                            rule.field === 'gestor'
-                              ? 'Escribe nombre del responsable...'
-                              : rule.field === 'region'
-                              ? 'Escribe sede o región...'
-                              : 'Término a buscar...'
-                          }
-                          className="af-input"
-                          value={rule.val}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            setCustomRules((prev) =>
-                              prev.map((r) => (r.id === rule.id ? { ...r, val: v } : r))
-                            );
-                          }}
-                        />
-                      )}
+                        )}
 
-                      <button
-                        type="button"
-                        className="af-btn-remove"
-                        onClick={() => {
-                          setCustomRules((prev) => prev.filter((r) => r.id !== rule.id));
-                        }}
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-                  ))}
+                        <button
+                          type="button"
+                          className="af-btn-remove"
+                          onClick={() => {
+                            setCustomRules((prev) => prev.filter((r) => r.id !== rule.id));
+                          }}
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="af-footer">
+                  <div className="af-footer-info">
+                    <Info size={15} className="af-footer-icon" />
+                    <span>Aplica filtros para encontrar rápidamente los componentes que necesitas.</span>
+                  </div>
+                  <div className="af-footer-actions">
+                    <button
+                      type="button"
+                      className="af-btn-cancel"
+                      onClick={() => setAdvancedFiltersOpen(false)}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className="af-btn-apply"
+                      onClick={() => {
+                        setAdvancedFiltersOpen(false);
+                        notify('Filtros aplicados al cronograma');
+                      }}
+                    >
+                      <Filter size={13} />
+                      <span>Aplicar filtros</span>
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            );
+          })()}
 
 
           {/* Vistas específicas de perspectiva Equipo */}
@@ -9105,6 +10186,16 @@ export default function CronogramaGanttView({
                 notify(`Estado actualizado a: ${nextStatus}`);
               }}
               formatDatePE={formatDatePE}
+              resetSignal={kanbanResetSignal}
+              cardThemeProp={kanbanCardTheme}
+              colorByProp={kanbanColorBy}
+              densityProp={kanbanDensity}
+              statusColumnsProp={kanbanStatusColumns}
+              wipLimitsProp={kanbanWipLimits}
+              onSaveWipProp={handleKanbanSaveWip}
+              boardPrefsProp={kanbanBoardPrefs}
+              fitColumnsProp={kanbanFitColumns}
+              fitSignal={kanbanFitSignal}
             />
           )}
 

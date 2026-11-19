@@ -73,6 +73,21 @@
 --     A-6 §0 (aborta ANTES de insertar); RLS → ejecutar con service_role (M-7.4);
 --     updated_at → explícito en cada INSERT/UPDATE (no depende de triggers de 0004).
 -- ==============================================================================
+-- v3.2 (2026-11-18) · EJECUCIÓN REAL Etapa 7 Fase 1 (autorización “opcion a”):
+--   · v_empresa_default = 8bbc04cb-f030-48cc-904e-954c5b5af813 (tenant DIGERE MINEDU)
+--     para p1 “MINEDU · Dotación 2026”.
+--   · WBS EFECTIVO único por (proyecto_id, wbs_eff) para cumplir uq_gp_nodos_edt_wbs
+--     SIN mutar legado (evidencia: 6614 ítems con code vacío, 3 con code '1.8' duplicado):
+--       - btrim(code) vacío  -> wbs_eff = id
+--       - code duplicado en su (project_id, btrim(code)) -> wbs_eff = btrim(code)||'::'||id
+--       - resto -> wbs_eff = btrim(code)
+--     Trazabilidad: metadata.legacy.code conserva el original; se añaden
+--     metadata.wbs_code_original y metadata.wbs_code_desambiguado. Prevalidación A-6
+--     de nodos alineada al wbs_eff.
+--   · Corrida gp_backfill_v3_20261113_0100 COMPLETADA (6956): 1 proyecto, 6704 nodos,
+--     251 unidades estampadas; conteos=legado, huérfanos 0, WBS duplicados 0.
+--     Evidencia: 7-Bitacoras/20261118-etapa7-fase1-backfill-0100-aplicado.md
+-- ==============================================================================
 -- REQUISITOS PREVIOS (M-7) — verificar TODO antes de ejecutar este script:
 --   1. Migraciones 0001 → 0002 → 0003 → 0004 aplicadas EN ORDEN en el entorno destino.
 --   2. Esquema legacy vigente aplicado (supabase\01…02 mínimo): gestor_proyectos,
@@ -86,29 +101,26 @@
 --   3. Tablas de plataforma existentes: tenants, users (FK de gp_proyectos/gp_personas),
 --      public.user_app_roles (helpers RLS de 0004 v2) y auth.uid() disponible.
 --   4. Ejecutar con service_role (bypassa RLS) y con v_empresa_default ajustada al
---      tenant real (placeholder 00000000-0000-0000-0000-000000000001).
+--      tenant real.
 -- ==============================================================================
 
 DO $$
 DECLARE
   v_corrida_key text := 'gp_backfill_v3_20261113_0100'; -- (A-3) clave nueva: preserva el registro de corridas previas
   v_corrida_id uuid;
-  v_empresa_default uuid := '00000000-0000-0000-0000-000000000001'; -- AJUSTAR tenant/empresa real
+  v_empresa_default uuid := '8bbc04cb-f030-48cc-904e-954c5b5af813'; -- AJUSTADO (opción A, DIGERE MINEDU) 18-nov-2026 Etapa 7 Fase 1
   v_proyectos_ins bigint := 0;
   v_unidades_ins bigint := 0; -- unidades ESTAMPADAS (legacy_source_id/is_deleted), no insertadas
   v_nodos_ins bigint := 0;
 BEGIN
   -- Registrar corrida (idempotente)
   INSERT INTO public.gp_corridas_migracion (corrida_key, descripcion, origen, destino, estado)
-  VALUES (v_corrida_key, 'Backfill gestor_* -> gp_* (v3, mapeo corregido 2026-11-13)', 'gestor_proyectos,gestor_cronograma_items,gestor_unidades', 'gp_proyectos,gp_nodos_edt + estampado aditivo en gestor_unidades', 'iniciada')
+  VALUES (v_corrida_key, 'Backfill gestor_* -> gp_* (v3.2 ejecutado 2026-11-18: tenant DIGERE MINEDU, wbs efectivo único)', 'gestor_proyectos,gestor_cronograma_items,gestor_unidades', 'gp_proyectos,gp_nodos_edt + estampado aditivo en gestor_unidades', 'iniciada')
   ON CONFLICT (corrida_key) DO UPDATE SET estado = 'iniciada', iniciado_at = now(), finalizado_at = NULL;
 
   SELECT id INTO v_corrida_id FROM public.gp_corridas_migracion WHERE corrida_key = v_corrida_key;
 
-  -- 0) PRE-validación de duplicados (A-6): las restricciones UNIQUE uq_gp_proyectos_
-  --    empresa_codigo y uq_gp_nodos_edt_wbs abortarían la corrida a mitad de camino
-  --    (transacción revertida). Detectarlas ANTES de insertar y fallar con reporte
-  --    claro: la corrida queda 'fallida' vía el handler de excepciones y NADA se inserta.
+  -- 0) PRE-validación de duplicados (A-6)
   IF to_regclass('public.gestor_proyectos') IS NOT NULL THEN
     IF EXISTS (
       SELECT 1 FROM public.gestor_proyectos
@@ -130,13 +142,26 @@ BEGIN
     END IF;
   END IF;
 
+  -- A-6 nodos: validar contra WBS EFECTIVO (vacío->id, duplicado->code::id)
   IF to_regclass('public.gestor_cronograma_items') IS NOT NULL THEN
     IF EXISTS (
-      SELECT 1 FROM public.gestor_cronograma_items
-      GROUP BY project_id, COALESCE(code, id)
-      HAVING count(*) > 1
+      SELECT 1 FROM (
+        SELECT project_id, wbs_eff, count(*) AS n
+        FROM (
+          SELECT
+            project_id,
+            CASE
+              WHEN btrim(COALESCE(code,'')) = '' THEN id
+              WHEN count(*) OVER (PARTITION BY project_id, btrim(code)) > 1 THEN btrim(code) || '::' || id
+              ELSE btrim(code)
+            END AS wbs_eff
+          FROM public.gestor_cronograma_items
+        ) e
+        GROUP BY project_id, wbs_eff
+        HAVING count(*) > 1
+      ) x
     ) THEN
-      RAISE EXCEPTION 'PREVALIDACION [A-6]: codigos duplicados por proyecto en gestor_cronograma_items colisionarian con uq_gp_nodos_edt_wbs (proyecto_id, wbs_code). Consolidar/corregir los code en origen antes de ejecutar el backfill.';
+      RAISE EXCEPTION 'PREVALIDACION [A-6]: wbs efectivo duplicado en gestor_cronograma_items (inesperado). Revisar datos antes de ejecutar el backfill.';
     END IF;
   END IF;
 
@@ -150,8 +175,6 @@ BEGIN
         COALESCE(p.code, p.id) AS codigo_proyecto,
         COALESCE(p.name, p.code, p.id) AS nombre,
         p.subtext, p.region, p.budget, p.sponsor, p.risk_level, p.metodologia,
-        -- (corr. 2) nivel_riesgo: SOLO el valor original, normalizado, si pertenece al dominio.
-        -- Sin default 'medio'; sin reinterprete de estados ('Completado' → NULL + revisión).
         CASE lower(btrim(COALESCE(p.risk_level,'')))
           WHEN 'bajo'    THEN 'bajo'
           WHEN 'medio'   THEN 'medio'
@@ -160,10 +183,6 @@ BEGIN
           WHEN 'critico' THEN 'critico'
           ELSE NULL
         END AS nivel_riesgo,
-        -- (corr. 3/A-4/A-5) presupuesto: conversión VALIDADA en 2 pasos (coma decimal
-        -- internacional vs. comas de miles PEN, ver laterales br/bc), guardia de
-        -- overflow (>=17 dígitos no cabe en numeric(18,2)) y > 0; si no valida →
-        -- NULL (el original se conserva en metadata.presupuesto_original).
         CASE
           WHEN bc.b_num ~ '^\d+(\.\d{1,2})?$'
                AND bc.b_num !~ '\d{17,}'
@@ -171,18 +190,16 @@ BEGIN
             THEN bc.b_num::numeric(18,2)
           ELSE NULL
         END AS presupuesto,
-        -- (corr. 3) moneda: SOLO si el texto original la evidencia. Sin PEN por defecto.
         CASE
           WHEN lower(COALESCE(p.budget,'')) ~ 's/|pen|sol(es)?' THEN 'PEN'
           WHEN lower(COALESCE(p.budget,'')) ~ 'usd|\$'          THEN 'USD'
           ELSE NULL
         END AS moneda,
-        -- (corr. 1/2/3) Bandera de revisión por campo, SOLO cuando falta evidencia:
         (
           SELECT COALESCE(jsonb_agg(t.item ORDER BY t.ord), '[]'::jsonb)
           FROM (
             SELECT 1 AS ord, 'estado'::text AS item
-            UNION ALL SELECT 2, 'subtext'      -- significado no confirmado: no se migra [corr. 1]
+            UNION ALL SELECT 2, 'subtext'
             UNION ALL SELECT 3, 'riesgo'
                      WHERE btrim(COALESCE(p.risk_level,'')) <> ''
                        AND lower(btrim(COALESCE(p.risk_level,''))) NOT IN ('bajo','medio','alto','crítico','critico')
@@ -197,8 +214,6 @@ BEGIN
           ) t
         ) AS revision
       FROM public.gestor_proyectos p
-      -- (A-4/B-9) Lateral en 2 pasos: detectar coma decimal ANTES de eliminar comas;
-      -- signo negativo o texto con '-' = ambiguo → sin conversión (NULL + bandera).
       CROSS JOIN LATERAL (
         SELECT regexp_replace(COALESCE(p.budget,''), '[^\d.,]', '', 'g') AS b_raw,
                COALESCE(p.budget,'') ~ '-' AS tiene_guion
@@ -206,11 +221,11 @@ BEGIN
       CROSS JOIN LATERAL (
         SELECT CASE
                  WHEN br.b_raw = '' OR br.tiene_guion
-                   THEN NULL::text                                -- sin valor o ambiguo: NO convertir [B-9]
-                 WHEN br.b_raw ~ '^\d{1,3}(\.\d{3})*,\d{1,2}$'    -- miles con punto + coma decimal (1.850.000,50)
-                   OR br.b_raw ~ '^\d+,\d{1,2}$'                  -- coma decimal simple (850,50)
+                   THEN NULL::text
+                 WHEN br.b_raw ~ '^\d{1,3}(\.\d{3})*,\d{1,2}$'
+                   OR br.b_raw ~ '^\d+,\d{1,2}$'
                    THEN replace(replace(br.b_raw, '.', ''), ',', '.')
-                 ELSE regexp_replace(br.b_raw, ',', '', 'g')      -- comas = miles PEN (850,000)
+                 ELSE regexp_replace(br.b_raw, ',', '', 'g')
                END AS b_num
       ) bc
     )
@@ -225,14 +240,14 @@ BEGIN
       v_empresa_default,
       m.codigo_proyecto,
       m.nombre,
-      NULL,                       -- descripcion: no se inventa ni concatena [corr. 1]
-      NULL,                       -- estado_codigo: sin evidencia; revisión manual [corr. 2]
-      m.region,                   -- ambito: equivalencia confirmada ("Zona/Ámbito Operativo" en modal y edición)
-      m.metodologia,              -- metodologia: equivalencia confirmada (mismo concepto en modal y legacy)
-      m.nivel_riesgo,             -- valor original conservado o NULL [corr. 2]
-      m.sponsor,                  -- patrocinador: equivalencia confirmada ("Patrocinador/Stakeholder" en modal)
-      m.presupuesto,              -- validado [corr. 3]
-      m.moneda,                   -- evidenciada o NULL [corr. 3]
+      NULL,
+      NULL,
+      m.region,
+      m.metodologia,
+      m.nivel_riesgo,
+      m.sponsor,
+      m.presupuesto,
+      m.moneda,
       NULL::date, NULL::date,
       jsonb_build_object(
         'legacy', jsonb_build_object(
@@ -240,8 +255,8 @@ BEGIN
           'subtext', m.subtext, 'budget', m.budget, 'sponsor', m.sponsor,
           'risk_level', m.risk_level, 'metodologia', m.metodologia
         ),
-        'presupuesto_original', m.budget,   -- dato original conservado a nivel raíz [corr. 3]
-        'revision_pendiente', m.revision,   -- bandera por campo [corr. 1/2/3]
+        'presupuesto_original', m.budget,
+        'revision_pendiente', m.revision,
         'corrida_key', v_corrida_key
       ),
       m.legacy_id,
@@ -253,23 +268,19 @@ BEGIN
     GET DIAGNOSTICS v_proyectos_ins = ROW_COUNT;
   END IF;
 
-  -- 2) Unidades territoriales (v3): NO existe gp_unidades_territoriales
-  --    (decisión 3.6 §2.2 y encabezado de 0002: la jerarquía territorial vive en
-  --    public.gestor_unidades). Acción: estampado ADITIVO para borrado lógico y
-  --    trazabilidad del backfill. Sin inserts, sin cambios de datos existentes.
+  -- 2) Unidades: estampado ADITIVO en public.gestor_unidades (sin inserts)
   IF to_regclass('public.gestor_unidades') IS NOT NULL THEN
     ALTER TABLE public.gestor_unidades ADD COLUMN IF NOT EXISTS legacy_source_id text;
     ALTER TABLE public.gestor_unidades ADD COLUMN IF NOT EXISTS is_deleted boolean NOT NULL DEFAULT false;
     UPDATE public.gestor_unidades
        SET legacy_source_id = id
      WHERE legacy_source_id IS NULL;
-    GET DIAGNOSTICS v_unidades_ins = ROW_COUNT; -- unidades estampadas (no insertadas)
-    -- Nota: la jerarquía (parent_unit_id) ya es nativa; no requiere resolución de padres.
+    GET DIAGNOSTICS v_unidades_ins = ROW_COUNT;
   END IF;
 
-  -- 3) Nodos EDT desde cronograma legado (dos pasadas: nodos, luego padres)
+  -- 3) Nodos EDT desde cronograma legado
   IF to_regclass('public.gestor_cronograma_items') IS NOT NULL AND to_regclass('public.gestor_proyectos') IS NOT NULL THEN
-    -- 3a) Insertar nodos (sin padre aún, se resuelve después)
+    -- 3a) Insertar nodos (WBS EFECTIVO único; jerarquía padre se resuelve en 3b)
     INSERT INTO public.gp_nodos_edt (
       id, proyecto_id, empresa_id, nodo_padre_id, wbs_code, nombre, descripcion, kind,
       is_entregable, estado, progreso, fecha_inicio, fecha_fin, fecha_inicio_real, fecha_fin_real,
@@ -280,14 +291,10 @@ BEGIN
       gp.id,
       gp.empresa_id,
       NULL,
-      ci.code,
+      ci.wbs_eff,
       COALESCE(ci.name, ci.code, ci.id),
       NULLIF(ci.description,''),
       CASE WHEN ci.kind IN ('hito','subproceso') THEN ci.kind ELSE 'subproceso' END,
-      -- (v3.1, punto 3) is_entregable: SOLO la UI lo declara (checkbox edtType='ENTREGABLE'
-      -- en GanttEditorDrawer; persiste en localStorage). Sin el mapa localStorage se
-      -- deja false + bandera 'is_entregable' en metadata.revision_pendiente (abajo);
-      -- el merge P-1 la resuelve (true) y la limpia. Nada se fuerza a true sin evidencia.
       false,
       ci.status,
       LEAST(GREATEST(COALESCE(ci.progress,0),0),100)::numeric(5,2),
@@ -295,27 +302,31 @@ BEGIN
       ci.actual_start, ci.actual_end,
       ci.region,
       NULL,
-      -- (v3.1, punto 2 → opción b) BD viva SIN columnas task_type/icon (migración 04
-      -- sin evidencia de aplicación). Se escribe NULL y el merge P-1 desde localStorage
-      -- (SCHEDULE_FIELDS: taskType, icon) las completa por legacy_source_id.
       NULL::text, NULL::text,
       jsonb_build_object(
         'legacy', jsonb_build_object(
-          'id', ci.id, 'project_id', ci.project_id, 'parent_id', ci.parent_id,
+          'id', ci.id, 'project_id', ci.project_id, 'parent_id', ci.parent_id, 'code', ci.code,
           'deliverable', ci.deliverable, 'deliverables', ci.deliverables, 'attachments', ci.attachments,
           'gestor', ci.gestor, 'gestores', ci.gestores, 'report_type', ci.report_type,
           'baseline_start', ci.baseline_start, 'baseline_end', ci.baseline_end, 'tasks', ci.tasks, 'done', ci.done
         ),
-        -- (v3.1) bandera de revisión del NODO: v3 siempre escribe revision_pendiente
-        -- (proyectos: [] o sus banderas de campo; nodos: ['is_entregable']). Así el
-        -- detector de filas de corridas previas (metadata ? 'revision_pendiente')
-        -- sigue siendo fiable. El merge P-1 la resuelve y la limpia.
+        'wbs_code_original', ci.code,
+        'wbs_code_desambiguado', (ci.wbs_eff IS DISTINCT FROM btrim(COALESCE(ci.code,''))),
         'revision_pendiente', '["is_entregable"]'::jsonb,
         'corrida_key', v_corrida_key
       ),
       ci.id,
       COALESCE(ci.created_at, now()), COALESCE(ci.updated_at, now())
-    FROM public.gestor_cronograma_items ci
+    FROM (
+      SELECT
+        c.*,
+        CASE
+          WHEN btrim(COALESCE(c.code,'')) = '' THEN c.id
+          WHEN count(*) OVER (PARTITION BY c.project_id, btrim(c.code)) > 1 THEN btrim(c.code) || '::' || c.id
+          ELSE btrim(c.code)
+        END AS wbs_eff
+      FROM public.gestor_cronograma_items c
+    ) ci
     JOIN public.gestor_proyectos lp ON lp.id = ci.project_id
     JOIN public.gp_proyectos gp ON gp.legacy_source_id = lp.id
     WHERE NOT EXISTS (
@@ -331,40 +342,18 @@ BEGIN
     WHERE child.legacy_source_id = ci.id
       AND ci.parent_id IS NOT NULL
       AND child.nodo_padre_id IS DISTINCT FROM parent.id;
-
-    -- 3c) Dependencias FS desde metadata legacy si existieran (complemento app/localStorage se mergea aparte)
-    -- (placeholder idempotente: no-op si no hay fuente estructurada en BD legada)
   END IF;
 
   -- 3d) MERGES POST-BACKFILL DOCUMENTADOS (NO ejecutables desde este script).
-  --     Corren desde app/servicio (P-1/P-2) o como merges controlados caso por caso
-  --     (P-3/P-4), registrando su propia corrida en gp_corridas_migracion (p. ej.
-  --     gp_merge_p1_<fecha>). Regla (punto 14): NADA crea tablas/columnas nuevas;
-  --     lo no promovido a columna permanece en metadata.legacy.
-  --
-  --     P-1 · localStorage -> gp_nodos_edt (obligatorio tras esta corrida):
-  --       fuente SCHEDULE_FIELDS (gestorCronogramaService.ts): taskType, icon,
-  --       edtType, faseId, phase, dependencies (baseline/actual ya están en
-  --       columnas de la migración 02). task_type/icon quedan NULL aquí; el merge
-  --       escribe por legacy_source_id (= id legacy del ítem). edtType='ENTREGABLE'
-  --       (checkbox GanttEditorDrawer) -> is_entregable=true + LIMPIAR la bandera
-  --       'is_entregable' de metadata.revision_pendiente. 'expanded' se descarta.
-  --     P-2 · edt_type_cached: 2ª pasada con resolveEdtNodeType
-  --       (cronograma-core/edtPmbokModel.ts) sobre el árbol ya migrado (padres
-  --       resueltos en 3b). Cache regenerable (0002): NO es fuente de verdad.
-  --     P-3 · responsables (metadata.legacy.gestor/gestores, texto/array): merge
-  --       controlado -> dedup en gp_personas + gp_edt_responsables_r. Sin SQL
-  --       automático (match por nombre requiere revisión humana).
-  --     P-4 · entregables embebidos (metadata.legacy.deliverable/deliverables):
-  --       merge controlado -> gp_entregables (nodo_edt_id, proyecto_id); tipo/estado
-  --       de catálogo NULL hasta definición funcional.
-  --     P-5 · attachments: permanecen en metadata.legacy (decisión); migración a
-  --       gp_archivos solo si las URLs se estructuran en la fase de integración.
-  --     P-6 · sede_unidad_id: queda NULL (legacy sin id de unidad; match por región
-  --       ambiguo) -> revisión humana contra public.gestor_unidades.
-  --     P-7 · faseId/phase/dependencies (localStorage): fase -> gp_nodos_edt.fase_id
-  --       vía gp_fases.legacy_source_id; dependencias -> gp_nodo_dependencias_r
-  --       resolviendo los nodos por legacy_source_id.
+  --     P-1 · localStorage -> gp_nodos_edt: taskType/icon/edtType/faseId/phase/deps por legacy_source_id.
+  --           edtType='ENTREGABLE' -> is_entregable=true + limpiar bandera 'is_entregable'.
+  --     P-2 · edt_type_cached: 2ª pasada con resolveEdtNodeType (cache regenerable).
+  --     P-3 · responsables -> gp_personas + gp_edt_responsables_r (merge controlado).
+  --     P-4 · deliverable(s) -> gp_entregables (merge controlado).
+  --     P-5 · attachments permanecen en metadata.legacy (salvo estructuración -> gp_archivos).
+  --     P-6 · sede_unidad_id queda NULL (match por región ambiguo) -> revisión humana.
+  --     P-7 · faseId/phase/dependencies -> gp_fases / gp_nodo_dependencias_r.
+  --     Cada merge debe registrar su propia corrida en gp_corridas_migracion.
 
   UPDATE public.gp_corridas_migracion
   SET estado = 'completada',
@@ -374,7 +363,8 @@ BEGIN
         'proyectos_insertados', v_proyectos_ins,
         'unidades_estampadas', v_unidades_ins,
         'nodos_insertados', v_nodos_ins,
-        'empresa_default', v_empresa_default
+        'empresa_default', v_empresa_default,
+        'ajuste_wbs_efectivo', true
       )
   WHERE id = v_corrida_id;
 
@@ -393,32 +383,14 @@ END $$;
 -- 3) WBS únicos: duplicados (proyecto_id,wbs_code)
 -- 4) Clasificación: validar con resolveEdtNodeType en capa app/servicio
 -- 5) Merge localStorage: comparar por legacy_source_id y registrar en gp_corridas_migracion
--- 6) (v3, corr. 1/2/3) Revisión pendiente: listar filas con metadata->'revision_pendiente'
---    no vacía (estado / subtext / riesgo / riesgo_vacio / presupuesto / moneda) y decidir
---    caso por caso. El backfill NO asigna valores sin evidencia.
--- 7) (v3) Si la versión 20261112 se ejecutó antes: auditar filas con
---    metadata->>'corrida_key' = 'gp_backfill_v2_20261112_0100' cuyo estado_codigo o
---    nivel_riesgo hayan sido asignados por el mapeo antiguo ('en_curso', 'completado',
---    'medio'); reevaluar antes de dar por válida la migración. El detector fiable:
---    corrida_key v2 + metadata SIN 'revision_pendiente' (v3 siempre la escribe).
--- 8) (A-3) La corrida v3 se registra con key 'gp_backfill_v3_20261113_0100': el
---    registro de una corrida v2 previa en gp_corridas_migracion queda intacto como
---    evidencia (ON CONFLICT de v3 ya no toca esa fila). Filas nuevas escriben
---    metadata->>'corrida_key' = 'gp_backfill_v3_20261113_0100'.
--- 9) (v3.1) Pendiente P-1: nodos con la bandera 'is_entregable' sin resolver
---    (esperado: TODOS los nodos migrados, hasta ejecutar el merge localStorage):
---    select count(*) from public.gp_nodos_edt
---    where metadata->'revision_pendiente' @> '["is_entregable"]'::jsonb;
---    task_type/icon quedarán NULL hasta ese mismo merge (opción b del punto 2).
--- 10) (v3.1) Pendiente P-2: cache de clasificación EDT sin llenar (esperado: total
---    de nodos insertados; se llena en 2ª pasada con resolveEdtNodeType):
---    select count(*) from public.gp_nodos_edt where edt_type_cached is null;
--- 11) (v3.1) Huérfanos por parent_id legacy: nodos cuyo padre declarado no existe
---    (quedan nodo_padre_id NULL por diseño de 3b; reportar para revisión):
---    select n.legacy_source_id, n.wbs_code, n.nombre,
---           n.metadata->'legacy'->>'parent_id' as parent_legacy
---    from public.gp_nodos_edt n
---    where coalesce(n.metadata->'legacy'->>'parent_id','') <> ''
---      and not exists (select 1 from public.gp_nodos_edt p
---                      where p.legacy_source_id = n.metadata->'legacy'->>'parent_id');
+-- 6) Revisión pendiente: metadata->'revision_pendiente' no vacía (proyecto: estado/subtext; nodos: is_entregable hasta P-1)
+-- 7) Auditoría de corridas previas (v2) si aplica
+-- 8) P-1 pendiente: nodos con bandera 'is_entregable' (esperado todos hasta merge localStorage)
+-- 9) P-2 pendiente: edt_type_cached IS NULL (esperado todos hasta 2ª pasada)
+-- 10) Huérfanos por parent_id legacy no migrado (quedan nodo_padre_id NULL por diseño):
+--     select n.legacy_source_id, n.wbs_code, n.nombre, n.metadata->'legacy'->>'parent_id' as parent_legacy
+--     from public.gp_nodos_edt n
+--     where coalesce(n.metadata->'legacy'->>'parent_id','') <> ''
+--       and not exists (select 1 from public.gp_nodos_edt p where p.legacy_source_id = n.metadata->'legacy'->>'parent_id');
+-- 11) WBS desambiguados por ajuste v3.2: metadata->>'wbs_code_desambiguado' = 'true'
 -- ==============================================================================

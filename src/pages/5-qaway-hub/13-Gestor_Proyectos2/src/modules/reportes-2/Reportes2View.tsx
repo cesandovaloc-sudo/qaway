@@ -61,7 +61,7 @@ import {
   normalizeRegionKey,
 } from './regionalCoordinationModel';
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
-import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
+import { MINEDU_UNIDADES } from '../../../Bases de Datos/geocoding/New/mineduUnidades';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 
 /** Cache a nivel de módulo: un solo fetch de gestor_unidades para todas las instancias montadas. */
@@ -2100,10 +2100,17 @@ export default function Reportes2View({
   const [typeFilter, setTypeFilter] = useState('Todos');
   // Multiselección de estados operativos
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const ALL_FILTER_STATES = ['Completados', 'En proceso', 'Con retraso', 'Pendiente'];
   const toggleState = (st: string) => {
-    setSelectedStates((prev) =>
-      prev.includes(st) ? prev.filter((x) => x !== st) : [...prev, st]
-    );
+    setSelectedStates((prev) => {
+      if (prev.length === 0) {
+        return ALL_FILTER_STATES.filter((x) => x !== st);
+      }
+      const cleanPrev = prev.filter((x) => x !== '__NONE__');
+      const next = cleanPrev.includes(st) ? cleanPrev.filter((x) => x !== st) : [...cleanPrev, st];
+      if (next.length === 0) return ['__NONE__'];
+      return next.length === ALL_FILTER_STATES.length ? [] : next;
+    });
   };
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
@@ -2122,9 +2129,17 @@ export default function Reportes2View({
   // Selecciona / quita todas las regiones de una macro-region (preserva las demas).
   const toggleMacroRegions = (regiones: string[]) => {
     setSelectedRegions((prev) => {
-      const todasMarcadas = regiones.every((r) => prev.includes(r));
-      if (todasMarcadas) return prev.filter((r) => !regiones.includes(r));
-      const next = [...prev];
+      if (prev.length === 0) {
+        const allRegs = MACROREGIONES_NACIONAL.flatMap((m) => m.regiones);
+        return allRegs.filter((r) => !regiones.includes(r));
+      }
+      const cleanPrev = prev.filter((r) => r !== '__NONE__');
+      const todasMarcadas = regiones.every((r) => cleanPrev.includes(r));
+      if (todasMarcadas) {
+        const rest = cleanPrev.filter((r) => !regiones.includes(r));
+        return rest.length === 0 ? ['__NONE__'] : rest;
+      }
+      const next = [...cleanPrev];
       regiones.forEach((r) => {
         if (!next.includes(r)) next.push(r);
       });
@@ -2438,6 +2453,7 @@ export default function Reportes2View({
 
   const getCompSelectionState = useCallback(
     (comp: any, products: any[]): 'checked' | 'indeterminate' | 'unchecked' => {
+      if (selectedEdtCodes.length === 0) return 'checked';
       const isCompExplicit = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
       if (isCompExplicit) return 'checked';
 
@@ -2462,11 +2478,17 @@ export default function Reportes2View({
       const allSubKeys = new Set([...compKeys, ...prodKeys]);
 
       setSelectedEdtCodes((prev) => {
-        if (currentState === 'checked' || currentState === 'indeterminate') {
-          return prev.filter((k) => !allSubKeys.has(k));
-        } else {
-          return [...prev.filter((k) => !allSubKeys.has(k)), comp.id];
+        if (prev.length === 0) {
+          return edtComponentsWithProducts.filter((c) => c.comp.id !== comp.id).map((c) => c.comp.id);
         }
+        const next =
+          currentState === 'checked' || currentState === 'indeterminate'
+            ? prev.filter((k) => k !== '__NONE__' && !allSubKeys.has(k))
+            : [...prev.filter((k) => k !== '__NONE__' && !allSubKeys.has(k)), comp.id];
+        const allCompsSelected =
+          edtComponentsWithProducts.length > 0 &&
+          edtComponentsWithProducts.every((c) => next.includes(c.comp.id) || next.includes(c.comp.code));
+        return allCompsSelected ? [] : next;
       });
     },
     [getCompSelectionState]
@@ -2480,6 +2502,11 @@ export default function Reportes2View({
         isCompExplicit || selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
 
       setSelectedEdtCodes((prev) => {
+        if (prev.length === 0) {
+          const otherComps = edtComponentsWithProducts.filter((c) => c.comp.id !== comp.id).map((c) => c.comp.id);
+          const otherProds = (products || []).filter((p) => p.id !== prod.id && p.code !== prod.id).map((p) => p.id);
+          return [...otherComps, ...otherProds];
+        }
         if (isCompExplicit) {
           const otherProdIds = (products || [])
             .filter((p) => p.id !== prod.id && p.code !== prod.id)
@@ -2488,7 +2515,7 @@ export default function Reportes2View({
         } else if (isProdChecked) {
           return prev.filter((k) => k !== prod.id && k !== prod.code);
         } else {
-          const next = [...prev, prod.id];
+          const next = [...prev.filter((k) => k !== '__NONE__'), prod.id];
           const allSelected = (products || []).every(
             (p) => p.id === prod.id || next.includes(p.id) || next.includes(p.code)
           );
@@ -2505,6 +2532,7 @@ export default function Reportes2View({
 
   const edtButtonText = useMemo(() => {
     if (selectedEdtCodes.length === 0) return 'Todos los componentes';
+    if (selectedEdtCodes.includes('__NONE__')) return 'Ninguno';
     if (selectedEdtCodes.length === 1) {
       const target = selectedEdtCodes[0];
       const it = items.find((x) => x.id === target || x.code === target);
@@ -2584,6 +2612,7 @@ export default function Reportes2View({
     return () => window.removeEventListener('qaway-date-changed', onDateChanged);
   }, []);
   const [newMenu, setNewMenu] = useState(false);
+  const [showSecondaryFilters, setShowSecondaryFilters] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [attachment, setAttachment] = useState('');
   const [pickedFile, setPickedFile] = useState('');
@@ -5841,7 +5870,6 @@ export default function Reportes2View({
               >
                 <Upload size={15} />
                 <span>Importar Cronograma</span>
-                <ChevronDown size={14} />
               </button>
               <div className="menu-wrap">
                 <button className="btn primary" onClick={() => setNewMenu((v) => !v)}>
@@ -6137,6 +6165,7 @@ export default function Reportes2View({
                         if (selectedStates.length === 0) {
                           return venc || 'Todos los estados';
                         }
+                        if (selectedStates.includes('__NONE__')) return venc || 'Ninguno';
                         if (selectedStates.length === 1) {
                           return venc ? `${selectedStates[0]} · ${venc}` : selectedStates[0];
                         }
@@ -6182,16 +6211,14 @@ export default function Reportes2View({
                         type="button"
                         className={`filter-item-btn filter-item-check ${selectedStates.length === 0 ? 'selected' : ''}`}
                         onClick={() => {
-                          setSelectedStates([]);
+                          setSelectedStates((prev) => (prev.length === 0 ? ['__NONE__'] : []));
                           setTab('Todos');
                         }}
                       >
                         <span className="filter-item-main">
-                          <span className={`filter-radio ${selectedStates.length === 0 ? 'checked' : ''}`}>
-                            {selectedStates.length === 0 && <span className="filter-radio-dot" />}
-                          </span>
+                          <span className={`filter-checkbox ${selectedStates.length === 0 ? 'checked' : ''}`}>{selectedStates.length === 0 && <Check size={10} strokeWidth={3} />}</span>
                           <span className="filter-item-text">
-                            <strong>Todos los estados</strong>
+                            <strong>Ver todo</strong>
                           </span>
                         </span>
                         <span className="wbs-level-badge">{items.length}</span>
@@ -6204,7 +6231,7 @@ export default function Reportes2View({
                         { id: 'Con retraso', label: 'Con retraso', count: late, dotColor: '#dc2626', badgeClass: 'badge-retraso' },
                         { id: 'Pendiente', label: 'Pendientes', count: items.filter((x) => x.status === 'Pendiente').length, dotColor: '#94a3b8', badgeClass: 'badge-pendiente' },
                       ].map((opt) => {
-                        const isChecked = selectedStates.includes(opt.id);
+                        const isChecked = selectedStates.length === 0 || selectedStates.includes(opt.id);
                         return (
                           <button
                             key={opt.id}
@@ -6335,7 +6362,7 @@ export default function Reportes2View({
                         <button
                           type="button"
                           className="filter-reset-link"
-                          onClick={() => setSelectedEdtCodes([])}
+                          onClick={() => setSelectedEdtCodes((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
                         >
                           Restablecer ({selectedEdtCodes.length})
                         </button>
@@ -6349,14 +6376,12 @@ export default function Reportes2View({
                           <button
                             type="button"
                             className={`filter-item-btn filter-item-check ${isAll ? 'selected' : ''}`}
-                            onClick={() => setSelectedEdtCodes([])}
+                            onClick={() => setSelectedEdtCodes((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
                           >
                             <span className="filter-item-main">
-                              <span className={`filter-radio ${isAll ? 'checked' : ''}`}>
-                                {isAll && <span className="filter-radio-dot" />}
-                              </span>
+                              <span className={`filter-checkbox ${isAll ? 'checked' : ''}`}>{isAll && <Check size={10} strokeWidth={3} />}</span>
                               <span className="filter-item-text">
-                                <strong>Todos los componentes</strong>
+                                <strong>Ver todo</strong>
                               </span>
                             </span>
                             <span className="wbs-level-badge">{items.length}</span>
@@ -6390,7 +6415,7 @@ export default function Reportes2View({
                                 padding: '7px 8px',
                                 borderRadius: '6px',
                                 cursor: 'pointer',
-                                background: isCompChecked ? '#eff6ff' : 'transparent',
+                                background: 'transparent',
                                 transition: 'background 0.12s ease',
                               }}
                             >
@@ -6494,7 +6519,7 @@ export default function Reportes2View({
                                     padding: '6px 8px',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
-                                    background: isProdChecked ? '#eff6ff' : 'transparent',
+                                    background: 'transparent',
                                   }}
                                   onClick={() => toggleProductSelection(comp, prod, products)}
                                   title={prodLabel}
@@ -6558,7 +6583,7 @@ export default function Reportes2View({
                 >
                   <div className="filter-card-copy">
                     <small>Región</small>
-                    <span>{selectedRegions.length === 0 ? 'Todas las regiones' : regionButtonText}</span>
+                    <span>{selectedRegions.length === 0 ? 'Todas las regiones' : selectedRegions.includes('__NONE__') ? 'Ninguna' : regionButtonText}</span>
                   </div>
                   <ChevronDown size={14} className="filter-chevron" />
                 </button>
@@ -6576,9 +6601,9 @@ export default function Reportes2View({
                     style={{ minWidth: 270 }}
                   >
                     <div className="filter-popover-title filter-popover-title-row">
-                      <span>Regiones y sedes del catálogo</span>
+                      <span>Regiones y sedes</span>
                       {selectedRegions.length > 0 && (
-                        <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions([])}>
+                        <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions((prev) => (prev.length === 0 ? ['__NONE__'] : []))}>
                           Limpiar ({selectedRegions.length})
                         </button>
                       )}
@@ -6587,7 +6612,7 @@ export default function Reportes2View({
                       <button
                         type="button"
                         className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
-                        onClick={() => setSelectedRegions([])}
+                        onClick={() => setSelectedRegions((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -6595,20 +6620,13 @@ export default function Reportes2View({
                           padding: '8px 10px',
                           borderRadius: '6px',
                           cursor: 'pointer',
-                          background: selectedRegions.length === 0 ? '#eff6ff' : 'transparent',
+                          background: 'transparent',
                           border: 'none',
                           width: '100%',
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span
-                            className={`filter-checkbox ${selectedRegions.length === 0 ? 'checked' : ''}`}
-                            style={{ borderRadius: '50%' }}
-                          >
-                            {selectedRegions.length === 0 && (
-                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0066ff' }} />
-                            )}
-                          </span>
+                          <span className={`filter-checkbox ${selectedRegions.length === 0 ? 'checked' : ''}`}>{selectedRegions.length === 0 && <Check size={10} strokeWidth={3} />}</span>
                           <span className="filter-item-text">
                             <strong style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
                               Todas las regiones
@@ -6629,7 +6647,7 @@ export default function Reportes2View({
                           (acc, reg) => acc + (sedesPorRegion.get(normalizeRegionKey(reg)) || 0),
                           0
                         );
-                        const selectedCountInMacro = macro.regiones.filter((r) => selectedRegions.includes(r)).length;
+                        const selectedCountInMacro = selectedRegions.length === 0 ? macro.regiones.length : macro.regiones.filter((r) => selectedRegions.includes(r)).length;
                         const isAllMacroSelected = macro.regiones.length > 0 && selectedCountInMacro === macro.regiones.length;
                         const isMacroIndeterminate = selectedCountInMacro > 0 && selectedCountInMacro < macro.regiones.length;
                         const isCompChecked = isAllMacroSelected || isMacroIndeterminate;
@@ -6646,7 +6664,7 @@ export default function Reportes2View({
                                 padding: '7px 8px',
                                 borderRadius: '6px',
                                 cursor: 'pointer',
-                                background: isCompChecked ? '#eff6ff' : 'transparent',
+                                background: 'transparent',
                                 transition: 'background 0.12s ease',
                               }}
                             >
@@ -6919,6 +6937,55 @@ export default function Reportes2View({
               {/* Separador vertical: Restablecer | Conmutador de vistas */}
               <div className="filter-group-divider" aria-hidden="true" />
 
+            {/* Controles de utilidad del módulo en Fila 1 con separadores lógicos */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', marginRight: '8px' }}>
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${showSecondaryFilters ? 'active' : ''}`}
+                onClick={() => setShowSecondaryFilters((v) => !v)}
+                title={showSecondaryFilters ? 'Ocultar segunda fila de filtros' : 'Mostrar segunda fila de filtros'}
+                aria-label="Alternar segunda fila de filtros"
+              >
+                <SlidersHorizontal size={15} />
+              </button>
+              <div className="filter-group-divider" aria-hidden="true" />
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${isFullscreen ? 'active' : ''}`}
+                onClick={toggleFullscreen}
+                title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+                aria-label="Alternar modo pantalla completa"
+              >
+                {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              </button>
+              <div className="filter-group-divider" aria-hidden="true" />
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUndo();
+                }}
+                disabled={history.length === 0}
+                title={history.length > 0 ? 'Retroceder / Deshacer (Ctrl+Z)' : 'Sin cambios para retroceder'}
+                aria-label="Retroceder o deshacer último cambio"
+              >
+                <Undo2 size={14} />
+              </button>
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRedo();
+                }}
+                disabled={redoHistory.length === 0}
+                title={redoHistory.length > 0 ? 'Adelantar / Rehacer (Ctrl+Y)' : 'Sin cambios para adelantar'}
+                aria-label="Adelantar o rehacer último cambio"
+              >
+                <Redo2 size={14} />
+              </button>
+            </div>
               <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
                 {perspective === 'equipo' ? (
                   <>
@@ -6986,6 +7053,7 @@ export default function Reportes2View({
           </nav>
 
           {/* Filtros Contextuales y Macro */}
+          {showSecondaryFilters && (
           <ProjectShellFilters>
             {/* Filtro Contextual 1: UGEL / Sede Territorial */}
             <div className="filter-dropdown-wrap contextual-filter-wrap sede-filter-wrap">
@@ -7397,7 +7465,7 @@ export default function Reportes2View({
                   ))}
                 </div>
               </>
-            ) : (
+            ) : viewMode !== 'kanban' ? (
               /* En Modo Gantt, Calendario, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
               <>
                 <button
@@ -7461,7 +7529,7 @@ export default function Reportes2View({
                   </button>
                 </div>
               </>
-            )}
+            ) : null}
 
             {/* Separador vertical: Bloque 2 (Tiempo) | Bloque 3 (Capas y Visualización de Cronograma) */}
             {(viewMode === 'gantt' || viewMode === 'calendario' || perspective === 'equipo') && (
@@ -7676,6 +7744,7 @@ export default function Reportes2View({
               )}
             </div>
           </ProjectShellFilters>
+          )}
 
           {/* Fila extra expandible de Filtros Personalizados */}
           {advancedFiltersOpen && (

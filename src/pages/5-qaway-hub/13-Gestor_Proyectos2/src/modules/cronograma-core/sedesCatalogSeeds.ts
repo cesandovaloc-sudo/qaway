@@ -1,5 +1,5 @@
 import type { OfficialEdtReferenceRow } from './edtPmbokModel';
-import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
+import { MINEDU_UNIDADES } from '../../../Bases de Datos/geocoding/New/mineduUnidades';
 
 export interface SedeEdtItem extends OfficialEdtReferenceRow {
   region: string;

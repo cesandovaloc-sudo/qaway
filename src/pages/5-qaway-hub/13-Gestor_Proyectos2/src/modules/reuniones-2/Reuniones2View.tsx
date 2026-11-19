@@ -62,7 +62,7 @@ import {
   normalizeRegionKey,
 } from './regionalCoordinationModel';
 import { ALL_SEDES_EDT_ITEMS } from './sedesCatalogSeeds';
-import { MINEDU_UNIDADES } from '../../data/mineduUnidades';
+import { MINEDU_UNIDADES } from '../../../Bases de Datos/geocoding/New/mineduUnidades';
 import { listGestorUnits } from '../../services/gestorOrganizacionService';
 
 /** Cache a nivel de módulo: un solo fetch de gestor_unidades para todas las instancias montadas. */
@@ -93,6 +93,7 @@ import {
   CalendarRange,
   ChartNoAxesColumnIncreasing,
   Check,
+  Minus,
   CheckCircle2,
   CheckSquare,
   ChevronDown,
@@ -2113,13 +2114,34 @@ export default function Reuniones2View({
   const [typeFilter, setTypeFilter] = useState('Todos');
   // Multiselección de estados operativos
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const ALL_FILTER_STATES = ['Completados', 'En proceso', 'Con retraso', 'Pendiente'];
   const toggleState = (st: string) => {
-    setSelectedStates((prev) =>
-      prev.includes(st) ? prev.filter((x) => x !== st) : [...prev, st]
-    );
+    setSelectedStates((prev) => {
+      if (prev.length === 0) {
+        return ALL_FILTER_STATES.filter((x) => x !== st);
+      }
+      const cleanPrev = prev.filter((x) => x !== '__NONE__');
+      const next = cleanPrev.includes(st) ? cleanPrev.filter((x) => x !== st) : [...cleanPrev, st];
+      if (next.length === 0) return ['__NONE__'];
+      return next.length === ALL_FILTER_STATES.length ? [] : next;
+    });
   };
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [expandedRegion, setExpandedRegion] = useState<string | null>(null);
+  const [expandedMacroIds, setExpandedMacroIds] = useState<Record<string, boolean>>({});
+  // Formateador de títulos de macro-regiones a minúsculas con mayúscula inicial (ej. Macro Norte, Macro Centro)
+  const formatMacroName = useCallback((name: string): string => {
+    if (!name) return '';
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map((w) => (w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : ''))
+      .join(' ');
+  }, []);
+
+  // Límite uniforme y calibrado de caracteres con puntos suspensivos para padres e hijos.
+  // Al estirar el desplegable, el límite se amplía dinámicamente permitiendo ver el título completo.
+
 
   const toggleRegion = (regionName: string) => {
     setSelectedRegions((prev) => {
@@ -2134,9 +2156,17 @@ export default function Reuniones2View({
   // Selecciona / quita todas las regiones de una macro-region (preserva las demas).
   const toggleMacroRegions = (regiones: string[]) => {
     setSelectedRegions((prev) => {
-      const todasMarcadas = regiones.every((r) => prev.includes(r));
-      if (todasMarcadas) return prev.filter((r) => !regiones.includes(r));
-      const next = [...prev];
+      if (prev.length === 0) {
+        const allRegs = MACROREGIONES_NACIONAL.flatMap((m) => m.regiones);
+        return allRegs.filter((r) => !regiones.includes(r));
+      }
+      const cleanPrev = prev.filter((r) => r !== '__NONE__');
+      const todasMarcadas = regiones.every((r) => cleanPrev.includes(r));
+      if (todasMarcadas) {
+        const rest = cleanPrev.filter((r) => !regiones.includes(r));
+        return rest.length === 0 ? ['__NONE__'] : rest;
+      }
+      const next = [...cleanPrev];
       regiones.forEach((r) => {
         if (!next.includes(r)) next.push(r);
       });
@@ -2181,6 +2211,52 @@ export default function Reuniones2View({
   const [gestorFilter, setGestorFilter] = useState('Todos');
   const [selectedSedes, setSelectedSedes] = useState<string[]>([]);
   const [selectedEdtCodes, setSelectedEdtCodes] = useState<string[]>([]);
+  const [expandedCompIds, setExpandedCompIds] = useState<Record<string, boolean>>({});
+  const [compPopoverWidth, setCompPopoverWidth] = useState<number>(330);
+  const isResizingCompPopover = useRef(false);
+  const startResizeX = useRef(0);
+  const startPopoverWidth = useRef(330);
+
+  const handlePopoverResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isResizingCompPopover.current = true;
+    startResizeX.current = e.clientX;
+    startPopoverWidth.current = compPopoverWidth;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isResizingCompPopover.current) return;
+      const delta = ev.clientX - startResizeX.current;
+      const newWidth = Math.max(320, Math.min(850, startPopoverWidth.current + delta));
+      setCompPopoverWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      isResizingCompPopover.current = false;
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [compPopoverWidth]);
+
+
+  const getTruncatedLabel = useCallback(
+    (label: string, currentWidth: number = 330, isChild: boolean = false): string => {
+      if (!label) return '';
+      const extraWidth = Math.max(0, currentWidth - 330);
+      const baseChars = isChild ? 27 : 29;
+      const maxChars = baseChars + Math.floor(extraWidth / 7.2);
+      if (label.length > maxChars) {
+        return `${label.slice(0, maxChars).trim()}...`;
+      }
+      return label;
+    },
+    []
+  );
+
+
 
   // Unidades operativas (DRE / UGEL) del filtro territorial: Supabase gestor_unidades
   // (REGION_UGEL.xlsx) con respaldo inmediato del catálogo local idéntico.
@@ -2352,6 +2428,39 @@ export default function Reuniones2View({
     return `${selectedSedes.length} sedes`;
   }, [selectedSedes, gestorFilter]);
 
+  const formatEdtLabel = useCallback((code: string | undefined, name: string): string => {
+    if (!name) return '';
+    let clean = name.trim();
+    const codePrefixMatch = clean.match(/^(\d+(?:\.\d+)*\.?)\s*(.+)$/);
+    let effectiveCode = code ? code.trim() : '';
+    let rest = clean;
+    if (codePrefixMatch) {
+      if (!effectiveCode && codePrefixMatch[1]) effectiveCode = codePrefixMatch[1];
+      if (codePrefixMatch[2]) rest = codePrefixMatch[2];
+    }
+
+    const isAllCaps = rest === rest.toUpperCase() && rest !== rest.toLowerCase();
+    let sentence = rest;
+    if (isAllCaps) {
+      const lower = rest.toLowerCase();
+      sentence = lower.charAt(0).toUpperCase() + lower.slice(1);
+    }
+
+    const formatted = sentence
+      .replace(/\bdre\b/gi, 'DRE')
+      .replace(/\bugel\b/gi, 'UGEL')
+      .replace(/\bii\.ee\.\b/gi, 'II.EE.')
+      .replace(/\biiee\b/gi, 'II.EE.')
+      .replace(/\bmc siga\b/gi, 'MC SIGA')
+      .replace(/\bsiga\b/gi, 'SIGA')
+      .replace(/\bcdl\b/gi, 'CDL')
+      .replace(/\brar\b/gi, 'RAR')
+      .replace(/\bedt\b/gi, 'EDT');
+
+    const prefix = effectiveCode ? (effectiveCode.endsWith('.') ? `${effectiveCode} ` : `${effectiveCode}. `) : '';
+    return `${prefix}${formatted}`;
+  }, []);
+
   const edtComponentsWithProducts = useMemo(() => {
     const components = items.filter((x) => !x.parentId && (x.kind === 'hito' || x.edtType === 'COMPONENTE'));
     return components.map((comp) => {
@@ -2362,20 +2471,99 @@ export default function Reuniones2View({
     });
   }, [items]);
 
+  const getCompSelectionState = useCallback(
+    (comp: any, products: any[]): 'checked' | 'indeterminate' | 'unchecked' => {
+      if (selectedEdtCodes.length === 0) return 'checked';
+      const isCompExplicit = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
+      if (isCompExplicit) return 'checked';
+
+      if (!products || products.length === 0) return 'unchecked';
+
+      const selectedCount = products.filter(
+        (p) => selectedEdtCodes.includes(p.id) || selectedEdtCodes.includes(p.code)
+      ).length;
+
+      if (selectedCount === products.length) return 'checked';
+      if (selectedCount > 0) return 'indeterminate';
+      return 'unchecked';
+    },
+    [selectedEdtCodes]
+  );
+
+  const toggleComponentSelection = useCallback(
+    (comp: any, products: any[]) => {
+      const currentState = getCompSelectionState(comp, products);
+      const compKeys = [comp.id, comp.code].filter(Boolean);
+      const prodKeys = (products || []).flatMap((p) => [p.id, p.code].filter(Boolean));
+      const allSubKeys = new Set([...compKeys, ...prodKeys]);
+
+      setSelectedEdtCodes((prev) => {
+        if (prev.length === 0) {
+          return edtComponentsWithProducts.filter((c) => c.comp.id !== comp.id).map((c) => c.comp.id);
+        }
+        const next =
+          currentState === 'checked' || currentState === 'indeterminate'
+            ? prev.filter((k) => k !== '__NONE__' && !allSubKeys.has(k))
+            : [...prev.filter((k) => k !== '__NONE__' && !allSubKeys.has(k)), comp.id];
+        const allCompsSelected =
+          edtComponentsWithProducts.length > 0 &&
+          edtComponentsWithProducts.every((c) => next.includes(c.comp.id) || next.includes(c.comp.code));
+        return allCompsSelected ? [] : next;
+      });
+    },
+    [getCompSelectionState]
+  );
+
+  const toggleProductSelection = useCallback(
+    (comp: any, prod: any, products: any[]) => {
+      const compKeys = [comp.id, comp.code].filter(Boolean);
+      const isCompExplicit = selectedEdtCodes.some((k) => compKeys.includes(k));
+      const isProdChecked =
+        isCompExplicit || selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
+
+      setSelectedEdtCodes((prev) => {
+        if (prev.length === 0) {
+          const otherComps = edtComponentsWithProducts.filter((c) => c.comp.id !== comp.id).map((c) => c.comp.id);
+          const otherProds = (products || []).filter((p) => p.id !== prod.id && p.code !== prod.id).map((p) => p.id);
+          return [...otherComps, ...otherProds];
+        }
+        if (isCompExplicit) {
+          const otherProdIds = (products || [])
+            .filter((p) => p.id !== prod.id && p.code !== prod.id)
+            .map((p) => p.id);
+          return [...prev.filter((k) => !compKeys.includes(k)), ...otherProdIds];
+        } else if (isProdChecked) {
+          return prev.filter((k) => k !== prod.id && k !== prod.code);
+        } else {
+          const next = [...prev.filter((k) => k !== '__NONE__'), prod.id];
+          const allSelected = (products || []).every(
+            (p) => p.id === prod.id || next.includes(p.id) || next.includes(p.code)
+          );
+          if (allSelected) {
+            const prodKeys = (products || []).flatMap((p) => [p.id, p.code].filter(Boolean));
+            return [...next.filter((k) => !prodKeys.includes(k)), comp.id];
+          }
+          return next;
+        }
+      });
+    },
+    [selectedEdtCodes]
+  );
+
   const edtButtonText = useMemo(() => {
     if (selectedEdtCodes.length === 0) return 'Todos los componentes';
+    if (selectedEdtCodes.includes('__NONE__')) return 'Ninguno';
     if (selectedEdtCodes.length === 1) {
       const target = selectedEdtCodes[0];
       const it = items.find((x) => x.id === target || x.code === target);
       if (it) {
-        const prefix = it.code ? `${it.code} ` : '';
-        const namePart = it.name.length > 20 ? `${it.name.slice(0, 20)}...` : it.name;
-        return `${prefix}${namePart}`;
+        const formatted = formatEdtLabel(it.code, it.name);
+        return formatted.length > 24 ? `${formatted.slice(0, 24)}...` : formatted;
       }
       return target;
     }
-    return `${selectedEdtCodes.length} componentes/prod.`;
-  }, [selectedEdtCodes, items]);
+    return `${selectedEdtCodes.length} seleccionados`;
+  }, [selectedEdtCodes, items, formatEdtLabel]);
 
   // Filtro de cargo territorial: Coordinador Macro-regional (supervisa 2 regiones)
   const [macroFilter, setMacroFilter] = useState<string>('Todos');
@@ -2444,6 +2632,7 @@ export default function Reuniones2View({
     return () => window.removeEventListener('qaway-date-changed', onDateChanged);
   }, []);
   const [newMenu, setNewMenu] = useState(false);
+  const [showSecondaryFilters, setShowSecondaryFilters] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [attachment, setAttachment] = useState('');
   const [pickedFile, setPickedFile] = useState('');
@@ -5956,7 +6145,7 @@ export default function Reuniones2View({
               ? `Equipo del Proyecto · ${activeProject?.name || 'MINEDU · Dotación 2026'}`
               : perspective === 'territorial'
               ? `Sedes · ${activeProject?.name || 'Gestión del Proyecto'}`
-              : `Cronograma Maestro · ${activeProject?.name || 'Gestión del Proyecto'}`
+              : `Cronograma · ${activeProject?.name || 'Gestión del Proyecto'}`
           }
           description={
             perspective === 'equipo'
@@ -6263,6 +6452,841 @@ export default function Reuniones2View({
                 Todos <span>({perspective === 'territorial' ? countTerritorial : items.length})</span>
               </button>
 
+              {/* Filtro Universal 2: Estado de avance (Multiselección) + plazos de vencimiento */}
+              <div className="filter-dropdown-wrap estado-filter-wrap tabs-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn estado-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
+                    selectedStates.length > 0 || vencimientosFilter !== 'todos' ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('state')}
+                  title="Filtrar por estado de avance y plazos de vencimiento"
+                >
+                  <div className="filter-card-copy">
+                    <small>Estado</small>
+                    <span>
+                      {(() => {
+                        const vencLabels: Record<string, string> = {
+                          hoy: 'Vencen hoy',
+                          semana: 'Vencen esta semana',
+                          mes: 'Vencen este mes',
+                          trimestre: 'Vencen este trimestre',
+                          retraso: 'Retraso crítico',
+                        };
+                        const venc = vencLabels[vencimientosFilter];
+                        if (selectedStates.length === 0) {
+                          return venc || 'Todos los estados';
+                        }
+                        if (selectedStates.includes('__NONE__')) return venc || 'Ninguno';
+                        if (selectedStates.length === 1) {
+                          return venc ? `${selectedStates[0]} · ${venc}` : selectedStates[0];
+                        }
+                        const multiStr = `${selectedStates.length} seleccionados`;
+                        return venc ? `${multiStr} · ${venc}` : multiStr;
+                      })()}
+                    </span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'state' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 300 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Estado de avance</span>
+                      {(selectedStates.length > 0 || vencimientosFilter !== 'todos') && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => {
+                            setSelectedStates([]);
+                            setTab('Todos');
+                            setVencimientosFilter('todos');
+                          }}
+                        >
+                          Restablecer
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list">
+                      {/* Opción Todos los estados: limpia la multiselección */}
+                      <button
+                        type="button"
+                        className={`filter-item-btn filter-item-check ${selectedStates.length === 0 ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedStates((prev) => (prev.length === 0 ? ['__NONE__'] : []));
+                          setTab('Todos');
+                        }}
+                      >
+                        <span className="filter-item-main">
+                          <span className={`filter-checkbox ${selectedStates.length === 0 ? 'checked' : ''}`}>{selectedStates.length === 0 && <Check size={10} strokeWidth={3} />}</span>
+                          <span className="filter-item-text">
+                            <strong>Ver todo</strong>
+                          </span>
+                        </span>
+                        <span className="wbs-level-badge">{items.length}</span>
+                      </button>
+
+                      {/* Estados con multiselección via Checkbox */}
+                      {[
+                        { id: 'Completados', label: 'Completados', count: complete, dotColor: '#16a34a', badgeClass: 'badge-cumple' },
+                        { id: 'En proceso', label: 'En proceso', count: inprog, dotColor: '#0284c7', badgeClass: 'badge-enproceso' },
+                        { id: 'Con retraso', label: 'Con retraso', count: late, dotColor: '#dc2626', badgeClass: 'badge-retraso' },
+                        { id: 'Pendiente', label: 'Pendientes', count: items.filter((x) => x.status === 'Pendiente').length, dotColor: '#94a3b8', badgeClass: 'badge-pendiente' },
+                      ].map((opt) => {
+                        const isChecked = selectedStates.length === 0 || selectedStates.includes(opt.id);
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                            onClick={() => toggleState(opt.id)}
+                            aria-pressed={isChecked}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
+                                {isChecked && <Check size={10} strokeWidth={3} />}
+                              </span>
+                              <span className="filter-status-dot" style={{ background: opt.dotColor }} />
+                              <span className="filter-item-text">
+                                <strong>{opt.label}</strong>
+                              </span>
+                            </span>
+                            <span className={`wbs-level-badge ${opt.badgeClass}`}>{opt.count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="filter-popover-title filter-popover-subtitle">
+                      <span>Plazos de vencimiento</span>
+                    </div>
+                    <div className="filter-popover-list">
+                      {[
+                        { id: 'todos', label: 'Todos los plazos', badge: items.length, icon: CalendarDays },
+                        { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount, icon: Clock, alert: vencenHoyCount > 0 },
+                        { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount, icon: Clock3, alert: vencenSemanaCount > 0 },
+                        { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount, icon: CalendarRange, alert: false },
+                        { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount, icon: CalendarRange, alert: false },
+                        { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, icon: AlertTriangle, alert: criticalItemsCount > 0 },
+                      ].map((opt) => {
+                        const isSelected = vencimientosFilter === opt.id;
+                        const IconComponent = opt.icon;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
+                            onClick={() => {
+                              setVencimientosFilter(opt.id as any);
+                            }}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
+                                {isSelected && <span className="filter-radio-dot" />}
+                              </span>
+                              <IconComponent size={14} className={opt.alert ? 'filter-icon-alert' : 'filter-icon-muted'} />
+                              <span className="filter-item-text">
+                                <strong style={opt.alert ? { color: '#b91c1c' } : undefined}>{opt.label}</strong>
+                              </span>
+                            </span>
+                            <span className={`wbs-level-badge ${opt.alert ? 'is-late' : ''}`}>{opt.badge}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Filtro Contextual 3 (Caja Roja): Componente / Producto EDT */}
+              {/* Filtro Universal 2: Componente / Producto EDT (con grupos colapsables via Chevron) */}
+              <div className="filter-dropdown-wrap contextual-filter-wrap edt-filter-wrap tabs-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'edtComponent' ? 'active' : ''} ${
+                    selectedEdtCodes.length > 0 ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('edtComponent')}
+                  title="Filtrar por Componente o Producto EDT"
+                >
+                  <div className="filter-card-copy">
+                    <small>Componente / Producto</small>
+                    <span>{edtButtonText}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'edtComponent' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{
+                      width: compPopoverWidth ? `${compPopoverWidth}px` : 330,
+                      minWidth: 320,
+                      maxWidth: 850,
+                      position: 'relative',
+                      resize: 'horizontal',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {/* Asa interactiva en el borde derecho para estirar horizontalmente el desplegable */}
+                    <div
+                      className="popover-resize-handle-right"
+                      onMouseDown={handlePopoverResizeStart}
+                      title="Arrastrar para ajustar ancho del desplegable"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: 7,
+                        cursor: 'ew-resize',
+                        zIndex: 20,
+                        background: 'transparent',
+                        transition: 'background 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(0, 102, 255, 0.25)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                      }}
+                    />
+
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Componentes y Productos</span>
+                      {selectedEdtCodes.length > 0 && (
+                        <button
+                          type="button"
+                          className="filter-reset-link"
+                          onClick={() => setSelectedEdtCodes((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
+                        >
+                          Restablecer ({selectedEdtCodes.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list" style={{ maxHeight: 380, overflowX: 'hidden' }}>
+                      {/* Opción Todos */}
+                      {(() => {
+                        const isAll = selectedEdtCodes.length === 0;
+                        return (
+                          <button
+                            type="button"
+                            className={`filter-item-btn filter-item-check ${isAll ? 'selected' : ''}`}
+                            onClick={() => setSelectedEdtCodes((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
+                          >
+                            <span className="filter-item-main">
+                              <span className={`filter-checkbox ${isAll ? 'checked' : ''}`}>{isAll && <Check size={10} strokeWidth={3} />}</span>
+                              <span className="filter-item-text">
+                                <strong>Ver todo</strong>
+                              </span>
+                            </span>
+                            <span className="wbs-level-badge">{items.length}</span>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Título de sección sutil idéntico a ESTADO DE AVANCE y MACRO NORTE */}
+                      <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                        <span>Componentes Rectores EDT</span>
+                      </div>
+
+                      {/* Grupos de Componentes con Chevrones para Desplegar/Colapsar (Colapsados por defecto) */}
+                      {edtComponentsWithProducts.map(({ comp, products }) => {
+                        const selectionState = getCompSelectionState(comp, products);
+                        const isCompChecked = selectionState === 'checked' || selectionState === 'indeterminate';
+                        const isExpanded = Boolean(expandedCompIds[comp.id]);
+                        const compTotalItems = items.filter(
+                          (x) => x.id === comp.id || x.parentId === comp.id || items.some((p) => p.id === x.parentId && p.parentId === comp.id)
+                        ).length;
+                        const compLabel = formatEdtLabel(comp.code, comp.name);
+
+                        return (
+                          <React.Fragment key={comp.id}>
+                            <div
+                              className={`filter-item-btn filter-item-check ${isCompChecked ? 'selected' : ''}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '7px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                background: 'transparent',
+                                transition: 'background 0.12s ease',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedCompIds((prev) => ({ ...prev, [comp.id]: !prev[comp.id] }));
+                                  }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '2px',
+                                    margin: '0',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#64748b',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                    lineHeight: 1,
+                                  }}
+                                  title={isExpanded ? 'Colapsar productos' : 'Desplegar productos'}
+                                  aria-expanded={isExpanded}
+                                >
+                                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    flex: 1,
+                                    minWidth: 0,
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => toggleComponentSelection(comp, products)}
+                                  title={compLabel}
+                                >
+                                  <span
+                                    className={`filter-checkbox ${selectionState === 'checked' ? 'checked' : selectionState === 'indeterminate' ? 'indeterminate' : ''}`}
+                                    style={{
+                                      flexShrink: 0,
+                                      ...(selectionState === 'indeterminate' ? { background: '#0066ff', borderColor: '#0066ff' } : {}),
+                                    }}
+                                  >
+                                    {selectionState === 'checked' && <Check size={10} strokeWidth={3} />}
+                                    {selectionState === 'indeterminate' && <Minus size={10} strokeWidth={3} color="#ffffff" />}
+                                  </span>
+                                  <span
+                                    className="filter-item-text"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    <strong
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        color: '#0f172a',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: 'block',
+                                      }}
+                                    >
+                                      {getTruncatedLabel(compLabel, compPopoverWidth, false)}
+                                    </strong>
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                {compTotalItems}
+                              </span>
+                            </div>
+
+                            {/* Productos hijos desplegables: sangría alineada a la derecha, color sólido y una sola fila */}
+                            {isExpanded && products.map((prod) => {
+                              const isProdChecked =
+                                selectionState === 'checked' ||
+                                selectedEdtCodes.includes(prod.id) ||
+                                selectedEdtCodes.includes(prod.code);
+                              const prodSedesCount = items.filter((x) => x.parentId === prod.id).length;
+                              const prodLabel = formatEdtLabel(prod.code, prod.name);
+                              const prodDisplayLabel = getTruncatedLabel(prodLabel, compPopoverWidth, true);
+
+                              return (
+                                <div
+                                  key={prod.id}
+                                  className={`filter-item-btn filter-item-check ${isProdChecked ? 'selected' : ''}`}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 8px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    background: 'transparent',
+                                  }}
+                                  onClick={() => toggleProductSelection(comp, prod, products)}
+                                  title={prodLabel}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                    {/* Sangría estructural que desplaza el checkbox 24px a la derecha del padre */}
+                                    <div style={{ width: 24, flexShrink: 0 }} aria-hidden="true" />
+                                    <span className={`filter-checkbox ${isProdChecked ? 'checked' : ''}`} style={{ flexShrink: 0 }}>
+                                      {isProdChecked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span
+                                      className="filter-item-text"
+                                      style={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        flex: 1,
+                                        minWidth: 0,
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontSize: '12.5px',
+                                          color: isProdChecked ? '#0066ff' : '#1e293b',
+                                          fontWeight: isProdChecked ? 600 : 500,
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          display: 'block',
+                                        }}
+                                      >
+                                        {prodDisplayLabel}
+                                      </span>
+                                    </span>
+                                  </div>
+                                  {prodSedesCount > 0 && (
+                                    <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                      {prodSedesCount}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Filtro Universal 3: Región / DRE (Subido a la Fila 1) */}
+              <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap tabs-filter-wrap">
+                <button
+                  type="button"
+                  className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
+                    selectedRegions.length > 0 ? 'filtered' : ''
+                  }`}
+                  onClick={() => toggleMenu('region')}
+                  title="Filtrar por región (DRE) del proyecto"
+                >
+                  <div className="filter-card-copy">
+                    <small>Región</small>
+                    <span>{selectedRegions.length === 0 ? 'Todas las regiones' : selectedRegions.includes('__NONE__') ? 'Ninguna' : regionButtonText}</span>
+                  </div>
+                  <ChevronDown size={14} className="filter-chevron" />
+                </button>
+                {activeMenu === 'region' && (
+                  <div
+                    className="filter-card-popover"
+                    onClick={(e) => e.stopPropagation()}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
+                      if (list && e.target !== list && !list.contains(e.target as Node)) {
+                        list.scrollTop += e.deltaY;
+                      }
+                    }}
+                    style={{ minWidth: 270 }}
+                  >
+                    <div className="filter-popover-title filter-popover-title-row">
+                      <span>Regiones y sedes</span>
+                      {selectedRegions.length > 0 && (
+                        <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions((prev) => (prev.length === 0 ? ['__NONE__'] : []))}>
+                          Limpiar ({selectedRegions.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="filter-popover-list" style={{ maxHeight: 320 }}>
+                      <button
+                        type="button"
+                        className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
+                        onClick={() => setSelectedRegions((prev) => (prev.length === 0 ? ['__NONE__'] : []))}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          background: 'transparent',
+                          border: 'none',
+                          width: '100%',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span className={`filter-checkbox ${selectedRegions.length === 0 ? 'checked' : ''}`}>{selectedRegions.length === 0 && <Check size={10} strokeWidth={3} />}</span>
+                          <span className="filter-item-text">
+                            <strong style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                              Todas las regiones
+                            </strong>
+                          </span>
+                        </div>
+                        <span className="wbs-level-badge">{unidades.length}</span>
+                      </button>
+
+                      {/* Título de sección sutil idéntico a Componentes y Estado */}
+                      <div className="filter-popover-group-label" style={{ marginTop: 6 }}>
+                        <span>Macro-regiones y sedes</span>
+                      </div>
+
+                      {/* Grupos de Macro-regiones con Chevrones para Desplegar/Colapsar (Colapsados por defecto) */}
+                      {MACROREGIONES_NACIONAL.map((macro) => {
+                        const totalSedesMacro = macro.regiones.reduce(
+                          (acc, reg) => acc + (sedesPorRegion.get(normalizeRegionKey(reg)) || 0),
+                          0
+                        );
+                        const selectedCountInMacro = selectedRegions.length === 0 ? macro.regiones.length : macro.regiones.filter((r) => selectedRegions.includes(r)).length;
+                        const isAllMacroSelected = macro.regiones.length > 0 && selectedCountInMacro === macro.regiones.length;
+                        const isMacroIndeterminate = selectedCountInMacro > 0 && selectedCountInMacro < macro.regiones.length;
+                        const isCompChecked = isAllMacroSelected || isMacroIndeterminate;
+                        const isExpanded = Boolean(expandedMacroIds[macro.id]);
+
+                        return (
+                          <React.Fragment key={macro.id}>
+                            <div
+                              className={`filter-item-btn filter-item-check ${isCompChecked ? 'selected' : ''}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '7px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                background: 'transparent',
+                                transition: 'background 0.12s ease',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedMacroIds((prev) => ({ ...prev, [macro.id]: !prev[macro.id] }));
+                                  }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '2px',
+                                    margin: '0',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#64748b',
+                                    borderRadius: '4px',
+                                    flexShrink: 0,
+                                    lineHeight: 1,
+                                  }}
+                                  title={isExpanded ? 'Colapsar macro-región' : 'Desplegar macro-región'}
+                                  aria-expanded={isExpanded}
+                                >
+                                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    flex: 1,
+                                    minWidth: 0,
+                                    cursor: 'pointer',
+                                  }}
+                                  onClick={() => toggleMacroRegions(macro.regiones)}
+                                  title={formatMacroName(macro.name)}
+                                >
+                                  <span
+                                    className={`filter-checkbox ${isAllMacroSelected ? 'checked' : isMacroIndeterminate ? 'indeterminate' : ''}`}
+                                    style={{
+                                      flexShrink: 0,
+                                      ...(isMacroIndeterminate ? { background: '#0066ff', borderColor: '#0066ff' } : {}),
+                                    }}
+                                  >
+                                    {isAllMacroSelected && <Check size={10} strokeWidth={3} />}
+                                    {isMacroIndeterminate && <Minus size={10} strokeWidth={3} color="#ffffff" />}
+                                  </span>
+                                  <span
+                                    className="filter-item-text"
+                                    style={{
+                                      whiteSpace: 'nowrap',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    <strong
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        color: '#0f172a',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: 'block',
+                                      }}
+                                    >
+                                      {formatMacroName(macro.name)}
+                                    </strong>
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                {totalSedesMacro}
+                              </span>
+                            </div>
+
+                            {/* Regiones hijas desplegables: sangría a la derecha (26px), peso normal, una sola fila */}
+                            {isExpanded && macro.regiones.map((regName) => {
+                              const isChecked = selectedRegions.includes(regName);
+                              const numSedes = sedesPorRegion.get(normalizeRegionKey(regName)) || 0;
+                              const coordinador = getRegionCoordinador(regName);
+
+                              return (
+                                <div
+                                  key={regName}
+                                  className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '6px 8px',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    background: isChecked ? '#eff6ff' : 'transparent',
+                                  }}
+                                  onClick={() => toggleRegion(regName)}
+                                  title={`${regName} (${numSedes} sedes)${coordinador ? ` · Coord. regional: ${coordinador}` : ''}`}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                    {/* Sangría estructural que desplaza el checkbox 24px a la derecha del padre */}
+                                    <div style={{ width: 24, flexShrink: 0 }} aria-hidden="true" />
+                                    <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`} style={{ flexShrink: 0 }}>
+                                      {isChecked && <Check size={10} strokeWidth={3} />}
+                                    </span>
+                                    <span
+                                      className="filter-item-text"
+                                      style={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        flex: 1,
+                                        minWidth: 0,
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontSize: '12.5px',
+                                          color: isChecked ? '#0066ff' : '#1e293b',
+                                          fontWeight: isChecked ? 600 : 500,
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          display: 'block',
+                                        }}
+                                      >
+                                        {regName}
+                                      </span>
+                                    </span>
+                                  </div>
+                                  {numSedes > 0 && (
+                                    <span className="wbs-level-badge" style={{ marginLeft: 6, flexShrink: 0 }}>
+                                      {numSedes}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Controles de utilidad del módulo en Fila 1 con separadores lógicos */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', marginRight: '8px' }}>
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${showSecondaryFilters ? 'active' : ''}`}
+                onClick={() => setShowSecondaryFilters((v) => !v)}
+                title={showSecondaryFilters ? 'Ocultar segunda fila de filtros' : 'Mostrar segunda fila de filtros'}
+                aria-label="Alternar segunda fila de filtros"
+              >
+                <SlidersHorizontal size={15} />
+              </button>
+              <div className="filter-group-divider" aria-hidden="true" />
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${isFullscreen ? 'active' : ''}`}
+                onClick={toggleFullscreen}
+                title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+                aria-label="Alternar modo pantalla completa"
+              >
+                {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              </button>
+              <div className="filter-group-divider" aria-hidden="true" />
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${history.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUndo();
+                }}
+                disabled={history.length === 0}
+                title={history.length > 0 ? 'Retroceder / Deshacer (Ctrl+Z)' : 'Sin cambios para retroceder'}
+                aria-label="Retroceder o deshacer último cambio"
+              >
+                <Undo2 size={14} />
+              </button>
+              <button
+                type="button"
+                className={`btn secondary qm-btn-icon ${redoHistory.length === 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRedo();
+                }}
+                disabled={redoHistory.length === 0}
+                title={redoHistory.length > 0 ? 'Adelantar / Rehacer (Ctrl+Y)' : 'Sin cambios para adelantar'}
+                aria-label="Adelantar o rehacer último cambio"
+              >
+                <Redo2 size={14} />
+              </button>
+            </div>
+            <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
+              {perspective === 'equipo' ? (
+                <>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'directorio' || viewMode === 'lista' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('directorio')}
+                    title="Directorio de Integrantes"
+                  >
+                    <Users size={14} />
+                    <span>Directorio</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('organigrama')}
+                    title="Organigrama Estructural"
+                  >
+                    <GitBranch size={14} />
+                    <span>Organigrama</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('sedes')}
+                    title="Frentes Territoriales y Sedes"
+                  >
+                    <Building2 size={14} />
+                    <span>Frentes Territoriales</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'carga' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('carga')}
+                    title="Carga de Trabajo Operativa"
+                  >
+                    <Activity size={14} />
+                    <span>Carga de Trabajo</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('calendario')}
+                    title="Vista Calendario"
+                  >
+                    <CalendarDays size={14} />
+                    <span>Calendario</span>
+                  </button>
+                  {false && (
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('gantt')}
+                    title="Vista Cronograma Gantt"
+                  >
+                    <FolderKanban size={14} />
+                    <span>Gantt</span>
+                  </button>
+                  )}
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('lista')}
+                    title="Vista Tabla Analítica"
+                  >
+                    <List size={14} />
+                    <span>Lista</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('kanban')}
+                    title="Vista Tablero Kanban"
+                  >
+                    <LayoutDashboard size={14} />
+                    <span>Kanban</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'itinerario' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('itinerario')}
+                    title="Plan de visitas presenciales e itinerario"
+                  >
+                    <Route size={14} />
+                    <span>Itinerario</span>
+                  </button>
+                  {false && (
+                  <button
+                    type="button"
+                    className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
+                    onClick={() => handleViewModeChange('mapa')}
+                    title="Vista Mapa Territorial"
+                  >
+                    <MapPin size={14} />
+                    <span>Mapa</span>
+                  </button>
+                  )}
+                </>
+              )}
+            </div>
+          </nav>
+
+          {/* Filtros Contextuales y Macro */}
+          {showSecondaryFilters && (
+          <ProjectShellFilters>
               {/* Filtro Universal 1: Estructura WBS (Doble Sección: Profundidad y Rol PM4R / BID) */}
               <div className="filter-dropdown-wrap wbs-filter-wrap tabs-filter-wrap">
                 <button
@@ -6433,525 +7457,6 @@ export default function Reuniones2View({
                   </div>
                 )}
               </div>
-
-              {/* Filtro Universal 2: Estado de avance (Multiselección) + plazos de vencimiento */}
-              <div className="filter-dropdown-wrap estado-filter-wrap tabs-filter-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn estado-card-btn ${activeMenu === 'state' ? 'active' : ''} ${
-                    selectedStates.length > 0 || vencimientosFilter !== 'todos' ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('state')}
-                  title="Filtrar por estado de avance y plazos de vencimiento"
-                >
-                  <div className="filter-card-copy">
-                    <small>Estado</small>
-                    <span>
-                      {(() => {
-                        const vencLabels: Record<string, string> = {
-                          hoy: 'Vencen hoy',
-                          semana: 'Vencen esta semana',
-                          mes: 'Vencen este mes',
-                          trimestre: 'Vencen este trimestre',
-                          retraso: 'Retraso crítico',
-                        };
-                        const venc = vencLabels[vencimientosFilter];
-                        if (selectedStates.length === 0) {
-                          return venc || 'Todos los estados';
-                        }
-                        if (selectedStates.length === 1) {
-                          return venc ? `${selectedStates[0]} · ${venc}` : selectedStates[0];
-                        }
-                        const multiStr = `${selectedStates.length} seleccionados`;
-                        return venc ? `${multiStr} · ${venc}` : multiStr;
-                      })()}
-                    </span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'state' && (
-                  <div
-                    className="filter-card-popover"
-                    onClick={(e) => e.stopPropagation()}
-                    onWheel={(e) => {
-                      e.stopPropagation();
-                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                      if (list && e.target !== list && !list.contains(e.target as Node)) {
-                        list.scrollTop += e.deltaY;
-                      }
-                    }}
-                    style={{ minWidth: 300 }}
-                  >
-                    <div className="filter-popover-title filter-popover-title-row">
-                      <span>Estado de avance</span>
-                      {(selectedStates.length > 0 || vencimientosFilter !== 'todos') && (
-                        <button
-                          type="button"
-                          className="filter-reset-link"
-                          onClick={() => {
-                            setSelectedStates([]);
-                            setTab('Todos');
-                            setVencimientosFilter('todos');
-                          }}
-                        >
-                          Restablecer
-                        </button>
-                      )}
-                    </div>
-                    <div className="filter-popover-list">
-                      {/* Opción Todos los estados: limpia la multiselección */}
-                      <button
-                        type="button"
-                        className={`filter-item-btn filter-item-check ${selectedStates.length === 0 ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSelectedStates([]);
-                          setTab('Todos');
-                        }}
-                      >
-                        <span className="filter-item-main">
-                          <span className={`filter-radio ${selectedStates.length === 0 ? 'checked' : ''}`}>
-                            {selectedStates.length === 0 && <span className="filter-radio-dot" />}
-                          </span>
-                          <span className="filter-item-text">
-                            <strong>Todos los estados</strong>
-                          </span>
-                        </span>
-                        <span className="wbs-level-badge">{items.length}</span>
-                      </button>
-
-                      {/* Estados con multiselección via Checkbox */}
-                      {[
-                        { id: 'Completados', label: 'Completados', count: complete, dotColor: '#16a34a', badgeClass: 'badge-cumple' },
-                        { id: 'En proceso', label: 'En proceso', count: inprog, dotColor: '#0284c7', badgeClass: 'badge-enproceso' },
-                        { id: 'Con retraso', label: 'Con retraso', count: late, dotColor: '#dc2626', badgeClass: 'badge-retraso' },
-                        { id: 'Pendiente', label: 'Pendientes', count: items.filter((x) => x.status === 'Pendiente').length, dotColor: '#94a3b8', badgeClass: 'badge-pendiente' },
-                      ].map((opt) => {
-                        const isChecked = selectedStates.includes(opt.id);
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                            onClick={() => toggleState(opt.id)}
-                            aria-pressed={isChecked}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
-                                {isChecked && <Check size={10} strokeWidth={3} />}
-                              </span>
-                              <span className="filter-status-dot" style={{ background: opt.dotColor }} />
-                              <span className="filter-item-text">
-                                <strong>{opt.label}</strong>
-                              </span>
-                            </span>
-                            <span className={`wbs-level-badge ${opt.badgeClass}`}>{opt.count}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="filter-popover-title filter-popover-subtitle">
-                      <span>Plazos de vencimiento</span>
-                    </div>
-                    <div className="filter-popover-list">
-                      {[
-                        { id: 'todos', label: 'Todos los plazos', badge: items.length, icon: CalendarDays },
-                        { id: 'hoy', label: 'Vencen hoy', badge: vencenHoyCount, icon: Clock, alert: vencenHoyCount > 0 },
-                        { id: 'semana', label: 'Vencen esta semana', badge: vencenSemanaCount, icon: Clock3, alert: vencenSemanaCount > 0 },
-                        { id: 'mes', label: 'Vencen este mes', badge: vencenMesCount, icon: CalendarRange, alert: false },
-                        { id: 'trimestre', label: 'Vencen este trimestre', badge: vencenTrimestreCount, icon: CalendarRange, alert: false },
-                        { id: 'retraso', label: 'Con retraso crítico', badge: criticalItemsCount, icon: AlertTriangle, alert: criticalItemsCount > 0 },
-                      ].map((opt) => {
-                        const isSelected = vencimientosFilter === opt.id;
-                        const IconComponent = opt.icon;
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isSelected ? 'selected' : ''}`}
-                            onClick={() => {
-                              setVencimientosFilter(opt.id as any);
-                            }}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isSelected ? 'checked' : ''}`}>
-                                {isSelected && <span className="filter-radio-dot" />}
-                              </span>
-                              <IconComponent size={14} className={opt.alert ? 'filter-icon-alert' : 'filter-icon-muted'} />
-                              <span className="filter-item-text">
-                                <strong style={opt.alert ? { color: '#b91c1c' } : undefined}>{opt.label}</strong>
-                              </span>
-                            </span>
-                            <span className={`wbs-level-badge ${opt.alert ? 'is-late' : ''}`}>{opt.badge}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Filtro Contextual 3 (Caja Roja): Componente / Producto EDT */}
-              <div className="filter-dropdown-wrap contextual-filter-wrap edt-filter-wrap">
-                <button
-                  type="button"
-                  className={`filter-card-btn ${activeMenu === 'edtComponent' ? 'active' : ''} ${
-                    selectedEdtCodes.length > 0 ? 'filtered' : ''
-                  }`}
-                  onClick={() => toggleMenu('edtComponent')}
-                  title="Filtrar por Componente o Producto EDT"
-                >
-                  <div className="filter-card-copy">
-                    <small>Componente / Producto</small>
-                    <span>{edtButtonText}</span>
-                  </div>
-                  <ChevronDown size={14} className="filter-chevron" />
-                </button>
-                {activeMenu === 'edtComponent' && (
-                  <div
-                    className="filter-card-popover"
-                    onClick={(e) => e.stopPropagation()}
-                    onWheel={(e) => {
-                      e.stopPropagation();
-                      const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                      if (list && e.target !== list && !list.contains(e.target as Node)) {
-                        list.scrollTop += e.deltaY;
-                      }
-                    }}
-                    style={{ minWidth: 320 }}
-                  >
-                    <div className="filter-popover-title filter-popover-title-row">
-                      <span>Componentes y Productos EDT</span>
-                      {selectedEdtCodes.length > 0 && (
-                        <button
-                          type="button"
-                          className="filter-reset-link"
-                          onClick={() => setSelectedEdtCodes([])}
-                        >
-                          Restablecer
-                        </button>
-                      )}
-                    </div>
-                    <div className="filter-popover-list" style={{ maxHeight: 380 }}>
-                      {/* Opción Todos */}
-                      {(() => {
-                        const isAll = selectedEdtCodes.length === 0;
-                        return (
-                          <button
-                            type="button"
-                            className={`filter-item-btn filter-item-check ${isAll ? 'selected' : ''}`}
-                            onClick={() => setSelectedEdtCodes([])}
-                          >
-                            <span className="filter-item-main">
-                              <span className={`filter-radio ${isAll ? 'checked' : ''}`}>
-                                {isAll && <span className="filter-radio-dot" />}
-                              </span>
-                              <span className="filter-item-text">
-                                <strong>Todos los componentes</strong>
-                              </span>
-                            </span>
-                            <span className="wbs-level-badge">{items.length}</span>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Grupos de Componentes y sus Productos */}
-                      {edtComponentsWithProducts.map(({ comp, products }) => {
-                        const isCompChecked = selectedEdtCodes.includes(comp.id) || selectedEdtCodes.includes(comp.code);
-                        const compTotalItems = items.filter((x) => x.id === comp.id || x.parentId === comp.id || items.some(p => p.id === x.parentId && p.parentId === comp.id)).length;
-                        return (
-                          <React.Fragment key={comp.id}>
-                            <div
-                              className="filter-popover-group-label"
-                              style={{
-                                marginTop: 8,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                background: 'rgba(37, 99, 235, 0.05)',
-                                padding: '5px 8px',
-                                borderRadius: 4,
-                              }}
-                            >
-                              <button
-                                type="button"
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: 0,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 6,
-                                  textAlign: 'left',
-                                  font: 'inherit',
-                                  color: 'inherit',
-                                  flex: 1,
-                                }}
-                                onClick={() => {
-                                  setSelectedEdtCodes((prev) =>
-                                    prev.includes(comp.id) ? prev.filter((c) => c !== comp.id) : [...prev, comp.id]
-                                  );
-                                }}
-                              >
-                                <span className={`filter-checkbox ${isCompChecked ? 'checked' : ''}`}>
-                                  {isCompChecked && <Check size={10} strokeWidth={3} />}
-                                </span>
-                                <strong style={{ fontSize: 11, color: '#0f172a' }}>
-                                  {comp.code} {comp.name}
-                                </strong>
-                              </button>
-                              <span className="wbs-level-badge">{compTotalItems}</span>
-                            </div>
-
-                            {products.map((prod) => {
-                              const isProdChecked = selectedEdtCodes.includes(prod.id) || selectedEdtCodes.includes(prod.code);
-                              const prodSedesCount = items.filter((x) => x.parentId === prod.id).length;
-                              return (
-                                <button
-                                  key={prod.id}
-                                  type="button"
-                                  className={`filter-item-btn filter-item-check ${isProdChecked ? 'selected' : ''}`}
-                                  style={{ paddingLeft: 18 }}
-                                  onClick={() => {
-                                    setSelectedEdtCodes((prev) =>
-                                      prev.includes(prod.id) ? prev.filter((c) => c !== prod.id) : [...prev, prod.id]
-                                    );
-                                  }}
-                                >
-                                  <span className="filter-item-main">
-                                    <span className={`filter-checkbox ${isProdChecked ? 'checked' : ''}`}>
-                                      {isProdChecked && <Check size={10} strokeWidth={3} />}
-                                    </span>
-                                    <span className="filter-item-text">
-                                      <strong>{prod.code ? `${prod.code} ` : ''}{prod.name}</strong>
-                                    </span>
-                                  </span>
-                                  {prodSedesCount > 0 && <span className="wbs-level-badge">{prodSedesCount}</span>}
-                                </button>
-                              );
-                            })}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="view-mode-switcher" role="tablist" aria-label="Modo de presentación">
-              {perspective === 'equipo' ? (
-                <>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'directorio' || viewMode === 'lista' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('directorio')}
-                    title="Directorio de Integrantes"
-                  >
-                    <Users size={14} />
-                    <span>Directorio</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'organigrama' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('organigrama')}
-                    title="Organigrama Estructural"
-                  >
-                    <GitBranch size={14} />
-                    <span>Organigrama</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'sedes' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('sedes')}
-                    title="Frentes Territoriales y Sedes"
-                  >
-                    <Building2 size={14} />
-                    <span>Frentes Territoriales</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'carga' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('carga')}
-                    title="Carga de Trabajo Operativa"
-                  >
-                    <Activity size={14} />
-                    <span>Carga de Trabajo</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'calendario' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('calendario')}
-                    title="Vista Calendario"
-                  >
-                    <CalendarDays size={14} />
-                    <span>Calendario</span>
-                  </button>
-                  {false && (
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'gantt' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('gantt')}
-                    title="Vista Cronograma Gantt"
-                  >
-                    <FolderKanban size={14} />
-                    <span>Gantt</span>
-                  </button>
-                  )}
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'lista' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('lista')}
-                    title="Vista Tabla Analítica"
-                  >
-                    <List size={14} />
-                    <span>Lista</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('kanban')}
-                    title="Vista Tablero Kanban"
-                  >
-                    <LayoutDashboard size={14} />
-                    <span>Kanban</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'itinerario' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('itinerario')}
-                    title="Plan de visitas presenciales e itinerario"
-                  >
-                    <Route size={14} />
-                    <span>Itinerario</span>
-                  </button>
-                  {false && (
-                  <button
-                    type="button"
-                    className={`view-mode-btn ${viewMode === 'mapa' ? 'active' : ''}`}
-                    onClick={() => handleViewModeChange('mapa')}
-                    title="Vista Mapa Territorial"
-                  >
-                    <MapPin size={14} />
-                    <span>Mapa</span>
-                  </button>
-                  )}
-                </>
-              )}
-            </div>
-          </nav>
-
-          {/* Filtros Contextuales y Macro */}
-          <ProjectShellFilters>
-            {/* Filtro Contextual 1 (Vista Proyecto): Región / DRE */}
-            <div className="filter-dropdown-wrap contextual-filter-wrap region-filter-wrap">
-              <button
-                type="button"
-                className={`filter-card-btn ${activeMenu === 'region' ? 'active' : ''} ${
-                  selectedRegions.length > 0 ? 'filtered' : ''
-                }`}
-                onClick={() => toggleMenu('region')}
-                title="Filtrar por región (DRE) del proyecto"
-              >
-                <div className="filter-card-copy">
-                  <small>Región</small>
-                  <span>{selectedRegions.length === 0 ? 'Todas las regiones' : regionButtonText}</span>
-                </div>
-                <ChevronDown size={14} className="filter-chevron" />
-              </button>
-              {activeMenu === 'region' && (
-                <div
-                  className="filter-card-popover"
-                  onClick={(e) => e.stopPropagation()}
-                  onWheel={(e) => {
-                    e.stopPropagation();
-                    const list = e.currentTarget.querySelector('.filter-popover-list') as HTMLElement | null;
-                    if (list && e.target !== list && !list.contains(e.target as Node)) {
-                      list.scrollTop += e.deltaY;
-                    }
-                  }}
-                  style={{ minWidth: 270 }}
-                >
-                  <div className="filter-popover-title filter-popover-title-row">
-                    <span>Regiones y sedes del catálogo</span>
-                    {selectedRegions.length > 0 && (
-                      <button type="button" className="filter-reset-link" onClick={() => setSelectedRegions([])}>
-                        Limpiar ({selectedRegions.length})
-                      </button>
-                    )}
-                  </div>
-                  <div className="filter-popover-list" style={{ maxHeight: 320 }}>
-                    <button
-                      type="button"
-                      className={`filter-item-btn ${selectedRegions.length === 0 ? 'selected' : ''}`}
-                      onClick={() => setSelectedRegions([])}
-                    >
-                      <span className="filter-item-text">
-                        <strong>Todas las regiones</strong>
-                        <small>{MACROREGIONES_NACIONAL.length} macro-regiones · {unidades.length} sedes</small>
-                      </span>
-                      <span className="wbs-level-badge">{unidades.length}</span>
-                    </button>
-                    {MACROREGIONES_NACIONAL.map((macro) => {
-                      const todasMacro = macro.regiones.every((r) => selectedRegions.includes(r));
-                      return (
-                        <React.Fragment key={macro.id}>
-                          <div className="filter-popover-group-label macro-group-row">
-                            <span>{macro.name}</span>
-                            <button
-                              type="button"
-                              className={`filter-reset-link ${todasMacro ? 'macro-all-active' : ''}`}
-                              onClick={() => toggleMacroRegions(macro.regiones)}
-                              aria-pressed={todasMacro}
-                              title={
-                                todasMacro
-                                  ? `Quitar las ${macro.regiones.length} regiones de esta macro`
-                                  : `Seleccionar las ${macro.regiones.length} regiones de esta macro`
-                              }
-                            >
-                              {todasMacro ? `Quitar (${macro.regiones.length})` : `Todas (${macro.regiones.length})`}
-                            </button>
-                          </div>
-                        {macro.regiones.map((regName) => {
-                          const isChecked = selectedRegions.includes(regName);
-                          const coordinador = getRegionCoordinador(regName);
-                          return (
-                            <button
-                              key={regName}
-                              type="button"
-                              className={`filter-item-btn filter-item-check ${isChecked ? 'selected' : ''}`}
-                              onClick={() => toggleRegion(regName)}
-                              aria-pressed={isChecked}
-                            >
-                              <span className="filter-item-main">
-                                <span className={`filter-checkbox ${isChecked ? 'checked' : ''}`}>
-                                  {isChecked && <Check size={10} strokeWidth={3} />}
-                                </span>
-                                <span className="filter-item-text">
-                                  <strong>{regName}</strong>
-                                  <small>
-                                    {sedesPorRegion.get(normalizeRegionKey(regName)) || 0} sedes
-                                    {coordinador ? ` · Coord. regional: ${coordinador}` : ''}
-                                  </small>
-                                </span>
-                              </span>
-                              {(regionItemCounts[regName] || 0) > 0 && (
-                                <span className="wbs-level-badge">{regionItemCounts[regName]}</span>
-                              )}
-                            </button>
-                          );
-                        })}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-            </div>
 
             {/* Filtro Contextual 2 (Vista Territorial): Sede Territorial / UGEL o Gestor de Campo */}
             {perspective === 'territorial' ? (
@@ -7326,7 +7831,7 @@ export default function Reuniones2View({
                   ))}
                 </div>
               </>
-            ) : (
+            ) : viewMode !== 'kanban' ? (
               /* En Modo Gantt, Calendario, Kanban y Jerárquica: Barra de Navegación y Escala Oficial Homologada 1:1 */
               <>
                 <button
@@ -7390,7 +7895,7 @@ export default function Reuniones2View({
                   </button>
                 </div>
               </>
-            )}
+            ) : null}
 
             {/* Separador vertical: Bloque 2 (Tiempo) | Bloque 3 (Capas y Visualización de Cronograma) */}
             {(viewMode === 'gantt' || viewMode === 'calendario' || perspective === 'equipo') && (
@@ -7726,6 +8231,7 @@ export default function Reuniones2View({
             </div>
             )}
           </ProjectShellFilters>
+          )}
 
           {/* Fila extra expandible de Filtros Personalizados */}
           {advancedFiltersOpen && (

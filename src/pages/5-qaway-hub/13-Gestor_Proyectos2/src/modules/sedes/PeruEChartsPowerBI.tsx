@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as echarts from 'echarts';
-import PERU_GEOJSON from '../../data/peru_departamental_simple.json';
+import PERU_GEOJSON from '../../../Bases de Datos/geocoding/New/peru_departamental_simple.json';
 
 const normalize = (value: any = '') =>
   String(value)

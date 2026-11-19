@@ -1,0 +1,219 @@
+La idea es que el sistema no obligue al usuario a diseñar su organización desde cero. Al crear una empresa o entidad, debe ofrecerle una **estructura jerárquica de referencia**, coherente con su naturaleza:
+
+- **Entidad pública:** una estructura institucional basada en los órganos y unidades que normalmente establece su organización formal (ROF u otro instrumento aplicable).
+- **Empresa privada:** una estructura empresarial convencional, organizada por niveles de dirección, gerencias, áreas y equipos, según su tamaño y actividad.
+
+En ambos casos, la estructura será una propuesta inicial editable: el usuario podrá conservarla, renombrar, agregar, eliminar o reorganizar unidades. La propuesta debe orientar, no imponer una estructura obligatoria.
+
+## **1. Estructura recomendada para una entidad pública**
+
+En Perú sí existe un marco de referencia normativo. La base son los **Lineamientos de Organización del Estado**, aprobados por el D. S. 054-2018-PCM y modificados por los D. S. 131-2018-PCM y 064-2021-PCM.
+
+La PCM establece que la estructura debe responder a las competencias, funciones, servicios, personal y capacidad operativa de cada entidad. Por tanto, no corresponde imponer el mismo organigrama a un ministerio, una municipalidad, un gobierno regional o un organismo público.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://busquedas.elperuano.pe\&sz=32)
+
+DECRETO SUPREMO -+2
+
+
+
+### **Plantilla institucional de referencia**
+
+Esta sería una estructura orientativa para mostrar al usuario:
+
+**TITULAR DE LA ENTIDAD**
+
+Máxima autoridad institucional
+
+**ALTA DIRECCIÓN**
+
+Despacho, consejo, gerencia general o equivalente, según entidad
+
+ÓRGANOS QUE PUEDEN DEPENDER DE LA ALTA DIRECCIÓN
+
+**Control institucional**
+
+Órgano de Control Institucional (OCI), cuando corresponda
+
+**Defensa jurídica**
+
+Procuraduría Pública, cuando corresponda
+
+**Asesoramiento**
+
+Planeamiento, presupuesto, asesoría jurídica, etc.
+
+**Apoyo**
+
+Administración, recursos humanos, abastecimiento, tecnologías, etc.
+
+**ÓRGANOS DE LÍNEA**
+
+Direcciones, gerencias o unidades responsables de las funciones sustantivas
+
+**UNIDADES ORGÁNICAS**
+
+Subdirecciones, subgerencias, departamentos u otras denominaciones aplicables
+
+**UNIDADES DE MENOR NIVEL**
+
+Solo cuando la dimensión y las reglas aplicables justifiquen su creación
+
+Los órganos desconcentrados, programas y proyectos pueden representarse como ramas adicionales según su naturaleza y dependencia. No son niveles que deban agregarse automáticamente a toda entidad.
+
+**Importante:** los órganos de alta dirección, asesoramiento, apoyo y línea son categorías organizacionales; no deben convertirse en ramas obligatorias para todas las entidades. La norma establece niveles organizacionales y criterios de diseño, no una plantilla universal.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://busquedas.elperuano.pe\&sz=32)
+
+busquedas.elperuano.pe+1
+
+
+
+También hay que contemplar que algunas entidades se organizan mediante un **Manual de Operaciones (MOP)** en lugar de un ROF, por ejemplo determinados programas y proyectos especiales.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://busquedas.elperuano.pe\&sz=32)
+
+DECRETO SUPREMO -+1
+
+
+
+### **La plantilla debe adaptarse al tipo de entidad pública**
+
+| Tipo de entidad              | Referencia para la estructura                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| Ministerio                   | Despacho Ministerial, despachos viceministeriales, Secretaría General y órganos correspondientes |
+| Gobierno regional            | Consejo Regional, Gobernación Regional, Gerencia Regional y gerencias/direcciones                |
+| Municipalidad                | Concejo Municipal, Alcaldía, Gerencia Municipal, gerencias y subgerencias                        |
+| Organismo público            | Jefatura o presidencia, gerencia general y órganos según su naturaleza                           |
+| Programa o proyecto especial | Estructura funcional y dependencia de la entidad a la que pertenece                              |
+
+Estos son ejemplos de denominaciones y configuraciones previstas en los lineamientos; la estructura real debe corresponder al ROF o MOP de cada institución.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://busquedas.elperuano.pe\&sz=32)
+
+busquedas.elperuano.pe+1
+
+
+
+## **2. Estructura recomendada para una empresa privada**
+
+En el sector privado no existe una estructura jerárquica única impuesta de manera general. La empresa organiza sus áreas según su actividad, tamaño, estrategia y necesidades. Una estructura funcional es un punto de partida convencional; también existen estructuras divisionales, matriciales y horizontales.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://www.bdo.com.pe\&sz=32)
+
+BDO+1
+
+
+
+### **Plantilla empresarial convencional**
+
+**PROPIETARIOS / SOCIOS**
+
+Accionistas o titulares, según la forma empresarial
+
+**DIRECTORIO**
+
+Opcional, según el gobierno corporativo
+
+**GERENCIA GENERAL**
+
+Dirección y gestión integral de la empresa
+
+**Administración y Finanzas**
+
+Contabilidad · Tesorería · Compras
+
+**Comercial**
+
+Ventas · Marketing · Atención al cliente
+
+**Operaciones**
+
+Producción · Servicios · Logística
+
+**Gestión Humana**
+
+Selección · Nómina · Desarrollo
+
+**Tecnología**
+
+Sistemas · Soporte · Desarrollo
+
+**Legal y Cumplimiento**
+
+Asesoría · Contratos · Cumplimiento
+
+**JEFATURAS / DEPARTAMENTOS**
+
+Responsables de áreas, departamentos o unidades
+
+**EQUIPOS / UNIDADES / PERSONAL**
+
+Equipos de trabajo y puestos dependientes
+
+El directorio, las gerencias y las áreas son configurables. Una pequeña empresa podría empezar directamente con Gerencia General y tres áreas; una empresa más grande podría incorporar direcciones, divisiones, sucursales y unidades de negocio.
+
+## **3. Cómo debería funcionar en el Gestor de Proyectos**
+
+Mi recomendación es implementar un **asistente de estructura organizacional** durante la configuración inicial del tenant.
+
+El usuario elige la naturaleza de su organización y recibe una propuesta inicial. No debería encontrarse con un organigrama vacío ni con una estructura rígida.
+
+**Paso 1. Identificar la organización**
+
+**Entidad pública**
+
+Ministerio, gobierno regional, municipalidad, organismo público, etc.
+
+**Empresa privada**
+
+Comercial, servicios, industria, tecnología, consultoría, etc.
+
+**Paso 2. Proponer una estructura**
+
+El sistema carga una plantilla de referencia según la selección anterior y el tipo de organización.
+
+**Paso 3. Personalizar**
+
+Agregar órganos, gerencias, áreas o unidades
+
+Cambiar nombres y denominaciones
+
+Mover unidades y cambiar dependencias
+
+Eliminar unidades que no correspondan
+
+Asignar responsables y miembros posteriormente
+
+**Paso 4. Confirmar estructura**
+
+La estructura queda registrada como organización del tenant y puede seguir modificándose desde Configuración.
+
+## **4. Una decisión arquitectónica importante**
+
+Para que esto funcione bien, la aplicación debe distinguir tres conceptos:
+
+| Concepto              | Qué representa                                           |
+| --------------------- | -------------------------------------------------------- |
+| Unidad organizacional | Gerencia, dirección, oficina, departamento, área, equipo |
+| Puesto o cargo        | Gerente, director, jefe, coordinador, analista           |
+| Persona               | Usuario o integrante que ocupa un puesto                 |
+
+No deben confundirse. Una gerencia puede existir aunque todavía no tenga gerente asignado; una persona puede cambiar de puesto sin que desaparezca la unidad organizacional.
+
+También conviene que la estructura admita niveles anidados sin límite fijo de tres o cuatro niveles, aunque la interfaz pueda sugerir niveles convencionales.
+
+## **5. Mi propuesta definitiva**
+
+Implementaría dos plantillas principales:
+
+- **Pública:** basada en la organización del Estado peruano, con denominaciones institucionales y referencias a ROF/MOP.
+- **Privada:** basada en una jerarquía empresarial funcional, con alternativas por tamaño y actividad.
+
+Y una tercera posibilidad: **estructura personalizada desde cero**, para organizaciones que no encajen en las plantillas.
+
+La estructura inicial debe ser una sugerencia, nunca una obligación. El usuario puede conservarla o modificarla completamente.
+
+Hay un detalle adicional que considero importante: para entidades públicas, en una futura mejora, se podría permitir cargar o seleccionar su ROF/MOP y construir una propuesta a partir de su organigrama oficial. Así el sistema podría ofrecer una estructura mucho más precisa que una plantilla genérica.
+
+**Conclusión:** no se trata simplemente de preguntar si el tenant es público o privado. Se trata de ofrecerle una estructura jerárquica inicial que le ayude a comprender cómo organizar su institución o empresa, y que pueda adaptar a su realidad.

@@ -1,3 +1,5 @@
+import { UGEL_COORDINATES } from './ugel-coordinates';
+
 export const MINEDU_UNIDADES = [
   {
     "id": "unit-001",
@@ -5,7 +7,8 @@ export const MINEDU_UNIDADES = [
     "code": "DRE-AMAZONAS",
     "unitType": "dre",
     "region": "AMAZONAS",
-    "status": "active"
+    "status": "active",
+    ...UGEL_COORDINATES['DRE AMAZONAS']
   },
   {
     "id": "unit-002",
@@ -13,7 +16,8 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-BAGUA",
     "unitType": "ugel",
     "region": "AMAZONAS",
-    "status": "active"
+    "status": "active",
+    ...UGEL_COORDINATES['UGEL BAGUA']
   },
   {
     "id": "unit-003",
@@ -989,7 +993,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-CHANCHAMAYO",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.9000,
+    "lng": -75.5200
   },
   {
     "id": "unit-125",
@@ -997,15 +1003,19 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-CHUPACA",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -12.2000,
+    "lng": -75.5300
   },
   {
     "id": "unit-126",
     "name": "UGEL CONCEPCIÓN",
-    "code": "UGEL-CONCEPCION",
+    "code": "UGEL-CONCEPCIÓN",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -12.5000,
+    "lng": -75.5000
   },
   {
     "id": "unit-127",
@@ -1013,7 +1023,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-HUANCAYO",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -12.0500,
+    "lng": -75.4500
   },
   {
     "id": "unit-128",
@@ -1021,7 +1033,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-JAUJA",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.7000,
+    "lng": -75.4500
   },
   {
     "id": "unit-129",
@@ -1029,7 +1043,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-JUNIN",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.6000,
+    "lng": -75.5200
   },
   {
     "id": "unit-130",
@@ -1037,7 +1053,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-PANGOA",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.3000,
+    "lng": -74.6000
   },
   {
     "id": "unit-131",
@@ -1045,7 +1063,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-PICHANAKI",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.1000,
+    "lng": -75.2000
   },
   {
     "id": "unit-132",
@@ -1053,7 +1073,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-RIO-ENE-MANTARO",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.8000,
+    "lng": -75.2000
   },
   {
     "id": "unit-133",
@@ -1061,7 +1083,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-RIO-TAMBO",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -12.8000,
+    "lng": -75.3000
   },
   {
     "id": "unit-134",
@@ -1069,7 +1093,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-SATIPO",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -12.2000,
+    "lng": -75.7000
   },
   {
     "id": "unit-135",
@@ -1077,7 +1103,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-TARMA",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.3000,
+    "lng": -75.7000
   },
   {
     "id": "unit-136",
@@ -1085,7 +1113,9 @@ export const MINEDU_UNIDADES = [
     "code": "UGEL-YAULI",
     "unitType": "ugel",
     "region": "JUNÍN",
-    "status": "active"
+    "status": "active",
+    "lat": -11.5000,
+    "lng": -75.6000
   },
   {
     "id": "unit-137",

@@ -1,0 +1,126 @@
+No exactamente. La lógica correcta es esta: **el sistema debe cargar automáticamente una estructura jerárquica diferente según la naturaleza del tenant. No debe mostrar un catálogo genérico ni dejar campos vacíos para que el cliente los complete.**
+
+El tenant recibe una estructura completa, con sus denominaciones correspondientes, y luego puede personalizar cómo se muestran esos nombres mediante alias, sin alterar la clasificación original.
+
+## **1. Dos plantillas iniciales diferentes**
+
+Tenant público
+
+**Estructura institucional**
+
+**Alta Dirección**
+
+**Órganos de asesoramiento**
+
+**Órganos de apoyo**
+
+**Órganos de línea**
+
+**Direcciones / Gerencias**
+
+**Subdirecciones / Subgerencias**
+
+**Unidades orgánicas**
+
+Tenant privado
+
+**Estructura empresarial**
+
+**Propietarios / Socios**
+
+**Directorio**
+
+**Gerencia General**
+
+**Gerencias**
+
+**Jefaturas**
+
+**Departamentos / Áreas**
+
+**Equipos**
+
+Estas son plantillas de referencia, no organigramas obligatorios. En el sector público se deben adaptar al tipo de entidad y su ROF/MOP; en el privado, al tamaño y actividad empresarial.
+
+## **2. Cómo debe funcionar el alias**
+
+Ejemplo: el sistema carga para una entidad pública el nombre estándar **Dirección**.
+
+El tenant decide que en su organización quiere visualizarlo como **Gerencia**.
+
+**Configuración de la unidad**
+
+DENOMINACIÓN ESTÁNDAR DEL SISTEMA
+
+**Dirección**
+
+Referencia original de la plantilla pública
+
+ALIAS PERSONALIZADO POR EL TENANT
+
+**Gerencia**
+
+Denominación elegida por la organización
+
+**Así se visualizará en la aplicación**
+
+**Gerencia**
+
+Personalizado
+
+La denominación original permanece intacta. El alias solo modifica el nombre que ve el tenant.
+
+Y si el usuario no quiere cambiarlo, se muestra directamente el nombre estándar. No hay espacios vacíos ni campos obligatorios que completar.
+
+## **3. Arquitectura de base de datos que recomiendo**
+
+En este caso sí utilizaría dos tablas:
+
+**Tabla 1:&#x20;**`gp_plantillas_estructura_org_c`
+
+Contiene las estructuras predeterminadas del sistema, con sus jerarquías completas.
+
+| plantilla | nombre estándar          | padre                 |
+| --------- | ------------------------ | --------------------- |
+| PUBLICA   | Alta Dirección           | NULL                  |
+| PUBLICA   | Órganos de asesoramiento | Alta Dirección        |
+| PUBLICA   | Órganos de apoyo         | Alta Dirección        |
+| PUBLICA   | Órganos de línea         | Alta Dirección        |
+| PRIVADA   | Propietarios / Socios    | NULL                  |
+| PRIVADA   | Directorio               | Propietarios / Socios |
+| PRIVADA   | Gerencia General         | Directorio            |
+| PRIVADA   | Gerencias                | Gerencia General      |
+| PRIVADA   | Jefaturas                | Gerencias             |
+
+Cada registro tendría su identificador, código, sector, nodo padre, nivel, orden y demás metadatos.
+
+**Tabla 2:&#x20;**`gp_unidades_organizacionales`
+
+Contiene la estructura que efectivamente recibe y personaliza cada tenant.
+
+| Campo             | Función                               |
+| ----------------- | ------------------------------------- |
+| id                | Identificador                         |
+| tenant_id         | Organización propietaria              |
+| plantilla_nodo_id | Referencia a la denominación estándar |
+| unidad_padre_id   | Jerarquía propia del tenant           |
+| alias             | Nombre personalizado                  |
+| orden             | Posición                              |
+| activo            | Estado                                |
+
+El nombre que se presenta se resuelve así:
+
+`COALESCE(alias, nombre_estandar)`
+
+De esta manera, el nombre estándar nunca se pierde.
+
+## **4. El flujo definitivo**
+
+1. El tenant se registra como público o privado.
+2. El sistema selecciona automáticamente la plantilla correspondiente.
+3. Se copian todos sus nodos y relaciones jerárquicas a la estructura del tenant.
+4. El tenant visualiza el organigrama completo.
+5. Puede cambiar los nombres mediante alias, agregar unidades propias, reorganizar dependencias o desactivar las que no utiliza.
+6. La plantilla original permanece intacta para otros tenants.
+
+**Esta es la arquitectura que implementaría.** Separa las plantillas institucionales del Estado, las empresariales y las estructuras particulares de cada cliente. El tenant decide cómo denominar y organizar su estructura sin modificar el catálogo estándar del sistema.

@@ -43,42 +43,12 @@ export interface Fase {
  * no está activo, las vistas renderizan directamente desde el Nivel 1 (Componentes).
  */
 export const PROJECT_PHASES_CATALOG: Fase[] = [
-  {
-    id: 'FASE-INICIO',
-    code: 'F-01',
-    name: 'Inicio',
-    description: 'Constitución formal y lineamientos iniciales del programa',
-    order: 1,
-  },
-  {
-    id: 'FASE-PLANIFICACION',
-    code: 'F-02',
-    name: 'Planificación y Preparación',
-    description: 'Planificación de la distribución, habilitación de almacenes, actuaciones preparatorias de contratos y registro de personal de apoyo',
-    order: 2,
-  },
-  {
-    id: 'FASE-EJECUCION',
-    code: 'F-03',
-    name: 'Ejecución (Distribución y Registro)',
-    description: 'Recepción en DRE/UGEL, despacho a II.EE., recepción en IE, conformidad UGEL, entrega a beneficiarios, SIAGIE y redistribución',
-    order: 3,
-  },
-  {
-    id: 'FASE-MONITOREO',
-    code: 'F-04',
-    name: 'Monitoreo y Control',
-    description: 'Seguimiento transversal de indicadores, alertas de desviación y control de calidad de entregables',
-    order: 4,
-  },
-  {
-    id: 'FASE-CIERRE',
-    code: 'F-05',
-    name: 'Cierre',
-    description: 'Balance general, evaluación de lecciones aprendidas e Informe Final de Cierre a MINEDU-DIGERE',
-    order: 5,
-  },
-];
+  { id: 'FASE-INICIO', code: 'F-01', name: 'Inicio', order: 1 },
+  { id: 'FASE-PLANIFICACION', code: 'F-02', name: 'Planificación', order: 2 },
+  { id: 'FASE-EJECUCION', code: 'F-03', name: 'Ejecución', order: 3 },
+  { id: 'FASE-MONITOREO', code: 'F-04', name: 'Monitoreo y Control', order: 4 },
+  { id: 'FASE-CIERRE', code: 'F-05', name: 'Cierre', order: 5 },
+]
 
 /**
  * Normaliza un valor heredado o desconocido al tipo vigente equivalente.

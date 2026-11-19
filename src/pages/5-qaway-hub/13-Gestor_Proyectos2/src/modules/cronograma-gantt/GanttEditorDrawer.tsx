@@ -31,6 +31,9 @@ import {
   Link as LinkIcon,
   Package,
   ArrowUpRight,
+  Users,
+  Tag,
+  Layers,
 } from 'lucide-react';
 import type {
   Item,
@@ -47,6 +50,9 @@ import { getLinkedTasksSummary } from '../cronograma-core/wbsHierarchy';
 import TipoDependenciaCatalogoSelect from '../../components/TipoDependenciaCatalogoSelect';
 import TipoEntregableCatalogoSelect from '../../components/TipoEntregableCatalogoSelect';
 import EstadoEntregableCatalogoSelect from '../../components/EstadoEntregableCatalogoSelect';
+import { listarEstadosEjecucionGestor } from '../../services/gpCatalogosService';
+import { fetchEquipoIntegrantesFromSupabase } from '../../services/gestorEquipoService';
+import type { Integrante } from '../equipo/types';
 
 import {
   REGIONES_PROYECTO,
@@ -265,6 +271,57 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
   const [drawerDraft, setDrawerDraft] = useState<Item | null>(null);
   const [isNewDraft, setIsNewDraft] = useState<boolean>(initialIsNewDraft);
   const [editorTab, setEditorTab] = useState<'info' | 'subprocesos' | 'dependencias'>('info');
+  const [newDraftRespOpen, setNewDraftRespOpen] = useState(false);
+  const [newDraftTagsOpen, setNewDraftTagsOpen] = useState(false);
+  const [newDraftNivelOpen, setNewDraftNivelOpen] = useState(false);
+  const [newDraftFaseOpen, setNewDraftFaseOpen] = useState(false);
+  const [newDraftEstadoOpen, setNewDraftEstadoOpen] = useState(false);
+  const [newDraftRespSelectOpen, setNewDraftRespSelectOpen] = useState(false);
+  const [supabaseEstadoOptions, setSupabaseEstadoOptions] = useState<Status[]>(STATUS_OPTIONS);
+  const [equipoIntegrantes, setEquipoIntegrantes] = useState<Integrante[]>([]);
+
+  useEffect(() => {
+    if (!panelOpen || !isNewDraft) return;
+    let alive = true;
+    listarEstadosEjecucionGestor()
+      .then((res) => {
+        if (!alive) return;
+        if (res.estado === 'lista' && res.items.length > 0) {
+          const validSet = new Set<string>(STATUS_OPTIONS);
+          const mapped = res.items
+            .map((it) => it.nombre as Status)
+            .filter((name) => validSet.has(name));
+          if (mapped.length > 0) setSupabaseEstadoOptions(mapped);
+        }
+      })
+      .catch(() => {});
+
+    fetchEquipoIntegrantesFromSupabase()
+      .then((list) => {
+        if (!alive) return;
+        if (Array.isArray(list)) setEquipoIntegrantes(list);
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, [panelOpen, isNewDraft]);
+
+  const availableGestores = useMemo(() => {
+    const fromEquipo = equipoIntegrantes
+      .map((m) => ({
+        name: m.nombreCompleto || `${m.nombre} ${m.apellidos}`.trim(),
+        meta: [m.cargo, m.areaNombre || m.sedeNombre].filter(Boolean).join(' · '),
+      }))
+      .filter((m) => Boolean(m.name));
+    const seen = new Set(fromEquipo.map((m) => m.name));
+    const fromItems = items
+      .map((it) => it.gestor)
+      .filter((g): g is string => Boolean(g && g !== 'Sin asignar' && !seen.has(g)))
+      .map((g) => ({ name: g, meta: '' }));
+    return [...fromEquipo, ...fromItems];
+  }, [equipoIntegrantes, items]);
   const [editorInitialSnapshot, setEditorInitialSnapshot] = useState<string>('');
   const [unsavedAlertOpen, setUnsavedAlertOpen] = useState(false);
   const [pendingCloseAction, setPendingCloseAction] = useState<(() => void) | null>(null);
@@ -870,11 +927,11 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   </h2>
                 </div>
               </div>
-              {!isNewDraft && onOpenFullDetail && (
+              {onOpenFullDetail && (
                 <button
                   type="button"
                   onClick={() => onOpenFullDetail(activeItem)}
-                  title="Abrir ficha completa del elemento"
+                  title="Ir a la página completa de este elemento"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -892,7 +949,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                   }}
                 >
                   <ExternalLink size={13} />
-                  <span>Ver ficha</span>
+                  <span>Vista completa</span>
                 </button>
               )}
               <button
@@ -966,7 +1023,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                       }}
                     >
                       {isNewDraft
-                        ? `+ ${activeItem.kind === 'hito' ? 'Nuevo componente' : 'Nuevo subcomponente'} (en borrador)`
+                        ? `${activeItem.code ? `${activeItem.code} ` : ''}${activeItem.name || 'Nuevo componente'}`
                         : activeItem.kind === 'hito'
                         ? `${activeItem.code} ${activeItem.name}`
                         : `${hitos.find((h) => h.id === activeItem.parentId)?.code || ''} ${hitos.find((h) => h.id === activeItem.parentId)?.name || 'Componente padre'}`}
@@ -1102,7 +1159,396 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                     </button>
                   </div>
                 )}
-                <div className={isNewDraft ? '' : 'drawer-advanced-content'}>
+                {isNewDraft && (
+                  <div
+                    style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                    onClick={() => {
+                      setNewDraftNivelOpen(false);
+                      setNewDraftFaseOpen(false);
+                      setNewDraftEstadoOpen(false);
+                      setNewDraftRespSelectOpen(false);
+                    }}
+                  >
+                    {/* Tarjeta 1: Información principal */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13px', fontWeight: 750, color: '#0f172a' }}>
+                        <Layers size={15} color="#2563eb" />
+                        <span>Información principal</span>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 650, color: '#334155' }}>
+                          Nombre del componente <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={activeItem.name === 'Nuevo componente' ? '' : activeItem.name}
+                          placeholder="Ej. Gestión de entregables principales"
+                          onChange={(e) => updateDraft({ name: e.target.value || 'Nuevo componente' })}
+                          style={{ height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '13px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }}
+                          autoFocus
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '10px' }}>
+                        {/* Nivel */}
+                        <div className="field relative" style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0, margin: 0 }}>
+                          <label style={{ fontSize: '12px', fontWeight: 650, color: '#334155' }}>
+                            Nivel <span style={{ color: '#ef4444' }}>*</span>
+                          </label>
+                          <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                            <button
+                              type="button"
+                              className={`filter-card-btn ${newDraftNivelOpen ? 'active' : ''}`}
+                              style={{ width: '100%', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '0 10px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12.5px', color: '#0f172a' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNewDraftFaseOpen(false);
+                                setNewDraftEstadoOpen(false);
+                                setNewDraftRespSelectOpen(false);
+                                setEditorCalOpen(null);
+                                setNewDraftNivelOpen((v) => !v);
+                              }}
+                            >
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {(() => {
+                                  const cur = activeItem.edtType || (activeItem.kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO');
+                                  const labels: Record<string, string> = {
+                                    COMPONENTE: 'Nivel 1 · Componente',
+                                    PRODUCTO: 'Nivel 2 · Producto',
+                                    PAQUETE_TRABAJO: 'Nivel 3 · Paquete de Trabajo',
+                                    ACTIVIDAD: 'Nivel 4 · Actividad',
+                                  };
+                                  return labels[cur] || 'Nivel 1 · Componente';
+                                })()}
+                              </span>
+                              <ChevronDown size={14} className="filter-chevron" style={{ flexShrink: 0, transform: newDraftNivelOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease', color: '#64748b' }} />
+                            </button>
+                            {newDraftNivelOpen && (
+                              <div className="filter-card-popover" style={{ width: '100%', minWidth: '220px' }} onClick={(e) => e.stopPropagation()}>
+                                <div className="filter-popover-title">Nivel jerárquico</div>
+                                {[
+                                  { value: 'COMPONENTE' as EdtNodeType, label: 'Nivel 1 · Componente' },
+                                  { value: 'PRODUCTO' as EdtNodeType, label: 'Nivel 2 · Producto' },
+                                  { value: 'PAQUETE_TRABAJO' as EdtNodeType, label: 'Nivel 3 · Paquete de Trabajo' },
+                                  { value: 'ACTIVIDAD' as EdtNodeType, label: 'Nivel 4 · Actividad' },
+                                ].map((opt) => {
+                                  const cur = activeItem.edtType || (activeItem.kind === 'hito' ? 'COMPONENTE' : 'PAQUETE_TRABAJO');
+                                  const selected = cur === opt.value;
+                                  return (
+                                    <button
+                                      key={opt.value}
+                                      type="button"
+                                      className={`filter-item-btn ${selected ? 'selected' : ''}`}
+                                      onClick={() => {
+                                        updateDraft({
+                                          edtType: opt.value,
+                                          wbsNodeType: opt.value,
+                                          kind: opt.value === 'COMPONENTE' ? 'hito' : 'subproceso',
+                                        });
+                                        setNewDraftNivelOpen(false);
+                                      }}
+                                    >
+                                      <span>{opt.label}</span>
+                                      {selected && <Check size={14} className="item-check" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Fase */}
+                        <div className="field relative" style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0, margin: 0 }}>
+                          <label style={{ fontSize: '12px', fontWeight: 650, color: '#334155' }}>
+                            Fase <span style={{ color: '#ef4444' }}>*</span>
+                          </label>
+                          <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                            <button
+                              type="button"
+                              className={`filter-card-btn ${newDraftFaseOpen ? 'active' : ''}`}
+                              style={{ width: '100%', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '0 10px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12.5px', color: activeItem.faseId ? '#0f172a' : '#64748b' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNewDraftNivelOpen(false);
+                                setNewDraftEstadoOpen(false);
+                                setNewDraftRespSelectOpen(false);
+                                setEditorCalOpen(null);
+                                setNewDraftFaseOpen((v) => !v);
+                              }}
+                            >
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {(() => {
+                                  const fObj = PROJECT_PHASES_CATALOG.find((p) => p.id === activeItem.faseId);
+                                  return fObj ? `${fObj.code} · ${fObj.name}` : 'Seleccionar...';
+                                })()}
+                              </span>
+                              <ChevronDown size={14} className="filter-chevron" style={{ flexShrink: 0, transform: newDraftFaseOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease', color: '#64748b' }} />
+                            </button>
+                            {newDraftFaseOpen && (
+                              <div className="filter-card-popover" style={{ right: 0, left: 'auto', minWidth: '250px' }} onClick={(e) => e.stopPropagation()}>
+                                <div className="filter-popover-title">Fase del proyecto</div>
+                                <button
+                                  type="button"
+                                  className={`filter-item-btn ${!activeItem.faseId ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    updateDraft({ faseId: null, phase: '' });
+                                    setNewDraftFaseOpen(false);
+                                  }}
+                                >
+                                  <span>Sin fase asignada</span>
+                                  {!activeItem.faseId && <Check size={14} className="item-check" />}
+                                </button>
+                                {PROJECT_PHASES_CATALOG.map((p) => {
+                                  const selected = activeItem.faseId === p.id;
+                                  return (
+                                    <button
+                                      key={p.id}
+                                      type="button"
+                                      className={`filter-item-btn ${selected ? 'selected' : ''}`}
+                                      onClick={() => {
+                                        updateDraft({ faseId: p.id, phase: `${p.code} · ${p.name}` });
+                                        setNewDraftFaseOpen(false);
+                                      }}
+                                    >
+                                      <span>{p.code} · {p.name}</span>
+                                      {selected && <Check size={14} className="item-check" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Estado inicial (desde catálogo Supabase gp_estados_ejecucion_c) */}
+                      <div className="field relative" style={{ display: 'flex', flexDirection: 'column', gap: '5px', minWidth: 0, margin: 0 }}>
+                        <label style={{ fontSize: '12px', fontWeight: 650, color: '#334155' }}>Estado inicial</label>
+                        <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                          <button
+                            type="button"
+                            className={`filter-card-btn ${newDraftEstadoOpen ? 'active' : ''}`}
+                            style={{ width: '100%', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '0 10px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12.5px', color: '#0f172a' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNewDraftNivelOpen(false);
+                              setNewDraftFaseOpen(false);
+                              setNewDraftRespSelectOpen(false);
+                              setEditorCalOpen(null);
+                              setNewDraftEstadoOpen((v) => !v);
+                            }}
+                          >
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                              <span className={`status ${STATUS_CLASS[activeItem.status]}`}>
+                                {activeItem.status}
+                              </span>
+                            </span>
+                            <ChevronDown size={14} className="filter-chevron" style={{ flexShrink: 0, transform: newDraftEstadoOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease', color: '#64748b' }} />
+                          </button>
+                          {newDraftEstadoOpen && (
+                            <div className="filter-card-popover" onClick={(e) => e.stopPropagation()}>
+                              <div className="filter-popover-title">Estado inicial</div>
+                              {supabaseEstadoOptions.map((st) => (
+                                <button
+                                  key={st}
+                                  type="button"
+                                  className={`filter-item-btn ${activeItem.status === st ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    setDraftStatus(st);
+                                    setNewDraftEstadoOpen(false);
+                                  }}
+                                >
+                                  <span className={`status ${STATUS_CLASS[st]}`}>{st}</span>
+                                  {activeItem.status === st && <Check size={14} className="item-check" />}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tarjeta 2: Programación */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '13px', fontWeight: 750, color: '#0f172a' }}>
+                        <CalendarDays size={15} color="#2563eb" />
+                        <span>Programación</span>
+                      </div>
+                      <div className="date-fields" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '10px', margin: 0 }}>
+                        <div className="field relative" style={{ minWidth: 0, margin: 0 }}>
+                          <span style={{ fontSize: '12px', fontWeight: 650, color: '#334155', textTransform: 'none', letterSpacing: 'normal' }}>
+                            Fecha de inicio <span style={{ color: '#ef4444' }}>*</span>
+                          </span>
+                          <button
+                            type="button"
+                            className={`custom-date-btn ${editorCalOpen === 'start' ? 'active' : ''}`}
+                            style={{ borderRadius: '8px', height: '36px' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNewDraftNivelOpen(false);
+                              setNewDraftFaseOpen(false);
+                              setNewDraftEstadoOpen(false);
+                              setNewDraftRespSelectOpen(false);
+                              setEditorCalOpen((p) => (p === 'start' ? null : 'start'));
+                            }}
+                          >
+                            <span>{formatDatePE(activeItem.start)}</span>
+                            <CalendarDays size={14} className="date-btn-icon" />
+                          </button>
+                          {editorCalOpen === 'start' && (
+                            <MiniCalendar
+                              value={activeItem.start}
+                              onChange={(newDate) => {
+                                setDraftStart(newDate);
+                                setEditorCalOpen(null);
+                              }}
+                              onClose={() => setEditorCalOpen(null)}
+                              align="left"
+                            />
+                          )}
+                        </div>
+
+                        <div className="field relative" style={{ minWidth: 0, margin: 0 }}>
+                          <span style={{ fontSize: '12px', fontWeight: 650, color: '#334155', textTransform: 'none', letterSpacing: 'normal' }}>
+                            Fecha de fin <span style={{ color: '#ef4444' }}>*</span>
+                          </span>
+                          <button
+                            type="button"
+                            className={`custom-date-btn ${editorCalOpen === 'end' ? 'active' : ''}`}
+                            style={{ borderRadius: '8px', height: '36px' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNewDraftNivelOpen(false);
+                              setNewDraftFaseOpen(false);
+                              setNewDraftEstadoOpen(false);
+                              setNewDraftRespSelectOpen(false);
+                              setEditorCalOpen((p) => (p === 'end' ? null : 'end'));
+                            }}
+                          >
+                            <span>{formatDatePE(activeItem.end)}</span>
+                            <CalendarDays size={14} className="date-btn-icon" />
+                          </button>
+                          {editorCalOpen === 'end' && (
+                            <MiniCalendar
+                              value={activeItem.end}
+                              min={activeItem.start}
+                              onChange={(newDate) => {
+                                setDraftEnd(newDate);
+                                setEditorCalOpen(null);
+                              }}
+                              onClose={() => setEditorCalOpen(null)}
+                              align="right"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Acordeón 3: Responsable (desde Equipo en Supabase) */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setNewDraftRespOpen((v) => !v)}
+                        style={{ width: '100%', padding: '11px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#0f172a' }}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <Users size={15} color="#475569" />
+                          <span>Responsable</span>
+                        </span>
+                        <ChevronDown size={15} color="#64748b" style={{ transform: newDraftRespOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                      </button>
+                      {newDraftRespOpen && (
+                        <div style={{ padding: '10px 14px 12px', borderTop: '1px solid #f1f5f9' }}>
+                          <div className="filter-dropdown-wrap" style={{ position: 'relative' }}>
+                            <button
+                              type="button"
+                              className={`filter-card-btn ${newDraftRespSelectOpen ? 'active' : ''}`}
+                              style={{ width: '100%', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '0 10px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12.5px', color: '#0f172a' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNewDraftNivelOpen(false);
+                                setNewDraftFaseOpen(false);
+                                setNewDraftEstadoOpen(false);
+                                setEditorCalOpen(null);
+                                setNewDraftRespSelectOpen((v) => !v);
+                              }}
+                            >
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {activeItem.gestor || 'Sin asignar'}
+                              </span>
+                              <ChevronDown size={14} className="filter-chevron" style={{ flexShrink: 0, transform: newDraftRespSelectOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease', color: '#64748b' }} />
+                            </button>
+                            {newDraftRespSelectOpen && (
+                              <div className="filter-card-popover" style={{ maxHeight: '220px', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                                <div className="filter-popover-title">Integrantes del equipo</div>
+                                <button
+                                  type="button"
+                                  className={`filter-item-btn ${(!activeItem.gestor || activeItem.gestor === 'Sin asignar') ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    updateDraft({ gestor: 'Sin asignar', gestores: [] });
+                                    setNewDraftRespSelectOpen(false);
+                                  }}
+                                >
+                                  <span>Sin asignar</span>
+                                  {(!activeItem.gestor || activeItem.gestor === 'Sin asignar') && <Check size={14} className="item-check" />}
+                                </button>
+                                {availableGestores.map((g) => {
+                                  const selected = activeItem.gestor === g.name;
+                                  return (
+                                    <button
+                                      key={g.name}
+                                      type="button"
+                                      className={`filter-item-btn ${selected ? 'selected' : ''}`}
+                                      onClick={() => {
+                                        updateDraft({ gestor: g.name, gestores: [g.name] });
+                                        setNewDraftRespSelectOpen(false);
+                                      }}
+                                    >
+                                      <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
+                                        <span>{g.name}</span>
+                                        {g.meta && <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 500 }}>{g.meta}</span>}
+                                      </span>
+                                      {selected && <Check size={14} className="item-check" />}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Acordeón 4: Etiquetas */}
+                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
+                      <button
+                        type="button"
+                        onClick={() => setNewDraftTagsOpen((v) => !v)}
+                        style={{ width: '100%', padding: '11px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#0f172a' }}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          <Tag size={15} color="#475569" />
+                          <span>Etiquetas</span>
+                        </span>
+                        <ChevronDown size={15} color="#64748b" style={{ transform: newDraftTagsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                      </button>
+                      {newDraftTagsOpen && (
+                        <div style={{ padding: '10px 14px 12px', borderTop: '1px solid #f1f5f9' }}>
+                          <input
+                            type="text"
+                            value={activeItem.deliverable || ''}
+                            placeholder="Ej. Prioritario, Hito clave, Fase 1..."
+                            onChange={(e) => updateDraft({ deliverable: e.target.value })}
+                            style={{ width: '100%', height: '36px', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '0 10px', fontSize: '12.5px', color: '#0f172a', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className={isNewDraft ? 'drawer-advanced-content' : 'drawer-advanced-content'}>
                 {/* Selector de Elemento Padre si es subcomponente (admite Componentes y Subcomponentes para multinivel) */}
                 {activeItem.kind === 'subproceso' && (
                   <div className="field relative" style={{ background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '10px' }}>

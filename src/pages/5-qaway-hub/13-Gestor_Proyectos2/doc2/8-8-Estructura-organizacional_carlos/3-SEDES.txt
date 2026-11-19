@@ -1,0 +1,63 @@
+Correcto. El diseño de Sedes debe ser universal y configurable, no estar condicionado a UGEL, DRE ni a ninguna estructura territorial específica.
+
+Debemos partir de una regla: cualquier tenant, público o privado, puede operar desde una sola sede o desde múltiples sedes.
+1. Modelo universal de sedes
+La sede representa una ubicación física u operativa de la organización.
+Organización / Tenant
+Empresa o entidad
+
+Una única organización propietaria de sus sedes
+
+Sede principal
+
+Lima
+Principal
+
+
+Sede secundaria
+
+Arequipa
+
+
+Sucursal
+
+Cusco
+
+
+Local operativo
+
+Trujillo
+
+
+
+Las sedes son independientes de las áreas, gerencias y unidades organizacionales.
+
+2. ¿Qué pasa si solo tiene una sede?
+No hay que obligar al usuario a crear varias.
+- Una sede: se registra como sede principal. La aplicación funciona normalmente.
+- Varias sedes: puede crear sucursales, oficinas, locales, plantas o establecimientos.
+- Organización sin sedes físicas: puede utilizar una modalidad operativa sin sede asignada, si su actividad lo requiere.
+3. ¿Qué debe poder configurar el tenant?
+Campo	Ejemplo
+Nombre	Sede principal
+Alias	Oficina central
+Tipo	Oficina, sucursal, planta, local, establecimiento
+Código	SEDE-001
+Dirección	Dirección física
+País / región / ciudad	Ubicación geográfica
+Responsable	Persona encargada
+Estado	Activa / inactiva
+Sede principal	Sí / no
+
+El tipo debe ser una clasificación de referencia, mientras que el nombre y alias pueden adaptarse a cada organización.
+4. Relación con la estructura organizacional
+Esta separación es fundamental:
+Estructura organizacional	Sedes
+Gerencia General	Sede Lima
+Administración	Sede Arequipa
+Recursos Humanos	Sede Cusco
+Operaciones	Sede Trujillo
+
+Una gerencia puede operar en varias sedes y una sede puede albergar varias gerencias.
+
+Por tanto, la relación debe permitir múltiples unidades organizacionales por sede y múltiples sedes por unidad organizacional, sin imponer una dependencia jerárquica entre ambas.
