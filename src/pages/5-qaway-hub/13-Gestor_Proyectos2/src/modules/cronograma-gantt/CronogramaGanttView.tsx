@@ -1,4 +1,4 @@
-import { claveTareasLocal } from '../../services/gestorTareasLocalService';
+import { claveTareasLocal, esTenantMineduPrincipal } from '../../services/gestorTareasLocalService';
 import { GanttEditorDrawer } from './GanttEditorDrawer';
 import DeliverableCellPopover from '../../components/DeliverableCellPopover';
 // @ts-nocheck
@@ -1307,7 +1307,7 @@ export default function CronogramaGanttView({
           }
           if (pid !== 'p1') {
             const isPolluted = parsed.some((it: Item) => it.id === 's11' || it.code === '1.1');
-            if (isPolluted) {
+            if (!esTenantMineduPrincipal(tenantKey) && isPolluted) {
               localStorage.setItem(storageKey, JSON.stringify([]));
               return [];
             }
@@ -1320,7 +1320,7 @@ export default function CronogramaGanttView({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
+            if (!esTenantMineduPrincipal(tenantKey) && !isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
@@ -1328,7 +1328,7 @@ export default function CronogramaGanttView({
               } catch {}
               return [];
             }
-            if (isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
+            if (!esTenantMineduPrincipal(tenantKey) && isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
@@ -1367,15 +1367,17 @@ export default function CronogramaGanttView({
 
   // Sincronización reactiva con Keep-Alive al conmutar de proyecto o perspectiva
   const currentPerspectiveRef = useRef(perspective);
+  const currentTenantRef = useRef(tenantKey);
   useEffect(() => {
-    if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective) {
+    if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective || currentTenantRef.current !== tenantKey) {
       currentPidRef.current = projectId;
       currentPerspectiveRef.current = perspective;
+      currentTenantRef.current = tenantKey;
       const loaded = loadProjectItems(projectId, rawTasks);
       setItems(loaded);
       setSelectedId(null);
     }
-  }, [projectId, perspective]);
+  }, [projectId, perspective, tenantKey]);
 
   /* Índices O(1) del EDT: evitan recorridos O(n²) al filtrar miles de ítems territoriales */
   const itemsById = useMemo(() => {

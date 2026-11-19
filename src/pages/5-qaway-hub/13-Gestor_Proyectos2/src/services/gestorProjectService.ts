@@ -91,10 +91,40 @@ export async function listGestorProjects(tenantId?: string | null): Promise<Proj
   }
 }
 
+/**
+ * Espejo mínimo en gp_proyectos. gp_tareas exige un proyecto_id UUID con RLS por
+ * empresa; el id del frontend (`pX`) se guarda como legacy_source_id para que
+ * gpTareasService pueda resolverlo. No siembra sedes ni datos operativos.
+ */
+async function asegurarGpProyecto(project: ProjectItem, tenantId?: string | null): Promise<void> {
+  if (!supabase || !tenantId || !project.id) return;
+  const db = supabase;
+  const { data: existente } = await db
+    .from('gp_proyectos')
+    .select('id')
+    .eq('empresa_id', tenantId)
+    .eq('legacy_source_id', project.id)
+    .is('is_deleted', false)
+    .limit(1)
+    .maybeSingle();
+  if (existente) return;
+  const { error } = await db.from('gp_proyectos').insert({
+    empresa_id: tenantId,
+    codigo_proyecto: project.code || project.id,
+    nombre: project.name || project.code || project.id,
+    legacy_source_id: project.id,
+    metadata: { origen: 'gestor_proyectos' },
+  });
+  if (error) {
+    console.warn('[Gestor Projects] no se pudo preparar gp_proyectos para tareas:', error.message);
+  }
+}
+
 export async function upsertGestorProject(project: ProjectItem, tenantId?: string | null): Promise<boolean> {
   if (!supabase) return false;
   const { error } = await supabase.from('gestor_proyectos').upsert(toRow(project, tenantId));
   if (error) throw error;
+  await asegurarGpProyecto(project, tenantId);
   return true;
 }
 

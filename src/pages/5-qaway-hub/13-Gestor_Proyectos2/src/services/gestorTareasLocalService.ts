@@ -21,6 +21,11 @@ export function tenantIdTareasLocal(): string | null {
   return tenantIdGpEnCache();
 }
 
+/** ¿Es el tenant MINEDU original? Se usa para NO borrar su dataset legítimo. */
+export function esTenantMineduPrincipal(tenantId?: string | null): boolean {
+  return (tenantId ?? null) === TENANT_MINEDU_PRINCIPAL;
+}
+
 /** Clave efectiva según el tenant autenticado (fail-closed: sin tenant ⇒ clave vacía). */
 export function claveTareasLocal(): string {
   const tenantId = tenantIdGpEnCache();

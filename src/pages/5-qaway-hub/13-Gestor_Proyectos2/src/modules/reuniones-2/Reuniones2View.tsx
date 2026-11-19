@@ -1,4 +1,4 @@
-import { claveTareasLocal } from '../../services/gestorTareasLocalService';
+import { claveTareasLocal, esTenantMineduPrincipal } from '../../services/gestorTareasLocalService';
 import { GanttEditorDrawer } from './GanttEditorDrawer';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
@@ -1371,7 +1371,7 @@ export default function Reuniones2View({
             const hasAllComponents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].every((n) =>
               parsed.some((it: Item) => it.id === `comp-${n}`)
             );
-            if (!hasAllComponents || parsed.length < 50) {
+            if (!esTenantMineduPrincipal(tenantKey) && (!hasAllComponents || parsed.length < 50)) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
@@ -1380,7 +1380,7 @@ export default function Reuniones2View({
           }
           if (pid !== 'p1') {
             const isPolluted = parsed.some((it: Item) => it.id === 's11' || it.code === '1.1');
-            if (isPolluted) {
+            if (!esTenantMineduPrincipal(tenantKey) && isPolluted) {
               localStorage.setItem(storageKey, JSON.stringify([]));
               return [];
             }
@@ -1393,7 +1393,7 @@ export default function Reuniones2View({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
+            if (!esTenantMineduPrincipal(tenantKey) && !isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
@@ -1401,7 +1401,7 @@ export default function Reuniones2View({
               } catch {}
               return [];
             }
-            if (isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
+            if (!esTenantMineduPrincipal(tenantKey) && isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
@@ -1440,15 +1440,17 @@ export default function Reuniones2View({
 
   // Sincronización reactiva con Keep-Alive al conmutar de proyecto o perspectiva
   const currentPerspectiveRef = useRef(perspective);
+  const currentTenantRef = useRef(tenantKey);
   useEffect(() => {
-    if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective) {
+    if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective || currentTenantRef.current !== tenantKey) {
       currentPidRef.current = projectId;
       currentPerspectiveRef.current = perspective;
+      currentTenantRef.current = tenantKey;
       const loaded = loadReuniones2Items(projectId);
       setItems(loaded);
       setSelectedId(null);
     }
-  }, [projectId, perspective]);
+  }, [projectId, perspective, tenantKey]);
 
   // En Reuniones 2 las agendas no se sobrescriben con el cronograma Gantt maestro de Supabase ni con qaway-gantt-items
   // Persistencia aislada por proyecto activo para Reuniones 2

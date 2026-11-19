@@ -218,10 +218,15 @@ export function tenantIdGpEnCache(): string | null {
 
 // La caché del perfil depende de la sesión del Hub: al cambiar de cuenta debe
 // re-resolverse, o un tenant nuevo heredaría el tenant del perfil anterior.
+// Solo en eventos de identidad (NO INITIAL_SESSION/TOKEN_REFRESHED): invalidar
+// en cada evento dejaba la caché vacía mientras el estado React seguía con el
+// tenant anterior, y las claves de storage apuntaban a '__sin_tenant__'.
 if (supabase) {
   try {
-    supabase.auth.onAuthStateChange(() => {
-      invalidarPerfilGp();
+    supabase.auth.onAuthStateChange((evento) => {
+      if (evento === 'SIGNED_IN' || evento === 'SIGNED_OUT' || evento === 'USER_UPDATED') {
+        invalidarPerfilGp();
+      }
     });
   } catch {}
 }

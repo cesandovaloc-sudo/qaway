@@ -1,4 +1,5 @@
-import { claveTareasLocal } from '../../services/gestorTareasLocalService';
+import { esTenantMineduPrincipal } from '../../services/gestorTareasLocalService';
+import { leerTareasGp, guardarTareasGp } from '../../services/gpTareasService';
 import { GanttEditorDrawer } from './GanttEditorDrawer';
 // @ts-nocheck
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
@@ -1203,26 +1204,22 @@ export default function Reportes2View({
   const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
   const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
 
-  // Estado reactivo de tareas operativas sincronizadas desde /tareas
-  const [rawTasks, setRawTasks] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem(claveTareasLocal());
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Estado reactivo de tareas operativas. Fuente de verdad: gp_tareas (RLS por tenant).
+  const [rawTasks, setRawTasks] = useState<any[]>([]);
 
-  // La clave de tareas depende del tenant: al resolverse/cambiar la sesión se
-  // recarga desde SU clave (un tenant nuevo nunca hereda qaway-tasks-v1).
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(claveTareasLocal());
-      setRawTasks(saved ? JSON.parse(saved) : []);
-    } catch {
-      setRawTasks([]);
-    }
-  }, [tenantKey]);
+    let vigente = true;
+    leerTareasGp(projectId)
+      .then((tareas) => {
+        if (vigente) setRawTasks(tareas);
+      })
+      .catch(() => {
+        if (vigente) setRawTasks([]);
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [projectId, tenantKey]);
 
   const loadProjectItems = (pid: string, tasksOverride?: any[]): Item[] => {
     const isMaestro = perspective === 'maestro';
@@ -1239,7 +1236,7 @@ export default function Reportes2View({
             const hasAllComponents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].every((n) =>
               parsed.some((it: Item) => it.id === `comp-${n}`)
             );
-            if (!hasAllComponents || parsed.length < 50) {
+            if (!esTenantMineduPrincipal(tenantKey) && (!hasAllComponents || parsed.length < 50)) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
@@ -1248,7 +1245,7 @@ export default function Reportes2View({
           }
           if (pid !== 'p1') {
             const isPolluted = parsed.some((it: Item) => it.id === 's11' || it.code === '1.1');
-            if (isPolluted) {
+            if (!esTenantMineduPrincipal(tenantKey) && isPolluted) {
               localStorage.setItem(storageKey, JSON.stringify([]));
               return [];
             }
@@ -1261,7 +1258,7 @@ export default function Reportes2View({
                 it.name.toLowerCase().includes('husyan') ||
                 it.name.toLowerCase().includes('adad')
             );
-            if (!isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
+            if (!esTenantMineduPrincipal(tenantKey) && !isMaestro && (hasLegacyMocks || parsed.length > 3000 || !parsed.some((it: Item) => it.id === 'comp-11') || !parsed.some((it: Item) => it.id === 'comp-1-dre-ancash') || parsed.some((it: Item) => it.id === 'pt-2.1-unit-001'))) {
               // Limpieza y migración automática y definitiva a los registros oficiales con desglose territorial de sedes completas
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
@@ -1269,7 +1266,7 @@ export default function Reportes2View({
               } catch {}
               return [];
             }
-            if (isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
+            if (!esTenantMineduPrincipal(tenantKey) && isMaestro && (hasLegacyMocks || !parsed.some((it: Item) => it.id === 'comp-11') || parsed.some((it: Item) => isTerritorialSedeOnlyItem(it)))) {
               try {
                 localStorage.setItem(storageKey, JSON.stringify([]));
               } catch {}
@@ -1308,15 +1305,17 @@ export default function Reportes2View({
 
   // Sincronización reactiva con Keep-Alive al conmutar de proyecto o perspectiva
   const currentPerspectiveRef = useRef(perspective);
+  const currentTenantRef = useRef(tenantKey);
   useEffect(() => {
-    if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective) {
+    if (currentPidRef.current !== projectId || currentPerspectiveRef.current !== perspective || currentTenantRef.current !== tenantKey) {
       currentPidRef.current = projectId;
       currentPerspectiveRef.current = perspective;
+      currentTenantRef.current = tenantKey;
       const loaded = loadProjectItems(projectId, rawTasks);
       setItems(loaded);
       setSelectedId(null);
     }
-  }, [projectId, perspective]);
+  }, [projectId, perspective, tenantKey]);
 
   // Autocuración y persistencia inmediata de dependencias si provienen de caché anterior sin dependencias
   useEffect(() => {
@@ -1407,21 +1406,19 @@ export default function Reportes2View({
   useEffect(() => {
     if (!isActive) return;
     const handleTasksUpdated = () => {
-      try {
-        const saved = localStorage.getItem(claveTareasLocal());
-        const parsed = saved ? JSON.parse(saved) : [];
-        setRawTasks(parsed);
-        setItems((prevItems) => {
-          const recomputed = computeWbsHierarchy(prevItems, parsed);
-          try {
-            localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
-            window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
-          } catch {}
-          return recomputed;
-        });
-      } catch (e) {
-        console.error('Error sincronizando tareas operativas con WBS:', e);
-      }
+      leerTareasGp(projectId)
+        .then((parsed) => {
+          setRawTasks(parsed);
+          setItems((prevItems) => {
+            const recomputed = computeWbsHierarchy(prevItems, parsed);
+            try {
+              localStorage.setItem(`qaway-gantt-items-${projectId}`, JSON.stringify(recomputed));
+              window.dispatchEvent(new CustomEvent('qaway-gantt-items-updated'));
+            } catch {}
+            return recomputed;
+          });
+        })
+        .catch((e) => console.error('Error sincronizando tareas operativas con WBS:', e));
     };
 
     window.addEventListener('qaway-tasks-updated', handleTasksUpdated);
@@ -1679,15 +1676,7 @@ export default function Reportes2View({
 
   const getLinkedTasks = (milestoneName?: string) => {
     if (!milestoneName) return [];
-    try {
-      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
-      if (Array.isArray(raw)) {
-        return raw.filter((t: any) => t.milestone === milestoneName);
-      }
-    } catch {
-      /* fallback */
-    }
-    return [];
+    return rawTasks.filter((t: any) => t.milestone === milestoneName);
   };
 
   const handleOpenCreateTaskModal = (milestoneName: string) => {
@@ -1710,8 +1699,7 @@ export default function Reportes2View({
       return;
     }
     try {
-      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
-      const list = Array.isArray(raw) ? raw : [];
+      const list = Array.isArray(rawTasks) ? rawTasks : [];
       const newTask = {
         id: Math.max(0, ...list.map((x: any) => x.id || 0)) + 1,
         title: newTaskForm.title.trim(),
@@ -1730,7 +1718,8 @@ export default function Reportes2View({
         history: [{ text: 'Tarea creada desde el cronograma maestro', date: new Date().toLocaleString('es-PE') }],
       };
       const nextList = [newTask, ...list];
-      localStorage.setItem(claveTareasLocal(), JSON.stringify(nextList));
+      setRawTasks(nextList);
+      void guardarTareasGp(projectId, nextList);
       setForceTasksNonce((n) => n + 1);
       setCreateTaskModalOpen(false);
       notify(`Tarea "${newTaskForm.title.trim()}" vinculada y agregada al módulo Tareas`);
@@ -1742,7 +1731,7 @@ export default function Reportes2View({
 
   const handleToggleTask = (taskId: number) => {
     try {
-      const raw = JSON.parse(localStorage.getItem(claveTareasLocal()) || '[]');
+      const raw = rawTasks;
       if (Array.isArray(raw)) {
         const nextList = raw.map((t: any) => {
           if (t.id === taskId) {
@@ -1751,7 +1740,8 @@ export default function Reportes2View({
           }
           return t;
         });
-        localStorage.setItem(claveTareasLocal(), JSON.stringify(nextList));
+        setRawTasks(nextList);
+        void guardarTareasGp(projectId, nextList);
         window.dispatchEvent(new CustomEvent('qaway-tasks-updated'));
         setForceTasksNonce((n) => n + 1);
         notify('Estado de tarea operativa actualizado');
