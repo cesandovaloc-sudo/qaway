@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { claveTareasLocal } from '../../services/gestorTareasLocalService';
 import React, { useMemo, useState, useEffect } from 'react';
+import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { linkWhatsApp, telefonoDeContacto } from '../../services/comunicacionesService';
 import '../cronograma-gantt/gantt.css';
 import './hitos.css';
 import {
@@ -151,8 +153,8 @@ const getLiveTasksForComponent = (component: ComponenteWbs): OperationalTask[] =
         title: t.title,
         hitoId: component.id,
         gestor: t.owner || 'Gestor Territorial',
-        phone: '+51987654321',
-        email: 'gestor@qaway.pe',
+        phone: '',
+        email: String((t as any).email || ''),
         ugel: t.deliverable ? `Entregable: ${t.deliverable.slice(0, 32)}` : 'Sede Regional Junín',
         dueDate: t.due ? formatDatePE(t.due) : '30/11/2026',
         status: (t.status === 'Cumple' || t.status === 'Completado' ? 'done' : t.status === 'En proceso' ? 'in_progress' : 'todo') as any,
@@ -166,6 +168,7 @@ const getLiveTasksForComponent = (component: ComponenteWbs): OperationalTask[] =
 };
 
 export default function HitosView({ onActions }: { onActions?: (h: any) => void }) {
+  const { perfil: visible } = usePerfilVisible();
   const [componentes, setComponentes] = useState<ComponenteWbs[]>(getLiveWbsComponents);
   const [tasksNonce, setTasksNonce] = useState(0);
 
@@ -275,12 +278,17 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
     return getLiveTasksForComponent(hito);
   };
 
+  // El número sale del perfil real del responsable (users.phone). Si no lo
+  // tiene, no se fabrica un deep link con un número de relleno.
   const buildWhatsAppLink = (task: OperationalTask) => {
-    const cleanPhone = task.phone.replace(/[^0-9]/g, '');
-    const message = encodeURIComponent(
+    const real = telefonoDeContacto(visible?.contactos || [], {
+      email: task.email,
+      nombre: task.gestor,
+    }) || task.phone;
+    return linkWhatsApp(
+      real,
       `Estimado ${task.gestor}, recordatorio institucional sobre ${task.ugel}: La tarea "${task.title}" vence el ${task.dueDate}. Favor remitir estado de avance.`
     );
-    return `https://wa.me/${cleanPhone}?text=${message}`;
   };
 
   const exportCSV = () => {
@@ -785,16 +793,27 @@ export default function HitosView({ onActions }: { onActions?: (h: any) => void 
                                       : '○ Pendiente'}
                                   </span>
 
-                                  <a
-                                    href={buildWhatsAppLink(task)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hit-wa-btn"
-                                    title="Enviar recordatorio inteligente por WhatsApp"
-                                  >
-                                    <MessageCircle size={14} />
-                                    <span>WhatsApp 1-Clic</span>
-                                  </a>
+                                  {buildWhatsAppLink(task) ? (
+                                    <a
+                                      href={buildWhatsAppLink(task) || '#'}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="hit-wa-btn"
+                                      title="Enviar recordatorio inteligente por WhatsApp"
+                                    >
+                                      <MessageCircle size={14} />
+                                      <span>WhatsApp 1-Clic</span>
+                                    </a>
+                                  ) : (
+                                    <span
+                                      className="hit-wa-btn"
+                                      title="El responsable no tiene teléfono registrado en su perfil"
+                                      style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                                    >
+                                      <MessageCircle size={14} />
+                                      <span>Sin teléfono</span>
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             ))}

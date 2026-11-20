@@ -19,6 +19,8 @@ import type {
   OrganigramaRelationKind,
 } from './types/organigrama.types';
 import type { Integrante } from '../types';
+import { usePerfilVisible } from '../../../services/perfilVisibleService';
+import { formatearTelefono, telefonoDeContacto } from '../../../services/comunicacionesService';
 
 interface OrganigramaDetailPanelProps {
   node: OrganigramaRawNode | null;
@@ -60,6 +62,7 @@ export const OrganigramaDetailPanel: React.FC<OrganigramaDetailPanelProps> = ({
   onJumpToNode,
   onOpenIntegranteSheet,
 }) => {
+  const { perfil: visible } = usePerfilVisible();
   if (!node) return null;
 
   const badge = getHeaderBadge(node.kind);
@@ -202,7 +205,12 @@ export const OrganigramaDetailPanel: React.FC<OrganigramaDetailPanelProps> = ({
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
                 <Phone size={12} color="#64748b" />
-                <span>{person.telefono}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {formatearTelefono(telefonoDeContacto(visible?.contactos || [], {
+                    email: person.email,
+                    nombre: person.nombreCompleto || person.nombre,
+                  })) || 'Sin teléfono registrado en su perfil'}
+                </span>
               </div>
             </>
           )}

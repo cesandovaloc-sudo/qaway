@@ -31,10 +31,13 @@ import {
   Tooltip,
 } from 'recharts'
 import { territoryMonitoringService } from './territoryMonitoringService'
+import { usePerfilVisible } from '../../../services/perfilVisibleService'
+import { normalizarTelefono, telefonoDeContacto } from '../../../services/comunicacionesService'
 
 export function buildWhatsAppUrl(phone: string, text: string) {
-  const cleanPhone = phone.replace(/\D/g, '')
-  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`
+  const digits = normalizarTelefono(phone)
+  if (!digits) return ''
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`
 }
 
 export function buildFollowUpMessage(contact: any) {
@@ -171,7 +174,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Culminación completa certificada en las 3 etapas.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-chupaca',
@@ -198,7 +201,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Evidencia en Drive OK. Cierre oficial notificado al Residente SIGA.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-concepcion',
@@ -225,7 +228,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Validado con acta de AGP y archivo RAR enviado.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-huancayo',
@@ -252,7 +255,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 completada; pendiente subida de evidencia en Drive. Cierre oficial en plazo.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-jauja',
@@ -279,7 +282,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Culminación completa de las 3 etapas.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-junin',
@@ -306,7 +309,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 OK; pendiente evidencia en Drive (corte 22/10). RAR oficial en plazo.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-pangoa',
@@ -333,7 +336,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 y Drive OK. Consolidando generación de RAR en MC SIGA hasta el 26/10.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-pichanaqui',
@@ -360,7 +363,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 y Drive OK; procesando cierre oficial en MC SIGA hasta el 26/10.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-rio-ene-mantaro',
@@ -385,7 +388,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 OK. Subida a Drive en proceso (22/10). Cierre oficial en plazo regular.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-rio-tambo',
@@ -411,7 +414,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Culminación completa de las 3 fases.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-satipo',
@@ -438,7 +441,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Drive cargado oportunamente (21/10); elaboración de RAR en plazo oficial.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-tarma',
@@ -465,7 +468,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Excel en Drive OK; procesando cierre oficial RAR en MC SIGA hasta 26/10.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'ugel-yauli',
@@ -491,7 +494,7 @@ const INITIAL_JUNIN_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 OK. Subida a Drive en proceso; cierre oficial RAR en plazo.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
 ]
 
@@ -520,7 +523,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Validación regional consolidada DRE Pasco.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'pasco-ugel-daniel-alcides-carrion',
@@ -547,7 +550,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 y Drive 100% completados. Fase 2 en plazo regular.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'pasco-ugel-oxapampa',
@@ -574,7 +577,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1, Drive y Fase 2 completadas conforme.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'pasco-ugel-pasco',
@@ -602,7 +605,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Fase 1 y Drive OK. Cierre RAR en plazo.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
   {
     id: 'pasco-ugel-puerto-bermudez',
@@ -629,7 +632,7 @@ export const INITIAL_PASCO_UGELS_V2: UgelMonitoringV2Row[] = [
     },
     observation: 'Avance en zona selva Oxapampa. Cierre RAR en coordinación.',
     gestorName: 'Carlos Sandoval',
-    gestorPhone: '+51964112233',
+    gestorPhone: '',
   },
 ]
 
@@ -856,6 +859,11 @@ export function TerritoryReporterV2Tab({
   onBack?: () => void
   notify?: (m: string) => void
 }) {
+  const { perfil: visible } = usePerfilVisible()
+  // Todo número de persona sale de users.phone. El dato gestorPhone del
+  // monitoreo es sólo referencia heredada; nunca se usa para abrir WhatsApp.
+  const telefonoGestor = (nombre?: string) =>
+    telefonoDeContacto(visible?.contactos || [], { nombre }) || ''
   const brand = { name: 'Qaway Lab', logo: '' }
   const workItems = []
   const perspective = 'territorial'
@@ -2547,15 +2555,24 @@ export function TerritoryReporterV2Tab({
                   {inspectedUgel.observation}
                 </p>
                 <div className="pt-1 flex items-center justify-end">
-                  <a
-                    href={`https://wa.me/${inspectedUgel.gestorPhone.replace(/[^0-9]/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
-                  >
-                    <MessageCircle size={13} />
-                    <span>WhatsApp Gestor ({inspectedUgel.gestorPhone})</span>
-                  </a>
+                  {telefonoGestor(inspectedUgel.gestorName) ? (
+                    <a
+                      href={buildWhatsAppUrl(
+                        telefonoGestor(inspectedUgel.gestorName),
+                        `Hola ${inspectedUgel.gestorName}, te contacto desde la coordinación de seguimiento territorial.`
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                    >
+                      <MessageCircle size={13} />
+                      <span>WhatsApp Gestor</span>
+                    </a>
+                  ) : (
+                    <span className="text-[11.5px] font-medium text-slate-400">
+                      Gestor sin teléfono registrado en su perfil
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -2633,7 +2650,7 @@ export function TerritoryReporterV2Tab({
                     {getTasksForUgel(inspectedUgel.name).map((t) => {
                       const contact = toFollowUpContact(t)
                       const waUrl = buildWhatsAppUrl(
-                        t.assignee.phone,
+                        telefonoGestor(t.assignee.name),
                         buildFollowUpMessage(contact),
                       )
                       return (

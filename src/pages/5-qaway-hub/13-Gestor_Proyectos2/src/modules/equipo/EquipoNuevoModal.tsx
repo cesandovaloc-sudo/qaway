@@ -20,7 +20,9 @@ export default function EquipoNuevoModal({
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [email, setEmail] = useState('');
-  const [telefono, setTelefono] = useState('+51 ');
+  // El teléfono de la persona se registra en Mi Perfil (users.phone).
+  // Este formulario local no captura un segundo número.
+  const telefono = '';
   const [documento, setDocumento] = useState('');
   const [cargo, setCargo] = useState('');
   const [sedeId, setSedeId] = useState(sedes[0]?.id || '');
@@ -196,12 +198,9 @@ export default function EquipoNuevoModal({
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
                 Teléfono / WhatsApp
               </label>
-              <input
-                type="text"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                style={{ width: '100%', height: '36px', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '0 10px', fontSize: '13px', boxSizing: 'border-box' }}
-              />
+              <div style={{ height: '36px', display: 'flex', alignItems: 'center', fontSize: '12px', color: '#64748b', border: '1px dashed #cbd5e1', borderRadius: '6px', padding: '0 10px' }}>
+                Se registra en Mi Perfil → Teléfono / WhatsApp
+              </div>
             </div>
           </div>
 

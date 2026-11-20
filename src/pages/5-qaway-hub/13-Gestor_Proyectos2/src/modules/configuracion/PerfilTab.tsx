@@ -1,9 +1,11 @@
 // @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
-import { AlertCircle, Camera, CheckCircle2, Mail, Save, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import { AlertCircle, Camera, CheckCircle2, Mail, Phone, Save, ShieldCheck, Trash2, UserRound } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { usePerfilGp } from '../../services/gpPermisosService';
-import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { invalidarPerfilVisible, usePerfilVisible } from '../../services/perfilVisibleService';
+import { formatearTelefono, telefonoParaGuardar } from '../../services/comunicacionesService';
+import { invalidarCacheAcceso } from '../../../../../../router/sessionCache';
 import { esImagenPermitida, optimizarAvatar } from '../../../../14-Librerías/services/imageOptimization';
 import UpdatePasswordCard, { hasPendingPasswordChange } from '../../../../../../components/auth/UpdatePasswordCard';
 
@@ -21,6 +23,8 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
 
   const [nombreInput, setNombreInput] = useState('');
   const [nombreGuardado, setNombreGuardado] = useState('');
+  const [telefonoInput, setTelefonoInput] = useState('');
+  const [telefonoGuardado, setTelefonoGuardado] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [fotoPendiente, setFotoPendiente] = useState<File | null>(null);
   const [fotoEliminada, setFotoEliminada] = useState(false);
@@ -33,13 +37,23 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
   const rol = visible?.rol || perfil?.rol || 'viewer';
   const empresa = visible?.tenantNombre || '';
   const fotoMostrada = fotoPendiente ? previewUrl : (fotoEliminada ? '' : avatarUrl);
-  const hayCambios = Boolean(fotoPendiente) || fotoEliminada || nombreInput.trim() !== nombreGuardado;
+  const hayCambios = Boolean(fotoPendiente) || fotoEliminada
+    || nombreInput.trim() !== nombreGuardado
+    || telefonoInput.trim() !== telefonoGuardado;
+  const telefonoValido = !telefonoInput.trim() || Boolean(telefonoParaGuardar(telefonoInput));
+  const puedeGuardar = hayCambios && Boolean(nombreInput.trim()) && telefonoValido && !savingProfile;
 
   useEffect(() => {
     const nombre = String(visible?.nombre || '').trim();
     setNombreInput(nombre);
     setNombreGuardado(nombre);
   }, [visible?.nombre]);
+
+  useEffect(() => {
+    const telefono = formatearTelefono(visible?.phone || '');
+    setTelefonoInput(telefono);
+    setTelefonoGuardado(telefono);
+  }, [visible?.phone]);
 
   useEffect(() => () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -58,7 +72,7 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
 
   // Guarda la cápsula completa de una sola vez. Lanza el error real para que el
   // botón único pueda conservar los cambios pendientes y mostrar el detalle.
-  const persistirPerfil = async (nuevoNombre: string, nuevoAvatar: string | null) => {
+  const persistirPerfil = async (nuevoNombre: string, nuevoAvatar: string | null, nuevoTelefono: string | null) => {
     if (!supabase) throw new Error('Servicio no disponible.');
     const { data: userData, error: authErr } = await supabase.auth.updateUser({
       data: {
@@ -68,11 +82,12 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
     });
     if (authErr) throw authErr;
 
+    // El teléfono NO se copia a user_metadata: su única fuente es users.phone.
     const uid = userData?.user?.id || perfil?.userId;
     if (uid) {
       const { error: usersErr } = await supabase
         .from('users')
-        .update({ full_name: nuevoNombre, avatar_url: nuevoAvatar })
+        .update({ full_name: nuevoNombre, avatar_url: nuevoAvatar, phone: nuevoTelefono })
         .eq('id', uid);
       if (usersErr) throw usersErr;
     }
@@ -125,6 +140,8 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
       if (!supabase) throw new Error('Servicio no disponible.');
       const uid = perfil?.userId;
       if (!uid) throw new Error('Tu sesión no está disponible para guardar los cambios.');
+      if (!nombreInput.trim()) throw new Error('Escribe tu nombre antes de guardar.');
+      if (!telefonoValido) throw new Error('El teléfono debe tener entre 8 y 15 dígitos.');
 
       let avatarFinal: string | null = avatarUrl || null;
       if (fotoEliminada) {
@@ -137,13 +154,19 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
         avatarFinal = await subirAvatar(fotoPendiente, uid);
       }
 
-      await persistirPerfil(nombreInput.trim(), avatarFinal);
+      const telefonoFinal = telefonoParaGuardar(telefonoInput);
+      await persistirPerfil(nombreInput.trim(), avatarFinal, telefonoFinal);
 
       setAvatarUrl(avatarFinal || '');
       setNombreGuardado(nombreInput.trim());
+      setTelefonoGuardado(formatearTelefono(telefonoFinal || ''));
+      setTelefonoInput(formatearTelefono(telefonoFinal || ''));
       setFotoPendiente(null);
       setFotoEliminada(false);
       setPreviewUrl('');
+      // El perfil compartido y la caché de acceso deben reflejar el teléfono ya.
+      invalidarPerfilVisible();
+      invalidarCacheAcceso();
       setProfileMsg({ type: 'ok', text: 'Cambios guardados correctamente.' });
       notify?.('Perfil actualizado correctamente.');
     } catch (err: any) {
@@ -236,6 +259,25 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
             />
           </div>
 
+          {/* Teléfono / WhatsApp: fuente única para mensajes y tareas ágiles. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: `1px solid ${telefonoValido ? '#e2e8f0' : '#fecaca'}`, flexWrap: 'wrap' }}>
+            <span style={{ color: '#64748b', display: 'flex' }}><Phone size={15} /></span>
+            <span style={{ fontSize: '12px', color: '#64748b', width: '150px', flexShrink: 0 }}>Teléfono / WhatsApp</span>
+            <input
+              type="tel"
+              value={telefonoInput}
+              onChange={(e) => {
+                setTelefonoInput(e.target.value);
+                setProfileMsg(null);
+              }}
+              placeholder="+51 999 999 999"
+              style={{ flex: 1, minWidth: '180px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', color: '#0f172a' }}
+            />
+          </div>
+          {!telefonoValido && (
+            <div style={{ fontSize: '12px', color: '#b91c1c', textAlign: 'right' }}>El teléfono debe tener entre 8 y 15 dígitos.</div>
+          )}
+
           <Fila icono={<Mail size={15} />} etiqueta="Correo" valor={email || 'Sin correo registrado'} />
           <Fila icono={<ShieldCheck size={15} />} etiqueta="Rol en esta empresa" valor={String(rol)} />
           <Fila icono={<AlertCircle size={15} />} etiqueta="Empresa" valor={empresa || 'Sin empresa asignada'} />
@@ -245,7 +287,7 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
           )}
           <button
             type="button"
-            disabled={savingProfile || !hayCambios || !nombreInput.trim()}
+            disabled={!puedeGuardar}
             onClick={() => void handleGuardarCambios()}
             style={{
               marginTop: '6px',
@@ -257,12 +299,12 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
               color: '#ffffff',
               fontSize: '14px',
               fontWeight: 500,
-              cursor: savingProfile || !hayCambios || !nombreInput.trim() ? 'not-allowed' : 'pointer',
+              cursor: puedeGuardar ? 'pointer' : 'not-allowed',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              opacity: savingProfile || !hayCambios || !nombreInput.trim() ? 0.55 : 1,
+              opacity: puedeGuardar ? 1 : 0.55,
             }}
           >
             <Save size={16} />

@@ -2,6 +2,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import './usuarios.css';
 import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
+import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { formatearTelefono, linkWhatsApp, telefonoDeContacto } from '../../services/comunicacionesService';
 import {
   Bell, BriefcaseBusiness, Building2, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleHelp, ContactRound, Copy, Download, History, Mail, MapPin, MoreVertical,
@@ -33,16 +35,16 @@ type Person = {
 
 const initialPeople: Person[] = [
   { id: 1, name: 'Carlos Sandoval', email: 'csandoval.digere@gmail.com', role: 'Coordinador General', type: 'Coordinador', org: 'MINEDU', status: 'Pendiente', lastAccess: '—', phone: '—', area: 'Coordinación General', location: 'Lima, Perú', initials: 'CS', assignments: 0 },
-  { id: 3, name: 'Lucía Flores', email: 'l.flores@minedu.gob.pe', role: 'Especialista SIGA', type: 'Gestor', org: 'DRE Junín', status: 'Activo', lastAccess: '25 oct. 2026 · 16:45', phone: '+51 955 123 456', area: 'Distribución de materiales', location: 'Huancayo, Junín', initials: 'LF', assignments: 6, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces' },
-  { id: 4, name: 'Juan Pérez', email: 'j.perez@ugelchanchamayo.gob.pe', role: 'Responsable de Logística', type: 'Equipo UGEL', org: 'UGEL Chanchamayo', status: 'Pendiente', lastAccess: '—', phone: '+51 945 123 890', area: 'Logística y almacén', location: 'Chanchamayo, Junín', initials: 'JP', assignments: 2 },
-  { id: 5, name: 'Ana Torres', email: 'a.torres@ugeljauja.gob.pe', role: 'Especialista de Materiales', type: 'Equipo UGEL', org: 'UGEL Jauja', status: 'Activo', lastAccess: '25 oct. 2026 · 14:30', phone: '+51 966 789 012', area: 'Materiales educativos', location: 'Jauja, Junín', initials: 'AT', assignments: 3, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=faces' },
-  { id: 6, name: 'Luis Ramírez', email: 'l.ramirez@minedu.gob.pe', role: 'Analista de Seguimiento', type: 'Equipo interno', org: 'Unidad de Seguimiento', status: 'Inactivo', lastAccess: '15 oct. 2026 · 09:12', phone: '+51 981 456 123', area: 'Seguimiento de campo', location: 'Lima, Perú', initials: 'LR', assignments: 1 },
-  { id: 7, name: 'Sofía Huamán', email: 's.huaman@ugelconcepcion.gob.pe', role: 'Coordinadora Pedagógica', type: 'Equipo UGEL', org: 'UGEL Concepción', status: 'Activo', lastAccess: '24 oct. 2026 · 11:08', phone: '+51 974 567 890', area: 'Gestión pedagógica', location: 'Concepción, Junín', initials: 'SH', assignments: 5, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces' },
-  { id: 8, name: 'Diego Castro', email: 'd.castro@minedu.gob.pe', role: 'Especialista de Datos MC SIGA', type: 'Gestor', org: 'Unidad de Información', status: 'Pendiente', lastAccess: '—', phone: '+51 989 234 567', area: 'Información y datos', location: 'Lima, Perú', initials: 'DC', assignments: 2 },
-  { id: 9, name: 'Elena Rojas', email: 'e.rojas@ugelsatipo.gob.pe', role: 'Responsable de Almacén', type: 'Equipo UGEL', org: 'UGEL Satipo', status: 'Activo', lastAccess: '24 oct. 2026 · 15:42', phone: '+51 982 654 789', area: 'Almacén central', location: 'Satipo, Junín', initials: 'ER', assignments: 3 },
-  { id: 10, name: 'Miguel Salazar', email: 'm.salazar@minedu.gob.pe', role: 'Gestor de Proyecto', type: 'Gestor', org: 'Equipo de implementación', status: 'Activo', lastAccess: '23 oct. 2026 · 09:20', phone: '+51 976 543 210', area: 'Gestión de proyectos', location: 'Lima, Perú', initials: 'MS', assignments: 7 },
-  { id: 11, name: 'Patricia León', email: 'p.leon@ugeltarma.gob.pe', role: 'Especialista de Distribución', type: 'Equipo UGEL', org: 'UGEL Tarma', status: 'Inactivo', lastAccess: '10 oct. 2026 · 12:11', phone: '+51 963 456 789', area: 'Distribución local', location: 'Tarma, Junín', initials: 'PL', assignments: 1 },
-  { id: 12, name: 'Roberto Vega', email: 'r.vega@minedu.gob.pe', role: 'Coordinador Operativo DRE', type: 'Coordinador', org: 'DRE Junín', status: 'Activo', lastAccess: '26 oct. 2026 · 08:41', phone: '+51 956 234 567', area: 'Operaciones de campo', location: 'Huancayo, Junín', initials: 'RV', assignments: 4 }
+  { id: 3, name: 'Lucía Flores', email: 'l.flores@minedu.gob.pe', role: 'Especialista SIGA', type: 'Gestor', org: 'DRE Junín', status: 'Activo', lastAccess: '25 oct. 2026 · 16:45', phone: '', area: 'Distribución de materiales', location: 'Huancayo, Junín', initials: 'LF', assignments: 6, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces' },
+  { id: 4, name: 'Juan Pérez', email: 'j.perez@ugelchanchamayo.gob.pe', role: 'Responsable de Logística', type: 'Equipo UGEL', org: 'UGEL Chanchamayo', status: 'Pendiente', lastAccess: '—', phone: '', area: 'Logística y almacén', location: 'Chanchamayo, Junín', initials: 'JP', assignments: 2 },
+  { id: 5, name: 'Ana Torres', email: 'a.torres@ugeljauja.gob.pe', role: 'Especialista de Materiales', type: 'Equipo UGEL', org: 'UGEL Jauja', status: 'Activo', lastAccess: '25 oct. 2026 · 14:30', phone: '', area: 'Materiales educativos', location: 'Jauja, Junín', initials: 'AT', assignments: 3, avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=faces' },
+  { id: 6, name: 'Luis Ramírez', email: 'l.ramirez@minedu.gob.pe', role: 'Analista de Seguimiento', type: 'Equipo interno', org: 'Unidad de Seguimiento', status: 'Inactivo', lastAccess: '15 oct. 2026 · 09:12', phone: '', area: 'Seguimiento de campo', location: 'Lima, Perú', initials: 'LR', assignments: 1 },
+  { id: 7, name: 'Sofía Huamán', email: 's.huaman@ugelconcepcion.gob.pe', role: 'Coordinadora Pedagógica', type: 'Equipo UGEL', org: 'UGEL Concepción', status: 'Activo', lastAccess: '24 oct. 2026 · 11:08', phone: '', area: 'Gestión pedagógica', location: 'Concepción, Junín', initials: 'SH', assignments: 5, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces' },
+  { id: 8, name: 'Diego Castro', email: 'd.castro@minedu.gob.pe', role: 'Especialista de Datos MC SIGA', type: 'Gestor', org: 'Unidad de Información', status: 'Pendiente', lastAccess: '—', phone: '', area: 'Información y datos', location: 'Lima, Perú', initials: 'DC', assignments: 2 },
+  { id: 9, name: 'Elena Rojas', email: 'e.rojas@ugelsatipo.gob.pe', role: 'Responsable de Almacén', type: 'Equipo UGEL', org: 'UGEL Satipo', status: 'Activo', lastAccess: '24 oct. 2026 · 15:42', phone: '', area: 'Almacén central', location: 'Satipo, Junín', initials: 'ER', assignments: 3 },
+  { id: 10, name: 'Miguel Salazar', email: 'm.salazar@minedu.gob.pe', role: 'Gestor de Proyecto', type: 'Gestor', org: 'Equipo de implementación', status: 'Activo', lastAccess: '23 oct. 2026 · 09:20', phone: '', area: 'Gestión de proyectos', location: 'Lima, Perú', initials: 'MS', assignments: 7 },
+  { id: 11, name: 'Patricia León', email: 'p.leon@ugeltarma.gob.pe', role: 'Especialista de Distribución', type: 'Equipo UGEL', org: 'UGEL Tarma', status: 'Inactivo', lastAccess: '10 oct. 2026 · 12:11', phone: '', area: 'Distribución local', location: 'Tarma, Junín', initials: 'PL', assignments: 1 },
+  { id: 12, name: 'Roberto Vega', email: 'r.vega@minedu.gob.pe', role: 'Coordinador Operativo DRE', type: 'Coordinador', org: 'DRE Junín', status: 'Activo', lastAccess: '26 oct. 2026 · 08:41', phone: '', area: 'Operaciones de campo', location: 'Huancayo, Junín', initials: 'RV', assignments: 4 }
 ];
 
 const typeClass: Record<UserType, string> = {
@@ -79,6 +81,7 @@ const USER_COLUMNS: ColumnDef<Person>[] = [
 ];
 
 export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds) => void }) {
+  const { perfil: visible } = usePerfilVisible();
   const [currentMode, setCurrentMode] = useState<'directorio' | 'organigrama'>('directorio');
   const [organigramaTipo, setOrganigramaTipo] = useState<'tradicional' | 'matricial' | 'territorial' | 'circular'>('tradicional');
   const [people, setPeople] = useState<Person[]>(initialPeople);
@@ -106,6 +109,16 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
   useEffect(() => {
     onActions?.({ notify });
   }, [onActions]);
+
+  // Los teléfonos visibles vienen de public.users. Si la persona no tiene
+  // número registrado, queda vacío: nunca se muestra un número inventado.
+  useEffect(() => {
+    const contactos = visible?.contactos || [];
+    setPeople((prev) => prev.map((p) => {
+      const real = telefonoDeContacto(contactos, { email: p.email, nombre: p.name });
+      return { ...p, phone: real ? formatearTelefono(real) : '' };
+    }));
+  }, [visible?.contactos]);
 
   const selected = people.find((p) => p.id === selectedId) ?? null;
   const organizations = useMemo(() => Array.from(new Set(people.map((p) => p.org))).sort(), [people]);
@@ -217,7 +230,7 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
         const role = findVal(['cargo', 'rol', 'puesto', 'role']) || 'Especialista';
         const rawType = findVal(['tipo', 'type']) || 'Equipo UGEL';
         const org = findVal(['dre', 'ugel', 'área', 'area', 'entidad', 'sede', 'org']) || 'DRE Junín';
-        const phone = findVal(['teléfono', 'telefono', 'celular', 'phone', 'whatsapp']) || '+51 900 000 000';
+        const phone = findVal(['teléfono', 'telefono', 'celular', 'phone', 'whatsapp']) || '';
         const statusRaw = findVal(['estado', 'status']) || 'Activo';
 
         let type: UserType = 'Equipo UGEL';
@@ -283,8 +296,13 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
   };
 
   const sendWhatsApp = (p: Person) => {
-    const phone = p.phone.replace(/\D/g, '');
-    window.open(`https://wa.me/${phone}`, '_blank', 'noopener,noreferrer');
+    const real = telefonoDeContacto(visible?.contactos || [], { email: p.email, nombre: p.name });
+    const href = linkWhatsApp(real || p.phone, `Hola ${p.name}, te contacto desde el Gestor de Proyectos.`);
+    if (!href) {
+      notify(`${p.name} no tiene un teléfono registrado en su perfil.`);
+      return;
+    }
+    window.open(href, '_blank', 'noopener,noreferrer');
   };
 
   const deactivate = (p: Person) => {
@@ -780,7 +798,9 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
               const role = (formData.get('role') as string)?.trim();
               const type = formData.get('type') as UserType;
               const org = (formData.get('org') as string)?.trim() || 'DRE Junín';
-              const phone = (formData.get('phone') as string)?.trim() || '+51 900 000 000';
+              // No se captura aquí: se conserva el valor real ya hidratado
+              // desde users.phone. El alta/edición del número es en Mi Perfil.
+              const phone = editingUser?.phone || '';
               const status = (formData.get('status') as UserStatus) || (editingUser?.status ?? 'Activo');
 
               const initials = name
@@ -865,14 +885,12 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
                   placeholder="c.valdivia@minedu.gob.pe"
                 />
               </label>
-              <label className="form-field">
+              <div className="form-field">
                 <span>Teléfono / WhatsApp</span>
-                <input
-                  name="phone"
-                  defaultValue={editingUser?.phone || ''}
-                  placeholder="+51 964 000 111"
-                />
-              </label>
+                <div style={{ minHeight: '36px', display: 'flex', alignItems: 'center', fontSize: '12px', color: '#64748b', border: '1px dashed #cbd5e1', borderRadius: '6px', padding: '6px 10px' }}>
+                  Se registra en Mi Perfil → Teléfono / WhatsApp
+                </div>
+              </div>
               <label className="form-field">
                 <span>Cargo o rol *</span>
                 <input

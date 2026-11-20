@@ -72,8 +72,8 @@ function mapDbToUgelRow(r: TerritoryUgelDbRecord): UgelMonitoringV2Row {
     driveDate: r.drive_date,
     directions: (r.directions || {}) as Record<DirectionCode, TerritoryStatus>,
     observation: r.observation || '',
-    gestorName: r.gestor_name || 'Carlos Sandoval',
-    gestorPhone: r.gestor_phone || '+51964112233',
+    gestorName: r.gestor_name || '',
+    gestorPhone: r.gestor_phone || '',
   }
 }
 

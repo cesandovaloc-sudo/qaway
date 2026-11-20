@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import type { Integrante, AsignacionViva, SedeFrente, EstadoOperativo, EstadoCuenta } from './types';
+import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { linkLlamada, linkWhatsApp, telefonoDeContacto } from '../../services/comunicacionesService';
 import {
   X,
   Maximize2,
@@ -42,6 +44,7 @@ export default function EquipoDrawer({
 }: EquipoDrawerProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'asignaciones' | 'historial' | 'notas'>('info');
   const [nuevaNota, setNuevaNota] = useState('');
+  const { perfil: visible } = usePerfilVisible();
 
   if (!integrante) return null;
 
@@ -114,7 +117,17 @@ export default function EquipoDrawer({
     setNuevaNota('');
   };
 
-  const cleanPhone = integrante.telefono.replace(/\D/g, '');
+  // Fuente única: users.phone del tenant. Nunca se usa el teléfono del mock
+  // como relleno para abrir WhatsApp o iniciar una llamada.
+  const telefonoReal = telefonoDeContacto(visible?.contactos || [], {
+    email: integrante.email,
+    nombre: integrante.nombre || integrante.nombreCompleto,
+  });
+  const whatsappHref = linkWhatsApp(
+    telefonoReal,
+    `Hola ${integrante.nombre}, te contacto desde la coordinación del proyecto.`
+  );
+  const llamadaHref = linkLlamada(telefonoReal);
 
   return (
     <>
@@ -259,29 +272,52 @@ export default function EquipoDrawer({
 
           {/* Accesos Rápidos de Contacto */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
-            <a
-              href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hola ${integrante.nombre}, te contacto desde la coordinación del proyecto.`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                flex: 1,
-                height: '34px',
-                background: '#25d366',
-                color: '#ffffff',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                fontSize: '12px',
-                fontWeight: 600,
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-              }}
-            >
-              <MessageSquare size={14} />
-              WhatsApp
-            </a>
+            {whatsappHref ? (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  height: '34px',
+                  background: '#25d366',
+                  color: '#ffffff',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                }}
+              >
+                <MessageSquare size={14} />
+                WhatsApp
+              </a>
+            ) : (
+              <span
+                title="El integrante no tiene teléfono registrado en su perfil"
+                style={{
+                  flex: 1,
+                  height: '34px',
+                  background: '#e2e8f0',
+                  color: '#64748b',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'not-allowed',
+                }}
+              >
+                <MessageSquare size={14} />
+                Sin teléfono
+              </span>
+            )}
 
             <a
               href={`mailto:${integrante.email}?subject=${encodeURIComponent('Coordinación del Proyecto')}`}
@@ -305,24 +341,44 @@ export default function EquipoDrawer({
               Correo
             </a>
 
-            <a
-              href={`tel:${integrante.telefono}`}
-              style={{
-                width: '36px',
-                height: '34px',
-                background: '#ffffff',
-                color: '#1e293b',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              title={`Llamar a ${integrante.telefono}`}
-            >
-              <Phone size={14} />
-            </a>
+            {llamadaHref ? (
+              <a
+                href={llamadaHref}
+                style={{
+                  width: '36px',
+                  height: '34px',
+                  background: '#ffffff',
+                  color: '#1e293b',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title="Llamar al teléfono registrado en el perfil"
+              >
+                <Phone size={14} />
+              </a>
+            ) : (
+              <span
+                style={{
+                  width: '36px',
+                  height: '34px',
+                  background: '#f1f5f9',
+                  color: '#94a3b8',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'not-allowed',
+                }}
+                title="Sin teléfono registrado"
+              >
+                <Phone size={14} />
+              </span>
+            )}
           </div>
         </div>
 

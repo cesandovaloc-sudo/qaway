@@ -33,11 +33,15 @@ export interface PerfilVisible {
   roleLabel: string;
   initials: string;
   avatarUrl: string | null;
+  /** Teléfono canónico de la persona, fuente única de comunicaciones ágiles. */
+  phone: string | null;
   esPlataforma: boolean;
   tenantId: string;
   tenantNombre: string;
   /** Responsable real de la empresa (admin del tenant), no quien está mirando. */
   responsable: string;
+  /** Contactos del tenant con su teléfono real de public.users, para wa.me. */
+  contactos: Array<{ userId: string; nombre: string; email: string; rol: string; phone: string | null }>;
   /** Fila completa del tenant: la edición de empresa conserva content/features. */
   tenant: {
     id: string;
@@ -76,7 +80,7 @@ async function resolver(): Promise<PerfilVisible | null> {
     `user:${user.id}`,
     () => supabase!
       .from('users')
-      .select('id, full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url')
+      .select('id, full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url, phone')
       .eq('id', user.id)
       .maybeSingle(),
   );
@@ -98,7 +102,7 @@ async function resolver(): Promise<PerfilVisible | null> {
           `tenant_users:${tenantId}`,
           () => supabase!
             .from('users')
-            .select('id, full_name, last_name, email, role')
+            .select('id, full_name, last_name, email, role, phone')
             .eq('tenant_id', tenantId)
             .limit(50),
         )
@@ -122,6 +126,16 @@ async function resolver(): Promise<PerfilVisible | null> {
     ? nombreDe(admin, user)
     : '';
 
+  // Un solo listado de contactos del tenant con el teléfono real de users.
+  // Lo consumen los botones wa.me del Gestor; nunca se inventa un número.
+  const contactos = filas.map((u: any) => ({
+    userId: String(u.id),
+    nombre: nombreDe(u, user),
+    email: String(u.email || ''),
+    rol: String(u.role || ''),
+    phone: u.phone == null ? null : String(u.phone),
+  }));
+
   return {
     userId: user.id,
     nombre,
@@ -130,10 +144,12 @@ async function resolver(): Promise<PerfilVisible | null> {
     roleLabel,
     initials: inicialesDe(nombre),
     avatarUrl: uRow?.avatar_url || null,
+    phone: uRow?.phone == null ? null : String(uRow.phone),
     esPlataforma,
     tenantId,
     tenantNombre,
     responsable,
+    contactos,
     tenant: tRow
       ? {
           id: String(tRow.id),

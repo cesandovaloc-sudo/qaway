@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import type { Integrante, AsignacionViva, SedeFrente, UnidadOrganizacional, RolSeguridad } from './types';
 import TablaPorConectar from '../../components/TablaPorConectar';
+import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { formatearTelefono, telefonoDeContacto } from '../../services/comunicacionesService';
 import {
   ArrowLeft,
   Shield,
@@ -46,6 +48,7 @@ export default function EquipoExpedienteModal({
   const [activeTab, setActiveTab] = useState<'perfil' | 'estructura' | 'historial' | 'documentos'>('perfil');
   const [rolSeguridad, setRolSeguridad] = useState<RolSeguridad>(integrante?.rolSeguridad || 'Colaborador');
   const [alertaGuardado, setAlertaGuardado] = useState(false);
+  const { perfil: visible } = usePerfilVisible();
 
   if (!isOpen || !integrante) return null;
 
@@ -306,8 +309,13 @@ export default function EquipoExpedienteModal({
                     <div style={{ fontSize: '13.5px', fontWeight: 650, color: '#0284c7', marginTop: '2px' }}>{integrante.email}</div>
                   </div>
                   <div>
-                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Teléfono Móvil:</span>
-                    <div style={{ fontSize: '13.5px', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>{integrante.telefono}</div>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Teléfono / WhatsApp:</span>
+                    <div style={{ fontSize: '13.5px', fontWeight: 650, color: '#0f172a', marginTop: '2px' }}>
+                      {formatearTelefono(telefonoDeContacto(visible?.contactos || [], {
+                        email: integrante.email,
+                        nombre: integrante.nombreCompleto || integrante.nombre,
+                      })) || 'Sin teléfono registrado en su perfil'}
+                    </div>
                   </div>
                 </div>
               </div>
