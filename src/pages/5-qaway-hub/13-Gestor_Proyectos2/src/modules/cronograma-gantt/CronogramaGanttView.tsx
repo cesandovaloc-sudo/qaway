@@ -5233,6 +5233,7 @@ export default function CronogramaGanttView({
     const remaining = items.filter((x) => !idsToDelete.has(x.id));
     commitChange(() => remaining);
     deleteCronogramaItemFromSupabase(projectId, activeItem.id, Array.from(idsToDelete));
+    setDeleteConfirmModalOpen(false);
     setDrawerDraft(null);
     setSelectedId(null);
     setPanelOpen(false);

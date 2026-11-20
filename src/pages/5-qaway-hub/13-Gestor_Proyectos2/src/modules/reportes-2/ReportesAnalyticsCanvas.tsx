@@ -28,6 +28,8 @@ import {
   type ColumnDef,
 } from '../../shared/table-engine';
 import { TerritoryReporterV2Tab } from './territory-reporter/TerritoryReporterV2View';
+import { usePerfilGp } from '../../services/gpPermisosService';
+import { esTenantMineduPrincipal } from '../../services/gestorTareasLocalService';
 import './reportesAnalytics.css';
 
 type Sub = {
@@ -166,8 +168,13 @@ export default function ReportesAnalyticsCanvas({
   activeView?: 'reportes' | 'analitica';
   onViewChange?: (view: 'reportes' | 'analitica') => void;
 }) {
+  const { perfil, cargando: cargandoPerfilGp } = usePerfilGp();
+  const esDigerePrincipal = esTenantMineduPrincipal(perfil?.tenantId);
   const [activeReportHito, setActiveReportHito] = useState<string | null>(null);
-  const [milestones] = useState<Milestone[]>(initialMilestones);
+  const milestones = useMemo<Milestone[]>(
+    () => (esDigerePrincipal ? initialMilestones : []),
+    [esDigerePrincipal]
+  );
   const [expanded, setExpanded] = useState<string[]>(['1.6']);
 
   const engine = useTableEngine<Milestone>({
@@ -190,6 +197,14 @@ export default function ReportesAnalyticsCanvas({
     onViewChange?.('analitica');
     notify?.(`Abriendo reporte territorial: Hito ${m.id} · ${m.name}`);
   };
+
+  if (cargandoPerfilGp) {
+    return (
+      <div className="rep-analytics-canvas" style={{ padding: '70px 24px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+        Cargando reportes...
+      </div>
+    );
+  }
 
   const showAnalitica = activeView === 'analitica' || activeReportHito !== null;
 
@@ -216,19 +231,23 @@ export default function ReportesAnalyticsCanvas({
         <section className="panel">
           <div className="panel-head">
             <h2>Avance regional por hito</h2>
-            <p>Porcentaje promedio de cumplimiento en las 13 UGEL.</p>
+            <p>{esDigerePrincipal ? 'Porcentaje promedio de cumplimiento en las 13 UGEL.' : 'Sin datos de cumplimiento registrados aún.'}</p>
           </div>
           <div className="bar-chart">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={[
-                  { id: '1.4', name: 'Preparación', v: 100 },
-                  { id: '1.6', name: 'CDL SIGA', v: 67 },
-                  { id: '2.1', name: 'Recepción', v: 42 },
-                  { id: '3.1', name: 'Distribución', v: 18 },
-                  { id: '4.1', name: 'Cierre', v: 0 },
-                  { id: '5.1', name: 'Informe', v: 0 },
-                ]}
+                data={
+                  esDigerePrincipal
+                    ? [
+                        { id: '1.4', name: 'Preparación', v: 100 },
+                        { id: '1.6', name: 'CDL SIGA', v: 67 },
+                        { id: '2.1', name: 'Recepción', v: 42 },
+                        { id: '3.1', name: 'Distribución', v: 18 },
+                        { id: '4.1', name: 'Cierre', v: 0 },
+                        { id: '5.1', name: 'Informe', v: 0 },
+                      ]
+                    : []
+                }
                 margin={{ top: 14, right: 8, bottom: 0, left: -18 }}
               >
                 <CartesianGrid stroke="#e2e8f0" vertical={false} strokeDasharray="3 4" />
@@ -269,28 +288,38 @@ export default function ReportesAnalyticsCanvas({
                     contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', boxShadow: '0 4px 14px rgba(15,23,42,0.08)' }}
                   />
                   <Pie
-                    data={[
-                      { name: 'Cumplidos', value: 1 },
-                      { name: 'En proceso', value: 3 },
-                      { name: 'Pendientes', value: 2 },
-                    ]}
+                    data={
+                      esDigerePrincipal
+                        ? [
+                            { name: 'Cumplidos', value: 1 },
+                            { name: 'En proceso', value: 3 },
+                            { name: 'Pendientes', value: 2 },
+                          ]
+                        : [{ name: 'Sin hitos', value: 1 }]
+                    }
                     innerRadius={42}
                     outerRadius={65}
-                    paddingAngle={3}
+                    paddingAngle={esDigerePrincipal ? 3 : 0}
                     dataKey="value"
                     isAnimationActive={true}
                     animationBegin={200}
                     animationDuration={1100}
                     animationEasing="ease-out"
                   >
-                    <Cell fill="#10b981" />
-                    <Cell fill="#f59e0b" />
-                    <Cell fill="#ef4444" />
+                    {esDigerePrincipal ? (
+                      <>
+                        <Cell fill="#10b981" />
+                        <Cell fill="#f59e0b" />
+                        <Cell fill="#ef4444" />
+                      </>
+                    ) : (
+                      <Cell fill="#e2e8f0" />
+                    )}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                <b style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>06</b>
+                <b style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{esDigerePrincipal ? '06' : '00'}</b>
                 <small style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>hitos</small>
               </div>
             </div>
@@ -298,17 +327,17 @@ export default function ReportesAnalyticsCanvas({
               <div className="legend-row">
                 <span className="legend-dot green" />
                 <span>Cumplidos</span>
-                <b>1 (17%)</b>
+                <b>{esDigerePrincipal ? '1 (17%)' : '0 (0%)'}</b>
               </div>
               <div className="legend-row">
                 <span className="legend-dot amber" />
                 <span>En proceso</span>
-                <b>3 (50%)</b>
+                <b>{esDigerePrincipal ? '3 (50%)' : '0 (0%)'}</b>
               </div>
               <div className="legend-row">
                 <span className="legend-dot red" />
                 <span>Pendientes</span>
-                <b>2 (33%)</b>
+                <b>{esDigerePrincipal ? '2 (33%)' : '0 (0%)'}</b>
               </div>
             </div>
           </div>
@@ -322,7 +351,7 @@ export default function ReportesAnalyticsCanvas({
           </div>
           <div className="line-chart">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={generalTrend} margin={{ top: 14, right: 8, bottom: 0, left: -18 }}>
+              <LineChart data={esDigerePrincipal ? generalTrend : []} margin={{ top: 14, right: 8, bottom: 0, left: -18 }}>
                 <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 4" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                 <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
