@@ -5103,6 +5103,9 @@ export default function CronogramaGanttView({
     };
 
     if (openInline) {
+      if (inlineDraftCreatedId && items.some((it) => it.id === inlineDraftCreatedId && (it.name === 'Nuevo componente' || it.name === 'Nuevo paquete de trabajo'))) {
+        return;
+      }
       if (pId) {
         const mode = viewMode === 'lista' ? 'lista' : 'gantt';
         setCollapsedByMode((prev) => {
@@ -5496,7 +5499,7 @@ export default function CronogramaGanttView({
               title="Enter para guardar · Shift+Enter para agregar otro · Esc para cancelar"
               onBlur={(e) => {
                 const val = e.target.value.trim();
-                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
                   commitChange((old) => old.filter((it) => it.id !== x.id));
                   setInlineDraftCreatedId(null);
                   closeEdit();
@@ -5511,7 +5514,7 @@ export default function CronogramaGanttView({
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   const val = e.currentTarget.value.trim();
-                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
                     commitChange((old) => old.filter((it) => it.id !== x.id));
                     setInlineDraftCreatedId(null);
                     closeEdit();

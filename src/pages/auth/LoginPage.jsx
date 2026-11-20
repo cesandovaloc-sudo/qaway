@@ -120,14 +120,31 @@ export default function LoginPage() {
       // El login pasa por auth-login-guard: es el único punto que cuenta
       // intentos fallidos y puede avisar "te quedan N". GoTrue sigue validando
       // la clave; aquí NO hay fallback directo para no saltarse el contador.
-      const { data: guardData, error: guardError } = await supabase.functions.invoke('auth-login-guard', {
+      const { data: guardData, error: guardError, response: guardResponse } = await supabase.functions.invoke('auth-login-guard', {
         body: { email: cleanEmail, password },
       })
       let result = guardData
-      if (!result && guardError) {
-        // supabase-js devuelve el cuerpo del error como texto en error.message.
-        try { result = JSON.parse(guardError.message) }
-        catch (_) { result = { error: 'No se pudo conectar con el servicio de acceso.' } }
+      if (!result) {
+        // supabase-js 2.x NO pone el cuerpo en error.message en un 4xx/5xx:
+        // error.message es siempre "Edge Function returned a non-2xx status
+        // code"; el cuerpo JSON viene en error.context / response (Response).
+        const ctx = guardResponse || guardError?.context
+        let raw = ''
+        if (ctx && typeof ctx.clone === 'function' && typeof ctx.text === 'function') {
+          raw = await ctx.clone().text().catch(() => '')
+        }
+        if (!raw && guardError?.message && !String(guardError.message).startsWith('Edge Function returned')) {
+          raw = String(guardError.message)
+        }
+        try { result = JSON.parse(raw) } catch (_) { /* se informa abajo */ }
+        if (!result) {
+          setError(
+            guardError?.name === 'FunctionsFetchError'
+              ? 'No se pudo conectar con el servicio de acceso. Revisa tu conexión.'
+              : (raw || 'No se pudo conectar con el servicio de acceso.'),
+          )
+          return
+        }
       }
 
       if (result?.error) {
