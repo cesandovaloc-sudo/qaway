@@ -53,7 +53,7 @@ export function AppSwitcherDropdown({ isOpen, onClose, allowedAppSlugs = null })
       slug: "gestor-proyectos",
       name: "Gestor de Proyectos",
       desc: "Suite P6, Scrum y Monitoreo Territorial",
-      path: "/hub/proyectos",
+      path: "/hub/gestor_proyecto_eliminar",
       icon: FolderKanban,
       badge: "Pro"
     },

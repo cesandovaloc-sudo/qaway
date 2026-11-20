@@ -1,0 +1,112 @@
+# Caso: Reset Password cae en `/hub/panel` y el tenant ve el panel antes del F5
+
+**Tema / casuística:** autenticación · recovery link · doble cliente Supabase · guard de rutas del Hub.
+**Fecha:** 20-nov-2026. **Commit local:** `3d56c16a` (sin push). **Producción:** NO desplegada; sigue sirviendo `index-DJH5dZqy.js`.
+
+---
+
+## Descripción (síntoma)
+
+1. El usuario hace clic en *¿Olvidaste tu contraseña?*,llega el correo, abre el enlace y **termina en `/hub/panel`** en vez de `/update-password`.
+2. En `/hub/panel` el tenant **ve el panel unos segundos**; al recargar (F5) aparece el candado «Módulo no habilitado».
+3. Usuario del reporte: `carlossandoval172@gmail.com`, `is_platform_admin=false`, tenant con suscripción activa solo a `gestor-proyectos`. Por código, su destino normal sería `/hub/gestor_proyectos`, **no** `/hub/panel`.
+
+---
+
+## Causa raíz A — dos clientes Supabase y el hash se borra antes de React
+
+- `src/config/supabase.js` (antes línea 10) hacía `export const supabase = createClient(url, key)` **sin opciones**. `detectSessionInUrl` queda en `true` por defecto.
+- Ese módulo se importa desde `src/router/AppRouter.jsx:9` → `InicioPage.jsx:43` (`@/config/supabase`). Resultado: el cliente se crea **al cargar el bundle, antes de que monte React**.
+- `@supabase/auth-js` (`node_modules/@supabase/auth-js/dist/module/GoTrueClient.js`):
+  - `:389` detecta el callback implicit;
+  - `:3232` `_getSessionFromURL()` procesa `#access_token=...&type=recovery`;
+  - `:408-411` emite `PASSWORD_RECOVERY` con `setTimeout(0)`;
+  - `:3315` ejecuta `window.location.hash = ''`.
+- Para cuando corren `src/router/AuthLinkHandler.jsx:13-22` y `:24-54`, y `RootIndexRoute` (`AppRouter.jsx:206-225`), **el hash ya está vacío**: `hash.includes('type=recovery')` da `false`. El evento se disparó en el cliente que nadie escuchaba.
+- **Evidencia:** log de Auth `2026-11-20T03:47:22Z` → `login`, `login_method: "implicit"`, HTTP 303. PKCE descartado. Bundle viejo descartado: producción servía `LoginPage-CBm3JPSD.js` con `/update-password` y `PASSWORD_RECOVERY` presentes.
+- **Destino `/hub/panel`:** no lo elige `UpdatePasswordPage` (`resolvePostUpdateTarget`, `:16-47`). Viene del `redirect` entrante: `src/data/navigation.js:29` fija `/login?redirect=/hub/panel`, y/o el `RedirectTo` del correo (config remota no consultable: API de Management devuelve 401).
+
+## Causa raíz B — fallback permisivo del guard (el F5)
+
+- `src/router/HubAccessGuard.jsx` (antes `:77-85`): si la verificación superaba **10 s** y había sesión local, hacía `resolve(null)` → renderizaba `HubPanelPage` **sin comprobar permisos**.
+- Al terminar la consulta, `is_platform_admin=false` + `rule.type === 'platform_only'` (`:124-137`) devolvían `resolve(null, true)` → `<AppAccessLockedView />`. El F5 solo le daba tiempo a la red.
+
+---
+
+## Solución aplicada
+
+### 1. Un solo cliente procesa la URL (manteniendo el export existente)
+
+`src/config/supabase.js`:
+
+```js
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { detectSessionInUrl: false },
+})
+```
+
+- **No** migrar los ~80 `import { supabase } from '@/config/supabase'` a `getSupabaseClient()`: esa función devuelve `SupabaseClient | null` y el cambio masivo es innecesario y riesgoso.
+- Con el flag, el único que consume el hash es `getSupabaseClient()` de `src/pages/5-qaway-hub/blog-editor/services/supabaseClient.ts:22-27`, que es exactamente el cliente que escuchan `AuthLinkHandler` y `UpdatePasswordPage`.
+- Ambos comparten la clave de storage (`sb-<project-ref>-auth-token`), así que la sesión sigue visible en todo el app.
+
+### 2. Guard *fail-closed*
+
+`src/router/HubAccessGuard.jsx`:
+- Eliminada la función `hasLocalSupabaseSession()` y la rama `resolve(null)` del timeout.
+- Timeout de 10 s ahora:
+
+```js
+const timeoutId = setTimeout(() => {
+  if (!alive) return
+  if (rule.type === 'platform_only') {
+    resolve(null, true, rule.moduleKey)   // candado
+    return
+  }
+  resolve(loginHref)                       // /login?redirect=...
+}, 10000)
+```
+
+- **Nunca** se abre una ruta protegida apoyándose solo en una sesión guardada en el navegador. El bloqueo `platform_only` de `:135-137` queda intacto: ningún tenant entra a `/hub/panel`.
+
+### 3. Documentación
+
+`.../13-Gestor_Proyectos2/doc2/9-Credenciales-y-auditoria/9.3-Intentos-de-acceso-y-recuperacion.md` §10, y fila 9.3 del `0-INDICE-Y-BITACORA.md`.
+
+---
+
+## Verificación correcta (sin generar `dist`)
+
+- `npm run typecheck` → limpio.
+- Revisión de source: `detectSessionInUrl: false` presente en `src/config/supabase.js`; `Verificación lenta` / `hasLocalSupabaseSession` **ausentes** en `HubAccessGuard.jsx`.
+- **REGLA:** no ejecutar `npm run build` ni `build:dev` solo para validar. `dist/` está prohibido por consumo de tokens. Otros agentes validan con pruebas de source/typecheck, no con build. (En esta sesión se generó `dist` por error; quedó dentro del commit local, sin push ni deploy.)
+- Para probar en vivo hace falta un **enlace de recuperación nuevo**: el token anterior ya estaba consumido (`auth.one_time_tokens` vacío).
+
+---
+
+## No repetir / trampas
+
+1. No culpar al bundle de producción sin comprobar qué asset sirve: aquí producción servía `index-DJH5dZqy.js` y el código ya tenía `/update-password`; el fallo era de orden de inicialización del cliente.
+2. No "arreglar" `AuthLinkHandler` ni `RootIndexRoute`: sus chequeos de hash están bien escritos; llegan tarde porque otro cliente ya limpió el hash.
+3. No confundir el 303 de GoTrue con una redirección a Site URL: es el exchange del token. Igual conviene registrar en Dashboard → Authentication → URL Configuration: `https://www.qawaylab.com/update-password`, `https://qawaylab.com/update-password`, `http://localhost:4100/update-password` (puerto confirmado en `vite.config.js:57`).
+4. No dejar el fallback de 10 s "por si la red va lenta": es un hueco de autorización. Ante duda, candado o login, nunca panel.
+5. Commit total (`git add -A`) **sin push**, incluyendo cambios de otros agentes.
+
+## Pendiente externo
+
+Confirmar en el Dashboard de Supabase la complejidad de clave remota y las 3 Redirect URLs; la API de Management devuelve 401 con el token local de CLI, así que no se pudo verificar desde aquí.
+
+---
+
+## Plantilla breve para el próximo caso
+
+```
+# Caso: <síntoma en una línea>
+Tema: ...
+Fecha / commit / ¿salió a producción?: ...
+## Descripción
+## Causa raíz (archivo:línea + evidencia)
+## Solución aplicada (código exacto)
+## Verificación sin dist
+## No repetir
+## Pendiente externo
+```

@@ -408,3 +408,25 @@ body {
 @media(max-width:1150px){ .pxp-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media(max-width:800px){ .pxp-content { padding: 16px 12px; } .pxp-heading h1 { font-size: 24px; } .pxp-heading-actions { width: 100%; margin-left: 0; } .pxp-heading-actions .pxp-btn { flex: 1; justify-content: center; } .pxp-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media(max-width:480px){ .pxp-metrics { grid-template-columns: 1fr; } .pxp-heading-actions { flex-wrap: wrap; } .pxp-heading-actions .pxp-btn { flex: auto; } }
+
+/* ── MARCA TEMPORAL: app legacy (11-gestor-de-proyectos) ──
+   Esta app está deprecada y solo se mantiene accesible en
+   /hub/gestor_proyecto_eliminar hasta que desaparezca. El topbar y el
+   panel izquierdo se pintan en VERDE para reconocerla de inmediato frente
+   a Gestor Proyectos 2 (/hub/gestor_proyectos), que usa el chrome oscuro. */
+.qaway-gestor-proyectos-root .hub-shell[data-mode] {
+  --hub-bg: #14532d;
+  --hub-surface: #166534;
+  --hub-surface-strong: #15803d;
+  --hub-pop: #166534;
+  --hub-chip: rgba(255, 255, 255, 0.10);
+  --hub-hover: rgba(255, 255, 255, 0.14);
+  --hub-hover-strong: rgba(255, 255, 255, 0.20);
+  --hub-border: rgba(255, 255, 255, 0.18);
+  --hub-border-soft: rgba(255, 255, 255, 0.10);
+  --hub-text: #ffffff;
+  --hub-text-soft: rgba(255, 255, 255, 0.72);
+  --hub-dim: rgba(255, 255, 255, 0.60);
+  --hub-faint: rgba(255, 255, 255, 0.48);
+  --hub-footer: rgba(0, 0, 0, 0.25);
+}

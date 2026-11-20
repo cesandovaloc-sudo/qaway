@@ -137,7 +137,7 @@ const routes = [
     icon: FolderKanban,
     title: 'Gestor de Proyectos & Entregas',
     description: 'Trazabilidad y portal de cliente: ciclo de 6 hitos para Desarrollo Web, Branding, CRM y Marketing.',
-    path: '/hub/proyectos',
+    path: '/hub/gestor_proyecto_eliminar',
     access: 'pro',
     badge: 'Pro',
     category: 'Product Management',
