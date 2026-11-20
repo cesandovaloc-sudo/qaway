@@ -5496,7 +5496,7 @@ export default function CronogramaGanttView({
               title="Enter para guardar · Shift+Enter para agregar otro · Esc para cancelar"
               onBlur={(e) => {
                 const val = e.target.value.trim();
-                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
                   commitChange((old) => old.filter((it) => it.id !== x.id));
                   setInlineDraftCreatedId(null);
                   closeEdit();
@@ -5511,7 +5511,7 @@ export default function CronogramaGanttView({
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   const val = e.currentTarget.value.trim();
-                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
+                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
                     commitChange((old) => old.filter((it) => it.id !== x.id));
                     setInlineDraftCreatedId(null);
                     closeEdit();
@@ -5560,15 +5560,15 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className="quick-inline-icon-btn"
-                title={`Crear nueva tarea rápida subordinada a "${x.name}"`}
+                title={x.parentId ? 'Agregar elemento hermano' : 'Agregar nuevo componente'}
                 onClick={(e) => {
                   e.stopPropagation();
-                  add('subproceso', x.id, true);
+                  if (x.parentId) { add('subproceso', x.parentId, true); } else { add('hito', undefined, true); }
                 }}
               >
                 <Plus size={13} style={{ color: '#0066ff' }} />
               </button>
-              {x.wbsNodeType === 'COMPONENTE' && (
+              {true && (
                 <>
                   <button
                     type="button"
@@ -5584,7 +5584,7 @@ export default function CronogramaGanttView({
                   <button
                     type="button"
                     className="quick-inline-icon-btn"
-                    title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar subcomponentes" : "Expandir subcomponentes"}
+                    style={{ display: items.some((c) => c.parentId === x.id) ? undefined : 'none' }} title={isItemExpanded(x.id, x.expanded !== false) ? "Colapsar elementos hijos" : "Expandir elementos hijos"}
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleItemExpand(x.id, x.expanded !== false);
