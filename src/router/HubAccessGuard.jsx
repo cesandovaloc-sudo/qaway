@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
+import { getSesionCompartida, invalidarSesionCompartida } from './sessionCache'
+import { getAppIdCacheado, invalidarAppCatalog } from '@/config/appCatalogCache'
 import { logoutUser } from '@/config/auth'
 import AppAccessLockedView from '@/components/ui/AppAccessLockedView'
 import { hasPendingPasswordChange } from '@/components/auth/UpdatePasswordCard'
@@ -23,6 +25,12 @@ function resolveHubAccessRule(pathname) {
   ) {
     return { type: 'app', appSlug: 'gestor-proyectos', moduleKey: 'gestor-proyectos' }
   }
+  // Centro de Notificaciones y Perfiles: núcleo interno del Hub. Basta con
+  // tener sesión (no depende de app_catalog ni de suscripción): guarda solo
+  // datos locales de demostración, nunca datos de negocio.
+  if (path === '/hub/notificaciones' || path.startsWith('/hub/notificaciones/')) {
+    return { type: 'session', moduleKey: 'notificaciones' }
+  }
   if (path === '/hub/inventario' || path.startsWith('/hub/inventario/')) {
     return { type: 'app', appSlug: 'inventario', moduleKey: 'inventario' }
   }
@@ -41,10 +49,48 @@ function resolveHubAccessRule(pathname) {
   return { type: 'platform_only', moduleKey: null }
 }
 
-export default function HubAccessGuard({ children }) {
+/**
+ * Caché de autorización en vuelo + TTL corto.
+ *
+ * El guard se ejecuta al cambiar de módulo. Sin esto repetía users → tenants →
+ * app_catalog → suscripción en cada ruta. Las consultas siguen PASANDO por RLS:
+ * solo se reutiliza una respuesta ya verificada durante 15 s. El catálogo de
+ * apps se comparte con el Gestor desde appCatalogCache (slug -> id es dato fijo).
+ */
+const TTL_MS = 15000
+const cacheAcceso = new Map()
+
+function consultaCacheada(key, loader, ttl = TTL_MS) {
+  const ahora = Date.now()
+  const hit = cacheAcceso.get(key)
+  if (hit?.promise) return hit.promise
+  if (hit && ahora - hit.at < ttl) return Promise.resolve(hit.value)
+
+  const promise = loader().then((res) => {
+    if (res && res.error) cacheAcceso.delete(key)
+    else cacheAcceso.set(key, { value: res, at: Date.now() })
+    return res
+  }).catch((error) => {
+    cacheAcceso.delete(key)
+    throw error
+  })
+  cacheAcceso.set(key, { promise })
+  return promise
+}
+
+function invalidarCacheAcceso() {
+  cacheAcceso.clear()
+  invalidarSesionCompartida()
+  invalidarAppCatalog()
+}
+
+export default function HubAccessGuard({ children, loadingFallback = null }) {
   const location = useLocation()
   const [state, setState] = useState({ checking: true, redirect: null, locked: false, moduleKey: null })
 
+  // El search no cambia la regla de acceso: solo se usa para construir el
+  // redirect. Depender de él hacía que el guard repitiera 5 consultas en cada
+  // cambio de query string.
   useEffect(() => {
     let alive = true
     const rule = resolveHubAccessRule(location.pathname)
@@ -74,20 +120,29 @@ export default function HubAccessGuard({ children }) {
         return
       }
 
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      // ProtectedRoute ya pidió la sesión: reutilizamos esa promesa.
+      // app_catalog no depende del usuario, así que se pide en paralelo.
+      const [{ data: sessionData, error: sessionError }, { data: appRow, error: appErr }] = await Promise.all([
+        getSesionCompartida(),
+        getAppIdCacheado(rule.appSlug, supabase),
+      ])
       const session = sessionData?.session
       if (sessionError || !session) {
         resolve(loginHref)
         return
       }
 
-      const { data: user, error: userError } = await supabase
-        .from('users')
-        .select('tenant_id, is_platform_admin, role')
-        .eq('id', session.user.id)
-        .maybeSingle()
+      const { data: user, error: userError } = await consultaCacheada(
+        `user:${session.user.id}`,
+        () => supabase
+          .from('users')
+          .select('tenant_id, is_platform_admin, role')
+          .eq('id', session.user.id)
+          .maybeSingle(),
+      )
 
       if (userError || !user) {
+        invalidarCacheAcceso()
         try {
           await supabase.auth.signOut({ scope: 'local' })
         } catch (_) {}
@@ -125,16 +180,25 @@ export default function HubAccessGuard({ children }) {
         return
       }
 
+      // Ruta de sesión: cualquier usuario autenticado con ficha válida.
+      if (rule.type === 'session') {
+        resolve(null)
+        return
+      }
+
       if (!user.tenant_id) {
         resolve(null, true, rule.moduleKey)
         return
       }
 
-      const { data: tenant, error: tenantError } = await supabase
-        .from('tenants')
-        .select('status, features')
-        .eq('id', user.tenant_id)
-        .maybeSingle()
+      const { data: tenant, error: tenantError } = await consultaCacheada(
+        `tenant:${user.tenant_id}`,
+        () => supabase
+          .from('tenants')
+          .select('status, features')
+          .eq('id', user.tenant_id)
+          .maybeSingle(),
+      )
 
       if (tenantError || !tenant) {
         resolve(null, true, rule.moduleKey)
@@ -146,28 +210,33 @@ export default function HubAccessGuard({ children }) {
       const needsOnboarding = tenant.status !== 'active' && (tenant.status === 'draft' || !onboardingCompleted)
 
       if (needsOnboarding) {
+        // Solo una app puede pedir el perfil de empresa. Las rutas
+        // platform_only (/hub/panel y legacy) siguen en candado absoluto:
+        // ningún tenant las ve "por donde sea que ingrese".
+        if (rule.type === 'app') {
+          const destino = `${location.pathname}${location.search}`
+          resolve(`/completar-perfil?redirect=${encodeURIComponent(destino)}`)
+          return
+        }
         resolve(null, true, rule.moduleKey)
         return
       }
-
-      const { data: appRow, error: appErr } = await supabase
-        .from('app_catalog')
-        .select('id')
-        .eq('slug', rule.appSlug)
-        .maybeSingle()
 
       if (appErr || !appRow?.id) {
         resolve(null, true, rule.moduleKey)
         return
       }
 
-      const { data: subRows, error: subErr } = await supabase
-        .from('tenant_app_subscriptions')
-        .select('id, status')
-        .eq('tenant_id', user.tenant_id)
-        .eq('app_id', appRow.id)
-        .in('status', ['active', 'trialing'])
-        .limit(1)
+      const { data: subRows, error: subErr } = await consultaCacheada(
+        `sub:${user.tenant_id}:${appRow.id}`,
+        () => supabase
+          .from('tenant_app_subscriptions')
+          .select('id, status')
+          .eq('tenant_id', user.tenant_id)
+          .eq('app_id', appRow.id)
+          .in('status', ['active', 'trialing'])
+          .limit(1),
+      )
 
       if (subErr || !Array.isArray(subRows) || subRows.length === 0) {
         resolve(null, true, rule.moduleKey)
@@ -179,9 +248,9 @@ export default function HubAccessGuard({ children }) {
 
     checkAccess().catch(() => resolve(loginHref))
     return () => { alive = false }
-  }, [location.pathname, location.search])
+  }, [location.pathname])
 
-  if (state.checking) return <RouteLoading />
+  if (state.checking) return loadingFallback || <RouteLoading />
   if (state.locked) return <AppAccessLockedView moduleKey={state.moduleKey} />
   if (state.redirect) return <Navigate to={state.redirect} replace />
   return children

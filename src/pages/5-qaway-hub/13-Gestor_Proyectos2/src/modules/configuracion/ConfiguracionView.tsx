@@ -28,6 +28,7 @@ import {
   Sparkles,
   Tags,
   Trash2,
+  UserRound,
   Users,
   X,
 } from 'lucide-react';
@@ -47,6 +48,9 @@ import CicloVidaEstadoChip from '../../components/CicloVidaEstadoChip';
 import { capacidadesDeProyecto, historialEstado } from '../../services/gpCicloVidaService';
 import PermisosTab from './PermisosTab';
 import OrganizacionTab from './OrganizacionTab';
+import PerfilTab from './PerfilTab';
+import PreferenciasTab from './PreferenciasTab';
+import EmpresaTab from './EmpresaTab';
 import { usePerfilGp } from '../../services/gpPermisosService';
 
 export type ConfigBinds = { notify: (m: string) => void };
@@ -75,6 +79,10 @@ export interface ConfiguracionViewProps {
   onDeleteProject?: (id: string) => void;
   /** Etapa 6.3: navegar a la ficha Resumen (donde viven las acciones de dirección). */
   onIrAFicha?: () => void;
+  /** Topbar: abre un tab concreto CADA VEZ (seq cambia aunque repitan el tab). */
+  tabRequest?: { tab: string; seq: number } | null;
+  /** El notify local de este archivo ya existe; este es el del shell. */
+  notifyExterno?: (msg: string) => void;
 }
 
 const TIMEZONES = [
@@ -93,12 +101,25 @@ export default function ConfiguracionView({
   onUpdateProject,
   onDeleteProject,
   onIrAFicha,
+  tabRequest,
+  notifyExterno,
 }: ConfiguracionViewProps) {
-  const [activeTab, setActiveTab] = useState<'organizacion' | 'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente' | 'permisos'>('organizacion');
+  type TabId = 'perfil' | 'preferencias' | 'empresa' | 'organizacion' | 'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente' | 'permisos';
+  const [activeTab, setActiveTab] = useState<TabId>('organizacion');
   const [searchQuery, setSearchQuery] = useState('');
   // Etapa 6-B: perfil GP real. El gating de guardado SOLO aplica con sesión
   // real (perfilGp no nulo); en modo local se conserva el comportamiento actual.
   const { perfil: perfilGp, capacidades: capGp } = usePerfilGp();
+  const esAdmin = !perfilGp || Boolean(
+    perfilGp.esPlataforma || perfilGp.rol === 'admin' || capGp?.administrarPermisos
+  );
+
+  // Keep-alive: Configuración NO se desmonta al cambiar de módulo. useState(tab)
+  // no bastaba: si el usuario estaba en otra pestaña, el clic del Topbar no
+  // cambiaba nada. seq dispara el cambio incluso repetido el mismo tab.
+  useEffect(() => {
+    if (tabRequest?.tab) setActiveTab(tabRequest.tab as TabId);
+  }, [tabRequest?.seq]);
   const [timezone, setTimezone] = useState(() => {
     return localStorage.getItem('qaway-system-timezone-v1') || 'America/Lima';
   });
@@ -364,12 +385,16 @@ export default function ConfiguracionView({
               Ajuste de zona horaria oficial, calibración de fecha operativa para seguimiento territorial y parámetros de tolerancia.
             </p>
           </div>
-          <div className="heading-actions">
-            <button type="button" className="btn-save" onClick={handleSave}>
-              <Save size={15} />
-              <span>Guardar Parámetros</span>
-            </button>
-          </div>
+          {/* Estas pestañas guardan por sí mismas. El botón global solo aplica
+              a general / proyectos / cronograma / asistente. */}
+          {!['perfil', 'preferencias', 'empresa', 'organizacion', 'permisos', 'auditoria'].includes(activeTab) ? (
+            <div className="heading-actions">
+              <button type="button" className="btn-save" onClick={handleSave}>
+                <Save size={15} />
+                <span>Guardar Parámetros</span>
+              </button>
+            </div>
+          ) : null}
         </header>
 
         <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', width: '100%', flex: 1, minHeight: 0, overflow: 'hidden' }}>
@@ -405,10 +430,18 @@ export default function ConfiguracionView({
 
             {[
               {
+                group: 'Mi Cuenta',
+                items: [
+                  { id: 'perfil', label: 'Mi Perfil', icon: <UserRound size={15} /> },
+                  { id: 'preferencias', label: 'Preferencias', icon: <SlidersHorizontal size={15} /> },
+                ],
+              },
+              {
                 group: 'Organización',
                 items: [
-                  { id: 'organizacion', label: 'Organización y Sedes', icon: <Building2 size={15} /> },
-                  { id: 'permisos', label: 'Permisos del Equipo', icon: <Users size={15} /> },
+                  { id: 'empresa', label: 'Datos de la Empresa', icon: <Building2 size={15} /> },
+                  { id: 'organizacion', label: 'Organización y Sedes', icon: <Layers size={15} />, adminOnly: true },
+                  { id: 'permisos', label: 'Permisos del Equipo', icon: <Users size={15} />, adminOnly: true },
                 ],
               },
               {
@@ -422,13 +455,15 @@ export default function ConfiguracionView({
               {
                 group: 'Sistema e IA',
                 items: [
-                  { id: 'auditoria', label: 'Seguridad y Auditoría', icon: <ShieldCheck size={15} /> },
+                  { id: 'auditoria', label: 'Seguridad y Auditoría', icon: <ShieldCheck size={15} />, adminOnly: true },
                   { id: 'asistente', label: 'Asistente IA (Copilot)', icon: <Bot size={15} /> },
                 ],
               },
             ].map((section) => {
               const q = searchQuery.trim().toLowerCase();
-              const filtered = section.items.filter((i) => !q || i.label.toLowerCase().includes(q));
+              const filtered = section.items.filter(
+                (i: any) => (!i.adminOnly || esAdmin) && (!q || i.label.toLowerCase().includes(q))
+              );
               if (filtered.length === 0) return null;
               return (
                 <div key={section.group} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -465,6 +500,9 @@ export default function ConfiguracionView({
           </aside>
 
           <div style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', paddingRight: '4px' }}>
+            {activeTab === 'perfil' && <PerfilTab notify={notifyExterno} />}
+            {activeTab === 'preferencias' && <PreferenciasTab notify={notifyExterno} />}
+            {activeTab === 'empresa' && <EmpresaTab notify={notifyExterno} />}
             {activeTab === 'organizacion' && <OrganizacionTab />}
 
         {activeTab === 'general' && (

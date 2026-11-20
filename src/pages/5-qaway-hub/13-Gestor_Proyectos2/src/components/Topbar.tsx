@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { ModuleKey, UserRole } from '../types';
 import { NotificationPopover } from './NotificationPopover';
 import { supabase } from '../services/supabaseClient';
+import type { PerfilVisible } from '../services/perfilVisibleService';
 import {
   Bell,
   Check,
@@ -31,6 +32,10 @@ interface TopbarProps {
     region: string;
     subtext?: string | undefined;
   } | undefined;
+  /** Abrir Configuración en un tab concreto sin salir del shell del Gestor. */
+  onOpenConfig?: (tab: 'perfil' | 'preferencias') => void;
+  /** Perfil ya resuelto por App: el Topbar NO consulta ni muestra "Cargando...". */
+  perfilVisible?: PerfilVisible | null;
 }
 
 const MODULE_LABELS: Record<ModuleKey, string> = {
@@ -58,95 +63,34 @@ export default function Topbar({
   sidebarCollapsed = false,
   onToggleSidebar,
   activeProject,
+  onOpenConfig,
+  perfilVisible,
 }: TopbarProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLDivElement | null>(null);
-  const [authProfile, setAuthProfile] = useState<{
-    name: string;
-    email: string;
-    roleLabel: string;
-    initials: string;
-    avatarUrl: string | null;
-  }>({
-    name: 'Cargando...',
-    email: '',
-    roleLabel: 'Sesión activa',
-    initials: '..',
-    avatarUrl: null,
-  });
+  // Antes aquí había un estado "Cargando..." y una consulta propia (getUser +
+  // users + tenants). Eso pintaba el nombre en blanco durante milisegundos.
+  // Ahora App.tsx ya resolvió el perfil antes de montar el Topbar.
+  const authProfile = {
+    name: perfilVisible?.nombre || 'Usuario',
+    email: perfilVisible?.email || '',
+    roleLabel: perfilVisible?.roleLabel || 'Sesión activa',
+    initials: perfilVisible?.initials || '..',
+    avatarUrl: perfilVisible?.avatarUrl || null,
+  };
 
   useEffect(() => {
-    if (!supabase) return;
-    let alive = true;
-
-    const loadUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!alive) return;
-        if (!user) {
-          window.location.assign('/login');
-          return;
-        }
-        const { data: uRow } = await supabase
-          .from('users')
-          .select('full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        let tenantName = '';
-        if (uRow?.tenant_id) {
-          const { data: tRow } = await supabase
-            .from('tenants')
-            .select('name')
-            .eq('id', uRow.tenant_id)
-            .maybeSingle();
-          tenantName = tRow?.name || '';
-        }
-
-        if (!alive) return;
-        const fullName = [uRow?.full_name, uRow?.last_name].filter(Boolean).join(' ').trim()
-          || (user.user_metadata?.full_name as string)
-          || user.email?.split('@')[0]
-          || 'Usuario';
-        const email = uRow?.email || user.email || '';
-        const roleLabel = uRow?.is_platform_admin
-          ? 'Super Administrador'
-          : tenantName
-            ? `${tenantName}${uRow?.role ? ` · ${uRow.role}` : ''}`
-            : (uRow?.role || 'Usuario');
-        const words = fullName.split(/\s+/).filter(Boolean);
-        const initials = (words.length >= 2
-          ? `${words[0][0]}${words[1][0]}`
-          : fullName.slice(0, 2)
-        ).toUpperCase();
-
-        setAuthProfile({
-          name: fullName,
-          email,
-          roleLabel,
-          initials,
-          avatarUrl: uRow?.avatar_url || null,
-        });
-      } catch {
-        // Silencioso en caso de error transitorio
-      }
-    };
-
-    loadUser();
+    if (!supabase) return; // modo local explícito: sin redirección
+    if (perfilVisible === null) {
+      window.location.assign('/login');
+      return;
+    }
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
-        window.location.assign('/login');
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        loadUser();
-      }
+      if (event === 'SIGNED_OUT') window.location.assign('/login');
     });
-
-    return () => {
-      alive = false;
-      subscription?.unsubscribe();
-    };
-  }, []);
+    return () => subscription?.unsubscribe();
+  }, [perfilVisible]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -362,7 +306,8 @@ export default function Topbar({
                 }}
                 onClick={() => {
                   setIsProfileMenuOpen(false);
-                  notify('Ficha institucional del usuario y permisos de sistema');
+                  if (onOpenConfig) onOpenConfig('perfil');
+                  else notify('Ficha institucional del usuario y permisos de sistema');
                 }}
               >
                 <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', display: 'grid', placeItems: 'center', color: '#0066ff', flexShrink: 0 }}>
@@ -397,7 +342,8 @@ export default function Topbar({
                 }}
                 onClick={() => {
                   setIsProfileMenuOpen(false);
-                  notify('Configuración de cuenta y notificaciones territoriales');
+                  if (onOpenConfig) onOpenConfig('preferencias');
+                  else notify('Configuración de cuenta y notificaciones territoriales');
                 }}
               >
                 <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#f1f5f9', display: 'grid', placeItems: 'center', color: '#475569', flexShrink: 0 }}>

@@ -17,3 +17,4 @@
 - **Problema:** El tenant `DIGERE MINEDU` aparecía sin proyectos y el cronograma mostraba brevemente `"Cronograma nuevo · Listo para estructurar"` antes de cargar los datos.
 - **Causa:** `listGestorProjects(tenantId)` en `gestorProjectService.ts` no incluía `tenant_id` en el `.select(...)` y luego filtraba `row.tenant_id === tenantId`, descartando todos los proyectos. Además, `CronogramaGanttView.tsx` evaluaba `items.length === 0` mientras la sesión y la BD aún estaban cargando.
 - **Solución:** Se agregó `tenant_id` al `.select(...)` de `gestorProjectService.ts` y se añadió el estado `cargandoNube` en `CronogramaGanttView.tsx` para mostrar `"Cargando cronograma..."` hasta terminar la carga real.
+- **Actualización (20-nov-2026):** ese parche cubría solo el Gantt y fue retirado. La corrección definitiva (puerta de entrada en `App.tsx` + perfil visible compartido) está documentada en `2-Destello-carga-inicial.md`.

@@ -1256,7 +1256,8 @@ export default function CronogramaGanttView({
   const currentPidRef = useRef(projectId);
   const { perfil: perfilGp, cargando: cargandoPerfilGp } = usePerfilGp();
   const tenantKey = perfilGp?.tenantId ?? '__sin_tenant__';
-  const [cargandoNube, setCargandoNube] = useState<boolean>(false);
+  // Se retiró el parche local `cargandoNube` (0-SOLUCIONES/1-Pop Up.txt:16-19):
+  // App.tsx ya no monta este canvas hasta que identidad y proyectos terminaron.
 
   /* FASE 1 — Aislamiento de UI: claves de configuración de columnas/anchos por módulo+perspectiva
      (qaway-cronograma-{maestro|territorial|equipo}-*) para que la config de un módulo no pise la de otro. */
@@ -9896,7 +9897,7 @@ export default function CronogramaGanttView({
 
           {/* Tabla Gantt con Timeline (Filas operativas con scroll 2D) */}
           <div className="gantt-scroll" ref={scrollRef} onScroll={handleScroll}>
-            {(cargandoPerfilGp || cargandoNube) && items.length === 0 ? (
+            {cargandoPerfilGp && items.length === 0 ? (
               <div style={{ padding: '70px 24px', textAlign: 'center', color: '#64748b', fontSize: '14px', background: '#ffffff', width: '100%' }}>
                 Cargando cronograma...
               </div>

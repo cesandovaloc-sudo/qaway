@@ -1,5 +1,8 @@
 # Instrucciones de Desarrollo de Qaway Lab
 
+> Espejo oficial de directivas del repositorio.
+> Aplica a todos los agentes que trabajen en este repositorio.
+
 ## RESTRICCIONES Y REGLAS DEL AGENTE
 
 ### 🚨 Alertas, Competencia y Comunicación
@@ -54,6 +57,9 @@
 * Los commits existentes son históricos y deben permanecer intactos. Que un commit anterior haya funcionado mejor NO significa que tengas autorización para regresar a él.
 * Si necesitas consultar un commit anterior para INVESTIGAR: solo puedes leerlo/compararlo. Nunca modificarás el estado actual para regresar a él.
 
+## 📝 Respuesta Obligatoria al Final de Cada Mensaje
+Tu rama - tu ultimo commit - tu carpeta repo.
+
 ---
 
 CANDADO VISUAL:
@@ -83,4 +89,20 @@ Toda decisión visual, tipográfica, espacial, responsive o de animación debe s
 4. Ejecución en Modo Tarea (Task-by-Task Verification):
    - El agente debe ejecutar y validar cada punto anterior paso a paso, sin saltarse etapas ni entregar código sin previa verificación de compilación y visualización.
 
+---
 
+## 🎯 Alineación obligatoria antes de tocar código
+* Al iniciar, lee `AGENTS.md` (o `ALINEACION.md`) en la raíz del repo y confírmalo en el chat antes de analizar. Si no existe, avisa y sigue solo con este bloque.
+* Antes de proponer un fix, busca si el caso ya está documentado en `src/pages/5-qaway-hub/0-SOLUCIONES` y en `13-Gestor_Proyectos2/AUDITORIA`. Si existe, reutiliza esa solución; no la reinventes.
+* Toda solución es estructural: se elimina la causa. Nunca subir timeouts, añadir fallbacks ni ocultar lentitud apoyándose en la sesión local del navegador.
+
+## ⚡ Rendimiento (reglas verificables)
+* Nunca encadenes `await` a Supabase si las consultas no dependen entre sí: usa `Promise.all` o promesa compartida (in-flight + caché). Prohibido pedir lo mismo en varias capas.
+* Una sola resolución de sesión por flujo: reutiliza `getSession`/`getUser`, no la vuelvas a pedir en cada módulo.
+* Todo módulo que no se use en el arranque se importa con `lazy()`. Prohibido añadir imports estáticos nuevos a `src/router/AppRouter.jsx`.
+* La deduplicación es por recurso, no por módulo. Si un dato ya se consultó, se reutiliza.
+* Las mediciones se hacen con datos sanos: una respuesta 400 no valida una métrica.
+
+## ✅ Validación y cierre
+* Valida solo con `typecheck` + revisión de source (grep). `build`, `build:dev` o regenerar `dist` está prohibido salvo autorización explícita.
+* Antes del commit, revisa el `git diff` completo, no solo tus archivos: el commit total arrastra cambios de otros agentes.

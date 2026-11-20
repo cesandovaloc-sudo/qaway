@@ -16,7 +16,10 @@ import {
 } from 'recharts'
 import { logoutUser } from '@/config/auth'
 import { supabase } from '@/config/supabase'
+import { getSesionCompartida } from '@/router/sessionCache'
 import { useAppAccess } from './hooks/useAppAccess'
+import { getUnreadCount } from './14-Notificaciones/services/notificationEngine'
+import { onExternalChange } from './14-Notificaciones/services/storage'
 import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/AppSwitcherDropdown'
 import EmpresasModule from './HubSuperEmpresasModule'
 import UsersModule from './HubSuperUsersModule'
@@ -75,6 +78,7 @@ const ROUTES = [
   { icon: Instagram, title: 'Descargador & Extractor de Instagram', description: 'Extractor y descargador multimedia de publicaciones.', path: '/hub/descargador-ig', access: 'free', badge: 'Borrador', category: 'Herramientas', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-creador.png', published: false },
   { icon: FolderKanban, title: 'Gestor de Proyectos (Suite)', description: 'Suite de gestión territorial, metodologías P6 y Scrum con monitoreo en tiempo real.', path: '/hub/gestor_proyecto_eliminar', access: 'pro', badge: 'Pro', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: true, app: 'proyectos' },
   { icon: FolderKanban, title: 'Gestor de Proyectos 2 · Tareas', description: 'Modulo de tareas: kanban, hitos, checklist, consultas y trazabilidad del proyecto.', path: '/hub/tareas', access: 'pro', badge: 'Nuevo', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: true, app: 'tareas' },
+  { icon: Bell, title: 'Centro de Notificaciones y Perfiles', description: 'Nucleo compartido del Hub: bandeja unificada, prioridades, canales de correo y WhatsApp con auditoria, perfiles y preferencias.', path: '/hub/notificaciones', access: 'pro', badge: 'Nucleo', category: 'Automatizacion', pillar: 'Automatizacion', tone: 'bg-[#14532d]/10 text-[#14532d]', preview: '/assets/hub-previews/preview-agenda.png', published: true },
   { icon: PenSquare, title: 'Editor de Blog', description: 'Plataforma editorial para crear, estructurar y publicar articulos.', path: '/hub/blog-editor', access: 'pro', badge: 'Listo', category: 'Herramientas', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/hub-portada.webp', published: true, app: 'blog' },
   { icon: Calendar, title: 'Consola WABA + CRM', description: 'Panel ejecutivo para campana: integracion WhatsApp API.', path: '/hub/waba-crm', access: 'pro', badge: 'Destacado', category: 'Panel de control', pillar: 'IA', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agentes.png', published: false },
   { icon: MessageSquare, title: 'Consola CRM Comercial', description: 'Bandeja multiagente de WhatsApp, atribucion en tiempo real.', path: '/hub/crm', access: 'pro', badge: 'Nuevo', category: 'Panel de control', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-crm.jpg', published: true, app: 'crm' },
@@ -2102,6 +2106,25 @@ function HubPanelContent({ canvasOnly = false }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  // Contador real del Centro de Notificaciones y Perfiles (mismo motor que la app).
+  const [notifUnread, setNotifUnread] = useState(() => {
+    try {
+      return getUnreadCount()
+    } catch {
+      return 0
+    }
+  })
+  useEffect(() => {
+    const sync = () => {
+      try {
+        setNotifUnread(getUnreadCount())
+      } catch {
+        setNotifUnread(0)
+      }
+    }
+    sync()
+    return onExternalChange(sync)
+  }, [location.pathname])
   // Tema del shell del Hub: 'claro' | 'contraste' (actual) | 'oscuro'. Persistido localmente.
   const [themeMode, setThemeMode] = useState(() => localStorage.getItem('qaway.hubTheme') || 'contraste')
   useEffect(() => {
@@ -2195,7 +2218,8 @@ function HubPanelContent({ canvasOnly = false }) {
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      // Mismo TTL que ProtectedRoute y HubAccessGuard: una sola petición de sesión.
+      const { data: { session } } = await getSesionCompartida()
       if (!session || !alive) return
       const { data: me } = await supabase.from('users').select('tenant_id, role, is_platform_admin, permissions, full_name, avatar_url, created_at').eq('id', session.user.id).maybeSingle()
       if (!alive) return
@@ -2901,11 +2925,19 @@ function HubPanelContent({ canvasOnly = false }) {
               </AnimatePresence>
             </div>
 
-            {/* Notifications Bell */}
-            <button className="relative p-2 text-[var(--hub-text-soft)] hover:text-white hover:bg-[var(--hub-hover)] rounded-full transition-colors cursor-pointer" title="Notificaciones (0)">
+            {/* Notifications Bell: contador real del Centro de Notificaciones */}
+            <Link
+              to="/hub/notificaciones"
+              className="relative p-2 text-[var(--hub-text-soft)] hover:text-white hover:bg-[var(--hub-hover)] rounded-full transition-colors cursor-pointer"
+              title={notifUnread > 0 ? `Notificaciones sin leer (${notifUnread})` : 'Notificaciones: todo leído'}
+            >
               <HubIcon icon={Bell} size={20} className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
-            </button>
+              {notifUnread > 0 ? (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[#ff4b0b] text-white text-[9px] font-bold leading-4 text-center ring-2 ring-[#111111]">
+                  {notifUnread > 99 ? '99+' : notifUnread}
+                </span>
+              ) : null}
+            </Link>
 
             {/* User Profile Dropdown: neutro hasta resolver identidad actual; jamás pinta identidad anterior */}
             <div className="relative z-[100] ml-1">

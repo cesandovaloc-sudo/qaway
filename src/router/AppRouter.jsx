@@ -1,37 +1,41 @@
 ﻿import { lazy, useEffect, useState } from 'react'
 import { RouteSuspense, RouteLoading } from './RouteSuspense'
+import { GestorRouteLoading } from './GestorRouteLoading'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
+import { getSesionCompartida } from './sessionCache'
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import AuthLinkHandler from '@/router/AuthLinkHandler'
 import HubAccessGuard from './HubAccessGuard'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
-import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
+// InicioPage se deja estático: RootIndexRoute lo renderiza directamente.
+const InicioPageV3 = lazy(() => import('@/pages/1-inicio/InicioPageV3.jsx'))
 import AuthShell from '@/pages/auth/AuthShell'
 import LoginPage from '@/pages/auth/LoginPage'
 import UpdatePasswordPage from '@/pages/auth/UpdatePasswordPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
-import {
-  EstudioPage,
-  EstudioLayout,
-  BrandingDigitalPage,
-  ContenidoVisualPage,
-  PresenciaProfesionalPage,
-  EstrategiaDigitalPage as EstudioEstrategiaDigitalPage,
-  ConsultoriaPage,
-} from '@/pages/2-estudio'
-import SistemasDigitalesPage from '@/pages/3-sistemas-digitales/SistemasDigitalesPage'
-import { AutomatizacionPage } from '@/pages/3-sistemas-digitales/1-automatizacion'
-import { CanalesDigitalesPage } from '@/pages/3-sistemas-digitales/2-canales-digitales'
-import { WebsYLandingsPage } from '@/pages/3-sistemas-digitales/3-webs-y-landings'
-import { CRMDatosDashboardsPage } from '@/pages/3-sistemas-digitales/4-crm-datos-dashboards'
-import { AgentesIAPage } from '@/pages/3-sistemas-digitales/5-agentes-ia'
-import { HerramientasInternasPage } from '@/pages/3-sistemas-digitales/6-herramientas-internas'
-import { EstrategiaDigitalPage as SistemasEstrategiaDigitalPage } from '@/pages/3-sistemas-digitales/7-estrategia-digital'
-import RecursosPage from '@/pages/6-recursos/RecursosPage'
-import BlogPage from '@/pages/7-blog/BlogPage'
-import ArticleDetailPage from '@/pages/7-blog/ArticleDetailPage'
+// Páginas secundarias: se descargan solo al abrir su ruta. Antes engordaban
+// el índice aunque el usuario entrara directo a /hub/gestor_proyectos.
+const EstudioModule = () => import('@/pages/2-estudio')
+const EstudioPage = lazy(() => EstudioModule().then((m) => ({ default: m.EstudioPage })))
+const EstudioLayout = lazy(() => EstudioModule().then((m) => ({ default: m.EstudioLayout })))
+const BrandingDigitalPage = lazy(() => EstudioModule().then((m) => ({ default: m.BrandingDigitalPage })))
+const ContenidoVisualPage = lazy(() => EstudioModule().then((m) => ({ default: m.ContenidoVisualPage })))
+const PresenciaProfesionalPage = lazy(() => EstudioModule().then((m) => ({ default: m.PresenciaProfesionalPage })))
+const EstudioEstrategiaDigitalPage = lazy(() => EstudioModule().then((m) => ({ default: m.EstrategiaDigitalPage })))
+const ConsultoriaPage = lazy(() => EstudioModule().then((m) => ({ default: m.ConsultoriaPage })))
+const SistemasDigitalesPage = lazy(() => import('@/pages/3-sistemas-digitales/SistemasDigitalesPage'))
+const AutomatizacionPage = lazy(() => import('@/pages/3-sistemas-digitales/1-automatizacion').then((m) => ({ default: m.AutomatizacionPage })))
+const CanalesDigitalesPage = lazy(() => import('@/pages/3-sistemas-digitales/2-canales-digitales').then((m) => ({ default: m.CanalesDigitalesPage })))
+const WebsYLandingsPage = lazy(() => import('@/pages/3-sistemas-digitales/3-webs-y-landings').then((m) => ({ default: m.WebsYLandingsPage })))
+const CRMDatosDashboardsPage = lazy(() => import('@/pages/3-sistemas-digitales/4-crm-datos-dashboards').then((m) => ({ default: m.CRMDatosDashboardsPage })))
+const AgentesIAPage = lazy(() => import('@/pages/3-sistemas-digitales/5-agentes-ia').then((m) => ({ default: m.AgentesIAPage })))
+const HerramientasInternasPage = lazy(() => import('@/pages/3-sistemas-digitales/6-herramientas-internas').then((m) => ({ default: m.HerramientasInternasPage })))
+const SistemasEstrategiaDigitalPage = lazy(() => import('@/pages/3-sistemas-digitales/7-estrategia-digital').then((m) => ({ default: m.EstrategiaDigitalPage })))
+const RecursosPage = lazy(() => import('@/pages/6-recursos/RecursosPage'))
+const BlogPage = lazy(() => import('@/pages/7-blog/BlogPage'))
+const ArticleDetailPage = lazy(() => import('@/pages/7-blog/ArticleDetailPage'))
 import NotFoundPage from '@/pages/NotFoundPage'
 
 // Code-splitting para herramientas administrativas del Hub y páginas secundarias
@@ -62,6 +66,8 @@ const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/13-Gestor_
 const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
 const PreguntasFrecuentesAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAppPage'))
 const PreguntasFrecuentesAdminAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAdminAppPage'))
+// Centro de Notificaciones y Perfiles (núcleo compartido del Hub)
+const NotificacionesAppPage = lazy(() => import('@/pages/5-qaway-hub/14-Notificaciones/NotificacionesAppPage'))
 // Tienda de cliente: las páginas viven en inventario y se sirven aquí, dentro
 // del Layout, para que lleven el navbar oficial de Qaway Lab.
 const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/TiendaClientePage'))
@@ -84,12 +90,15 @@ const RestauracionFotografica2Page = lazy(() => import('@/pages/8-landings/6-res
 const DesarrolloWebQawayPage = lazy(() => import('@/pages/8-landings/8-desarollo web/DesarrolloWebQawayPage.jsx'))
 const MondayInventarioLandingPage = lazy(() => import('@/pages/5-qaway-hub/0-Landings/10-inventario/MondayInventarioLandingPage.jsx'))
 const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage.jsx'))
+// RutasPage se usa directo en <Route> (sin RouteSuspense): se deja estático.
 import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
-import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
-import UsuariosPage from '@/pages/5-qaway-hub/usuarios/UsuariosPage.jsx'
-import InvitarPage from '@/pages/5-qaway-hub/invitar/InvitarPage.jsx'
-import EmpresasPage from '@/pages/5-qaway-hub/empresas/EmpresasPage.jsx'
-import HubOnboardingPage from '@/pages/5-qaway-hub/HubOnboardingPage.jsx'
+const BibliotecaPage = lazy(() => import('@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'))
+const UsuariosPage = lazy(() => import('@/pages/5-qaway-hub/usuarios/UsuariosPage.jsx'))
+const InvitarPage = lazy(() => import('@/pages/5-qaway-hub/invitar/InvitarPage.jsx'))
+const EmpresasPage = lazy(() => import('@/pages/5-qaway-hub/empresas/EmpresasPage.jsx'))
+const HubOnboardingPage = lazy(() => import('@/pages/5-qaway-hub/HubOnboardingPage.jsx'))
+// Perfil de empresa con la carátula de UpdatePasswordPage: se carga solo al abrirlo.
+const CompletarPerfilPage = lazy(() => import('@/pages/auth/CompletarPerfilPage.jsx'))
 
 // Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
 const FormulariosShowcasePage = lazy(() => import('@/pages/10-briefs/1- Formularios/FormulariosShowcasePage.jsx'))
@@ -102,8 +111,8 @@ const AirbnbWizardCardDeck = lazy(() => import('@/pages/10-briefs/1- Formularios
 const TestPreparacionDigital = lazy(() => import('@/pages/10-briefs/1- Formularios/7-TestPreparacionDigital.jsx'))
 
 // Proyectos (portada estática + subproyectos aislados por ruta con lazy loading para que sus CSS/tipografías no se filtren al inicio)
-import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
-import ProyectosPageV2 from '@/pages/11-Proyectos/ProyectosPageV2.jsx'
+const ProyectosPage = lazy(() => import('@/pages/11-Proyectos/ProyectosPage.jsx'))
+const ProyectosPageV2 = lazy(() => import('@/pages/11-Proyectos/ProyectosPageV2.jsx'))
 const TemplateDemo = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'))
 const HorizontePage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'))
 const HorizontePageReal = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'))
@@ -135,7 +144,8 @@ function ProtectedRoute({ children }) {
       resolve(Boolean(token))
       return
     }
-    sb.auth.getSession()
+    // HubAccessGuard reutiliza esta misma promesa: una sola petición de sesión.
+    getSesionCompartida()
       .then(({ data }) => resolve(Boolean(data.session)))
       .catch(() => resolve(false))
     return () => { alive = false }
@@ -148,9 +158,15 @@ function ProtectedRoute({ children }) {
   return <HubAccessGuard>{children}</HubAccessGuard>
 }
 
-function renderRoute(routeKey, element) {
-  if (isRouteEnabled(routeKey)) return <RouteSuspense>{element}</RouteSuspense>
+function renderRoute(routeKey, element, fallback = null) {
+  if (isRouteEnabled(routeKey)) return <RouteSuspense fallback={fallback}>{element}</RouteSuspense>
   return <Navigate to="/" replace />
+}
+
+/** Gestor: un solo loader (barras azules + QAWAY CARGANDO) en chunk y en guard. */
+function renderGestorRoute(element) {
+  const fallback = <GestorRouteLoading />
+  return renderRoute('hub', <HubAccessGuard loadingFallback={fallback}>{element}</HubAccessGuard>, fallback)
 }
 
 /**
@@ -433,6 +449,23 @@ export default function AppRouter() {
           path="hub/gestor_proyecto_eliminar"
           element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
         />
+        {/* Centro de Notificaciones y Perfiles: núcleo compartido del Hub */}
+        <Route
+          path="/hub/notificaciones/*"
+          element={renderRoute('hub', <HubAccessGuard><NotificacionesAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="/hub/notificaciones"
+          element={renderRoute('hub', <HubAccessGuard><NotificacionesAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/notificaciones/*"
+          element={renderRoute('hub', <HubAccessGuard><NotificacionesAppPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/notificaciones"
+          element={renderRoute('hub', <HubAccessGuard><NotificacionesAppPage /></HubAccessGuard>)}
+        />
         {/* Compatibilidad: /hub/tareas redirige al módulo Tareas dentro de Gestor de Proyectos */}
         <Route path="/hub/tareas/*" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
         <Route path="/hub/tareas" element={<Navigate to="/hub/gestor_proyectos/tareas" replace />} />
@@ -441,20 +474,20 @@ export default function AppRouter() {
         {/* Gestor de Proyectos: acceso directo para usuarios autorizados del proyecto. */}
         <Route
           path="/hub/gestor_proyecto/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          element={renderGestorRoute(<GestorProyectosAppPage />)}
         />
         <Route
           path="/hub/gestor_proyecto"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          element={renderGestorRoute(<GestorProyectosAppPage />)}
         />
         {/* Ruta canónica pública: Gestor de Proyectos. */}
         <Route
           path="/hub/gestor_proyectos/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          element={renderGestorRoute(<GestorProyectosAppPage />)}
         />
         <Route
           path="/hub/gestor_proyectos"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectosAppPage /></HubAccessGuard>)}
+          element={renderGestorRoute(<GestorProyectosAppPage />)}
         />
         {/* Compatibilidad: URLs antiguas del Gestor sin el prefijo /hub. */}
         <Route path="/gestor_proyectos/*" element={<LegacyGestorProyectosRedirect />} />
@@ -796,6 +829,9 @@ export default function AppRouter() {
           <Route path="/registrarse" element={renderRoute('auth', <RegisterPage />)} />
         </Route>
         <Route path="/update-password" element={renderRoute('auth', <UpdatePasswordPage />)} />
+        {/* Perfil de empresa: misma carátula que el cambio de contraseña.
+            No es el wizard antiguo y no incluye pagos ni invitaciones. */}
+        <Route path="/completar-perfil" element={renderRoute('auth', <CompletarPerfilPage />)} />
         {/* Onboarding: standalone FUERA del Layout (sin navbar/footer de marca).
             Cada paso es una ruta (/onboarding/:paso) para que Atrás/Adelante del
             navegador y los deep-links funcionen. */}

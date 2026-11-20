@@ -50,6 +50,7 @@ const publicPathAllowList = new Set([
   '/hub/landings/inventario',
   '/landings/sistema-contenido-notion',
   '/login',
+  '/completar-perfil',
   '/onboarding',
   '/onboarding/:paso',
   '/portal/:slug',

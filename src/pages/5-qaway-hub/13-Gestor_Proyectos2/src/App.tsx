@@ -11,7 +11,10 @@ import Topbar from './components/Topbar';
 import CreateProjectModal from './components/CreateProjectModal';
 import CambiarContrasenaModal from './components/CambiarContrasenaModal';
 import { supabase } from './services/supabaseClient';
+import { obtenerUsuarioSesion } from './services/contextoSesion';
 import { usePerfilGp, capacidadesDe } from './services/gpPermisosService';
+import { usePerfilVisible } from './services/perfilVisibleService';
+import { GestorRouteLoading } from '../../../../router/GestorRouteLoading';
 import ResumenProyectoView from './modules/resumen/ResumenProyectoView';
 import TareasView from './modules/tareas/TareasView';
 const Tareas2View = lazy(() => import('./modules/tareas-2/Tareas2View'));
@@ -132,11 +135,21 @@ function GestorProyectosApp() {
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string>('');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  // Topbar → Configuración: seq crece en cada clic para que el tab cambie
+  // aunque el módulo ya esté montado (keep-alive).
+  const [configTabRequest, setConfigTabRequest] = useState<{ tab: string; seq: number } | null>(null);
   // Etapa 6-B: permisos granulares del modelo GP. El gating SOLO aplica con
   // sesión real (perfilGp no nulo); sin sesión el estado permanece vacío.
   // La DB (RLS) sigue siendo el mando real; esto es UX.
   const { perfil: perfilGp, capacidades: capGp, cargando: cargandoPerfilGp } = usePerfilGp();
+  // Perfil visible (Topbar / Mi Perfil / Empresa): una sola consulta compartida.
+  const { perfil: perfilVisible, cargando: cargandoPerfilVisible } = usePerfilVisible();
   const sesionReal = !cargandoPerfilGp && perfilGp !== null;
+  // Puerta de entrada del shell: nada se monta hasta que respondan las TRES
+  // fuentes reales (identidad, proyectos del tenant, perfil visible). Esperar
+  // datos, no tiempo: sin setTimeout y sin localStorage como fuente.
+  const [cargandoProyectos, setCargandoProyectos] = useState(true);
+  const listo = !cargandoPerfilGp && !cargandoProyectos && !cargandoPerfilVisible;
   // Tenant REAL de la sesión compartida del Hub (public.users.tenant_id =
   // get_auth_tenant_id()). Nunca se infiere de localStorage ni se fuerza a null.
   const gestorTenantId: string | null = perfilGp?.tenantId ?? null;
@@ -144,7 +157,7 @@ function GestorProyectosApp() {
 
   useEffect(() => {
     if (!supabase) return;
-    const checkUser = (u: any) => {
+    const checkUser = (u: { user_metadata?: Record<string, unknown> } | null | undefined) => {
       const meta = u?.user_metadata || {};
       return Boolean(
         meta.must_change_password ||
@@ -154,11 +167,12 @@ function GestorProyectosApp() {
         meta.needs_password_change
       );
     };
-    supabase.auth.getUser().then(({ data }) => {
-      if (checkUser(data?.user)) {
-        setMustChangePassword(true);
-      }
-    });
+    // La sesión ya la resolvió contextoSesion: NO repetir getUser aquí.
+    obtenerUsuarioSesion()
+      .then((usuario) => {
+        if (checkUser(usuario)) setMustChangePassword(true);
+      })
+      .catch(() => {});
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       setMustChangePassword(checkUser(session?.user));
     });
@@ -408,11 +422,13 @@ function GestorProyectosApp() {
   // local, porque localStorage no distingue tenants.
   useEffect(() => {
     let cancelled = false;
+    setCargandoProyectos(true);
     if (cargandoPerfilGp) return () => { cancelled = true; };
     if (!sesionReal || (!gestorTenantId && !perfilGp?.esPlataforma)) {
       // Sin sesión o sin empresa asignada: vacío, nunca datos de otro tenant.
       setProjects([]);
       setActiveProjectId('');
+      setCargandoProyectos(false);
       return () => { cancelled = true; };
     }
     listGestorProjects(gestorTenantId)
@@ -420,6 +436,7 @@ function GestorProyectosApp() {
         if (cancelled) return;
         const delTenant = Array.isArray(remoteProjects) ? remoteProjects : [];
         setProjects(delTenant);
+        setCargandoProyectos(false);
         setActiveProjectId((curr) =>
           delTenant.some((r) => r.id === curr) ? curr : (delTenant[0]?.id ?? '')
         );
@@ -429,6 +446,7 @@ function GestorProyectosApp() {
         console.warn('[Gestor Projects] no se pudieron cargar los proyectos:', error?.message || error);
         setProjects([]);
         setActiveProjectId('');
+        setCargandoProyectos(false);
       });
     return () => {
       cancelled = true;
@@ -445,6 +463,11 @@ function GestorProyectosApp() {
     if (targetSlug && location.pathname !== targetSlug) {
       navigate(targetSlug);
     }
+  };
+
+  const handleOpenConfig = (tab: 'perfil' | 'preferencias') => {
+    setConfigTabRequest((prev) => ({ tab, seq: (prev?.seq || 0) + 1 }));
+    handleSelectModule('configuracion');
   };
 
   const handleChangeRole = (next: UserRole) => {
@@ -556,6 +579,15 @@ function GestorProyectosApp() {
     binds.current['tareas']?.setView?.(v);
   };
 
+  // Hasta aquí NO se monta nada del shell. Antes se renderizaba de inmediato
+  // con projects=[] y "Cargando...", y el usuario veía la cara vacía durante
+  // milisegundos. Ahora el loader real cubre toda la espera; si el tenant tiene
+  // 0 proyectos, el estado vacío aparece recién cuando la BD lo confirmó.
+  if (!listo) {
+    // MISMO loader que usó el router: una sola vista desde la ruta hasta el shell.
+    return <GestorRouteLoading />;
+  }
+
   return (
     <div className={`qm-root ${sidebarCollapsed ? 'qm-sidebar-is-collapsed' : ''}`}>
       <div className={`qm-side qt-v2 ${sidebarCollapsed ? 'collapsed' : ''}`}>
@@ -584,6 +616,8 @@ function GestorProyectosApp() {
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={toggleSidebar}
           activeProject={activeProject}
+          onOpenConfig={handleOpenConfig}
+          perfilVisible={perfilVisible}
         />
         <main ref={canvasRef} className="qm-canvas">
           {/* La maqueta se monta siempre, incluso sin proyecto del tenant.
@@ -675,6 +709,8 @@ function GestorProyectosApp() {
               onUpdateProject={handleUpdateProject}
               onDeleteProject={handleDeleteProject}
               onIrAFicha={() => navigate(MODULE_SLUGS['resumen'])}
+              tabRequest={configTabRequest}
+              notifyExterno={notifyActive}
               onActions={(h) => { binds.current['configuracion'] = h; }}
             />
            </div></Suspense>}

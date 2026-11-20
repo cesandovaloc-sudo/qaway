@@ -13,6 +13,7 @@ export function hasPendingPasswordChange(user) {
 }
 
 export default function UpdatePasswordCard({
+  fullWidth = false,
   supabaseClient,
   title = 'Actualiza tu contraseña',
   subtitle = 'Por seguridad, define una contraseña personal en tu primer ingreso.',
@@ -94,7 +95,7 @@ export default function UpdatePasswordCard({
     <div
       style={{
         width: '100%',
-        maxWidth: '440px',
+        maxWidth: fullWidth ? 'none' : '440px',
         backgroundColor: '#ffffff',
         borderRadius: '14px',
         border: '1px solid #e2e8f0',

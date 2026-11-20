@@ -22,6 +22,7 @@ import {
   CreditCard,
   Package,
   Bot,
+  Bell,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { WHATSAPP_LINK } from '@/data/navigation'
@@ -156,6 +157,19 @@ const routes = [
     category: 'Product Management',
     pillar: 'Automatizacion',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+    preview: '/assets/hub-previews/preview-agenda.png',
+    published: true,
+  },
+  {
+    icon: Bell,
+    title: 'Centro de Notificaciones y Perfiles',
+    description: 'Núcleo compartido del Hub: bandeja unificada, prioridades, canales de correo y WhatsApp con auditoría, perfiles y preferencias de todas las apps.',
+    path: '/hub/notificaciones',
+    access: 'pro',
+    badge: 'Núcleo',
+    category: 'Automatización',
+    pillar: 'Automatizacion',
+    tone: 'bg-[#14532d]/10 text-[#14532d]',
     preview: '/assets/hub-previews/preview-agenda.png',
     published: true,
   },

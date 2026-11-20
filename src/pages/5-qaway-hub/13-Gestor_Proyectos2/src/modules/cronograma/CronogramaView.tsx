@@ -34,7 +34,7 @@ function App({
 }: {
   onActions?: (h: { notify: (m: string) => void }) => void;
   onSwitchPerspective?: (p: 'maestro' | 'territorial') => void;
-  activeProject?: { id?: string; name?: string; region?: string };
+  activeProject?: { id?: string; name?: string; region?: string } | undefined;
 }) {
  const location = useLocation();
  const navigate = useNavigate();

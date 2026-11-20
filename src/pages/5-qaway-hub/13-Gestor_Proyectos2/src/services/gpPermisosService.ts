@@ -35,6 +35,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import { APP_SLUG, resolverContextoSesion } from './contextoSesion';
+import { getAppIdCacheado } from '../../../../../config/appCatalogCache';
 
 /** Llaves delicadas v1 (curables por el admin de la empresa en la UI). */
 export const LLAVES_V1 = [
@@ -167,14 +168,10 @@ async function resolverPerfil(): Promise<PerfilGp | null> {
     rol: null,
     permisos: [],
   };
-  const { data: app, error: appError } = await supabase
-    .from('app_catalog')
-    .select('id')
-    .eq('slug', APP_SLUG)
-    .maybeSingle();
-  if (appError || !app) return base;
-  const appId = String((app as { id?: unknown }).id ?? '');
-  if (!appId) return base;
+  // id de app_catalog compartido con HubAccessGuard: ya no se pide dos veces.
+  const { data: app, error: appError } = await getAppIdCacheado(APP_SLUG, supabase);
+  if (appError || !app?.id) return base;
+  const appId = app.id;
   const { data: fila, error: filaError } = await supabase
     .from('user_app_roles')
     .select('role,permissions')
@@ -282,15 +279,11 @@ export async function listarUsuariosEmpresa(): Promise<ResultadoUsuarios> {
   if (!perfil.tenantId) {
     return { estado: 'error', mensaje: 'La cuenta no tiene empresa asignada (public.users.tenant_id NULL).' };
   }
-  const { data: app, error: appError } = await supabase
-    .from('app_catalog')
-    .select('id')
-    .eq('slug', APP_SLUG)
-    .maybeSingle();
+  const { data: app, error: appError } = await getAppIdCacheado(APP_SLUG, supabase);
   if (appError || !app) {
     return { estado: 'error', mensaje: 'No se pudo resolver la app gestor-proyectos en app_catalog.' };
   }
-  const appId = String((app as { id?: unknown }).id ?? '');
+  const appId = app?.id ?? '';
   if (!appId) return { estado: 'error', mensaje: 'La app gestor-proyectos no tiene id en app_catalog.' };
 
   const [usersRes, rolesRes] = await Promise.all([
@@ -354,13 +347,9 @@ export async function guardarRolGp(p: {
   if (!perfil.esPlataforma && perfil.rol !== 'admin') {
     return { ok: false, mensaje: 'Solo el admin de la empresa (o la plataforma) administra permisos.' };
   }
-  const { data: app, error: appError } = await supabase
-    .from('app_catalog')
-    .select('id')
-    .eq('slug', APP_SLUG)
-    .maybeSingle();
+  const { data: app, error: appError } = await getAppIdCacheado(APP_SLUG, supabase);
   if (appError || !app) return { ok: false, mensaje: 'No se pudo resolver la app en app_catalog.' };
-  const appId = String((app as { id?: unknown }).id ?? '');
+  const appId = app?.id ?? '';
   if (!appId) return { ok: false, mensaje: 'La app gestor-proyectos no tiene id en app_catalog.' };
 
   const permisosJsonb: Record<string, boolean> = {};

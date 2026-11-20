@@ -157,13 +157,53 @@ export function evaluarEscritura(ctx: ContextoSesion | null, tenantIdParam?: str
 let valorCache: ContextoSesion | null | undefined = undefined;
 let enVuelo: Promise<ContextoSesion | null> | null = null;
 
+// Usuario de la sesión: UNA SOLA llamada getUser compartida por todo el flujo
+// del Gestor (contexto + aviso de cambio de clave en App.tsx). Antes se pedía
+// dos veces: aquí y en App.tsx:157. Se renueva solo al cambiar la identidad.
+export interface UsuarioSesion {
+  id: string;
+  email: string | null;
+  user_metadata: Record<string, unknown>;
+}
+
+let usuarioCache: UsuarioSesion | null | undefined = undefined;
+let usuarioEnVuelo: Promise<UsuarioSesion | null> | null = null;
+
+export async function obtenerUsuarioSesion(): Promise<UsuarioSesion | null> {
+  if (usuarioCache !== undefined) return usuarioCache;
+  if (!supabase) return null; // modo local / pruebas sin cliente
+  if (!usuarioEnVuelo) {
+    usuarioEnVuelo = supabase.auth.getUser()
+      .then(({ data, error }) => {
+        if (error) {
+          throw new ErrorSesion('SIN_SESION', `No se pudo validar la sesión de Qaway Hub: ${error.message}`);
+        }
+        const u = data?.user ?? null;
+        usuarioCache = u
+          ? {
+              id: u.id,
+              email: typeof u.email === 'string' ? u.email : null,
+              user_metadata: (u.user_metadata ?? {}) as Record<string, unknown>,
+            }
+          : null;
+        return usuarioCache;
+      })
+      .finally(() => {
+        usuarioEnVuelo = null;
+      });
+  }
+  return usuarioEnVuelo;
+}
+
+/** Fuerza una nueva lectura del usuario (cambio de identidad). */
+export function invalidarUsuarioSesion(): void {
+  usuarioCache = undefined;
+  usuarioEnVuelo = null;
+}
+
 async function resolver(): Promise<ContextoSesion | null> {
   if (!supabase) return null; // modo local / pruebas sin cliente: sin contexto real
-  const { data: sesion, error: errorSesion } = await supabase.auth.getUser();
-  if (errorSesion) {
-    throw new ErrorSesion('SIN_SESION', `No se pudo validar la sesión de Qaway Hub: ${errorSesion.message}`);
-  }
-  const usuario = sesion?.user ?? null;
+  const usuario = await obtenerUsuarioSesion();
   if (!usuario) return null;
 
   // Perfil de plataforma + rol de app + derecho de uso, en paralelo
@@ -230,6 +270,7 @@ if (supabase) {
     supabase.auth.onAuthStateChange((evento) => {
       if (evento === 'SIGNED_IN' || evento === 'SIGNED_OUT' || evento === 'USER_UPDATED') {
         invalidarContexto();
+        invalidarUsuarioSesion();
       }
     });
   } catch {

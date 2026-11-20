@@ -13,6 +13,7 @@ export function RouteLoading() {
   )
 }
 
-export function RouteSuspense({ children }) {
-  return <Suspense fallback={<RouteLoading />}>{children}</Suspense>
+/** `fallback` permite que una app concreta (Gestor) use su propio loader. */
+export function RouteSuspense({ children, fallback }) {
+  return <Suspense fallback={fallback || <RouteLoading />}>{children}</Suspense>
 }

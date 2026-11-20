@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Building2, CheckCircle2, Globe2, Layers, MapPin, Plus, RefreshCw, ShieldAlert } from 'lucide-react';
+import { Building2, CheckCircle2, Globe2, Layers, MapPin, Plus, RefreshCw, ShieldAlert, X } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
+import { usePerfilGp } from '../../services/gpPermisosService';
 import { construirBorradoresPlantilla, type PlantillaSector } from '../../services/organizacionPlantillas';
 import { crearEstructuraDesdePlantilla } from '../../services/organizacionEscritura';
 
@@ -21,6 +22,7 @@ interface UnidadRow {
 }
 
 export const OrganizacionTab: React.FC = () => {
+  const { perfil } = usePerfilGp();
   const [sector, setSector] = useState<PlantillaSector>('publico');
   const [unidades, setUnidades] = useState<UnidadRow[]>([]);
   const [sedes, setSedes] = useState<SedeRow[]>([]);
@@ -70,10 +72,17 @@ export const OrganizacionTab: React.FC = () => {
   }, []);
 
   const handlePrecargarPlantilla = async () => {
+    if (!perfil?.tenantId) {
+      setFeedback({ type: 'err', text: 'No se detectó un tenant activo en la sesión.' });
+      return;
+    }
     setSaving(true);
     setFeedback(null);
     try {
-      const res = await crearEstructuraDesdePlantilla(sector);
+      const res = await crearEstructuraDesdePlantilla({
+        origen: sector,
+        tenantId: perfil.tenantId,
+      });
       if (res && (res as any).ok === false) {
         setFeedback({ type: 'err', text: (res as any).error || 'No se pudo precargar la plantilla.' });
       } else {
@@ -134,7 +143,15 @@ export const OrganizacionTab: React.FC = () => {
           ) : (
             <ShieldAlert size={18} color="#dc2626" />
           )}
-          <span style={{ fontSize: '14px', fontWeight: 500 }}>{feedback.text}</span>
+          <span style={{ fontSize: '14px', fontWeight: 500, flex: 1 }}>{feedback.text}</span>
+          <button
+            type="button"
+            onClick={() => setFeedback(null)}
+            aria-label="Cerrar alerta"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px', display: 'flex' }}
+          >
+            <X size={16} />
+          </button>
         </div>
       )}
 
