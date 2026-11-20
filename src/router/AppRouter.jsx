@@ -206,9 +206,6 @@ function AdminCanonicalRedirect() {
 function RootIndexRoute() {
   if (typeof window !== 'undefined' && window.location.hash) {
     const hash = window.location.hash
-    if (hash.includes('access_token') || hash.includes('type=signup') || hash.includes('type=recovery')) {
-      return <Navigate to={`/onboarding/tu-plan${hash}`} replace />
-    }
     if (hash.includes('error')) {
       const params = new URLSearchParams(hash.replace(/^#/, ''))
       const qs = new URLSearchParams({
@@ -216,6 +213,12 @@ function RootIndexRoute() {
         linkErrorDesc: params.get('error_description') || 'El enlace es inválido o ha expirado.',
       })
       return <Navigate to={`/login?${qs.toString()}`} replace />
+    }
+    if (hash.includes('type=recovery')) {
+      return <Navigate to={`/update-password${hash}`} replace />
+    }
+    if (hash.includes('access_token') || hash.includes('type=signup')) {
+      return <Navigate to={`/onboarding/tu-plan${hash}`} replace />
     }
   }
   return <InicioPage />

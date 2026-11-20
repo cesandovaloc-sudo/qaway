@@ -244,8 +244,9 @@ export default function LoginPage() {
     try {
       const supabase = getSupabaseClient()
       if (!supabase) { setError('Servicio no disponible.'); return }
+      const resetOrigin = typeof window !== 'undefined' ? window.location.origin : APP_BASE_URL
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-        redirectTo: `${APP_BASE_URL}/update-password`,
+        redirectTo: `${resetOrigin}/update-password`,
       })
       if (resetError) setError('No se pudo enviar el correo de recuperación.')
       else setResetSent(true)
@@ -259,6 +260,10 @@ export default function LoginPage() {
   // o tras confirmar correo), no mostramos el formulario: al panel directamente.
   useEffect(() => {
     let alive = true
+    if (typeof window !== 'undefined' && window.location.hash.includes('type=recovery')) {
+      navigate(`/update-password${window.location.hash}`, { replace: true })
+      return
+    }
     const supabase = getSupabaseClient()
     if (!supabase) {
       if (alive) setChecking(false)
