@@ -41,24 +41,6 @@ function resolveHubAccessRule(pathname) {
   return { type: 'platform_only', moduleKey: null }
 }
 
-/**
- * ¿Hay una sesión de Supabase guardada en el navegador?
- *
- * Supabase JS persiste la sesión como `sb-<project-ref>-auth-token` (localStorage o
- * sessionStorage). Se usa solo como último recurso cuando la verificación en red
- * tarda demasiado: la autorización real la sigue haciendo RLS en el servidor.
- */
-function hasLocalSupabaseSession() {
-  try {
-    const stores = [localStorage, sessionStorage]
-    return stores.some((store) =>
-      Object.keys(store).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')),
-    )
-  } catch (_) {
-    return false
-  }
-}
-
 export default function HubAccessGuard({ children }) {
   const location = useLocation()
   const [state, setState] = useState({ checking: true, redirect: null, locked: false, moduleKey: null })
@@ -76,9 +58,10 @@ export default function HubAccessGuard({ children }) {
 
     const timeoutId = setTimeout(() => {
       if (!alive) return
-      if (hasLocalSupabaseSession()) {
-        console.warn('[HubAccessGuard] Verificación lenta; se renderiza con la sesión local.')
-        resolve(null)
+      // Ante lentitud se cierra por defecto: NUNCA se abre una ruta protegida
+      // apoyándose solo en una sesión guardada en el navegador.
+      if (rule.type === 'platform_only') {
+        resolve(null, true, rule.moduleKey)
         return
       }
       resolve(loginHref)

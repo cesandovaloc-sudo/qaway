@@ -1,0 +1,1 @@
+import{t as e}from"./dist-C8tDg3bT.js";var t=e(`https://qrusdsqgygfolxfrafyd.supabase.co`,`sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi`,{auth:{detectSessionInUrl:!1}});export{t};

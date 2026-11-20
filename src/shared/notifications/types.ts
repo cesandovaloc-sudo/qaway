@@ -7,6 +7,12 @@
    la estructura de datos, no tienen lógica de negocio ni efectos secundarios.
    ------------------------------------------------------------------ */
 
+export type WhatsAppStatus = 'sent' | 'delivered' | 'read' | 'failed'
+
+export type TaskResponseStatus = 'sin_notificar' | 'esperando_respuesta' | 'respondido'
+
+export type TaskOriginType = 'oficial_oficio' | 'accion_emergente'
+
 export type NotificationPriority = 'LOW' | 'MEDIUM' | 'HIGH'
 
 export type NotificationType =
@@ -17,6 +23,8 @@ export type NotificationType =
   | 'inventory_alert'
   | 'subscription'
   | 'custom'
+  | 'whatsapp'
+  | 'email'
 
 export type RecipientRole = 'admin' | 'user' | 'viewer' | 'customer'
 
@@ -41,6 +49,23 @@ export interface SharedNotification {
   priority?: NotificationPriority
   /** ID del tenant/empresa asociada */
   tenant_id?: string
+  /** Datos específicos de WhatsApp */
+  whatsappData?: {
+    status: WhatsAppStatus
+    sentAt?: string
+    sentBy?: string
+    messageSid?: string
+  }
+  /** Datos específicos de email */
+  emailData?: {
+    sentAt?: string
+    sentBy?: string
+    messageId?: string
+  }
+  /** Seguimiento de respuesta de tarea */
+  taskResponseStatus?: TaskResponseStatus
+  /** Origen de la tarea */
+  taskOrigin?: TaskOriginType
 }
 
 /** Estructura para preferencias de notificación por usuario */
@@ -51,6 +76,10 @@ export interface UserNotificationPreferences {
   email: boolean
   /** Si el usuario quiere push notifications */
   push: boolean
+  /** Si el usuario quiere notificaciones WhatsApp */
+  whatsapp: boolean
+  /** Si el usuario quiere notificaciones push de WhatsApp */
+  whatsappPush: boolean
   /** Horario de silencio (opcional) */
   quietHours?: {
     start: string // HH:MM format
@@ -71,13 +100,13 @@ export interface TenantNotificationPreferences {
     internal: boolean // Mostrar en la app
     email: boolean // Enviar email
     push: boolean // Notificaciones push del navegador
+    whatsapp: boolean // Enviar por WhatsApp
   }
   /** Cuántos días mantener la notificación en vista */
   defaultExpirationDays?: number
 }
 
-/** Filtros para consultar/notificar */
-export interface NotificationFilters {
+/** Filtros para consultar/notificar */export interface NotificationFilters {
   /** Filtrar por tipo */
   type?: NotificationType | NotificationType[]
   /** Filtrar por prioridad */
@@ -90,4 +119,8 @@ export interface NotificationFilters {
   after?: string // ISO string
   /** Filtrar por fecha (antes de esta fecha) */
   before?: string // ISO string
+  /** Filtrar por estado de respuesta de tarea */
+  taskResponseStatus?: TaskResponseStatus
+  /** Filtrar por tipo de origen de tarea */
+  taskOrigin?: TaskOriginType
 }
