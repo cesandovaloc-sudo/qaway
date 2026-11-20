@@ -1752,7 +1752,7 @@ export default function CronogramaGanttView({
           ? old.flatMap((x) => (x.id === drawerDraft.parentId ? [x, drawerDraft] : [x]))
           : [...old, drawerDraft];
       });
-      notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'componente' : 'subcomponente'} guardado con éxito en el cronograma maestro`);
+      notify(`Nuevo ${drawerDraft.kind === 'hito' ? 'componente' : 'paquete de trabajo'} guardado con éxito en el cronograma maestro`);
     } else {
       commitChange((old) => old.map((x) => (x.id === drawerDraft.id ? applyActuals(x, drawerDraft, currentTodayIso) : x)));
       notify('Cambios guardados con éxito en el cronograma maestro');
@@ -5560,10 +5560,10 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className="quick-inline-icon-btn"
-                title={`Crear nueva tarea rápida subordinada a "${x.name}"`}
+                title={x.parentId ? 'Agregar elemento hermano en este nivel' : 'Agregar nuevo componente'}
                 onClick={(e) => {
                   e.stopPropagation();
-                  add('subproceso', x.id, true);
+                  if (x.parentId) { add('subproceso', x.parentId, true); } else { add('hito', undefined, true); }
                 }}
               >
                 <Plus size={13} style={{ color: '#0066ff' }} />
@@ -10896,7 +10896,7 @@ export default function CronogramaGanttView({
                   ? old.flatMap((x) => (x.id === updated.parentId ? [x, updated] : [x]))
                   : [...old, updated]
               );
-              notify(`Nuevo ${updated.kind === 'hito' ? 'componente' : 'subcomponente'} guardado con éxito en el cronograma maestro`);
+              notify(`Nuevo ${updated.kind === 'hito' ? 'componente' : 'paquete de trabajo'} guardado con éxito en el cronograma maestro`);
             } else {
               commitChange((old) => old.map((x) => (x.id === updated.id ? applyActuals(x, updated, currentTodayIso) : x)));
               notify('Cambios guardados con éxito en el cronograma maestro');
@@ -10963,7 +10963,7 @@ export default function CronogramaGanttView({
                 </div>
                 <div>
                   <h3 style={{ margin: '2px 0 4px', fontSize: '16.5px', fontWeight: 750, color: '#0f172a' }}>
-                    ¿Eliminar {activeItem.kind === 'hito' ? 'componente' : 'subcomponente'}?
+                    ¿Eliminar {getEdtNodeDisplayLabel(resolveEdtNodeType(activeItem)).toLowerCase()}?
                   </h3>
                   <small style={{ fontSize: '12px', color: '#64748b' }}>
                     Esta acción retirará el registro y sus dependencias directas del cronograma maestro.
@@ -10973,7 +10973,7 @@ export default function CronogramaGanttView({
               <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.55 }}>
                 Estás a punto de eliminar permanentemente <b>"{activeItem.code} {activeItem.name}"</b>.
                 {activeItem.kind === 'hito' && (
-                  <span> Todos los subcomponentes y actividades vinculadas a este componente también serán removidos.</span>
+                  <span> Todos los elementos hijos y actividades vinculadas también serán removidos.</span>
                 )}
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>

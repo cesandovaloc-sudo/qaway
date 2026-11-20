@@ -1100,7 +1100,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                 className={editorTab === 'subprocesos' ? 'active' : ''}
                 onClick={() => setEditorTab('subprocesos')}
               >
-                Subcomponentes
+                Paquetes de trabajo / Elementos EDT
               </button>
               <button
                 type="button"
@@ -1598,7 +1598,7 @@ export const GanttEditorDrawer = memo(function GanttEditorDrawer({
                             if (!parent) return 'Selecciona el elemento padre...';
                             return parent.kind === 'hito'
                               ? `[Componente] ${parent.code} ${parent.name}`
-                              : `└ [Subcomponente] ${parent.code} ${parent.name}`;
+                              : `└ [Paquete de trabajo] ${parent.code} ${parent.name}`;
                           })()}
                         </span>
                         <ChevronDown

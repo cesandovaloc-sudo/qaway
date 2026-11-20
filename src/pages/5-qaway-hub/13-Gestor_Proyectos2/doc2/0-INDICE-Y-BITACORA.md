@@ -50,7 +50,8 @@ doc2/
 | 3.7.5 | `.../backfill/20261112_0100_backfill_idempotente.sql` | Carga inicial desde el modelo antiguo. | ✅ **EJECUTADO (ajustado) 18-nov-2026** (Etapa 7 Fase 1): tenant DIGERE MINEDU, WBS efectivo único por proyecto (vacío→id, duplicado→`code::id`) sin mutar legado; ver bitácora `20261118-etapa7-fase1-backfill-0100-aplicado.md`. Pendientes: merges P-1..P-7 y cutover app. |
 | **9** | **`9-Credenciales-y-auditoria/`** | **Nuevo bloque: credenciales compartidas del Hub (no solo Gestor 2). Pasa a la carta general (usauripos).** | ✅ creado 19-nov-2026 |
 | 9.1 | `9.1-Plan-y-decisiones-de-seguridad.md` | Por qué: hallazgos H-1..H-6 (migración 20261116 nunca aplicada, sin auditoría, sin bloqueo), decisiones D-1..D-8 con razón, pendientes y ruta a la carta general. | ✅ vigente |
-| 9.2 | `9.2-Ejecucion-y-verificacion.md` | Bitácora: SQL aplicado, verificación en vivo, backfill de 1 evento con evidencia, rollback documentado, commit total pendiente. | ✅ vigente |
+| 9.2 | `9.2-Ejecucion-y-verificacion.md` | Bitácora: SQL aplicado, verificación en vivo, backfill de 1 evento con evidencia, rollback documentado. | ✅ vigente |
+| 9.3 | `9.3-Intentos-de-acceso-y-recuperacion.md` | Bloqueo 5 intentos → 15 min con aviso, límite 5 cambios/hora, Edge `auth-login-guard` v2 activa, recuperación verificada, pasos de prueba y riesgos. | ✅ vigente |
 
 **Leyenda de estado:** ✅ vigente y correcto · ⚠️ vigente pero requiere cambio ya especificado · ❌ superado.
 
@@ -76,7 +77,7 @@ doc2/
 
 ### Siguiente acción concreta
 
-> **CREDENCIALES ENDURECIDAS 19-NOV-2026 (bloque `9-`, infra compartida):** orden del responsable de documentar, no solo crear la migración. Aplicada `20261119_password_change_hardening`: columnas `must_change_password`/`password_changed_at` en `public.users`, tabla `user_password_events` con RLS de solo lectura, trigger en `auth.users` y un evento histórico verificado para Roberto. La migración `20261116120000_assisted_provisioning.sql` queda marcada `[SUPERADO]` (nunca se aplicó). **Decisión pendiente:** límite de cambios y bloqueo por intentos (propuestas en `9.1` §5). Evidencia: `9-Credenciales-y-auditoria/9.2`.
+> **CREDENCIALES ENDURECIDAS 19-NOV-2026 (bloque `9-`, infra compartida):** orden del responsable de documentar, no solo crear la migración. Aplicada `20261119_password_change_hardening`: columnas `must_change_password`/`password_changed_at` en `public.users`, tabla `user_password_events` con RLS de solo lectura, trigger en `auth.users` y un evento histórico verificado para Roberto. La migración `20261116120000_assisted_provisioning.sql` queda marcada `[SUPERADO]` (nunca se aplicó). **Cierre 19-nov:** límite de cambios y bloqueo por intentos ya implementados y probados por HTTP (`9.3`). Pendiente: complejidad remota de Auth, CAPTCHA y entrega real del correo de recuperación. Evidencia: `9-Credenciales-y-auditoria/9.2` y `9.3`.
 > 
 > **INCIDENTE RESUELTO 18-NOV-2026 (fuera del plan `gp_*`):** el checkout guest de commerce fallaba desde el 19-sep (`REVOKE SELECT ON orders FROM anon` sin ajustar la política de INSERT de `order_items`). Aplicada migración `20261118152905` (`can_insert_order_item` `SECURITY DEFINER` + política reescrita), verificada con tres escenarios en vivo (guest ✅ / ajeno bloqueado ✅ / propio autenticado ✅) y `rollback`. Evidencia: `7-Bitacoras/20261118-fix-order-items-insert-anon-guest.md`. **Etapa 6 conserva su estado** (incidente ajeno al plan `gp_*`).
 
@@ -196,7 +197,7 @@ doc2/
 | `5-Implementacion-y-cutover/` | Plan de cutover: doble escritura, verificación de conteos, retiro de `localStorage`. | ⬜ reservado |
 | `6-Integracion-con-el-Hub/` | ETAPA 2D: sesión compartida con el Hub, slug `gestor-proyectos` en `app_catalog`, activación de RLS, resolución de usuario en el Gestor 2. | ⬜ reservado |
 | `7-Bitacoras/` | Registro de ejecuciones reales en Supabase (fecha, migración, resultado, rollback). | 🟡 en uso — primer registro: `20261116-auditoria-4-catalogos-gp.md`; último: `20261118-etapa7-fase1-backfill-0100-aplicado.md` |
-| `9-Credenciales-y-auditoria/` | **EN USO:** credenciales del Hub (compartidas, luego carta general). `9.1` decisiones · `9.2` ejecución. | ✅ creado 19-nov-2026 |
+| `9-Credenciales-y-auditoria/` | **EN USO:** credenciales del Hub (compartidas, luego carta general). `9.1` decisiones · `9.2` ejecución · `9.3` intentos/recuperación. | ✅ creado 19-nov-2026 |
 
 **Nada se crea fuera de estos bloques.** Si aparece un tema nuevo, se crea `N-<Nombre>/` con su `N.1`.
 

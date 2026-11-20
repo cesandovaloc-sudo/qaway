@@ -115,33 +115,46 @@ export default function LoginPage() {
 
     try {
       const supabase = getSupabaseClient()
-      if (supabase) {
-        const { data: supaData, error: supaError } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
-        })
+      if (!supabase) { setError('Servicio no disponible.'); return }
 
-        if (!supaError && supaData?.session) {
-          // F-AUTH run-2: default viewer (antes 'admin'). El rol real lo da el servidor.
-          const role = isSuperAdmin(cleanEmail) ? 'admin' : (supaData.user?.user_metadata?.role || 'viewer')
-          persistSession(supaData.session.access_token, cleanEmail, role)
-          const target = await resolvePostLoginTarget(supabase, supaData.session.user.id)
-          navigate(target, { replace: true })
-          return
-        }
-
-        if (supaError && (
-          supaError.code === 'email_not_confirmed' ||
-          String(supaError.message || '').toLowerCase().includes('confirm')
-        )) {
-          setError('Te falta confirmar tu correo.')
-          return
-        }
+      // El login pasa por auth-login-guard: es el único punto que cuenta
+      // intentos fallidos y puede avisar "te quedan N". GoTrue sigue validando
+      // la clave; aquí NO hay fallback directo para no saltarse el contador.
+      const { data: guardData, error: guardError } = await supabase.functions.invoke('auth-login-guard', {
+        body: { email: cleanEmail, password },
+      })
+      let result = guardData
+      if (!result && guardError) {
+        // supabase-js devuelve el cuerpo del error como texto en error.message.
+        try { result = JSON.parse(guardError.message) }
+        catch (_) { result = { error: 'No se pudo conectar con el servicio de acceso.' } }
       }
 
-      // F-AUTH run-2: eliminado fallback localhost:4000 (aceptaba tokens
-      // locales sin validación real). Solo Supabase autentica.
-      setError('Credenciales incorrectas o usuario no registrado.')
+      if (result?.error) {
+        setError(
+          result.code === 'email_not_confirmed' || String(result.error).toLowerCase().includes('confirm')
+            ? 'Te falta confirmar tu correo.'
+            : result.error,
+        )
+        return
+      }
+      if (!result?.access_token || !result?.refresh_token) {
+        setError('No se pudo iniciar sesión. Intenta de nuevo.')
+        return
+      }
+
+      // Instalamos la sesión en el cliente igual que lo hacía signInWithPassword.
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: result.access_token,
+        refresh_token: result.refresh_token,
+      })
+      if (sessionError) { setError('No se pudo iniciar la sesión. Intenta de nuevo.'); return }
+
+      // F-AUTH run-2: default viewer (antes 'admin'). El rol real lo da el servidor.
+      const role = isSuperAdmin(cleanEmail) ? 'admin' : (result.metadata?.role || 'viewer')
+      persistSession(result.access_token, cleanEmail, role)
+      const target = await resolvePostLoginTarget(supabase, result.user_id)
+      navigate(target, { replace: true })
     } catch (err) {
       console.error('[Auth Error]', err)
       setError('Error al procesar la autenticación. Verifica tus datos.')

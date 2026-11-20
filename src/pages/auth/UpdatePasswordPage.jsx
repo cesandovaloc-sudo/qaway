@@ -28,14 +28,31 @@ export default function UpdatePasswordPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    if (password.length < 8) {
-      setError('Mínimo 8 caracteres.')
+    // Mismas reglas que CambiarContrasenaModal: una sola política en las 3 vías.
+    const valid = password.length >= 8
+      && /[A-Z]/.test(password)
+      && /[a-z]/.test(password)
+      && /\d/.test(password)
+      && !/^(.)\1+$/.test(password)
+    if (!valid) {
+      setError('Mínimo 8 caracteres, con mayúscula, minúscula y número (sin repetir el mismo carácter).')
       return
     }
     setLoading(true)
     try {
       const supabase = getSupabaseClient()
-      const { error } = await supabase.auth.updateUser({ password })
+      // Si el usuario venía de un reset con cambio obligatorio, limpiar los
+      // flags aquí evita que vuelva a aparecer el modal tras recuperar la clave.
+      const { error } = await supabase.auth.updateUser({
+        password,
+        data: {
+          must_change_password: false,
+          requiere_cambio_clave: false,
+          force_password_change: false,
+          primer_ingreso: false,
+          needs_password_change: false,
+        },
+      })
       if (error) throw error
       setDone(true)
     } catch (err) {
@@ -67,7 +84,7 @@ export default function UpdatePasswordPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="8+, mayúscula, minúscula y número"
                   className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-3.5 pl-12 pr-4 text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
                 />
               </span>
