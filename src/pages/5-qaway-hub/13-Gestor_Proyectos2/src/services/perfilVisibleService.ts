@@ -114,7 +114,7 @@ async function resolver(): Promise<PerfilVisible | null> {
   const rol = String(uRow?.role || '');
   const esPlataforma = uRow?.is_platform_admin === true;
   const roleLabel = esPlataforma
-    ? 'Super Administrador'
+    ? 'Admin plataforma'
     : tenantNombre
       ? `${tenantNombre}${rol ? ` · ${rol}` : ''}`
       : rol || 'Usuario';

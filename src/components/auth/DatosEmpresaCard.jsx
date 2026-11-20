@@ -92,7 +92,7 @@ export function validarDatosEmpresa(form) {
   if (!form.phone) errs.phone = 'Escribe tu teléfono / WhatsApp.'
   else if (form.phone.length < (pais?.minDigitos || 6)) errs.phone = `El número necesita al menos ${pais?.minDigitos || 6} dígitos.`
   else if (pais?.maxDigitos && form.phone.length > pais.maxDigitos) errs.phone = `El número de ${pais.nombre} tiene como máximo ${pais.maxDigitos} dígitos.`
-  if (!form.email.trim()) errs.email = 'Escribe el correo de contacto.'
+  if (!form.email.trim()) errs.email = 'Escribe el correo de empresa.'
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) errs.email = 'Escribe un correo válido (ej. nombre@empresa.com).'
   if (form.constituida) {
     if (!form.legal.trim()) errs.legal = 'Escribe la razón social de la empresa.'
@@ -254,7 +254,7 @@ export default function DatosEmpresaCard({
           </div>
         </Campo>
 
-        <Campo label="Correo de contacto" error={errores.email}>
+        <Campo label="Correo de empresa" error={errores.email}>
           <input type="email" style={input()} value={form.email} onChange={(e) => setField('email', e.target.value)} placeholder="contacto@empresa.com" readOnly={soloLectura} required />
         </Campo>
 

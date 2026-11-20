@@ -279,7 +279,7 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
           )}
 
           <Fila icono={<Mail size={15} />} etiqueta="Correo" valor={email || 'Sin correo registrado'} />
-          <Fila icono={<ShieldCheck size={15} />} etiqueta="Rol en esta empresa" valor={String(rol)} />
+          <Fila icono={<ShieldCheck size={15} />} etiqueta="Rol" valor={visible?.roleLabel || String(rol)} />
           <Fila icono={<AlertCircle size={15} />} etiqueta="Empresa" valor={empresa || 'Sin empresa asignada'} />
 
           {hayCambios && (

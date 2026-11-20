@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState } from 'react';
+import { Pencil, X } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { usePerfilVisible } from '../../services/perfilVisibleService';
@@ -44,6 +45,7 @@ export default function EmpresaTab({ notify }: EmpresaTabProps) {
   const [errores, setErrores] = useState<any>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editando, setEditando] = useState(false);
 
   // Tenant y responsable YA vienen resueltos desde App.tsx (usePerfilVisible).
   // Antes este tab nacía con el formulario en blanco y lo llenaba tras tres
@@ -60,7 +62,7 @@ export default function EmpresaTab({ notify }: EmpresaTabProps) {
     setForm((f: any) => ({ ...f, country: v }));
     setErrores((x: any) => ({ ...x, country: undefined }));
     const match = PAISES.find((p: any) => p.nombre === v);
-    if (match?.prefijo) setPrefix(match.prefijo);
+    if (match?.dial) setPrefix(match.dial);
   }
 
   function setNumeric(k: string, raw: string, max: number) {
@@ -117,6 +119,7 @@ export default function EmpresaTab({ notify }: EmpresaTabProps) {
       }));
       // Refresca la caché compartida sin volver a mostrar el formulario vacío.
       void recargar();
+      setEditando(false);
       notify?.('Datos de la empresa guardados correctamente.');
     } catch (e: any) {
       setError(e?.message || 'No se pudieron guardar los datos de la empresa.');
@@ -141,16 +144,38 @@ export default function EmpresaTab({ notify }: EmpresaTabProps) {
       submitLabel="Guardar datos de la empresa"
       title="Datos de la Empresa"
       subtitle="Información fiscal y de contacto de tu organización."
-      soloLectura={!esAdmin}
+      soloLectura={!esAdmin || !editando}
       encabezadoExtra={
-        responsable ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b' }}>
               Responsable de la cuenta
             </span>
-            <span style={{ fontSize: '14px', color: '#0f172a' }}>{responsable}</span>
+            <span style={{ fontSize: '14px', color: '#0f172a' }}>{responsable || '—'}</span>
           </div>
-        ) : null
+          {esAdmin && (
+            <button
+              type="button"
+              onClick={() => setEditando((v) => !v)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 12px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                fontSize: '13px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              {editando ? <X size={14} /> : <Pencil size={14} />}
+              <span>{editando ? 'Cancelar' : 'Editar'}</span>
+            </button>
+          )}
+        </div>
       }
     />
   );

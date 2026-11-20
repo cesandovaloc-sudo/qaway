@@ -359,13 +359,16 @@ export default function ConfiguracionView({
         {notice && (
           <div style={{
             position: 'fixed',
-            top: 24,
-            right: 28,
+            top: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
             zIndex: 9999,
-            background: '#0f172a',
-            color: '#fff',
+            background: '#ffffff',
+            color: '#0f172a',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.12)',
             padding: '10px 18px',
-            borderRadius: '8px',
+            borderRadius: '10px',
             boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
             display: 'flex',
             alignItems: 'center',
@@ -433,7 +436,7 @@ export default function ConfiguracionView({
                 group: 'Mi Cuenta',
                 items: [
                   { id: 'perfil', label: 'Mi Perfil', icon: <UserRound size={15} /> },
-                  { id: 'preferencias', label: 'Preferencias', icon: <SlidersHorizontal size={15} /> },
+                  ...(perfilGp?.esPlataforma ? [{ id: 'preferencias', label: 'Preferencias', icon: <SlidersHorizontal size={15} /> }] : []),
                 ],
               },
               {

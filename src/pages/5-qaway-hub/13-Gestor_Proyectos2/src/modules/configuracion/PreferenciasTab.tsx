@@ -122,6 +122,21 @@ export default function PreferenciasTab({ notify }: PreferenciasTabProps) {
             />
           </label>
 
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 500, color: '#334155' }}>
+              <SlidersHorizontal size={15} /> Tema (deuda pendiente)
+            </span>
+            <SelectEstilizado
+              value={prefs.tema || 'claro'}
+              options={[
+                { value: 'claro', label: 'Claro' },
+                { value: 'oscuro', label: 'Oscuro' },
+                { value: 'sistema', label: 'Sistema' },
+              ]}
+              onChange={(val) => cambiar('tema', val)}
+            />
+          </label>
+
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#334155' }}>
             <input type="checkbox" checked={prefs.notificaciones} onChange={(e) => cambiar('notificaciones', e.target.checked)} />
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Bell size={15} /> Recibir notificaciones del sistema</span>
