@@ -23,6 +23,7 @@ export const FRAMEWORK_FEATURES = [
   { id: 'profile-prefs', label: 'Preferencias por usuario (tema, idioma, canales)', api: 'updateProfile()' },
   { id: 'audit', label: 'Auditoría de entrega (quién, cuándo, estado)', api: 'delivery[]' },
   { id: 'task-origin', label: 'Origen de tarea (oficial / emergente)', api: 'taskOrigin' },
+  { id: 'image-optimization', label: 'Optimización de imágenes (avatar / producto / evidencia)', api: 'optimizarImagen(), optimizarAvatar(), optimizarProducto(), optimizarEvidencia()' },
 ]
 
 const NEED = (id, status = 'cubierto', note = '') => {
@@ -67,6 +68,7 @@ export const APP_ADOPTION = [
       NEED('events'),
       NEED('task-origin'),
       NEED('audit'),
+      NEED('image-optimization', 'cubierto', 'Mi Perfil usa optimizarAvatar y sube el WebP al bucket avatars.'),
     ],
   },
   {

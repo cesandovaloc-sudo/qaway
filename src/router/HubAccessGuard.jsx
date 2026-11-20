@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
-import { getSesionCompartida, invalidarSesionCompartida } from './sessionCache'
-import { getAppIdCacheado, invalidarAppCatalog } from '@/config/appCatalogCache'
+import { getSesionCompartida, consultaCacheada, invalidarCacheAcceso } from './sessionCache'
+import { getAppIdCacheado } from '@/config/appCatalogCache'
 import { logoutUser } from '@/config/auth'
 import AppAccessLockedView from '@/components/ui/AppAccessLockedView'
 import { hasPendingPasswordChange } from '@/components/auth/UpdatePasswordCard'
@@ -13,6 +13,7 @@ function resolveHubAccessRule(pathname) {
   if (
     path === '/hub/panel' || path.startsWith('/hub/panel/') ||
     path === '/hub/gestor_proyecto_eliminar' || path.startsWith('/hub/gestor_proyecto_eliminar/') ||
+    path === '/hub/proyectos' || path.startsWith('/hub/proyectos/') ||
     path === '/hub/analytics' || path.startsWith('/hub/analytics/') ||
     path === '/hub/dashboards' || path.startsWith('/hub/dashboards/') ||
     path === '/hub/descargador-ig' || path.startsWith('/hub/descargador-ig/')
@@ -50,39 +51,10 @@ function resolveHubAccessRule(pathname) {
 }
 
 /**
- * Caché de autorización en vuelo + TTL corto.
- *
- * El guard se ejecuta al cambiar de módulo. Sin esto repetía users → tenants →
- * app_catalog → suscripción en cada ruta. Las consultas siguen PASANDO por RLS:
- * solo se reutiliza una respuesta ya verificada durante 15 s. El catálogo de
- * apps se comparte con el Gestor desde appCatalogCache (slug -> id es dato fijo).
+ * La caché de autorización (consultaCacheada / invalidarCacheAcceso) vive en
+ * sessionCache.js para que HubAccessGuard y el Gestor compartan la misma
+ * lectura de users y tenants (respetando RLS y TTL de 15 s).
  */
-const TTL_MS = 15000
-const cacheAcceso = new Map()
-
-function consultaCacheada(key, loader, ttl = TTL_MS) {
-  const ahora = Date.now()
-  const hit = cacheAcceso.get(key)
-  if (hit?.promise) return hit.promise
-  if (hit && ahora - hit.at < ttl) return Promise.resolve(hit.value)
-
-  const promise = loader().then((res) => {
-    if (res && res.error) cacheAcceso.delete(key)
-    else cacheAcceso.set(key, { value: res, at: Date.now() })
-    return res
-  }).catch((error) => {
-    cacheAcceso.delete(key)
-    throw error
-  })
-  cacheAcceso.set(key, { promise })
-  return promise
-}
-
-function invalidarCacheAcceso() {
-  cacheAcceso.clear()
-  invalidarSesionCompartida()
-  invalidarAppCatalog()
-}
 
 export default function HubAccessGuard({ children, loadingFallback = null }) {
   const location = useLocation()
@@ -136,7 +108,7 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
         `user:${session.user.id}`,
         () => supabase
           .from('users')
-          .select('tenant_id, is_platform_admin, role')
+          .select('id, full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url')
           .eq('id', session.user.id)
           .maybeSingle(),
       )
@@ -195,7 +167,7 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
         `tenant:${user.tenant_id}`,
         () => supabase
           .from('tenants')
-          .select('status, features')
+          .select('id, name, legal_name, status, content, features')
           .eq('id', user.tenant_id)
           .maybeSingle(),
       )

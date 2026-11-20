@@ -23,6 +23,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import { obtenerUsuarioSesion } from './contextoSesion';
+import { consultaCacheada } from '../../../../../router/sessionCache';
 
 export interface PerfilVisible {
   userId: string;
@@ -71,27 +72,36 @@ async function resolver(): Promise<PerfilVisible | null> {
   const user = await obtenerUsuarioSesion();
   if (!user) return null;
 
-  const { data: uRow } = await supabase
-    .from('users')
-    .select('id, full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url')
-    .eq('id', user.id)
-    .maybeSingle();
+  const { data: uRow } = await consultaCacheada(
+    `user:${user.id}`,
+    () => supabase!
+      .from('users')
+      .select('id, full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url')
+      .eq('id', user.id)
+      .maybeSingle(),
+  );
 
   const tenantId = uRow?.tenant_id == null ? '' : String(uRow.tenant_id);
   const [{ data: tRow }, { data: usuarios }] = await Promise.all([
     tenantId
-      ? supabase
-          .from('tenants')
-          .select('id, name, legal_name, content, features')
-          .eq('id', tenantId)
-          .maybeSingle()
+      ? consultaCacheada(
+          `tenant:${tenantId}`,
+          () => supabase!
+            .from('tenants')
+            .select('id, name, legal_name, status, content, features')
+            .eq('id', tenantId)
+            .maybeSingle(),
+        )
       : Promise.resolve({ data: null }),
     tenantId
-      ? supabase
-          .from('users')
-          .select('id, full_name, last_name, email, role')
-          .eq('tenant_id', tenantId)
-          .limit(50)
+      ? consultaCacheada(
+          `tenant_users:${tenantId}`,
+          () => supabase!
+            .from('users')
+            .select('id, full_name, last_name, email, role')
+            .eq('tenant_id', tenantId)
+            .limit(50),
+        )
       : Promise.resolve({ data: [] }),
   ]);
 

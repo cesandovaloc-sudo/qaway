@@ -173,12 +173,12 @@ Notification Core (infraestructura compartida)
 
 3. **¿Contratar notificaciones como módulo opcional por tenant?** Opcional desde el inicio o agregar cuando haya demanda real?
 
-4. **¿Documentación para los desarrolladores?** Los archivos 1-6 ya están en `src/pages/5-qaway-hub/14-Notificaciones/Documentación/`. ¿Suficiente o se necesita más?
+4. **¿Documentación para los desarrolladores?** Los archivos 1-6 ya están en `src/pages/5-qaway-hub/14-Librerías/Documentación/`. ¿Suficiente o se necesita más?
 
 5. **¿Comenzar Fase 1 (contratos compartidos) inmediatamente?** Los archivos ya están creados. ¿Se comienza a importar el `SharedNotification` interface en las apps?
 
 ---
 *Entregable completado el: 2026-11-19*
-*Todos los archivos están en: `src/pages/5-qaway-hub/14-Notificaciones/Documentación/`*
+*Todos los archivos están en: `src/pages/5-qaway-hub/14-Librerías/Documentación/`*
 *Archivos: 1-diagnostico-arquitectonico.md, 2-inventario-implementaciones.md, 3-clasificacion-functional.md, 4-arquitectura-objetivo.md, 5-configuracion-funcionalidades.md, 6-compatibilidad-migracion.md, 7-deliverable-resumen.md*
 *Principio rector: integración progresiva sin reescribir lógica de negocio existente*

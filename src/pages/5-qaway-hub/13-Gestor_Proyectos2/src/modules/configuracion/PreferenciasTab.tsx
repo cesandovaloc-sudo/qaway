@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Globe2, SlidersHorizontal, Bell, LayoutDashboard } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { obtenerUsuarioSesion } from '../../services/contextoSesion';
+import SelectEstilizado from './SelectEstilizado';
 
 interface PreferenciasTabProps {
   notify?: (msg: string) => void;
@@ -96,21 +97,29 @@ export default function PreferenciasTab({ notify }: PreferenciasTabProps) {
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 500, color: '#334155' }}>
               <Globe2 size={15} /> Idioma
             </span>
-            <select value={prefs.idioma} onChange={(e) => cambiar('idioma', e.target.value)} style={{ width: '100%', padding: '9px 12px', fontSize: '14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a' }}>
-              <option value="es">Español</option>
-              <option value="en">English</option>
-            </select>
+            <SelectEstilizado
+              value={prefs.idioma}
+              options={[
+                { value: 'es', label: 'Español' },
+                { value: 'en', label: 'English' },
+              ]}
+              onChange={(val) => cambiar('idioma', val)}
+            />
           </label>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 500, color: '#334155' }}>
               <LayoutDashboard size={15} /> Vista por defecto al entrar
             </span>
-            <select value={prefs.vista} onChange={(e) => cambiar('vista', e.target.value)} style={{ width: '100%', padding: '9px 12px', fontSize: '14px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a' }}>
-              <option value="resumen">Resumen del proyecto</option>
-              <option value="cronograma">Cronograma</option>
-              <option value="sedes">Sedes</option>
-            </select>
+            <SelectEstilizado
+              value={prefs.vista}
+              options={[
+                { value: 'resumen', label: 'Resumen del proyecto' },
+                { value: 'cronograma', label: 'Cronograma' },
+                { value: 'sedes', label: 'Sedes' },
+              ]}
+              onChange={(val) => cambiar('vista', val)}
+            />
           </label>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#334155' }}>

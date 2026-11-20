@@ -18,8 +18,8 @@ import { logoutUser } from '@/config/auth'
 import { supabase } from '@/config/supabase'
 import { getSesionCompartida } from '@/router/sessionCache'
 import { useAppAccess } from './hooks/useAppAccess'
-import { getUnreadCount } from './14-Notificaciones/services/notificationEngine'
-import { onExternalChange } from './14-Notificaciones/services/storage'
+import { getUnreadCount } from './14-Librerías/services/notificationEngine'
+import { onExternalChange } from './14-Librerías/services/storage'
 import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/AppSwitcherDropdown'
 import EmpresasModule from './HubSuperEmpresasModule'
 import UsersModule from './HubSuperUsersModule'
@@ -76,7 +76,7 @@ const ROUTES = [
   { icon: Sparkles, title: 'Creador de Contenido Modular (5 Skills)', description: 'Fabrica de contenidos con IA: Radar viral, Guiones con retencion medida.', path: '/hub/creador-contenido', access: 'pro', badge: 'Nuevo', category: 'Marketing & Creacion', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-creador.png', published: true },
   { icon: FileImage, title: 'Optimizador de Imagenes WebP', description: 'Herramienta interactiva para comprimir y convertir imagenes PNG y JPG a WebP.', path: '/hub/optimizador-webp', access: 'free', badge: 'Gratis', category: 'Herramientas', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-inventario.png', published: false },
   { icon: Instagram, title: 'Descargador & Extractor de Instagram', description: 'Extractor y descargador multimedia de publicaciones.', path: '/hub/descargador-ig', access: 'free', badge: 'Borrador', category: 'Herramientas', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-creador.png', published: false },
-  { icon: FolderKanban, title: 'Gestor de Proyectos (Suite)', description: 'Suite de gestión territorial, metodologías P6 y Scrum con monitoreo en tiempo real.', path: '/hub/gestor_proyecto_eliminar', access: 'pro', badge: 'Pro', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: true, app: 'proyectos' },
+  { icon: FolderKanban, title: 'Gestor de Proyectos (Suite)', description: 'Suite de gestión territorial, metodologías P6 y Scrum con monitoreo en tiempo real.', path: '/hub/proyectos', access: 'pro', badge: 'Pro', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: true, app: 'proyectos' },
   { icon: FolderKanban, title: 'Gestor de Proyectos 2 · Tareas', description: 'Modulo de tareas: kanban, hitos, checklist, consultas y trazabilidad del proyecto.', path: '/hub/tareas', access: 'pro', badge: 'Nuevo', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: true, app: 'tareas' },
   { icon: Bell, title: 'Centro de Notificaciones y Perfiles', description: 'Nucleo compartido del Hub: bandeja unificada, prioridades, canales de correo y WhatsApp con auditoria, perfiles y preferencias.', path: '/hub/notificaciones', access: 'pro', badge: 'Nucleo', category: 'Automatizacion', pillar: 'Automatizacion', tone: 'bg-[#14532d]/10 text-[#14532d]', preview: '/assets/hub-previews/preview-agenda.png', published: true },
   { icon: PenSquare, title: 'Editor de Blog', description: 'Plataforma editorial para crear, estructurar y publicar articulos.', path: '/hub/blog-editor', access: 'pro', badge: 'Listo', category: 'Herramientas', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/hub-portada.webp', published: true, app: 'blog' },

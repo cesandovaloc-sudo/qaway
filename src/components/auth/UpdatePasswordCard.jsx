@@ -18,6 +18,7 @@ export default function UpdatePasswordCard({
   title = 'Actualiza tu contraseña',
   subtitle = 'Por seguridad, define una contraseña personal en tu primer ingreso.',
   submitLabel = 'Guardar y continuar',
+  recoveryEmail = '',
   onSuccess,
 }) {
   const [password, setPassword] = useState('')
@@ -25,6 +26,9 @@ export default function UpdatePasswordCard({
   const [showPwd, setShowPwd] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [recoveryLoading, setRecoveryLoading] = useState(false)
+  const [recoverySent, setRecoverySent] = useState(false)
+  const [recoveryError, setRecoveryError] = useState(null)
 
   const rules = useMemo(() => {
     const hasLength = password.length >= 8
@@ -49,6 +53,25 @@ export default function UpdatePasswordCard({
   const isValidPassword =
     rules.hasLength && rules.hasUpper && rules.hasLower && rules.hasNumber && rules.notRepeated
   const passwordsMatch = confirm.length > 0 && password === confirm
+
+  // Misma recuperación que el login: LoginPage.jsx:239-256 → /update-password.
+  const handleRecovery = async () => {
+    if (!recoveryEmail || !supabaseClient || recoveryLoading) return
+    setRecoveryError(null)
+    setRecoveryLoading(true)
+    try {
+      const resetOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+      const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(recoveryEmail, {
+        redirectTo: `${resetOrigin}/update-password`,
+      })
+      if (resetError) setRecoveryError('No se pudo enviar el correo de recuperación.')
+      else setRecoverySent(true)
+    } catch {
+      setRecoveryError('No se pudo enviar el correo de recuperación.')
+    } finally {
+      setRecoveryLoading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -284,6 +307,36 @@ export default function UpdatePasswordCard({
           <CheckCircle2 size={16} />
           <span>{loading ? 'Guardando...' : submitLabel}</span>
         </button>
+
+        {recoveryEmail && (
+          <div style={{ textAlign: 'center', fontSize: '12.5px', marginTop: '2px' }}>
+            {recoverySent ? (
+              <span style={{ color: '#059669' }}>
+                Te enviamos un correo para restablecer tu contraseña.
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleRecovery}
+                disabled={recoveryLoading}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  color: '#2563eb',
+                  fontSize: '12.5px',
+                  cursor: recoveryLoading ? 'not-allowed' : 'pointer',
+                  opacity: recoveryLoading ? 0.6 : 1,
+                }}
+              >
+                {recoveryLoading ? 'Enviando correo...' : '¿Olvidaste tu contraseña?'}
+              </button>
+            )}
+            {recoveryError && (
+              <div style={{ color: '#b91c1c', marginTop: '6px' }}>{recoveryError}</div>
+            )}
+          </div>
+        )}
       </form>
     </div>
   )

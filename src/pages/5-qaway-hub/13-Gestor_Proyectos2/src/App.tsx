@@ -2,7 +2,7 @@
 // Los tres módulos viven nativamente en src/modules (sin alias ni subproyectos).
 // Keep-alive perezoso: cada canvas se monta solo al visitarlo por primera vez y
 // luego conserva su estado mientras permanece oculto.
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { ModuleKey, UserRole } from './types';
 import { MODULE_STORAGE_KEY, MODULE_SLUGS, SLUG_TO_MODULE, USER_ROLE_STORAGE_KEY } from './types';
@@ -93,17 +93,8 @@ const readStoredRole = (): UserRole => {
   return 'coordinador';
 };
 
-function ModuleLoadingFallback({ text = 'Cargando módulo…' }: { text?: string }) {
-  return (
-    <div className="qm-module-loading" role="status" aria-live="polite">
-      <div className="qm-loading-chart" aria-hidden="true">
-        <span className="qm-loading-bar qm-bar-1" />
-        <span className="qm-loading-bar qm-bar-2" />
-        <span className="qm-loading-bar qm-bar-3" />
-      </div>
-      <p className="qm-loading-caption">{text}</p>
-    </div>
-  );
+function ModuleLoadingFallback(_props: { text?: string }) {
+  return <GestorRouteLoading />;
 }
 
 function GestorProyectosApp() {
@@ -114,10 +105,8 @@ function GestorProyectosApp() {
   const active: ModuleKey = resolveModuleFromPath(location.pathname);
   const [visitedModules, setVisitedModules] = useState<Set<ModuleKey>>(() => new Set([active]));
   const [tasksCount] = useState<number>(0);
-  const [userRole, setUserRole] = useState<UserRole>(readStoredRole);
-  const [cronogramaPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial'>(() =>
-    readStoredRole() === 'coordinador' ? 'maestro' : 'territorial'
-  );
+  const [manualUserRole, setUserRole] = useState<UserRole>(readStoredRole);
+  const [manualPerspective, setCronogramaPerspective] = useState<'maestro' | 'territorial' | null>(null);
 
   useEffect(() => {
     setVisitedModules((previous) => {
@@ -179,26 +168,25 @@ function GestorProyectosApp() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Etapa 6-D: perspectiva UI desde sesión real (Hub); fallback demo sin sesión.
-  useEffect(() => {
-    if (cargandoPerfilGp) return;
-    if (perfilGp) {
-      const cap = capacidadesDe(perfilGp.rol, perfilGp.permisos, perfilGp.esPlataforma, true);
-      const derived: UserRole =
-        perfilGp.esPlataforma ||
-        perfilGp.rol === 'admin' ||
-        perfilGp.rol === 'editor' ||
-        cap.crearProyecto ||
-        cap.editarProyecto ||
-        cap.administrarEdt ||
-        cap.administrarPermisos
-          ? 'coordinador'
-          : 'gestor';
-      setUserRole(derived);
-      setCronogramaPerspective(derived === 'coordinador' ? 'maestro' : 'territorial');
-    }
-    // sin sesión real: se mantiene la perspectiva demo (readStoredRole)
-  }, [cargandoPerfilGp, perfilGp]);
+  // Etapa 6-D: perspectiva UI derivada síncronamente en el mismo render desde perfilGp (sin doble render).
+  const userRole: UserRole = useMemo(() => {
+    if (!perfilGp) return manualUserRole;
+    const cap = capacidadesDe(perfilGp.rol, perfilGp.permisos, perfilGp.esPlataforma, true);
+    return (
+      perfilGp.esPlataforma ||
+      perfilGp.rol === 'admin' ||
+      perfilGp.rol === 'editor' ||
+      cap.crearProyecto ||
+      cap.editarProyecto ||
+      cap.administrarEdt ||
+      cap.administrarPermisos
+    )
+      ? 'coordinador'
+      : 'gestor';
+  }, [perfilGp, manualUserRole]);
+
+  const cronogramaPerspective: 'maestro' | 'territorial' =
+    manualPerspective ?? (userRole === 'coordinador' ? 'maestro' : 'territorial');
 
   const puedeCrearProyectoUi = sesionReal ? capGp.crearProyecto : userRole === 'coordinador';
 

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { usePerfilVisible } from '../../services/perfilVisibleService';
+import { PAISES } from '@/config/paises';
 import DatosEmpresaCard, {
   contactoDesdeForm,
   formDesdeTenant,
@@ -58,6 +59,8 @@ export default function EmpresaTab({ notify }: EmpresaTabProps) {
   function setCountry(v: string) {
     setForm((f: any) => ({ ...f, country: v }));
     setErrores((x: any) => ({ ...x, country: undefined }));
+    const match = PAISES.find((p: any) => p.nombre === v);
+    if (match?.prefijo) setPrefix(match.prefijo);
   }
 
   function setNumeric(k: string, raw: string, max: number) {

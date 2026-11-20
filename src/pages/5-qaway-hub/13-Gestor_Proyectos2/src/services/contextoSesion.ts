@@ -27,6 +27,7 @@
  */
 
 import { supabase } from './supabaseClient';
+import { getSesionCompartida, consultaCacheada, invalidarCacheAcceso } from '../../../../../router/sessionCache';
 
 /** Slug de la app en public.app_catalog (migración 0006a). */
 export const APP_SLUG = 'gestor-proyectos';
@@ -173,8 +174,18 @@ export async function obtenerUsuarioSesion(): Promise<UsuarioSesion | null> {
   if (usuarioCache !== undefined) return usuarioCache;
   if (!supabase) return null; // modo local / pruebas sin cliente
   if (!usuarioEnVuelo) {
-    usuarioEnVuelo = supabase.auth.getUser()
-      .then(({ data, error }) => {
+    usuarioEnVuelo = getSesionCompartida()
+      .then(async ({ data: sesData }) => {
+        const sUser = sesData?.session?.user ?? null;
+        if (sUser) {
+          usuarioCache = {
+            id: sUser.id,
+            email: typeof sUser.email === 'string' ? sUser.email : null,
+            user_metadata: (sUser.user_metadata ?? {}) as Record<string, unknown>,
+          };
+          return usuarioCache;
+        }
+        const { data, error } = await supabase!.auth.getUser();
         if (error) {
           throw new ErrorSesion('SIN_SESION', `No se pudo validar la sesión de Qaway Hub: ${error.message}`);
         }
@@ -199,6 +210,7 @@ export async function obtenerUsuarioSesion(): Promise<UsuarioSesion | null> {
 export function invalidarUsuarioSesion(): void {
   usuarioCache = undefined;
   usuarioEnVuelo = null;
+  invalidarCacheAcceso();
 }
 
 async function resolver(): Promise<ContextoSesion | null> {
@@ -206,10 +218,12 @@ async function resolver(): Promise<ContextoSesion | null> {
   const usuario = await obtenerUsuarioSesion();
   if (!usuario) return null;
 
-  // Perfil de plataforma + rol de app + derecho de uso, en paralelo
-  // (patrón verificado en 11-gestor-de-proyectos/src/services/userService.ts:15-23).
+  // Perfil de plataforma (compartido con HubAccessGuard via consultaCacheada) + RPCs en paralelo.
   const [perfilRes, rolRes, usoRes] = await Promise.all([
-    supabase.from('users').select('id,tenant_id,is_platform_admin').eq('id', usuario.id).single(),
+    consultaCacheada(
+      `user:${usuario.id}`,
+      () => supabase!.from('users').select('id, full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url').eq('id', usuario.id).maybeSingle(),
+    ),
     supabase.rpc('user_app_role', { p_app_slug: APP_SLUG }),
     supabase.rpc('user_can_use_app', { p_app_slug: APP_SLUG }),
   ]);

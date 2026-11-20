@@ -143,7 +143,7 @@ export default function ComposerTab({ profiles, settings, onRefresh }) {
             className="cnp-input"
             value={form.link}
             onChange={(event) => set('link', event.target.value)}
-            placeholder="/hub/gestor_proyecto_eliminar/tareas"
+            placeholder="/hub/proyectos/bandeja"
           />
         </label>
 

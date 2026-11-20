@@ -62,12 +62,13 @@ const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inv
 // Gestor de Proyectos v1 (versión inicial, marcada para eliminar)
 const GestorProyectoEliminarPage = lazy(() => import('@/pages/5-qaway-hub/11-gestor-de-proyectos/GestorProyectosAppPage'))
 // Gestor de Proyectos (app consolidada y oficial)
-const GestorProyectosAppPage = lazy(() => import('@/pages/5-qaway-hub/13-Gestor_Proyectos2/GestorProyectos2AppPage'))
+const loadGestorProyectosApp = () => import('@/pages/5-qaway-hub/13-Gestor_Proyectos2/GestorProyectos2AppPage')
+const GestorProyectosAppPage = lazy(loadGestorProyectosApp)
 const CriteriosAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/2-Búsqueda Criterios/CriteriosAppPage'))
 const PreguntasFrecuentesAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAppPage'))
 const PreguntasFrecuentesAdminAppPage = lazy(() => import('@/pages/5-qaway-hub/12-qaway_empresarial/3-Preguntas frecuentes/PreguntasFrecuentesAdminAppPage'))
 // Centro de Notificaciones y Perfiles (núcleo compartido del Hub)
-const NotificacionesAppPage = lazy(() => import('@/pages/5-qaway-hub/14-Notificaciones/NotificacionesAppPage'))
+const NotificacionesAppPage = lazy(() => import('@/pages/5-qaway-hub/14-Librerías/NotificacionesAppPage'))
 // Tienda de cliente: las páginas viven en inventario y se sirven aquí, dentro
 // del Layout, para que lleven el navbar oficial de Qaway Lab.
 const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/TiendaClientePage'))
@@ -163,8 +164,9 @@ function renderRoute(routeKey, element, fallback = null) {
   return <Navigate to="/" replace />
 }
 
-/** Gestor: un solo loader (barras azules + QAWAY CARGANDO) en chunk y en guard. */
+/** Gestor: un solo loader (barras azules + QAWAY CARGANDO) y descarga en paralelo al guard. */
 function renderGestorRoute(element) {
+  if (isRouteEnabled('hub')) void loadGestorProyectosApp()
   const fallback = <GestorRouteLoading />
   return renderRoute('hub', <HubAccessGuard loadingFallback={fallback}>{element}</HubAccessGuard>, fallback)
 }
@@ -174,6 +176,12 @@ function renderGestorRoute(element) {
  * (`/gestor_proyectos/...`) ahora viven como módulo del Hub. Redirige
  * conservando el subcamino y el query string.
  */
+function LegacyGestorVerdeRedirect() {
+  const location = useLocation()
+  const rest = location.pathname.replace(/^\/?hub\/gestor_proyecto_eliminar/, '')
+  return <Navigate to={`/hub/proyectos${rest}${location.search}`} replace />
+}
+
 function LegacyGestorProyectosRedirect() {
   const location = useLocation()
   const rest = location.pathname.replace(/^\/gestor_proyectos/, '')
@@ -432,22 +440,42 @@ export default function AppRouter() {
           path="inventario"
           element={renderRoute('hub', <HubAccessGuard><InventarioAppPage /></HubAccessGuard>)}
         />
-        {/* Gestor de Proyectos v1 (versión inicial, solo platform_admin) */}
+        {/* Gestor de Proyectos v1 / app verde: su base real es /hub/proyectos
+            (AppLayout, Sidebar y Header construyen ahí todos sus enlaces).
+            Montarla solo en /hub/gestor_proyecto_eliminar dejaba la portada
+            accesible y todo lo demás en 404. */}
+        <Route
+          path="/hub/proyectos/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="/hub/proyectos"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/proyectos/*"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+        />
+        <Route
+          path="hub/proyectos"
+          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+        />
+        {/* Alias heredado: conserva el subcamino y el query. */}
         <Route
           path="/hub/gestor_proyecto_eliminar/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+          element={<LegacyGestorVerdeRedirect />}
         />
         <Route
           path="/hub/gestor_proyecto_eliminar"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+          element={<Navigate to="/hub/proyectos" replace />}
         />
         <Route
           path="hub/gestor_proyecto_eliminar/*"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+          element={<LegacyGestorVerdeRedirect />}
         />
         <Route
           path="hub/gestor_proyecto_eliminar"
-          element={renderRoute('hub', <HubAccessGuard><GestorProyectoEliminarPage /></HubAccessGuard>)}
+          element={<Navigate to="/hub/proyectos" replace />}
         />
         {/* Centro de Notificaciones y Perfiles: núcleo compartido del Hub */}
         <Route

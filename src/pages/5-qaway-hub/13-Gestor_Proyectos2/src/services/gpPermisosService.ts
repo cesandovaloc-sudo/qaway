@@ -155,8 +155,12 @@ let enVueloPerfil: Promise<PerfilGp | null> | null = null;
 async function resolverPerfil(): Promise<PerfilGp | null> {
   if (!supabase) return null; // modo local / pruebas sin cliente
   let ctx: Awaited<ReturnType<typeof resolverContextoSesion>> = null;
+  let appRes: Awaited<ReturnType<typeof getAppIdCacheado>> = { data: null, error: null };
   try {
-    ctx = await resolverContextoSesion();
+    [ctx, appRes] = await Promise.all([
+      resolverContextoSesion(),
+      getAppIdCacheado(APP_SLUG, supabase),
+    ]);
   } catch {
     return null; // sin sesión no hay perfil GP (fail-closed para el llamador)
   }
@@ -168,8 +172,8 @@ async function resolverPerfil(): Promise<PerfilGp | null> {
     rol: null,
     permisos: [],
   };
-  // id de app_catalog compartido con HubAccessGuard: ya no se pide dos veces.
-  const { data: app, error: appError } = await getAppIdCacheado(APP_SLUG, supabase);
+  // id de app_catalog compartido con HubAccessGuard en paralelo.
+  const { data: app, error: appError } = appRes;
   if (appError || !app?.id) return base;
   const appId = app.id;
   const { data: fila, error: filaError } = await supabase

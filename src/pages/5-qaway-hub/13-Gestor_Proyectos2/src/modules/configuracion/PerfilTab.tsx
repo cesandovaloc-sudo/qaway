@@ -4,7 +4,8 @@ import { AlertCircle, Camera, CheckCircle2, Mail, Save, ShieldCheck, Trash2, Use
 import { supabase } from '../../services/supabaseClient';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { usePerfilVisible } from '../../services/perfilVisibleService';
-import UpdatePasswordCard from '../../../../../../components/auth/UpdatePasswordCard';
+import { esImagenPermitida, optimizarAvatar } from '../../../../14-Librerías/services/imageOptimization';
+import UpdatePasswordCard, { hasPendingPasswordChange } from '../../../../../../components/auth/UpdatePasswordCard';
 
 interface PerfilTabProps {
   notify?: (msg: string) => void;
@@ -12,38 +13,18 @@ interface PerfilTabProps {
 
 const FUENTE = "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
-function comprimirAvatar(file: File, maxSize = 256): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('No se pudo leer la imagen.'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('Formato de imagen no válido.'));
-      img.onload = () => {
-        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-        const w = Math.max(1, Math.round(img.width * scale));
-        const h = Math.max(1, Math.round(img.height * scale));
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('No se pudo procesar la imagen.'));
-        ctx.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
-      };
-      img.src = String(reader.result || '');
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function PerfilTab({ notify }: PerfilTabProps) {
   const [listo, setListo] = useState(false);
+  const [passwordPending, setPasswordPending] = useState(true);
   const { perfil } = usePerfilGp();
   const { perfil: visible } = usePerfilVisible();
 
   const [nombreInput, setNombreInput] = useState('');
+  const [nombreGuardado, setNombreGuardado] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [fotoPendiente, setFotoPendiente] = useState<File | null>(null);
+  const [fotoEliminada, setFotoEliminada] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -51,59 +32,124 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
   const email = visible?.email || '';
   const rol = visible?.rol || perfil?.rol || 'viewer';
   const empresa = visible?.tenantNombre || '';
+  const fotoMostrada = fotoPendiente ? previewUrl : (fotoEliminada ? '' : avatarUrl);
+  const hayCambios = Boolean(fotoPendiente) || fotoEliminada || nombreInput.trim() !== nombreGuardado;
 
   useEffect(() => {
-    setNombreInput(String(visible?.nombre || '').trim());
+    const nombre = String(visible?.nombre || '').trim();
+    setNombreInput(nombre);
+    setNombreGuardado(nombre);
   }, [visible?.nombre]);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   useEffect(() => {
     if (!supabase) return;
     supabase.auth.getUser().then(({ data }) => {
-      const metaAvatar = data?.user?.user_metadata?.avatar_url;
+      const user = data?.user;
+      if (!user) return;
+      const metaAvatar = user.user_metadata?.avatar_url;
       if (metaAvatar) setAvatarUrl(String(metaAvatar));
+      setPasswordPending(hasPendingPasswordChange(user));
     });
   }, []);
 
+  // Guarda la cápsula completa de una sola vez. Lanza el error real para que el
+  // botón único pueda conservar los cambios pendientes y mostrar el detalle.
   const persistirPerfil = async (nuevoNombre: string, nuevoAvatar: string | null) => {
-    if (!supabase) return;
-    setSavingProfile(true);
-    setProfileMsg(null);
-    try {
-      const { data: userData, error: authErr } = await supabase.auth.updateUser({
-        data: {
-          full_name: nuevoNombre,
-          avatar_url: nuevoAvatar,
-        },
-      });
-      if (authErr) throw authErr;
+    if (!supabase) throw new Error('Servicio no disponible.');
+    const { data: userData, error: authErr } = await supabase.auth.updateUser({
+      data: {
+        full_name: nuevoNombre,
+        avatar_url: nuevoAvatar,
+      },
+    });
+    if (authErr) throw authErr;
 
-      const uid = userData?.user?.id || perfil?.userId;
-      if (uid) {
-        await supabase
-          .from('users')
-          .update({ full_name: nuevoNombre, avatar_url: nuevoAvatar })
-          .eq('id', uid);
-      }
-      setProfileMsg({ type: 'ok', text: 'Perfil actualizado en tu cuenta.' });
-      notify?.('Perfil actualizado correctamente.');
-    } catch (e: any) {
-      setProfileMsg({ type: 'err', text: e?.message || 'No se pudo actualizar el perfil.' });
-    } finally {
-      setSavingProfile(false);
+    const uid = userData?.user?.id || perfil?.userId;
+    if (uid) {
+      const { error: usersErr } = await supabase
+        .from('users')
+        .update({ full_name: nuevoNombre, avatar_url: nuevoAvatar })
+        .eq('id', uid);
+      if (usersErr) throw usersErr;
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const subirAvatar = async (file: File, uid: string) => {
+    const optimizado = await optimizarAvatar(file);
+    const path = `avatars/${uid}.webp`;
+    const { error: uploadError } = await supabase!.storage
+      .from('avatars')
+      .upload(path, optimizado.blob, {
+        upsert: true,
+        contentType: 'image/webp',
+        cacheControl: '3600',
+      });
+    // Se muestra el mensaje real de Supabase: nunca se cae al JPEG base64 anterior.
+    if (uploadError) {
+      throw new Error(`No se pudo subir la foto a Supabase Storage. Detalle real: ${uploadError.message}`);
+    }
+    const { data: publicUrl } = supabase!.storage.from('avatars').getPublicUrl(path);
+    return `${publicUrl.publicUrl}?v=${Date.now()}`;
+  };
+
+  // Elegir foto y borrarla son acciones locales: sólo el botón principal persiste.
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
+    setProfileMsg(null);
+    if (!esImagenPermitida(file)) {
+      setProfileMsg({ type: 'err', text: 'Formato no permitido. Usa PNG, JPG o WebP.' });
+      return;
+    }
+    setFotoEliminada(false);
+    setFotoPendiente(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleEliminarFoto = () => {
+    setProfileMsg(null);
+    setFotoPendiente(null);
+    setPreviewUrl('');
+    setFotoEliminada(true);
+  };
+
+  const handleGuardarCambios = async () => {
+    setProfileMsg(null);
+    setSavingProfile(true);
     try {
-      const dataUrl = await comprimirAvatar(file, 256);
-      setAvatarUrl(dataUrl);
-      await persistirPerfil(nombreInput.trim(), dataUrl);
+      if (!supabase) throw new Error('Servicio no disponible.');
+      const uid = perfil?.userId;
+      if (!uid) throw new Error('Tu sesión no está disponible para guardar los cambios.');
+
+      let avatarFinal: string | null = avatarUrl || null;
+      if (fotoEliminada) {
+        const { error: removeError } = await supabase.storage
+          .from('avatars')
+          .remove([`avatars/${uid}.webp`]);
+        if (removeError) throw new Error(`No se pudo eliminar la foto: ${removeError.message}`);
+        avatarFinal = null;
+      } else if (fotoPendiente) {
+        avatarFinal = await subirAvatar(fotoPendiente, uid);
+      }
+
+      await persistirPerfil(nombreInput.trim(), avatarFinal);
+
+      setAvatarUrl(avatarFinal || '');
+      setNombreGuardado(nombreInput.trim());
+      setFotoPendiente(null);
+      setFotoEliminada(false);
+      setPreviewUrl('');
+      setProfileMsg({ type: 'ok', text: 'Cambios guardados correctamente.' });
+      notify?.('Perfil actualizado correctamente.');
     } catch (err: any) {
-      setProfileMsg({ type: 'err', text: err?.message || 'Error al procesar la foto.' });
+      setProfileMsg({ type: 'err', text: err?.message || 'No se pudieron guardar los cambios.' });
     } finally {
-      e.target.value = '';
+      setSavingProfile(false);
     }
   };
 
@@ -131,15 +177,15 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
           {/* Foto de perfil */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px', borderRadius: '10px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
             <div style={{ width: '64px', height: '64px', borderRadius: '999px', overflow: 'hidden', backgroundColor: '#e2e8f0', display: 'grid', placeItems: 'center', flexShrink: 0, border: '2px solid #fff', boxShadow: '0 2px 6px rgba(15,23,42,0.08)' }}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Foto de perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {fotoMostrada ? (
+                <img src={fotoMostrada} alt="Foto de perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <UserRound size={26} color="#64748b" />
               )}
             </div>
             <div style={{ flex: 1, minWidth: '180px' }}>
               <div style={{ fontSize: '13.5px', fontWeight: 500, color: '#0f172a' }}>Foto de perfil</div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Se optimiza automáticamente (256×256) y se sincroniza con Hub y Academy.</div>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Se recorta y convierte a WebP (máx. 512 px) y se sincroniza con Hub y Academy.</div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
@@ -152,17 +198,26 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
                 <Camera size={14} />
                 <span>Cambiar foto</span>
               </button>
-              {avatarUrl && (
+              {!fotoEliminada && fotoMostrada && (
                 <button
                   type="button"
                   disabled={savingProfile}
-                  onClick={() => {
-                    setAvatarUrl('');
-                    void persistirPerfil(nombreInput.trim(), null);
-                  }}
+                  onClick={handleEliminarFoto}
+                  title="Eliminar foto"
+                  aria-label="Eliminar foto"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 10px', borderRadius: '8px', border: '1px solid #fecaca', background: '#fef2f2', color: '#b91c1c', fontSize: '13px', cursor: 'pointer' }}
                 >
                   <Trash2 size={14} />
+                </button>
+              )}
+              {fotoEliminada && (
+                <button
+                  type="button"
+                  disabled={savingProfile}
+                  onClick={() => setFotoEliminada(false)}
+                  style={{ display: 'inline-flex', alignItems: 'center', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a', fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Deshacer
                 </button>
               )}
             </div>
@@ -179,20 +234,40 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
               placeholder="Tu nombre completo"
               style={{ flex: 1, minWidth: '180px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', color: '#0f172a' }}
             />
-            <button
-              type="button"
-              disabled={savingProfile || !nombreInput.trim()}
-              onClick={() => persistirPerfil(nombreInput.trim(), avatarUrl || null)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '6px', border: 'none', background: '#2563eb', color: '#fff', fontSize: '13px', fontWeight: 500, cursor: savingProfile ? 'not-allowed' : 'pointer', opacity: savingProfile || !nombreInput.trim() ? 0.6 : 1 }}
-            >
-              <Save size={14} />
-              <span>Guardar</span>
-            </button>
           </div>
 
           <Fila icono={<Mail size={15} />} etiqueta="Correo" valor={email || 'Sin correo registrado'} />
           <Fila icono={<ShieldCheck size={15} />} etiqueta="Rol en esta empresa" valor={String(rol)} />
           <Fila icono={<AlertCircle size={15} />} etiqueta="Empresa" valor={empresa || 'Sin empresa asignada'} />
+
+          {hayCambios && (
+            <div style={{ fontSize: '12px', color: '#b45309', textAlign: 'right' }}>Tienes cambios sin guardar.</div>
+          )}
+          <button
+            type="button"
+            disabled={savingProfile || !hayCambios || !nombreInput.trim()}
+            onClick={() => void handleGuardarCambios()}
+            style={{
+              marginTop: '6px',
+              width: '100%',
+              padding: '10px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: savingProfile || !hayCambios || !nombreInput.trim() ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              opacity: savingProfile || !hayCambios || !nombreInput.trim() ? 0.55 : 1,
+            }}
+          >
+            <Save size={16} />
+            <span>{savingProfile ? 'Guardando...' : 'Guardar cambios'}</span>
+          </button>
         </div>
       </div>
 
@@ -206,11 +281,15 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
       <UpdatePasswordCard
         supabaseClient={supabase}
         fullWidth
-        title="Cambiar contraseña"
-        subtitle="Define una contraseña personal para proteger el acceso a tu cuenta."
-        submitLabel="Guardar contraseña"
+        title={passwordPending ? 'Define tu contraseña' : 'Cambiar contraseña'}
+        subtitle={passwordPending
+          ? 'Por seguridad, define una contraseña personal en tu primer ingreso.'
+          : 'Actualiza la contraseña de tu cuenta cuando lo necesites.'}
+        submitLabel={passwordPending ? 'Guardar contraseña' : 'Cambiar contraseña'}
+        recoveryEmail={passwordPending ? '' : email}
         onSuccess={() => {
           setListo(true);
+          setPasswordPending(false);
           notify?.('Contraseña actualizada correctamente.');
         }}
       />

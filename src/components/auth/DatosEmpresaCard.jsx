@@ -1,4 +1,5 @@
-import { AlertCircle, Building2, CheckCircle2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { AlertCircle, Building2, Check, CheckCircle2, ChevronDown } from 'lucide-react'
 import { PAISES } from '@/config/paises'
 
 // Tarjeta ÚNICA de datos de empresa. La usa el alta (/completar-perfil) y la
@@ -182,17 +183,23 @@ export default function DatosEmpresaCard({
         </Campo>
 
         <Campo label="País / ubicación" error={errores.country}>
-          <select style={input()} value={form.country} onChange={(e) => setCountry(e.target.value)} disabled={soloLectura} required>
-            <option value="">Selecciona tu país…</option>
-            {PAISES.map((p) => <option key={p.codigo} value={p.nombre}>{p.nombre}</option>)}
-          </select>
+          <SelectEstilizado
+            value={form.country}
+            placeholder="Selecciona tu país…"
+            options={PAISES.map((p) => ({ value: p.nombre, label: p.nombre }))}
+            onChange={(val) => setCountry(val)}
+            disabled={soloLectura}
+          />
         </Campo>
 
         <Campo label="Rubro / actividad" error={errores.rubro}>
-          <select style={input()} value={form.rubro} onChange={(e) => setField('rubro', e.target.value)} disabled={soloLectura} required>
-            <option value="">Selecciona tu rubro…</option>
-            {RUBROS.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
+          <SelectEstilizado
+            value={form.rubro}
+            placeholder="Selecciona tu rubro…"
+            options={RUBROS.map((r) => ({ value: r, label: r }))}
+            onChange={(val) => setField('rubro', val)}
+            disabled={soloLectura}
+          />
         </Campo>
 
         {form.rubro === 'Otro' ? (
@@ -258,6 +265,110 @@ export default function DatosEmpresaCard({
           </button>
         )}
       </form>
+    </div>
+  )
+}
+
+
+function SelectEstilizado({ value, placeholder, options, onChange, disabled }) {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
+
+  const selected = options.find((o) => o.value === value)
+
+  return (
+    <div ref={wrapRef} style={{ position: 'relative', width: '100%' }}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        style={{
+          width: '100%',
+          padding: '9px 12px',
+          fontSize: '14px',
+          borderRadius: '8px',
+          border: '1px solid #cbd5e1',
+          outline: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          textAlign: 'left',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          backgroundColor: disabled ? '#f8fafc' : '#ffffff',
+          color: selected ? '#0f172a' : '#94a3b8',
+        }}
+      >
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <ChevronDown size={15} style={{ color: '#64748b', flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            maxHeight: '240px',
+            overflowY: 'auto',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '10px',
+            boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05)',
+            padding: '4px',
+          }}
+        >
+          {options.map((opt) => {
+            const active = opt.value === value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value)
+                  setOpen(false)
+                }}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 10px',
+                  border: 'none',
+                  borderRadius: '7px',
+                  backgroundColor: active ? '#eff6ff' : 'transparent',
+                  color: active ? '#1d4ed8' : '#334155',
+                  fontSize: '13.5px',
+                  fontWeight: active ? 500 : 400,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) e.currentTarget.style.backgroundColor = '#f8fafc'
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                <span>{opt.label}</span>
+                {active && <Check size={14} />}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

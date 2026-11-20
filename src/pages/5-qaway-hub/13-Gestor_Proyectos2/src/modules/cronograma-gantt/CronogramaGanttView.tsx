@@ -1423,9 +1423,7 @@ export default function CronogramaGanttView({
     if (!isActive || perspective !== 'maestro') return;
     let isCancelled = false;
     if (!projectId) return;
-    setCargandoNube(true);
     fetchCronogramaFromSupabase(projectId).then((cloudItems) => {
-      if (!isCancelled) setCargandoNube(false);
       if (!isCancelled && cloudItems && cloudItems.length > 0) {
         const isMaestro = perspective === 'maestro';
         const storageKey = isMaestro ? `qaway-gantt-items-${projectId}-maestro` : `qaway-gantt-items-${projectId}`;
