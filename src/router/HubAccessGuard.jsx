@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { logoutUser } from '@/config/auth'
 import AppAccessLockedView from '@/components/ui/AppAccessLockedView'
+import { hasPendingPasswordChange } from '@/components/auth/UpdatePasswordCard'
 import { RouteLoading } from './RouteSuspense'
 
 function resolveHubAccessRule(pathname) {
@@ -133,6 +134,11 @@ export default function HubAccessGuard({ children }) {
       // ningún tenant puede ingresar: se muestra pantalla de acceso restringido (candado).
       if (rule.type === 'platform_only') {
         resolve(null, true, rule.moduleKey)
+        return
+      }
+
+      if (hasPendingPasswordChange(session.user)) {
+        resolve(`/update-password?redirect=${encodeURIComponent(location.pathname + location.search)}`)
         return
       }
 

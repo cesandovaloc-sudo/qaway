@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { getSupabaseClient, APP_BASE_URL } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { isSuperAdmin, logoutUser } from '@/config/auth'
+import { hasPendingPasswordChange } from '@/components/auth/UpdatePasswordCard'
 import QawayCleanLoader from '@/components/ui/QawayCleanLoader'
 
 export default function LoginPage() {
@@ -56,10 +57,17 @@ export default function LoginPage() {
   }
 
   const resolvePostLoginTarget = async (supabase, userId) => {
-    if (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')) return rawRedirect
+    const explicitTarget = (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')) ? rawRedirect : null
     try {
-      const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
-      if (me?.is_platform_admin) return '/hub/panel'
+      const [{ data: me }, { data: authRes }] = await Promise.all([
+        supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle(),
+        supabase.auth.getUser(),
+      ])
+      if (me?.is_platform_admin) return explicitTarget || '/hub/panel'
+      if (hasPendingPasswordChange(authRes?.user)) {
+        return explicitTarget ? `/update-password?redirect=${encodeURIComponent(explicitTarget)}` : '/update-password'
+      }
+      if (explicitTarget) return explicitTarget
       if (me && !me.is_platform_admin && !isGestorDirectEntry) {
         if (!me.tenant_id) return '/onboarding'
         const { data: t } = await supabase.from('tenants').select('status, features').eq('id', me.tenant_id).maybeSingle()

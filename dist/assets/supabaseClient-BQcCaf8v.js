@@ -1,1 +1,0 @@
-import{t as e}from"./dist-C8tDg3bT.js";var t=`https://qrusdsqgygfolxfrafyd.supabase.co`,n=`sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi`,r=typeof window<`u`?window.location.origin:`https://www.qawaylab.com`,i=()=>!t.includes(`placeholder`),a=null;function o(){return i()?(a||=e(t,n),a):null}export{o as n,i as r,r as t};

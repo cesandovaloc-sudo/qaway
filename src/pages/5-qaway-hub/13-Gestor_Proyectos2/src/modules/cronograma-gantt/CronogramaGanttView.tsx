@@ -4084,7 +4084,8 @@ export default function CronogramaGanttView({
         setNewMenu(false);
       }
       if (!t.closest('.cell-editor, .col-resizer, .editable, .cell-pop')) {
-        setEdit(null);
+        // Dispara .blur() antes de desmontar para que onBlur descarte borradores sin nombre en lugar de guardarlos.
+        if (document.activeElement && (document.activeElement as HTMLElement).classList.contains('name-edit')) { (document.activeElement as HTMLElement).blur(); } else { setEdit(null); }
       }
       if (!t.closest('.name-head, .cols-dropdown-wrap, .cols-popover, .cols-trigger-btn')) {
         setColsMenuOpen(false);
@@ -4125,7 +4126,8 @@ export default function CronogramaGanttView({
           return;
         }
         setNewMenu(false);
-        setEdit(null);
+        // Dispara .blur() antes de desmontar para que onBlur descarte borradores sin nombre en lugar de guardarlos.
+        if (document.activeElement && (document.activeElement as HTMLElement).classList.contains('name-edit')) { (document.activeElement as HTMLElement).blur(); } else { setEdit(null); }
         setActiveMenu(null);
         setCalOpen(null);
         setColsMenuOpen(false);
@@ -5121,7 +5123,7 @@ export default function CronogramaGanttView({
       }
       commitChange((old) => {
         if (pId) {
-          const withExpanded = old.map((it) => (it.id === pId ? { ...it, expanded: true } : it));
+          const withExpanded = (inlineDraftCreatedId ? old.filter((it) => !(it.id === inlineDraftCreatedId && (!it.name.trim() || it.name === 'Nuevo componente' || it.name === 'Nuevo paquete de trabajo'))) : old).map((it) => (it.id === pId ? { ...it, expanded: true } : it));
           const parentIdx = withExpanded.findIndex((it) => it.id === pId);
           if (parentIdx >= 0) {
             const isDescendant = (itemId: string, ancestorId: string): boolean => {
@@ -5148,7 +5150,7 @@ export default function CronogramaGanttView({
             return copy;
           }
         }
-        return [...old, draftItem];
+        return [...(inlineDraftCreatedId ? old.filter((it) => !(it.id === inlineDraftCreatedId && (!it.name.trim() || it.name === 'Nuevo componente' || it.name === 'Nuevo paquete de trabajo'))) : old), draftItem];
       });
       setSelectedId(id);
       if (initialName?.trim()) {
