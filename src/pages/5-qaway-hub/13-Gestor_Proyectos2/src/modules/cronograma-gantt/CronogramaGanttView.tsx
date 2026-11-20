@@ -5103,9 +5103,6 @@ export default function CronogramaGanttView({
     };
 
     if (openInline) {
-      if (inlineDraftCreatedId && items.some((it) => it.id === inlineDraftCreatedId && (it.name === 'Nuevo componente' || it.name === 'Nuevo paquete de trabajo'))) {
-        return;
-      }
       if (pId) {
         const mode = viewMode === 'lista' ? 'lista' : 'gantt';
         setCollapsedByMode((prev) => {
@@ -5499,7 +5496,7 @@ export default function CronogramaGanttView({
               title="Enter para guardar · Shift+Enter para agregar otro · Esc para cancelar"
               onBlur={(e) => {
                 const val = e.target.value.trim();
-                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
+                if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
                   commitChange((old) => old.filter((it) => it.id !== x.id));
                   setInlineDraftCreatedId(null);
                   closeEdit();
@@ -5514,7 +5511,7 @@ export default function CronogramaGanttView({
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   const val = e.currentTarget.value.trim();
-                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo paquete de trabajo' || val === 'Nuevo subcomponente')) {
+                  if (inlineDraftCreatedId === x.id && (!val || val === 'Nuevo componente' || val === 'Nuevo subcomponente')) {
                     commitChange((old) => old.filter((it) => it.id !== x.id));
                     setInlineDraftCreatedId(null);
                     closeEdit();
@@ -5563,10 +5560,10 @@ export default function CronogramaGanttView({
               <button
                 type="button"
                 className="quick-inline-icon-btn"
-                title={x.parentId ? 'Agregar elemento hermano en este nivel' : 'Agregar nuevo componente'}
+                title={`Crear nueva tarea rápida subordinada a "${x.name}"`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (x.parentId) { add('subproceso', x.parentId, true); } else { add('hito', undefined, true); }
+                  add('subproceso', x.id, true);
                 }}
               >
                 <Plus size={13} style={{ color: '#0066ff' }} />

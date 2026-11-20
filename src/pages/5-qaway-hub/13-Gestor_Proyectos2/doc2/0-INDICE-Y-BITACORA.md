@@ -51,7 +51,7 @@ doc2/
 | **9** | **`9-Credenciales-y-auditoria/`** | **Nuevo bloque: credenciales compartidas del Hub (no solo Gestor 2). Pasa a la carta general (usauripos).** | ✅ creado 19-nov-2026 |
 | 9.1 | `9.1-Plan-y-decisiones-de-seguridad.md` | Por qué: hallazgos H-1..H-6 (migración 20261116 nunca aplicada, sin auditoría, sin bloqueo), decisiones D-1..D-8 con razón, pendientes y ruta a la carta general. | ✅ vigente |
 | 9.2 | `9.2-Ejecucion-y-verificacion.md` | Bitácora: SQL aplicado, verificación en vivo, backfill de 1 evento con evidencia, rollback documentado. | ✅ vigente |
-| 9.3 | `9.3-Intentos-de-acceso-y-recuperacion.md` | Bloqueo 5 intentos → 15 min con aviso, límite 5 cambios/hora, Edge `auth-login-guard` v2 activa, recuperación verificada, pasos de prueba y riesgos. | ✅ vigente |
+| 9.3 | `9.3-Intentos-de-acceso-y-recuperacion.md` | Bloqueo **6 intentos** (2 libres + avisos 3/2/1) → 15 min con ruta de recuperación; mensajes correo vs clave; límite 5 cambios/hora; Edge `auth-login-guard` **v4** activa; pasos de prueba y riesgos. | ✅ vigente (ajustado 20-nov) |
 
 **Leyenda de estado:** ✅ vigente y correcto · ⚠️ vigente pero requiere cambio ya especificado · ❌ superado.
 

@@ -7,6 +7,9 @@
 -- (verify_jwt: false) que llama a GoTrue y escribe estas funciones.
 -- ADITIVO: tabla nueva + funciones + trigger. Sin DROP sobre tablas existentes.
 -- Ejecución y evidencia: doc2/9-Credenciales-y-auditoria/9.3.
+-- NOTA (20-nov-2026): el límite de 5 intentos de este archivo fue SUPERADO
+-- por 20261120_login_attempts_seis_intentos.sql (6 intentos: 2 libres + 3/2/1).
+-- Se conserva como historial de la decisión original; no volver a aplicar solo.
 -- ============================================================================
 
 create table if not exists public.user_login_attempts (
