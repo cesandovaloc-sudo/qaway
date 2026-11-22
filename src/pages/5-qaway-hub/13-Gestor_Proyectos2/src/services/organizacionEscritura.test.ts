@@ -336,7 +336,7 @@ async function expectErrorOrganizacion(
 // ---------------------------------------------------------------------------
 
 describe('crearEstructuraDesdePlantilla', () => {
-  it('crea la plantilla pública: 12 nodos, BFS, orden 1..n por definición, codes y numeración', async () => {
+  it('crea la plantilla pública: 14 nodos, BFS, orden 1..n por definición, codes y numeración', async () => {
     const almacen = new AlmacenFalso();
     const semillasAntes = almacen.snapshotSeeds();
 
@@ -346,66 +346,64 @@ describe('crearEstructuraDesdePlantilla', () => {
       db: almacen,
       generarId: crearGeneradorId(),
       generarSufijo: crearGeneradorSufijo([
-        'AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF',
-        'GGGG', 'HHHH', 'JJJJ', 'KKKK', 'LLLL', 'MMMM',
+        'AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG',
+        'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL', 'MMMM', 'NNNN',
       ]),
     });
 
     expect(resultado.tenantId).toBe('empresa-a');
     expect(resultado.autorizacionVerificada).toBe(false); // sin callback ⇒ NO segura
     expect(warnSpy).toHaveBeenCalled();
-    expect(resultado.insertadas).toHaveLength(12);
+    expect(resultado.insertadas).toHaveLength(14);
 
-    // Orden de inserción BFS: raíz, hijos de entidad (en orden de definición),
-    // luego hijos de dre. Los ids van en orden de DEFINICIÓN (id-2..id-13).
+    // Orden de inserción BFS: raíz, hijos de entidad, luego los demás niveles.
     expect(resultado.insertadas.map((u) => u.key)).toEqual([
-      'entidad', 'despacho', 'oci', 'asesoria-juridica', 'planeamiento',
-      'recursos-humanos', 'administracion', 'ti', 'dre', 'unidad-otra',
-      'ugel-principal', 'ugel-secundaria',
+      'entidad', 'asesoramiento', 'apoyo', 'linea', 'oci',
+      'planeamiento', 'asesoria-juridica', 'administracion', 'linea-a', 'linea-b',
+      'recursos-humanos', 'finanzas', 'logistica', 'ti',
     ]);
-    expect(resultado.insertadas.map((u) => u.code)).toEqual([
-      'ENTIDAD-RAIZ-AAAA',
-      'DESPACHO-DE-ALTA-DIRECCION-BBBB',
-      'ORGANO-DE-CONTROL-INSTITUCIO-CCCC', // base truncada a 28 por normalizarBase
-      'ASESORIA-JURIDICA-DDDD',
-      'OFICINA-DE-PLANEAMIENTO-Y-PR-EEEE',
-      'OFICINA-DE-RECURSOS-HUMANOS-FFFF',
-      'OFICINA-DE-ADMINISTRACION-GGGG',
-      'OFICINA-DE-TECNOLOGIAS-DE-LA-HHHH',
-      'DIRECCION-REGIONAL-DE-EDUCAC-JJJJ',
-      'UNIDAD-SIN-CLASIFICAR-EDITAB-MMMM',
-      'UGEL-UNIDAD-DESCONCENTRADA-KKKK',
-      'UGEL-ADICIONAL-LLLL',
+    // normalizarBase se prueba aparte; aquí se verifica el sufijo inyectado en orden.
+    expect(resultado.insertadas.map((u) => u.code.slice(-4))).toEqual([
+      'AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG',
+      'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL', 'MMMM', 'NNNN',
     ]);
 
     const porKey = new Map(resultado.insertadas.map((u) => [u.key, u]));
     // `orden` 1..n entre hermanos según el ORDEN DE DEFINICIÓN de la plantilla.
     expect(porKey.get('entidad')?.orden).toBe(1);
-    expect(porKey.get('despacho')?.orden).toBe(1);
-    expect(porKey.get('oci')?.orden).toBe(2);
-    expect(porKey.get('asesoria-juridica')?.orden).toBe(3);
-    expect(porKey.get('planeamiento')?.orden).toBe(4);
-    expect(porKey.get('recursos-humanos')?.orden).toBe(5);
-    expect(porKey.get('administracion')?.orden).toBe(6);
-    expect(porKey.get('ti')?.orden).toBe(7);
-    expect(porKey.get('dre')?.orden).toBe(8);
-    expect(porKey.get('unidad-otra')?.orden).toBe(9);
-    expect(porKey.get('ugel-principal')?.orden).toBe(1);
-    expect(porKey.get('ugel-secundaria')?.orden).toBe(2);
+    expect(porKey.get('asesoramiento')?.orden).toBe(1);
+    expect(porKey.get('apoyo')?.orden).toBe(2);
+    expect(porKey.get('linea')?.orden).toBe(3);
+    expect(porKey.get('oci')?.orden).toBe(4);
+    expect(porKey.get('planeamiento')?.orden).toBe(1);
+    expect(porKey.get('asesoria-juridica')?.orden).toBe(2);
+    expect(porKey.get('administracion')?.orden).toBe(1);
+    expect(porKey.get('linea-a')?.orden).toBe(1);
+    expect(porKey.get('linea-b')?.orden).toBe(2);
+    expect(porKey.get('recursos-humanos')?.orden).toBe(1);
+    expect(porKey.get('finanzas')?.orden).toBe(2);
+    expect(porKey.get('logistica')?.orden).toBe(3);
+    expect(porKey.get('ti')?.orden).toBe(4);
 
-    // Jerarquía: BFS insertó a dre ANTES que sus hijos (padres antes que hijos).
-    const idDre = porKey.get('dre')?.id;
-    expect(porKey.get('ugel-principal')?.parentUnitId).toBe(idDre);
-    expect(porKey.get('ugel-secundaria')?.parentUnitId).toBe(idDre);
-    expect(porKey.get('despacho')?.parentUnitId).toBe(porKey.get('entidad')?.id);
+    expect(porKey.get('asesoramiento')?.parentUnitId).toBe(porKey.get('entidad')?.id);
+    expect(porKey.get('planeamiento')?.parentUnitId).toBe(porKey.get('asesoramiento')?.id);
     expect(porKey.get('entidad')?.parentUnitId).toBeNull();
 
     // Numeración de presentación calculada del árbol real.
     expect(resultado.numeracionPorKey['entidad']).toBe('1');
-    expect(resultado.numeracionPorKey['dre']).toBe('1.8');
-    expect(resultado.numeracionPorKey['ugel-principal']).toBe('1.8.1');
-    expect(resultado.numeracionPorKey['ugel-secundaria']).toBe('1.8.2');
-    expect(resultado.numeracionPorKey['unidad-otra']).toBe('1.9');
+    expect(resultado.numeracionPorKey['asesoramiento']).toBe('1.1');
+    expect(resultado.numeracionPorKey['planeamiento']).toBe('1.1.1');
+    expect(resultado.numeracionPorKey['asesoria-juridica']).toBe('1.1.2');
+    expect(resultado.numeracionPorKey['apoyo']).toBe('1.2');
+    expect(resultado.numeracionPorKey['administracion']).toBe('1.2.1');
+    expect(resultado.numeracionPorKey['recursos-humanos']).toBe('1.2.1.1');
+    expect(resultado.numeracionPorKey['finanzas']).toBe('1.2.1.2');
+    expect(resultado.numeracionPorKey['logistica']).toBe('1.2.1.3');
+    expect(resultado.numeracionPorKey['ti']).toBe('1.2.1.4');
+    expect(resultado.numeracionPorKey['linea']).toBe('1.3');
+    expect(resultado.numeracionPorKey['linea-a']).toBe('1.3.1');
+    expect(resultado.numeracionPorKey['linea-b']).toBe('1.3.2');
+    expect(resultado.numeracionPorKey['oci']).toBe('1.4');
 
     // Sello de trazabilidad + lote en metadata de TODAS las filas insertadas.
     const loteId = resultado.loteId;
@@ -445,7 +443,7 @@ describe('crearEstructuraDesdePlantilla', () => {
 
   it('fallo en el INSERT #5 ⇒ detiene el lote y compensa las 4 filas insertadas (verificadas)', async () => {
     const almacen = new AlmacenFalso();
-    almacen.falloEnInsert = 5; // 5ª llamada = planeamiento; previas: entidad..asesoria-juridica
+    almacen.falloEnInsert = 5; // 5ª llamada = OCI; previas: entidad, asesoramiento, apoyo, línea
     const semillasAntes = almacen.snapshotSeeds();
 
     const error = await expectErrorOrganizacion(
@@ -480,8 +478,8 @@ describe('crearEstructuraDesdePlantilla', () => {
 
   it('DELETE #2 y #3 fallan ⇒ COMPENSACION_INCOMPLETA con lote y pendientes EXACTAS', async () => {
     const almacen = new AlmacenFalso();
-    almacen.falloEnInsert = 4; // asesoria-juridica falla; quedan entidad, despacho, oci
-    almacen.fallosDeDelete = new Set([2, 3]); // delete de despacho y de oci
+    almacen.falloEnInsert = 4; // "línea" falla; quedan entidad, asesoramiento, apoyo
+    almacen.fallosDeDelete = new Set([2, 3]); // delete de asesoramiento y de apoyo
     const semillasAntes = almacen.snapshotSeeds();
 
     const error = await expectErrorOrganizacion(
@@ -499,9 +497,9 @@ describe('crearEstructuraDesdePlantilla', () => {
     expect(typeof detalle['loteId']).toBe('string');
     expect(detalle['limpiadas']).toEqual(['id-2']); // entidad: delete verificado
     const pendientes = detalle['pendientes'] as Array<{ id: string; code: string | null; motivo: string }>;
-    expect(pendientes.map((p) => p.id)).toEqual(['id-3', 'id-4']); // despacho, oci
-    expect(pendientes[0]?.code).toBe('DESPACHO-DE-ALTA-DIRECCION-BBBB');
-    expect(pendientes[1]?.code).toBe('ORGANO-DE-CONTROL-INSTITUCIO-CCCC');
+    expect(pendientes.map((p) => p.id)).toEqual(['id-3', 'id-4']); // asesoramiento, apoyo
+    expect(pendientes[0]?.code).toBe('ORGANOS-DE-ASESORAMIENTO-BBBB');
+    expect(pendientes[1]?.code).toBe('ORGANOS-DE-APOYO-CCCC');
     expect(pendientes.every((p) => p.motivo.includes('DELETE'))).toBe(true);
     expect(error.message).toContain('pendientes de limpieza');
     expect(error.message).toContain('Lote:');
@@ -518,7 +516,8 @@ describe('crearEstructuraDesdePlantilla', () => {
     // Colisión GLOBAL: un code existente (semilla/otro tenant) ya usa AAAA.
     almacen.filas.push({
       id: 'unit-999', tenant_id: 'empresa-z', parent_unit_id: null,
-      name: 'Entidad (raíz)', code: 'ENTIDAD-RAIZ-AAAA', unit_type: 'central',
+      name: 'Titular / Alta Dirección de la Entidad',
+      code: 'TITULAR-ALTA-DIRECCION-DE-LA-AAAA', unit_type: 'central',
       region: null, macroregion: null, address: null, status: 'active',
       metadata: null, orden: 1, created_at: '2025-06-01T00:00:00.000Z',
     });
@@ -529,8 +528,8 @@ describe('crearEstructuraDesdePlantilla', () => {
       tenantId: 'empresa-a',
       db: almacen,
       borradoresPersonalizados: [
-        borrador('raiz', 'Entidad (raíz)', 'central', null),
-        borrador('raiz2', 'Entidad (raíz)', 'central', null), // mismo nombre
+        borrador('raiz', 'Titular / Alta Dirección de la Entidad', 'central', null),
+        borrador('raiz2', 'Titular / Alta Dirección de la Entidad', 'central', null), // mismo nombre
       ],
       generarId: crearGeneradorId(),
       generarSufijo: crearGeneradorSufijo(['AAAA', 'BBBB', 'CCCC']),
@@ -539,8 +538,8 @@ describe('crearEstructuraDesdePlantilla', () => {
     // 'AAAA' chocó con la fila global ⇒ regenerado; el segundo sufijo libre fue BBBB…
     // (la secuencia compartida asigna: raiz → BBBB tras descartar AAAA, raiz2 → CCCC).
     expect(resultado.insertadas.map((u) => u.code)).toEqual([
-      'ENTIDAD-RAIZ-BBBB',
-      'ENTIDAD-RAIZ-CCCC',
+      'TITULAR-ALTA-DIRECCION-DE-LA-BBBB',
+      'TITULAR-ALTA-DIRECCION-DE-LA-CCCC',
     ]);
     const codes = new Set(resultado.insertadas.map((u) => u.code));
     expect(codes.size).toBe(2); // sin colisiones entre hermanos
@@ -551,8 +550,8 @@ describe('crearEstructuraDesdePlantilla', () => {
 
   it('colisión EN VIVO (23505 por escritor concurrente) ⇒ lote detenido, compensado y sin tocar al intruso', async () => {
     const almacen = new AlmacenFalso();
-    // TOCTOU: el intruso aparece ANTES del INSERT #2 (despacho) con SU code.
-    almacen.codeIntruso = 'DESPACHO-DE-ALTA-DIRECCION-BBBB';
+    // TOCTOU: el intruso aparece ANTES del INSERT #2 con SU code.
+    almacen.codeIntruso = 'ORGANOS-DE-ASESORAMIENTO-BBBB';
     almacen.insertDelIntruso = 2;
     const semillasAntes = almacen.snapshotSeeds();
 
@@ -575,7 +574,7 @@ describe('crearEstructuraDesdePlantilla', () => {
     expect(almacen.filas.filter((f) => f.tenant_id === 'empresa-a' && f.id === 'id-2')).toHaveLength(0);
     // El intruso del escritor concurrente NO fue eliminado (solo se limpia el lote propio).
     const intruso = almacen.filas.find((f) => f.id === 'intruso-concurrente');
-    expect(intruso?.code).toBe('DESPACHO-DE-ALTA-DIRECCION-BBBB');
+    expect(intruso?.code).toBe('ORGANOS-DE-ASESORAMIENTO-BBBB');
     expect(almacen.snapshotSeeds()).toEqual(semillasAntes);
   });
 });
@@ -622,7 +621,9 @@ describe('Garantía de no-upsert', () => {
         origen: 'desde-cero',
         tenantId: 'empresa-a',
         db: almacen,
-        borradoresPersonalizados: [borrador('raiz', 'Entidad (raíz)', 'central', null)],
+        borradoresPersonalizados: [
+          borrador('raiz', 'Titular / Alta Dirección de la Entidad', 'central', null),
+        ],
         generarId: () => 'unit-001', // constante: colisiona con la semilla
         generarSufijo: crearGeneradorSufijo(['AAAA']),
       }),
@@ -639,7 +640,7 @@ describe('Garantía de no-upsert', () => {
 
 describe('Validaciones previas (nada toca la BD)', () => {
   it('normalizarBase: sin acentos, mayúsculas, guiones limpios y acotado a 28', () => {
-    expect(normalizarBase('Entidad (raíz)')).toBe('ENTIDAD-RAIZ');
+    expect(normalizarBase('Titular / Alta Dirección de la Entidad')).toBe('TITULAR-ALTA-DIRECCION-DE-LA');
     expect(normalizarBase('Órgano de Control')).toBe('ORGANO-DE-CONTROL');
     expect(normalizarBase('  Dirección  Regional--2026  ')).toBe('DIRECCION-REGIONAL-2026');
     expect(normalizarBase('Oficina de Tecnologías de la Información')).toBe('OFICINA-DE-TECNOLOGIAS-DE-LA');
@@ -730,8 +731,8 @@ describe('Aislamiento de tenant (un tenant no opera sobre otro)', () => {
       generarSufijo: crearGeneradorSufijo(['AAAA']),
     });
     const porKey = new Map(creacion.insertadas.map((u) => [u.key, u]));
-    const idDespacho = porKey.get('despacho')?.id ?? '';
-    const idDre = porKey.get('dre')?.id ?? '';
+    const idAsesoramiento = porKey.get('asesoramiento')?.id ?? '';
+    const idLinea = porKey.get('linea')?.id ?? '';
     const idOci = porKey.get('oci')?.id ?? '';
     const filasA = () =>
       almacen.filas.filter((f) => f.tenant_id === 'empresa-a').map((f) => JSON.parse(JSON.stringify(f)));
@@ -739,20 +740,20 @@ describe('Aislamiento de tenant (un tenant no opera sobre otro)', () => {
 
     // Renombrar una unidad de A desde B ⇒ FUERA_DE_TENANT (update de 0 filas).
     await expectErrorOrganizacion(
-      renombrarUnidad({ tenantId: 'empresa-b', unidadId: idDespacho, nuevoNombre: 'Hack', db: almacen }),
+      renombrarUnidad({ tenantId: 'empresa-b', unidadId: idAsesoramiento, nuevoNombre: 'Hack', db: almacen }),
       CODIGO_ERROR.FUERA_DE_TENANT,
     );
     // Crear hija bajo una unidad de A desde B ⇒ FUERA_DE_TENANT.
     await expectErrorOrganizacion(
       crearHija({
         tenantId: 'empresa-b', name: 'Infiltrada', unitType: 'other',
-        parentUnitId: idDre, db: almacen,
+        parentUnitId: idLinea, db: almacen,
       }),
       CODIGO_ERROR.FUERA_DE_TENANT,
     );
     // Mover una unidad de A desde B ⇒ FUERA_DE_TENANT.
     await expectErrorOrganizacion(
-      moverUnidad({ tenantId: 'empresa-b', unidadId: idDespacho, nuevoPadreId: idOci, db: almacen }),
+      moverUnidad({ tenantId: 'empresa-b', unidadId: idAsesoramiento, nuevoPadreId: idOci, db: almacen }),
       CODIGO_ERROR.FUERA_DE_TENANT,
     );
     // Colgar/mover bajo una SEMILLA (tenant NULL) ⇒ FUERA_DE_TENANT (decisión pendiente).
@@ -764,7 +765,7 @@ describe('Aislamiento de tenant (un tenant no opera sobre otro)', () => {
       CODIGO_ERROR.FUERA_DE_TENANT,
     );
     await expectErrorOrganizacion(
-      moverUnidad({ tenantId: 'empresa-a', unidadId: idDespacho, nuevoPadreId: 'unit-002', db: almacen }),
+      moverUnidad({ tenantId: 'empresa-a', unidadId: idAsesoramiento, nuevoPadreId: 'unit-002', db: almacen }),
       CODIGO_ERROR.FUERA_DE_TENANT,
     );
     // Reordenar desde B con ids de A ⇒ rechazo (lista ≠ hermanos de B).
@@ -803,21 +804,21 @@ describe('moverUnidad', () => {
       generarId: crearGeneradorId(), generarSufijo: crearGeneradorSufijo(['AAAA']),
     });
     const porKey = new Map(creacion.insertadas.map((u) => [u.key, u]));
-    const idDre = porKey.get('dre')?.id ?? '';
-    const idUgel = porKey.get('ugel-principal')?.id ?? '';
+    const idLinea = porKey.get('linea')?.id ?? '';
+    const idLineaA = porKey.get('linea-a')?.id ?? '';
     const idEntidad = porKey.get('entidad')?.id ?? '';
 
     await expectErrorOrganizacion(
-      moverUnidad({ tenantId: 'emp-m', unidadId: idDre, nuevoPadreId: idDre, db: almacen }),
+      moverUnidad({ tenantId: 'emp-m', unidadId: idLinea, nuevoPadreId: idLinea, db: almacen }),
       CODIGO_ERROR.CICLO_ORGANIZACIONAL,
     );
     await expectErrorOrganizacion(
-      moverUnidad({ tenantId: 'emp-m', unidadId: idDre, nuevoPadreId: idUgel, db: almacen }),
+      moverUnidad({ tenantId: 'emp-m', unidadId: idLinea, nuevoPadreId: idLineaA, db: almacen }),
       CODIGO_ERROR.CICLO_ORGANIZACIONAL,
     );
-    const dre = almacen.filas.find((f) => f.id === idDre);
-    expect(dre?.parent_unit_id).toBe(idEntidad);
-    expect(dre?.orden).toBe(8);
+    const linea = almacen.filas.find((f) => f.id === idLinea);
+    expect(linea?.parent_unit_id).toBe(idEntidad);
+    expect(linea?.orden).toBe(3);
   });
 
   it('movimiento válido: identidad intacta, orden en destino y re-pack de hermanos', async () => {
@@ -827,33 +828,33 @@ describe('moverUnidad', () => {
       generarId: crearGeneradorId(), generarSufijo: crearGeneradorSufijo(['AAAA']),
     });
     const porKey = new Map(creacion.insertadas.map((u) => [u.key, u]));
-    const idDre = porKey.get('dre')?.id ?? '';
+    const idLinea = porKey.get('linea')?.id ?? '';
 
-    // 1) Despacho → dentro de DRE (al final: orden 3 tras las 2 UGEL).
+    // 1) OCI → dentro de Línea (al final: orden 3 tras las 2 direcciones de línea).
     const movido = await moverUnidad({
-      tenantId: 'emp-m', unidadId: porKey.get('despacho')?.id ?? '', nuevoPadreId: idDre, db: almacen,
+      tenantId: 'emp-m', unidadId: porKey.get('oci')?.id ?? '', nuevoPadreId: idLinea, db: almacen,
     });
-    expect(movido.parentUnitId).toBe(idDre);
+    expect(movido.parentUnitId).toBe(idLinea);
     expect(movido.orden).toBe(3);
-    expect(movido.ruta).toBe('1.7.3'); // sin despacho, dre pasa a ser el 7º hijo de entidad
-    // Al irse el PRIMER hijo, los 8 hermanos restantes de entidad se renumeran.
-    expect(movido.ordenesRepack).toBe(8);
+    expect(movido.ruta).toBe('1.3.3');
+    // Destino y origen ya quedan consecutivos: no hay que reempaquetar.
+    expect(movido.ordenesRepack).toBe(0);
 
-    const despachoFila = almacen.filas.find((f) => f.id === porKey.get('despacho')?.id);
-    expect(despachoFila?.parent_unit_id).toBe(idDre);
-    expect(despachoFila?.orden).toBe(3);
-    expect(despachoFila?.id).toBe(porKey.get('despacho')?.id);
-    expect(despachoFila?.code).toBe(porKey.get('despacho')?.code); // identidad: code intacto
-    expect((despachoFila?.metadata?.plantilla as Record<string, unknown>)['key_plantilla']).toBe('despacho');
+    const ociFila = almacen.filas.find((f) => f.id === porKey.get('oci')?.id);
+    expect(ociFila?.parent_unit_id).toBe(idLinea);
+    expect(ociFila?.orden).toBe(3);
+    expect(ociFila?.id).toBe(porKey.get('oci')?.id);
+    expect(ociFila?.code).toBe(porKey.get('oci')?.code); // identidad: code intacto
+    expect((ociFila?.metadata?.plantilla as Record<string, unknown>)['key_plantilla']).toBe('oci');
 
-    // 2) OCI → raíz en posición 1: la entidad se reempaqueta a orden 2.
-    const movidoOci = await moverUnidad({
-      tenantId: 'emp-m', unidadId: porKey.get('oci')?.id ?? '', nuevoPadreId: null, posicion: 1, db: almacen,
+    // 2) Apoyo → raíz en posición 1: la entidad se reempaqueta a orden 2.
+    const movidoApoyo = await moverUnidad({
+      tenantId: 'emp-m', unidadId: porKey.get('apoyo')?.id ?? '', nuevoPadreId: null, posicion: 1, db: almacen,
     });
-    expect(movidoOci.orden).toBe(1);
-    expect(movidoOci.ruta).toBe('1');
-    // 1 re-pack en destino (entidad 1→2) + 7 en origen (los hermanos se cierran).
-    expect(movidoOci.ordenesRepack).toBe(8);
+    expect(movidoApoyo.orden).toBe(1);
+    expect(movidoApoyo.ruta).toBe('1');
+    // 1 re-pack en destino (entidad 1→2); los hermanos de origen ya están corridos.
+    expect(movidoApoyo.ordenesRepack).toBe(1);
     const entidad = almacen.filas.find((f) => f.id === porKey.get('entidad')?.id);
     expect(entidad?.orden).toBe(2);
     expect(entidad?.parent_unit_id).toBeNull();
@@ -874,30 +875,30 @@ describe('crearHija y reordenarHermanos', () => {
     });
     const porKey = new Map(creacion.insertadas.map((u) => [u.key, u]));
     const idEntidad = porKey.get('entidad')?.id ?? '';
-    const idUnidadOtra = porKey.get('unidad-otra')?.id ?? '';
+    const idOci = porKey.get('oci')?.id ?? '';
 
     const hija = await crearHija({
       tenantId: 'emp-r', name: 'Nueva Área', unitType: 'oficina',
       parentUnitId: idEntidad, db: almacen,
       generarId: crearGeneradorId(), generarSufijo: crearGeneradorSufijo(['ZZZZ']),
     });
-    expect(hija.orden).toBe(10); // max+1 tras unidad-otra (9)
+    expect(hija.orden).toBe(5); // max+1 tras los 4 hijos de entidad
     expect(hija.code).toBe('NUEVA-AREA-ZZZZ');
     expect(hija.parentUnitId).toBe(idEntidad);
 
     const idsHijos = creacion.insertadas
       .filter((u) => u.parentUnitId === idEntidad)
       .map((u) => u.id);
-    expect(idsHijos).toHaveLength(9);
+    expect(idsHijos).toHaveLength(4);
     const pedidos = [hija.id, ...[...idsHijos].reverse()];
 
     const primera = await reordenarHermanos({
       tenantId: 'emp-r', parentUnitId: idEntidad, idsEnNuevoOrden: pedidos, db: almacen,
       verificarAutorizacion: () => true,
     });
-    expect(primera.actualizadas).toBe(10);
+    expect(primera.actualizadas).toBe(5);
     expect(primera.numeracion[hija.id]).toBe('1.1');
-    expect(primera.numeracion[idUnidadOtra]).toBe('1.2');
+    expect(primera.numeracion[idOci]).toBe('1.2');
 
     const segunda = await reordenarHermanos({
       tenantId: 'emp-r', parentUnitId: idEntidad, idsEnNuevoOrden: pedidos, db: almacen,
@@ -908,7 +909,7 @@ describe('crearHija y reordenarHermanos', () => {
       .filter((f) => f.tenant_id === 'emp-r' && f.parent_unit_id === idEntidad)
       .map((f) => f.orden ?? 0)
       .sort((a, b) => a - b);
-    expect(ordenes).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(ordenes).toEqual([1, 2, 3, 4, 5]);
   });
 });
 
@@ -923,34 +924,34 @@ describe('renombrarUnidad', () => {
       origen: 'publico', tenantId: 'emp-n', db: almacen,
       generarId: crearGeneradorId(), generarSufijo: crearGeneradorSufijo(['AAAA']),
     });
-    const despacho = creacion.insertadas.find((u) => u.key === 'despacho');
-    const idDespacho = despacho?.id ?? '';
-    const antes = { ...almacen.filas.find((f) => f.id === idDespacho)! };
+    const area = creacion.insertadas.find((u) => u.key === 'asesoramiento');
+    const idArea = area?.id ?? '';
+    const antes = { ...almacen.filas.find((f) => f.id === idArea)! };
 
     const resultado = await renombrarUnidad({
-      tenantId: 'emp-n', unidadId: idDespacho, nuevoNombre: 'Despacho Ejecutivo', db: almacen,
+      tenantId: 'emp-n', unidadId: idArea, nuevoNombre: 'Área Ejecutiva', db: almacen,
     });
-    expect(resultado.name).toBe('Despacho Ejecutivo');
+    expect(resultado.name).toBe('Área Ejecutiva');
 
-    const fila = almacen.filas.find((f) => f.id === idDespacho)!;
-    expect(fila.name).toBe('Despacho Ejecutivo');
+    const fila = almacen.filas.find((f) => f.id === idArea)!;
+    expect(fila.name).toBe('Área Ejecutiva');
     expect(fila.id).toBe(antes.id);
     expect(fila.code).toBe(antes.code);
     expect(fila.parent_unit_id).toBe(antes.parent_unit_id);
     expect(fila.orden).toBe(antes.orden);
     expect((fila.metadata?.plantilla as Record<string, unknown>)['nombre_original'])
-      .toBe('Despacho de Alta Dirección');
+      .toBe('Órganos de Asesoramiento');
     expect(typeof fila.updated_at).toBe('string');
 
     await expectErrorOrganizacion(
-      renombrarUnidad({ tenantId: 'emp-n', unidadId: idDespacho, nuevoNombre: '   ', db: almacen }),
+      renombrarUnidad({ tenantId: 'emp-n', unidadId: idArea, nuevoNombre: '   ', db: almacen }),
       CODIGO_ERROR.BORRADORES_INVALIDOS,
     );
     await expectErrorOrganizacion(
-      renombrarUnidad({ tenantId: 'otro', unidadId: idDespacho, nuevoNombre: 'X', db: almacen }),
+      renombrarUnidad({ tenantId: 'otro', unidadId: idArea, nuevoNombre: 'X', db: almacen }),
       CODIGO_ERROR.FUERA_DE_TENANT,
     );
-    expect(almacen.filas.find((f) => f.id === idDespacho)?.name).toBe('Despacho Ejecutivo');
+    expect(almacen.filas.find((f) => f.id === idArea)?.name).toBe('Área Ejecutiva');
   });
 });
 
@@ -1010,14 +1011,14 @@ describe('Integridad de las 251 semillas', () => {
     const semillasIniciales = crearSemillas251();
     const almacen = new AlmacenFalso();
 
-    // 1) Creación exitosa (12 filas del tenant).
+    // 1) Creación exitosa (14 filas del tenant).
     await crearEstructuraDesdePlantilla({
       origen: 'publico', tenantId: 'emp-f', db: almacen,
       generarId: crearGeneradorId(), generarSufijo: crearGeneradorSufijo(['AAAA']),
     });
 
-    // 2) Segundo lote que falla en su 2º INSERT (llamada #14 global) y compensa.
-    almacen.falloEnInsert = 14;
+    // 2) Segundo lote que falla en su 2º INSERT (llamada #16 global) y compensa.
+    almacen.falloEnInsert = 16;
     await expectErrorOrganizacion(
       crearEstructuraDesdePlantilla({
         origen: 'desde-cero', tenantId: 'emp-f', db: almacen,
@@ -1025,7 +1026,7 @@ describe('Integridad de las 251 semillas', () => {
           borrador('raiz', 'Entidad F', 'central', null),
           borrador('hijo', 'Hijo F', 'oficina', 'raiz'),
         ],
-        generarId: crearGeneradorIdDesde(100), // evita los ids id-1..id-13 ya ocupados
+        generarId: crearGeneradorIdDesde(100), // evita los ids id-1..id-14 ya ocupados
         generarSufijo: crearGeneradorSufijo(['AAAA']),
       }),
       CODIGO_ERROR.INSERCION_LOTE,
@@ -1034,20 +1035,20 @@ describe('Integridad de las 251 semillas', () => {
     // 3) Vida posterior: hija, movimiento y renombrado (sin deletes).
     const filasEmpF = () => almacen.filas.filter((f) => f.tenant_id === 'emp-f');
     const porNombre = (nombre: string) => filasEmpF().find((f) => f.name === nombre);
-    const idEntidad = porNombre('Entidad (raíz)')?.id ?? '';
-    const idDre = porNombre('Dirección Regional de Educación (DRE)')?.id ?? '';
-    const idDespacho = porNombre('Despacho de Alta Dirección')?.id ?? '';
-    const idOci = porNombre('Órgano de Control Institucional (OCI)')?.id ?? '';
+    const idEntidad = porNombre('Titular / Alta Dirección de la Entidad')?.id ?? '';
+    const idLinea = porNombre('Órganos de Línea')?.id ?? '';
+    const idLineaA = porNombre('Dirección de Línea A')?.id ?? '';
+    const idOci = porNombre('Órgano de Control Institucional')?.id ?? '';
 
     await crearHija({
       tenantId: 'emp-f', name: 'Área Nueva', unitType: 'oficina',
       parentUnitId: idEntidad, db: almacen,
       generarId: crearGeneradorId(), generarSufijo: crearGeneradorSufijo(['QQQQ']),
     });
-    await moverUnidad({ tenantId: 'emp-f', unidadId: idDespacho, nuevoPadreId: idDre, db: almacen });
-    await renombrarUnidad({ tenantId: 'emp-f', unidadId: idOci, nuevoNombre: 'OCI Renombrada', db: almacen });
+    await moverUnidad({ tenantId: 'emp-f', unidadId: idLineaA, nuevoPadreId: idLinea, db: almacen });
+    await renombrarUnidad({ tenantId: 'emp-f', unidadId: idOci, nuevoNombre: 'Control Renombrado', db: almacen });
 
-    expect(filasEmpF()).toHaveLength(13); // 12 del lote + hija (el lote fallido quedó compensado)
+    expect(filasEmpF()).toHaveLength(15); // 14 del lote + hija (el lote fallido quedó compensado)
     expect(almacen.deletesRealizados).toHaveLength(1); // solo la compensación del lote fallido
 
     // Ningún DELETE apuntó jamás a una semilla (siempre id del lote + tenant).

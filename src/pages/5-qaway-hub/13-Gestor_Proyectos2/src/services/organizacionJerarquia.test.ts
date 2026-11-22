@@ -266,7 +266,7 @@ describe('Numeración jerárquica (organizacionJerarquia)', () => {
 // ---------------------------------------------------------------------------
 
 describe('Plantillas organizacionales (organizacionPlantillas)', () => {
-  it('expone público (12) y privado (15) con claves únicas y parentKey resuelto', () => {
+  it('expone público (14) y privado (15) con claves únicas y parentKey resuelto', () => {
     for (const defs of [PLANTILLA_SECTOR_PUBLICO, PLANTILLA_SECTOR_PRIVADO]) {
       const claves = new Set(defs.map((d) => d.key));
       expect(claves.size).toBe(defs.length);
@@ -274,7 +274,7 @@ describe('Plantillas organizacionales (organizacionPlantillas)', () => {
         expect(def.parentKey === null || claves.has(def.parentKey)).toBe(true);
       }
     }
-    expect(PLANTILLA_SECTOR_PUBLICO).toHaveLength(12);
+    expect(PLANTILLA_SECTOR_PUBLICO).toHaveLength(14);
     expect(PLANTILLA_SECTOR_PRIVADO).toHaveLength(15);
   });
 
@@ -291,7 +291,7 @@ describe('Plantillas organizacionales (organizacionPlantillas)', () => {
     expect(entidad?.metadata.plantilla).toEqual({
       origen: 'publico',
       version: VERSION_PLANTILLAS,
-      nombre_original: 'Entidad (raíz)',
+      nombre_original: 'Titular / Alta Dirección de la Entidad',
       key_plantilla: 'entidad',
     });
     const privada = construirBorradoresPlantilla('privado');
@@ -322,14 +322,17 @@ describe('Plantillas organizacionales (organizacionPlantillas)', () => {
     expect(construirDesdeCero()).toEqual([]);
   });
 
-  it('soloActivadas filtra ramas opcionales (público: 6 nodos coherentes)', () => {
+  it('soloActivadas filtra ramas opcionales (público: 9 nodos coherentes)', () => {
     const activos = construirBorradoresPlantilla('publico', { soloActivadas: true });
-    expect(activos.map((b) => b.key).sort()).toEqual(
-      ['administracion', 'despacho', 'dre', 'entidad', 'recursos-humanos', 'ugel-principal'].sort(),
-    );
-    // El padre de ugel-principal (dre) sí está activado → se conserva el enlace.
-    expect(activos.find((b) => b.key === 'ugel-principal')?.parentKey).toBe('dre');
+    expect(activos.map((b) => b.key).sort()).toEqual([
+      'administracion', 'apoyo', 'asesoramiento', 'asesoria-juridica', 'entidad',
+      'linea', 'linea-a', 'planeamiento', 'recursos-humanos',
+    ].sort());
+    // Padres activados conservan sus enlaces; DRE/UGEL no están en la plantilla.
+    expect(activos.find((b) => b.key === 'recursos-humanos')?.parentKey).toBe('administracion');
+    expect(activos.find((b) => b.key === 'linea-a')?.parentKey).toBe('linea');
     expect(activos.find((b) => b.key === 'oci')).toBeUndefined();
+    expect(activos.some((b) => b.key === 'dre' || b.key === 'ugel-principal')).toBe(false);
   });
 
   it('soloActivadas re-resuelve padres excluidos a raíz (privado: Directorio opcional)', () => {

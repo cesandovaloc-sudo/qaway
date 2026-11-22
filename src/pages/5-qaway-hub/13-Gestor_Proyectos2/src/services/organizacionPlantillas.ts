@@ -8,8 +8,9 @@
  * gestorOrganizacionService.ts L3-12); no se introducen valores nuevos.
  *
  * Fuentes (informe de investigación A-K, 2026-11):
- *   · Público: DS 054-2018-PCM (arts. 9/10/13/14, DCF Cuarta), SERVIR (ROF/RRHH),
- *     MINEDU (DRE/UGEL).
+ *   · Público: DS 054-2018-PCM, SERVIR (ROF/RRHH) y la lista completa del Estado
+ *     (doc2/8-8-Estructura-organizacional_carlos/5-estructuras-convencionales-investigadas.md:37-58).
+ *     DRE/UGEL son sedes externas (Paso 1), no áreas de la sede central.
  *   · Privado: Cosapi (Directorio + Gerencia General + gerencias; Auditoría
  *     Interna reporta al Directorio = enlace matricial) y Ferreycorp
  *     (holding con filiales/sucursales y red de tiendas).
@@ -34,7 +35,8 @@ export type PlantillaSector = 'publico' | 'privado';
  * Nodos que representan sedes externas (no áreas de la sede central).
  * Se excluyen cuando la empresa declara una sola sede. Se excluye el padre
  * junto a sus hijos para que la re-resolución de padres no cree raíces sueltas
- * (p. ej. UGEL sin DRE).
+ * (p. ej. UGEL sin DRE). Las claves DRE/UGEL ya no están en la plantilla pública:
+ * las sedes externas se registran en el Paso 1, no como áreas de la sede central.
  */
 export const CLAVES_SEDES_EXTERNAS: ReadonlySet<string> = new Set([
   'dre', 'ugel-principal', 'ugel-secundaria',
@@ -76,104 +78,134 @@ export interface GestorUnitBorrador {
   };
 }
 
-/** Sector público (12 nodos). Ramas opcionales: OCI, asesorías, planeamiento, TI, 2ª UGEL. */
+/**
+ * Sector público / Estado — lista completa trabajada (14 nodos).
+ * Fuente: doc2/8-8-Estructura-organizacional_carlos/5-estructuras-convencionales-investigadas.md:37-58
+ *         y doc2/8-8-Estructura-organizacional_carlos/1-concepto.txt:20-64.
+ * DRE y UGEL NO son áreas de la sede central: son sedes externas y se registran
+ * en el Paso 1, por eso no aparecen aquí. El orden de definición produce la
+ * numeración 1, 1.1, 1.1.1, 1.2, 1.3, 1.4 sin tocar el render.
+ *
+ * REGLA CANÓNICA (no negociable): ESTA es la única lista del sector público.
+ * Si necesitas cambiarla, edita primero el documento fuente y luego este array.
+ * NO crear otra lista, ni en este archivo, ni en Supabase, ni en tests, ni en
+ * doc2. No reintroducir "Entidad (raíz)", "Despacho de Alta Dirección", DRE,
+ * UGEL, "Unidad sin clasificar" ni "(Misionales)": ya fueron extirpados.
+ * Las sedes externas (DRE/UGEL) van en el Paso 1, nunca en el organigrama.
+ */
 export const PLANTILLA_SECTOR_PUBLICO: PlantillaNodoDef[] = [
   {
     key: 'entidad',
-    nombre: 'Entidad (raíz)',
+    nombre: 'Titular / Alta Dirección de la Entidad',
     unitType: 'central',
     parentKey: null,
     activadaPorDefecto: true,
     cargoResponsable: 'Titular de la entidad',
-    fuente: 'DS 054-2018-PCM art. 9: la entidad se organiza en órganos de dirección, ejecución, asesoramiento y control',
+    fuente: 'DS 054-2018-PCM art. 9 + 5-estructuras-convencionales-investigadas.md:41',
   },
   {
-    key: 'despacho',
-    nombre: 'Despacho de Alta Dirección',
-    unitType: 'jefatura',
-    parentKey: 'entidad',
-    activadaPorDefecto: true,
-    fuente: 'DS 054-2018-PCM art. 10 (órganos de alta dirección)',
-  },
-  {
-    key: 'oci',
-    nombre: 'Órgano de Control Institucional (OCI)',
+    key: 'asesoramiento',
+    nombre: 'Órganos de Asesoramiento',
     unitType: 'oficina',
     parentKey: 'entidad',
-    activadaPorDefecto: false,
-    fuente: 'DS 054-2018-PCM art. 14 + Ley 27785 (reporta funcionalmente fuera de la línea: enlace matricial típico)',
+    activadaPorDefecto: true,
+    fuente: '5-estructuras-convencionales-investigadas.md:42',
+  },
+  {
+    key: 'planeamiento',
+    nombre: 'Planeamiento y Presupuesto',
+    unitType: 'oficina',
+    parentKey: 'asesoramiento',
+    activadaPorDefecto: true,
+    fuente: '5-estructuras-convencionales-investigadas.md:43',
   },
   {
     key: 'asesoria-juridica',
     nombre: 'Asesoría Jurídica',
     unitType: 'oficina',
-    parentKey: 'entidad',
-    activadaPorDefecto: false,
-    fuente: 'DS 054-2018-PCM art. 13.2 (órganos de asesoramiento)',
+    parentKey: 'asesoramiento',
+    activadaPorDefecto: true,
+    fuente: '5-estructuras-convencionales-investigadas.md:44',
   },
   {
-    key: 'planeamiento',
-    nombre: 'Oficina de Planeamiento y Presupuesto',
-    unitType: 'oficina',
-    parentKey: 'entidad',
-    activadaPorDefecto: false,
-    fuente: 'DS 054-2018-PCM art. 13.2 + DCF Cuarta (planeamiento y presupuesto)',
-  },
-  {
-    key: 'recursos-humanos',
-    nombre: 'Oficina de Recursos Humanos',
+    key: 'apoyo',
+    nombre: 'Órganos de Apoyo',
     unitType: 'oficina',
     parentKey: 'entidad',
     activadaPorDefecto: true,
-    fuente: 'SERVIR RRHH + DS 054-2018-PCM art. 13.2 (órganos de apoyo)',
+    fuente: '5-estructuras-convencionales-investigadas.md:45',
   },
   {
     key: 'administracion',
-    nombre: 'Oficina de Administración',
+    nombre: 'Administración',
     unitType: 'oficina',
-    parentKey: 'entidad',
+    parentKey: 'apoyo',
     activadaPorDefecto: true,
-    fuente: 'DS 054-2018-PCM art. 13.2 (apoyo: abastecimiento, tesorería, logística)',
+    fuente: '5-estructuras-convencionales-investigadas.md:46',
+  },
+  {
+    key: 'recursos-humanos',
+    nombre: 'Recursos Humanos',
+    unitType: 'oficina',
+    parentKey: 'administracion',
+    activadaPorDefecto: true,
+    fuente: '5-estructuras-convencionales-investigadas.md:47',
+  },
+  {
+    key: 'finanzas',
+    nombre: 'Finanzas / Contabilidad / Tesorería',
+    unitType: 'oficina',
+    parentKey: 'administracion',
+    activadaPorDefecto: false,
+    fuente: '5-estructuras-convencionales-investigadas.md:48',
+  },
+  {
+    key: 'logistica',
+    nombre: 'Logística / Abastecimiento / Patrimonio',
+    unitType: 'oficina',
+    parentKey: 'administracion',
+    activadaPorDefecto: false,
+    fuente: '5-estructuras-convencionales-investigadas.md:49',
   },
   {
     key: 'ti',
-    nombre: 'Oficina de Tecnologías de la Información',
+    nombre: 'Tecnologías de la Información',
+    unitType: 'oficina',
+    parentKey: 'administracion',
+    activadaPorDefecto: false,
+    fuente: '5-estructuras-convencionales-investigadas.md:50',
+  },
+  {
+    key: 'linea',
+    nombre: 'Órganos de Línea',
+    unitType: 'jefatura',
+    parentKey: 'entidad',
+    activadaPorDefecto: true,
+    fuente: '5-estructuras-convencionales-investigadas.md:51',
+  },
+  {
+    key: 'linea-a',
+    nombre: 'Dirección de Línea A',
+    unitType: 'jefatura',
+    parentKey: 'linea',
+    activadaPorDefecto: true,
+    fuente: '5-estructuras-convencionales-investigadas.md:52',
+  },
+  {
+    key: 'linea-b',
+    nombre: 'Dirección de Línea B',
+    unitType: 'jefatura',
+    parentKey: 'linea',
+    activadaPorDefecto: false,
+    fuente: '5-estructuras-convencionales-investigadas.md:54',
+  },
+  {
+    key: 'oci',
+    nombre: 'Órgano de Control Institucional',
     unitType: 'oficina',
     parentKey: 'entidad',
     activadaPorDefecto: false,
-    fuente: 'Referencia editable (sin evidencia externa específica en el informe A-K)',
-  },
-  {
-    key: 'dre',
-    nombre: 'Dirección Regional de Educación (DRE)',
-    unitType: 'dre',
-    parentKey: 'entidad',
-    activadaPorDefecto: true,
-    fuente: 'Informe A-K §C · MINEDU (dirección de línea regional)',
-  },
-  {
-    key: 'ugel-principal',
-    nombre: 'UGEL (unidad desconcentrada)',
-    unitType: 'ugel',
-    parentKey: 'dre',
-    activadaPorDefecto: true,
-    fuente: 'Informe A-K §C · MINEDU (UGEL bajo su DRE)',
-  },
-  {
-    key: 'ugel-secundaria',
-    nombre: 'UGEL adicional',
-    unitType: 'ugel',
-    parentKey: 'dre',
-    activadaPorDefecto: false,
-    fuente: 'Informe A-K §C · MINEDU (segunda UGEL, opcional)',
-  },
-  {
-    key: 'unidad-otra',
-    nombre: 'Unidad sin clasificar (editable)',
-    unitType: 'other',
-    parentKey: 'entidad',
-    activadaPorDefecto: false,
-    fuente: 'Referencia editable (dominio unit_type: other)',
+    fuente: '5-estructuras-convencionales-investigadas.md:55',
   },
 ];
 

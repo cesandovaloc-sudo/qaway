@@ -283,7 +283,8 @@ El usuario no planea pagar hasta tener muchos tenants.
 **Verificación de MCP para descarga automática:** no hay ningún servidor MCP de
 Google Drive conectado (`list_mcp_resources` devuelve 0 recursos y 0 plantillas;
 el catálogo sólo tiene Supabase y OpenCode). Por lo tanto **no se puede crear la
-descarga automática a Drive desde esta sesión**. Queda como tarea manual.
+descarga automática a Drive desde esta sesión**. Queda como tarea manual, o se
+puede automatizar con Google Apps Script según la sección 15.
 
 Supabase Free sí tiene `pg_cron` 1.6.4 instalado, pero programar un job cada 7
 días no sirve sin un destino Drive: haría falta un Edge Function con un token de
@@ -338,8 +339,236 @@ ORDER BY tabla, id;
 ```
 
 No incluye archivos de Storage (fotos/adjuntos): éstos se bajan aparte desde
-Storage si hiciera falta. Con la base actual (81 MB, 3 usuarios, 1 proyecto) el
-CSV es pequeño; no genera espacio que obligue a Pro.
+Storage si hiciera falta.
+
+### 14. Ejecución real del respaldo (22-11-2026)
+
+La consulta de la sección 13 **sí se ejecutó desde esta sesión** (MCP de
+Supabase). Lo que no se pudo hacer solo fue subir el archivo a Drive: no hay
+MCP de Google conectado. Sí hay CLI de Supabase en
+`C:\Users\csand\AppData\Roaming\npm\supabase.ps1`, pero `db dump` necesita la
+contraseña de la base, que no está en esta sesión.
+
+Archivo generado: `C:\Users\csand\Respaldos Qaway\qaway-gp-2026-11-22.csv`.
+
+- **14.041 filas**, **21.024.751 bytes (≈21 MB)**.
+- Por tabla: `gestor_cronograma_items` 6.743, `gp_nodos_edt` 6.704,
+  `gestor_unidades` 302, `gp_sedes` 252, `tenants` 11, `users` 3,
+  `gp_config_gestion_proyectos` 2, `gp_proyectos` 1, `gestor_proyectos` 1.
+- Corrección: el CSV **no es pequeño** (21 MB). Aun así no obliga a comprar Pro:
+  se guarda en Drive, no en Supabase. Guardando 4 copias son ~84 MB de tus 5 TB.
+- No hay carpeta local sincronizada de Google Drive en este equipo (sí hay
+  OneDrive). Falta subir el CSV a Drive a mano o activar el método de la
+  sección 15.
+
+### 15. ¿Existe conexión Supabase → Drive?
+
+**No hay botón nativo** en Supabase ni MCP de Google en esta sesión. La forma
+gratis de automatizarlo es **Google Apps Script**, que vive dentro de tu Drive:
+
+1. En Drive: **Nuevo → Más → Google Apps Script**.
+2. En Supabase: **Settings → API → service_role key** (clave secreta; copiarla,
+   nunca pegarla en un chat ni en la app).
+3. Pegar este script, reemplazando `URL`, `CLAVE` y el nombre de la carpeta:
+
+```javascript
+const URL = 'https://qrusdsqgygfolxfrafyd.supabase.co/rest/v1/';
+const CLAVE = 'PEGAR_AQUI_LA_SERVICE_ROLE_KEY';
+const TABLAS = ['users','tenants','gp_config_gestion_proyectos','gp_sedes',
+  'gp_unidades_organizacionales','gp_personas','gp_equipos','gp_proyectos',
+  'gp_tareas','gp_nodos_edt','gp_entregables','gp_avances','gp_reuniones',
+  'gp_archivos','gestor_unidades','gestor_proyectos',
+  'gestor_cronograma_items','gp_eventos_auditoria'];
+
+function respaldar() {
+  const lineas = ['tabla,id,fila'];
+  for (const tabla of TABLAS) {
+    const res = UrlFetchApp.fetch(URL + tabla + '?select=*', {
+      headers: { apikey: CLAVE, Authorization: 'Bearer ' + CLAVE },
+      muteHttpExceptions: true
+    });
+    if (res.getResponseCode() !== 200) throw new Error(tabla + ': ' + res.getContentText());
+    for (const fila of JSON.parse(res.getContentText())) {
+      const json = JSON.stringify(fila).replace(/"/g, '""');
+      lineas.push('"' + tabla + '","' + fila.id + '","' + json + '"');
+    }
+  }
+  const nombre = 'qaway-gp-' + Utilities.formatDate(new Date(), 'America/Lima', 'yyyy-MM-dd') + '.csv';
+  const carpeta = DriveApp.getFoldersByName('Respaldos Qaway');
+  const destino = carpeta.hasNext() ? carpeta.next() : DriveApp.createFolder('Respaldos Qaway');
+  destino.createFile(nombre, lineas.join('\n'), 'text/csv');
+}
+
+function programar() {
+  ScriptApp.newTrigger('respaldar').timeBased()
+    .everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).create();
+}
+```
+
+4. Ejecutar `programar` **una sola vez** desde el menú del editor. Eso crea el
+   disparador cada 7 días.
+5. Ejecutar `respaldar` una vez para probar y revisar el CSV en Drive.
+
+No se activó todavía: requiere que el usuario pegue su clave secreta. Es gratis
+y no aumenta el espacio de Supabase. Si no quiere dejar la clave en el script,
+se mantiene el procedimiento manual de la sección 13.
+
+### 16. Flujo de "Sede central + sedes externas" (22-11-2026)
+
+Sólo se cambió esa modalidad. **No se tocó** "Solo la sede central", el botón
+**Editar** ni los estados **Guardado** de la tarjeta. Tampoco se tocó
+`SedeUbicacionFields.tsx` (otro agente está trabajando en él).
+
+Orden nuevo:
+
+1. Elegir **Sede central + sedes externas**.
+2. **Cantidad de sedes** (mínimo 2) y **Guardar cantidad**. Hasta aquí no se
+   muestra el formulario de la sede principal.
+3. Recién entonces aparece **Registrar Sede Central** con su mapa.
+4. Al guardarla, el mapa se pliega: queda una línea
+   `Sede Central registrada: <nombre>` con **Ver / editar ubicación**.
+5. Debajo, con más peso, aparece **¿Registrar las demás sedes ahora?** e indica
+   cuántas sedes externas faltan. Botones: **Registrar ahora** y
+   **Continuar después**.
+6. Al dar **Continuar después**, el aviso **no desaparece**: se queda en gris
+   con el texto **Registro de sedes externas pendiente · Guardado para después**
+   y el botón **Registrar ahora** sigue disponible para retomarlo. Igual que los
+   demás campos guardados: se deja visible en gris, no se borra.
+7. Al registrar, se abren los formularios de las sedes externas.
+
+Cuidados aplicados:
+
+- El aviso exige que ya exista sede principal; si no, las externas se contaban
+  de más (`cantidad - sedes.length`).
+- En "varias", cantidad 1 ya no cambia la modalidad a "una": muestra error.
+- La cantidad no se escribe dos veces: si ya está guardada,
+  `handleCrearSedeCentral` omite ese `upsert`.
+- En "varias" no se cierra la tarjeta al guardar la principal (antes se cerraba
+  y el aviso quedaba escondido tras **Editar**). En "una" se mantiene el cierre.
+
+Verificación: `npm run typecheck` limpio. Sin `build`, push ni commit.
+
+### 17. Plantilla del sector público corregida (22-11-2026)
+
+La lista que se venía mostrando en el paso 2 **no era la trabajada**. Se
+reemplazó `PLANTILLA_SECTOR_PUBLICO` en `organizacionPlantillas.ts:80-203` por
+la lista completa del Estado:
+
+```
+1      Titular / Alta Dirección de la Entidad
+1.1    Órganos de Asesoramiento
+1.1.1    Planeamiento y Presupuesto
+1.1.2    Asesoría Jurídica
+1.2    Órganos de Apoyo
+1.2.1    Administración
+1.2.1.1    Recursos Humanos
+1.2.1.2    Finanzas / Contabilidad / Tesorería
+1.2.1.3    Logística / Abastecimiento / Patrimonio
+1.2.1.4    Tecnologías de la Información
+1.3    Órganos de Línea
+1.3.1    Dirección de Línea A
+1.3.2    Dirección de Línea B
+1.4    Órgano de Control Institucional
+```
+
+Fuentes: `doc2/8-8-Estructura-organizacional_carlos/5-estructuras-convencionales-investigadas.md:37-58`
+y `1-concepto.txt:20-64`. `4-aclaración.txt:10` ya indicaba que esto era lo que
+debía reflejarse y "distinto de lo que se creó hoy".
+
+**DRE y UGEL ya no son áreas de la sede central.** Se sacaron de la plantilla.
+Se registran como sedes externas en el Paso 1, igual que dice el flujograma
+(`ARCHITECTURE_ROLES_SEDES.md:43-48`: DRE hija, UGEL nieta). Con "solo sede
+central" no aparecen; con "central + sedes externas" se registran en el bloque
+de sedes, nunca dentro del organigrama de la entidad. El nodo 1.5
+"Órganos Desconcentrados" tampoco se precarga: `1-concepto.txt:62` dice que no
+se agrega automáticamente.
+
+**Sin tocar diseño:** no se cambió `OrganizacionTab.tsx` (render, botones
+**Editar**, estados **Guardado**) ni `SedeUbicacionFields.tsx`. La numeración
+sale sola del orden de definición: los hijos de "Entidad" son asesoramiento,
+apoyo, línea y control → 1.1, 1.2, 1.3, 1.4. Sólo se cambiaron datos.
+
+Nota técnica: los tests se alinearon después con esta misma plantilla
+(sección 19). La validación acordada sigue siendo sólo `npm run typecheck`.
+
+### 18. Origen de la plantilla vieja y limpieza (22-11-2026)
+
+**De dónde salió la otra lista** (Entidad raíz, Despacho, OCI, DRE, UGEL,
+Unidad sin clasificar): estaba escrita **sólo en el front**, en
+`organizacionPlantillas.ts` → `PLANTILLA_SECTOR_PUBLICO`. No venía de Supabase.
+Sus nombres se inspiraron en `doc2/8-8-Estructura-organizacional_carlos/1-concepto.txt`
+y en los aliases de `gp_plantilla_estructura_org_c`, pero el array que se
+mostraba vivía en el front.
+
+**A qué alimentaba:** a un solo lugar, `OrganizacionTab.tsx:107-109`:
+la misma lista se usaba para la vista previa del paso 2 y para escribir la
+estructura (`borradoresPersonalizados`). El front **no lee**
+`gp_plantilla_estructura_org_c` (grep en `src`: 0 usos; sólo aparece en doc2).
+
+**Supabase revisado:**
+
+| Tabla | Resultado |
+|---|---|
+| `gp_plantilla_estructura_org_c` (22 filas) | 2 aliases tenían "Órganos de Línea (Misionales)" y "Oficina de Planeamiento y Presupuesto". Se cambió el primero a **Órganos de Línea** (nombre y alias). Verificado: 0 filas con "Misional". |
+| `gp_unidades_organizacionales` | 1 alias con "Órganos de Línea (Misionales)". Cambiado a **Órganos de Línea**. Verificado: 0 filas con "Misional". |
+| `gestor_unidades` (302 filas, 260 DRE/UGEL) | **NO se tocó**: es el catálogo legado real documentado en `doc2/1-Auditoria-y-decision/1.1-Hallazgos-criticos-y-eliminar-todo-menos-infraestructura.txt:65`. Es datos de tenant, no la plantilla del front. |
+| `gp_config_gestion_proyectos` | 0 filas con nombres viejos. |
+
+También se quitó "(Misionales)" del nombre de la plantilla del front.
+
+### 19. Alineación total y barrera anti-listas (22-11-2026)
+
+**Tests alineados con la plantilla pública correcta:**
+
+| Archivo | Cambio |
+|---|---|
+| `organizacionEscritura.test.ts` | 14 nodos, sufijos `AAAA`–`NNNN`, claves `asesoramiento`/`apoyo`/`linea`/`oci`, numeración 1 → 1.4, nombres "Titular / Alta Dirección de la Entidad", "Órganos de Línea", "Dirección de Línea A". Fallos inyectados en INSERT #5 y #16; semillas intactas; 15 filas de tenant al final. |
+| `organizacionJerarquia.test.ts` | `nombre_original` = "Titular / Alta Dirección de la Entidad"; `soloActivadas` = 9 nodos coherentes, sin DRE/UGEL. |
+
+**Barrera para que ningún agente invente otra lista:**
+
+1. `organizacionPlantillas.ts` lleva un comentario **REGLA CANÓNICA** justo
+   encima de `PLANTILLA_SECTOR_PUBLICO`: esa es la única lista del sector
+   público; para cambiarla se edita primero el documento fuente y luego el
+   array; está prohibido crear otra lista o reintroducir los nombres viejos.
+2. El documento fuente `5-estructuras-convencionales-investigadas.md:31,51-54,59`
+   usa los mismos nombres (sin "(Misionales)" ni "(misión 1/2)"). Fuente y
+   código ya no se contradicen.
+3. Los tests ya no recuerdan la lista vieja: no hay fixtures con "Entidad
+   (raíz)", "Despacho de Alta Dirección", DRE, UGEL ni "Unidad sin clasificar".
+4. Supabase: 0 filas con "Misional" en `gp_plantilla_estructura_org_c` y
+   `gp_unidades_organizacionales`. `gestor_unidades` sigue intacto (catálogo
+   legado de tenants).
+
+**Verificación:** grep de nombres viejos en `src` sólo devuelve el comentario
+de la barrera y las menciones históricas de esta bitácora. `npm run typecheck`:
+limpio. Sin `build`, commit ni push.
+
+### 20. Sucursales visibles en el paso 2 (22-11-2026)
+
+**Reporte del tenant Roberto Gómez:** guardó Sede Central Lima + 2 sucursales
+en el Paso 1 (datos confirmados en `gp_sedes`: `Sede Oxpamapa`, `Sede Huacho`),
+pero el paso 2 sólo mostraba el árbol de áreas del sector.
+
+**Causa:** `plantillaPreview` se construía sólo desde
+`construirBorradoresPlantilla(sector, …)`. Ese array no lee `gp_sedes`, así que
+las sedes guardadas nunca aparecían en la vista previa.
+
+**Cambio:** en el paso 2, dentro del modo edición, se agregó un bloque
+**Sedes registradas** arriba del árbol de áreas:
+
+- Sede Principal en el primer nivel.
+- Sucursales indentadas debajo (una por fila, con el nombre guardado).
+- Texto corto: «Las sedes se registran en el Paso 1 y no se convierten en áreas
+  del organigrama».
+
+No se metió a las sedes en `PLANTILLA_SECTOR_PUBLICO`, no se crearon unidades
+nuevas y no se borraron las estructuras antiguas del tenant. Es sólo vista: el
+mismo criterio de la sección 16 (DRE/UGEL y sucursales = sedes externas, no
+áreas de la sede central). No se tocó el render del paso 1 ni
+`SedeUbicacionFields.tsx`.
+
+**Verificación:** `npm run typecheck` limpio. Sin `build`, commit ni push.
 
 ## Deudas visibles (no ocultas)
 
@@ -348,6 +577,15 @@ CSV es pequeño; no genera espacio que obligue a Pro.
 3. El árbol escribe en `gestor_unidades` (`organizacionEscritura.ts:623-637`) y se lee/renombra en `gp_unidades_organizacionales`. No se cambió para no destruir lo que ya funciona.
 4. `gp_sedes` no tiene DDL versionado en `supabase/`, aunque existe en BD con RLS propio.
 5. El mapa depende de las teselas públicas de OpenStreetMap; si no hay red, las coordenadas se pueden digitar igualmente.
+6. **DEUDA PENDIENTE (veremos después): respaldo automático en Google Drive.**
+   Elegimos Free sin pagar. Hay un CSV real generado el 22-11-2026 en
+   `C:\Users\csand\Respaldos Qaway\qaway-gp-2026-11-22.csv` (14.041 filas, 21 MB),
+   pero **no está subido a Drive** y **no hay descarga automática cada 7 días**:
+   no hay MCP de Google conectado ni botón nativo en Supabase. La alternativa
+   gratis con Google Apps Script está escrita en la sección 15, sin activar
+   porque requiere la clave secreta del usuario. Mientras tanto, el respaldo es
+   manual (sección 13) y la recuperación real sigue siendo el borrado lógico.
+   No se activó pg_cron/Edge Function para no generar espacio ni costo.
 
 ## Verificación
 
@@ -360,3 +598,13 @@ CSV es pequeño; no genera espacio que obligue a Pro.
 - `gp_tipos_sede_c`: `sede_operativa` = "Sede operativa / externa".
 - Sin `build`, `dist`, `build:dev`, push ni commit.
 - Sin tocar `ConfiguracionView.tsx`, `EmpresaTab.tsx` ni `PreferenciasTab.tsx`.
+
+
+### 21. Decisión Opción A — Unificación en `public.gestor_unidades` (22-11-2026)
+
+**Problema detectado:** `organizacionEscritura.ts` insertaba la estructura organizacional en `public.gestor_unidades`, mientras `OrganizacionTab.tsx` intentaba leer/renombrar en `gp_unidades_organizacionales` (cayendo a `gestor_unidades` como respaldo) y `gp_config_gestion_proyectos.unidad_responsable_id` tenía la FK `gp_config_gestion_proyectos_unidad_responsable_id_fkey` apuntando a `gp_unidades_organizacionales(id)`. Al guardar el Paso 3, PostgreSQL rechazaba el `id` por violación de clave foránea.
+
+**Decisión aprobada (Opción A):**
+- `public.gestor_unidades` pasa a ser la **única fuente de verdad** para crear, leer, renombrar (`name`, conservando `metadata.plantilla.nombre_original`), reiniciar y referenciar la unidad responsable.
+- **Migración SQL requerida en Supabase:** `supabase/migrations/20261122000001_gp_config_gestion_fk_gestor_unidades.sql` (reapunta `gp_config_gestion_proyectos_unidad_responsable_id_fkey` a `public.gestor_unidades(id)` con `ON DELETE SET NULL`).
+- **Frontend (`OrganizacionTab.tsx`):** `cargarEstado()` lee directamente vía `listarUnidadesParaJerarquia` (`gestor_unidades` + `calcularNumeracion`) y `handleGuardarAliasesLote()` actualiza `gestor_unidades.name` acotado por `tenant_id`.

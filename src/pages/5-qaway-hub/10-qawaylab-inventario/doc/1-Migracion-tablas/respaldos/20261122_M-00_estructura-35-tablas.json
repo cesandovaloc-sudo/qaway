@@ -1,0 +1,4451 @@
+{
+ "fecha": "2026-11-22",
+ "columnas": [
+  {
+   "tabla": "accounting_entries",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 2,
+   "column_name": "entry_number",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 3,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 4,
+   "column_name": "entry_date",
+   "data_type": "date",
+   "udt_name": "date",
+   "is_nullable": "NO",
+   "column_default": "CURRENT_DATE",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 5,
+   "column_name": "reference",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 6,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'draft'::text",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 7,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 8,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 9,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entries",
+   "pos": 10,
+   "column_name": "updated_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 2,
+   "column_name": "entry_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 3,
+   "column_name": "account_code",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 4,
+   "column_name": "account_name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 5,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 6,
+   "column_name": "debit",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 7,
+   "column_name": "credit",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 8,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "pos": 9,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "bundle_items",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "bundle_items",
+   "pos": 2,
+   "column_name": "bundle_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "bundle_items",
+   "pos": 3,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "bundle_items",
+   "pos": 4,
+   "column_name": "variant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "bundle_items",
+   "pos": 5,
+   "column_name": "quantity",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "1",
+   "largo": null
+  },
+  {
+   "tabla": "bundle_items",
+   "pos": 6,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 2,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 3,
+   "column_name": "sku",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 4,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 5,
+   "column_name": "image_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 6,
+   "column_name": "total_individual_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 7,
+   "column_name": "bundle_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 8,
+   "column_name": "discount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 9,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'active'::text",
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 10,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "bundles",
+   "pos": 11,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 2,
+   "column_name": "ruc",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 3,
+   "column_name": "razon_social",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 4,
+   "column_name": "nombre_comercial",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 5,
+   "column_name": "direccion",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 6,
+   "column_name": "regimen",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'general'::text",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 7,
+   "column_name": "igv_rate",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "18",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 8,
+   "column_name": "moneda",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'PEN'::text",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 9,
+   "column_name": "sunat_connected",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "false",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 10,
+   "column_name": "sunat_connection_meta",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 11,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 12,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "business_settings",
+   "pos": 13,
+   "column_name": "updated_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 2,
+   "column_name": "catalog_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 3,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 4,
+   "column_name": "bundle_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 5,
+   "column_name": "sort_order",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 6,
+   "column_name": "show_price",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 7,
+   "column_name": "show_description",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "catalog_items",
+   "pos": 8,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "get_auth_tenant_id()",
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 2,
+   "column_name": "campaign_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 3,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 4,
+   "column_name": "slug",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 5,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 6,
+   "column_name": "is_public",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "false",
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 7,
+   "column_name": "template",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'professional'::text",
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 8,
+   "column_name": "pdf_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 9,
+   "column_name": "public_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 10,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "catalogs",
+   "pos": 11,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 2,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 3,
+   "column_name": "slug",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 4,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 5,
+   "column_name": "color",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": "'#0f172a'::text",
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 6,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 7,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 8,
+   "column_name": "icon",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "categories",
+   "pos": 9,
+   "column_name": "sort_order",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 2,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 3,
+   "column_name": "company",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 4,
+   "column_name": "email",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 5,
+   "column_name": "phone",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 6,
+   "column_name": "type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'individual'::text",
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 7,
+   "column_name": "doc_type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'SIN_DOC'::text",
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 8,
+   "column_name": "doc_number",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 9,
+   "column_name": "fiscal_name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 10,
+   "column_name": "address",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 11,
+   "column_name": "extra_data",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 12,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 13,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "customers",
+   "pos": 14,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 2,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 3,
+   "column_name": "category",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 4,
+   "column_name": "amount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 5,
+   "column_name": "expense_date",
+   "data_type": "date",
+   "udt_name": "date",
+   "is_nullable": "NO",
+   "column_default": "CURRENT_DATE",
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 6,
+   "column_name": "receipt_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 7,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 8,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "expenses",
+   "pos": 9,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 2,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 3,
+   "column_name": "slug",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 4,
+   "column_name": "code",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 5,
+   "column_name": "type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'warehouse'::text",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 6,
+   "column_name": "parent_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 7,
+   "column_name": "address",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 8,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "pos": 9,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 2,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 3,
+   "column_name": "variant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 4,
+   "column_name": "type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'adjustment'::text",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 5,
+   "column_name": "quantity",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 6,
+   "column_name": "from_location_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 7,
+   "column_name": "to_location_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 8,
+   "column_name": "reference",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 9,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 10,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 11,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "pos": 12,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 2,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 3,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 4,
+   "column_name": "start_date",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 5,
+   "column_name": "end_date",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 6,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'draft'::text",
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 7,
+   "column_name": "discount_type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 8,
+   "column_name": "catalog_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 9,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "pos": 10,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "pos": 2,
+   "column_name": "campaign_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "pos": 3,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "pos": 4,
+   "column_name": "liquidation_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "pos": 5,
+   "column_name": "package_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "pos": 6,
+   "column_name": "max_quantity",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "pos": 7,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 2,
+   "column_name": "order_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 3,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 4,
+   "column_name": "product_type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 5,
+   "column_name": "product_title",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 6,
+   "column_name": "quantity",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "1",
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 7,
+   "column_name": "unit_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 8,
+   "column_name": "subtotal",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "order_items",
+   "pos": 9,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 2,
+   "column_name": "user_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 3,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'pending'::text",
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 4,
+   "column_name": "total",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 5,
+   "column_name": "payment_method",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 6,
+   "column_name": "shipping_address",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 7,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 8,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 9,
+   "column_name": "paid_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 10,
+   "column_name": "cancelled_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "orders",
+   "pos": 11,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 2,
+   "column_name": "user_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 3,
+   "column_name": "order_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 4,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 5,
+   "column_name": "product_title",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 6,
+   "column_name": "amount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 7,
+   "column_name": "currency",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'PEN'::text",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 8,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'pending'::text",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 9,
+   "column_name": "provider",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'manual'::text",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 10,
+   "column_name": "provider_id",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 11,
+   "column_name": "proof_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 12,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 13,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 14,
+   "column_name": "updated_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "payments",
+   "pos": 15,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 2,
+   "column_name": "type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 3,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 4,
+   "column_name": "amount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 5,
+   "column_name": "reference",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 6,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 7,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "pos": 8,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "price_lists",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "price_lists",
+   "pos": 2,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "price_lists",
+   "pos": 3,
+   "column_name": "type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'normal'::text",
+   "largo": null
+  },
+  {
+   "tabla": "price_lists",
+   "pos": 4,
+   "column_name": "is_active",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "price_lists",
+   "pos": 5,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "price_lists",
+   "pos": 6,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "price_lists",
+   "pos": 7,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 2,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 3,
+   "column_name": "type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 4,
+   "column_name": "condition",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "NO",
+   "column_default": "'{}'::jsonb",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 5,
+   "column_name": "discount_type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'percentage'::text",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 6,
+   "column_name": "value",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 7,
+   "column_name": "priority",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 8,
+   "column_name": "is_active",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 9,
+   "column_name": "valid_from",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 10,
+   "column_name": "valid_to",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 11,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "pos": 12,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 2,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 3,
+   "column_name": "original_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 4,
+   "column_name": "processed_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 5,
+   "column_name": "is_primary",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "false",
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 6,
+   "column_name": "alt",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 7,
+   "column_name": "sort_order",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 8,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "product_images",
+   "pos": 9,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 2,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 3,
+   "column_name": "price_list_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 4,
+   "column_name": "price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 5,
+   "column_name": "min_quantity",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "1",
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 6,
+   "column_name": "valid_from",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 7,
+   "column_name": "valid_to",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_prices",
+   "pos": 8,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 2,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 3,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 4,
+   "column_name": "sku",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 5,
+   "column_name": "attributes",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "NO",
+   "column_default": "'{}'::jsonb",
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 6,
+   "column_name": "stock",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 7,
+   "column_name": "cost",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 8,
+   "column_name": "price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 9,
+   "column_name": "condition",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "5",
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 10,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "product_variants",
+   "pos": 11,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 2,
+   "column_name": "sku",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 3,
+   "column_name": "name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 4,
+   "column_name": "title",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 5,
+   "column_name": "slug",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 6,
+   "column_name": "description",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 7,
+   "column_name": "base_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 8,
+   "column_name": "price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 9,
+   "column_name": "compare_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 10,
+   "column_name": "image_url",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 11,
+   "column_name": "images",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "YES",
+   "column_default": "'[]'::jsonb",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 12,
+   "column_name": "type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'service'::text",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 13,
+   "column_name": "category",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 14,
+   "column_name": "category_id",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 15,
+   "column_name": "subcategory_id",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 16,
+   "column_name": "brand",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 17,
+   "column_name": "stock",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "10",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 18,
+   "column_name": "min_stock",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 19,
+   "column_name": "condition",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "10",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 20,
+   "column_name": "unit",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'UNIDAD'::text",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 21,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'active'::text",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 22,
+   "column_name": "commercial_status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'available'::text",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 23,
+   "column_name": "metadata",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "YES",
+   "column_default": "'{}'::jsonb",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 24,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 25,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 26,
+   "column_name": "updated_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 27,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "get_auth_tenant_id()",
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 28,
+   "column_name": "course_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 29,
+   "column_name": "location_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "products",
+   "pos": 30,
+   "column_name": "cost",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 2,
+   "column_name": "order_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 3,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 4,
+   "column_name": "product_title",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 5,
+   "column_name": "quantity",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "1",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 6,
+   "column_name": "unit_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 7,
+   "column_name": "tax_code",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": "'10'::text",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 8,
+   "column_name": "total",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 9,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "pos": 10,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 2,
+   "column_name": "order_number",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 3,
+   "column_name": "supplier_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 4,
+   "column_name": "supplier_name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 5,
+   "column_name": "subtotal",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 6,
+   "column_name": "igv_total",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 7,
+   "column_name": "total",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 8,
+   "column_name": "currency",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'PEN'::text",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 9,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'draft'::text",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 10,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 11,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 12,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 13,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "pos": 14,
+   "column_name": "updated_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 2,
+   "column_name": "quotation_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 3,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 4,
+   "column_name": "bundle_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 5,
+   "column_name": "quantity",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "1",
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 6,
+   "column_name": "unit_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 7,
+   "column_name": "discount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 8,
+   "column_name": "subtotal",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "quotation_items",
+   "pos": 9,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 2,
+   "column_name": "customer_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 3,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'draft'::text",
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 4,
+   "column_name": "subtotal",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 5,
+   "column_name": "discount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 6,
+   "column_name": "total",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 7,
+   "column_name": "valid_until",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 8,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 9,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "quotations",
+   "pos": 10,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 2,
+   "column_name": "sale_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 3,
+   "column_name": "product_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 4,
+   "column_name": "product_title",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 5,
+   "column_name": "quantity",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "1",
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 6,
+   "column_name": "unit_price",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 7,
+   "column_name": "subtotal",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 8,
+   "column_name": "tax_code",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": "'10'::text",
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 9,
+   "column_name": "unit_sunat",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": "'NIU'::text",
+   "largo": null
+  },
+  {
+   "tabla": "sale_items",
+   "pos": 10,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 2,
+   "column_name": "sale_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 3,
+   "column_name": "amount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 4,
+   "column_name": "method",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'efectivo'::text",
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 5,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 6,
+   "column_name": "received_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 7,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sale_payments",
+   "pos": 8,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 2,
+   "column_name": "sale_number",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 3,
+   "column_name": "customer_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 4,
+   "column_name": "customer_name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 5,
+   "column_name": "doc_type",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 6,
+   "column_name": "doc_number",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 7,
+   "column_name": "fiscal_name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 8,
+   "column_name": "fiscal_address",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 9,
+   "column_name": "subtotal",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 10,
+   "column_name": "discount",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 11,
+   "column_name": "igv_total",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 12,
+   "column_name": "total",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 13,
+   "column_name": "currency",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'PEN'::text",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 14,
+   "column_name": "payment_status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'pagado'::text",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 15,
+   "column_name": "status",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'active'::text",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 16,
+   "column_name": "payment_method",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 17,
+   "column_name": "notes",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 18,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 19,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 20,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "sales",
+   "pos": 21,
+   "column_name": "paid_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 2,
+   "column_name": "tipo_doc",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 3,
+   "column_name": "serie",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 4,
+   "column_name": "descripcion",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 5,
+   "column_name": "correlativo_actual",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 6,
+   "column_name": "active",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 7,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "series",
+   "pos": 8,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 2,
+   "column_name": "token",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 3,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 4,
+   "column_name": "created_by",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 5,
+   "column_name": "guest_name",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 6,
+   "column_name": "guest_email",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 7,
+   "column_name": "permissions",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "NO",
+   "column_default": "'{}'::jsonb",
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 8,
+   "column_name": "expires_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 9,
+   "column_name": "max_uses",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 10,
+   "column_name": "use_count",
+   "data_type": "integer",
+   "udt_name": "int4",
+   "is_nullable": "NO",
+   "column_default": "0",
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 11,
+   "column_name": "is_active",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 12,
+   "column_name": "products",
+   "data_type": "jsonb",
+   "udt_name": "jsonb",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 13,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "pos": 14,
+   "column_name": "last_used_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sunat_units",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "sunat_units",
+   "pos": 2,
+   "column_name": "codigo",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sunat_units",
+   "pos": 3,
+   "column_name": "descripcion",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "sunat_units",
+   "pos": 4,
+   "column_name": "active",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "sunat_units",
+   "pos": 5,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "sunat_units",
+   "pos": 6,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 1,
+   "column_name": "id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "gen_random_uuid()",
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 2,
+   "column_name": "codigo",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 3,
+   "column_name": "descripcion",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 4,
+   "column_name": "tasa",
+   "data_type": "numeric",
+   "udt_name": "numeric",
+   "is_nullable": "YES",
+   "column_default": null,
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 5,
+   "column_name": "tipo",
+   "data_type": "text",
+   "udt_name": "text",
+   "is_nullable": "NO",
+   "column_default": "'igv'::text",
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 6,
+   "column_name": "active",
+   "data_type": "boolean",
+   "udt_name": "bool",
+   "is_nullable": "NO",
+   "column_default": "true",
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 7,
+   "column_name": "tenant_id",
+   "data_type": "uuid",
+   "udt_name": "uuid",
+   "is_nullable": "NO",
+   "column_default": "'00000000-0000-0000-0000-000000000001'::uuid",
+   "largo": null
+  },
+  {
+   "tabla": "taxes",
+   "pos": 8,
+   "column_name": "created_at",
+   "data_type": "timestamp with time zone",
+   "udt_name": "timestamptz",
+   "is_nullable": "NO",
+   "column_default": "now()",
+   "largo": null
+  }
+ ],
+ "policies": [
+  {
+   "tabla": "accounting_entries",
+   "policyname": "accounting_entries_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "policyname": "accounting_entry_lines_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "bundle_items",
+   "policyname": "bundle_items_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "bundles",
+   "policyname": "bundles_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "business_settings",
+   "policyname": "business_settings_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "catalog_items",
+   "policyname": "catalog_items_select_public",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "(EXISTS ( SELECT 1\n   FROM catalogs c\n  WHERE ((c.id = catalog_items.catalog_id) AND (c.is_public = true) AND tenant_has_app_feature(c.tenant_id, 'inventario'::text, 'public_catalog'::text))))",
+   "with_check": null
+  },
+  {
+   "tabla": "catalog_items",
+   "policyname": "catalog_items_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "catalog_items",
+   "policyname": "catalog_write_staff",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'public_catalog'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'public_catalog'::text)))"
+  },
+  {
+   "tabla": "catalogs",
+   "policyname": "catalog_write_staff",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'public_catalog'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'public_catalog'::text)))"
+  },
+  {
+   "tabla": "catalogs",
+   "policyname": "catalogs_select_public",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "((is_public = true) AND (EXISTS ( SELECT 1\n   FROM tenants t\n  WHERE ((t.id = catalogs.tenant_id) AND (t.status = 'active'::text) AND (t.deleted_at IS NULL)))) AND tenant_has_app_feature(tenant_id, 'inventario'::text, 'public_catalog'::text))",
+   "with_check": null
+  },
+  {
+   "tabla": "catalogs",
+   "policyname": "catalogs_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "categories",
+   "policyname": "Allow all operations for categories",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "true",
+   "with_check": "true"
+  },
+  {
+   "tabla": "categories",
+   "policyname": "catalog_write_staff",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(auth.role() = 'authenticated'::text)",
+   "with_check": "(auth.role() = 'authenticated'::text)"
+  },
+  {
+   "tabla": "categories",
+   "policyname": "categories_select_public",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "true",
+   "with_check": null
+  },
+  {
+   "tabla": "categories",
+   "policyname": "categories_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "customers",
+   "policyname": "customers_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "expenses",
+   "policyname": "expenses_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "inventory_locations",
+   "policyname": "inventory_locations_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "inventory_movements",
+   "policyname": "inventory_movements_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "policyname": "liquidation_campaigns_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "liquidation_items",
+   "policyname": "liquidation_items_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "order_items",
+   "policyname": "order_items_insert_own_or_guest",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "INSERT",
+   "qual": null,
+   "with_check": "can_insert_order_item(order_id)"
+  },
+  {
+   "tabla": "order_items",
+   "policyname": "order_items_read_own_or_admin",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "((EXISTS ( SELECT 1\n   FROM orders\n  WHERE ((orders.id = order_items.order_id) AND (orders.user_id = auth.uid())))) OR (get_user_role() = 'admin'::text))",
+   "with_check": null
+  },
+  {
+   "tabla": "order_items",
+   "policyname": "order_items_tenant_admin_read",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "(is_tenant_admin() AND (EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = order_items.order_id) AND (o.tenant_id = get_auth_tenant_id())))))",
+   "with_check": null
+  },
+  {
+   "tabla": "order_items",
+   "policyname": "order_items_update_admin",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "UPDATE",
+   "qual": "(get_user_role() = 'admin'::text)",
+   "with_check": null
+  },
+  {
+   "tabla": "orders",
+   "policyname": "orders_insert_user_or_guest",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "INSERT",
+   "qual": null,
+   "with_check": "((auth.uid() = user_id) OR (user_id IS NULL))"
+  },
+  {
+   "tabla": "orders",
+   "policyname": "orders_public_insert",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "INSERT",
+   "qual": null,
+   "with_check": "((status = 'pending'::text) AND (user_id IS NULL))"
+  },
+  {
+   "tabla": "orders",
+   "policyname": "orders_read_own_or_admin",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "(is_admin() OR ((auth.uid() IS NOT NULL) AND (user_id = auth.uid())))",
+   "with_check": null
+  },
+  {
+   "tabla": "orders",
+   "policyname": "orders_tenant_admin_read",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "(is_tenant_admin() AND (tenant_id = get_auth_tenant_id()))",
+   "with_check": null
+  },
+  {
+   "tabla": "orders",
+   "policyname": "orders_update_admin",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "UPDATE",
+   "qual": "(get_user_role() = 'admin'::text)",
+   "with_check": null
+  },
+  {
+   "tabla": "orders",
+   "policyname": "orders_update_own_pending",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "UPDATE",
+   "qual": "((auth.uid() = user_id) AND (status = 'pending'::text))",
+   "with_check": null
+  },
+  {
+   "tabla": "payments",
+   "policyname": "payments_insert_user_or_guest",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "INSERT",
+   "qual": null,
+   "with_check": "((auth.uid() = user_id) OR (user_id IS NULL))"
+  },
+  {
+   "tabla": "payments",
+   "policyname": "payments_read_own_or_admin",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "((auth.uid() = user_id) OR (get_user_role() = 'admin'::text))",
+   "with_check": null
+  },
+  {
+   "tabla": "payments",
+   "policyname": "payments_tenant_admin_read",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "(is_tenant_admin() AND (tenant_id = get_auth_tenant_id()))",
+   "with_check": null
+  },
+  {
+   "tabla": "payments",
+   "policyname": "payments_update_admin",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "UPDATE",
+   "qual": "(get_user_role() = 'admin'::text)",
+   "with_check": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "policyname": "petty_cash_movements_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "price_lists",
+   "policyname": "price_lists_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "pricing_rules",
+   "policyname": "pricing_rules_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "product_images",
+   "policyname": "product_images_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "product_prices",
+   "policyname": "product_prices_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "product_variants",
+   "policyname": "product_variants_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "products",
+   "policyname": "products_public_read",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "SELECT",
+   "qual": "((status = 'active'::text) OR ((auth.role() = 'authenticated'::text) AND (is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'products'::text)))))",
+   "with_check": null
+  },
+  {
+   "tabla": "products",
+   "policyname": "products_staff_delete",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "DELETE",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'products'::text)))",
+   "with_check": null
+  },
+  {
+   "tabla": "products",
+   "policyname": "products_staff_insert",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "INSERT",
+   "qual": null,
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'products'::text)))"
+  },
+  {
+   "tabla": "products",
+   "policyname": "products_staff_update",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "UPDATE",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'products'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'products'::text)))"
+  },
+  {
+   "tabla": "purchase_order_items",
+   "policyname": "purchase_order_items_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "purchase_orders",
+   "policyname": "purchase_orders_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "quotation_items",
+   "policyname": "quotation_items_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "quotations",
+   "policyname": "quotations_tenant_plan_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))",
+   "with_check": "(is_platform_admin() OR ((tenant_id = get_auth_tenant_id()) AND user_can_use_feature('inventario'::text, 'inventory'::text)))"
+  },
+  {
+   "tabla": "sale_items",
+   "policyname": "sale_items_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "sale_payments",
+   "policyname": "sale_payments_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "sales",
+   "policyname": "sales_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "series",
+   "policyname": "series_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "shared_access_links",
+   "policyname": "shared_access_links_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "sunat_units",
+   "policyname": "sunat_units_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  },
+  {
+   "tabla": "taxes",
+   "policyname": "taxes_tenant_all",
+   "permissive": "PERMISSIVE",
+   "roles": "{public}",
+   "cmd": "ALL",
+   "qual": "(is_admin() OR (tenant_id = get_auth_tenant_id()))",
+   "with_check": "(is_admin() OR (tenant_id = get_auth_tenant_id()))"
+  }
+ ],
+ "triggers": [
+  {
+   "tabla": "accounting_entries",
+   "trigger": "trg_next_entry_number",
+   "definicion": "CREATE TRIGGER trg_next_entry_number BEFORE INSERT ON public.accounting_entries FOR EACH ROW EXECUTE FUNCTION next_entry_number()"
+  },
+  {
+   "tabla": "order_items",
+   "trigger": "order_items_pin_price",
+   "definicion": "CREATE TRIGGER order_items_pin_price BEFORE INSERT OR UPDATE ON public.order_items FOR EACH ROW EXECUTE FUNCTION pin_order_item_price()"
+  },
+  {
+   "tabla": "order_items",
+   "trigger": "order_items_recalc_total",
+   "definicion": "CREATE TRIGGER order_items_recalc_total AFTER INSERT OR DELETE OR UPDATE ON public.order_items FOR EACH ROW EXECUTE FUNCTION recalc_order_total()"
+  },
+  {
+   "tabla": "payments",
+   "trigger": "set_payments_updated_at",
+   "definicion": "CREATE TRIGGER set_payments_updated_at BEFORE UPDATE ON public.payments FOR EACH ROW EXECUTE FUNCTION handle_updated_at()"
+  },
+  {
+   "tabla": "products",
+   "trigger": "trg_sync_product_title_name",
+   "definicion": "CREATE TRIGGER trg_sync_product_title_name BEFORE INSERT OR UPDATE ON public.products FOR EACH ROW EXECUTE FUNCTION sync_product_title_name()"
+  },
+  {
+   "tabla": "sale_items",
+   "trigger": "sale_items_apply_stock",
+   "definicion": "CREATE TRIGGER sale_items_apply_stock AFTER INSERT ON public.sale_items FOR EACH ROW EXECUTE FUNCTION apply_sale_stock()"
+  }
+ ],
+ "comentarios": [
+  {
+   "tabla": "accounting_entries",
+   "comentario": null
+  },
+  {
+   "tabla": "accounting_entry_lines",
+   "comentario": null
+  },
+  {
+   "tabla": "bundle_items",
+   "comentario": null
+  },
+  {
+   "tabla": "bundles",
+   "comentario": null
+  },
+  {
+   "tabla": "business_settings",
+   "comentario": null
+  },
+  {
+   "tabla": "catalog_items",
+   "comentario": null
+  },
+  {
+   "tabla": "catalogs",
+   "comentario": null
+  },
+  {
+   "tabla": "categories",
+   "comentario": null
+  },
+  {
+   "tabla": "customers",
+   "comentario": null
+  },
+  {
+   "tabla": "expenses",
+   "comentario": null
+  },
+  {
+   "tabla": "inventory_locations",
+   "comentario": null
+  },
+  {
+   "tabla": "inventory_movements",
+   "comentario": null
+  },
+  {
+   "tabla": "liquidation_campaigns",
+   "comentario": null
+  },
+  {
+   "tabla": "liquidation_items",
+   "comentario": null
+  },
+  {
+   "tabla": "order_items",
+   "comentario": null
+  },
+  {
+   "tabla": "orders",
+   "comentario": null
+  },
+  {
+   "tabla": "payments",
+   "comentario": null
+  },
+  {
+   "tabla": "petty_cash_movements",
+   "comentario": null
+  },
+  {
+   "tabla": "price_lists",
+   "comentario": null
+  },
+  {
+   "tabla": "pricing_rules",
+   "comentario": null
+  },
+  {
+   "tabla": "product_images",
+   "comentario": null
+  },
+  {
+   "tabla": "product_prices",
+   "comentario": null
+  },
+  {
+   "tabla": "product_variants",
+   "comentario": null
+  },
+  {
+   "tabla": "products",
+   "comentario": null
+  },
+  {
+   "tabla": "purchase_order_items",
+   "comentario": null
+  },
+  {
+   "tabla": "purchase_orders",
+   "comentario": null
+  },
+  {
+   "tabla": "quotation_items",
+   "comentario": null
+  },
+  {
+   "tabla": "quotations",
+   "comentario": null
+  },
+  {
+   "tabla": "sale_items",
+   "comentario": null
+  },
+  {
+   "tabla": "sale_payments",
+   "comentario": null
+  },
+  {
+   "tabla": "sales",
+   "comentario": null
+  },
+  {
+   "tabla": "series",
+   "comentario": null
+  },
+  {
+   "tabla": "shared_access_links",
+   "comentario": null
+  },
+  {
+   "tabla": "sunat_units",
+   "comentario": null
+  },
+  {
+   "tabla": "taxes",
+   "comentario": null
+  }
+ ],
+ "funcion_handle_updated_at": [
+  {
+   "firma": "handle_updated_at()",
+   "definicion": "CREATE OR REPLACE FUNCTION public.handle_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nbegin\n  new.updated_at = now();\n  return new;\nend;\n$function$\n"
+  }
+ ]
+}

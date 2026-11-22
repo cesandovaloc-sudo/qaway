@@ -270,9 +270,30 @@ export default function DatosEmpresaCard({
 }
 
 
+function normalizarBusquedaSelect(texto) {
+  return String(texto || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
 function SelectEstilizado({ value, placeholder, options, onChange, disabled }) {
   const [open, setOpen] = useState(false)
+  const [highlightedIdx, setHighlightedIdx] = useState(-1)
   const wrapRef = useRef(null)
+  const listRef = useRef(null)
+  const optionRefs = useRef([])
+  const bufferRef = useRef('')
+  const bufferTimerRef = useRef(null)
+
+  const centrarOpcion = (idx) => {
+    const lista = listRef.current
+    const item = optionRefs.current[idx]
+    if (!lista || !item) return
+    const targetTop = item.offsetTop - lista.clientHeight / 2 + item.offsetHeight / 2
+    lista.scrollTop = Math.max(0, targetTop)
+  }
 
   useEffect(() => {
     if (!open) return
@@ -283,10 +304,67 @@ function SelectEstilizado({ value, placeholder, options, onChange, disabled }) {
     return () => document.removeEventListener('mousedown', onDoc)
   }, [open])
 
+  useEffect(() => () => {
+    if (bufferTimerRef.current) window.clearTimeout(bufferTimerRef.current)
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+    const activeIdx = options.findIndex((o) => o.value === value)
+    const idx = activeIdx >= 0 ? activeIdx : 0
+    setHighlightedIdx(idx)
+    requestAnimationFrame(() => centrarOpcion(idx))
+  }, [open, value, options])
+
+  const handleKeyDown = (e) => {
+    if (disabled || options.length === 0) return
+    if (e.key === 'Escape') {
+      if (open) { e.preventDefault(); setOpen(false) }
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (!open) { setOpen(true); return }
+      const next = highlightedIdx < options.length - 1 ? highlightedIdx + 1 : 0
+      setHighlightedIdx(next)
+      centrarOpcion(next)
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (!open) { setOpen(true); return }
+      const prev = highlightedIdx > 0 ? highlightedIdx - 1 : options.length - 1
+      setHighlightedIdx(prev)
+      centrarOpcion(prev)
+      return
+    }
+    if (e.key === 'Enter' && open && highlightedIdx >= 0 && options[highlightedIdx]) {
+      e.preventDefault()
+      onChange(options[highlightedIdx].value)
+      setOpen(false)
+      return
+    }
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const char = normalizarBusquedaSelect(e.key)
+      if (!char) return
+      e.preventDefault()
+      if (bufferTimerRef.current) window.clearTimeout(bufferTimerRef.current)
+      bufferRef.current += char
+      bufferTimerRef.current = window.setTimeout(() => { bufferRef.current = '' }, 700)
+      const q = bufferRef.current
+      let idx = options.findIndex((o) => normalizarBusquedaSelect(o.label).startsWith(q))
+      if (idx < 0) idx = options.findIndex((o) => normalizarBusquedaSelect(o.label).includes(q))
+      if (idx >= 0) {
+        if (open) { setHighlightedIdx(idx); centrarOpcion(idx) }
+        else onChange(options[idx].value)
+      }
+    }
+  }
+
   const selected = options.find((o) => o.value === value)
 
   return (
-    <div ref={wrapRef} style={{ position: 'relative', width: '100%' }}>
+    <div ref={wrapRef} onKeyDown={handleKeyDown} style={{ position: 'relative', width: '100%' }}>
       <button
         type="button"
         disabled={disabled}
@@ -315,6 +393,7 @@ function SelectEstilizado({ value, placeholder, options, onChange, disabled }) {
 
       {open && (
         <div
+          ref={listRef}
           style={{
             position: 'absolute',
             top: 'calc(100% + 4px)',
@@ -330,11 +409,13 @@ function SelectEstilizado({ value, placeholder, options, onChange, disabled }) {
             padding: '4px',
           }}
         >
-          {options.map((opt) => {
+          {options.map((opt, idx) => {
             const active = opt.value === value
+            const highlighted = idx === highlightedIdx
             return (
               <button
                 key={opt.value}
+                ref={(el) => { optionRefs.current[idx] = el }}
                 type="button"
                 onClick={() => {
                   onChange(opt.value)
@@ -348,19 +429,14 @@ function SelectEstilizado({ value, placeholder, options, onChange, disabled }) {
                   padding: '8px 10px',
                   border: 'none',
                   borderRadius: '7px',
-                  backgroundColor: active ? '#eff6ff' : 'transparent',
+                  backgroundColor: active ? '#eff6ff' : (highlighted ? '#f1f5f9' : 'transparent'),
                   color: active ? '#1d4ed8' : '#334155',
                   fontSize: '13.5px',
                   fontWeight: active ? 500 : 400,
                   cursor: 'pointer',
                   textAlign: 'left',
                 }}
-                onMouseEnter={(e) => {
-                  if (!active) e.currentTarget.style.backgroundColor = '#f8fafc'
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) e.currentTarget.style.backgroundColor = 'transparent'
-                }}
+                onMouseEnter={() => setHighlightedIdx(idx)}
               >
                 <span>{opt.label}</span>
                 {active && <Check size={14} />}

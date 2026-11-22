@@ -28,11 +28,17 @@
 - **Órganos de Alta Dirección:** conducción política/estratégica y decisiones (titular de la entidad/pliego).
 - **Órganos de Asesoramiento/Consultivos:** planeamiento, asesoría jurídica, presupuesto, racionalización (apoyo técnico-normativo a la alta dirección).
 - **Órganos de Apoyo/Administrativos:** gestión interna y soporte (administración general, recursos humanos, finanzas/tesorería, contabilidad, logística/abastecimiento, tecnologías de la información, patrimonio, etc.).
-- **Órganos de Línea/Misionales:** ejecución de las competencias sustantivas del sector (direcciones/gerencias que prestan el servicio o cumplen la función propia del organismo).
+- **Órganos de Línea:** ejecución de las competencias sustantivas del sector (direcciones/gerencias que prestan el servicio o cumplen la función propia del organismo).
 - **Órganos de Control (institucional):** control interno/auditoría (según el marco normativo aplicable).
 - **Órganos Desconcentrados/Descentralizados/Territoriales (cuando aplica):** instancias en el territorio que dependen o se articulan con la entidad.
 
 > Nota: la denominación exacta (Ministerio/Secretaría/Gerencia, Dirección General/Dirección, Oficina, Unidad, etc.) y la existencia de cada tipo de órgano dependen del ordenamiento jurídico y del tamaño/competencias de cada entidad. La estructura es una convención de referencia, no una imposición rígida.
+
+> **Fuente canónica.** La tabla siguiente es la única lista del sector público.
+> `organizacionPlantillas.ts` → `PLANTILLA_SECTOR_PUBLICO` la replica tal cual.
+> No crear otra lista en el front, en Supabase ni en tests. Si cambia la lista,
+> se edita primero aquí y luego el array. DRE/UGEL son sedes externas (Paso 1),
+> no áreas de la sede central.
 
 ### Representación jerárquica de referencia (genérica, Estado)
 
@@ -48,15 +54,15 @@
 | 1.2.1.2 | 4 | Finanzas / Contabilidad / Tesorería | Oficina de Finanzas | Gestión económica-financiera. |
 | 1.2.1.3 | 4 | Logística / Abastecimiento / Patrimonio | Oficina de Logística | Compras, bienes, servicios generales. |
 | 1.2.1.4 | 4 | Tecnologías de la Información / Sistemas | Oficina de TI | Soporte y sistemas. |
-| 1.3 | 2 | **Órganos de Línea (Misionales)** | Direcciones Generales / Gerencias / Direcciones sustantivas del sector | Ejecución de competencias y servicios propios del organismo. |
-| 1.3.1 | 3 | Dirección/Unidad de Línea A (misión 1) | p. ej. Dirección de Educación, Salud, Obras, Políticas, etc. (según sector) | Función sustantiva específica. |
+| 1.3 | 2 | **Órganos de Línea** | Direcciones Generales / Gerencias / Direcciones sustantivas del sector | Ejecución de competencias y servicios propios del organismo. |
+| 1.3.1 | 3 | Dirección/Unidad de Línea A | p. ej. Dirección de Educación, Salud, Obras, Políticas, etc. (según sector) | Función sustantiva específica. |
 | 1.3.1.1 | 4 | Subdirección / Coordinación / Área A.1 | (según entidad) | Ejecución operativa especializada. |
-| 1.3.2 | 3 | Dirección/Unidad de Línea B (misión 2) | (según sector) | Función sustantiva específica. |
+| 1.3.2 | 3 | Dirección/Unidad de Línea B | (según sector) | Función sustantiva específica. |
 | 1.4 | 2 | **Órgano de Control Institucional** *(cuando corresponda)* | Órgano de Control Interno / Auditoría Interna | Control, auditoría y supervisión interna. |
 | 1.5 | 2 | **Órganos Desconcentrados / Instancias Territoriales** *(cuando corresponda)* | Direcciones regionales, oficinas zonales, unidades ejecutoras, etc. | Ejecución/desconcentración en el territorio. |
 | 1.5.1 | 3 | Instancia territorial / desconcentrada A | (según ámbito) | Gestión en ámbito territorial específico. |
 
-**Ejemplo de referencia (Perú, investigado):** nivel central del Ejecutivo = Presidente de la República, Presidencia del Consejo de Ministros (PCM) y Ministerios sectoriales (*Consejo de Ministros del Perú*). Nivel regional = Gobernador regional, Vicegobernador y Consejo Regional como órganos del gobierno regional, con estructura de gerencias/direcciones para la gestión (*Gobiernos regionales del Perú*). Estos casos ilustran la misma lógica jerárquica-funcional (dirección, asesoría/apoyo, línea/misión, instancia territorial) aplicada a distintos niveles del Estado.
+**Ejemplo de referencia (Perú, investigado):** nivel central del Ejecutivo = Presidente de la República, Presidencia del Consejo de Ministros (PCM) y Ministerios sectoriales (*Consejo de Ministros del Perú*). Nivel regional = Gobernador regional, Vicegobernador y Consejo Regional como órganos del gobierno regional, con estructura de gerencias/direcciones para la gestión (*Gobiernos regionales del Perú*). Estos casos ilustran la misma lógica jerárquica-funcional (dirección, asesoría/apoyo, línea, instancia territorial) aplicada a distintos niveles del Estado.
 
 ---
 
