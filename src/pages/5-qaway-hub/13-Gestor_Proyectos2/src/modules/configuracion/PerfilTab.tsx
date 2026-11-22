@@ -1,10 +1,12 @@
 // @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
-import { AlertCircle, Camera, CheckCircle2, Mail, Phone, Save, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import { AlertCircle, Camera, CheckCircle2, Mail, Pencil, Phone, Save, ShieldCheck, Trash2, UserRound, X } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { invalidarPerfilVisible, usePerfilVisible } from '../../services/perfilVisibleService';
-import { formatearTelefono, telefonoParaGuardar } from '../../services/comunicacionesService';
+import { telefonoParaGuardar } from '../../services/comunicacionesService';
+import { PAISES } from '@/config/paises';
+import SelectEstilizado from './SelectEstilizado';
 import { invalidarCacheAcceso } from '../../../../../../router/sessionCache';
 import { esImagenPermitida, optimizarAvatar } from '../../../../14-Librerías/services/imageOptimization';
 import UpdatePasswordCard, { hasPendingPasswordChange } from '../../../../../../components/auth/UpdatePasswordCard';
@@ -25,11 +27,14 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
   const [nombreGuardado, setNombreGuardado] = useState('');
   const [telefonoInput, setTelefonoInput] = useState('');
   const [telefonoGuardado, setTelefonoGuardado] = useState('');
+  const [prefijoTel, setPrefijoTel] = useState('+51');
+  const [prefijoGuardado, setPrefijoGuardado] = useState('+51');
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [fotoPendiente, setFotoPendiente] = useState<File | null>(null);
   const [fotoEliminada, setFotoEliminada] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [savingProfile, setSavingProfile] = useState(false);
+  const [editando, setEditando] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -37,11 +42,16 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
   const rol = visible?.rol || perfil?.rol || 'viewer';
   const empresa = visible?.tenantNombre || '';
   const fotoMostrada = fotoPendiente ? previewUrl : (fotoEliminada ? '' : avatarUrl);
+  const paisTel = PAISES.find((p: any) => p.dial === prefijoTel) || PAISES[0];
+  const minTel = paisTel?.minDigitos ?? 8;
+  const maxTel = paisTel?.maxDigitos ?? 15;
+  const telefonoDigits = telefonoInput.replace(/\D/g, '');
   const hayCambios = Boolean(fotoPendiente) || fotoEliminada
     || nombreInput.trim() !== nombreGuardado
-    || telefonoInput.trim() !== telefonoGuardado;
-  const telefonoValido = !telefonoInput.trim() || Boolean(telefonoParaGuardar(telefonoInput));
-  const puedeGuardar = hayCambios && Boolean(nombreInput.trim()) && telefonoValido && !savingProfile;
+    || telefonoDigits !== telefonoGuardado
+    || prefijoTel !== prefijoGuardado;
+  const telefonoValido = !telefonoDigits || (telefonoDigits.length >= minTel && telefonoDigits.length <= maxTel);
+  const puedeGuardar = editando && hayCambios && Boolean(nombreInput.trim()) && telefonoValido && !savingProfile;
 
   useEffect(() => {
     const nombre = String(visible?.nombre || '').trim();
@@ -50,9 +60,20 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
   }, [visible?.nombre]);
 
   useEffect(() => {
-    const telefono = formatearTelefono(visible?.phone || '');
-    setTelefonoInput(telefono);
-    setTelefonoGuardado(telefono);
+    const raw = String(visible?.phone || '').trim();
+    const digitsOnly = raw.replace(/\D/g, '');
+    const matchPais = PAISES.find((p: any) => raw.startsWith(p.dial) || (digitsOnly.length > p.maxDigitos && digitsOnly.startsWith(p.dial.replace(/\D/g, ''))));
+    const dial = matchPais?.dial || '+51';
+    const dialDigits = dial.replace(/\D/g, '');
+    const localDigits = raw.startsWith(dial)
+      ? raw.slice(dial.length).replace(/\D/g, '')
+      : digitsOnly.length > (matchPais?.maxDigitos ?? 9) && digitsOnly.startsWith(dialDigits)
+        ? digitsOnly.slice(dialDigits.length)
+        : digitsOnly;
+    setPrefijoTel(dial);
+    setPrefijoGuardado(dial);
+    setTelefonoInput(localDigits);
+    setTelefonoGuardado(localDigits);
   }, [visible?.phone]);
 
   useEffect(() => () => {
@@ -85,11 +106,15 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
     // El teléfono NO se copia a user_metadata: su única fuente es users.phone.
     const uid = userData?.user?.id || perfil?.userId;
     if (uid) {
-      const { error: usersErr } = await supabase
+      const { data: filas, error: usersErr } = await supabase
         .from('users')
         .update({ full_name: nuevoNombre, avatar_url: nuevoAvatar, phone: nuevoTelefono })
-        .eq('id', uid);
+        .eq('id', uid)
+        .select('id');
       if (usersErr) throw usersErr;
+      if (!filas || filas.length === 0) {
+        throw new Error('No se pudo guardar el teléfono en tu perfil. Vuelve a intentarlo.');
+      }
     }
   };
 
@@ -141,7 +166,13 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
       const uid = perfil?.userId;
       if (!uid) throw new Error('Tu sesión no está disponible para guardar los cambios.');
       if (!nombreInput.trim()) throw new Error('Escribe tu nombre antes de guardar.');
-      if (!telefonoValido) throw new Error('El teléfono debe tener entre 8 y 15 dígitos.');
+      if (!telefonoValido) {
+        throw new Error(
+          minTel === maxTel
+            ? `El teléfono para ${paisTel?.nombre || 'este país'} debe tener ${maxTel} dígitos.`
+            : `El teléfono para ${paisTel?.nombre || 'este país'} debe tener entre ${minTel} y ${maxTel} dígitos.`
+        );
+      }
 
       let avatarFinal: string | null = avatarUrl || null;
       if (fotoEliminada) {
@@ -154,19 +185,25 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
         avatarFinal = await subirAvatar(fotoPendiente, uid);
       }
 
-      const telefonoFinal = telefonoParaGuardar(telefonoInput);
+      const telLocal = telefonoInput.replace(/\D/g, '');
+      const telefonoFinal = telLocal ? telefonoParaGuardar(`${prefijoTel}${telLocal}`) : null;
+      if (telLocal && !telefonoFinal) {
+        throw new Error('El formato del teléfono no es válido para guardarse.');
+      }
       await persistirPerfil(nombreInput.trim(), avatarFinal, telefonoFinal);
 
       setAvatarUrl(avatarFinal || '');
       setNombreGuardado(nombreInput.trim());
-      setTelefonoGuardado(formatearTelefono(telefonoFinal || ''));
-      setTelefonoInput(formatearTelefono(telefonoFinal || ''));
+      setPrefijoGuardado(prefijoTel);
+      setTelefonoGuardado(telLocal);
+      setTelefonoInput(telLocal);
       setFotoPendiente(null);
       setFotoEliminada(false);
       setPreviewUrl('');
       // El perfil compartido y la caché de acceso deben reflejar el teléfono ya.
       invalidarPerfilVisible();
       invalidarCacheAcceso();
+      setEditando(false);
       setProfileMsg({ type: 'ok', text: 'Cambios guardados correctamente.' });
       notify?.('Perfil actualizado correctamente.');
     } catch (err: any) {
@@ -187,6 +224,40 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
             <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#0f172a' }}>Mi Perfil</h2>
             <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Tus datos personales sincronizados en todo el ecosistema Qaway.</p>
           </div>
+          <button
+            type="button"
+            disabled={savingProfile}
+            onClick={() => {
+              if (editando) {
+                setNombreInput(nombreGuardado);
+                setPrefijoTel(prefijoGuardado);
+                setTelefonoInput(telefonoGuardado);
+                setFotoPendiente(null);
+                setFotoEliminada(false);
+                setPreviewUrl('');
+              }
+              setProfileMsg(null);
+              setEditando((v) => !v);
+            }}
+            style={{
+              marginLeft: 'auto',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#0f172a',
+              fontSize: '12.5px',
+              fontWeight: 500,
+              cursor: savingProfile ? 'not-allowed' : 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            {editando ? <X size={13} /> : <Pencil size={13} />}
+            <span>{editando ? 'Cancelar' : 'Editar'}</span>
+          </button>
         </div>
 
         <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -214,9 +285,9 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
               <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
               <button
                 type="button"
-                disabled={savingProfile}
+                disabled={!editando || savingProfile}
                 onClick={() => fileRef.current?.click()}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', background: editando ? '#fff' : '#f1f5f9', color: editando ? '#0f172a' : '#64748b', fontSize: '13px', fontWeight: 500, cursor: editando && !savingProfile ? 'pointer' : 'not-allowed' }}
               >
                 <Camera size={14} />
                 <span>Cambiar foto</span>
@@ -224,11 +295,11 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
               {!fotoEliminada && fotoMostrada && (
                 <button
                   type="button"
-                  disabled={savingProfile}
+                  disabled={!editando || savingProfile}
                   onClick={handleEliminarFoto}
                   title="Eliminar foto"
                   aria-label="Eliminar foto"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 10px', borderRadius: '8px', border: '1px solid #fecaca', background: '#fef2f2', color: '#b91c1c', fontSize: '13px', cursor: 'pointer' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 10px', borderRadius: '8px', border: '1px solid #fecaca', background: '#fef2f2', color: '#b91c1c', fontSize: '13px', cursor: editando && !savingProfile ? 'pointer' : 'not-allowed', opacity: editando ? 1 : 0.55 }}
                 >
                   <Trash2 size={14} />
                 </button>
@@ -253,9 +324,13 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
             <input
               type="text"
               value={nombreInput}
-              onChange={(e) => setNombreInput(e.target.value)}
+              readOnly={!editando}
+              onChange={(e) => {
+                setNombreInput(e.target.value);
+                setProfileMsg(null);
+              }}
               placeholder="Tu nombre completo"
-              style={{ flex: 1, minWidth: '180px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', color: '#0f172a' }}
+              style={{ flex: 1, minWidth: '180px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: editando ? '#fff' : '#f1f5f9', fontSize: '14px', color: editando ? '#0f172a' : '#475569', cursor: editando ? 'text' : 'default' }}
             />
           </div>
 
@@ -263,19 +338,38 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: `1px solid ${telefonoValido ? '#e2e8f0' : '#fecaca'}`, flexWrap: 'wrap' }}>
             <span style={{ color: '#64748b', display: 'flex' }}><Phone size={15} /></span>
             <span style={{ fontSize: '12px', color: '#64748b', width: '150px', flexShrink: 0 }}>Teléfono / WhatsApp</span>
+            <div style={{ width: '130px', flexShrink: 0 }}>
+              <SelectEstilizado
+                value={prefijoTel}
+                options={PAISES.map((p: any) => ({ value: p.dial, label: `${p.dial} (${p.codigo})` }))}
+                disabled={!editando}
+                saved={!editando}
+                onChange={(val) => {
+                  const p = PAISES.find((x: any) => x.dial === val);
+                  setPrefijoTel(val);
+                  if (p?.maxDigitos) setTelefonoInput((prev) => prev.slice(0, p.maxDigitos));
+                  setProfileMsg(null);
+                }}
+              />
+            </div>
             <input
               type="tel"
-              value={telefonoInput}
+              readOnly={!editando}
+              value={telefonoInput.replace(/\D/g, '').replace(/(\d{3})(?=\d)/g, '$1 ')}
               onChange={(e) => {
-                setTelefonoInput(e.target.value);
+                setTelefonoInput(e.target.value.replace(/\D/g, '').slice(0, maxTel));
                 setProfileMsg(null);
               }}
-              placeholder="+51 999 999 999"
-              style={{ flex: 1, minWidth: '180px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', color: '#0f172a' }}
+              placeholder={'9'.repeat(maxTel).replace(/(\d{3})(?=\d)/g, '$1 ')}
+              style={{ flex: 1, minWidth: '160px', padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', background: editando ? '#fff' : '#f1f5f9', fontSize: '14px', color: editando ? '#0f172a' : '#475569', cursor: editando ? 'text' : 'default' }}
             />
           </div>
           {!telefonoValido && (
-            <div style={{ fontSize: '12px', color: '#b91c1c', textAlign: 'right' }}>El teléfono debe tener entre 8 y 15 dígitos.</div>
+            <div style={{ fontSize: '12px', color: '#b91c1c', textAlign: 'right' }}>
+              {minTel === maxTel
+                ? `El teléfono para ${paisTel?.nombre || 'este país'} debe tener ${maxTel} dígitos.`
+                : `El teléfono para ${paisTel?.nombre || 'este país'} debe tener entre ${minTel} y ${maxTel} dígitos.`}
+            </div>
           )}
 
           <Fila icono={<Mail size={15} />} etiqueta="Correo" valor={email || 'Sin correo registrado'} />
@@ -294,9 +388,9 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
               width: '100%',
               padding: '10px 16px',
               borderRadius: '8px',
-              border: 'none',
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
+              border: puedeGuardar ? '1px solid #2563eb' : '1px solid #cbd5e1',
+              backgroundColor: puedeGuardar ? '#2563eb' : '#e2e8f0',
+              color: puedeGuardar ? '#ffffff' : '#64748b',
               fontSize: '14px',
               fontWeight: 500,
               cursor: puedeGuardar ? 'pointer' : 'not-allowed',
@@ -304,7 +398,6 @@ export default function PerfilTab({ notify }: PerfilTabProps) {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              opacity: puedeGuardar ? 1 : 0.55,
             }}
           >
             <Save size={16} />

@@ -107,7 +107,7 @@ export function validarDatosEmpresa(form) {
 export function contactoDesdeForm(form, prefix) {
   return {
     email: form.email.trim(),
-    phone: `${prefix} ${form.phone}`.trim(),
+    phone: `${prefix}${String(form.phone || '').replace(/\D/g, '')}`.trim(),
     address: '',
     country: form.country,
   }
@@ -243,7 +243,7 @@ export default function DatosEmpresaCard({
               style={input({ width: '84px', flexShrink: 0 })}
             />
             <input
-              value={form.phone}
+              value={String(form.phone || '').replace(/\D/g, '').replace(/(\d{3})(?=\d)/g, '$1 ')}
               onChange={(e) => setNumeric('phone', e.target.value, pais?.maxDigitos ? pais.maxDigitos + 2 : 15)}
               placeholder="999 999 999"
               inputMode="tel"

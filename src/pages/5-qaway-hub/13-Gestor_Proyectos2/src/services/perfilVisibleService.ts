@@ -23,7 +23,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import { obtenerUsuarioSesion } from './contextoSesion';
-import { consultaCacheada } from '../../../../../router/sessionCache';
+import { consultaCacheada, invalidarCacheClave } from '../../../../../router/sessionCache';
 
 export interface PerfilVisible {
   userId: string;
@@ -54,6 +54,8 @@ export interface PerfilVisible {
 
 let cachePerfil: PerfilVisible | null | undefined = undefined;
 let enVuelo: Promise<PerfilVisible | null> | null = null;
+let idPerfilCache: string | null = null;
+const suscriptores = new Set<() => void>();
 
 function nombreDe(fila: any, user: { email: string | null; user_metadata: Record<string, unknown> }): string {
   const completo = [fila?.full_name, fila?.last_name].filter(Boolean).join(' ').trim();
@@ -75,9 +77,13 @@ async function resolver(): Promise<PerfilVisible | null> {
   if (!supabase) return null;
   const user = await obtenerUsuarioSesion();
   if (!user) return null;
+  idPerfilCache = user.id;
 
+  // Clave propia: HubAccessGuard y contextoSesion usan `user:<id>` con un select
+  // SIN phone. Compartir clave hacía que esta lectura recibiera esa fila y el
+  // campo del perfil apareciera vacío tras recargar, aunque users.phone exista.
   const { data: uRow } = await consultaCacheada(
-    `user:${user.id}`,
+    `user-perfil:${user.id}`,
     () => supabase!
       .from('users')
       .select('id, full_name, last_name, email, role, is_platform_admin, tenant_id, avatar_url, phone')
@@ -177,6 +183,8 @@ export async function cargarPerfilVisible(): Promise<PerfilVisible | null> {
 export function invalidarPerfilVisible(): void {
   cachePerfil = undefined;
   enVuelo = null;
+  if (idPerfilCache) invalidarCacheClave(`user-perfil:${idPerfilCache}`);
+  suscriptores.forEach((actualizar) => actualizar());
 }
 
 if (supabase) {
@@ -202,9 +210,12 @@ export function usePerfilVisible(): {
   const [perfil, setPerfil] = useState<PerfilVisible | null | undefined>(cachePerfil);
   useEffect(() => {
     let vigente = true;
-    if (cachePerfil !== undefined) return () => { vigente = false; };
-    cargarPerfilVisible().then((p) => { if (vigente) setPerfil(p); });
-    return () => { vigente = false; };
+    const actualizar = () => {
+      cargarPerfilVisible().then((p) => { if (vigente) setPerfil(p); });
+    };
+    suscriptores.add(actualizar);
+    actualizar();
+    return () => { vigente = false; suscriptores.delete(actualizar); };
   }, []);
 
   const recargar = async () => {

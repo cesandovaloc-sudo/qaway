@@ -3,7 +3,8 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import './usuarios.css';
 import { useTableEngine, ColumnHeader, TableEngineStatus, type ColumnDef } from '../../shared/table-engine';
 import { usePerfilVisible } from '../../services/perfilVisibleService';
-import { formatearTelefono, linkWhatsApp, telefonoDeContacto } from '../../services/comunicacionesService';
+import { formatearTelefono, linkWhatsApp, normalizarTelefono, telefonoDeContacto } from '../../services/comunicacionesService';
+import { PAISES } from '@/config/paises';
 import {
   Bell, BriefcaseBusiness, Building2, Check, ChevronDown, ChevronLeft, ChevronRight,
   CircleHelp, ContactRound, Copy, Download, History, Mail, MapPin, MoreVertical,
@@ -31,6 +32,24 @@ type Person = {
   initials: string;
   avatar?: string;
   assignments: number;
+};
+
+/** Separa el código de país del número local usando el catálogo de PAISES. */
+const separarTelefono = (raw: string): { codigo: string; numero: string } => {
+  const digits = normalizarTelefono(raw);
+  if (!digits) return { codigo: '', numero: '' };
+  const ordenados = [...PAISES].sort(
+    (a: any, b: any) => String(b.dial).replace(/\D/g, '').length - String(a.dial).replace(/\D/g, '').length
+  );
+  for (const p of ordenados) {
+    const dial = String(p.dial).replace(/\D/g, '');
+    if (!digits.startsWith(dial)) continue;
+    const local = digits.slice(dial.length);
+    if (local.length >= (p.minDigitos ?? 8) && local.length <= (p.maxDigitos ?? 15)) {
+      return { codigo: p.dial, numero: local };
+    }
+  }
+  return { codigo: '', numero: digits };
 };
 
 const initialPeople: Person[] = [
@@ -278,8 +297,11 @@ export default function UsuariosView({ onActions }: { onActions?: (h: UserBinds)
 
   const exportCsv = () => {
     const csv = [
-      ['Nombre', 'Correo', 'Cargo', 'Tipo', 'Sede / Área', 'Estado', 'Último acceso', 'Teléfono'],
-      ...filtered.map((p) => [p.name, p.email, p.role, p.type, p.org, p.status, p.lastAccess, p.phone]),
+      ['Nombre', 'Correo', 'Cargo', 'Tipo', 'Sede / Área', 'Estado', 'Último acceso', 'Código de país', 'Teléfono'],
+      ...filtered.map((p) => {
+        const tel = separarTelefono(p.phone);
+        return [p.name, p.email, p.role, p.type, p.org, p.status, p.lastAccess, tel.codigo, tel.numero];
+      }),
     ]
       .map((row) => row.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(','))
       .join('\n');

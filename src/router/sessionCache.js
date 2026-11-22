@@ -56,6 +56,11 @@ export function consultaCacheada(key, loader, ttl = TTL_MS) {
   return promise
 }
 
+/** Invalida una sola clave de consulta ( útil cuando dos selects comparten TTL). */
+export function invalidarCacheClave(key) {
+  cacheAcceso.delete(key)
+}
+
 export function invalidarCacheAcceso() {
   cacheAcceso.clear()
   invalidarSesionCompartida()

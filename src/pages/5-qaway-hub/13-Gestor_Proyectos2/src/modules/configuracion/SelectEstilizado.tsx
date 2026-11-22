@@ -12,6 +12,7 @@ interface SelectEstilizadoProps {
   options: SelectOption[];
   onChange: (value: string) => void;
   disabled?: boolean;
+  saved?: boolean;
 }
 
 export const SelectEstilizado: React.FC<SelectEstilizadoProps> = ({
@@ -20,6 +21,7 @@ export const SelectEstilizado: React.FC<SelectEstilizadoProps> = ({
   options,
   onChange,
   disabled = false,
+  saved = false,
 }) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -53,8 +55,8 @@ export const SelectEstilizado: React.FC<SelectEstilizadoProps> = ({
           justifyContent: 'space-between',
           textAlign: 'left',
           cursor: disabled ? 'not-allowed' : 'pointer',
-          backgroundColor: disabled ? '#f8fafc' : '#ffffff',
-          color: selected ? '#0f172a' : '#94a3b8',
+          backgroundColor: disabled ? '#f8fafc' : (saved ? '#f1f5f9' : '#ffffff'),
+          color: selected ? (saved ? '#475569' : '#0f172a') : '#94a3b8',
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

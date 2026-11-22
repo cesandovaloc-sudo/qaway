@@ -5,13 +5,22 @@ import { usePerfilGp } from '../../services/gpPermisosService';
 import { construirBorradoresPlantilla, type PlantillaSector } from '../../services/organizacionPlantillas';
 import { crearEstructuraDesdePlantilla } from '../../services/organizacionEscritura';
 import SelectEstilizado from './SelectEstilizado';
+import { SedeUbicacionFields, type DatosUbicacionSede } from './SedeUbicacionFields';
 
 interface SedeRow {
   id: string;
   nombre: string;
   tipo_codigo: string | null;
   es_principal: boolean;
+  pais: string | null;
   departamento: string | null;
+  provincia: string | null;
+  distrito: string | null;
+  ubigeo: string | null;
+  direccion: string | null;
+  referencia_ubicacion: string | null;
+  latitud: number | string | null;
+  longitud: number | string | null;
 }
 
 interface UnidadRow {
@@ -30,6 +39,8 @@ interface ConfigGestionRow {
   puede_programar_reuniones: boolean;
   puede_gestionar_participantes: boolean;
   puede_solicitar_informacion: boolean;
+  activo: boolean;
+  metadata: Record<string, unknown> | null;
 }
 
 type ModoSedes = '' | 'una' | 'varias' | 'sin_sede';
@@ -43,13 +54,35 @@ export const OrganizacionTab: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = window.setTimeout(() => setFeedback(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [aliasDraft, setAliasDraft] = useState<string>('');
   const [arbolExpandido, setArbolExpandido] = useState<boolean>(false);
   const [editandoSector, setEditandoSector] = useState<boolean>(false);
+  const [editandoSedes, setEditandoSedes] = useState<boolean>(false);
+  const [editandoGobernanza, setEditandoGobernanza] = useState<boolean>(false);
 
-  const [sedeCentralNombre, setSedeCentralNombre] = useState('Sede Central Lima');
-  const [sedeCentralDepto, setSedeCentralDepto] = useState('Lima');
+  const [sedeCentral, setSedeCentral] = useState<DatosUbicacionSede>({
+    nombre: 'Sede Central Lima',
+    pais: 'Perú',
+    departamento: 'Lima',
+    provincia: 'Lima',
+    distrito: 'Miraflores',
+    ubigeo: '',
+    direccion: '',
+    referencia: '',
+    latitud: '',
+    longitud: '',
+  });
+  const [cantidadSedes, setCantidadSedes] = useState('1');
+  const [cantidadGuardada, setCantidadGuardada] = useState<number | null>(null);
+  const [registrandoExternas, setRegistrandoExternas] = useState(false);
+  const [externas, setExternas] = useState<DatosUbicacionSede[]>([]);
 
   // Pasos 4 y 5: gobernanza de la gestion de proyectos (tabla ya existente).
   const [configGestion, setConfigGestion] = useState<ConfigGestionRow | null>(null);
@@ -73,6 +106,75 @@ export const OrganizacionTab: React.FC = () => {
   );
   const sedePrincipal = useMemo(() => sedes.find((s) => s.es_principal), [sedes]);
 
+  const nuevaSedeVacia = (): DatosUbicacionSede => ({
+    nombre: '',
+    pais: 'Perú',
+    departamento: '',
+    provincia: '',
+    distrito: '',
+    ubigeo: '',
+    direccion: '',
+    referencia: '',
+    latitud: '',
+    longitud: '',
+  });
+
+  const aCoordenada = (valor: string): number | null => {
+    if (!valor.trim()) return null;
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : null;
+  };
+
+  const guardarConfiguracionSedes = async (modalidad: ModoSedes, cantidad: number) => {
+    if (!supabase || !perfil?.tenantId) {
+      return { ok: false, error: 'No se detectó una empresa activa en tu sesión.' };
+    }
+    const metadata = (configGestion?.metadata && typeof configGestion.metadata === 'object' ? configGestion.metadata : {}) as Record<string, unknown>;
+    const base = configGestion
+      ? {
+          unidad_responsable_id: configGestion.unidad_responsable_id,
+          alcance_asignacion_tareas: configGestion.alcance_asignacion_tareas,
+          puede_dar_seguimiento: configGestion.puede_dar_seguimiento,
+          puede_programar_reuniones: configGestion.puede_programar_reuniones,
+          puede_gestionar_participantes: configGestion.puede_gestionar_participantes,
+          puede_solicitar_informacion: configGestion.puede_solicitar_informacion,
+          activo: configGestion.activo,
+        }
+      : {};
+    const { error } = await supabase
+      .from('gp_config_gestion_proyectos')
+      .upsert({
+        empresa_id: perfil.tenantId,
+        ...base,
+        metadata: { ...metadata, modalidad_sedes: modalidad, cantidad_sedes: cantidad },
+      }, { onConflict: 'empresa_id' });
+    return error ? { ok: false, error: error.message } : { ok: true, error: '' };
+  };
+
+  const handleSeleccionarModo = async (valor: ModoSedes) => {
+    setModoSedes(valor);
+    if (valor === 'una') {
+      setCantidadSedes('1');
+      setRegistrandoExternas(false);
+      return;
+    }
+    if (valor === 'varias') {
+      setCantidadSedes((prev) => (Number(prev) < 2 ? '2' : prev));
+      setRegistrandoExternas(false);
+      return;
+    }
+    const res = await guardarConfiguracionSedes(valor, 0);
+    if (!res.ok) {
+      setFeedback({ type: 'err', text: res.error });
+      return;
+    }
+    setCantidadSedes('0');
+    setCantidadGuardada(0);
+    setRegistrandoExternas(false);
+    setFeedback({ type: 'ok', text: 'Modalidad guardada.' });
+    await cargarEstado();
+  };
+
   const cargarEstado = async () => {
     if (!supabase) {
       setLoading(false);
@@ -88,13 +190,13 @@ export const OrganizacionTab: React.FC = () => {
           .limit(200),
         supabase
           .from('gp_sedes')
-          .select('id, nombre, tipo_codigo, es_principal, departamento')
+          .select('id, nombre, tipo_codigo, es_principal, pais, departamento, provincia, distrito, ubigeo, direccion, referencia_ubicacion, latitud, longitud')
           .eq('empresa_id', perfil?.tenantId ?? '')
           .order('es_principal', { ascending: false })
           .limit(300),
         supabase
           .from('gp_config_gestion_proyectos')
-          .select('id, unidad_responsable_id, alcance_asignacion_tareas, puede_dar_seguimiento, puede_programar_reuniones, puede_gestionar_participantes, puede_solicitar_informacion')
+          .select('id, unidad_responsable_id, alcance_asignacion_tareas, puede_dar_seguimiento, puede_programar_reuniones, puede_gestionar_participantes, puede_solicitar_informacion, activo, metadata')
           .eq('empresa_id', perfil?.tenantId ?? '')
           .maybeSingle(),
       ]);
@@ -120,10 +222,31 @@ export const OrganizacionTab: React.FC = () => {
           );
         }
       }
+      const meta = (gRes.data?.metadata && typeof gRes.data.metadata === 'object' ? gRes.data.metadata : {}) as Record<string, unknown>;
       if (!sRes.error && Array.isArray(sRes.data)) {
         const filas = sRes.data as SedeRow[];
         setSedes(filas);
-        setModoSedes((prev) => prev || (filas.length === 0 ? '' : filas.length === 1 ? 'una' : 'varias'));
+        const principal = filas.find((s) => s.es_principal);
+        if (principal) {
+          setSedeCentral({
+            nombre: principal.nombre,
+            pais: principal.pais || 'Perú',
+            departamento: principal.departamento || '',
+            provincia: principal.provincia || '',
+            distrito: principal.distrito || '',
+            ubigeo: principal.ubigeo || '',
+            direccion: principal.direccion || '',
+            referencia: principal.referencia_ubicacion || '',
+            latitud: principal.latitud != null ? String(principal.latitud) : '',
+            longitud: principal.longitud != null ? String(principal.longitud) : '',
+          });
+        }
+        const modalidadGuardada = (meta.modalidad_sedes as ModoSedes) || '';
+        const cantidadDb = Number(meta.cantidad_sedes);
+        const cantidadValida = Number.isFinite(cantidadDb) && cantidadDb >= 0;
+        setModoSedes((prev) => prev || modalidadGuardada || (filas.length === 0 ? '' : filas.length === 1 ? 'una' : 'varias'));
+        setCantidadSedes(String(cantidadValida ? cantidadDb : filas.length));
+        setCantidadGuardada(cantidadValida ? cantidadDb : null);
       }
       if (!gRes.error && gRes.data) {
         const g = gRes.data as ConfigGestionRow;
@@ -169,6 +292,8 @@ export const OrganizacionTab: React.FC = () => {
           text: `Estructura de ${sector === 'publico' ? 'Sector Público' : 'Sector Privado'} para ${modoSedes === 'una' ? 'una sola sede' : 'sede central con sedes externas'} creada correctamente.`,
         });
         setEditandoSector(false);
+        setEditandoSedes(false);
+        setEditandoGobernanza(false);
         await cargarEstado();
       }
     } catch (e: any) {
@@ -229,6 +354,8 @@ export const OrganizacionTab: React.FC = () => {
       } else {
         setFeedback({ type: 'ok', text: 'Área encargada y facultades guardadas.' });
         setEditandoSector(false);
+        setEditandoSedes(false);
+        setEditandoGobernanza(false);
         await cargarEstado();
       }
     } catch (err: any) {
@@ -240,27 +367,126 @@ export const OrganizacionTab: React.FC = () => {
 
   const handleCrearSedeCentral = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase || !sedeCentralNombre.trim()) return;
+    if (!supabase || !sedeCentral.nombre.trim()) return;
     if (!perfil?.tenantId) {
       setFeedback({ type: 'err', text: 'No se detectó una empresa activa en tu sesión.' });
+      return;
+    }
+    const cantidad = parseInt(cantidadSedes, 10);
+    const cantidadFinal = Number.isFinite(cantidad) && cantidad >= 1 ? cantidad : 1;
+    setSaving(true);
+    setFeedback(null);
+    try {
+      const cfg = await guardarConfiguracionSedes(modoSedes, cantidadFinal);
+      if (!cfg.ok) {
+        setFeedback({ type: 'err', text: cfg.error });
+        return;
+      }
+      const datos = {
+        nombre: sedeCentral.nombre.trim(),
+        pais: sedeCentral.pais.trim() || null,
+        departamento: sedeCentral.departamento.trim() || null,
+        provincia: sedeCentral.provincia.trim() || null,
+        distrito: sedeCentral.distrito.trim() || null,
+        ubigeo: sedeCentral.ubigeo.trim() || null,
+        direccion: sedeCentral.direccion.trim() || null,
+        referencia_ubicacion: sedeCentral.referencia.trim() || null,
+        latitud: aCoordenada(sedeCentral.latitud),
+        longitud: aCoordenada(sedeCentral.longitud),
+      };
+      const { error } = sedePrincipal
+        ? await supabase.from('gp_sedes').update(datos).eq('id', sedePrincipal.id)
+        : await supabase.from('gp_sedes').insert({
+            empresa_id: perfil.tenantId,
+            ...datos,
+            tipo_codigo: 'sede_principal',
+            es_principal: true,
+            activo: true,
+          });
+      if (error) {
+        setFeedback({ type: 'err', text: error.message });
+      } else {
+        setCantidadSedes(String(cantidadFinal));
+        setCantidadGuardada(cantidadFinal);
+        setFeedback({ type: 'ok', text: sedePrincipal ? 'Sede Central actualizada correctamente.' : 'Sede Central registrada correctamente.' });
+        setEditandoSector(false);
+        setEditandoSedes(false);
+        setEditandoGobernanza(false);
+        await cargarEstado();
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGuardarCantidad = async (registrarAhora: boolean) => {
+    const cantidad = parseInt(cantidadSedes, 10);
+    if (!Number.isFinite(cantidad) || cantidad < 1) {
+      setFeedback({ type: 'err', text: 'Indica la cantidad de sedes.' });
+      return;
+    }
+    const modalidadFinal: ModoSedes = cantidad === 1 ? 'una' : 'varias';
+    setSaving(true);
+    setFeedback(null);
+    try {
+      const cfg = await guardarConfiguracionSedes(modalidadFinal, cantidad);
+      if (!cfg.ok) {
+        setFeedback({ type: 'err', text: cfg.error });
+        return;
+      }
+      setModoSedes(modalidadFinal);
+      setCantidadSedes(String(cantidad));
+      setCantidadGuardada(cantidad);
+      if (registrarAhora) {
+        setRegistrandoExternas(true);
+        setExternas((prev) => prev.length ? prev : Array.from({ length: Math.max(0, cantidad - sedes.length) }, nuevaSedeVacia));
+      } else {
+        setRegistrandoExternas(false);
+        setFeedback({ type: 'ok', text: 'Cantidad de sedes guardada.' });
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGuardarSedesExternas = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabase || !perfil?.tenantId) {
+      setFeedback({ type: 'err', text: 'No se detectó una empresa activa en tu sesión.' });
+      return;
+    }
+    const filas = externas
+      .filter((s) => s.nombre.trim())
+      .map((s) => ({
+        empresa_id: perfil.tenantId,
+        nombre: s.nombre.trim(),
+        tipo_codigo: 'sede_operativa',
+        es_principal: false,
+        pais: s.pais.trim() || null,
+        departamento: s.departamento.trim() || null,
+        provincia: s.provincia.trim() || null,
+        distrito: s.distrito.trim() || null,
+        ubigeo: s.ubigeo.trim() || null,
+        direccion: s.direccion.trim() || null,
+        referencia_ubicacion: s.referencia.trim() || null,
+        latitud: aCoordenada(s.latitud),
+        longitud: aCoordenada(s.longitud),
+        activo: true,
+      }));
+    if (filas.length === 0) {
+      setFeedback({ type: 'err', text: 'Indica el nombre de las sedes externas.' });
       return;
     }
     setSaving(true);
     setFeedback(null);
     try {
-      const { error } = await supabase.from('gp_sedes').insert({
-        empresa_id: perfil.tenantId,
-        nombre: sedeCentralNombre.trim(),
-        tipo_codigo: 'sede_principal',
-        es_principal: true,
-        departamento: sedeCentralDepto.trim() || 'Lima',
-        activo: true,
-      });
+      const { error } = await supabase.from('gp_sedes').insert(filas);
       if (error) {
         setFeedback({ type: 'err', text: error.message });
       } else {
-        setFeedback({ type: 'ok', text: 'Sede Central registrada correctamente.' });
-        setEditandoSector(false);
+        setRegistrandoExternas(false);
+        setExternas([]);
+        setFeedback({ type: 'ok', text: 'Sedes externas registradas correctamente.' });
         await cargarEstado();
       }
     } finally {
@@ -271,32 +497,30 @@ export const OrganizacionTab: React.FC = () => {
   return (
     <div className="cards-grid">
       {feedback && (
-        <div
-          className="cfg-card"
-          style={{
-            gridColumn: '1 / -1',
-            borderColor: feedback.type === 'ok' ? '#10b981' : '#ef4444',
-            background: feedback.type === 'ok' ? '#ecfdf5' : '#fef2f2',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-          }}
-        >
+        <div style={{
+          position: 'fixed',
+          top: 20,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 9999,
+          background: '#ffffff',
+          color: '#0f172a',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          padding: '10px 18px',
+          borderRadius: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          fontSize: '13px',
+          fontWeight: 600,
+        }}>
           {feedback.type === 'ok' ? (
-            <CheckCircle2 size={18} color="#059669" />
+            <CheckCircle2 size={16} color="#00b96b" />
           ) : (
-            <ShieldAlert size={18} color="#dc2626" />
+            <ShieldAlert size={16} color="#dc2626" />
           )}
-          <span style={{ fontSize: '14px', fontWeight: 500, flex: 1 }}>{feedback.text}</span>
-          <button
-            type="button"
-            onClick={() => setFeedback(null)}
-            aria-label="Cerrar alerta"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '2px', display: 'flex' }}
-          >
-            <X size={16} />
-          </button>
+          <span>{feedback.text}</span>
         </div>
       )}
 
@@ -306,12 +530,47 @@ export const OrganizacionTab: React.FC = () => {
           <div className="card-icon">
             <MapPin size={18} />
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <h2>Paso 1 · Alcance de Sedes</h2>
             <p>Define si tu organización opera únicamente desde su sede principal o también con sedes externas.</p>
           </div>
+          {sedes.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setEditandoSedes((v) => !v)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#0f172a',
+                fontSize: '12.5px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              {editandoSedes ? <X size={13} /> : <Pencil size={13} />}
+              <span>{editandoSedes ? 'Cancelar' : 'Editar'}</span>
+            </button>
+          )}
         </div>
 
+        {sedes.length > 0 && !editandoSedes ? (
+          <div className="card-body">
+            <div style={{ padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '13.5px', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <div>
+                <span style={{ color: '#64748b' }}>Sede Principal: </span>
+                <span style={{ color: '#0f172a', fontWeight: 500 }}>{sedePrincipal?.nombre || 'Sin principal'}</span>
+                <span style={{ color: '#64748b' }}> · {sedes.length} {sedes.length === 1 ? 'sede registrada' : 'sedes registradas'}</span>
+              </div>
+              <span style={{ fontSize: '12px', color: '#059669', fontWeight: 500 }}>Guardado</span>
+            </div>
+          </div>
+        ) : (
         <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>Modalidad operativa de sedes</span>
@@ -325,7 +584,7 @@ export const OrganizacionTab: React.FC = () => {
                   key={op.value}
                   type="button"
                   className={`tab-item ${modoSedes === op.value ? 'active' : ''}`}
-                  onClick={() => setModoSedes(op.value)}
+                  onClick={() => void handleSeleccionarModo(op.value)}
                   style={{ border: '1px solid #cbd5e1', borderRadius: '8px' }}
                 >
                   {op.label}
@@ -367,34 +626,92 @@ export const OrganizacionTab: React.FC = () => {
             </div>
           </div>
 
-          {!sedePrincipal && modoSedes !== '' && modoSedes !== 'sin_sede' && (
+          {modoSedes !== '' && modoSedes !== 'sin_sede' && (
             <form onSubmit={handleCrearSedeCentral} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                Registrar Sede Central
+                {sedePrincipal ? 'Sede Central' : 'Registrar Sede Central'}
               </label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <input
-                  type="text"
-                  value={sedeCentralNombre}
-                  onChange={(e) => setSedeCentralNombre(e.target.value)}
-                  placeholder="Nombre de la Sede Central"
-                  style={{ flex: 2, minWidth: '180px', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-                <input
-                  type="text"
-                  value={sedeCentralDepto}
-                  onChange={(e) => setSedeCentralDepto(e.target.value)}
-                  placeholder="Departamento"
-                  style={{ flex: 1, minWidth: '120px', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
+              <SedeUbicacionFields
+                valor={sedeCentral}
+                onChange={(patch) => setSedeCentral((prev) => ({ ...prev, ...patch }))}
+                placeholderNombre="Nombre de la Sede Central"
+              />
               <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
                 <Plus size={15} />
-                <span>Crear Sede Central</span>
+                <span>{saving ? 'Guardando...' : sedePrincipal ? 'Actualizar Sede Central' : 'Crear Sede Central'}</span>
+              </button>
+            </form>
+          )}
+
+          {sedePrincipal && modoSedes === 'varias' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                Cantidad de sedes
+                <input
+                  type="number"
+                  min="1"
+                  value={cantidadSedes}
+                  onChange={(e) => setCantidadSedes(e.target.value)}
+                  style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '120px', fontSize: '13.5px' }}
+                />
+              </label>
+              {(cantidadGuardada === null || Number(cantidadSedes) !== cantidadGuardada) && (
+                <button
+                  type="button"
+                  className="btn-save"
+                  disabled={saving}
+                  onClick={() => void handleGuardarCantidad(false)}
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  <Check size={15} />
+                  <span>Guardar cantidad</span>
+                </button>
+              )}
+              {cantidadGuardada !== null && Number(cantidadSedes) === cantidadGuardada && cantidadGuardada > sedes.length && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '13px', color: '#475569' }}>¿Registrar las demás sedes ahora?</span>
+                  <button
+                    type="button"
+                    className="btn-save"
+                    disabled={saving}
+                    onClick={() => void handleGuardarCantidad(true)}
+                    style={{ alignSelf: 'flex-start' }}
+                  >
+                    <Check size={15} />
+                    <span>Registrar ahora</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => void handleGuardarCantidad(false)}
+                    style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontSize: '12.5px', cursor: 'pointer' }}
+                  >
+                    Continuar después
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {registrandoExternas && (
+            <form onSubmit={handleGuardarSedesExternas} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {externas.map((s, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#ffffff' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>Sede externa {i + 1}</span>
+                  <SedeUbicacionFields
+                    valor={s}
+                    onChange={(patch) => setExternas((prev) => prev.map((x, idx) => (idx === i ? { ...x, ...patch } : x)))}
+                  />
+                </div>
+              ))}
+              <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
+                <Check size={15} />
+                <span>Guardar sedes externas</span>
               </button>
             </form>
           )}
         </div>
+        )}
       </div>
 
       {/* Bloque 2: Paso 2: sector público / privado */}
@@ -525,28 +842,42 @@ export const OrganizacionTab: React.FC = () => {
               <Layers size={18} />
             </div>
             <div style={{ flex: 1 }}>
-              <h2>Paso 3 · Estructura Organizacional ({unidades.length} áreas)</h2>
+              <h2>Paso 3 · Estructura Organizacional</h2>
               <p>Personaliza la denominación (alias) de cada área según la estructura interna de tu institución.</p>
             </div>
             <button
               type="button"
               onClick={() => setArbolExpandido((v) => !v)}
               style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
                 padding: '6px 12px',
                 borderRadius: '8px',
                 border: '1px solid #cbd5e1',
                 background: '#ffffff',
-                color: '#334155',
+                color: '#0f172a',
                 fontSize: '12.5px',
                 fontWeight: 500,
                 cursor: 'pointer',
                 flexShrink: 0,
               }}
             >
-              {arbolExpandido ? 'Ocultar áreas' : 'Ver áreas'}
+              {arbolExpandido ? <X size={13} /> : <Pencil size={13} />}
+              <span>{arbolExpandido ? 'Cerrar' : 'Editar'}</span>
             </button>
           </div>
-          {arbolExpandido && (
+          {!arbolExpandido ? (
+            <div className="card-body">
+              <div style={{ padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '13.5px', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <span style={{ color: '#64748b' }}>Estructura configurada: </span>
+                  <span style={{ color: '#0f172a', fontWeight: 500 }}>{unidades.length} áreas registradas</span>
+                </div>
+                <span style={{ fontSize: '12px', color: '#059669', fontWeight: 500 }}>Guardado</span>
+              </div>
+            </div>
+          ) : (
           <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {unidades.map((u) => {
               const isEditing = editingId === u.id;
@@ -631,12 +962,50 @@ export const OrganizacionTab: React.FC = () => {
             <div className="card-icon">
               <ShieldCheck size={18} />
             </div>
-            <div>
+            <div style={{ flex: 1 }}>
               <h2>Paso 4 · Unidad Responsable de Proyectos</h2>
               <p>Selecciona el área responsable de liderar la gestión de proyectos en tu organización.</p>
             </div>
+            {configGestion?.unidad_responsable_id && (
+              <button
+                type="button"
+                onClick={() => setEditandoGobernanza((v) => !v)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  fontSize: '12.5px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {editandoGobernanza ? <X size={13} /> : <Pencil size={13} />}
+                <span>{editandoGobernanza ? 'Cancelar' : 'Editar'}</span>
+              </button>
+            )}
           </div>
 
+          {configGestion?.unidad_responsable_id && !editandoGobernanza ? (
+            <div className="card-body">
+              <div style={{ padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '13.5px', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <div>
+                  <span style={{ color: '#64748b' }}>Área responsable: </span>
+                  <span style={{ color: '#0f172a', fontWeight: 500 }}>
+                    {unidades.find((u) => u.id === unidadResponsableId)?.alias ||
+                      unidades.find((u) => u.id === unidadResponsableId)?.nombre_estandar ||
+                      'Asignada'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '12px', color: '#059669', fontWeight: 500 }}>Guardado</span>
+              </div>
+            </div>
+          ) : (
           <form onSubmit={handleGuardarGestion} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               Unidad responsable
@@ -678,6 +1047,7 @@ export const OrganizacionTab: React.FC = () => {
               <span>{guardandoGestion ? 'Guardando...' : configGestion ? 'Actualizar gobernanza' : 'Guardar gobernanza'}</span>
             </button>
           </form>
+          )}
         </div>
       )}
 
