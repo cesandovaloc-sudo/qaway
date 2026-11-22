@@ -30,6 +30,17 @@ import type { GestorUnitType } from './gestorOrganizacionService';
 
 export type PlantillaSector = 'publico' | 'privado';
 
+/**
+ * Nodos que representan sedes externas (no áreas de la sede central).
+ * Se excluyen cuando la empresa declara una sola sede. Se excluye el padre
+ * junto a sus hijos para que la re-resolución de padres no cree raíces sueltas
+ * (p. ej. UGEL sin DRE).
+ */
+export const CLAVES_SEDES_EXTERNAS: ReadonlySet<string> = new Set([
+  'dre', 'ugel-principal', 'ugel-secundaria',
+  'obra-1', 'obra-2', 'tienda-1', 'tienda-2', 'sucursal-provincia',
+]);
+
 /** Versión de las plantillas: se sella en metadata.plantilla.version al copiar. */
 export const VERSION_PLANTILLAS = '2026-11';
 
@@ -320,19 +331,28 @@ function validarPlantilla(defs: PlantillaNodoDef[], sector: PlantillaSector): vo
  *        Re-resolución de padres: si el padre del nodo quedó excluido por el
  *        filtro, el nodo pasa a RAÍZ (permite p. ej. Directorio opcional con
  *        Gerencia General como raíz, o plantear estructuras más planas).
+ * @param opts.incluirSedesExternas Por defecto true. Si false, se omiten las
+ *        sedes externas (CLAVES_SEDES_EXTERNAS) y queda solo la jerarquía de la
+ *        sede central. No crea ni cambia tipos: solo filtra la copia.
  * @returns Borradores NUEVOS en cada llamada (sin referencias compartidas con
  *          la plantilla ni entre llamadas); no se insertan en BD aquí.
  */
 export function construirBorradoresPlantilla(
   sector: PlantillaSector,
-  opts?: { soloActivadas?: boolean },
+  opts?: { soloActivadas?: boolean; incluirSedesExternas?: boolean },
 ): GestorUnitBorrador[] {
   const defs = sector === 'publico' ? PLANTILLA_SECTOR_PUBLICO : PLANTILLA_SECTOR_PRIVADO;
   validarPlantilla(defs, sector);
 
-  const filtro = opts?.soloActivadas === true;
-  const presentes = filtro
-    ? new Set(defs.filter((d) => d.activadaPorDefecto).map((d) => d.key))
+  const soloActivadas = opts?.soloActivadas === true;
+  const sinSedesExternas = opts?.incluirSedesExternas === false;
+  const aplicarFiltro = soloActivadas || sinSedesExternas;
+  const presentes = aplicarFiltro
+    ? new Set(
+        defs
+          .filter((d) => (!soloActivadas || d.activadaPorDefecto) && (!sinSedesExternas || !CLAVES_SEDES_EXTERNAS.has(d.key)))
+          .map((d) => d.key),
+      )
     : null;
 
   const borradores: GestorUnitBorrador[] = [];

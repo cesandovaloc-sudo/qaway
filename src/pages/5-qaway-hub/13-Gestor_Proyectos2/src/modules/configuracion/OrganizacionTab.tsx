@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Building2, Check, CheckCircle2, Globe2, Layers, MapPin, Pencil, Plus, ShieldAlert, X } from 'lucide-react';
+import { Building2, Check, CheckCircle2, Globe2, Layers, MapPin, Pencil, Plus, ShieldAlert, ShieldCheck, X } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { usePerfilGp } from '../../services/gpPermisosService';
 import { construirBorradoresPlantilla, type PlantillaSector } from '../../services/organizacionPlantillas';
 import { crearEstructuraDesdePlantilla } from '../../services/organizacionEscritura';
+import SelectEstilizado from './SelectEstilizado';
 
 interface SedeRow {
   id: string;
@@ -21,6 +22,18 @@ interface UnidadRow {
   nivel: number;
 }
 
+interface ConfigGestionRow {
+  id: string;
+  unidad_responsable_id: string | null;
+  alcance_asignacion_tareas: 'ninguna' | 'autorizadas' | 'todas';
+  puede_dar_seguimiento: boolean;
+  puede_programar_reuniones: boolean;
+  puede_gestionar_participantes: boolean;
+  puede_solicitar_informacion: boolean;
+}
+
+type ModoSedes = '' | 'una' | 'varias' | 'sin_sede';
+
 export const OrganizacionTab: React.FC = () => {
   const { perfil } = usePerfilGp();
   const [sector, setSector] = useState<PlantillaSector>('publico');
@@ -32,11 +45,32 @@ export const OrganizacionTab: React.FC = () => {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [aliasDraft, setAliasDraft] = useState<string>('');
+  const [arbolExpandido, setArbolExpandido] = useState<boolean>(false);
+  const [editandoSector, setEditandoSector] = useState<boolean>(false);
 
   const [sedeCentralNombre, setSedeCentralNombre] = useState('Sede Central Lima');
   const [sedeCentralDepto, setSedeCentralDepto] = useState('Lima');
 
-  const plantillaPreview = useMemo(() => construirBorradoresPlantilla(sector), [sector]);
+  // Pasos 4 y 5: gobernanza de la gestion de proyectos (tabla ya existente).
+  const [configGestion, setConfigGestion] = useState<ConfigGestionRow | null>(null);
+  const [unidadResponsableId, setUnidadResponsableId] = useState('');
+  const [alcanceAsignacion, setAlcanceAsignacion] = useState<'ninguna' | 'autorizadas' | 'todas'>('ninguna');
+  const [puedeDarSeguimiento, setPuedeDarSeguimiento] = useState(true);
+  const [puedeProgramarReuniones, setPuedeProgramarReuniones] = useState(true);
+  const [puedeGestionarParticipantes, setPuedeGestionarParticipantes] = useState(true);
+  const [puedeSolicitarInformacion, setPuedeSolicitarInformacion] = useState(true);
+  const [guardandoGestion, setGuardandoGestion] = useState(false);
+
+  // Paso 1: cardinalidad de sedes. La sede central siempre tiene jerarquia
+  // propia; "varias" significa que ademas hay sedes externas. No crea columnas.
+  const [modoSedes, setModoSedes] = useState<ModoSedes>('');
+
+  // Misma plantilla para la vista previa y para la escritura: asi lo que se
+  // muestra coincide exactamente con lo que se guarda.
+  const plantillaPreview = useMemo(
+    () => construirBorradoresPlantilla(sector, { incluirSedesExternas: modoSedes === 'varias' }),
+    [sector, modoSedes],
+  );
   const sedePrincipal = useMemo(() => sedes.find((s) => s.es_principal), [sedes]);
 
   const cargarEstado = async () => {
@@ -46,7 +80,7 @@ export const OrganizacionTab: React.FC = () => {
     }
     setLoading(true);
     try {
-      const [uRes, sRes] = await Promise.all([
+      const [uRes, sRes, gRes] = await Promise.all([
         supabase
           .from('gp_unidades_organizacionales')
           .select('id, codigo_jerarquico, nombre_estandar, alias, nivel')
@@ -55,12 +89,52 @@ export const OrganizacionTab: React.FC = () => {
         supabase
           .from('gp_sedes')
           .select('id, nombre, tipo_codigo, es_principal, departamento')
+          .eq('empresa_id', perfil?.tenantId ?? '')
           .order('es_principal', { ascending: false })
           .limit(300),
+        supabase
+          .from('gp_config_gestion_proyectos')
+          .select('id, unidad_responsable_id, alcance_asignacion_tareas, puede_dar_seguimiento, puede_programar_reuniones, puede_gestionar_participantes, puede_solicitar_informacion')
+          .eq('empresa_id', perfil?.tenantId ?? '')
+          .maybeSingle(),
       ]);
 
-      if (!uRes.error && Array.isArray(uRes.data)) setUnidades(uRes.data as UnidadRow[]);
-      if (!sRes.error && Array.isArray(sRes.data)) setSedes(sRes.data as SedeRow[]);
+      if (!uRes.error && Array.isArray(uRes.data) && uRes.data.length > 0) {
+        setUnidades(uRes.data as UnidadRow[]);
+      } else if (perfil?.tenantId) {
+        const gUnits = await supabase
+          .from('gestor_unidades')
+          .select('id, code, name, parent_unit_id, orden')
+          .eq('tenant_id', perfil.tenantId)
+          .order('orden', { ascending: true })
+          .limit(200);
+        if (!gUnits.error && Array.isArray(gUnits.data)) {
+          setUnidades(
+            gUnits.data.map((u: any) => ({
+              id: u.id,
+              codigo_jerarquico: u.code || null,
+              nombre_estandar: u.name,
+              alias: null,
+              nivel: u.parent_unit_id ? 2 : 1,
+            }))
+          );
+        }
+      }
+      if (!sRes.error && Array.isArray(sRes.data)) {
+        const filas = sRes.data as SedeRow[];
+        setSedes(filas);
+        setModoSedes((prev) => prev || (filas.length === 0 ? '' : filas.length === 1 ? 'una' : 'varias'));
+      }
+      if (!gRes.error && gRes.data) {
+        const g = gRes.data as ConfigGestionRow;
+        setConfigGestion(g);
+        setUnidadResponsableId(g.unidad_responsable_id || '');
+        setAlcanceAsignacion(g.alcance_asignacion_tareas || 'ninguna');
+        setPuedeDarSeguimiento(g.puede_dar_seguimiento !== false);
+        setPuedeProgramarReuniones(g.puede_programar_reuniones !== false);
+        setPuedeGestionarParticipantes(g.puede_gestionar_participantes !== false);
+        setPuedeSolicitarInformacion(g.puede_solicitar_informacion !== false);
+      }
     } finally {
       setLoading(false);
     }
@@ -68,11 +142,15 @@ export const OrganizacionTab: React.FC = () => {
 
   useEffect(() => {
     void cargarEstado();
-  }, []);
+  }, [perfil?.tenantId]);
 
   const handlePrecargarPlantilla = async () => {
     if (!perfil?.tenantId) {
       setFeedback({ type: 'err', text: 'No se detectó una empresa activa en tu sesión.' });
+      return;
+    }
+    if (modoSedes === '') {
+      setFeedback({ type: 'err', text: 'Responde primero si tienes una sola sede o varias.' });
       return;
     }
     setSaving(true);
@@ -81,14 +159,16 @@ export const OrganizacionTab: React.FC = () => {
       const res = await crearEstructuraDesdePlantilla({
         origen: sector,
         tenantId: perfil.tenantId,
+        borradoresPersonalizados: plantillaPreview,
       });
       if (res && (res as any).ok === false) {
         setFeedback({ type: 'err', text: (res as any).error || 'No se pudo aplicar la estructura inicial.' });
       } else {
         setFeedback({
           type: 'ok',
-          text: `Estructura de ${sector === 'publico' ? 'Sector Público' : 'Sector Privado'} creada correctamente.`,
+          text: `Estructura de ${sector === 'publico' ? 'Sector Público' : 'Sector Privado'} para ${modoSedes === 'una' ? 'una sola sede' : 'sede central con sedes externas'} creada correctamente.`,
         });
+        setEditandoSector(false);
         await cargarEstado();
       }
     } catch (e: any) {
@@ -119,6 +199,45 @@ export const OrganizacionTab: React.FC = () => {
     }
   };
 
+  const handleGuardarGestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabase || !perfil?.tenantId) {
+      setFeedback({ type: 'err', text: 'No se detectó una empresa activa en tu sesión.' });
+      return;
+    }
+    if (!unidadResponsableId) {
+      setFeedback({ type: 'err', text: 'Selecciona el área encargada de dirigir los proyectos.' });
+      return;
+    }
+    setGuardandoGestion(true);
+    setFeedback(null);
+    try {
+      const { error } = await supabase
+        .from('gp_config_gestion_proyectos')
+        .upsert({
+          empresa_id: perfil.tenantId,
+          unidad_responsable_id: unidadResponsableId,
+          alcance_asignacion_tareas: alcanceAsignacion,
+          puede_dar_seguimiento: puedeDarSeguimiento,
+          puede_programar_reuniones: puedeProgramarReuniones,
+          puede_gestionar_participantes: puedeGestionarParticipantes,
+          puede_solicitar_informacion: puedeSolicitarInformacion,
+          activo: true,
+        }, { onConflict: 'empresa_id' });
+      if (error) {
+        setFeedback({ type: 'err', text: error.message });
+      } else {
+        setFeedback({ type: 'ok', text: 'Área encargada y facultades guardadas.' });
+        setEditandoSector(false);
+        await cargarEstado();
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'err', text: err?.message || 'No se pudo guardar la configuración de gestión.' });
+    } finally {
+      setGuardandoGestion(false);
+    }
+  };
+
   const handleCrearSedeCentral = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!supabase || !sedeCentralNombre.trim()) return;
@@ -130,7 +249,7 @@ export const OrganizacionTab: React.FC = () => {
     setFeedback(null);
     try {
       const { error } = await supabase.from('gp_sedes').insert({
-        tenant_id: perfil.tenantId,
+        empresa_id: perfil.tenantId,
         nombre: sedeCentralNombre.trim(),
         tipo_codigo: 'sede_principal',
         es_principal: true,
@@ -141,6 +260,7 @@ export const OrganizacionTab: React.FC = () => {
         setFeedback({ type: 'err', text: error.message });
       } else {
         setFeedback({ type: 'ok', text: 'Sede Central registrada correctamente.' });
+        setEditandoSector(false);
         await cargarEstado();
       }
     } finally {
@@ -180,19 +300,152 @@ export const OrganizacionTab: React.FC = () => {
         </div>
       )}
 
-      {/* Bloque 1: Solo para tenants nuevos sin estructura */}
-      {!loading && unidades.length === 0 && (
+      {/* Bloque 1: Paso 1: sede central con jerarquia propia + sedes externas */}
+      <div className="cfg-card" style={{ gridColumn: '1 / -1' }}>
+        <div className="card-header">
+          <div className="card-icon">
+            <MapPin size={18} />
+          </div>
+          <div>
+            <h2>Paso 1 · Alcance de Sedes</h2>
+            <p>Define si tu organización opera únicamente desde su sede principal o también con sedes externas.</p>
+          </div>
+        </div>
+
+        <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>Modalidad operativa de sedes</span>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {([
+                { value: 'una' as ModoSedes, label: 'Solo la sede central' },
+                { value: 'varias' as ModoSedes, label: 'Sede central + sedes externas' },
+                { value: 'sin_sede' as ModoSedes, label: 'Sin sede física' },
+              ]).map((op) => (
+                <button
+                  key={op.value}
+                  type="button"
+                  className={`tab-item ${modoSedes === op.value ? 'active' : ''}`}
+                  onClick={() => setModoSedes(op.value)}
+                  style={{ border: '1px solid #cbd5e1', borderRadius: '8px' }}
+                >
+                  {op.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {modoSedes === 'una' && (
+            <div style={{ fontSize: '13px', color: '#475569', background: '#f8fafc', padding: '10px 12px', borderRadius: '8px' }}>
+              Operación centralizada: la estructura se configurará únicamente con las áreas de tu sede principal.
+            </div>
+          )}
+
+          {modoSedes === 'varias' && (
+            <div style={{ fontSize: '13px', color: '#475569', background: '#f8fafc', padding: '10px 12px', borderRadius: '8px' }}>
+              Varias sedes: la plantilla incluye la sede central y las sedes externas que correspondan a tu sector.
+            </div>
+          )}
+
+          {modoSedes === 'sin_sede' && (
+            <div style={{ fontSize: '13px', color: '#475569', background: '#f8fafc', padding: '10px 12px', borderRadius: '8px' }}>
+              Sin sede física: tu organización puede operar con una modalidad operativa sin sede asignada. No es necesario registrar una sede.
+            </div>
+          )}
+
+          <div style={{ fontSize: '13.5px', color: '#475569', background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div>
+              <span style={{ color: '#64748b' }}>Sedes registradas:</span>{' '}
+              <span style={{ color: '#0f172a', fontWeight: 500 }}>{loading ? 'Cargando...' : sedes.length}</span>
+            </div>
+            <div>
+              <span style={{ color: '#64748b' }}>Sede Central:</span>{' '}
+              {sedePrincipal ? (
+                <span style={{ color: '#059669', fontWeight: 500 }}>{sedePrincipal.nombre}</span>
+              ) : (
+                <span style={{ color: '#d97706', fontWeight: 500 }}>Pendiente de registrar</span>
+              )}
+            </div>
+          </div>
+
+          {!sedePrincipal && modoSedes !== '' && modoSedes !== 'sin_sede' && (
+            <form onSubmit={handleCrearSedeCentral} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>
+                Registrar Sede Central
+              </label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  value={sedeCentralNombre}
+                  onChange={(e) => setSedeCentralNombre(e.target.value)}
+                  placeholder="Nombre de la Sede Central"
+                  style={{ flex: 2, minWidth: '180px', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+                <input
+                  type="text"
+                  value={sedeCentralDepto}
+                  onChange={(e) => setSedeCentralDepto(e.target.value)}
+                  placeholder="Departamento"
+                  style={{ flex: 1, minWidth: '120px', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+              <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
+                <Plus size={15} />
+                <span>Crear Sede Central</span>
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+
+      {/* Bloque 2: Paso 2: sector público / privado */}
+      {!loading && (
         <div className="cfg-card" style={{ gridColumn: '1 / -1' }}>
           <div className="card-header">
             <div className="card-icon">
               <Building2 size={18} />
             </div>
-            <div>
-              <h2>Elige tu Estructura Inicial</h2>
-              <p>Selecciona el tipo de institución para ver cómo organizaremos tus áreas (luego podrás renombrar cada una).</p>
+            <div style={{ flex: 1 }}>
+              <h2>Paso 2 · Sector Institucional</h2>
+              <p>Selecciona el sector de la institución para previsualizar su estructura base.</p>
             </div>
+            {unidades.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setEditandoSector((v) => !v)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#0f172a',
+                  fontSize: '12.5px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {editandoSector ? <X size={13} /> : <Pencil size={13} />}
+                <span>{editandoSector ? 'Cancelar' : 'Editar'}</span>
+              </button>
+            )}
           </div>
 
+          {unidades.length > 0 && !editandoSector ? (
+            <div className="card-body">
+              <div style={{ padding: '10px 12px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '13.5px', color: '#334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <span style={{ color: '#64748b' }}>Sector configurado: </span>
+                  <span style={{ color: '#0f172a', fontWeight: 500 }}>
+                    {sector === 'publico' ? 'Sector Público' : 'Sector Privado'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '12px', color: '#059669', fontWeight: 500 }}>Guardado</span>
+              </div>
+            </div>
+          ) : (
           <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
@@ -215,51 +468,37 @@ export const OrganizacionTab: React.FC = () => {
               </button>
             </div>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', overflowX: 'auto' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '14px' }}>
-                Vista previa tipo organigrama ({sector === 'publico' ? 'Sector Público' : 'Sector Privado'}):
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {(() => {
-                const raices = plantillaPreview.filter((n) => !n.parentKey);
-                const hijosDe = (key: string) => plantillaPreview.filter((n) => n.parentKey === key);
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                    {raices.map((raiz) => {
-                      const nivel2 = hijosDe(raiz.key);
-                      return (
-                        <div key={raiz.key} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                          <div style={{ padding: '10px 18px', borderRadius: '10px', background: '#0f172a', color: '#ffffff', fontSize: '13.5px', fontWeight: 600, boxShadow: '0 4px 12px rgba(15, 23, 42, 0.12)', textAlign: 'center' }}>
-                            {raiz.name}
-                          </div>
-                          {nivel2.length > 0 && (
-                            <>
-                              <div style={{ width: '2px', height: '16px', background: '#cbd5e1' }} />
-                              <div style={{ width: '100%', borderTop: '2px solid #cbd5e1', paddingTop: '14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '10px' }}>
-                                {nivel2.map((n2) => {
-                                  const nivel3 = hijosDe(n2.key);
-                                  return (
-                                    <div key={n2.key} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderTop: '3px solid #2563eb', borderRadius: '10px', padding: '10px 12px', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{n2.name}</div>
-                                      {nivel3.length > 0 && (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingLeft: '8px', borderLeft: '2px solid #e2e8f0', marginTop: '2px' }}>
-                                          {nivel3.map((n3) => (
-                                            <div key={n3.key} style={{ fontSize: '12px', color: '#475569', background: '#f8fafc', padding: '4px 8px', borderRadius: '6px' }}>
-                                              {n3.name}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      );
-                    })}
+                const nodosOrdenados: Array<{ key: string; name: string; nivel: number; codigo: string }> = [];
+                const visitar = (parentKey: string | null, prefijo: string, nivel: number) => {
+                  const hijos = plantillaPreview.filter((n) => n.parentKey === parentKey);
+                  hijos.forEach((h, i) => {
+                    const codigo = prefijo ? `${prefijo}.${i + 1}` : `${i + 1}`;
+                    nodosOrdenados.push({ key: h.key, name: h.name, nivel, codigo });
+                    visitar(h.key, codigo, nivel + 1);
+                  });
+                };
+                visitar(null, '', 1);
+                return nodosOrdenados.map((nodo) => (
+                  <div
+                    key={nodo.key}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 12px',
+                      paddingLeft: `${12 + Math.max(0, (nodo.nivel - 1) * 18)}px`,
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      background: '#ffffff',
+                      fontSize: '13.5px',
+                    }}
+                  >
+                    <span style={{ color: '#64748b', fontWeight: 500, flexShrink: 0 }}>{nodo.codigo}</span>
+                    <span style={{ color: '#0f172a', fontWeight: nodo.nivel === 1 ? 600 : 400 }}>{nodo.name}</span>
                   </div>
-                );
+                ));
               })()}
             </div>
 
@@ -274,21 +513,40 @@ export const OrganizacionTab: React.FC = () => {
               <span>{saving ? 'Aplicando...' : 'Aplicar esta estructura inicial'}</span>
             </button>
           </div>
+          )}
         </div>
       )}
 
-      {/* Bloque 2: Estructura ya configurada (con edición de alias) */}
+      {/* Bloque 3: Estructura ya configurada (con edición de alias) */}
       {unidades.length > 0 && (
         <div className="cfg-card" style={{ gridColumn: '1 / -1' }}>
           <div className="card-header">
             <div className="card-icon">
               <Layers size={18} />
             </div>
-            <div>
-              <h2>Estructura Organizacional ({unidades.length} áreas)</h2>
-              <p>Haz clic en el lápiz para personalizar el nombre (alias) de cualquier área según tu institución.</p>
+            <div style={{ flex: 1 }}>
+              <h2>Paso 3 · Estructura Organizacional ({unidades.length} áreas)</h2>
+              <p>Personaliza la denominación (alias) de cada área según la estructura interna de tu institución.</p>
             </div>
+            <button
+              type="button"
+              onClick={() => setArbolExpandido((v) => !v)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#334155',
+                fontSize: '12.5px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              {arbolExpandido ? 'Ocultar áreas' : 'Ver áreas'}
+            </button>
           </div>
+          {arbolExpandido && (
           <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {unidades.map((u) => {
               const isEditing = editingId === u.id;
@@ -362,66 +620,67 @@ export const OrganizacionTab: React.FC = () => {
               );
             })}
           </div>
+          )}
         </div>
       )}
 
-      {/* Bloque 3: Sede Central y Sedes */}
-      <div className="cfg-card" style={{ gridColumn: '1 / -1' }}>
-        <div className="card-header">
-          <div className="card-icon">
-            <MapPin size={18} />
-          </div>
-          <div>
-            <h2>Sede Central y Sedes Operativas</h2>
-            <p>Administra la sede principal de tu organización y el total de sedes activas.</p>
-          </div>
-        </div>
-
-        <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ fontSize: '13.5px', color: '#475569', background: '#f8fafc', padding: '10px 12px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div>
-              <span style={{ color: '#64748b' }}>Sedes registradas:</span>{' '}
-              <span style={{ color: '#0f172a', fontWeight: 500 }}>{loading ? 'Cargando...' : sedes.length}</span>
+      {/* Bloque 4: Pasos 4 y 5: gobernanza de la gestion de proyectos */}
+      {unidades.length > 0 && (
+        <div className="cfg-card" style={{ gridColumn: '1 / -1' }}>
+          <div className="card-header">
+            <div className="card-icon">
+              <ShieldCheck size={18} />
             </div>
             <div>
-              <span style={{ color: '#64748b' }}>Sede Principal:</span>{' '}
-              {sedePrincipal ? (
-                <span style={{ color: '#059669', fontWeight: 500 }}>{sedePrincipal.nombre}</span>
-              ) : (
-                <span style={{ color: '#d97706', fontWeight: 500 }}>Pendiente de registrar</span>
-              )}
+              <h2>Paso 4 · Unidad Responsable de Proyectos</h2>
+              <p>Selecciona el área responsable de liderar la gestión de proyectos en tu organización.</p>
             </div>
           </div>
 
-          {!sedePrincipal && (
-            <form onSubmit={handleCrearSedeCentral} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                Registrar Sede Central
+          <form onSubmit={handleGuardarGestion} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              Unidad responsable
+              <SelectEstilizado
+                value={unidadResponsableId}
+                placeholder="Selecciona un área"
+                options={unidades.map((u) => ({
+                  value: u.id,
+                  label: `${u.codigo_jerarquico ? `${u.codigo_jerarquico} · ` : ''}${u.alias || u.nombre_estandar}`,
+                }))}
+                onChange={(val) => setUnidadResponsableId(val)}
+              />
+            </label>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#334155' }}>Paso 5 · Gobernanza y Asignación de Tareas</span>
+              <label style={{ fontSize: '13px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                Alcance de asignación de tareas a otras dependencias o sedes
+                <SelectEstilizado
+                  value={alcanceAsignacion}
+                  options={[
+                    { value: 'ninguna', label: 'No asignar tareas a otras sedes ni dependencias' },
+                    { value: 'autorizadas', label: 'Solo a sedes y dependencias autorizadas' },
+                    { value: 'todas', label: 'A todas las sedes y dependencias' },
+                  ]}
+                  onChange={(val) => setAlcanceAsignacion(val as 'ninguna' | 'autorizadas' | 'todas')}
+                />
               </label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <input
-                  type="text"
-                  value={sedeCentralNombre}
-                  onChange={(e) => setSedeCentralNombre(e.target.value)}
-                  placeholder="Nombre de la Sede Central"
-                  style={{ flex: 2, minWidth: '180px', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-                <input
-                  type="text"
-                  value={sedeCentralDepto}
-                  onChange={(e) => setSedeCentralDepto(e.target.value)}
-                  placeholder="Departamento"
-                  style={{ flex: 1, minWidth: '120px', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '13px', color: '#475569' }}>
+                <label><input type="checkbox" checked={puedeDarSeguimiento} onChange={(e) => setPuedeDarSeguimiento(e.target.checked)} /> Dar seguimiento</label>
+                <label><input type="checkbox" checked={puedeProgramarReuniones} onChange={(e) => setPuedeProgramarReuniones(e.target.checked)} /> Programar reuniones</label>
+                <label><input type="checkbox" checked={puedeGestionarParticipantes} onChange={(e) => setPuedeGestionarParticipantes(e.target.checked)} /> Gestionar participantes</label>
+                <label><input type="checkbox" checked={puedeSolicitarInformacion} onChange={(e) => setPuedeSolicitarInformacion(e.target.checked)} /> Solicitar información</label>
               </div>
-              <button type="submit" className="btn-save" disabled={saving} style={{ alignSelf: 'flex-start' }}>
-                <Plus size={15} />
-                <span>Crear Sede Central</span>
-              </button>
-            </form>
-          )}
+            </div>
+
+            <button type="submit" className="btn-save" disabled={guardandoGestion} style={{ alignSelf: 'flex-start' }}>
+              <Check size={15} />
+              <span>{guardandoGestion ? 'Guardando...' : configGestion ? 'Actualizar gobernanza' : 'Guardar gobernanza'}</span>
+            </button>
+          </form>
         </div>
-      </div>
+      )}
+
     </div>
   );
 };
