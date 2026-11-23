@@ -147,6 +147,12 @@ const baseHierarchicalRoutes = [
         tag: 'Auth',
       },
       {
+        title: 'Registro de Cuenta',
+        path: '/registrarse',
+        description: 'Formulario de alta para crear una cuenta nueva en la plataforma.',
+        tag: 'Auth',
+      },
+      {
         title: 'CRM de Ventas & Leads',
         path: '/hub/crm',
         description: 'Bandeja de prospectos comerciales, estados de seguimiento y trazabilidad.',
@@ -199,6 +205,12 @@ const baseHierarchicalRoutes = [
         path: '/hub/marketing',
         description: 'Planificación editorial, lanzamientos de productos y campañas de contenido.',
         tag: 'Marketing',
+      },
+      {
+        title: 'Biblioteca de Skills & Recursos',
+        path: '/hub/biblioteca',
+        description: 'Índice vivo de skills, herramientas y recursos del equipo para ubicar capacidades rápidamente.',
+        tag: 'Biblioteca',
       },
     ],
   },

@@ -97,7 +97,7 @@ export const catalogService = {
       .from('catalog_items')
       .select(`
         *,
-        product:products(id, sku, name, slug, description, category, brand, type, status, condition, unit, base_price, commercial_status, image_url, images, created_at, updated_at),
+        product:inv_products(id, sku, name, slug, description, category, brand, type, status, condition, unit, base_price, commercial_status, image_url, images, created_at, updated_at),
         bundle:bundles(name, bundle_price)
       `)
       .eq('catalog_id', id)
@@ -272,7 +272,7 @@ export const catalogService = {
     // Get product prices
     if (productIds.length > 0) {
       const { data: products } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('base_price')
         .in('id', productIds)
 

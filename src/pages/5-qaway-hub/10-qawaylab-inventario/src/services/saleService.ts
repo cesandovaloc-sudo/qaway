@@ -111,7 +111,7 @@ export const saleService = {
     const productIds = [...new Set(items.map(item => item.product_id))]
 
     const { data: products, error } = await supabase
-      .from('products')
+      .from('inv_products')
       .select('id, stock, name')
       .in('id', productIds)
 

@@ -106,7 +106,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
     }
 
     let query = supabase
-      .from('products')
+      .from('inv_products')
       .select('*', { count: 'exact' })
 
     if (targetTenantId) {
@@ -171,7 +171,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
   async getProductById(id) {
     const { data, error } = await supabase
-      .from('products')
+      .from('inv_products')
       .select('*')
       .eq('id', id)
       .single()
@@ -185,7 +185,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
   async getProductBySku(sku) {
     const { data, error } = await supabase
-      .from('products')
+      .from('inv_products')
       .select('*')
       .eq('sku', sku)
       .single()
@@ -207,7 +207,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
     }
 
     const { data, error } = await supabase
-      .from('products')
+      .from('inv_products')
       .insert(payload)
       .select()
       .single()
@@ -231,7 +231,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
     }))
 
     const { data, error } = await supabase
-      .from('products')
+      .from('inv_products')
       .insert(payload)
       .select()
 
@@ -245,7 +245,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
   async updateProduct(id, productData) {
     // 3. Verificar que el producto exista y pertenezca al tenant activo antes de modificar
     const { data: existing, error: fetchErr } = await supabase
-      .from('products')
+      .from('inv_products')
       .select('id, tenant_id')
       .eq('id', id)
       .maybeSingle()
@@ -268,7 +268,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
     const targetTenant = existing.tenant_id || ctx.tenantId
     let query = supabase
-      .from('products')
+      .from('inv_products')
       .update({ ...productData, updated_at: new Date().toISOString() })
       .eq('id', id)
 
@@ -290,7 +290,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
   async deleteProduct(id) {
     // 4. Verificar que el producto pertenezca al tenant activo antes de eliminar
     const { data: existing, error: fetchErr } = await supabase
-      .from('products')
+      .from('inv_products')
       .select('id, tenant_id')
       .eq('id', id)
       .maybeSingle()
@@ -313,7 +313,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
     const targetTenant = existing.tenant_id || ctx.tenantId
     let query = supabase
-      .from('products')
+      .from('inv_products')
       .delete()
       .eq('id', id)
 
@@ -337,9 +337,9 @@ export const supabaseProductAdapter: ProductsAdapter = {
       if (ctx.tenantId) targetTenantId = ctx.tenantId
     } catch {}
 
-    let totalQ = supabase.from('products').select('*', { count: 'exact', head: true })
-    let activeQ = supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'active')
-    let lowStockQ = supabase.from('products').select('*', { count: 'exact', head: true }).filter('min_stock', 'gt', 0).filter('stock', 'lte', 'min_stock')
+    let totalQ = supabase.from('inv_products').select('*', { count: 'exact', head: true })
+    let activeQ = supabase.from('inv_products').select('*', { count: 'exact', head: true }).eq('status', 'active')
+    let lowStockQ = supabase.from('inv_products').select('*', { count: 'exact', head: true }).filter('min_stock', 'gt', 0).filter('stock', 'lte', 'min_stock')
 
     if (targetTenantId) {
       totalQ = totalQ.eq('tenant_id', targetTenantId)
@@ -374,7 +374,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
     const orFilter = ilikeOr(['name', 'sku'], query)
     let request = supabase
-      .from('products')
+      .from('inv_products')
       .select('*')
     if (targetTenantId) request = request.eq('tenant_id', targetTenantId)
     if (orFilter) request = request.or(orFilter)

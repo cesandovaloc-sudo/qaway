@@ -43,7 +43,7 @@ async function resolvePostUpdateTarget(supabase, rawRedirect) {
       }
     }
   } catch (_) {}
-  return '/hub/gestor_proyectos'
+  return '/hub/panel'
 }
 
 // Flujo /update-password: sirve tanto para links de recuperación de contraseña

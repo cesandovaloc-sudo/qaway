@@ -72,7 +72,7 @@ export default function NewSalePage() {
     // C-2: término saneado — nunca interpolar input crudo en el DSL or=
     const productFilter = ilikeOr(['name', 'sku'], query)
     let productReq = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, name, sku, base_price, stock, unit')
       .eq('status', 'active')
     if (productFilter) productReq = productReq.or(productFilter)

@@ -82,7 +82,7 @@ export default function NewPurchaseOrderPage() {
     }
     const productFilter = ilikeOr(['name', 'sku'], query)
     let productReq = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, name, sku, base_price, cost, unit')
       .eq('status', 'active')
     if (productFilter) productReq = productReq.or(productFilter)

@@ -72,6 +72,9 @@ const readStoredModule = (): ModuleKey => {
 const resolveModuleFromPath = (path: string): ModuleKey => {
   try {
     const clean = path.replace(/\/+$/, '') || '/';
+    if (clean.startsWith(`${MODULE_SLUGS.configuracion}/`)) {
+      return 'configuracion';
+    }
     if (SLUG_TO_MODULE[clean]) {
       // PRUEBAS, HITOS (Componentes) y ACTAS quedan desactivados del shell principal
       if (SLUG_TO_MODULE[clean] === 'pruebas' || SLUG_TO_MODULE[clean] === 'hitos' || SLUG_TO_MODULE[clean] === 'actas') return 'cronograma';
@@ -448,14 +451,19 @@ function GestorProyectosApp() {
       /* almacenamiento no disponible */
     }
     const targetSlug = MODULE_SLUGS[next];
-    if (targetSlug && location.pathname !== targetSlug) {
-      navigate(targetSlug);
+    if (targetSlug) {
+      const yaEnSubrutaConfig =
+        next === 'configuracion' && location.pathname.startsWith(`${targetSlug}/`);
+      if (!yaEnSubrutaConfig && location.pathname !== targetSlug) {
+        navigate(targetSlug);
+      }
     }
   };
 
   const handleOpenConfig = (tab: 'perfil' | 'preferencias') => {
     setConfigTabRequest((prev) => ({ tab, seq: (prev?.seq || 0) + 1 }));
     handleSelectModule('configuracion');
+    navigate(`${MODULE_SLUGS.configuracion}/${tab}`);
   };
 
   const handleChangeRole = (next: UserRole) => {

@@ -2,7 +2,7 @@ export function createProductsService(supabase) {
   return {
     async getProducts({ type, category, search, status = 'active' } = {}) {
       let query = supabase
-        .from('products')
+        .from('inv_products')
         .select('*')
         .eq('status', status)
         .order('created_at', { ascending: false })
@@ -18,7 +18,7 @@ export function createProductsService(supabase) {
 
     async getProduct(slug) {
       const { data, error } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('*')
         .eq('slug', slug)
         .single()
@@ -29,7 +29,7 @@ export function createProductsService(supabase) {
 
     async getProductById(id) {
       const { data, error } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('*')
         .eq('id', id)
         .single()
@@ -40,7 +40,7 @@ export function createProductsService(supabase) {
 
     async getProductsByIds(ids) {
       const { data, error } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('*')
         .in('id', ids)
 
@@ -50,7 +50,7 @@ export function createProductsService(supabase) {
 
     async createProduct(data) {
       const { data: product, error } = await supabase
-        .from('products')
+        .from('inv_products')
         .insert(data)
         .select()
         .single()
@@ -61,7 +61,7 @@ export function createProductsService(supabase) {
 
     async updateProduct(id, data) {
       const { data: product, error } = await supabase
-        .from('products')
+        .from('inv_products')
         .update(data)
         .eq('id', id)
         .select()
@@ -73,7 +73,7 @@ export function createProductsService(supabase) {
 
     async deleteProduct(id) {
       const { error } = await supabase
-        .from('products')
+        .from('inv_products')
         .update({ status: 'archived' })
         .eq('id', id)
 
@@ -82,7 +82,7 @@ export function createProductsService(supabase) {
 
     async reserveStock(id, quantity) {
       const { data: product, error: fetchError } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('stock')
         .eq('id', id)
         .single()
@@ -91,7 +91,7 @@ export function createProductsService(supabase) {
       if (product.stock < quantity) throw new Error('Stock insuficiente')
 
       const { error: updateError } = await supabase
-        .from('products')
+        .from('inv_products')
         .update({ stock: product.stock - quantity })
         .eq('id', id)
         .gte('stock', quantity)
@@ -101,7 +101,7 @@ export function createProductsService(supabase) {
 
     async releaseStock(id, quantity) {
       const { error } = await supabase
-        .from('products')
+        .from('inv_products')
         .update({ stock: supabase.rpc('increment', { x: quantity }) })
         .eq('id', id)
 

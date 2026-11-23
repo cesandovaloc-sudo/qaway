@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import './configuracion.css';
 import {
   AlertCircle,
@@ -105,7 +106,62 @@ export default function ConfiguracionView({
   notifyExterno,
 }: ConfiguracionViewProps) {
   type TabId = 'perfil' | 'preferencias' | 'empresa' | 'organizacion' | 'general' | 'proyectos' | 'cronograma' | 'auditoria' | 'asistente' | 'permisos';
-  const [activeTab, setActiveTab] = useState<TabId>('organizacion');
+  const CONFIG_BASE = '/hub/gestor_proyectos/configuracion';
+  const TAB_TO_SLUG: Record<TabId, string> = {
+    perfil: 'perfil',
+    preferencias: 'preferencias',
+    empresa: 'empresa',
+    organizacion: 'organizacion',
+    permisos: 'permisos',
+    general: 'zona-horaria',
+    proyectos: 'proyecto',
+    cronograma: 'tolerancias',
+    auditoria: 'seguridad',
+    asistente: 'asistente',
+  };
+  const SLUG_TO_TAB: Record<string, TabId> = {
+    perfil: 'perfil',
+    preferencias: 'preferencias',
+    empresa: 'empresa',
+    organizacion: 'organizacion',
+    permisos: 'permisos',
+    'zona-horaria': 'general',
+    proyecto: 'proyectos',
+    tolerancias: 'cronograma',
+    seguridad: 'auditoria',
+    asistente: 'asistente',
+  };
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const tabDesdeRuta = (pathname: string): TabId | null => {
+    const clean = pathname.replace(/\/+$/, '');
+    if (!clean.startsWith(`${CONFIG_BASE}/`)) return null;
+    const sub = clean.slice(CONFIG_BASE.length + 1).split('/')[0] || '';
+    return SLUG_TO_TAB[sub] ?? null;
+  };
+
+  const [activeTab, setActiveTab] = useState<TabId>(() => tabDesdeRuta(location.pathname) ?? 'organizacion');
+
+  useEffect(() => {
+    const clean = location.pathname.replace(/\/+$/, '');
+    const fromUrl = tabDesdeRuta(clean);
+    if (fromUrl) {
+      if (fromUrl !== activeTab) setActiveTab(fromUrl);
+    } else if (clean === CONFIG_BASE) {
+      navigate(`${CONFIG_BASE}/${TAB_TO_SLUG[activeTab]}`, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  const selectTab = (nextTab: TabId) => {
+    setActiveTab(nextTab);
+    const targetUrl = `${CONFIG_BASE}/${TAB_TO_SLUG[nextTab]}`;
+    if (location.pathname !== targetUrl) {
+      navigate(targetUrl);
+    }
+  };
   const [searchQuery, setSearchQuery] = useState('');
   // Etapa 6-B: perfil GP real. El gating de guardado SOLO aplica con sesión
   // real (perfilGp no nulo); en modo local se conserva el comportamiento actual.
@@ -118,7 +174,8 @@ export default function ConfiguracionView({
   // no bastaba: si el usuario estaba en otra pestaña, el clic del Topbar no
   // cambiaba nada. seq dispara el cambio incluso repetido el mismo tab.
   useEffect(() => {
-    if (tabRequest?.tab) setActiveTab(tabRequest.tab as TabId);
+    if (tabRequest?.tab) selectTab(tabRequest.tab as TabId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabRequest?.seq]);
   const [timezone, setTimezone] = useState(() => {
     return localStorage.getItem('qaway-system-timezone-v1') || 'America/Lima';
@@ -477,7 +534,7 @@ export default function ConfiguracionView({
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => setActiveTab(item.id as any)}
+                      onClick={() => selectTab(item.id as TabId)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',

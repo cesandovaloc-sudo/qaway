@@ -94,7 +94,7 @@ export default function ReportsPage() {
     setLoading(true)
     const { data } = await supabase
       .from('inventory_movements')
-      .select('product_id, type, quantity, created_at, products(name)')
+      .select('product_id, type, quantity, created_at, inv_products(name)')
       .gte('created_at', `${dateFrom}T00:00:00`)
       .lte('created_at', `${dateTo}T23:59:59`)
       .order('created_at', { ascending: false })

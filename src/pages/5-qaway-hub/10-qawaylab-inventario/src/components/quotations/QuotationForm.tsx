@@ -48,7 +48,7 @@ export function QuotationForm({ quotation, onSave, onClose }: QuotationFormProps
       try {
         const [customersData, productsData] = await Promise.all([
           customerService.getCustomers({ page: 1, per_page: 100 }),
-          supabase.from('products').select('*').eq('status', 'active').order('name'),
+          supabase.from('inv_products').select('*').eq('status', 'active').order('name'),
         ])
         setCustomers(customersData.data)
         setProducts(productsData.data || [])

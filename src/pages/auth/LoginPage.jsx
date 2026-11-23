@@ -84,10 +84,11 @@ export default function LoginPage() {
           const slug = slugById[sub.app_id]
           if (slug && APP_ROUTE_BY_SLUG[slug]) return APP_ROUTE_BY_SLUG[slug]
         }
-        return '/hub/gestor_proyectos'
+        // Sin app contratada no se entra a ninguna app: al panel del Hub.
+        return '/hub/panel'
       }
     } catch (_) { /* error de lectura: cae al destino seguro */ }
-    return '/hub/gestor_proyectos'
+    return '/hub/panel'
   }
   const mailHref = (() => {
     const e = regEmail.trim().toLowerCase()

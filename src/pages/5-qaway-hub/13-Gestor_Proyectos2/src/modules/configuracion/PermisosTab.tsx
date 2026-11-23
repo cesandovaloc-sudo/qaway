@@ -11,8 +11,13 @@
  * Estados honestos: sin sesión, sin permiso, directorio vacío, error de red.
  */
 
-import { useEffect, useState } from 'react';
-import { CheckSquare, FolderKanban, Key, Layers, Pencil, Save, ShieldCheck, Users } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Check, CheckCircle2, CheckSquare, ChevronDown, ChevronRight, Copy, FolderKanban, Key, KeyRound, Layers, Mail, Pencil, Plus, Save, Search, Send, ShieldAlert, ShieldCheck, Trash2, UserPlus, Users, X } from 'lucide-react';
+import { supabase } from '../../services/supabaseClient';
+import { APP_SLUG } from '../../services/contextoSesion';
+import { aNodosJerarquia, listarUnidadesParaJerarquia } from '../../services/organizacionJerarquiaLectura';
+import { calcularNumeracion } from '../../services/organizacionJerarquia';
+import SelectEstilizado, { type SelectOption } from './SelectEstilizado';
 import {
   LLAVES_V1,
   ROLES_GP,
@@ -125,6 +130,31 @@ export default function PermisosTab() {
   const [borradores, setBorradores] = useState<Record<string, Borrador>>({});
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
   const [llaveEditando, setLlaveEditando] = useState<LlavePermiso | null>(null);
+  const [invitarAbierto, setInvitarAbierto] = useState(false);
+  const [metodoAlta, setMetodoAlta] = useState<'correo' | 'directo'>('correo');
+  const [inviteModo, setInviteModo] = useState<'uno' | 'varios'>('uno');
+  const [inviteNombre, setInviteNombre] = useState('');
+  const [inviteApellido, setInviteApellido] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteTelefono, setInviteTelefono] = useState('');
+  const [inviteClave, setInviteClave] = useState('');
+  const [inviteRol, setInviteRol] = useState<'editor' | 'viewer' | 'guest'>('editor');
+  const [inviteUnidadId, setInviteUnidadId] = useState('');
+  const [inviteUnidadLote, setInviteUnidadLote] = useState('');
+  const [unidadesArea, setUnidadesArea] = useState<SelectOption[]>([]);
+  const [inviteFilas, setInviteFilas] = useState<Array<{ id: string; nombre: string; apellido: string; email: string; telefono: string; clave: string; rol: 'editor' | 'viewer' | 'guest'; unidadId: string }>>([
+    { id: 'fila-1', nombre: '', apellido: '', email: '', telefono: '', clave: '', rol: 'editor', unidadId: '' },
+  ]);
+  const [credencialesCreadas, setCredencialesCreadas] = useState<Array<{ tipo: 'directo' | 'correo'; nombre: string; email: string; telefono: string; password: string; enviado?: boolean }>>([]);
+  const [copiadoIdx, setCopiadoIdx] = useState<number | null>(null);
+  const [copiadoResumen, setCopiadoResumen] = useState(false);
+  const [llavesMenuAbiertoId, setLlavesMenuAbiertoId] = useState<string | null>(null);
+  const [miembrosUnidad, setMiembrosUnidad] = useState<Record<string, string>>({});
+  const [busquedaUsuario, setBusquedaUsuario] = useState('');
+  const [areasAbiertas, setAreasAbiertas] = useState<Record<string, boolean>>({});
+  const [esquemaAbierto, setEsquemaAbierto] = useState<Record<string, boolean>>({});
+  const inviteInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [enviandoInvite, setEnviandoInvite] = useState(false);
   const [aviso, setAviso] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
 
   const puedeAdministrar = Boolean(perfil) && capacidades.administrarPermisos;
@@ -150,9 +180,109 @@ export default function PermisosTab() {
   };
 
   useEffect(() => {
-    if (puedeAdministrar) cargar();
+    if (!puedeAdministrar) return;
+    cargar();
+    if (perfil?.tenantId) {
+      Promise.all([
+        listarUnidadesParaJerarquia({ tenantId: perfil.tenantId }).catch(() => []),
+        supabase
+          ? supabase
+              .from('gestor_unidad_miembros')
+              .select('user_id, unit_id')
+              .eq('tenant_id', perfil.tenantId)
+              .eq('status', 'active')
+              .then((res) => (res.data ?? []) as Array<{ user_id: string | null; unit_id: string }>, () => [])
+          : Promise.resolve([]),
+      ]).then(([rows, miembros]) => {
+        const mapa = calcularNumeracion(aNodosJerarquia(rows));
+        const ordenarPorRuta = (aId: string, bId: string): number => {
+          const pa = (mapa.get(aId)?.ruta ?? '9999').split('.').map(Number);
+          const pb = (mapa.get(bId)?.ruta ?? '9999').split('.').map(Number);
+          const len = Math.max(pa.length, pb.length);
+          for (let i = 0; i < len; i += 1) {
+            const va = pa[i] ?? 0;
+            const vb = pb[i] ?? 0;
+            if (va !== vb) return va - vb;
+          }
+          return 0;
+        };
+        const ordenadas = [...rows].sort((a, b) => ordenarPorRuta(a.id, b.id));
+        const opciones: SelectOption[] = ordenadas.map((u) => {
+          const info = mapa.get(u.id);
+          return {
+            value: u.id,
+            label: u.name,
+            badge: info?.ruta,
+            nivel: info?.nivel ?? 1,
+            parentValue: u.parentUnitId,
+          };
+        });
+        setUnidadesArea(opciones);
+
+        const mapaMiembros: Record<string, string> = {};
+        for (const m of miembros) {
+          if (m.user_id && m.unit_id) mapaMiembros[m.user_id] = m.unit_id;
+        }
+        setMiembrosUnidad(mapaMiembros);
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [puedeAdministrar]);
+  }, [puedeAdministrar, perfil?.tenantId]);
+
+  useEffect(() => {
+    if (!aviso) return;
+    const t = window.setTimeout(() => setAviso(null), 4000);
+    return () => window.clearTimeout(t);
+  }, [aviso]);
+
+  useEffect(() => {
+    if (!llavesMenuAbiertoId) return;
+    const onDoc = (ev: MouseEvent) => {
+      const target = ev.target as HTMLElement | null;
+      if (target?.closest('[data-llaves-menu="true"]')) return;
+      setLlavesMenuAbiertoId(null);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [llavesMenuAbiertoId]);
+
+  const gruposPorArea = useMemo(() => {
+    const usuarios = estado.fase === 'lista' ? estado.usuarios : [];
+    const q = busquedaUsuario.trim().toLowerCase();
+    const filtrados = usuarios.filter((u) => {
+      if ((u.rol ?? 'visor') === 'admin') return false;
+      if (!q) return true;
+      return (u.nombre ?? '').toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q);
+    });
+
+    const porUnidad = new Map<string, UsuarioEmpresa[]>();
+    for (const u of filtrados) {
+      const key = miembrosUnidad[u.id] || '__SIN_AREA__';
+      const arr = porUnidad.get(key) ?? [];
+      arr.push(u);
+      porUnidad.set(key, arr);
+    }
+
+    const resultado: Array<{ key: string; badge?: string; label: string; usuarios: UsuarioEmpresa[] }> = [];
+    for (const area of unidadesArea) {
+      const lista = porUnidad.get(area.value);
+      if (lista && lista.length > 0) {
+        resultado.push({ key: area.value, badge: area.badge, label: area.label, usuarios: lista });
+        porUnidad.delete(area.value);
+      }
+    }
+    const sinArea = porUnidad.get('__SIN_AREA__');
+    if (sinArea && sinArea.length > 0) {
+      resultado.push({ key: '__SIN_AREA__', label: 'Sin área asignada', usuarios: sinArea });
+      porUnidad.delete('__SIN_AREA__');
+    }
+    for (const [k, lista] of porUnidad.entries()) {
+      if (lista.length > 0) {
+        resultado.push({ key: k, label: 'Área no listada', usuarios: lista });
+      }
+    }
+    return resultado;
+  }, [estado, busquedaUsuario, miembrosUnidad, unidadesArea]);
 
   if (!perfil) {
     return (
@@ -211,94 +341,967 @@ export default function PermisosTab() {
     }
   };
 
+  const agregarFilaInvite = (rolBase: 'editor' | 'viewer' | 'guest', unidadBase?: string) => {
+    const nuevaId = `fila-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+    setInviteFilas((prev) => [
+      ...prev,
+      { id: nuevaId, nombre: '', apellido: '', email: '', telefono: '', clave: '', rol: rolBase, unidadId: unidadBase ?? inviteUnidadLote },
+    ]);
+    requestAnimationFrame(() => inviteInputRefs.current[nuevaId]?.focus());
+  };
+
+  const resolverEnlaceCorreo = (email: string): string => {
+    const dom = email.split('@')[1]?.toLowerCase() ?? '';
+    if (dom === 'gmail.com' || dom === 'googlemail.com') return 'https://mail.google.com';
+    if (dom.startsWith('outlook.') || dom.startsWith('hotmail.') || dom.startsWith('live.')) return 'https://outlook.live.com';
+    return `${window.location.origin}/login?redirect=${encodeURIComponent('/hub/gestor_proyectos')}`;
+  };
+
+  const armarMensajeAcceso = (cred: { tipo: 'directo' | 'correo'; nombre: string; email: string; password: string }) => {
+    const saludo = cred.nombre ? `Hola ${cred.nombre},` : 'Hola,';
+    if (cred.tipo === 'correo') {
+      const correoUrl = resolverEnlaceCorreo(cred.email);
+      return `${saludo} te enviamos una invitación al Gestor de Proyectos al correo ${cred.email}.\n\nRevisa tu bandeja de entrada (o spam) aquí: ${correoUrl}`;
+    }
+    const link = `${window.location.origin}/login?redirect=${encodeURIComponent('/hub/gestor_proyectos')}`;
+    return `${saludo} ya tienes acceso al Gestor de Proyectos.\n\nIngresa aquí: ${link}\nUsuario: ${cred.email}\nClave provisional: ${cred.password}\n\nPor seguridad, el sistema te pedirá cambiar la clave en tu primer ingreso.`;
+  };
+
+  const normalizarTelefonoWa = (tel: string): string => {
+    const digits = tel.replace(/\D/g, '');
+    if (digits.length === 9 && digits.startsWith('9')) return `51${digits}`;
+    return digits;
+  };
+
+  const enviarInvitacion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabase || !perfil.tenantId) return;
+
+    const items = inviteModo === 'uno'
+      ? (inviteEmail.trim()
+          ? [{ nombre: inviteNombre.trim(), apellido: inviteApellido.trim(), email: inviteEmail.trim(), telefono: inviteTelefono.trim(), clave: inviteClave.trim(), rol: inviteRol, unidadId: inviteUnidadId }]
+          : [])
+      : inviteFilas
+          .map((f) => ({ nombre: f.nombre.trim(), apellido: f.apellido.trim(), email: f.email.trim(), telefono: f.telefono.trim(), clave: f.clave.trim(), rol: f.rol, unidadId: f.unidadId }))
+          .filter((f) => f.email.length > 0);
+
+    if (items.length === 0) {
+      setAviso({ tipo: 'error', texto: 'Ingresa al menos un correo electrónico válido.' });
+      return;
+    }
+    const invalidos = items.filter((c) => !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c.email));
+    if (invalidos.length > 0) {
+      setAviso({ tipo: 'error', texto: `Correo no válido: ${invalidos[0].email}` });
+      return;
+    }
+
+    if (metodoAlta === 'directo') {
+      const claveCorta = items.find((c) => c.clave.length > 0 && c.clave.length < 8);
+      if (claveCorta) {
+        setAviso({ tipo: 'error', texto: `La clave provisional para "${claveCorta.email}" debe tener al menos 8 caracteres (o déjala vacía para generarla automática).` });
+        return;
+      }
+    }
+
+    const correosExistentes = new Set(
+      estado.fase === 'lista'
+        ? estado.usuarios.map((u) => (u.email ?? '').trim().toLowerCase()).filter(Boolean)
+        : [],
+    );
+    const yaEnEmpresa = items.find((c) => correosExistentes.has(c.email.toLowerCase()));
+    if (yaEnEmpresa) {
+      setAviso({ tipo: 'error', texto: `El correo "${yaEnEmpresa.email}" ya pertenece a esta empresa (correo duplicado).` });
+      return;
+    }
+
+    const vistosLote = new Set<string>();
+    for (const c of items) {
+      const key = c.email.toLowerCase();
+      if (vistosLote.has(key)) {
+        setAviso({ tipo: 'error', texto: `Correo duplicado en el lote: ${c.email}` });
+        return;
+      }
+      vistosLote.add(key);
+    }
+
+    setEnviandoInvite(true);
+    setAviso(null);
+    let enviadas = 0;
+    let existentes = 0;
+    let errores = 0;
+    let ultimoError = '';
+    const nuevasCreds: Array<{ tipo: 'directo' | 'correo'; nombre: string; email: string; telefono: string; password: string; enviado?: boolean }> = [];
+
+    try {
+      for (const item of items) {
+        if (metodoAlta === 'correo') {
+          const { data, error: invokeError } = await supabase.functions.invoke('invite-user', {
+            body: {
+              email: item.email,
+              tenant_id: perfil.tenantId,
+              role: item.rol,
+              app_slugs: [APP_SLUG],
+              unidad_id: item.unidadId || null,
+              full_name: item.nombre || null,
+              last_name: item.apellido || null,
+            },
+          });
+          if (invokeError && !data?.error && !data?.status) {
+            errores += 1;
+            ultimoError = 'No se pudo enviar la invitación.';
+          } else if (data?.status === 'existing_account' || data?.status === 'already_member') {
+            existentes += 1;
+          } else if (data?.error) {
+            errores += 1;
+            ultimoError = String(data.error);
+          } else {
+            enviadas += 1;
+            nuevasCreds.push({
+              tipo: 'correo',
+              nombre: [item.nombre, item.apellido].filter(Boolean).join(' '),
+              email: item.email,
+              telefono: item.telefono,
+              password: '',
+              enviado: false,
+            });
+          }
+        } else {
+          const { data, error: invokeError } = await supabase.functions.invoke('admin-provision-user', {
+            body: {
+              action: 'create',
+              email: item.email,
+              tenant_id: perfil.tenantId,
+              role: item.rol,
+              app_slugs: [APP_SLUG],
+              unidad_id: item.unidadId || null,
+              full_name: item.nombre || null,
+              last_name: item.apellido || null,
+              phone: item.telefono || null,
+              ...(item.clave ? { password: item.clave } : {}),
+            },
+          });
+          if (invokeError && !data?.error && !data?.status) {
+            errores += 1;
+            ultimoError = 'No se pudo crear la cuenta.';
+          } else if (data?.status === 'already_exists') {
+            existentes += 1;
+          } else if (data?.error) {
+            errores += 1;
+            ultimoError = String(data.error);
+          } else if (data?.provisional_password) {
+            enviadas += 1;
+            nuevasCreds.push({
+              tipo: 'directo',
+              nombre: [item.nombre, item.apellido].filter(Boolean).join(' '),
+              email: data.email || item.email,
+              telefono: item.telefono,
+              password: String(data.provisional_password),
+              enviado: false,
+            });
+          }
+        }
+      }
+
+      if (nuevasCreds.length > 0) {
+        setCredencialesCreadas((prev) => [...nuevasCreds, ...prev]);
+      }
+
+      if (items.length === 1) {
+        if (enviadas === 1) {
+          setInviteNombre('');
+          setInviteApellido('');
+          setInviteEmail('');
+          setInviteTelefono('');
+          setInviteClave('');
+          setInviteUnidadId('');
+          setInviteUnidadLote('');
+          setInviteFilas([{ id: `fila-${Date.now()}`, nombre: '', apellido: '', email: '', telefono: '', clave: '', rol: 'editor', unidadId: '' }]);
+          setInvitarAbierto(false);
+          setAviso({
+            tipo: 'ok',
+            texto: metodoAlta === 'correo'
+              ? `Invitación enviada a "${items[0].email}".`
+              : `Cuenta creada para "${items[0].email}". Ya puedes copiar o enviar su acceso por WhatsApp.`,
+          });
+          cargar();
+        } else if (existentes === 1) {
+          setAviso({ tipo: 'error', texto: `El correo "${items[0].email}" ya tiene cuenta o ya pertenece a esta empresa.` });
+        } else {
+          setAviso({ tipo: 'error', texto: ultimoError || 'No se pudo completar el alta.' });
+        }
+        return;
+      }
+
+      if (enviadas > 0) {
+        setInviteUnidadLote('');
+        setInviteFilas([{ id: `fila-${Date.now()}`, nombre: '', apellido: '', email: '', telefono: '', clave: '', rol: 'editor', unidadId: '' }]);
+        setInvitarAbierto(false);
+        cargar();
+      }
+      setAviso({
+        tipo: errores > 0 && enviadas === 0 ? 'error' : 'ok',
+        texto: `Lote procesado: ${enviadas} enviada(s)${existentes ? ` · ${existentes} ya registrada(s)` : ''}${errores ? ` · ${errores} con error (${ultimoError})` : ''}.`,
+      });
+    } finally {
+      setEnviandoInvite(false);
+    }
+  };
+
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
     <div style={estiloPanel}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-        <Users size={17} color="#0284c7" />
-        <b style={{ fontSize: '14px', color: '#0f172a' }}>Permisos de Gestor de Proyectos · {estado.usuarios.length} usuarios</b>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Users size={17} />
+          </div>
+          <div>
+            <b style={{ fontSize: '14px', color: '#0f172a', display: 'block' }}>
+              Permisos de Gestor de Proyectos · {estado.usuarios.length} {estado.usuarios.length === 1 ? 'usuario' : 'usuarios'}
+            </b>
+            <span style={{ fontSize: '12px', color: '#64748b' }}>
+              Asigna roles, áreas y llaves delicadas a los integrantes de tu empresa.
+            </span>
+          </div>
+        </div>
+        {(capacidades.administrarPermisos || capacidades.registrarPersonas) && (
+          <button
+            type="button"
+            onClick={() => {
+              setAviso(null);
+              setInvitarAbierto((v) => !v);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 13px',
+              borderRadius: '8px',
+              border: invitarAbierto ? '1px solid #cbd5e1' : 'none',
+              background: invitarAbierto ? '#ffffff' : '#2563eb',
+              color: invitarAbierto ? '#0f172a' : '#ffffff',
+              fontSize: '12.5px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            {invitarAbierto ? <X size={14} /> : <UserPlus size={14} />}
+            <span>{invitarAbierto ? 'Cerrar' : 'Invitar usuario'}</span>
+          </button>
+        )}
       </div>
+
       {aviso && (
         <div
           style={{
-            marginBottom: '12px',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            fontSize: '12px',
+            position: 'fixed',
+            top: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            background: '#ffffff',
+            color: '#0f172a',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: '13px',
             fontWeight: 600,
-            background: aviso.tipo === 'ok' ? '#f0fdf4' : '#fef2f2',
-            color: aviso.tipo === 'ok' ? '#166534' : '#b91c1c',
-            border: `1px solid ${aviso.tipo === 'ok' ? '#bbf7d0' : '#fecaca'}`,
           }}
         >
-          {aviso.texto}
+          {aviso.tipo === 'ok' ? (
+            <CheckCircle2 size={16} color="#00b96b" />
+          ) : (
+            <ShieldAlert size={16} color="#dc2626" />
+          )}
+          <span>{aviso.texto}</span>
         </div>
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {estado.usuarios.map((u) => {
-          const borrador = borradores[u.id] ?? { rol: 'visor', permisos: [] };
-          const sucio =
-            borrador.rol !== (u.rol ?? 'visor') ||
-            borrador.permisos.length !== u.permisos.length ||
-            borrador.permisos.some((k) => !u.permisos.includes(k));
-          return (
+        {estado.usuarios
+          .filter((u) => (u.rol ?? 'visor') === 'admin')
+          .map((u) => (
             <div key={u.id} style={estiloFila}>
-              <div style={{ minWidth: '220px' }}>
+              <div style={{ minWidth: '220px', flex: 1 }}>
                 <b style={{ fontSize: '13px', color: '#0f172a' }}>{u.nombre ?? 'Sin nombre'}</b>
                 <div style={{ fontSize: '11.5px', color: '#64748b' }}>{u.email ?? u.id}</div>
               </div>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '11px', color: '#64748b' }}>
-                <span style={{ fontWeight: 600 }}>Rol</span>
-                <select
-                  value={borrador.rol}
-                  onChange={(e) =>
-                    setBorradores((prev) => ({ ...prev, [u.id]: { ...borrador, rol: e.target.value } }))
-                  }
-                  style={estiloSelect}
-                >
-                  {ROLES_GP.map((r) => (
-                    <option key={r} value={r}>{r}</option>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '999px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: '12px', fontWeight: 600 }}>
+                <ShieldCheck size={14} />
+                <span>Admin de empresa · Acceso total (todas las llaves incluidas)</span>
+              </span>
+            </div>
+          ))}
+
+        {invitarAbierto && (
+          <form
+            onSubmit={enviarInvitacion}
+            style={{
+              marginLeft: '20px',
+              padding: '14px',
+              borderRadius: '10px',
+              border: '1px solid #bfdbfe',
+              background: '#f8fafc',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '7px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {metodoAlta === 'correo' ? <Mail size={14} /> : <KeyRound size={14} />}
+                </div>
+                <div>
+                  <b style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>
+                    {metodoAlta === 'correo' ? 'Invitar integrante(s) por correo' : 'Alta directa con clave provisional'}
+                  </b>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                    {metodoAlta === 'correo'
+                      ? 'Se enviará enlace de invitación por correo vinculado a tu empresa.'
+                      : 'Crea la cuenta al instante con enlace de acceso, clave provisional y cambio obligatorio al entrar.'}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'inline-flex', gap: '4px', padding: '3px', borderRadius: '8px', background: '#e2e8f0' }}>
+                  {([
+                    { id: 'correo', label: 'Por correo' },
+                    { id: 'directo', label: 'Acceso directo' },
+                  ] as const).map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setMetodoAlta(m.id)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: metodoAlta === m.id ? '#ffffff' : 'transparent',
+                        color: metodoAlta === m.id ? '#0f172a' : '#475569',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {m.label}
+                    </button>
                   ))}
-                  {!ROLES_GP.includes(borrador.rol as (typeof ROLES_GP)[number]) && borrador.rol && (
-                    <option value={borrador.rol}>{borrador.rol} (actual)</option>
-                  )}
-                </select>
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
-                  <Key size={11} /> Llaves delicadas (v1)
-                </span>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                  {LLAVES_V1.map((llave) => (
-                    <label key={llave} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#334155' }}>
-                      <input
-                        type="checkbox"
-                        checked={borrador.permisos.includes(llave)}
-                        onChange={(e) =>
-                          setBorradores((prev) => ({
-                            ...prev,
-                            [u.id]: {
-                              ...borrador,
-                              permisos: e.target.checked
-                                ? [...borrador.permisos, llave]
-                                : borrador.permisos.filter((k) => k !== llave),
-                            },
-                          }))
-                        }
-                      />
-                      {ETIQUETAS_LLAVE[llave] ?? llave}
-                    </label>
+                </div>
+                <div style={{ display: 'inline-flex', gap: '4px', padding: '3px', borderRadius: '8px', background: '#e2e8f0' }}>
+                  {(['uno', 'varios'] as const).map((modo) => (
+                    <button
+                      key={modo}
+                      type="button"
+                      onClick={() => setInviteModo(modo)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: inviteModo === modo ? '#ffffff' : 'transparent',
+                        color: inviteModo === modo ? '#0f172a' : '#475569',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {modo === 'uno' ? 'Uno' : 'Varios'}
+                    </button>
                   ))}
                 </div>
               </div>
+            </div>
+            {inviteModo === 'uno' ? (
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <label style={{ flex: '1 1 130px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569', fontWeight: 600 }}>
+                  Nombre (opcional)
+                  <input
+                    type="text"
+                    value={inviteNombre}
+                    onChange={(e) => setInviteNombre(e.target.value)}
+                    placeholder="Ej. Ana"
+                    style={{ height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a', fontWeight: 400 }}
+                  />
+                </label>
+                <label style={{ flex: '1 1 130px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569', fontWeight: 600 }}>
+                  Apellido (opcional)
+                  <input
+                    type="text"
+                    value={inviteApellido}
+                    onChange={(e) => setInviteApellido(e.target.value)}
+                    placeholder="Ej. Torres"
+                    style={{ height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a', fontWeight: 400 }}
+                  />
+                </label>
+                <label style={{ flex: '2 1 200px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569', fontWeight: 600 }}>
+                  Correo electrónico
+                  <input
+                    type="email"
+                    required
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    placeholder="nombre@empresa.com"
+                    style={{ height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a', fontWeight: 400 }}
+                  />
+                </label>
+                <label style={{ flex: '1.2 1 150px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569', fontWeight: 600 }}>
+                  Teléfono (WhatsApp)
+                  <input
+                    type="tel"
+                    value={inviteTelefono}
+                    onChange={(e) => setInviteTelefono(e.target.value)}
+                    placeholder="Ej. 999888777"
+                    style={{ height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a', fontWeight: 400 }}
+                  />
+                </label>
+                {metodoAlta === 'directo' && (
+                  <label style={{ flex: '1.3 1 170px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569', fontWeight: 600 }}>
+                    Clave provisional (opcional)
+                    <input
+                      type="text"
+                      value={inviteClave}
+                        onChange={(e) => setInviteClave(e.target.value)}
+                        placeholder="Auto o DNI (8+ car.)"
+                        style={{ height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a', fontWeight: 400 }}
+                      />
+                    </label>
+                )}
+                <div style={{ flex: '1.5 1 200px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569', fontWeight: 600 }}>
+                  <span>Área / Unidad</span>
+                  <SelectEstilizado
+                    value={inviteUnidadId}
+                    placeholder="Sin área asignada (opcional)"
+                    options={[{ value: '', label: 'Sin área asignada (opcional)' }, ...unidadesArea]}
+                    onChange={(val) => setInviteUnidadId(val)}
+                  />
+                </div>
+                <div style={{ flex: '1.3 1 200px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569', fontWeight: 600 }}>
+                  <span>Rol inicial</span>
+                  <SelectEstilizado
+                    value={inviteRol}
+                    options={[
+                      { value: 'editor', label: 'Editor (opera y registra)' },
+                      { value: 'viewer', label: 'Visor (solo lectura)' },
+                      { value: 'guest', label: 'Invitado (consulta limitada)' },
+                    ]}
+                    onChange={(val) => setInviteRol(val as 'editor' | 'viewer' | 'guest')}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={enviandoInvite}
+                  style={{ ...estiloBotonPrimario, height: '38px', padding: '0 14px', boxSizing: 'border-box', borderRadius: '8px', fontSize: '13.5px', opacity: enviandoInvite ? 0.65 : 1 }}
+                >
+                  {metodoAlta === 'correo' ? <Send size={13} /> : <KeyRound size={13} />}
+                  <span>
+                    {enviandoInvite
+                      ? 'Procesando…'
+                      : metodoAlta === 'correo'
+                        ? 'Enviar invitación'
+                        : 'Crear acceso directo'}
+                  </span>
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '8px 10px', borderRadius: '8px', background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                  <span style={{ fontSize: '12px', color: '#475569', fontWeight: 600 }}>Área para todo el lote:</span>
+                  <div style={{ flex: '1 1 240px', maxWidth: '340px' }}>
+                    <SelectEstilizado
+                      value={inviteUnidadLote}
+                      placeholder="Sin área asignada (aplicar a filas)"
+                      options={[{ value: '', label: 'Sin área asignada (opcional)' }, ...unidadesArea]}
+                      onChange={(val) => {
+                        setInviteUnidadLote(val);
+                        setInviteFilas((prev) => prev.map((f) => ({ ...f, unidadId: val })));
+                      }}
+                    />
+                  </div>
+                </div>
+                {inviteFilas.map((fila, idx) => (
+                  <div key={fila.id} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      value={fila.nombre}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setInviteFilas((prev) => prev.map((f) => (f.id === fila.id ? { ...f, nombre: val } : f)));
+                      }}
+                      placeholder="Nombre"
+                      style={{ flex: '1 1 100px', height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a' }}
+                    />
+                    <input
+                      type="text"
+                      value={fila.apellido}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setInviteFilas((prev) => prev.map((f) => (f.id === fila.id ? { ...f, apellido: val } : f)));
+                      }}
+                      placeholder="Apellido"
+                      style={{ flex: '1 1 100px', height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a' }}
+                    />
+                    <input
+                      ref={(el) => { inviteInputRefs.current[fila.id] = el; }}
+                      type="email"
+                      value={fila.email}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setInviteFilas((prev) => prev.map((f) => (f.id === fila.id ? { ...f, email: val } : f)));
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const siguiente = inviteFilas[idx + 1];
+                          if (siguiente) {
+                            inviteInputRefs.current[siguiente.id]?.focus();
+                          } else {
+                            agregarFilaInvite(fila.rol, fila.unidadId);
+                          }
+                        }
+                      }}
+                      placeholder={`correo${idx + 1}@empresa.com (Enter)`}
+                      style={{ flex: '2 1 180px', height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a' }}
+                    />
+                    <input
+                      type="tel"
+                      value={fila.telefono}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setInviteFilas((prev) => prev.map((f) => (f.id === fila.id ? { ...f, telefono: val } : f)));
+                      }}
+                      placeholder="Teléfono (WhatsApp)"
+                      style={{ flex: '1 1 125px', height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a' }}
+                    />
+                    {metodoAlta === 'directo' && (
+                      <input
+                        type="text"
+                        value={fila.clave}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setInviteFilas((prev) => prev.map((f) => (f.id === fila.id ? { ...f, clave: val } : f)));
+                        }}
+                        placeholder="Clave (auto/DNI)"
+                        style={{ flex: '1 1 120px', height: '38px', padding: '0 12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13.5px', color: '#0f172a' }}
+                      />
+                    )}
+                    <div style={{ flex: '1.5 1 180px' }}>
+                      <SelectEstilizado
+                        value={fila.unidadId}
+                        placeholder="Área / Unidad"
+                        options={[{ value: '', label: 'Sin área asignada' }, ...unidadesArea]}
+                        onChange={(val) => setInviteFilas((prev) => prev.map((f) => (f.id === fila.id ? { ...f, unidadId: val } : f)))}
+                      />
+                    </div>
+                    <div style={{ flex: '1 1 140px' }}>
+                      <SelectEstilizado
+                        value={fila.rol}
+                        options={[
+                          { value: 'editor', label: 'Editor' },
+                          { value: 'viewer', label: 'Visor' },
+                          { value: 'guest', label: 'Invitado' },
+                        ]}
+                        onChange={(val) => {
+                          const v = val as 'editor' | 'viewer' | 'guest';
+                          setInviteFilas((prev) => prev.map((f) => (f.id === fila.id ? { ...f, rol: v } : f)));
+                        }}
+                      />
+                    </div>
+                    {inviteFilas.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setInviteFilas((prev) => prev.filter((f) => f.id !== fila.id))}
+                        title="Quitar fila"
+                        style={{ width: '38px', height: '38px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #fecaca', background: '#fef2f2', color: '#b91c1c', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginTop: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => agregarFilaInvite(inviteFilas[inviteFilas.length - 1]?.rol ?? 'editor', inviteFilas[inviteFilas.length - 1]?.unidadId ?? inviteUnidadLote)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 11px', borderRadius: '7px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    <Plus size={13} />
+                    <span>Agregar fila</span>
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={enviandoInvite}
+                    style={{ ...estiloBotonPrimario, height: '38px', padding: '0 14px', boxSizing: 'border-box', borderRadius: '8px', fontSize: '13.5px', opacity: enviandoInvite ? 0.65 : 1 }}
+                  >
+                    {metodoAlta === 'correo' ? <Send size={13} /> : <KeyRound size={13} />}
+                    <span>
+                      {enviandoInvite
+                        ? 'Procesando…'
+                        : metodoAlta === 'correo'
+                          ? 'Enviar invitaciones'
+                          : 'Crear accesos directos'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </form>
+        )}
+
+        {credencialesCreadas.length > 0 && (
+          <div
+            style={{
+              marginLeft: '20px',
+              padding: '14px',
+              borderRadius: '10px',
+              border: '1px solid #e2e8f0',
+              background: '#f8fafc',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <KeyRound size={15} color="#2563eb" />
+                <b style={{ fontSize: '13px', color: '#0f172a' }}>
+                  Accesos y avisos listos para entregar ({credencialesCreadas.length})
+                </b>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const resumen = credencialesCreadas.map((c) => armarMensajeAcceso(c)).join('\n\n---\n\n');
+                    navigator.clipboard?.writeText(resumen);
+                    setCopiadoResumen(true);
+                    window.setTimeout(() => setCopiadoResumen(false), 2000);
+                  }}
+                  style={{ ...estiloBotonSecundario, height: '32px', padding: '0 10px', boxSizing: 'border-box', fontSize: '12px' }}
+                >
+                  <Copy size={13} />
+                  <span>{copiadoResumen ? 'Resumen copiado' : 'Copiar resumen completo'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCredencialesCreadas([])}
+                  style={{ ...estiloBotonSecundario, height: '32px', padding: '0 10px', boxSizing: 'border-box', fontSize: '12px' }}
+                >
+                  <X size={13} />
+                  <span>Ocultar</span>
+                </button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {credencialesCreadas.map((cred, i) => {
+                const msg = armarMensajeAcceso(cred);
+                const telWa = cred.telefono ? normalizarTelefonoWa(cred.telefono) : '';
+                const waUrl = telWa
+                  ? `https://wa.me/${telWa}?text=${encodeURIComponent(msg)}`
+                  : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+                const correoUrl = resolverEnlaceCorreo(cred.email);
+                return (
+                  <div
+                    key={`${cred.email}-${i}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                    }}
+                  >
+                    <div style={{ minWidth: '220px', flex: 1 }}>
+                      <b style={{ fontSize: '13px', color: '#0f172a', display: 'block' }}>
+                        {cred.nombre || cred.email}
+                      </b>
+                      <div style={{ fontSize: '12px', color: '#475569' }}>
+                        {cred.tipo === 'directo' ? (
+                          <>
+                            Usuario: <b>{cred.email}</b> · Clave provisional: <code style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: '4px', fontWeight: 700, color: '#0f172a' }}>{cred.password}</code>
+                          </>
+                        ) : (
+                          <>
+                            Invitación enviada a <b>{cred.email}</b> · Bandeja:{' '}
+                            <a href={correoUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: 600 }}>
+                              Abrir correo
+                            </a>
+                          </>
+                        )}
+                        {cred.telefono ? ` · Tel: ${cred.telefono}` : ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(msg);
+                          setCopiadoIdx(i);
+                          window.setTimeout(() => setCopiadoIdx((cur) => (cur === i ? null : cur)), 2000);
+                        }}
+                        style={{
+                          ...estiloBotonSecundario,
+                          height: '34px',
+                          padding: '0 12px',
+                          boxSizing: 'border-box',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          lineHeight: '1',
+                          margin: 0,
+                        }}
+                      >
+                        <Copy size={13} />
+                        <span>{copiadoIdx === i ? 'Copiado' : 'Copiar mensaje'}</span>
+                      </button>
+                      <a
+                        href={waUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          ...estiloBotonPrimario,
+                          height: '34px',
+                          padding: '0 12px',
+                          boxSizing: 'border-box',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          lineHeight: '1',
+                          margin: 0,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        <Send size={13} />
+                        <span>{cred.tipo === 'directo' ? 'Enviar por WhatsApp' : 'Avisar por WhatsApp'}</span>
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {estado.usuarios.filter((u) => (u.rol ?? 'visor') !== 'admin').length > 0 && (
+          <div style={{ marginLeft: '20px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flex: '1 1 260px', maxWidth: '380px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+              <input
+                type="text"
+                value={busquedaUsuario}
+                onChange={(e) => setBusquedaUsuario(e.target.value)}
+                placeholder="Buscar integrante por nombre o correo..."
+                style={{ width: '100%', height: '36px', padding: '0 12px 0 32px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', fontSize: '13px', color: '#0f172a' }}
+              />
+            </div>
+            <span style={{ fontSize: '12px', color: '#64748b' }}>
+              {gruposPorArea.length} {gruposPorArea.length === 1 ? 'grupo' : 'grupos'} por área
+            </span>
+          </div>
+        )}
+
+        {gruposPorArea.map((grupo) => {
+          const abierta = busquedaUsuario.trim() !== '' || Boolean(areasAbiertas[grupo.key]);
+          return (
+            <div key={grupo.key} style={{ marginLeft: '20px', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#f8fafc' }}>
               <button
                 type="button"
-                style={{ ...estiloBotonPrimario, opacity: sucio ? 1 : 0.5, cursor: sucio ? 'pointer' : 'default' }}
-                disabled={!sucio || guardandoId === u.id}
-                onClick={() => guardar(u)}
+                onClick={() => setAreasAbiertas((prev) => ({ ...prev, [grupo.key]: !prev[grupo.key] }))}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '10px',
+                  padding: '10px 14px',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
               >
-                <Save size={13} />
-                {guardandoId === u.id ? 'Guardando…' : 'Guardar'}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                  <ChevronRight
+                    size={15}
+                    style={{
+                      color: '#64748b',
+                      flexShrink: 0,
+                      transform: abierta ? 'rotate(90deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.15s ease',
+                    }}
+                  />
+                  {grupo.badge && (
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#1d4ed8', background: '#dbeafe', borderRadius: '5px', padding: '2px 7px', flexShrink: 0 }}>
+                      {grupo.badge}
+                    </span>
+                  )}
+                  <b style={{ fontSize: '13px', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {grupo.label}
+                  </b>
+                </span>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#475569', background: '#e2e8f0', borderRadius: '999px', padding: '2px 9px', flexShrink: 0 }}>
+                  {grupo.usuarios.length} {grupo.usuarios.length === 1 ? 'usuario' : 'usuarios'}
+                </span>
               </button>
+              {abierta && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 10px 10px' }}>
+                  {grupo.usuarios.map((u) => {
+                    const borrador = borradores[u.id] ?? { rol: 'visor', permisos: [] };
+                    const sucio =
+                      borrador.rol !== (u.rol ?? 'visor') ||
+                      borrador.permisos.length !== u.permisos.length ||
+                      borrador.permisos.some((k) => !u.permisos.includes(k));
+                    const nombreLimpio = u.nombre && u.nombre.trim().toLowerCase() !== (u.email ?? '').trim().toLowerCase()
+                      ? u.nombre
+                      : null;
+                    const menuLlavesAbierto = llavesMenuAbiertoId === u.id;
+                    const resumenLlaves = borrador.permisos.length === 0
+                      ? 'Sin llaves delicadas'
+                      : borrador.permisos.length === 1
+                        ? (ETIQUETAS_LLAVE[borrador.permisos[0]] ?? borrador.permisos[0])
+                        : `${borrador.permisos.length} llaves activas`;
+                    const opcionesRol = [
+                      ...ROLES_GP.filter((r) => r !== 'admin').map((r) => ({ value: r, label: r })),
+                      ...(!ROLES_GP.includes(borrador.rol as (typeof ROLES_GP)[number]) && borrador.rol
+                        ? [{ value: borrador.rol, label: `${borrador.rol} (actual)` }]
+                        : []),
+                    ];
+                    return (
+                      <div key={u.id} style={{ ...estiloFila, background: '#ffffff', alignItems: 'flex-end' }}>
+                        <div style={{ minWidth: '210px', flex: '1.5 1 210px', alignSelf: 'center' }}>
+                          <b style={{ fontSize: '13px', color: '#0f172a' }}>{nombreLimpio ?? (u.email ?? u.id)}</b>
+                          <div style={{ fontSize: '11.5px', color: nombreLimpio ? '#64748b' : '#94a3b8' }}>
+                            {nombreLimpio ? (u.email ?? u.id) : 'Pendiente de nombre (invitado)'}
+                          </div>
+                        </div>
+                        <div style={{ flex: '0 0 140px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: '#64748b' }}>
+                          <span style={{ fontWeight: 600 }}>Rol</span>
+                          <SelectEstilizado
+                            value={borrador.rol}
+                            options={opcionesRol}
+                            onChange={(val) =>
+                              setBorradores((prev) => ({ ...prev, [u.id]: { ...borrador, rol: val } }))
+                            }
+                          />
+                        </div>
+                        <div
+                          data-llaves-menu="true"
+                          style={{ position: 'relative', flex: '1 1 210px', maxWidth: '260px', display: 'flex', flexDirection: 'column', gap: '4px' }}
+                        >
+                          <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
+                            <Key size={11} /> Llaves delicadas (v1)
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setLlavesMenuAbiertoId((prev) => (prev === u.id ? null : u.id))}
+                            style={{
+                              width: '100%',
+                              height: '38px',
+                              padding: '0 12px',
+                              boxSizing: 'border-box',
+                              borderRadius: '8px',
+                              border: '1px solid #cbd5e1',
+                              background: '#ffffff',
+                              color: borrador.permisos.length > 0 ? '#0f172a' : '#64748b',
+                              fontSize: '13px',
+                              fontWeight: borrador.permisos.length > 0 ? 500 : 400,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '8px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resumenLlaves}</span>
+                            <ChevronDown
+                              size={14}
+                              style={{
+                                color: '#64748b',
+                                flexShrink: 0,
+                                transform: menuLlavesAbierto ? 'rotate(180deg)' : 'none',
+                                transition: 'transform 0.15s ease',
+                              }}
+                            />
+                          </button>
+                          {menuLlavesAbierto && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: 'calc(100% + 6px)',
+                                left: 0,
+                                minWidth: '250px',
+                                zIndex: 1200,
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '10px',
+                                boxShadow: '0 12px 28px -6px rgba(15, 23, 42, 0.14), 0 4px 12px -2px rgba(15, 23, 42, 0.06)',
+                                padding: '8px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '2px',
+                              }}
+                            >
+                              {LLAVES_V1.map((llave) => {
+                                const activa = borrador.permisos.includes(llave);
+                                return (
+                                  <button
+                                    key={llave}
+                                    type="button"
+                                    onClick={() =>
+                                      setBorradores((prev) => ({
+                                        ...prev,
+                                        [u.id]: {
+                                          ...borrador,
+                                          permisos: activa
+                                            ? borrador.permisos.filter((k) => k !== llave)
+                                            : [...borrador.permisos, llave],
+                                        },
+                                      }))
+                                    }
+                                    style={{
+                                      width: '100%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      gap: '10px',
+                                      padding: '8px 10px',
+                                      border: 'none',
+                                      borderRadius: '7px',
+                                      background: activa ? '#eff6ff' : 'transparent',
+                                      color: activa ? '#1d4ed8' : '#334155',
+                                      fontSize: '13px',
+                                      fontWeight: activa ? 500 : 400,
+                                      cursor: 'pointer',
+                                      textAlign: 'left',
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    <span>{ETIQUETAS_LLAVE[llave] ?? llave}</span>
+                                    {activa && <Check size={14} />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          style={{ ...estiloBotonPrimario, height: '38px', padding: '0 14px', boxSizing: 'border-box', borderRadius: '8px', opacity: sucio ? 1 : 0.5, cursor: sucio ? 'pointer' : 'default' }}
+                          disabled={!sucio || guardandoId === u.id}
+                          onClick={() => guardar(u)}
+                        >
+                          <Save size={13} />
+                          {guardandoId === u.id ? 'Guardando…' : 'Guardar'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
@@ -310,9 +1313,10 @@ export default function PermisosTab() {
         El rol <b>admin</b> lo ve todo; <b>editor</b> + llaves = totales; <b>operativo</b> registra lo suyo;
         <b> visor</b> solo consulta. El mando real vive en RLS — aquí se curan las llaves del jsonb.
       </p>
+    </div>
 
-      {/* Esquema completo de permisos del Gestor agrupado por módulo */}
-      <div style={{ marginTop: '20px', paddingTop: '18px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* Cápsula independiente: Esquema completo de permisos del Gestor */}
+      <div style={{ ...estiloPanel, display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <ShieldCheck size={17} />
@@ -327,6 +1331,7 @@ export default function PermisosTab() {
 
         {(['Proyectos', 'Estructura EDT', 'Tareas y Seguimiento', 'Equipo y Gobernanza'] as const).map((grupo) => {
           const items = ESQUEMA_PERMISOS.filter((p) => p.grupo === grupo);
+          const grupoAbierto = Boolean(esquemaAbierto[grupo]);
           const iconoGrupo = grupo === 'Proyectos'
             ? <FolderKanban size={15} color="#2563eb" />
             : grupo === 'Estructura EDT'
@@ -336,13 +1341,43 @@ export default function PermisosTab() {
                 : <Users size={15} color="#2563eb" />;
           return (
             <div key={grupo} style={{ border: '1px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden', background: '#ffffff' }}>
-              <div style={{ padding: '10px 14px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {iconoGrupo}
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{grupo}</span>
-              </div>
-              {items.map((item, idx) => {
+              <button
+                type="button"
+                onClick={() => setEsquemaAbierto((prev) => ({ ...prev, [grupo]: !prev[grupo] }))}
+                style={{
+                  width: '100%',
+                  padding: '11px 14px',
+                  background: '#f8fafc',
+                  border: 'none',
+                  borderBottom: grupoAbierto ? '1px solid #e2e8f0' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '10px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <ChevronRight
+                    size={15}
+                    style={{
+                      color: '#64748b',
+                      transform: grupoAbierto ? 'rotate(90deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.15s ease',
+                    }}
+                  />
+                  {iconoGrupo}
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{grupo}</span>
+                </span>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b', background: '#e2e8f0', borderRadius: '999px', padding: '2px 9px' }}>
+                  {items.length} {items.length === 1 ? 'capacidad' : 'capacidades'}
+                </span>
+              </button>
+              {grupoAbierto && items.map((item, idx) => {
+                const usuariosNoAdmin = estado.usuarios.filter((u) => (u.rol ?? 'visor') !== 'admin');
                 const usuariosConLlave = item.llaveCurable
-                  ? estado.usuarios.filter((u) => u.permisos.includes(item.llaveCurable!))
+                  ? usuariosNoAdmin.filter((u) => u.permisos.includes(item.llaveCurable!))
                   : [];
                 const editandoEstaLlave = Boolean(item.llaveCurable && llaveEditando === item.llaveCurable);
                 return (
@@ -398,7 +1433,13 @@ export default function PermisosTab() {
                           Otorgar llave "{ETIQUETAS_LLAVE[item.llaveCurable]}" a usuarios adicionales:
                         </span>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                          {estado.usuarios.map((u) => {
+                          {estado.usuarios.filter((u) => (u.rol ?? 'visor') !== 'admin').length === 0 ? (
+                            <span style={{ fontSize: '12px', color: '#64748b' }}>
+                              Aún no hay usuarios adicionales en el equipo. Usa <b>Invitar usuario</b> para agregar integrantes.
+                            </span>
+                          ) : estado.usuarios
+                            .filter((u) => (u.rol ?? 'visor') !== 'admin')
+                            .map((u) => {
                             const tiene = u.permisos.includes(item.llaveCurable!);
                             return (
                               <button

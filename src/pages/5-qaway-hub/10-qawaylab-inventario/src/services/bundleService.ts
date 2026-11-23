@@ -52,7 +52,7 @@ export const bundleService = {
 
     const { data: items, error: itemsError } = await supabase
       .from('bundle_items')
-      .select('*, product:products(*)')
+      .select('*, product:inv_products(*)')
       .eq('bundle_id', id)
 
     if (itemsError) throw itemsError
@@ -68,7 +68,7 @@ export const bundleService = {
     let totalIndividual = 0
     for (const item of items) {
       const { data: product } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('base_price')
         .eq('id', item.product_id)
         .single()
@@ -205,7 +205,7 @@ export const bundleService = {
     let total = 0
     for (const item of items) {
       const { data: product } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('base_price')
         .eq('id', item.product_id)
         .single()
@@ -233,7 +233,7 @@ export const bundleService = {
     let minStock = Infinity
     for (const item of items) {
       const { data: product } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('stock')
         .eq('id', item.product_id)
         .single()

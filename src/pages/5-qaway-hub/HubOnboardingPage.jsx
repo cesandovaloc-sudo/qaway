@@ -19,6 +19,7 @@ import { supabase } from "@/config/supabase";
 import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 import { PAISES } from "@/config/paises";
 import CanvaPlanSelector from "./CanvaPlanSelector";
+import { AUTO_APP_PROVISIONING_ENABLED, TRIAL_DAYS } from "@/config/appAccessPolicy";
 
 const steps = ["Elige tu plan", "Tu empresa", "Tu equipo", "Listo"];
 const FLOW_SLUGS = ["tu-plan", "frecuencia", "pago", "tu-empresa", "tu-equipo", "listo"];
@@ -534,7 +535,8 @@ export default function HubOnboardingPage() {
   }
 
   async function startSubscription(tenantId, cardTokenId, plan) {
-    const selectedSlugs = [...new Set([...selected, "inventario"].map((raw) => raw === "inventory" ? "inventario" : raw))];
+    const baseSlugs = selected.map((raw) => raw === "inventory" ? "inventario" : raw);
+    const selectedSlugs = [...new Set(AUTO_APP_PROVISIONING_ENABLED ? [...baseSlugs, "inventario"] : baseSlugs)];
     const { data, error } = await supabase.functions.invoke("mp-subscription-init", {
       body: {
         tenant_id: tenantId,
@@ -548,7 +550,8 @@ export default function HubOnboardingPage() {
   }
 
   async function startOneTimePayment(tenantId, cardTokenId, plan, amount, paymentMethodId) {
-    const selectedSlugs = [...new Set([...selected, "inventario"].map((raw) => raw === "inventory" ? "inventario" : raw))];
+    const baseSlugs = selected.map((raw) => raw === "inventory" ? "inventario" : raw);
+    const selectedSlugs = [...new Set(AUTO_APP_PROVISIONING_ENABLED ? [...baseSlugs, "inventario"] : baseSlugs)];
     const { data, error } = await supabase.functions.invoke("mp-onetime-payment", {
       body: { tenant_id: tenantId, plan_id: plan, amount, card_token_id: cardTokenId, card_payment_method_id: paymentMethodId, app_slugs: selectedSlugs },
     });
@@ -566,10 +569,10 @@ export default function HubOnboardingPage() {
       if (!activeTenantId) throw new Error("Primero registra tu empresa.");
       const activePlan = planToApply || chosenPlan || "intermedio";
       const alias = { inventory: "inventario" };
-      let selectedSlugs = selected.map((raw) => alias[raw] || raw);
-      if (!selectedSlugs.includes("inventario")) {
-        selectedSlugs.push("inventario");
-      }
+      const elegidas = selected.map((raw) => alias[raw] || raw);
+      // Con el alta automática desactivada solo se registran las apps que el
+      // cliente marcó explícitamente (nada de inyectar "inventario").
+      const selectedSlugs = [...new Set(AUTO_APP_PROVISIONING_ENABLED ? [...elegidas, "inventario"] : elegidas)];
 
       const [preciosRes, appsRes] = await Promise.all([
         supabase.from("app_plan_pricing").select("app_id, plan, price, currency, is_available").eq("plan", activePlan),
@@ -580,8 +583,10 @@ export default function HubOnboardingPage() {
       const catalogApps = appsRes.data || [];
       const selectedAppIds = catalogApps.filter((a) => selectedSlugs.includes(a.slug)).map((a) => a.id);
 
-      // Si el usuario desmarcó apps al retroceder, eliminamos las suscripciones desmarcadas:
-      if (selectedAppIds.length > 0) {
+      // Si el usuario desmarcó apps al retroceder, eliminamos las suscripciones desmarcadas.
+      // Con el alta automática desactivada no se borran accesos ya otorgados
+      // de forma explícita.
+      if (AUTO_APP_PROVISIONING_ENABLED && selectedAppIds.length > 0) {
         await supabase
           .from("tenant_app_subscriptions")
           .delete()
@@ -590,7 +595,10 @@ export default function HubOnboardingPage() {
       }
 
       const now = new Date();
-      const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const in30Days = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+      // Sin alta automática no hay prueba de 30 días: la suscripción nace con el
+      // estado real del pago (o "pending", que no da acceso).
+      const subStatus = AUTO_APP_PROVISIONING_ENABLED ? (payment?.status || "trialing") : (payment?.status || "pending");
       const in90Days = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
       const priceByPlan = {
@@ -610,20 +618,20 @@ export default function HubOnboardingPage() {
              tenant_id: activeTenantId,
             app_id: app.id,
             plan: activePlan,
-             status: payment?.status || "trialing",
+             status: subStatus,
              billing_type: payment?.billingType || "recurring",
              auto_renew: payment?.autoRenew ?? true,
              mp_payment_id: payment?.mpPaymentId || null,
-            trial_started_at: now.toISOString(),
-            trial_ends_at: in30Days.toISOString(),
+            trial_started_at: AUTO_APP_PROVISIONING_ENABLED ? now.toISOString() : null,
+            trial_ends_at: AUTO_APP_PROVISIONING_ENABLED ? in30Days.toISOString() : null,
             current_period_start: now.toISOString(),
             current_period_end: in30Days.toISOString(),
             list_price_at_signup: listPrice,
             contracted_price: priceByPlan[activePlan] || 50,
             price_currency: precio?.currency || "PEN",
-            trial_days_granted: 30,
-            trial_requires_card: true,
-             trial_source: "onboarding_canva_30d",
+            trial_days_granted: AUTO_APP_PROVISIONING_ENABLED ? TRIAL_DAYS : 0,
+            trial_requires_card: AUTO_APP_PROVISIONING_ENABLED,
+             trial_source: AUTO_APP_PROVISIONING_ENABLED ? "onboarding_canva_30d" : null,
              mp_preapproval_id: payment?.mpPreapprovalId || null,
           },
           { onConflict: "tenant_id,app_id" },
@@ -639,9 +647,9 @@ export default function HubOnboardingPage() {
         status: "active",
         features: {
            ...(tenant?.features || {}),
-          trial_plan: activePlan,
-          trial_started_at: now.toISOString(),
-          trial_ends_at: in30Days.toISOString(),
+          trial_plan: AUTO_APP_PROVISIONING_ENABLED ? activePlan : null,
+          trial_started_at: AUTO_APP_PROVISIONING_ENABLED ? now.toISOString() : null,
+          trial_ends_at: AUTO_APP_PROVISIONING_ENABLED ? in30Days.toISOString() : null,
           catalog_promo_active: true,
           catalog_promo_until: in90Days.toISOString(),
         },
@@ -652,9 +660,9 @@ export default function HubOnboardingPage() {
         status: "active",
         features: {
           ...(prev.features || {}),
-          trial_plan: activePlan,
-          trial_started_at: now.toISOString(),
-          trial_ends_at: in30Days.toISOString(),
+          trial_plan: AUTO_APP_PROVISIONING_ENABLED ? activePlan : null,
+          trial_started_at: AUTO_APP_PROVISIONING_ENABLED ? now.toISOString() : null,
+          trial_ends_at: AUTO_APP_PROVISIONING_ENABLED ? in30Days.toISOString() : null,
           catalog_promo_active: true,
           catalog_promo_until: in90Days.toISOString(),
         },

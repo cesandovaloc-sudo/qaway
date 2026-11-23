@@ -76,6 +76,7 @@ export default function Topbar({
     name: perfilVisible?.nombre || 'Usuario',
     email: perfilVisible?.email || '',
     roleLabel: perfilVisible?.roleLabel || 'Sesión activa',
+    empresaLabel: perfilVisible?.empresaLabel || perfilVisible?.roleLabel || 'Sesión activa',
     initials: perfilVisible?.initials || '..',
     avatarUrl: perfilVisible?.avatarUrl || null,
   };
@@ -269,7 +270,7 @@ export default function Topbar({
                     letterSpacing: '0.2px',
                   }}
                 >
-                  {authProfile.roleLabel}
+                  {authProfile.empresaLabel}
                 </span>
               </div>
             </div>

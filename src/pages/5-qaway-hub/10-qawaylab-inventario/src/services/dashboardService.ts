@@ -92,7 +92,7 @@ export const dashboardService = {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
     let productsQuery = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, stock, min_stock, base_price, status, commercial_status')
     if (tenantId) productsQuery = productsQuery.eq('tenant_id', tenantId)
 
@@ -232,7 +232,7 @@ export const dashboardService = {
 
     // Get recent products
     let productsQuery = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, name, sku, created_at')
       .order('created_at', { ascending: false })
       .limit(5)
@@ -306,7 +306,7 @@ export const dashboardService = {
   // Get top products (by stock value)
   async getTopProducts(limit: number = 5, tenantId?: string | null): Promise<TopProduct[]> {
     let query = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, name, sku, stock, base_price, image_url')
       .eq('status', 'active')
       .gt('stock', 0)
@@ -328,7 +328,7 @@ export const dashboardService = {
   // Get low stock products
   async getLowStockProducts(limit: number = 5, tenantId?: string | null): Promise<TopProduct[]> {
     let query = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, name, sku, stock, min_stock, base_price, image_url')
       .eq('status', 'active')
       .gt('stock', 0)
@@ -397,7 +397,7 @@ export const dashboardService = {
   // Get category distribution
   async getCategoryData(tenantId?: string | null): Promise<CategoryData[]> {
     let query = supabase
-      .from('products')
+      .from('inv_products')
       .select('category, categories(name)')
       .eq('status', 'active')
     if (tenantId) query = query.eq('tenant_id', tenantId)
@@ -430,7 +430,7 @@ export const dashboardService = {
     const windowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString()
 
     let query = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, stock, base_price, created_at')
       .gte('created_at', windowStart)
     if (tenantId) query = query.eq('tenant_id', tenantId)

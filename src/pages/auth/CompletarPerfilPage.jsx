@@ -4,6 +4,7 @@ import { AlertCircle } from 'lucide-react'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { getSesionCompartida } from '@/router/sessionCache'
 import { getAppIdCacheado } from '@/config/appCatalogCache'
+import { AUTO_APP_PROVISIONING_ENABLED, TRIAL_DAYS } from '@/config/appAccessPolicy'
 import DatosEmpresaCard, {
   contactoDesdeForm,
   formDesdeTenant,
@@ -16,7 +17,7 @@ export default function CompletarPerfilPage() {
   const rawRedirect = searchParams.get('redirect')
   const destino = rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
     ? rawRedirect
-    : '/hub/gestor_proyectos'
+    : '/hub/panel'
 
   const supabase = getSupabaseClient()
   const [checking, setChecking] = useState(true)
@@ -133,14 +134,15 @@ export default function CompletarPerfilPage() {
 
       localStorage.setItem(`qaway.onboarding_completed.${tenant.id}`, 'true')
 
-      // El onboarding antiguo solo daba inventario, CRM y agenda: sin esto el
-      // tenant nuevo llegaba al Gestor en candado.
+      // Alta automática de la app desactivada (ver appAccessPolicy): completar el
+      // perfil ya no regala una prueba de 30 días. El acceso se otorga por
+      // invitación por correo o por acceso directo a la app.
       const { data: app, error: appErr } = await getAppIdCacheado('gestor-proyectos', supabase)
       if (appErr || !app?.id) throw new Error('No se pudo resolver la aplicación Gestor de Proyectos.')
 
       const ahora = new Date()
-      const fin = new Date(ahora.getTime() + 30 * 24 * 60 * 60 * 1000)
-      const { error: subErr } = await supabase
+      const fin = new Date(ahora.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+      const { error: subErr } = AUTO_APP_PROVISIONING_ENABLED ? await supabase
         .from('tenant_app_subscriptions')
         .upsert({
           tenant_id: tenant.id,
@@ -156,12 +158,13 @@ export default function CompletarPerfilPage() {
           list_price_at_signup: 100,
           contracted_price: 50,
           price_currency: 'PEN',
-          trial_days_granted: 30,
+          trial_days_granted: TRIAL_DAYS,
           trial_requires_card: false,
           trial_source: 'completar_perfil',
           mp_payment_id: null,
           mp_preapproval_id: null,
         }, { onConflict: 'tenant_id,app_id' })
+        : { error: null }
       if (subErr) throw subErr
 
       const { error: rolErr } = await supabase

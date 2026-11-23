@@ -22,14 +22,14 @@ const PUBLIC_PRODUCT_COLUMNS =
 async function resolveProductByRef(ref: string): Promise<any> {
   if (UUID_RE.test(ref)) {
     // C-5: proyección pública explícita — sin cost/stock/notes
-    const { data } = await supabase.from('products').select(PUBLIC_PRODUCT_COLUMNS).eq('id', ref).limit(1)
+    const { data } = await supabase.from('inv_products').select(PUBLIC_PRODUCT_COLUMNS).eq('id', ref).limit(1)
     return data?.[0] ?? null
   }
 
-  const { data } = await supabase.from('products').select(PUBLIC_PRODUCT_COLUMNS).eq('slug', ref).limit(1)
+  const { data } = await supabase.from('inv_products').select(PUBLIC_PRODUCT_COLUMNS).eq('slug', ref).limit(1)
   if (data?.[0]) return data[0]
 
-  const { data: bySku } = await supabase.from('products').select(PUBLIC_PRODUCT_COLUMNS).eq('sku', ref).limit(1)
+  const { data: bySku } = await supabase.from('inv_products').select(PUBLIC_PRODUCT_COLUMNS).eq('sku', ref).limit(1)
   return bySku?.[0] ?? null
 }
 

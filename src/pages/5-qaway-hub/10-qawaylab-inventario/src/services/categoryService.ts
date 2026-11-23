@@ -88,7 +88,7 @@ export const categoryService = {
     const categories = await this.getCategories(tenantId)
 
     let countQuery = supabase
-      .from('products')
+      .from('inv_products')
       .select('id, category_id')
 
     if (tenantId) countQuery = countQuery.eq('tenant_id', tenantId)

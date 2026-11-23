@@ -26,6 +26,7 @@ export const routeVisibility = {
 
 const publicPathAllowList = new Set([
   '/',
+  '/inicio-v3',
   '/blog',
   '/blog/articulo/:id',
   '/carrito',
@@ -38,6 +39,7 @@ const publicPathAllowList = new Set([
   '/hub',
   '/hub/blog-editor',
   '/hub/blog-editor/editor/:id',
+  '/hub/biblioteca',
   '/hub/inventario',
   '/hub/criterios',
   '/hub/rag',
@@ -50,6 +52,7 @@ const publicPathAllowList = new Set([
   '/hub/landings/inventario',
   '/landings/sistema-contenido-notion',
   '/login',
+  '/registrarse',
   '/completar-perfil',
   '/onboarding',
   '/onboarding/:paso',

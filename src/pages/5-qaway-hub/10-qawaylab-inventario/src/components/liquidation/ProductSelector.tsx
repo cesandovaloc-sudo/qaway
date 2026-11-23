@@ -26,7 +26,7 @@ export function ProductSelector({ selectedProducts, onSelect, onRemove, onClose 
     try {
       setLoading(true)
       const { data, error } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('*')
         .eq('status', 'active')
         .order('name')

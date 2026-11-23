@@ -50,7 +50,7 @@ export default function GuestAccessPage() {
       try {
         // C-5: proyección pública explícita — sin cost/stock/notes
         let query = supabase
-          .from('products')
+          .from('inv_products')
           .select('id, sku, name, slug, description, category, brand, type, status, condition, unit, base_price, commercial_status, image_url, images, created_at, updated_at')
           .eq('status', 'active')
 

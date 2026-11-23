@@ -83,7 +83,7 @@ export const quotationService = {
     // Get items with products
     const { data: items, error: itemsError } = await supabase
       .from('quotation_items')
-      .select('*, product:products(*)')
+      .select('*, product:inv_products(*)')
       .eq('quotation_id', id)
 
     if (itemsError) throw itemsError

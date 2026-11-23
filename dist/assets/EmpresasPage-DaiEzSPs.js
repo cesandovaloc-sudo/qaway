@@ -1,0 +1,1 @@
+import{i as e}from"./chunk-62JRHF6Z-DMVsbPJU.js";import{t}from"./jsx-runtime-BdxMnOeJ.js";var n=t();function r(){return(0,n.jsx)(e,{to:`/hub/panel/empresas`,replace:!0})}export{r as default};

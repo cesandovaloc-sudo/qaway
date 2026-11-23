@@ -62,8 +62,9 @@ serve(async (req: Request) => {
     const { data: callerRow } = await admin.from('users')
       .select('role, tenant_id, is_platform_admin').eq('id', caller.id).single()
     if (!callerRow) return json({ error: 'Sin perfil' }, 403)
-    // Exclusivo de la plataforma: el admin de marca sigue con invite-user.
-    if (!(callerRow.role === 'admin' && callerRow.is_platform_admin === true)) {
+    const isGlobalAdmin = callerRow.role === 'admin' && callerRow.is_platform_admin === true
+    const isBrandAdmin = callerRow.role === 'admin' && callerRow.tenant_id !== null
+    if (!isGlobalAdmin && !isBrandAdmin) {
       return json({ error: 'No tienes permisos para realizar esta acción.' }, 403)
     }
 
@@ -78,6 +79,8 @@ serve(async (req: Request) => {
       last_name,
       password,
       must_change_password = true,
+      unidad_id = null,
+      phone = null,
     } = await req.json()
 
     const requiereCambioClave = must_change_password !== false
@@ -86,6 +89,9 @@ serve(async (req: Request) => {
     if (action === 'create') {
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) return json({ error: 'Introduce un correo válido.' })
       if (!ROLES.includes(role)) return json({ error: 'Rol inválido.' })
+      if (!isGlobalAdmin && (role === 'admin' || tenant_id !== callerRow.tenant_id)) {
+        return json({ error: 'No tienes permisos para realizar esta acción.' }, 403)
+      }
       if (password && (typeof password !== 'string' || password.length < MIN_PASSWORD)) {
         return json({ error: `La contraseña debe tener al menos ${MIN_PASSWORD} caracteres.` })
       }
@@ -93,6 +99,18 @@ serve(async (req: Request) => {
       // Misma validación de marca que invite-user: activa o en arranque.
       const { data: tenant } = await admin.from('tenants').select('id, status').eq('id', tenant_id).single()
       if (!tenant || !['active', 'draft'].includes(tenant.status)) return json({ error: 'La empresa destino no es válida.' })
+
+      let validUnidadId: string | null = null
+      if (unidad_id !== null && unidad_id !== undefined && String(unidad_id).trim() !== '') {
+        const { data: unitRow } = await admin
+          .from('gestor_unidades')
+          .select('id')
+          .eq('id', String(unidad_id).trim())
+          .eq('tenant_id', String(tenant_id))
+          .maybeSingle()
+        if (!unitRow) return json({ error: 'El área seleccionada no pertenece a tu empresa.' })
+        validUnidadId = unitRow.id
+      }
 
       const { data: apps } = await admin.from('app_catalog').select('slug').in('slug', app_slugs)
       const validSlugs = (apps || []).map((a: { slug: string }) => a.slug)
@@ -105,16 +123,18 @@ serve(async (req: Request) => {
       const lastName = typeof last_name === 'string' && last_name.trim()
         ? last_name.trim().slice(0, 120)
         : null
+      const cleanPhone = typeof phone === 'string' && phone.trim()
+        ? phone.trim().slice(0, 30)
+        : null
       const finalPassword = typeof password === 'string' && password.length >= MIN_PASSWORD
         ? password
         : provisionalPassword()
 
       // Invitación pendiente: handle_new_user la consume al crear la cuenta
-      // auth y vincula tenant + rol + apps. Es el mismo mecanismo de la
-      // invitación por correo; aquí no se envía ningún correo.
+      // auth y vincula tenant + rol + apps + unidad. Aquí no se envía ningún correo.
       const { error: invErr } = await admin.from('user_invites').upsert(
         {
-          email: inviteEmail, tenant_id, role, app_slugs: validSlugs,
+          email: inviteEmail, tenant_id, role, app_slugs: validSlugs, unidad_id: validUnidadId,
           expires_at: new Date(Date.now() + INVITE_TTL_MS).toISOString(),
           accepted_at: null, created_by: caller.id,
         },
@@ -146,9 +166,12 @@ serve(async (req: Request) => {
       }
 
       // El trigger ya creó el perfil (service role bypass de RLS): marcar el
-      // cambio obligatorio de contraseña en el primer ingreso (BD + metadata).
-      if (requiereCambioClave) {
-        await admin.from('users').update({ must_change_password: true }).eq('id', created.user.id)
+      // cambio obligatorio de contraseña y teléfono si fue proporcionado.
+      const userPatch: Record<string, unknown> = {}
+      if (requiereCambioClave) userPatch.must_change_password = true
+      if (cleanPhone) userPatch.phone = cleanPhone
+      if (Object.keys(userPatch).length > 0) {
+        await admin.from('users').update(userPatch).eq('id', created.user.id)
       }
 
       return json({ ok: true, user_id: created.user.id, email: inviteEmail, provisional_password: finalPassword })
@@ -156,12 +179,19 @@ serve(async (req: Request) => {
 
     // ─── Acción: restablecer contraseña perdida ───
     if (action === 'reset_password') {
-      let uid = typeof user_id === 'string' && user_id ? user_id : ''
-      if (!uid && email) {
-        const { data: row } = await admin.from('users').select('id').ilike('email', String(email)).maybeSingle()
-        uid = row?.id || ''
+      let targetRow: { id: string; tenant_id: string | null; role: string | null } | null = null
+      if (typeof user_id === 'string' && user_id) {
+        const { data: row } = await admin.from('users').select('id, tenant_id, role').eq('id', user_id).maybeSingle()
+        targetRow = row
+      } else if (email) {
+        const { data: row } = await admin.from('users').select('id, tenant_id, role').ilike('email', String(email)).maybeSingle()
+        targetRow = row
       }
+      const uid = targetRow?.id || ''
       if (!uid) return json({ error: 'Usuario no encontrado.' })
+      if (!isGlobalAdmin && (targetRow?.tenant_id !== callerRow.tenant_id || targetRow?.role === 'admin')) {
+        return json({ error: 'No tienes permisos para realizar esta acción.' }, 403)
+      }
 
       if (password && (typeof password !== 'string' || password.length < MIN_PASSWORD)) {
         return json({ error: `La contraseña debe tener al menos ${MIN_PASSWORD} caracteres.` })

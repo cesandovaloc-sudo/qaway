@@ -91,7 +91,7 @@ export const liquidationService = {
 
     const { data: items, error: itemsError } = await supabase
       .from('liquidation_items')
-      .select('*, product:products(*)')
+      .select('*, product:inv_products(*)')
       .eq('campaign_id', id)
 
     if (itemsError) throw itemsError
@@ -264,7 +264,7 @@ export const liquidationService = {
 
     for (const item of items) {
       const { data: product } = await supabase
-        .from('products')
+        .from('inv_products')
         .select('base_price, stock')
         .eq('id', item.product_id)
         .single()

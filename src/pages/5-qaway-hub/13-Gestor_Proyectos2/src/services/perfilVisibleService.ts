@@ -31,6 +31,8 @@ export interface PerfilVisible {
   email: string;
   rol: string;
   roleLabel: string;
+  empresaLabel: string;
+  areaNombre: string | null;
   initials: string;
   avatarUrl: string | null;
   /** Teléfono canónico de la persona, fuente única de comunicaciones ágiles. */
@@ -92,7 +94,7 @@ async function resolver(): Promise<PerfilVisible | null> {
   );
 
   const tenantId = uRow?.tenant_id == null ? '' : String(uRow.tenant_id);
-  const [{ data: tRow }, { data: usuarios }] = await Promise.all([
+  const [{ data: tRow }, { data: usuarios }, { data: membresia }] = await Promise.all([
     tenantId
       ? consultaCacheada(
           `tenant:${tenantId}`,
@@ -113,17 +115,49 @@ async function resolver(): Promise<PerfilVisible | null> {
             .limit(50),
         )
       : Promise.resolve({ data: [] }),
+    tenantId
+      ? consultaCacheada(
+          `user-area:${user.id}:${tenantId}`,
+          () => supabase!
+            .from('gestor_unidad_miembros')
+            .select('unit_id, gestor_unidades(name)')
+            .eq('user_id', user.id)
+            .eq('tenant_id', tenantId)
+            .eq('status', 'active')
+            .limit(1)
+            .maybeSingle(),
+        )
+      : Promise.resolve({ data: null }),
   ]);
 
   const nombre = nombreDe(uRow, user);
-  const tenantNombre = String(tRow?.name || '');
+  const tenantNombre = String(tRow?.legal_name || tRow?.name || '');
   const rol = String(uRow?.role || '');
+  const rolMap: Record<string, string> = {
+    admin: 'Administrador',
+    editor: 'Editor',
+    operativo: 'Operativo',
+    viewer: 'Visor',
+    visor: 'Visor',
+    guest: 'Invitado',
+  };
+  const rolLegible = rolMap[rol.toLowerCase()] || rol || 'Usuario';
+  const unidadJoin = (membresia as { gestor_unidades?: { name?: string } | Array<{ name?: string }> } | null)?.gestor_unidades;
+  const areaNombre = Array.isArray(unidadJoin)
+    ? (unidadJoin[0]?.name ? String(unidadJoin[0].name) : null)
+    : (unidadJoin?.name ? String(unidadJoin.name) : null);
+
   const esPlataforma = uRow?.is_platform_admin === true;
   const roleLabel = esPlataforma
     ? 'Admin plataforma'
+    : areaNombre
+      ? `${areaNombre} · ${rolLegible}`
+      : rolLegible;
+  const empresaLabel = esPlataforma
+    ? 'Admin plataforma'
     : tenantNombre
-      ? `${tenantNombre}${rol ? ` · ${rol}` : ''}`
-      : rol || 'Usuario';
+      ? `${tenantNombre} · ${rolLegible}`
+      : rolLegible;
 
   // RLS users_tenant_read permite leer a los usuarios de la propia empresa.
   const filas = Array.isArray(usuarios) ? usuarios : [];
@@ -148,6 +182,8 @@ async function resolver(): Promise<PerfilVisible | null> {
     email: String(uRow?.email || user.email || ''),
     rol,
     roleLabel,
+    empresaLabel,
+    areaNombre,
     initials: inicialesDe(nombre),
     avatarUrl: uRow?.avatar_url || null,
     phone: uRow?.phone == null ? null : String(uRow.phone),

@@ -1,16 +1,64 @@
 {
   "version": "seed-v6",
-  "total": 18,
+  "total": 19,
   "vocabulario": {
-    "tipo": ["skill", "app", "repo", "infra", "os", "lib"],
-    "instalacion_metodo": ["1-comando", "clone", "iso", "lib", "app", "vps"],
-    "tipo_key": ["none", "byok", "propia", "suscripcion"],
-    "costo": ["gratis", "freemium", "pago", "suscripcion"],
-    "plataforma": ["local", "cloud", "desktop", "movil", "os", "web"],
-    "nivel": ["no-code", "low-code", "dev"],
-    "licencia": ["open", "closed", "desconocida"],
-    "estado": ["verificado", "por-verificar", "por-crear"],
-    "curso_rol": ["herramienta", "demo", "practica", "referencia"]
+    "tipo": [
+      "skill",
+      "app",
+      "repo",
+      "infra",
+      "os",
+      "lib"
+    ],
+    "instalacion_metodo": [
+      "1-comando",
+      "clone",
+      "iso",
+      "lib",
+      "app",
+      "vps"
+    ],
+    "tipo_key": [
+      "none",
+      "byok",
+      "propia",
+      "suscripcion"
+    ],
+    "costo": [
+      "gratis",
+      "freemium",
+      "pago",
+      "suscripcion"
+    ],
+    "plataforma": [
+      "local",
+      "cloud",
+      "desktop",
+      "movil",
+      "os",
+      "web"
+    ],
+    "nivel": [
+      "no-code",
+      "low-code",
+      "dev"
+    ],
+    "licencia": [
+      "open",
+      "closed",
+      "desconocida"
+    ],
+    "estado": [
+      "verificado",
+      "por-verificar",
+      "por-crear"
+    ],
+    "curso_rol": [
+      "herramienta",
+      "demo",
+      "practica",
+      "referencia"
+    ]
   },
   "items": [
     {
@@ -21,24 +69,68 @@
       "tipo": "lib",
       "categoria": "Documentación Técnica",
       "subcategoria": "Diagramas Interactivos",
-      "instalacion": { "metodo": "lib", "formato": "Código en repo / NPM", "comando_ejemplo": "npm install archify" },
-      "stack": { "lenguaje": "TypeScript", "rendimiento": "Render web + export GIF/video", "entorno": "Web docs" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "100% Gratis Open Source" },
+      "instalacion": {
+        "metodo": "lib",
+        "formato": "Código en repo / NPM",
+        "comando_ejemplo": "npm install archify"
+      },
+      "stack": {
+        "lenguaje": "TypeScript",
+        "rendimiento": "Render web + export GIF/video",
+        "entorno": "Web docs"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "100% Gratis Open Source"
+      },
       "costo": "gratis",
-      "plataforma": ["web"],
+      "plataforma": [
+        "web"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~8,500", "nota": "Tendencia GitHub docs" },
-      "integraciones": ["web-ui", "git"],
-      "nichos": ["Desarrolladores", "Arquitectos de Software", "Redactores Técnicos"],
+      "popularidad": {
+        "estrellas": "~8,500",
+        "nota": "Tendencia GitHub docs"
+      },
+      "integraciones": [
+        "web-ui",
+        "git"
+      ],
+      "nichos": [
+        "Desarrolladores",
+        "Arquitectos de Software",
+        "Redactores Técnicos"
+      ],
       "funcionalidad_corta": "Diagramas de secuencia y arquitectura explorables paso a paso",
       "caso_uso": "Explicar flujos de código, eventos de frontend y arquitecturas complejas interactivamente.",
       "url_repo": "https://github.com/archify-dev/archify",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "media",
-      "tags": ["documentacion", "diagramas", "arquitectura", "open-source"],
-      "alias_busqueda": ["diagramas", "arquitectura", "documentacion", "secuencia"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "documentacion",
+        "diagramas",
+        "arquitectura",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "diagramas",
+        "arquitectura",
+        "documentacion",
+        "secuencia"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-002",
@@ -48,24 +140,74 @@
       "tipo": "infra",
       "categoria": "Infraestructura e IA",
       "subcategoria": "AI Gateway / Fallback Engine",
-      "instalacion": { "metodo": "1-comando", "formato": "CLI + Gateway Localhost", "comando_ejemplo": "npx omniroute" },
-      "stack": { "lenguaje": "Node.js / Rust", "rendimiento": "+350 proveedores / +100 modelos", "entorno": "Gateway local (http://localhost:20128)" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "Rotación inteligente de cuentas gratuitas" },
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "CLI + Gateway Localhost",
+        "comando_ejemplo": "npx omniroute"
+      },
+      "stack": {
+        "lenguaje": "Node.js / Rust",
+        "rendimiento": "+350 proveedores / +100 modelos",
+        "entorno": "Gateway local (http://localhost:20128)"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "Rotación inteligente de cuentas gratuitas"
+      },
       "costo": "gratis",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~60,000", "nota": "Alta en GitHub" },
-      "integraciones": ["cli", "mcp", "web-ui"],
-      "nichos": ["Desarrolladores de IA", "Creadores de Agentes", "Devs sin presupuesto"],
+      "popularidad": {
+        "estrellas": "~60,000",
+        "nota": "Alta en GitHub"
+      },
+      "integraciones": [
+        "cli",
+        "mcp",
+        "web-ui"
+      ],
+      "nichos": [
+        "Desarrolladores de IA",
+        "Creadores de Agentes",
+        "Devs sin presupuesto"
+      ],
       "funcionalidad_corta": "Gateway local multi-modelo con rotación automática para nunca quedarse sin IA",
       "caso_uso": "Alternar entre cuentas y modelos gratuitos automáticamente cuando se agotan los créditos o la tasa límite de uso.",
       "url_repo": "https://github.com/dtyu/omniroute",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["gateway", "modelos", "agentes", "gratis", "fallback", "redundancia"],
-      "alias_busqueda": ["omniroute", "gateway", "modelos gratis", "sin key", "probar ia", "multi-modelo", "fallback"],
-      "curso_repo": { "usar_en_curso": true, "curso": "cero-a-despliegue", "modulo": "DIA-02 Configuración IA", "leccion": "L3", "orden": 3, "rol": "practica", "prerequisitos": [], "resultado_esperado": "Gateway local operando con rotación automática" }
+      "tags": [
+        "gateway",
+        "modelos",
+        "agentes",
+        "gratis",
+        "fallback",
+        "redundancia"
+      ],
+      "alias_busqueda": [
+        "omniroute",
+        "gateway",
+        "modelos gratis",
+        "sin key",
+        "probar ia",
+        "multi-modelo",
+        "fallback"
+      ],
+      "curso_repo": {
+        "usar_en_curso": true,
+        "curso": "cero-a-despliegue",
+        "modulo": "DIA-02 Configuración IA",
+        "leccion": "L3",
+        "orden": 3,
+        "rol": "practica",
+        "prerequisitos": [],
+        "resultado_esperado": "Gateway local operando con rotación automática"
+      }
     },
     {
       "id": "BIB-003",
@@ -75,24 +217,70 @@
       "tipo": "app",
       "categoria": "Entorno de Desarrollo",
       "subcategoria": "ADE CLI",
-      "instalacion": { "metodo": "1-comando", "formato": "CLI + SSH remoto", "comando_ejemplo": "curl -fsSL https://herder.dev/install.sh | sh" },
-      "stack": { "lenguaje": "Rust", "rendimiento": "Ultra ligero TUI", "entorno": "Terminal Linux/macOS/Windows" },
-      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Usa tus suscripciones de Claude/OpenAI" },
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "CLI + SSH remoto",
+        "comando_ejemplo": "curl -fsSL https://herder.dev/install.sh | sh"
+      },
+      "stack": {
+        "lenguaje": "Rust",
+        "rendimiento": "Ultra ligero TUI",
+        "entorno": "Terminal Linux/macOS/Windows"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "byok",
+        "es_gratis": true,
+        "costo_ref": "Usa tus suscripciones de Claude/OpenAI"
+      },
       "costo": "freemium",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~12,400", "nota": "Destacado del año" },
-      "integraciones": ["cli", "ssh", "plugin"],
-      "nichos": ["Programadores CLI", "Administradores de Sistemas"],
+      "popularidad": {
+        "estrellas": "~12,400",
+        "nota": "Destacado del año"
+      },
+      "integraciones": [
+        "cli",
+        "ssh",
+        "plugin"
+      ],
+      "nichos": [
+        "Programadores CLI",
+        "Administradores de Sistemas"
+      ],
       "funcionalidad_corta": "Orquestar múltiples agentes de terminal en una sola pantalla interactiva",
       "caso_uso": "Controlar Claude Code, OpenCode y Codex en paralelo sin necesidad de configurar Tmux.",
       "url_repo": "https://github.com/herder-ade/herder",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["ade", "rust", "terminal", "orquestacion", "open-source"],
-      "alias_busqueda": ["terminal", "tui", "orquestar agentes", "ssh", "herder"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "ade",
+        "rust",
+        "terminal",
+        "orquestacion",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "terminal",
+        "tui",
+        "orquestar agentes",
+        "ssh",
+        "herder"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-004",
@@ -102,10 +290,10 @@
       "tipo": "app",
       "categoria": "Entorno de Desarrollo",
       "subcategoria": "IDE / GUI Studio",
-      "instalacion": { 
-        "metodo": "app", 
-        "formato": "Desktop + móvil + Server", 
-        "comando_ejemplo": "npx orca-studio@latest" 
+      "instalacion": {
+        "metodo": "app",
+        "formato": "Desktop + móvil + Server",
+        "comando_ejemplo": "npx orca-studio@latest"
       },
       "comandos_opciones": [
         {
@@ -129,23 +317,75 @@
           "desc": "Genera un túnel seguro y código QR para monitorear y aprobar acciones desde el celular."
         }
       ],
-      "stack": { "lenguaje": "TypeScript / Electron", "rendimiento": "GUI + servidor remoto", "entorno": "Desktop / móvil / Web" },
-      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Usa tus suscripciones de IA (BYOK)" },
+      "stack": {
+        "lenguaje": "TypeScript / Electron",
+        "rendimiento": "GUI + servidor remoto",
+        "entorno": "Desktop / móvil / Web"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "byok",
+        "es_gratis": true,
+        "costo_ref": "Usa tus suscripciones de IA (BYOK)"
+      },
       "costo": "freemium",
-      "plataforma": ["desktop", "movil", "cloud", "web"],
+      "plataforma": [
+        "desktop",
+        "movil",
+        "cloud",
+        "web"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~63,000", "nota": "Alta en GitHub" },
-      "integraciones": ["git", "ssh", "worktree", "web-ui", "movil"],
-      "nichos": ["Desarrolladores visuales", "Frontend Devs", "Orquestadores de Agentes"],
+      "popularidad": {
+        "estrellas": "~63,000",
+        "nota": "Alta en GitHub"
+      },
+      "integraciones": [
+        "git",
+        "ssh",
+        "worktree",
+        "web-ui",
+        "movil"
+      ],
+      "nichos": [
+        "Desarrolladores visuales",
+        "Frontend Devs",
+        "Orquestadores de Agentes"
+      ],
       "funcionalidad_corta": "Estudio gráfico para operar, monitorear y autorizar agentes de código en tiempo real",
       "caso_uso": "Gestionar tareas, diffs de código y ejecución remota de agentes con interfaz visual intuitiva.",
       "url_repo": "https://github.com/orca-ai/orca-studio",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["ide", "agentes", "gui", "remoto", "worktree", "movil", "open-source"],
-      "alias_busqueda": ["ide", "gui", "agentes visual", "remoto", "movil", "orca", "studio"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "ide",
+        "agentes",
+        "gui",
+        "remoto",
+        "worktree",
+        "movil",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "ide",
+        "gui",
+        "agentes visual",
+        "remoto",
+        "movil",
+        "orca",
+        "studio"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-005",
@@ -155,24 +395,69 @@
       "tipo": "os",
       "categoria": "Sistemas Operativos",
       "subcategoria": "Distro Linux para IA",
-      "instalacion": { "metodo": "iso", "formato": "ISO / Script de instalación Ubuntu", "comando_ejemplo": "wget -qO- https://omakub.org/install | bash" },
-      "stack": { "lenguaje": "Bash / Alacritty", "rendimiento": "Arch / Ubuntu + Hyprland + Neovim", "entorno": "Linux Desktop" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "100% Gratis" },
+      "instalacion": {
+        "metodo": "iso",
+        "formato": "ISO / Script de instalación Ubuntu",
+        "comando_ejemplo": "wget -qO- https://omakub.org/install | bash"
+      },
+      "stack": {
+        "lenguaje": "Bash / Alacritty",
+        "rendimiento": "Arch / Ubuntu + Hyprland + Neovim",
+        "entorno": "Linux Desktop"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "100% Gratis"
+      },
       "costo": "gratis",
-      "plataforma": ["os"],
+      "plataforma": [
+        "os"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~24,000", "nota": "Impulsado por DHH (Basecamp)" },
-      "integraciones": ["plugin"],
-      "nichos": ["Desarrolladores", "Entusiastas Linux"],
+      "popularidad": {
+        "estrellas": "~24,000",
+        "nota": "Impulsado por DHH (Basecamp)"
+      },
+      "integraciones": [
+        "plugin"
+      ],
+      "nichos": [
+        "Desarrolladores",
+        "Entusiastas Linux"
+      ],
       "funcionalidad_corta": "Sistema operativo Linux preconfigurado para programar con IA",
       "caso_uso": "Transformar Ubuntu en un entorno de desarrollo ultra rápido y moderno optimizado para IA.",
       "url_repo": "https://github.com/basecamp/omakub",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "baja",
-      "tags": ["linux", "arch", "ubuntu", "ia", "os"],
-      "alias_busqueda": ["linux", "arch", "ubuntu", "os", "hyprland", "omakub"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "linux",
+        "arch",
+        "ubuntu",
+        "ia",
+        "os"
+      ],
+      "alias_busqueda": [
+        "linux",
+        "arch",
+        "ubuntu",
+        "os",
+        "hyprland",
+        "omakub"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-006",
@@ -182,24 +467,68 @@
       "tipo": "lib",
       "categoria": "Procesamiento de Datos",
       "subcategoria": "Conversión a Markdown",
-      "instalacion": { "metodo": "lib", "formato": "Librería Rust / CLI", "comando_ejemplo": "cargo install anydoc-cli" },
-      "stack": { "lenguaje": "Rust", "rendimiento": "4 ms / archivo", "entorno": "Pipeline RAG" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "100% Gratis" },
+      "instalacion": {
+        "metodo": "lib",
+        "formato": "Librería Rust / CLI",
+        "comando_ejemplo": "cargo install anydoc-cli"
+      },
+      "stack": {
+        "lenguaje": "Rust",
+        "rendimiento": "4 ms / archivo",
+        "entorno": "Pipeline RAG"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "100% Gratis"
+      },
       "costo": "gratis",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~11,200", "nota": "Ultra alto rendimiento" },
-      "integraciones": ["plugin"],
-      "nichos": ["Ingenieros de Datos", "Desarrolladores RAG"],
+      "popularidad": {
+        "estrellas": "~11,200",
+        "nota": "Ultra alto rendimiento"
+      },
+      "integraciones": [
+        "plugin"
+      ],
+      "nichos": [
+        "Ingenieros de Datos",
+        "Desarrolladores RAG"
+      ],
       "funcionalidad_corta": "Convierte PDF, Word, Excel y HTML a Markdown a velocidad nativa",
       "caso_uso": "Ingesta masiva de documentos para sistemas RAG y entrenamiento de LLMs.",
       "url_repo": "https://github.com/anydoc-dev/anydoc",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["rag", "markdown", "rust", "datos", "open-source"],
-      "alias_busqueda": ["rag", "markdown", "pdf a markdown", "datos", "anydoc"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "rag",
+        "markdown",
+        "rust",
+        "datos",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "rag",
+        "markdown",
+        "pdf a markdown",
+        "datos",
+        "anydoc"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-007",
@@ -209,24 +538,68 @@
       "tipo": "skill",
       "categoria": "Prompt Engineering",
       "subcategoria": "Skill para Agentes",
-      "instalacion": { "metodo": "clone", "formato": "Skill para agentes CLI", "comando_ejemplo": "npx skills add mattpocock/grillme" },
-      "stack": { "lenguaje": "Markdown / Prompt Protocol", "rendimiento": "Interrogatorio interactivo", "entorno": "Harness agente" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "100% Gratis" },
+      "instalacion": {
+        "metodo": "clone",
+        "formato": "Skill para agentes CLI",
+        "comando_ejemplo": "npx skills add mattpocock/grillme"
+      },
+      "stack": {
+        "lenguaje": "Markdown / Prompt Protocol",
+        "rendimiento": "Interrogatorio interactivo",
+        "entorno": "Harness agente"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "100% Gratis"
+      },
       "costo": "gratis",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~4,800", "nota": "Creado por Matt Pocock" },
-      "integraciones": ["cli", "plugin"],
-      "nichos": ["Desarrolladores en refactors complejos", "Arquitectos Frontend"],
+      "popularidad": {
+        "estrellas": "~4,800",
+        "nota": "Creado por Matt Pocock"
+      },
+      "integraciones": [
+        "cli",
+        "plugin"
+      ],
+      "nichos": [
+        "Desarrolladores en refactors complejos",
+        "Arquitectos Frontend"
+      ],
       "funcionalidad_corta": "Fuerza al agente a realizar un cuestionario profundo antes de modificar código",
       "caso_uso": "Evitar refactors destructivos o malas interpretaciones obligando a la IA a planificar primero.",
       "url_repo": "https://github.com/mattpocock/skills",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["skill", "prompt", "planificacion", "grillme"],
-      "alias_busqueda": ["skill", "planificar", "preguntas", "refactor", "grillme"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "skill",
+        "prompt",
+        "planificacion",
+        "grillme"
+      ],
+      "alias_busqueda": [
+        "skill",
+        "planificar",
+        "preguntas",
+        "refactor",
+        "grillme"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-008",
@@ -236,24 +609,69 @@
       "tipo": "app",
       "categoria": "Interfaces de IA",
       "subcategoria": "Web UI + CLI Local",
-      "instalacion": { "metodo": "1-comando", "formato": "Servidor local Python", "comando_ejemplo": "pip install deepseek-harness && deepseek-harness start" },
-      "stack": { "lenguaje": "Python / FastHTML", "rendimiento": "Web UI local ultraligera", "entorno": "Local (http://localhost:3000)" },
-      "acceso": { "requiere_key": true, "tipo_key": "propia", "es_gratis": true, "costo_ref": "API Key DeepSeek (Ultra económica)" },
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "Servidor local Python",
+        "comando_ejemplo": "pip install deepseek-harness && deepseek-harness start"
+      },
+      "stack": {
+        "lenguaje": "Python / FastHTML",
+        "rendimiento": "Web UI local ultraligera",
+        "entorno": "Local (http://localhost:3000)"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "propia",
+        "es_gratis": true,
+        "costo_ref": "API Key DeepSeek (Ultra económica)"
+      },
       "costo": "freemium",
-      "plataforma": ["local", "web"],
+      "plataforma": [
+        "local",
+        "web"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~15,600", "nota": "Tendencia GitHub" },
-      "integraciones": ["cli", "web-ui", "plugin"],
-      "nichos": ["Programadores con bajo presupuesto"],
+      "popularidad": {
+        "estrellas": "~15,600",
+        "nota": "Tendencia GitHub"
+      },
+      "integraciones": [
+        "cli",
+        "web-ui",
+        "plugin"
+      ],
+      "nichos": [
+        "Programadores con bajo presupuesto"
+      ],
       "funcionalidad_corta": "Interfaz web y terminal económica optimizada para DeepSeek V3 / R1",
       "caso_uso": "Programar con modelos de razonamiento avanzado pagando centavos de dólar.",
       "url_repo": "https://github.com/deepseek-ai/deepseek-harness",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "media",
-      "tags": ["deepseek", "local", "economico", "open-source"],
-      "alias_busqueda": ["deepseek", "barato", "local", "economico", "harness"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "deepseek",
+        "local",
+        "economico",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "deepseek",
+        "barato",
+        "local",
+        "economico",
+        "harness"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-009",
@@ -263,24 +681,69 @@
       "tipo": "app",
       "categoria": "Generación Multimedia",
       "subcategoria": "Creación de Video",
-      "instalacion": { "metodo": "clone", "formato": "Repo Node + Web UI", "comando_ejemplo": "git clone https://github.com/open-montage/open-montage.git && cd open-montage && npm install" },
-      "stack": { "lenguaje": "TypeScript / Remotion", "rendimiento": "Workflow narrativo continuo", "entorno": "Web UI" },
-      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Usa API keys propias" },
+      "instalacion": {
+        "metodo": "clone",
+        "formato": "Repo Node + Web UI",
+        "comando_ejemplo": "git clone https://github.com/open-montage/open-montage.git && cd open-montage && npm install"
+      },
+      "stack": {
+        "lenguaje": "TypeScript / Remotion",
+        "rendimiento": "Workflow narrativo continuo",
+        "entorno": "Web UI"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "byok",
+        "es_gratis": true,
+        "costo_ref": "Usa API keys propias"
+      },
       "costo": "freemium",
-      "plataforma": ["web", "local"],
+      "plataforma": [
+        "web",
+        "local"
+      ],
       "nivel": "low-code",
-      "popularidad": { "estrellas": "~9,800", "nota": "Proyecto abierto" },
-      "integraciones": ["cli", "web-ui"],
-      "nichos": ["Creadores de Contenido", "Marketing Digital"],
+      "popularidad": {
+        "estrellas": "~9,800",
+        "nota": "Proyecto abierto"
+      },
+      "integraciones": [
+        "cli",
+        "web-ui"
+      ],
+      "nichos": [
+        "Creadores de Contenido",
+        "Marketing Digital"
+      ],
       "funcionalidad_corta": "Generador de videos narrativos automatizados mediante agentes de guion",
       "caso_uso": "Crear anuncios, demos de productos y shorts educativos automáticamente.",
       "url_repo": "https://github.com/open-montage/open-montage",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "media",
-      "tags": ["video", "agentes", "contenido", "open-source"],
-      "alias_busqueda": ["video", "anuncios", "contenido", "demos", "montage"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "video",
+        "agentes",
+        "contenido",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "video",
+        "anuncios",
+        "contenido",
+        "demos",
+        "montage"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-010",
@@ -290,24 +753,66 @@
       "tipo": "repo",
       "categoria": "Visualización de Agentes",
       "subcategoria": "Orquestador Gráfico",
-      "instalacion": { "metodo": "clone", "formato": "Repo React / Canvas", "comando_ejemplo": "git clone https://github.com/dunder-mifflin-ai/mander.git && cd mander && npm install" },
-      "stack": { "lenguaje": "React / Canvas API", "rendimiento": "GUI tiempo real 60fps", "entorno": "Web UI" },
-      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Conecta tus agentes" },
+      "instalacion": {
+        "metodo": "clone",
+        "formato": "Repo React / Canvas",
+        "comando_ejemplo": "git clone https://github.com/dunder-mifflin-ai/mander.git && cd mander && npm install"
+      },
+      "stack": {
+        "lenguaje": "React / Canvas API",
+        "rendimiento": "GUI tiempo real 60fps",
+        "entorno": "Web UI"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "byok",
+        "es_gratis": true,
+        "costo_ref": "Conecta tus agentes"
+      },
       "costo": "freemium",
-      "plataforma": ["web"],
+      "plataforma": [
+        "web"
+      ],
       "nivel": "low-code",
-      "popularidad": { "estrellas": "~7,300", "nota": "Viral visual" },
-      "integraciones": ["web-ui"],
-      "nichos": ["Educadores", "Monitoreo visual"],
+      "popularidad": {
+        "estrellas": "~7,300",
+        "nota": "Viral visual"
+      },
+      "integraciones": [
+        "web-ui"
+      ],
+      "nichos": [
+        "Educadores",
+        "Monitoreo visual"
+      ],
       "funcionalidad_corta": "Visualización gráfica animada de la colaboración entre múltiples agentes",
       "caso_uso": "Observar la delegación de tareas entre sub-agentes en un mapa visual 2D.",
       "url_repo": "https://github.com/dunder-mifflin-ai/mander",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "baja",
-      "tags": ["orquestacion", "visual", "agentes", "open-source"],
-      "alias_busqueda": ["orquestacion visual", "monitoreo", "agentes grafico", "mander"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "orquestacion",
+        "visual",
+        "agentes",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "orquestacion visual",
+        "monitoreo",
+        "agentes grafico",
+        "mander"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-011",
@@ -317,24 +822,69 @@
       "tipo": "infra",
       "categoria": "Infraestructura Cloud",
       "subcategoria": "Servidor VPS",
-      "instalacion": { "metodo": "vps", "formato": "Panel Cloud / SSH", "comando_ejemplo": "ssh root@<tu-vps-ip>" },
-      "stack": { "lenguaje": "Linux Ubuntu / Debian", "rendimiento": "AMD Epyc + NVMe + root", "entorno": "Cloud 24/7" },
-      "acceso": { "requiere_key": true, "tipo_key": "suscripcion", "es_gratis": false, "costo_ref": "Desde ~$5.99 / mes" },
+      "instalacion": {
+        "metodo": "vps",
+        "formato": "Panel Cloud / SSH",
+        "comando_ejemplo": "ssh root@<tu-vps-ip>"
+      },
+      "stack": {
+        "lenguaje": "Linux Ubuntu / Debian",
+        "rendimiento": "AMD Epyc + NVMe + root",
+        "entorno": "Cloud 24/7"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "suscripcion",
+        "es_gratis": false,
+        "costo_ref": "Desde ~$5.99 / mes"
+      },
       "costo": "suscripcion",
-      "plataforma": ["cloud"],
+      "plataforma": [
+        "cloud"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "N/A", "nota": "Proveedor cloud de alto rendimiento" },
-      "integraciones": ["ssh"],
-      "nichos": ["Desarrolladores que despliegan agentes 24/7", "SysAdmins"],
+      "popularidad": {
+        "estrellas": "N/A",
+        "nota": "Proveedor cloud de alto rendimiento"
+      },
+      "integraciones": [
+        "ssh"
+      ],
+      "nichos": [
+        "Desarrolladores que despliegan agentes 24/7",
+        "SysAdmins"
+      ],
       "funcionalidad_corta": "VPS Linux accesible por SSH para alojar bots y servicios siempre activos",
       "caso_uso": "Alojar agentes autónomos, bots de Telegram/WhatsApp y microservicios 24/7.",
       "url_repo": "https://www.hostinger.com/vps-hosting",
       "licencia": "closed",
       "estado": "verificado",
       "prioridad_qaway": "media",
-      "tags": ["vps", "cloud", "deploy", "24-7", "hostinger"],
-      "alias_busqueda": ["vps", "servidor", "deploy", "despliegue", "cloud", "hostinger"],
-      "curso_repo": { "usar_en_curso": true, "curso": "cero-a-despliegue", "modulo": "DIA-04 Despliegue y seguridad", "leccion": "L1", "orden": 1, "rol": "practica", "prerequisitos": [], "resultado_esperado": "VPS en línea 24/7 para el proyecto" }
+      "tags": [
+        "vps",
+        "cloud",
+        "deploy",
+        "24-7",
+        "hostinger"
+      ],
+      "alias_busqueda": [
+        "vps",
+        "servidor",
+        "deploy",
+        "despliegue",
+        "cloud",
+        "hostinger"
+      ],
+      "curso_repo": {
+        "usar_en_curso": true,
+        "curso": "cero-a-despliegue",
+        "modulo": "DIA-04 Despliegue y seguridad",
+        "leccion": "L1",
+        "orden": 1,
+        "rol": "practica",
+        "prerequisitos": [],
+        "resultado_esperado": "VPS en línea 24/7 para el proyecto"
+      }
     },
     {
       "id": "BIB-012",
@@ -344,24 +894,70 @@
       "tipo": "app",
       "categoria": "Diseño",
       "subcategoria": "Test de logos",
-      "instalacion": { "metodo": "app", "formato": "Web App gratuita", "comando_ejemplo": "Abrir en navegador: https://symbl.space" },
-      "stack": { "lenguaje": "JavaScript / Canvas", "rendimiento": "Simulación visual instantánea", "entorno": "Navegador Web" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "100% Gratis sin registro" },
+      "instalacion": {
+        "metodo": "app",
+        "formato": "Web App gratuita",
+        "comando_ejemplo": "Abrir en navegador: https://symbl.space"
+      },
+      "stack": {
+        "lenguaje": "JavaScript / Canvas",
+        "rendimiento": "Simulación visual instantánea",
+        "entorno": "Navegador Web"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "100% Gratis sin registro"
+      },
       "costo": "gratis",
-      "plataforma": ["web"],
+      "plataforma": [
+        "web"
+      ],
       "nivel": "no-code",
-      "popularidad": { "estrellas": "N/A", "nota": "Herramienta recomendada de branding" },
-      "integraciones": ["web-ui"],
-      "nichos": ["Diseñadores de logos", "Branding", "Marketing"],
+      "popularidad": {
+        "estrellas": "N/A",
+        "nota": "Herramienta recomendada de branding"
+      },
+      "integraciones": [
+        "web-ui"
+      ],
+      "nichos": [
+        "Diseñadores de logos",
+        "Branding",
+        "Marketing"
+      ],
       "funcionalidad_corta": "Simula la legibilidad y escala de logotipos en situaciones reales",
       "caso_uso": "Evaluar contraste, distancia y favicon de un logo antes de presentarlo al cliente.",
       "url_repo": "https://symbl.space",
       "licencia": "closed",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["logos", "branding", "diseno", "test-visual", "gratis"],
-      "alias_busqueda": ["logo", "logos", "branding", "probar logo", "legibilidad", "symbl"],
-      "curso_repo": { "usar_en_curso": true, "curso": "cero-a-despliegue", "modulo": "DIA-03 Web y marca", "leccion": "L1", "orden": 1, "rol": "demo", "prerequisitos": [], "resultado_esperado": "Logo validado en tamaños, fondos y distancia" }
+      "tags": [
+        "logos",
+        "branding",
+        "diseno",
+        "test-visual",
+        "gratis"
+      ],
+      "alias_busqueda": [
+        "logo",
+        "logos",
+        "branding",
+        "probar logo",
+        "legibilidad",
+        "symbl"
+      ],
+      "curso_repo": {
+        "usar_en_curso": true,
+        "curso": "cero-a-despliegue",
+        "modulo": "DIA-03 Web y marca",
+        "leccion": "L1",
+        "orden": 1,
+        "rol": "demo",
+        "prerequisitos": [],
+        "resultado_esperado": "Logo validado en tamaños, fondos y distancia"
+      }
     },
     {
       "id": "BIB-013",
@@ -371,24 +967,74 @@
       "tipo": "skill",
       "categoria": "Ciberseguridad",
       "subcategoria": "Auditoría de vulnerabilidades",
-      "instalacion": { "metodo": "1-comando", "formato": "Skill para agentes CLI", "comando_ejemplo": "npx skills add https://github.com/cloudflare/security-audit-skill --skill security-audit" },
-      "stack": { "lenguaje": "TypeScript / Node.js", "rendimiento": "6 fases: recon, hunting, validación, reporte, output, verificación", "entorno": "Claude Code / Codex / Agentes CLI" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "Open source MIT" },
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "Skill para agentes CLI",
+        "comando_ejemplo": "npx skills add https://github.com/cloudflare/security-audit-skill --skill security-audit"
+      },
+      "stack": {
+        "lenguaje": "TypeScript / Node.js",
+        "rendimiento": "6 fases: recon, hunting, validación, reporte, output, verificación",
+        "entorno": "Claude Code / Codex / Agentes CLI"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "Open source MIT"
+      },
       "costo": "gratis",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~16,000", "nota": "Repo oficial Cloudflare, MIT" },
-      "integraciones": ["cli", "plugin"],
-      "nichos": ["Desarrolladores", "Equipos de seguridad", "DevSecOps"],
+      "popularidad": {
+        "estrellas": "~16,000",
+        "nota": "Repo oficial Cloudflare, MIT"
+      },
+      "integraciones": [
+        "cli",
+        "plugin"
+      ],
+      "nichos": [
+        "Desarrolladores",
+        "Equipos de seguridad",
+        "DevSecOps"
+      ],
       "funcionalidad_corta": "Auditoría automática de seguridad en 6 fases con generación de reportes",
       "caso_uso": "Lanzar sub-agentes sobre tu código para detectar fugas de llaves, vulnerabilidades XSS/SQLi e inseguridad RLS.",
       "url_repo": "https://github.com/cloudflare/security-audit-skill",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["seguridad", "auditoria", "vulnerabilidades", "skill", "cloudflare", "sub-agentes", "open-source"],
-      "alias_busqueda": ["seguridad", "auditoria", "vulnerabilidades", "pentest", "cloudflare"],
-      "curso_repo": { "usar_en_curso": true, "curso": "cero-a-despliegue", "modulo": "DIA-04 Despliegue y seguridad", "leccion": "L2", "orden": 2, "rol": "practica", "prerequisitos": ["BIB-011"], "resultado_esperado": "Informe de vulnerabilidades + correcciones aplicadas" }
+      "tags": [
+        "seguridad",
+        "auditoria",
+        "vulnerabilidades",
+        "skill",
+        "cloudflare",
+        "sub-agentes",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "seguridad",
+        "auditoria",
+        "vulnerabilidades",
+        "pentest",
+        "cloudflare"
+      ],
+      "curso_repo": {
+        "usar_en_curso": true,
+        "curso": "cero-a-despliegue",
+        "modulo": "DIA-04 Despliegue y seguridad",
+        "leccion": "L2",
+        "orden": 2,
+        "rol": "practica",
+        "prerequisitos": [
+          "BIB-011"
+        ],
+        "resultado_esperado": "Informe de vulnerabilidades + correcciones aplicadas"
+      }
     },
     {
       "id": "BIB-014",
@@ -398,24 +1044,72 @@
       "tipo": "lib",
       "categoria": "Infraestructura e IA",
       "subcategoria": "SDK de agentes",
-      "instalacion": { "metodo": "lib", "formato": "Paquete PIP / NPM", "comando_ejemplo": "pip install strands-agents strands-agents-tools" },
-      "stack": { "lenguaje": "Python 3.10+ / TypeScript Node 20+", "rendimiento": "Bucle model-driven + hooks + guardrails", "entorno": "Local a producción" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "Open source Apache 2.0" },
+      "instalacion": {
+        "metodo": "lib",
+        "formato": "Paquete PIP / NPM",
+        "comando_ejemplo": "pip install strands-agents strands-agents-tools"
+      },
+      "stack": {
+        "lenguaje": "Python 3.10+ / TypeScript Node 20+",
+        "rendimiento": "Bucle model-driven + hooks + guardrails",
+        "entorno": "Local a producción"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "Open source Apache 2.0"
+      },
       "costo": "gratis",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~6,984", "nota": "SDK oficial AWS, Apache 2.0" },
-      "integraciones": ["cli", "mcp", "plugin"],
-      "nichos": ["Desarrolladores de IA", "Creadores de Agentes"],
+      "popularidad": {
+        "estrellas": "~6,984",
+        "nota": "SDK oficial AWS, Apache 2.0"
+      },
+      "integraciones": [
+        "cli",
+        "mcp",
+        "plugin"
+      ],
+      "nichos": [
+        "Desarrolladores de IA",
+        "Creadores de Agentes"
+      ],
       "funcionalidad_corta": "SDK open source para crear agentes con persistencia, MCP nativo y hooks",
       "caso_uso": "Crear chatbots avanzados para CRM o plataformas SaaS conectando Bedrock, Anthropic, OpenAI o Gemini.",
       "url_repo": "https://github.com/strands-agents/harness-sdk",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["sdk", "agentes", "aws", "mcp", "chatbot", "open-source"],
-      "alias_busqueda": ["sdk agentes", "crear agentes", "chatbot", "strands", "aws", "mcp"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "sdk",
+        "agentes",
+        "aws",
+        "mcp",
+        "chatbot",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "sdk agentes",
+        "crear agentes",
+        "chatbot",
+        "strands",
+        "aws",
+        "mcp"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-015",
@@ -425,24 +1119,70 @@
       "tipo": "app",
       "categoria": "Entorno de Desarrollo",
       "subcategoria": "Búsqueda de código",
-      "instalacion": { "metodo": "1-comando", "formato": "Binario CLI (Rust)", "comando_ejemplo": "tgrep index . && tgrep serve ." },
-      "stack": { "lenguaje": "Rust", "rendimiento": "Índice trigramas, hasta 52x vs ripgrep", "entorno": "Terminal cliente/servidor" },
-      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "Open source MIT" },
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "Binario CLI (Rust)",
+        "comando_ejemplo": "tgrep index . && tgrep serve ."
+      },
+      "stack": {
+        "lenguaje": "Rust",
+        "rendimiento": "Índice trigramas, hasta 52x vs ripgrep",
+        "entorno": "Terminal cliente/servidor"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "Open source MIT"
+      },
       "costo": "gratis",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~3,200", "nota": "Repo oficial Microsoft, lo usa Copilot CLI" },
-      "integraciones": ["cli"],
-      "nichos": ["Desarrolladores", "Agentes de IA"],
+      "popularidad": {
+        "estrellas": "~3,200",
+        "nota": "Repo oficial Microsoft, lo usa Copilot CLI"
+      },
+      "integraciones": [
+        "cli"
+      ],
+      "nichos": [
+        "Desarrolladores",
+        "Agentes de IA"
+      ],
       "funcionalidad_corta": "Buscador indexado ultra veloz para que los agentes encuentren símbolos al instante",
       "caso_uso": "Indexar repositorios masivos una sola vez para acelerar la búsqueda de código de los agentes de IA.",
       "url_repo": "https://github.com/microsoft/tgrep",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["busqueda", "codigo", "rust", "agentes", "ripgrep", "open-source"],
-      "alias_busqueda": ["buscar codigo", "grep", "ripgrep", "tgrep", "indexar", "monorepo"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "busqueda",
+        "codigo",
+        "rust",
+        "agentes",
+        "ripgrep",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "buscar codigo",
+        "grep",
+        "ripgrep",
+        "tgrep",
+        "indexar",
+        "monorepo"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-016",
@@ -452,24 +1192,70 @@
       "tipo": "infra",
       "categoria": "Infraestructura e IA",
       "subcategoria": "Modelo de decisiones",
-      "instalacion": { "metodo": "app", "formato": "API (OpenRouter / Vercel Gateway)", "comando_ejemplo": "curl -X POST https://api.typesafe.ai/v1/jev/decide -H 'Authorization: Bearer $KEY'" },
-      "stack": { "lenguaje": "API REST / JSON", "rendimiento": "70-500 ms, 32k contexto", "entorno": "Cloud API" },
-      "acceso": { "requiere_key": true, "tipo_key": "propia", "es_gratis": false, "costo_ref": "$0.042/M entrada, salida gratis" },
+      "instalacion": {
+        "metodo": "app",
+        "formato": "API (OpenRouter / Vercel Gateway)",
+        "comando_ejemplo": "curl -X POST https://api.typesafe.ai/v1/jev/decide -H 'Authorization: Bearer $KEY'"
+      },
+      "stack": {
+        "lenguaje": "API REST / JSON",
+        "rendimiento": "70-500 ms, 32k contexto",
+        "entorno": "Cloud API"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "propia",
+        "es_gratis": false,
+        "costo_ref": "$0.042/M entrada, salida gratis"
+      },
       "costo": "pago",
-      "plataforma": ["cloud"],
+      "plataforma": [
+        "cloud"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "N/A", "nota": "Lanzado 15-sep-2026, early access" },
-      "integraciones": ["plugin"],
-      "nichos": ["Desarrolladores de IA", "Creadores de Agentes"],
+      "popularidad": {
+        "estrellas": "N/A",
+        "nota": "Lanzado 15-sep-2026, early access"
+      },
+      "integraciones": [
+        "plugin"
+      ],
+      "nichos": [
+        "Desarrolladores de IA",
+        "Creadores de Agentes"
+      ],
       "funcionalidad_corta": "Sistema de decisiones tipadas ultra rápidas para ruteo de skills y guardrails",
       "caso_uso": "Decidir qué skill activar entre docenas sin llamar a un LLM costoso.",
       "url_repo": "https://typesafe.ai/jev",
       "licencia": "closed",
       "estado": "por-verificar",
       "prioridad_qaway": "media",
-      "tags": ["jev", "decisiones", "typesafe", "skills", "guardrails", "agentes"],
-      "alias_busqueda": ["jev", "decisiones", "typesafe", "system one", "ruteo skills", "micro-decisiones"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "jev",
+        "decisiones",
+        "typesafe",
+        "skills",
+        "guardrails",
+        "agentes"
+      ],
+      "alias_busqueda": [
+        "jev",
+        "decisiones",
+        "typesafe",
+        "system one",
+        "ruteo skills",
+        "micro-decisiones"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-017",
@@ -479,10 +1265,10 @@
       "tipo": "app",
       "categoria": "Entorno de Desarrollo",
       "subcategoria": "Agente CLI de Código",
-      "instalacion": { 
-        "metodo": "1-comando", 
-        "formato": "CLI Global (NPM)", 
-        "comando_ejemplo": "npm install -g opencode && opencode" 
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "CLI Global (NPM)",
+        "comando_ejemplo": "npm install -g opencode && opencode"
       },
       "comandos_opciones": [
         {
@@ -501,23 +1287,67 @@
           "desc": "Modo interfaz web experimental de la primera versión."
         }
       ],
-      "stack": { "lenguaje": "TypeScript / Node.js", "rendimiento": "TUI en terminal / Ejecución local", "entorno": "Terminal Windows/macOS/Linux" },
-      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Open Source (BYOK OpenAI/Claude/Ollama)" },
+      "stack": {
+        "lenguaje": "TypeScript / Node.js",
+        "rendimiento": "TUI en terminal / Ejecución local",
+        "entorno": "Terminal Windows/macOS/Linux"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "byok",
+        "es_gratis": true,
+        "costo_ref": "Open Source (BYOK OpenAI/Claude/Ollama)"
+      },
       "costo": "gratis",
-      "plataforma": ["local"],
+      "plataforma": [
+        "local"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~25,000", "nota": "Proyecto CLI de código abierto" },
-      "integraciones": ["cli", "git"],
-      "nichos": ["Desarrolladores", "Programadores CLI", "Devs Backend"],
+      "popularidad": {
+        "estrellas": "~25,000",
+        "nota": "Proyecto CLI de código abierto"
+      },
+      "integraciones": [
+        "cli",
+        "git"
+      ],
+      "nichos": [
+        "Desarrolladores",
+        "Programadores CLI",
+        "Devs Backend"
+      ],
       "funcionalidad_corta": "Agente autónomo de terminal para refactorizar y escribir código",
       "caso_uso": "Escribir código, depurar errores y ejecutar tareas de desarrollo directo en consola.",
       "url_repo": "https://github.com/opencode-ai/opencode",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["opencode", "cli", "agente", "terminal", "open-source", "v1"],
-      "alias_busqueda": ["opencode", "opencode 1", "opencode v1", "agente terminal", "cli", "codigo"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "opencode",
+        "cli",
+        "agente",
+        "terminal",
+        "open-source",
+        "v1"
+      ],
+      "alias_busqueda": [
+        "opencode",
+        "opencode 1",
+        "opencode v1",
+        "agente terminal",
+        "cli",
+        "codigo"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     },
     {
       "id": "BIB-018",
@@ -527,10 +1357,10 @@
       "tipo": "app",
       "categoria": "Entorno de Desarrollo",
       "subcategoria": "Agente CLI + Servidor Web",
-      "instalacion": { 
-        "metodo": "1-comando", 
-        "formato": "CLI Global (@opencode/cli) + Web", 
-        "comando_ejemplo": "opencode serve" 
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "CLI Global (@opencode/cli) + Web",
+        "comando_ejemplo": "opencode serve"
       },
       "comandos_opciones": [
         {
@@ -554,23 +1384,178 @@
           "desc": "Para levantar el servidor en segundo plano e ingresar desde tu navegador, ejecutas: opencode serve (sin la palabra --web). Abre http://localhost:8080."
         }
       ],
-      "stack": { "lenguaje": "TypeScript / Rust Core", "rendimiento": "Servidor local Web + Socket tiempo real", "entorno": "Web (http://localhost:8080)" },
-      "acceso": { "requiere_key": true, "tipo_key": "byok", "es_gratis": true, "costo_ref": "Open Source V2 (BYOK / Local)" },
+      "stack": {
+        "lenguaje": "TypeScript / Rust Core",
+        "rendimiento": "Servidor local Web + Socket tiempo real",
+        "entorno": "Web (http://localhost:8080)"
+      },
+      "acceso": {
+        "requiere_key": true,
+        "tipo_key": "byok",
+        "es_gratis": true,
+        "costo_ref": "Open Source V2 (BYOK / Local)"
+      },
       "costo": "gratis",
-      "plataforma": ["local", "web"],
+      "plataforma": [
+        "local",
+        "web"
+      ],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~35,000", "nota": "Nueva generación V2 con interfaz web" },
-      "integraciones": ["cli", "web-ui", "git"],
-      "nichos": ["Desarrolladores", "Equipos ágiles", "Creadores de Software"],
+      "popularidad": {
+        "estrellas": "~35,000",
+        "nota": "Nueva generación V2 con interfaz web"
+      },
+      "integraciones": [
+        "cli",
+        "web-ui",
+        "git"
+      ],
+      "nichos": [
+        "Desarrolladores",
+        "Equipos ágiles",
+        "Creadores de Software"
+      ],
       "funcionalidad_corta": "Entorno autónomo de programación con servidor web en localhost:8080 y CLI renovado",
       "caso_uso": "Programar proyectos complejos desde el navegador web local o terminal con soporte multi-sesión.",
       "url_repo": "https://github.com/opencode-ai/opencode",
       "licencia": "open",
       "estado": "verificado",
       "prioridad_qaway": "alta",
-      "tags": ["opencode", "opencode-v2", "web", "serve", "localhost-8080", "agente", "open-source"],
-      "alias_busqueda": ["opencode 2", "opencode v2", "opencode serve", "localhost 8080", "agente web", "cli v2"],
-      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+      "tags": [
+        "opencode",
+        "opencode-v2",
+        "web",
+        "serve",
+        "localhost-8080",
+        "agente",
+        "open-source"
+      ],
+      "alias_busqueda": [
+        "opencode 2",
+        "opencode v2",
+        "opencode serve",
+        "localhost 8080",
+        "agente web",
+        "cli v2"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
+    },
+    {
+      "id": "BIB-019",
+      "slug": "playwright-cli",
+      "nombre": "Playwright CLI",
+      "nombre_simple": "Automatiza navegador real desde terminal",
+      "tipo": "skill",
+      "categoria": "Testing / Automatización",
+      "subcategoria": "Browser Automation CLI",
+      "instalacion": {
+        "metodo": "1-comando",
+        "formato": "CLI npm (@playwright/cli)",
+        "comando_ejemplo": "npx -y @playwright/cli@latest install"
+      },
+      "comandos_opciones": [
+        {
+          "label": "1. Instalar workspace",
+          "comando": "npx -y @playwright/cli@latest install",
+          "desc": "Crea archivos de workspace para Playwright CLI."
+        },
+        {
+          "label": "2. Instalar navegador",
+          "comando": "npx -y @playwright/cli@latest install-browser",
+          "desc": "Descarga binarios de navegador."
+        },
+        {
+          "label": "3. Abrir página",
+          "comando": "npx -y @playwright/cli@latest open https://example.com",
+          "desc": "Inicia sesión headless y abre URL."
+        },
+        {
+          "label": "4. Snapshot accesibilidad/refs",
+          "comando": "npx -y @playwright/cli@latest snapshot",
+          "desc": "Obtiene árbol de accesibilidad con refs para interactuar."
+        },
+        {
+          "label": "5. Screenshot",
+          "comando": "npx -y @playwright/cli@latest screenshot --filename shot.png",
+          "desc": "Captura screenshot real de la página."
+        }
+      ],
+      "stack": {
+        "lenguaje": "Node.js / Playwright",
+        "rendimiento": "Sesión persistente navegador real",
+        "entorno": "Terminal + Chromium/Firefox/WebKit"
+      },
+      "acceso": {
+        "requiere_key": false,
+        "tipo_key": "none",
+        "es_gratis": true,
+        "costo_ref": "Open source / gratis"
+      },
+      "costo": "gratis",
+      "plataforma": [
+        "local",
+        "web"
+      ],
+      "nivel": "dev",
+      "popularidad": {
+        "estrellas": "~N/A",
+        "nota": "CLI oficial Playwright para agentes"
+      },
+      "integraciones": [
+        "cli",
+        "web-ui",
+        "git"
+      ],
+      "nichos": [
+        "QA",
+        "Desarrolladores frontend",
+        "Agentes de código",
+        "Replicación UI"
+      ],
+      "funcionalidad_corta": "Automatiza navegador real: navegar, snapshot DOM/accesibilidad, click/fill, screenshots, consola/red",
+      "caso_uso": "Capturar screenshots reales de una web de referencia, inspeccionar DOM/CSS, validar flujos y depurar UI antes de replicar a código.",
+      "url_repo": "https://github.com/microsoft/playwright-cli",
+      "licencia": "open",
+      "estado": "verificado",
+      "prioridad_qaway": "alta",
+      "tags": [
+        "playwright",
+        "browser",
+        "screenshot",
+        "dom",
+        "automation",
+        "testing",
+        "replicacion",
+        "cli"
+      ],
+      "alias_busqueda": [
+        "playwright",
+        "playwright cli",
+        "screenshot",
+        "captura web",
+        "dom",
+        "replicar web",
+        "browser automation"
+      ],
+      "curso_repo": {
+        "usar_en_curso": false,
+        "curso": "",
+        "modulo": "",
+        "leccion": "",
+        "orden": 0,
+        "rol": "",
+        "prerequisitos": [],
+        "resultado_esperado": ""
+      }
     }
   ]
 }

@@ -37,7 +37,7 @@ export const movementService = {
       let productIds: string[] | null = null
       if (opts?.tenant_id) {
         const { data: prods } = await supabase
-          .from('products')
+          .from('inv_products')
           .select('id')
           .eq('tenant_id', opts.tenant_id)
           .limit(2000)
@@ -145,7 +145,7 @@ export const movementService = {
     const qty = Number(input.cantidad) || 0
     if (!input.producto?.trim() || qty <= 0) throw new Error('Completa el producto y una cantidad mayor que cero.')
     // 1) Resolver product_id en el tenant
-    let productQuery = supabase.from('products').select('id, sku, name').limit(1)
+    let productQuery = supabase.from('inv_products').select('id, sku, name').limit(1)
     if (input.tenant_id) productQuery = productQuery.eq('tenant_id', input.tenant_id)
     if (input.sku?.trim()) productQuery = productQuery.eq('sku', input.sku.trim())
     else productQuery = productQuery.ilike('name', `%${input.producto.trim()}%`)

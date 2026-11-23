@@ -23,6 +23,7 @@ import {
   Package,
   Bot,
   Bell,
+  LibraryBig,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { WHATSAPP_LINK } from '@/data/navigation'
@@ -42,6 +43,19 @@ const routes = [
     tone: 'bg-indigo-600/10 text-indigo-600',
     preview: '/assets/hub-previews/preview-agentes.png',
     published: false,
+  },
+  {
+    icon: LibraryBig,
+    title: 'Biblioteca de Skills & Recursos',
+    description: 'Índice vivo de skills, apps y repositorios. Matriz de skills instaladas, fichas, filtros y rutas de implementación.',
+    path: '/hub/biblioteca',
+    access: 'free',
+    badge: 'Biblioteca',
+    category: 'Herramientas',
+    pillar: 'IA',
+    tone: 'bg-[#191918]/5 text-[#191918]/70',
+    preview: '/assets/hub-previews/preview-agentes.png',
+    published: true,
   },
   {
     icon: Calendar,

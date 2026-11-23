@@ -31,7 +31,7 @@ export const productDetailService = {
   async getProductById(id: string): Promise<ProductDetail> {
     // Get main product
     const { data: product, error: productError } = await supabase
-      .from('products')
+      .from('inv_products')
       .select('*')
       .eq('id', id)
       .single()
@@ -143,7 +143,7 @@ export const productDetailService = {
   // Get product by slug
   async getProductBySlug(slug: string): Promise<ProductDetail | null> {
     const { data: product, error } = await supabase
-      .from('products')
+      .from('inv_products')
       .select('id')
       .eq('slug', slug)
       .single()
@@ -155,7 +155,7 @@ export const productDetailService = {
   // Update product
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
     const { data, error } = await supabase
-      .from('products')
+      .from('inv_products')
       .update(updates)
       .eq('id', id)
       .select()
@@ -173,7 +173,7 @@ export const productDetailService = {
     await supabase.from('product_prices').delete().eq('product_id', id)
     
     const { error } = await supabase
-      .from('products')
+      .from('inv_products')
       .delete()
       .eq('id', id)
 

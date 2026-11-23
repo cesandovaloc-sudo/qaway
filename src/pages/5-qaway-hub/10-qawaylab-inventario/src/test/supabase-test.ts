@@ -28,7 +28,7 @@ export const cleanupTestData = async (client: SupabaseClient): Promise<void> => 
   // foreign key column
   const [quotationsRes, productsRes, bundlesRes, catalogsRes, campaignsRes] = await Promise.all([
     client.from('quotations').select('id').ilike('notes', '%integration test%'),
-    client.from('products').select('id').or('name.ilike.%test%,sku.ilike.%TEST%,slug.ilike.%test%'),
+    client.from('inv_products').select('id').or('name.ilike.%test%,sku.ilike.%TEST%,slug.ilike.%test%'),
     client.from('bundles').select('id').ilike('name', '%test%'),
     client.from('catalogs').select('id').ilike('name', '%test%'),
     client.from('liquidation_campaigns').select('id').ilike('name', '%test%'),
@@ -117,7 +117,7 @@ export const createTestProduct = async (client: SupabaseClient, overrides: Recor
   }
 
   const { data, error } = await client
-    .from('products')
+    .from('inv_products')
     .insert(productData)
     .select()
     .single()
