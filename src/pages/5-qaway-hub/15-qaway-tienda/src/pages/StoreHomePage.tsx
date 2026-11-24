@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import StoreLayout from '../components/layout/StoreLayout';
 import ProductCard from '../components/shared/ProductCard';
 import { storefrontService } from '../services/storefront.service';
@@ -11,24 +12,62 @@ import type { StoreHomeData, StoreProduct } from '../types/storefront';
 export default function StoreHomePage() {
   const tenantSlug = resolveTenantSlug(useParams().tenantSlug);
   const [data, setData] = useState<StoreHomeData | null>(null);
+  const [heroIndex, setHeroIndex] = useState(0);
   const { add, count } = useCart();
   useEffect(() => { storefrontService.getHome(tenantSlug).then(setData); }, [tenantSlug]);
   const onAdd = (p: StoreProduct) => add(productToCartItem(p, tenantSlug));
 
+  const banners = data?.banners || [];
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    const t = window.setInterval(() => setHeroIndex((i) => (i + 1) % banners.length), 5000);
+    return () => window.clearInterval(t);
+  }, [banners.length]);
+
   if (!data) return <div className="qwt-v1"><div className="qwt-container qwt-section">Cargando tienda...</div></div>;
-  const { tenant, banners, categories, featured, offers } = data;
-  const hero = banners[0];
+  const { tenant, categories, featured, offers } = data;
+  const hero = banners[heroIndex] || banners[0];
+  const heroHref = hero?.ctaHref || `/tienda/${tenantSlug}`;
   return (
     <StoreLayout tenant={tenant} categories={categories} cartCount={count}>
-      <section className="qwt-hero">
-        <div className="qwt-container qwt-hero-grid">
-          <div className="qwt-hero-copy">
-            <div className="qwt-eyebrow">Colección destacada</div>
-            <h1>{hero?.title || 'Descubre lo nuevo'}</h1>
-            <p>{hero?.subtitle || 'Explora productos seleccionados para tu tienda.'}</p>
-            {hero?.ctaHref && <Link className="qwt-btn qwt-btn-primary" to={hero.ctaHref}>{hero.ctaLabel || 'Ver más'}</Link>}
-          </div>
-          <div className="qwt-hero-media">{hero?.imageUrl && <img src={hero.imageUrl} alt={hero.title} />}</div>
+      <section className="qwt-hero" aria-label="Promociones principales">
+        <div className="qwt-hero-slider">
+          {hero ? (
+            <Link to={heroHref} className="qwt-hero-slide" aria-label={hero.title || 'Ver promoción'}>
+              <img className="qwt-hero-bg" src={hero.imageUrl} alt={hero.title || 'Banner principal'} />
+              <div className="qwt-hero-overlay" />
+              <div className="qwt-container qwt-hero-content">
+                <p className="qwt-hero-eyebrow">{tenant.name}</p>
+                <h1>{hero.title || 'Descubre lo nuevo'}</h1>
+                {hero.subtitle && <p className="qwt-hero-sub">{hero.subtitle}</p>}
+                <span className="qwt-btn qwt-btn-primary qwt-hero-cta">{hero.ctaLabel || 'Ver más'}</span>
+              </div>
+            </Link>
+          ) : (
+            <div className="qwt-hero-slide qwt-hero-empty">
+              <div className="qwt-container qwt-hero-content">
+                <p className="qwt-hero-eyebrow">{tenant.name}</p>
+                <h1>Tu tienda está lista</h1>
+                <p className="qwt-hero-sub">Agrega banners desde tu panel para mostrarlos aquí.</p>
+              </div>
+            </div>
+          )}
+
+          {banners.length > 1 && (
+            <>
+              <button type="button" className="qwt-hero-nav prev" aria-label="Banner anterior" onClick={(e) => { e.preventDefault(); setHeroIndex((i) => (i - 1 + banners.length) % banners.length); }}>
+                <ChevronLeft size={22} />
+              </button>
+              <button type="button" className="qwt-hero-nav next" aria-label="Siguiente banner" onClick={(e) => { e.preventDefault(); setHeroIndex((i) => (i + 1) % banners.length); }}>
+                <ChevronRight size={22} />
+              </button>
+              <div className="qwt-hero-dots" role="tablist" aria-label="Banners">
+                {banners.map((b, i) => (
+                  <button key={b.id || i} type="button" role="tab" aria-selected={i === heroIndex} aria-label={`Banner ${i + 1}`} className={`qwt-hero-dot ${i === heroIndex ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setHeroIndex(i); }} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </section>
 
