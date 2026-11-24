@@ -212,6 +212,12 @@ const baseHierarchicalRoutes = [
         description: 'Índice vivo de skills, herramientas y recursos del equipo para ubicar capacidades rápidamente.',
         tag: 'Biblioteca',
       },
+      {
+        title: 'Tienda Multi-tenant (Demo)',
+        path: '/tienda/demo',
+        description: 'Storefront multi-tenant: home, categorías, PDP y conexión con carrito/checkout existente.',
+        tag: 'Tienda',
+      },
     ],
   },
 

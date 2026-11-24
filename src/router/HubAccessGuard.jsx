@@ -177,11 +177,14 @@ export default function HubAccessGuard({ children, loadingFallback = null }) {
         return
       }
 
+      // ONBOARDING GATE: deshabilitado temporalmente (no eliminado) para validar
+      // el flujo operativo de la app primero. Rehabilitar poniendo en false.
+      const ONBOARDING_GATE_DISABLED = true
       const locallyCompleted = localStorage.getItem(`qaway.onboarding_completed.${user.tenant_id}`) === 'true'
       const onboardingCompleted = tenant.features?.onboarding_completed === true || locallyCompleted
       const needsOnboarding = tenant.status !== 'active' && (tenant.status === 'draft' || !onboardingCompleted)
 
-      if (needsOnboarding) {
+      if (!ONBOARDING_GATE_DISABLED && needsOnboarding) {
         // Solo una app puede pedir el perfil de empresa. Las rutas
         // platform_only (/hub/panel y legacy) siguen en candado absoluto:
         // ningún tenant las ve "por donde sea que ingrese".

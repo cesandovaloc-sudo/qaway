@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ArrowLeft, Sparkles, Save, AlertCircle } from "lucide-react"
+import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, Sparkles, Save, AlertCircle, ImagePlus, X } from "lucide-react"
 import type { AIAnalysisResult } from '@/services/aiSuggestionService'
 import { confidenceStyles, conditionLabels } from '@/services/aiSuggestionService'
 
@@ -23,6 +23,8 @@ export interface ProductDraftData {
   price: number
   cost: number
   notes: string
+  imageFile?: File | null
+  imagePreview?: string
 }
 
 export default function ProductDraftForm({
@@ -32,6 +34,9 @@ export default function ProductDraftForm({
   onBack,
   saving,
 }: ProductDraftFormProps) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [localImageFile, setLocalImageFile] = useState<File | null>(null)
+  const [localImagePreview, setLocalImagePreview] = useState<string>(imagePreview || '')
   const [formData, setFormData] = useState<ProductDraftData>({
     name: analysis.name,
     category: analysis.category,
@@ -44,9 +49,34 @@ export default function ProductDraftForm({
     price: analysis.suggested_price || 0,
     cost: analysis.suggested_cost || 0,
     notes: '',
+    imageFile: null,
+    imagePreview: imagePreview || '',
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof ProductDraftData, string>>>({})
+
+  useEffect(() => {
+    if (imagePreview) {
+      setLocalImagePreview(imagePreview)
+      setFormData((prev) => ({ ...prev, imagePreview }))
+    }
+  }, [imagePreview])
+
+  const handleImageSelect = (file?: File | null) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) return
+    const preview = URL.createObjectURL(file)
+    setLocalImageFile(file)
+    setLocalImagePreview(preview)
+    setFormData((prev) => ({ ...prev, imageFile: file, imagePreview: preview }))
+  }
+
+  const clearImage = () => {
+    setLocalImageFile(null)
+    setLocalImagePreview('')
+    setFormData((prev) => ({ ...prev, imageFile: null, imagePreview: '' }))
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   const handleChange = (field: keyof ProductDraftData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -69,7 +99,11 @@ export default function ProductDraftForm({
 
   const handleSubmit = () => {
     if (validate()) {
-      onSave(formData)
+      onSave({
+        ...formData,
+        imageFile: localImageFile,
+        imagePreview: localImagePreview || formData.imagePreview || '',
+      })
     }
   }
 
@@ -100,16 +134,52 @@ export default function ProductDraftForm({
         </div>
       </div>
 
-      {/* Image preview */}
-      {imagePreview && (
-        <div className="mb-6 rounded-3xl overflow-hidden border border-gray-200 shadow-lg">
-          <img
-            src={imagePreview}
-            alt="Producto capturado"
-            className="w-full h-48 object-cover"
-          />
-        </div>
-      )}
+      {/* Image preview / upload */}
+      <div className="mb-6 rounded-3xl overflow-hidden border border-gray-200 shadow-lg bg-white">
+        {localImagePreview ? (
+          <div className="relative">
+            <img
+              src={localImagePreview}
+              alt="Producto"
+              className="w-full h-48 object-cover"
+            />
+            <div className="absolute top-3 right-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3 py-1.5 rounded-lg bg-white/90 text-xs font-semibold text-gray-700 hover:bg-white border border-gray-200"
+              >
+                Cambiar foto
+              </button>
+              <button
+                type="button"
+                onClick={clearImage}
+                className="p-1.5 rounded-lg bg-white/90 text-gray-700 hover:bg-white border border-gray-200"
+                aria-label="Quitar foto"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full h-48 flex flex-col items-center justify-center gap-2 text-gray-500 hover:bg-gray-50 transition-colors"
+          >
+            <ImagePlus size={28} className="text-orange-500" />
+            <span className="text-sm font-semibold text-gray-700">Subir foto del producto</span>
+            <span className="text-xs text-gray-400">JPG, PNG o WebP</span>
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => handleImageSelect(e.target.files?.[0] || null)}
+        />
+      </div>
 
       {/* Form */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-xl p-8 space-y-6">

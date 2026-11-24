@@ -21,6 +21,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { supabase } from '@/config/supabase'
+import { useTenant } from '@/context/TenantContext'
 
 export interface WebOrderItem {
   id?: string
@@ -101,6 +102,7 @@ const statusBadges: Record<
 }
 
 export default function WebOrdersPage() {
+  const { activeTenant } = useTenant()
   const [orders, setOrders] = useState<WebOrder[]>([])
   // C-6: error de carga visible para el operador (antes el fallback DEMO lo ocultaba)
   const [dataError, setDataError] = useState<string | null>(null)
@@ -109,6 +111,8 @@ export default function WebOrdersPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selectedOrder, setSelectedOrder] = useState<WebOrder | null>(null)
   const modalRef = useDismissOnEscapeOrOutside(!!selectedOrder, () => setSelectedOrder(null))
+  const storefrontSlug = activeTenant?.slug || activeTenant?.id || ''
+  const storefrontUrl = storefrontSlug ? `/tienda/${storefrontSlug}` : '/tienda/demo'
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('es-PE', {
@@ -323,13 +327,13 @@ export default function WebOrdersPage() {
                   <span>Actualizar</span>
                 </button>
                 <a
-                  href="/landings/desarrollo-web-qaway"
+                  href={storefrontUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="pxp-btn primary"
-                  title="Ver tienda online pública"
+                  title={storefrontSlug ? `Ver web en vivo: ${storefrontSlug}` : 'Ver tienda demo'}
                 >
-                  <span>Ver Catálogo Web</span>
+                  <span>{storefrontSlug ? 'Ver mi web en vivo' : 'Ver tienda demo'}</span>
                   <ExternalLink size={14} />
                 </a>
               </div>

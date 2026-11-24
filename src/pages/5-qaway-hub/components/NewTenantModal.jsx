@@ -344,6 +344,19 @@ export default function NewTenantModal({
                     <Copy size={13} />
                     {ntCopied === "hub" ? "¡Link Hub copiado!" : "Copiar link Hub Panel"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const storeUrl = `${window.location.origin}/tienda/${ntSuccess.slug}`;
+                      navigator.clipboard?.writeText(`Web en vivo (${ntSuccess.tenantName}):\n${storeUrl}`);
+                      setNtCopied("store");
+                      setTimeout(() => setNtCopied(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+                  >
+                    <Copy size={13} />
+                    {ntCopied === "store" ? "¡Link web copiado!" : "Copiar link web en vivo"}
+                  </button>
                 </div>
               </div>
             )}

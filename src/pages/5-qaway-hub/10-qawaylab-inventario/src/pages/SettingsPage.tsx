@@ -11,6 +11,7 @@ import {
   Trash2,
   Check,
   Link2,
+  ExternalLink,
 } from 'lucide-react'
 import { fiscalService } from '@/services/fiscalService'
 import { useTenant } from '@/context/TenantContext'
@@ -43,14 +44,29 @@ const tipoDocLabels: Record<string, string> = {
 export default function SettingsPage() {
   const [tab, setTab] = useState<Tab>('negocio')
   const [error, setError] = useState<string | null>(null)
+  const { activeTenant } = useTenant()
+  const storefrontSlug = activeTenant?.slug || activeTenant?.id || ''
+  const storefrontUrl = storefrontSlug ? `/tienda/${storefrontSlug}` : '/tienda/demo'
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Configuración</h1>
-        <p className="text-sm text-muted mt-1">
-          Configuración fiscal y general de la aplicación.
-        </p>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Configuración</h1>
+          <p className="text-sm text-muted mt-1">
+            Configuración fiscal y general de la aplicación.
+          </p>
+        </div>
+        <a
+          href={storefrontUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 self-start rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
+          title="Abrir la web pública del tenant"
+        >
+          <ExternalLink size={16} />
+          Ver mi web en vivo
+        </a>
       </div>
 
       {error && (

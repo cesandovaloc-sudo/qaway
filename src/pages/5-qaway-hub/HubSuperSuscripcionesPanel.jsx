@@ -467,7 +467,8 @@ export default function SuscripcionesPanel({
               .filter(Boolean);
 
             if (subAppNames.length === 0) {
-              subAppNames = ["Inventario"];
+              // Sin suscripciones reales no se inventa una app.
+              subAppNames = [];
             }
 
             let statusLabel = "Pendiente";
@@ -554,9 +555,11 @@ export default function SuscripcionesPanel({
     const isPromoFree = catalogOpt === "promo_free";
     const rateMode = options?.rateMode || modalRateMode;
 
-    const newApps = ["Inventario"];
+    // Refleja solo las apps realmente contratadas por el tenant (sin forzar Inventario).
+    const newApps = [...(target.apps || [])];
     if (includeCatalog) {
-      newApps.push(isPromoFree ? "Catálogo Web (🎁 3M Gratis)" : "Catálogo Web");
+      const catalogLabel = isPromoFree ? "Catálogo Web (🎁 3M Gratis)" : "Catálogo Web";
+      if (!newApps.includes(catalogLabel)) newApps.push(catalogLabel);
     }
 
     // Actualización local inmediata
@@ -606,15 +609,8 @@ export default function SuscripcionesPanel({
           .eq("id", target.tenant_id);
 
         let subId = target.rawSub?.id;
-        let inventarioAppId = null;
-
-        const { data: appData } = await supabase
-          .from("app_catalog")
-          .select("id")
-          .eq("slug", "inventario")
-          .maybeSingle();
-
-        inventarioAppId = appData?.id || null;
+        // La app la define la suscripción seleccionada; nunca se fuerza "inventario".
+        const targetAppId = target.rawSub?.app_id || null;
 
         if (subId) {
           await supabase
@@ -627,12 +623,12 @@ export default function SuscripcionesPanel({
               promotion_name: isPromoFree ? "Promo 3 Meses Gratis Catálogo" : (rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null),
             })
             .eq("id", subId);
-        } else if (inventarioAppId) {
+        } else if (targetAppId) {
           const { data: newSub } = await supabase
             .from("tenant_app_subscriptions")
             .upsert({
               tenant_id: target.tenant_id,
-              app_id: inventarioAppId,
+              app_id: targetAppId,
               plan: rawPlan,
               status: "active",
               contracted_price: finalAmount,
@@ -646,7 +642,7 @@ export default function SuscripcionesPanel({
         }
 
         // ── Sincronizar roles de usuario para que el admin y miembros de la marca operen de inmediato ──
-        if (inventarioAppId && target.tenant_id) {
+        if (targetAppId && target.tenant_id) {
           try {
             const { data: tenantUsers } = await supabase
               .from("users")
@@ -661,7 +657,7 @@ export default function SuscripcionesPanel({
                 await supabase.from("user_app_roles").upsert({
                   user_id: u.id,
                   tenant_id: target.tenant_id,
-                  app_id: inventarioAppId,
+                  app_id: targetAppId,
                   role: "admin",
                 }, { onConflict: "user_id,tenant_id,app_id" });
               }

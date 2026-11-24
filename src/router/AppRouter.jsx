@@ -75,6 +75,7 @@ const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inv
 const TiendaCarritoPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/CartPage'))
 const TiendaCheckoutPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/CheckoutPage'))
 const TiendaComprasPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/PurchasesPage'))
+const QawayTiendaApp = lazy(() => import('@/pages/5-qaway-hub/15-qaway-tienda/src/TiendaApp'))
 
 // Recursos y Landings secundarias
 const EbookDigitalPage = lazy(() => import('@/pages/6-recursos/EbookDigitalPage'))
@@ -673,6 +674,10 @@ export default function AppRouter() {
             path="hub/panel/*"
             element={renderRoute('hub', <HubAccessGuard><HubPanelPage /></HubAccessGuard>)}
           />
+        {/* Tienda multi-tenant (15-qaway-tienda): storefront pública standalone */}
+        <Route path="/tienda" element={<Navigate to="/tienda/demo" replace />} />
+        <Route path="/tienda/*" element={<RouteSuspense><QawayTiendaApp /></RouteSuspense>} />
+
         <Route element={<Layout />}>
           <Route index element={<RootIndexRoute />} />
           {/* Tienda de cliente (páginas de 10-qawaylab-inventario).

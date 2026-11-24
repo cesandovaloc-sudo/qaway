@@ -5,10 +5,12 @@ import { useAuth } from './AuthContext'
 export interface ScopedTenant {
   id: string
   name: string
+  slug?: string | null
   client_code?: string
   legal_name?: string | null
   branding?: Record<string, unknown> | null
   content?: Record<string, unknown> | null
+  features?: Record<string, unknown> | null
 }
 
 interface TenantContextValue {
@@ -62,7 +64,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     setLoadingTenants(true)
     supabase
       .from('tenants')
-      .select('id, name, client_code, legal_name, branding, content, status')
+      .select('id, name, slug, client_code, legal_name, branding, content, features, status')
       .eq('status', 'active')
       .order('name')
       .then(({ data, error }) => {
@@ -74,10 +76,12 @@ export function TenantProvider({ children }: { children: ReactNode }) {
           setTenantOptions((data || []).map((t) => ({
             id: t.id,
             name: t.name,
+            slug: t.slug ?? null,
             client_code: t.client_code,
             legal_name: t.legal_name,
             branding: t.branding,
             content: t.content,
+            features: t.features ?? null,
           })))
         }
       })
@@ -105,7 +109,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
     supabase
       .from('tenants')
-      .select('id, name, client_code, legal_name, branding, content, status')
+      .select('id, name, slug, client_code, legal_name, branding, content, features, status')
       .eq('id', selectedTenantId)
       .maybeSingle()
       .then(({ data, error }) => {
@@ -114,7 +118,16 @@ export function TenantProvider({ children }: { children: ReactNode }) {
           setCurrentTenant(null)
           return
         }
-        setCurrentTenant(data)
+        setCurrentTenant({
+          id: data.id,
+          name: data.name,
+          slug: data.slug ?? null,
+          client_code: data.client_code,
+          legal_name: data.legal_name,
+          branding: data.branding,
+          content: data.content,
+          features: data.features ?? null,
+        })
       })
       .catch(() => {
         if (alive) setCurrentTenant(null)

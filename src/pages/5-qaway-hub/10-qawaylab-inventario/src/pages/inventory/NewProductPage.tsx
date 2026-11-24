@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Package } from 'lucide-react'
 import ProductDraftForm, { type ProductDraftData } from '@/components/capture/ProductDraftForm'
 import { productService } from '@/services/productService'
-import type { AIAnalysisResult } from '@/services/aiSuggestionService'
+import { uploadImageToStorage, type AIAnalysisResult } from '@/services/aiSuggestionService'
 
 const initialAnalysis: AIAnalysisResult = {
   name: '',
@@ -34,6 +34,11 @@ export default function NewProductPage() {
     setSaving(true)
     setError(null)
     try {
+      let imageUrl: string | null = null
+      if (data.imageFile) {
+        imageUrl = await uploadImageToStorage(data.imageFile, 'products')
+      }
+
       const product = await productService.createProduct({
         name: data.name,
         description: data.description,
@@ -47,7 +52,8 @@ export default function NewProductPage() {
         commercial_status: 'available',
         unit: 'unit',
         type: 'simple',
-      })
+        ...(imageUrl ? { image_url: imageUrl, images: [{ original_url: imageUrl, processed_url: imageUrl }] } : {}),
+      } as any)
 
       if (product) {
         const isCoupled = typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario')

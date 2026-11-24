@@ -17,49 +17,11 @@ import {
  * Exportada para que el tablero superior (13-SedesModuleLiteral.jsx) lea exactamente
  * la misma fuente, sin duplicar constantes ni inventar mock data.
  */
-export const INITIAL_SEDES = [
-  {
-    id: 1, nombre: "Sede Lima", subtitulo: "Oficina principal", codigo: "SED-001",
-    ciudad: "Lima", direccion: "Av. José Pardo 123, Miraflores, Lima",
-    tipo: "Principal", estado: "Activa", almacenes: 2, telefono: "+51 123 5678",
-    email: "lima@empresa.com", responsable: "Carlos Sandoval",
-    fechaCreacion: "15/01/2026", actualizacion: "25/09/2026 10:30",
-    descripcion: "Oficina principal de la empresa. Punto de atención al público y centro de operaciones.",
-    imagen: ""
-  },
-  {
-    id: 2, nombre: "Sede Cusco", subtitulo: "Tienda Cusco", codigo: "SED-002",
-    ciudad: "Cusco", direccion: "Av. El Sol 456, Cusco, Cusco",
-    tipo: "Tienda", estado: "Activa", almacenes: 2, telefono: "+51 984 111 222",
-    email: "cusco@empresa.com", responsable: "María Quispe",
-    fechaCreacion: "20/02/2026", actualizacion: "24/09/2026 15:20",
-    descripcion: "Tienda y punto de atención comercial en Cusco.", imagen: ""
-  },
-  {
-    id: 3, nombre: "Sede Arequipa", subtitulo: "Almacén Arequipa", codigo: "SED-003",
-    ciudad: "Arequipa", direccion: "Av. Aviación 789, Cerro Colorado",
-    tipo: "Almacén", estado: "Activa", almacenes: 1, telefono: "+51 954 333 444",
-    email: "arequipa@empresa.com", responsable: "Luis Castillo",
-    fechaCreacion: "10/03/2026", actualizacion: "23/09/2026 09:15",
-    descripcion: "Centro de almacenamiento y distribución para la zona sur.", imagen: ""
-  },
-  {
-    id: 4, nombre: "Sede Trujillo", subtitulo: "Punto de venta", codigo: "SED-004",
-    ciudad: "Trujillo", direccion: "Av. Fátima 321, Trujillo, La Libertad",
-    tipo: "Tienda", estado: "Inactiva", almacenes: 0, telefono: "+51 944 555 666",
-    email: "trujillo@empresa.com", responsable: "Ana Torres",
-    fechaCreacion: "12/04/2026", actualizacion: "18/09/2026 12:00",
-    descripcion: "Punto de venta en Trujillo.", imagen: ""
-  }
-];
+// Datos seed deshabilitados: no mostrar sedes/almacenes preconfigurados en frontend.
+// Se mantienen las constantes exportadas para no romper imports; conectar a Supabase en fase 2.
+export const INITIAL_SEDES = [];
 
-export const INITIAL_ALMACENES = [
-  { id: 1, nombre: "Almacén Principal", descripcion: "Inventario general", codigo: "ALM-001", sede: "Sede Lima", tipo: "Principal", ubicaciones: 25, productos: 1250, estado: "Activo", direccion: "Av. José Pardo 123, Miraflores, Lima", responsable: "Carlos Sandoval", telefono: "+51 123 5678", capacidad: "2,000 productos", fechaCreacion: "15/01/2026", actualizacion: "25/09/2026 10:30", valor: "S/ 48,920" },
-  { id: 2, nombre: "Almacén Tienda", descripcion: "Venta directa", codigo: "ALM-002", sede: "Sede Lima", tipo: "Tienda", ubicaciones: 10, productos: 320, estado: "Activo", direccion: "Av. José Pardo 123, Miraflores, Lima", responsable: "Carlos Sandoval", telefono: "+51 123 5678", capacidad: "500 productos", fechaCreacion: "20/01/2026", actualizacion: "25/09/2026 10:30", valor: "S/ 12,400" },
-  { id: 3, nombre: "Almacén Secundario", descripcion: "Stock de respaldo", codigo: "ALM-003", sede: "Sede Cusco", tipo: "Secundario", ubicaciones: 18, productos: 680, estado: "Activo", direccion: "Av. El Sol 456, Cusco, Cusco", responsable: "María Quispe", telefono: "+51 984 111 222", capacidad: "1,000 productos", fechaCreacion: "20/02/2026", actualizacion: "24/09/2026 15:20", valor: "S/ 22,700" },
-  { id: 4, nombre: "Almacén Producción", descripcion: "Insumos y materiales", codigo: "ALM-004", sede: "Sede Arequipa", tipo: "Producción", ubicaciones: 12, productos: 180, estado: "Activo", direccion: "Av. Aviación 789, Cerro Colorado", responsable: "Luis Castillo", telefono: "+51 954 333 444", capacidad: "700 productos", fechaCreacion: "10/03/2026", actualizacion: "23/09/2026 09:15", valor: "S/ 8,920" },
-  { id: 5, nombre: "Almacén Tránsito", descripcion: "En proceso de traslado", codigo: "ALM-005", sede: "Sede Trujillo", tipo: "Tránsito", ubicaciones: 8, productos: 50, estado: "Inactivo", direccion: "Av. Fátima 321, Trujillo, La Libertad", responsable: "Ana Torres", telefono: "+51 944 555 666", capacidad: "300 productos", fechaCreacion: "12/04/2026", actualizacion: "18/09/2026 12:00", valor: "S/ 1,850" }
-];
+export const INITIAL_ALMACENES = [];
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 const Button = ({ children, variant = "outline", className = "", ...props }) => (
@@ -98,8 +60,8 @@ export default function SedesModule() {
   const [section, setSection] = useState("sedes");
   const [sedes, setSedes] = useState(INITIAL_SEDES);
   const [almacenes, setAlmacenes] = useState(INITIAL_ALMACENES);
-  const [selectedSede, setSelectedSede] = useState(INITIAL_SEDES[0]);
-  const [selectedAlmacen, setSelectedAlmacen] = useState(INITIAL_ALMACENES[0]);
+  const [selectedSede, setSelectedSede] = useState(INITIAL_SEDES[0] || null);
+  const [selectedAlmacen, setSelectedAlmacen] = useState(INITIAL_ALMACENES[0] || null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [typeFilter, setTypeFilter] = useState("Todos");
@@ -193,10 +155,16 @@ export default function SedesModule() {
                 <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 text-xs text-slate-500"><span>Mostrando {filteredSedes.length} de {sedes.length} sedes</span><div className="flex items-center gap-2">Filas por página <Select className="w-20 py-1.5"><option>10</option><option>25</option><option>50</option></Select><Button className="h-8 w-8 px-0"><ChevronLeft size={16}/></Button><Button variant="primary" className="h-8 w-8 px-0">1</Button><Button className="h-8 w-8 px-0"><ChevronRight size={16}/></Button></div></div>
               </div>
             </div>
-            <Panel title="Detalle de sede" icon={ShieldCheck} action={<Button onClick={()=>openEdit("sede",selectedSede)}><Pencil size={14}/> Editar</Button>} className="self-start">
-              <div className="mb-4 flex h-32 items-center justify-center rounded-md bg-gradient-to-br from-slate-100 to-slate-300 text-blue-500"><Building2 size={54}/></div>
-              <div className="mb-1 flex items-center gap-2"><h2 className="text-lg font-bold text-slate-900">{selectedSede?.nombre}</h2><Status value={selectedSede?.estado}/></div><p className="mb-4 text-sm text-slate-500">{selectedSede?.subtitulo}</p>
-              <div className="space-y-3 text-xs">{[[Hash,"Código",selectedSede?.codigo],[Box,"Tipo de sede",selectedSede?.tipo],[MapPin,"Dirección",selectedSede?.direccion],[Phone,"Teléfono",selectedSede?.telefono],[Mail,"Email",selectedSede?.email],[UserRound,"Responsable",selectedSede?.responsable],[Warehouse,"Almacenes",`${selectedSede?.almacenes} almacenes asociados`],[CalendarDays,"Fecha de creación",selectedSede?.fechaCreacion],[Clock3,"Última actualización",selectedSede?.actualizacion]].map(([Icon,label,val])=><div key={label} className="grid grid-cols-[18px_105px_1fr] items-start gap-2"><Icon size={15} className="text-blue-600"/><span className="text-slate-500">{label}</span><span className="break-words text-slate-800">{val || "—"}</span></div>)}</div>
+            <Panel title="Detalle de sede" icon={ShieldCheck} action={selectedSede ? <Button onClick={()=>openEdit("sede",selectedSede)}><Pencil size={14}/> Editar</Button> : null} className="self-start">
+              {selectedSede ? (
+                <>
+                  <div className="mb-4 flex h-32 items-center justify-center rounded-md bg-gradient-to-br from-slate-100 to-slate-300 text-blue-500"><Building2 size={54}/></div>
+                  <div className="mb-1 flex items-center gap-2"><h2 className="text-lg font-bold text-slate-900">{selectedSede?.nombre}</h2><Status value={selectedSede?.estado}/></div><p className="mb-4 text-sm text-slate-500">{selectedSede?.subtitulo}</p>
+                  <div className="space-y-3 text-xs">{[[Hash,"Código",selectedSede?.codigo],[Box,"Tipo de sede",selectedSede?.tipo],[MapPin,"Dirección",selectedSede?.direccion],[Phone,"Teléfono",selectedSede?.telefono],[Mail,"Email",selectedSede?.email],[UserRound,"Responsable",selectedSede?.responsable],[Warehouse,"Almacenes",`${selectedSede?.almacenes ?? 0} almacenes asociados`],[CalendarDays,"Fecha de creación",selectedSede?.fechaCreacion],[Clock3,"Última actualización",selectedSede?.actualizacion]].map(([Icon,label,val])=><div key={label} className="grid grid-cols-[18px_105px_1fr] items-start gap-2"><Icon size={15} className="text-blue-600"/><span className="text-slate-500">{label}</span><span className="break-words text-slate-800">{val || "—"}</span></div>)}</div>
+                </>
+              ) : (
+                <div className="py-10 text-center text-sm text-slate-500">No hay sedes configuradas. Crea una sede para empezar.</div>
+              )}
             </Panel>
           </div>
         </>}
